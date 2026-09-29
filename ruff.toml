@@ -1,5 +1,5 @@
 # Configurazione ruff di MeTeOra.
-# Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5).
+# Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 line-length = 140
 
 [lint]
@@ -12,8 +12,6 @@ ignore = [
     "E701",
     "E702",
     "E741",
-    # Il rientro con le tabulazioni e' lo stile di Gabriele.
-    "W191",
     # Date e orari sono di proposito quelli locali, senza fuso: l'ora della
     # sveglia, la data nei report e nelle classifiche sono quelle
     # dell'orologio e del calendario di chi usa il programma.

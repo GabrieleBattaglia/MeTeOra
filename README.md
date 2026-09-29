@@ -4,7 +4,7 @@ Un lettore audio e video per Windows pensato per chi usa uno screen reader e un 
 
 MeTeOra è formato da tre parole italiane, una dedica alla mia ragazza Ginevra, e insieme sono una parola luminosa.
 
-Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5).
+Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 
 ## Stato
 
