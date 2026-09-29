@@ -1,0 +1,3 @@
+python-mpv
+numpy
+wxPython

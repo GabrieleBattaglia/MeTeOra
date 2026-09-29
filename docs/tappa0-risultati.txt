@@ -1,0 +1,28 @@
+TAPPA 0 - RISULTATI (29 settembre 2026)
+Ambiente: Python 3.14.5, wxPython 4.3.1, sounddevice, numpy.
+Materiale scaricato in E:\git\tmp\player-accessibile\prove (da pulire poi):
+libmpv-2.dll: build di shinchiro del 28 settembre 2026 (mpv 0.41.0-1087, FFmpeg N-126918), 31 MB, in prove\libmpv.
+python-mpv 1.0.8, in prove\lib.
+sidplayfp 3.2.0 (ucrt64) da GitHub libsidplayfp/sidplayfp, 1,2 MB, in prove\sidplayfp.
+HVSC: pacchetti di aggiornamento 84 e 85 da hvsc.brona.dk, 3,7 e 3,4 MB, in hvsc\.
+Script di prova: prova_formati.py, elenca_demuxer.py.
+Risultati:
+1. libmpv apre i MIDI (con il difetto delle patch TIMIDITY.CFG mancanti: il suono va ascoltato), ha 374 demuxer, fra cui libopenmpt, libmodplug (tracker), sap (Atari), ape, wv, tak, tta, dsf, mpc. NON apre i SID.
+2. SID: sidplayfp.exe li renderizza in WAV a circa 25 volte il tempo reale (120 s di Commando.sid in 4,7 s) e libmpv apre il WAV senza problemi (120,0 s, PCM 16 bit). Percorso SID -> WAV -> libmpv dimostrato.
+3. HVSC: la collezione in E:\C64Music era all'aggiornamento 83. Su una COPIA in hvsc\copia\C64Music ho applicato 84 e 85 con update.exe: riuscito, 61.157 SID, come annunciato per l'aggiornamento 85. L'originale non e stato toccato.
+4. VLC 3.0.24 installato ha plugin per SID, chip e tracker (libsid_plugin, libgme_plugin, libmod_plugin): confronto ancora da fare.
+5. Motore (prova_motore.py, uscita null): seek assoluto a 60 s preciso (60,49), velocita 1,5 accettata, equalizzatore a bande parametriche via filtro lavfi equalizer cambiato a riproduzione in corso senza fermare il brano, evento end-file ricevuto a fine brano, elenco dispositivi (auto, quattro wasapi, openal). Manca ancora l'ascolto reale: lo devi fare tu.
+Da fare:
+a. (fatto, vedi 5) Equalizzatore, eventi, dispositivi.
+c. Confronto SID: sidplayfp contro plugin di VLC.
+d. (fatto) Songlengths: prove\songlengths.py legge il database (61.157 voci, MD5 dell'intero file), l'intestazione PSID (titolo, autore, copyright, sottobrani) e trova da solo DOCUMENTS risalendo le cartelle. Verificato su Turbo Outrun, Great Giana Sisters e Rambo: tutte le durate trovate.
+6. Collezione originale E:\C64Music aggiornata a HVSC 85 il 29 settembre 2026 (61.157 SID). La copia in hvsc\copia si puo cancellare.
+7. Ascolti pronti in ascolti\: Turbo_Outrun (12 sottobrani), Great_Giana_Sisters (23), Rambo_First_Blood_Part_II (24), un WAV per sottobrano, durate da Songlengths (effetti sotto il secondo allungati a 1 s). Generati da prove\prepara_ascolti.py, circa 22 volte il tempo reale. Resta da confrontare con il plugin di foobar.
+Sessione 2 (29 settembre 2026, sera): il difetto sotto era proprio quello ipotizzato, confermato da Gabriele. Qualita dell'audio giudicata buona. Obiezioni: il file era mono (foobar gli pare stereo e migliore); il rendering su disco non e accettabile per ascolto e zapping.
+8. Stereo: foo_sid 2.0 (stuerp, GPL2, sorgente su GitHub) usa lo stesso motore libsidplayfp 3.0. Nel sorgente di libsidplayfp un SID a chip singolo in stereo mette lo stesso segnale sui due canali; la "stereo separation" di foo_sid lavora su mid/side, quindi con canali identici non cambia nulla. Misurato: sidplayfp -s da canali identici al campione. Lo stereo vero c'e solo nei brani a 2 o 3 SID. Da verificare con un WAV esportato da foobar (File, Convert) da confrontare canale per canale.
+9. Motore in tempo reale: MSYS2 portatile in msys64\ (gcc, libsidplayfp 2.16.1: la 3.x va compilata dai sorgenti se serve). DLL propria prove\sidshim\sidshim.dll con interfaccia C (apri, info, scegli sottobrano, rendi, chiudi). prove\sidmotore.py: un filo rende in anticipo in RAM (16-24 volte il tempo reale), niente disco; FlussoSid lo serve a libmpv come WAV virtuale tramite register_stream_protocol. Sottobrani ora corretti e diversi fra loro.
+Misure (prova_sid_mpv.py): partenza 375-400 ms, seek indietro istantaneo (circa 15 ms oltre il mezzo secondo di attesa della misura), seek in avanti oltre la parte gia resa 3-5 s (limite dell'emulazione, come in foo_sid). Da migliorare: partenza, seek in avanti (fastForward di libsidplayfp, versione 3.x), copia byte per byte di python-mpv nella lettura.
+prove\prova_zapping.py: ascoltata da Gabriele il 29 settembre 2026, "funziona in maniera egregia". DECISIONE: il motore SID in tempo reale (sidshim + BranoSid in RAM + FlussoSid in libmpv) si tiene.
+DIFETTO segnalato da Gabriele: in Great_Giana_Sisters i sottobrani da 1 a 8 sono tutti identici, gli altri tutti vuoti. Ipotesi da verificare: l'opzione -os passata dopo -o<n> riporta sidplayfp al sottobrano predefinito, quindi ogni file e il brano 1 tagliato alla durata del sottobrano richiesto (i sottobrani da 1 secondo sembrano vuoti). Probabile che riguardi anche Turbo Outrun e Rambo. Soluzione probabile: usare -os<n> in un'unica opzione, poi rigenerare e controllare.
+e. Rendering incrementale (in blocchi) invece del WAV intero, per partire subito e per il seek.
+f. Un giro sui tracker veri, appena c'e qualche file.

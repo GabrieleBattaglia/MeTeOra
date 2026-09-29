@@ -1,0 +1,86 @@
+METEORA - PIANO
+MeTeOra: tre parole italiane, dedica di Gabriele alla sua ragazza Ginevra, che insieme formano una parola luminosa.
+Prima bozza del 29 settembre 2026, riordinata la sera stessa con la bozza della GUI di Gabriele e le risposte alle domande aperte. Stato: tappa 0 conclusa, nessun codice del programma.
+1. OBIETTIVO
+Un lettore audio/video per Windows pensato per screen reader (NVDA) e display braille. Motore di riproduzione solido, molti formati (SID compresi), controllo totale da tastiera, ogni azione con un riscontro scritto e sonoro. Niente streaming, skin, copertine, equalizzazione avanzata.
+Il programma e fortemente orientato alle playlist. La riproduzione di singoli brani o singole cartelle e prevista ma secondaria.
+2. REQUISITI DI ACCESSIBILITA (nati dalle frustrazioni con foobar2000)
+2.1 Tre sole aree nella finestra principale (vedi 3), tutte etichettate. Nessun controllo muto per NVDA.
+2.2 Ordine di tabulazione fisso: plancia dei comandi, area dei messaggi, barra di stato. Mai posizioni casuali.
+2.3 Due concetti distinti e sempre distinguibili: il brano in riproduzione e il brano selezionato nell'albero. Il fuoco non viene mai spostato di iniziativa. Un tasto porta la selezione sul brano in riproduzione; un altro annuncia titolo, posizione e durata di cio che suona.
+2.4 Ogni azione produce un riscontro scritto nell'area dei messaggi e un effetto sonoro proprio (vedi 5.7). Esempi di messaggi: "Aggiunti 12 brani, ora 340", "Volume 60", "Segnalibro salvato a 12:31".
+2.5 Statistiche della playlist a richiesta e sempre a portata: numero brani, durata totale, durata residua, brano corrente su totale, tempo trascorso e mancante.
+2.6 Modifica della playlist dall'albero con Canc e con il menu contestuale della voce, al massimo un sottomenu (Ordina). Nessun percorso annidato per le operazioni comuni.
+2.7 Impostazioni in una sola finestra piatta, a schede al massimo di primo livello, ogni opzione con etichetta e valore leggibili.
+2.8 Tasti rapidi: tabella unica visibile, modificabile, con avviso di conflitto. Ogni comando ha un nome parlante.
+2.9 Niente tastierino numerico come tasto di comando (NVDA se lo tiene a blocco spento).
+2.10 Finestre e caratteri grandi: nessuna misura fissa in pixel (modello adatta_finestra di Dadillo).
+2.11 Prove con NVDA reale, non solo con eventi simulati.
+3. INTERFACCIA
+3.1 La finestra parte sempre massimizzata. Barra dei menu solo se serve a far funzionare gli acceleratori.
+3.2 Plancia dei comandi (F5): un grande albero dal bordo sinistro al centro, con rami espandibili, tutti collassati alla partenza. Ogni voce ha un menu contestuale che si apre con Invio, tasto Applicazioni o barra spaziatrice. Le lettere sono comandi (vedi 4), quindi l'albero non ha la ricerca per iniziale: al suo posto il tasto \ apre un campo di input e cerca in tutta la plancia.
+3.3 Area dei messaggi (F6): testo dal centro al bordo destro, che scorre come una console. In fondo si aggiungono i riscontri di tutte le operazioni del programma. Buffer di circa 2000 righe.
+3.4 Barra di stato (F7): su tutta la larghezza, in basso, alta almeno cinque righe. Mostra i tasti rapidi validi nel contesto in cui si trovava il fuoco prima di arrivarci.
+3.5 Memoria del fuoco: ogni area ricorda la posizione del fuoco quando lo perde e ce lo riporta quando si torna su di essa.
+3.6 F1 manuale, F2 changelog, F3 crediti: ciascuno in una grande area di testo navigabile. Esc la chiude.
+3.7 Esc sulla finestra principale chiude il programma salvando tutto, senza conferma.
+3.8 Alla riapertura si ritrovano la playlist, il brano e la posizione dell'ultima volta, in pausa: si riparte con X.
+3.9 Struttura della plancia dei comandi:
+Playlist (ramo)
+  Playlist 1, 2, ... (rami). Canc elimina la playlist, con conferma. Menu contestuale: Rinomina, Ordina (sottomenu), Mescola.
+    Brano (ramo). Canc lo toglie dalla playlist. Menu contestuale: Sposta su, Sposta giu, Sposta in cima, Sposta in fondo, Saltato (attivo o disattivo: il brano resta in lista ma non viene riprodotto).
+      Marcatori del brano (segnalibri). Canc elimina il marcatore.
+  Nuova playlist (comando)
+Questo PC (ramo). Espandendolo si interroga il sistema e compaiono tutte le unita logiche e virtuali collegate, con lettera e nome del volume (per esempio C:\HardDisk, E:\Dati).
+  Unita (ramo). Espandendola compare il suo file system: sottocartelle e file supportati.
+    Cartella (ramo): sottocartelle e file supportati. Una cartella funziona da playlist temporanea, creata al volo: resta nell'albero finche il programma e aperto e si perde alla chiusura. Dove possibile, il menu contestuale ha la voce "Crea playlist da qui", che la trasforma in una playlist vera.
+Apri file (comando). Il file scelto va solo in riproduzione, senza entrare in nessuna playlist; il lettore lo tiene finche non si suona altro, poi lo dimentica.
+Impostazioni (comando)
+4. TASTI RAPIDI
+Tutti i tasti valgono in tutto il programma, qualunque area abbia il fuoco, ma solo con la finestra in primo piano: niente tasti di sistema validi in secondo piano. Le 26 lettere sono tutte assegnate: i comandi futuri useranno Maiuscolo, Ctrl, Alt o i tasti funzione. Lista in espansione.
+4.1 Aree e finestre: F5 plancia, F6 messaggi, F7 barra di stato, F1 manuale, F2 changelog, F3 crediti, Esc chiude la finestra aperta o, dalla principale, esce salvando.
+4.2 Trasporto: Z brano precedente, X play, C pausa, V stop, B brano successivo, N brano a caso nella playlist, M muto attivo o disattivo.
+4.3 Posizione nel brano: Q indietro, E avanti, Maiuscolo+Q e Maiuscolo+E impostano i secondi di salto, W salta a un tempo digitato.
+4.4 Velocita e tono: A piu lento, S velocita normale, D piu veloce, F tono piu alto, G tono normale, H tono piu basso.
+4.5 Volume: + alza, - abbassa (tasti della tastiera principale).
+4.6 Playlist: J precedente, K successiva, da 1 a 0 seleziona la playlist da 1 a 10 e ne avvia la riproduzione se attiva, apostrofo e I accentata playlist precedente e successiva.
+4.7 Dissolvenza incrociata: L attiva o disattiva, Maiuscolo+L imposta i millisecondi.
+4.8 Segnalibri: R precedente, T nuovo segnalibro, Y successivo.
+4.9 Equalizzatore: U e I scelgono la banda, O e P aumentano e diminuiscono il valore, E accentata riporta la banda al valore predefinito. E ed E accentata, I e I accentata sono tasti fisici diversi: confermato da Gabriele, nessun conflitto.
+4.10 Nell'albero: Invio, Applicazioni e Spazio aprono il menu contestuale; Canc elimina la voce; \ cerca in tutta la plancia.
+5. FUNZIONI
+5.1 Riproduzione: play, pausa, stop, precedente, successivo, casuale, salto avanti e indietro a passi configurabili, salto a un tempo digitato, velocita e tono indipendenti, dissolvenza incrociata, loop A-B, ripetizione (brano, lista), volume, muto, scelta del dispositivo di uscita.
+5.2 Playlist multiple (almeno dieci con tasto diretto): aggiunta di file e cartelle, salvataggio e caricamento in un formato JSON proprio (niente M3U8), ricerca, ordinamento, mescola, brani saltati, statistiche.
+5.3 Segnalibri (marcatori) in JSON: file, posizione, nota, data. Visibili nell'albero sotto il brano. Recupero dell'ultima posizione per libri e brani lunghi.
+5.4 Equalizzatore semplice: poche bande, scelta e regolazione da tasto.
+5.5 Video: finestra separata, controllata dagli stessi tasti. Richiede un discorso a parte sulla GUI prima della sua tappa.
+5.6 Formati speciali: SID (con sottobrani e durate HVSC), tracker, chip music, MIDI, Amiga. Si metteranno tutti.
+5.7 Effetti sonori: ogni singola azione ha il suo effetto sonoro, prodotto con Acusticator di GBUtils. Scelta voluta di Gabriele, anche se non e prassi nei lettori. Volume degli effetti regolabile nelle impostazioni, separato da quello della musica.
+6. ARCHITETTURA
+6.1 Motore: libmpv tramite python-mpv. Verificato nella tappa 0: formati, seek, velocita, equalizzatore al volo, eventi di fine brano, dispositivi.
+6.2 SID: DLL propria su libsidplayfp, emulazione in tempo reale in un filo che rende in anticipo in RAM, passata a libmpv come WAV virtuale. Niente disco. Approvato all'ascolto il 29 settembre 2026.
+6.3 Altri formati che mpv non legge: stesso schema del SID (chip con libgme, Amiga con libuade, MIDI con FluidSynth). I tracker li legge gia libmpv tramite libopenmpt.
+6.4 Interfaccia: wxPython, controlli nativi (TreeCtrl per la plancia, TextCtrl in sola lettura per messaggi e barra di stato). I rami di Questo PC si riempiono solo quando vengono espansi.
+6.5 Effetti sonori con Acusticator, importato da GBUtils e mai copiato.
+6.6 Dati: JSON per playlist, segnalibri, impostazioni, tasti e stato di riapertura. Percorsi con il modulo nella radice, come negli altri progetti.
+6.7 Pacchetto: PyInstaller onedir.
+7. TAPPE
+Tappa 0 (conclusa): prove di fattibilita del motore e del SID in tempo reale. Dettagli in tappa0-risultati.txt.
+Tappa 1: scheletro con le tre aree, memoria del fuoco, albero con playlist e Questo PC, Apri file, riproduzione, area dei messaggi, tasti di trasporto, primi effetti sonori. Prova con NVDA.
+Tappa 2: gestione playlist completa dall'albero, ricerca con \, statistiche, salvataggio e caricamento, stato di riapertura.
+Tappa 3: segnalibri nell'albero, tabella tasti modificabile, impostazioni, F1 F2 F3.
+Tappa 4: equalizzatore, velocita, tono, dissolvenza, loop A-B.
+Tappa 5: SID dal prototipo al programma (libsidplayfp 3.x, partenza piu rapida, seek in avanti).
+Tappa 6: formati audio comuni (MP3 e compagnia): collaudo sistematico di quello che libmpv legge.
+Tappa 7: video, preceduto dal discorso sulla GUI.
+Tappa 8: tracker, chip di console, MIDI, Amiga.
+Tappa 9: rifiniture di accessibilita.
+8. RISCHI
+8.1 Dissolvenza incrociata: libmpv suona un file alla volta e non ha la dissolvenza fra brani. Servono due lettori affiancati o un missaggio proprio.
+8.2 Tono indipendente dalla velocita: richiede il filtro rubberband nella build di libmpv, da verificare.
+8.3 Seek in avanti sui SID: limitato dalla velocita di emulazione (3-5 s oltre la parte gia resa).
+8.4 Effetti sonori e musica insieme: Acusticator e libmpv suonano sullo stesso dispositivo, da verificare che non si disturbino.
+8.5 Licenze: LGPL o GPL della build di mpv e delle librerie dei chip; libsidplayfp e GPL.
+8.6 Dimensione del pacchetto con la DLL di mpv.
+9. DOMANDE APERTE
+Nessuna al momento.

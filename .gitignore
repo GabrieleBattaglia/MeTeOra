@@ -1,0 +1,12 @@
+# MeTeOra, cosa resta fuori da git.
+# Le librerie native: le scarica e le compila strumenti/prepara_ambiente.py.
+lib/
+strumenti/msys64/
+# I prodotti della compilazione e l'archivio della release, che si pubblica su GitHub.
+__pycache__/
+build/
+dist/
+*.zip
+*.exe
+.pytest_cache/
+.ruff_cache/

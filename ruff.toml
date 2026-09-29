@@ -1,0 +1,34 @@
+# Configurazione ruff di MeTeOra.
+# Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5).
+line-length = 140
+
+[lint]
+select = ["E", "F", "W", "B", "SIM", "UP", "I", "C4", "RET", "BLE", "S", "RUF", "DTZ", "FURB"]
+ignore = [
+    # Righe lunghe: quasi tutti i messaggi all'utente stanno su una riga
+    # sola, e spezzarli renderebbe piu' difficile ritrovarli nel codice.
+    "E501",
+    # Lo stile di Gabriele ammette l'istruzione breve sulla stessa riga.
+    "E701",
+    "E702",
+    "E741",
+    # Il rientro con le tabulazioni e' lo stile di Gabriele.
+    "W191",
+    # Date e orari sono di proposito quelli locali, senza fuso: l'ora della
+    # sveglia, la data nei report e nelle classifiche sono quelle
+    # dell'orologio e del calendario di chi usa il programma.
+    "DTZ001",
+    "DTZ005",
+    "DTZ011",
+]
+
+[lint.per-file-ignores]
+# Nelle prove l'assert e' lo strumento di pytest, non un controllo da
+# lasciare in produzione.
+"tests/*.py" = ["S101"]
+# Lo script di preparazione lancia solo programmi dai percorsi che conosce:
+# 7-Zip, l'installatore di MSYS2 appena scaricato e la bash di MSYS2.
+"strumenti/prepara_ambiente.py" = ["S603"]
+# I prototipi sono prove usa e getta: provano a leggere un formato e se
+# qualcosa va storto passano oltre, senza badare al tipo di errore.
+"prototipi/prova_formati.py" = ["BLE001", "S110"]
