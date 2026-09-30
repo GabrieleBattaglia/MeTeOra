@@ -1,3 +1,4 @@
 python-mpv
 numpy
 wxPython
+pytest

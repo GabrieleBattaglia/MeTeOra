@@ -4,12 +4,14 @@ import os
 import sys
 
 import ambiente  # noqa: F401
-import sidmotore
+
+import sid as sidmotore
 import songlengths
 
 # isort: split
 import mpv
-from sidmotore import FlussoSid
+
+from sid import FlussoSid
 
 origine = sys.argv[1] if len(sys.argv) > 1 else r"E:\C64Music\MUSICIANS\T\Tel_Jeroen"
 files = sorted(os.path.join(origine, f) for f in os.listdir(origine) if f.lower().endswith(".sid")) if os.path.isdir(origine) else [origine]

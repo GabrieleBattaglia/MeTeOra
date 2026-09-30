@@ -1,8 +1,11 @@
 """Velocita del motore e differenza fra sottobrani."""
 import time
 
+import ambiente  # noqa: F401
 import numpy as np
-import sidmotore
+
+# isort: split
+import sid as sidmotore
 
 SID = r"E:\C64Music\MUSICIANS\T\Tel_Jeroen\Turbo_Outrun.sid"
 impronte = []

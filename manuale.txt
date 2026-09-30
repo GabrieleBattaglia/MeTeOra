@@ -1,0 +1,37 @@
+Manuale di MeTeOra
+MeTeOra è un lettore audio pensato per chi usa uno screen reader e un display braille. Suona quasi tutti i formati audio, compresa la musica del Commodore 64 in formato SID, e si comanda tutto da tastiera. Ogni azione ha un suono suo e scrive una riga nell'area dei messaggi.
+Questo manuale è quello della tappa 1: descrive ciò che c'è adesso. Crescerà insieme al programma.
+La finestra
+La finestra ha tre aree, nell'ordine in cui le raggiunge il tasto Tab.
+La plancia dei comandi, F5: un albero con tutti i comandi e i contenuti. I rami si aprono con freccia destra e si chiudono con freccia sinistra.
+L'area dei messaggi, F6: una riga per ogni azione, la più recente in fondo. Quando torni nell'area il cursore è dove l'avevi lasciato.
+La barra di stato, F7: i tasti del punto da cui sei arrivato. Da una voce della plancia elenca i tasti di quella voce, dall'area dei messaggi quelli dei messaggi.
+La plancia dei comandi
+Playlist: le tue playlist, ciascuna con i suoi brani, e in fondo il comando Nuova playlist. Le playlist si salvano da sole a ogni modifica.
+Questo PC: le unità del computer, con la lettera e il nome del volume. Dentro le unità ci sono le cartelle e i file che MeTeOra sa suonare. Una cartella funziona come una playlist temporanea: dal suo menu la si suona, oppure si crea una playlist vera con tutti i file della cartella e delle sue sottocartelle.
+Apri file: sceglie un file qualsiasi e lo suona, senza metterlo in nessuna playlist.
+Impostazioni: arriverà con una delle prossime tappe.
+Su ogni voce Invio, il tasto Applicazioni e la barra spaziatrice aprono il menu della voce; sui comandi Invio li esegue. Canc elimina una playlist, dopo una conferma, o toglie un brano da una playlist.
+Menu di una playlist: Riproduci, Rinomina, Elimina.
+Menu di un brano: Riproduci, Sposta su, Sposta giù, Sposta in cima, Sposta in fondo, Saltato, Togli dalla playlist. Un brano saltato resta nella playlist ma non viene suonato.
+Menu di un'unità o di una cartella: Riproduci, Crea playlist da qui, Aggiungi alla playlist, Aggiorna.
+Menu di un file: Riproduci, Aggiungi alla playlist.
+Il brano in riproduzione e la voce selezionata sono due cose diverse: quando un brano finisce e ne parte un altro, la selezione resta dov'è. Nella plancia il brano che suona ha l'indicazione "in riproduzione" dopo il nome.
+I tasti
+I tasti a lettera funzionano in tutta la finestra, qualunque area abbia il fuoco. Per questo nella plancia non si salta alle voci digitandone l'iniziale.
+X: riproduce la voce selezionata, cioè un brano, un file, una playlist o una cartella. Se la voce è quella che sta già suonando in pausa, riprende.
+C: pausa, e di nuovo C riprende.
+V: stop. Poi X riparte dall'inizio del brano.
+Z e B: brano precedente e successivo.
+N: un brano a caso della playlist.
+Q ed E: indietro e avanti nel brano, di dieci secondi. Maiuscolo con Q e Maiuscolo con E chiedono di quanti secondi saltare, indietro e avanti.
+W: va a un tempo del brano, scritto come minuti e secondi, per esempio 1:30, oppure in secondi.
+Più e meno, sulla tastiera principale: volume su e giù di cinque.
+M: muto, e di nuovo M riaccende l'audio.
+F8: porta la selezione della plancia sul brano in riproduzione.
+F9: scrive nei messaggi cosa suona, a che punto è, e il volume.
+F1: questo manuale. F2: le novità di ogni versione. F3: i crediti. Esc chiude queste finestre.
+Esc nella finestra principale esce da MeTeOra salvando tutto.
+Gli altri tasti a lettera sono già assegnati a funzioni che arriveranno, come la velocità, il tono, l'equalizzatore e i segnalibri: per ora dicono che non sono ancora disponibili.
+I SID
+MeTeOra suona i SID emulando il Commodore 64 mentre suonano, senza scrivere niente su disco. Per ogni SID usa la durata del database della High Voltage SID Collection, se il file sta in una collezione HVSC; altrimenti lo suona per tre minuti. Per ora suona il sottobrano iniziale; la scelta dei sottobrani arriverà con la tappa dei SID.

@@ -1,0 +1,87 @@
+# MeTeOra, le prove dei moduli senza finestre: formati, Questo PC, suoni, impostazioni, songlengths.
+# Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
+
+import ctypes
+import json
+import os
+
+import pytest
+
+import formati
+import questo_pc
+import songlengths
+import suoni
+from finestra import leggi_tempo, tempo
+from impostazioni import PREDEFINITE, Impostazioni
+
+HVSC = r"E:\C64Music"
+
+
+def test_formati():
+    assert formati.supportato("a.MP3")
+    assert formati.e_sid("x.SID")
+    assert not formati.supportato("nota.txt")
+    assert "*.sid" in formati.filtro_dialogo()
+
+
+def test_contenuto_filtra_e_ordina(tmp_path):
+    (tmp_path / "b.mp3").write_bytes(b"")
+    (tmp_path / "A.flac").write_bytes(b"")
+    (tmp_path / "nota.txt").write_bytes(b"")
+    (tmp_path / "Sotto").mkdir()
+    (tmp_path / "Sotto" / "c.sid").write_bytes(b"")
+    nascosto = tmp_path / "nascosto.mp3"
+    nascosto.write_bytes(b"")
+    ctypes.windll.kernel32.SetFileAttributesW(str(nascosto), 0x2)
+    cartelle, files = questo_pc.contenuto(str(tmp_path))
+    assert [os.path.basename(c) for c in cartelle] == ["Sotto"]
+    assert [os.path.basename(f) for f in files] == ["A.flac", "b.mp3"]
+    assert [os.path.basename(f) for f in questo_pc.file_ricorsivi(str(tmp_path))] == ["A.flac", "b.mp3", "c.sid"]
+
+
+def test_unita_hanno_lettera_e_nome():
+    elenco = questo_pc.unita()
+    assert elenco
+    for radice, etichetta in elenco:
+        assert radice.endswith(":\\")
+        assert etichetta.startswith(radice) and len(etichetta) > len(radice)
+
+
+def test_ogni_evento_ha_un_preset_suo_che_esiste():
+    from GBUtils import Acusticator
+
+    preset = list(suoni.EVENTI.values())
+    assert len(preset) == len(set(preset)), "due eventi con lo stesso suono"
+    esistenti = set(Acusticator.list())
+    mancanti = [p for p in preset if p not in esistenti]
+    assert not mancanti, f"preset che non esistono nella collezione: {mancanti}"
+
+
+def test_impostazioni_scartano_i_valori_sbagliati(tmp_path):
+    percorso = tmp_path / "imp.json"
+    percorso.write_text(json.dumps({"volume": "alto", "passo_avanti": 30, "volume_effetti": 1, "passo_volume": True}), encoding="utf-8")
+    imp = Impostazioni(str(percorso))
+    imp.carica()
+    assert imp["volume"] == PREDEFINITE["volume"]
+    assert imp["passo_avanti"] == 30
+    assert imp["volume_effetti"] == 1.0
+    assert imp["passo_volume"] == PREDEFINITE["passo_volume"]
+
+
+def test_tempi():
+    assert tempo(75) == "1:15"
+    assert tempo(3725) == "1:02:05"
+    assert tempo(None) == "?"
+    assert leggi_tempo("1:30") == 90
+    assert leggi_tempo("90") == 90
+    assert leggi_tempo("1.30") == 90
+    assert leggi_tempo("a") is None
+    assert leggi_tempo("-5") is None
+
+
+@pytest.mark.skipif(not os.path.isdir(HVSC), reason="serve la collezione HVSC")
+def test_songlengths_della_collezione():
+    sid = os.path.join(HVSC, r"MUSICIANS\T\Tel_Jeroen\Turbo_Outrun.sid")
+    assert songlengths.durate_del_file(sid)[:2] == [475.0, 218.0]
+    info = songlengths.leggi_intestazione(sid)
+    assert info["titolo"] == "Turbo Outrun" and info["sottobrani"] == 12

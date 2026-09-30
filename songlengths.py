@@ -1,3 +1,7 @@
+# MeTeOra, le durate dei SID dal database Songlengths di HVSC.
+# Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
+# 30/09/2026: passa dai prototipi al programma con la tappa 1, con la memoria dei database letti.
+
 """Durate dei SID dal database Songlengths.md5 di HVSC.
 
 Dal formato attuale (HVSC 68 in poi) la chiave e l'MD5 dell'intero file.
@@ -64,3 +68,25 @@ def trova_database(percorso_sid):
         if superiore == cartella:
             return None
         cartella = superiore
+
+
+# I database gia' letti, per percorso, e il database di ogni cartella gia'
+# cercata: una collezione intera ne ha uno solo, e leggerlo costa qualche
+# decimo di secondo.
+_tabelle = {}
+_database_della_cartella = {}
+
+
+def durate_del_file(percorso_sid):
+    """Le durate dei sottobrani di un SID, cercando da solo il database della
+    sua collezione; None se il file non sta in una collezione o non e' nel
+    database."""
+    cartella = os.path.dirname(os.path.abspath(percorso_sid))
+    if cartella not in _database_della_cartella:
+        _database_della_cartella[cartella] = trova_database(percorso_sid)
+    database = _database_della_cartella[cartella]
+    if database is None:
+        return None
+    if database not in _tabelle:
+        _tabelle[database] = carica(database)
+    return durate(percorso_sid, _tabelle[database])

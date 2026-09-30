@@ -1,0 +1,31 @@
+Collaudo della tappa 1, MeTeOra 1.0.0, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+All'avvio la finestra è massimizzata, si sente il suono di avvio e il fuoco è sulla plancia, sulla voce Playlist.
+Tab e Maiuscolo+Tab passano per plancia, messaggi e barra di stato, in quest'ordine, e NVDA ne legge il nome.
+F5, F6 e F7 portano alle tre aree, ciascuna con il suo suono.
+Nell'area dei messaggi, sposta il cursore su una riga, vai altrove e torna con F6: il cursore è dove l'avevi lasciato.
+Da voci diverse della plancia, F7: la barra di stato elenca i tasti di quella voce, poi quelli comuni.
+Nella plancia le lettere non fanno saltare alle voci: fanno i comandi.
+Questo PC con freccia destra mostra le unità, con lettera e nome del volume.
+Apri E, poi C64Music, fino a una cartella di SID: si sentono il suono della cartella aperta e i file compaiono con l'estensione.
+Su un file SID, X: parte subito; la riga dei messaggi dice brano, posizione nella cartella e sottobrano.
+Mentre suona, muoviti nella plancia: la selezione non viene mai spostata dal programma, nemmeno quando il brano cambia da solo.
+Sul file che suona NVDA legge "in riproduzione" dopo il nome.
+F9 scrive cosa suona e a che punto è; F8 porta la selezione sul brano che suona.
+C pausa e riprende, V stop, X dopo lo stop riparte dall'inizio.
+Z e B passano al brano precedente e successivo della cartella; N ne sceglie uno a caso.
+Q ed E saltano indietro e avanti di dieci secondi; Maiuscolo+E chiede i secondi del salto in avanti.
+W chiede un tempo, per esempio 1:30, e ci va.
+Più e meno sulla tastiera principale cambiano il volume; M muto e di nuovo M riaccende.
+Un SID lasciato suonare fino alla fine passa da solo al successivo.
+Su una cartella, Invio, Applicazioni o Spazio aprono il menu; Crea playlist da qui crea una playlist con tutti i file, sottocartelle comprese.
+Su un file, menu, Aggiungi alla playlist: il sottomenu elenca le playlist e Nuova playlist.
+Sul ramo Playlist, Nuova playlist crea Playlist vuota.
+Su un brano di una playlist, il menu sposta su, giù, in cima e in fondo; la selezione segue il brano spostato.
+Saltato dal menu: NVDA legge "saltato" dopo il nome, e la riproduzione lo salta.
+Canc su un brano lo toglie; Canc su una playlist chiede conferma, e No è la risposta predefinita.
+Rinomina dal menu della playlist.
+Apri file, dalla plancia con Invio: suona il file scelto.
+Un tasto a lettera non ancora assegnato, per esempio A, dice a cosa servirà.
+F1, F2 e F3 aprono manuale, novità e crediti; Esc li chiude e il fuoco torna dove era.
+Gli effetti sonori e la musica insieme: nessun disturbo, nessun suono tagliato.
+Esc esce con il suono di uscita; riaprendo, le playlist sono al loro posto e il volume è quello lasciato.

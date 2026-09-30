@@ -3,12 +3,14 @@ import os
 import time
 
 import ambiente  # noqa: F401
-import sidmotore
+
+import sid as sidmotore
 import songlengths
 
 # isort: split
 import mpv
-from sidmotore import FlussoSid
+
+from sid import FlussoSid
 
 SID = r"E:\C64Music\MUSICIANS\T\Tel_Jeroen\Turbo_Outrun.sid"
 tabella = songlengths.carica(songlengths.trova_database(SID))

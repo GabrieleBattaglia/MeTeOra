@@ -1,13 +1,18 @@
+# MeTeOra, i SID: emulazione in tempo reale su sidshim.dll, resa in RAM, senza disco.
+# Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
+# 30/09/2026: passa dai prototipi al programma con la tappa 1.
+
 """Motore SID in tempo reale su sidshim.dll: rendering a blocchi in RAM, senza disco."""
 import ctypes
 import os
 import struct
 import threading
 
-import ambiente
 import numpy as np
 
-_dll = ctypes.CDLL(os.path.join(ambiente.LIB, "sidshim.dll"))
+import librerie
+
+_dll = ctypes.CDLL(os.path.join(librerie.LIB, "sidshim.dll"))
 _dll.sid_apri.restype = ctypes.c_void_p
 _dll.sid_apri.argtypes = [ctypes.c_char_p, ctypes.c_uint, ctypes.c_int]
 _dll.sid_errore.restype = ctypes.c_char_p

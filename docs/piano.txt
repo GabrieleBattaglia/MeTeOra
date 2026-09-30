@@ -1,6 +1,6 @@
 METEORA - PIANO
 MeTeOra: tre parole italiane, dedica di Gabriele alla sua ragazza Ginevra, che insieme formano una parola luminosa.
-Prima bozza del 29 settembre 2026, riordinata la sera stessa con la bozza della GUI di Gabriele e le risposte alle domande aperte. Stato: tappa 0 conclusa, nessun codice del programma.
+Prima bozza del 29 settembre 2026, riordinata la sera stessa con la bozza della GUI di Gabriele e le risposte alle domande aperte. Stato: tappa 1 scritta nella versione 1.0.0 del 30 settembre 2026, in attesa del collaudo con NVDA.
 1. OBIETTIVO
 Un lettore audio/video per Windows pensato per screen reader (NVDA) e display braille. Motore di riproduzione solido, molti formati (SID compresi), controllo totale da tastiera, ogni azione con un riscontro scritto e sonoro. Niente streaming, skin, copertine, equalizzazione avanzata.
 Il programma e fortemente orientato alle playlist. La riproduzione di singoli brani o singole cartelle e prevista ma secondaria.
@@ -66,7 +66,7 @@ Tutti i tasti valgono in tutto il programma, qualunque area abbia il fuoco, ma s
 6.7 Pacchetto: PyInstaller onedir.
 7. TAPPE
 Tappa 0 (conclusa): prove di fattibilita del motore e del SID in tempo reale. Dettagli in tappa0-risultati.txt.
-Tappa 1: scheletro con le tre aree, memoria del fuoco, albero con playlist e Questo PC, Apri file, riproduzione, area dei messaggi, tasti di trasporto, primi effetti sonori. Prova con NVDA.
+Tappa 1 (fatta nella 1.0.0, issue 1, da collaudare con NVDA): scheletro con le tre aree, memoria del fuoco, albero con playlist e Questo PC, Apri file, riproduzione, area dei messaggi, tasti di trasporto, primi effetti sonori. Prova con NVDA.
 Tappa 2: gestione playlist completa dall'albero, ricerca con \, statistiche, salvataggio e caricamento, stato di riapertura.
 Tappa 3: segnalibri nell'albero, tabella tasti modificabile, impostazioni, F1 F2 F3.
 Tappa 4: equalizzatore, velocita, tono, dissolvenza, loop A-B.
