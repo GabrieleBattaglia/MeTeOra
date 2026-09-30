@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.17.2] - 2026-09-30
+
+- I suoni di Maiuscolo con F8 sono lo stesso laser: sale quando aggancia l'inseguimento e scende quando lo sgancia. Il suono che sale, meteora_aggancio, è nuovo ed è entrato nella collezione di GBUtils.
+
 ## [1.17.1] - 2026-09-30
 
 - Tolti Maiuscolo con Z e Maiuscolo con B: con Z e B che seguono la plancia, i sottobrani si scorrono aprendo il ramo del SID.

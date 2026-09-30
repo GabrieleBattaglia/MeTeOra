@@ -5,8 +5,9 @@
 """La mappa degli eventi di MeTeOra sui preset della collezione di GBUtils.
 
 Ogni evento ha un preset suo: mai lo stesso suono per due eventi diversi.
-Per ora sono preset gia' presenti nella collezione; quelli fatti apposta,
-con il prefisso meteora_, arriveranno quando Gabriele li chiedera'.
+Sono preset della collezione; quelli fatti apposta per MeTeOra hanno il
+prefisso meteora_ e stanno anche loro nella collezione, dove ogni suono
+originale va appena nasce.
 """
 
 EVENTI = {
@@ -59,8 +60,9 @@ EVENTI = {
     "cartella_aperta": "carta_pescata",
     "file_aperto": "carta_girata",
     "vai_al_brano": "grosse_biglie",
-    "insegui_acceso": "laser_da_gioco_3",
-    "insegui_spento": "laser_da_gioco_4",
+    # Lo stesso laser: sale quando aggancia, scende quando sgancia.
+    "insegui_acceso": "meteora_aggancio",
+    "insegui_spento": "laser_da_gioco_3",
     "elenco_dei_tasti": "rimbalzo_stereo",
     "chiudi_tutto": "menu_tripletta_gi_7",
     "apri_tutto": "menu_tripletta_su_10",

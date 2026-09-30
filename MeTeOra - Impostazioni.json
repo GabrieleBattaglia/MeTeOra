@@ -3,5 +3,6 @@
  "passo_volume": 2,
  "passo_indietro": 1.21,
  "passo_avanti": 1.362,
- "volume_effetti": 0.5
+ "volume_effetti": 0.5,
+ "insegui": true
 }
