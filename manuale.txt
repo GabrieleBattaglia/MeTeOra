@@ -31,9 +31,9 @@ Se ciò che suona non si vede, per esempio una cartella suonata con X da chiusa 
 I tasti
 Tutti i tasti funzionano in tutta la finestra, qualunque area abbia il fuoco. Quelli a lettera valgono anche nella plancia, dove per questo non si salta alle voci digitandone l'iniziale. F12 scrive questo elenco nella console.
 F5: la plancia dei comandi. F6: la console. F7: il cruscotto, con i tasti del punto da cui arrivi. Tab e Maiuscolo con Tab passano da un'area all'altra.
-F1: questo manuale. F2: le novità di ogni versione. F3: i crediti. Esc chiude queste finestre.
+F1: questo manuale. F2: le novità di ogni versione. F3: i crediti. Si chiudono con il pulsante Chiudi.
 F12: scrive nella console questo elenco dei tasti; poi F6 porta il cursore al suo inizio.
-Esc: nella finestra principale esce da MeTeOra salvando tutto.
+Esc: esce da MeTeOra salvando tutto, anche mentre sono aperti il manuale, le novità o i crediti.
 X: riproduce la voce selezionata, cioè un brano, un file, un sottobrano, una playlist o una cartella. Una cartella, o un'unità, si suona con tutto ciò che ha sotto: prima i suoi file, poi quelli delle sottocartelle. Se la voce è quella che sta già suonando in pausa, riprende.
 C: pausa, e di nuovo C riprende.
 V: stop. Poi X riparte dall'inizio del brano.

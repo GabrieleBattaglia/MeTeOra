@@ -1,5 +1,4 @@
 Collaudo di MeTeOra 1.15.0, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra. Scrivi le note sulla riga della voce; le voci superate si cancellano.
-Nel cruscotto sposta il cursore, vai altrove e torna con F7 dallo stesso punto: il cursore è dove l'avevi lasciato.
 Brani delle playlist e file di Questo PC hanno la durata dopo il nome; un SID con più sottobrani dice quanti sono e quanto durano in tutto.
 Maiuscolo+E, scrivi 1.2: il messaggio dice 1.2 secondi, con il punto.
 Premi più volte + e -: nella console resta una riga sola del volume, riscritta.

@@ -22,8 +22,8 @@ Il programma e fortemente orientato alle playlist. La riproduzione di singoli br
 3.3 Console (F6), che nella prima bozza era l'area dei messaggi: testo dal centro al bordo destro, che scorre. In fondo si aggiungono i riscontri di tutte le operazioni del programma. Buffer di circa 2000 righe.
 3.4 Cruscotto (F7), che nella prima bozza era la barra di stato: su tutta la larghezza, in basso, alta almeno cinque righe. Mostra i tasti rapidi validi nel contesto in cui si trovava il fuoco prima di arrivarci.
 3.5 Memoria del fuoco: ogni area ricorda la posizione del fuoco quando lo perde e ce lo riporta quando si torna su di essa.
-3.6 F1 manuale, F2 changelog, F3 crediti: ciascuno in una grande area di testo navigabile. Esc la chiude.
-3.7 Esc sulla finestra principale chiude il programma salvando tutto, senza conferma.
+3.6 F1 manuale, F2 changelog, F3 crediti: ciascuno in una grande area di testo navigabile, con il pulsante Chiudi.
+3.7 Esc chiude il programma salvando tutto, senza conferma, anche da manuale, changelog e crediti: confermato da Gabriele il 30 settembre 2026.
 3.8 Alla riapertura si ritrovano la playlist, il brano e la posizione dell'ultima volta, in pausa: si riparte con X.
 3.9 Struttura della plancia dei comandi:
 Playlist (ramo)
@@ -38,7 +38,7 @@ Apri file (comando). Il file scelto va solo in riproduzione, senza entrare in ne
 Impostazioni (comando)
 4. TASTI RAPIDI
 Tutti i tasti valgono in tutto il programma, qualunque area abbia il fuoco, ma solo con la finestra in primo piano: niente tasti di sistema validi in secondo piano. Le 26 lettere sono tutte assegnate: i comandi futuri useranno Maiuscolo, Ctrl, Alt o i tasti funzione. Lista in espansione.
-4.1 Aree e finestre: F5 plancia, F6 console, F7 cruscotto, F1 manuale, F2 changelog, F3 crediti, Esc chiude la finestra aperta o, dalla principale, esce salvando.
+4.1 Aree e finestre: F5 plancia, F6 console, F7 cruscotto, F1 manuale, F2 changelog, F3 crediti, Esc esce salvando.
 4.2 Trasporto: Z brano precedente, X play, C pausa, V stop, B brano successivo, N brano a caso nella playlist, M muto attivo o disattivo.
 4.3 Posizione nel brano: Q indietro, E avanti, Maiuscolo+Q e Maiuscolo+E impostano i secondi di salto, W salta a un tempo digitato.
 4.4 Velocita e tono: A piu lento, S velocita normale, D piu veloce, F tono piu alto, G tono normale, H tono piu basso.

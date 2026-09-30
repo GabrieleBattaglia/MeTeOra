@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.17.3] - 2026-09-30
+
+- Il manuale diceva che Esc chiude il manuale, le novità e i crediti: in realtà esce da MeTeOra salvando tutto, ed è giusto così. Corretta la dicitura.
+
 ## [1.17.2] - 2026-09-30
 
 - I suoni di Maiuscolo con F8 sono lo stesso laser: sale quando aggancia l'inseguimento e scende quando lo sgancia. Il suono che sale, meteora_aggancio, è nuovo ed è entrato nella collezione di GBUtils.
