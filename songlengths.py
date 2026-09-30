@@ -39,6 +39,8 @@ def leggi_intestazione(percorso):
     """Titolo, autore, copyright, numero di sottobrani e sottobrano iniziale."""
     with open(percorso, "rb") as f:
         dati = f.read(0x76)
+    if len(dati) < 0x76 or dati[:4] not in (b"PSID", b"RSID"):
+        raise ValueError(f"{percorso} non ha l'intestazione di un SID")
 
     def testo(inizio):
         return dati[inizio:inizio + 32].split(b"\0")[0].decode("latin-1")
@@ -50,6 +52,21 @@ def leggi_intestazione(percorso):
         "sottobrani": int.from_bytes(dati[0x0E:0x10], "big"),
         "iniziale": int.from_bytes(dati[0x10:0x12], "big"),
     }
+
+
+_intestazioni = {}
+
+
+def info_del_sid(percorso):
+    """L'intestazione di un SID, letta una volta sola; None se il file non si
+    legge o non e' un SID."""
+    if percorso not in _intestazioni:
+        try:
+            info = leggi_intestazione(percorso)
+            _intestazioni[percorso] = info if info["sottobrani"] >= 1 else None
+        except (OSError, ValueError):
+            _intestazioni[percorso] = None
+    return _intestazioni[percorso]
 
 
 def durate(percorso_sid, tabella):

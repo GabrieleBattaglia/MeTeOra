@@ -26,6 +26,12 @@ import songlengths
 DURATA_SID_PREDEFINITA = 180.0
 
 
+def durata_del_sottobrano(percorso, sottobrano):
+    """I secondi di un sottobrano di un SID: dal database, o la durata predefinita."""
+    durate = songlengths.durate_del_file(percorso)
+    return durate[sottobrano - 1] if durate and sottobrano <= len(durate) else DURATA_SID_PREDEFINITA
+
+
 class Motore:
     def __init__(self, alla_fine=None, all_errore=None, ao="wasapi", volume=80):
         """alla_fine() quando un brano finisce da solo; all_errore(percorso)
@@ -64,17 +70,16 @@ class Motore:
         elif motivo == mpv.MpvEventEndFile.ERROR and self._all_errore:
             self._all_errore(percorso)
 
-    def suona(self, percorso):
-        """Avvia un file dall'inizio. Per i SID sceglie il sottobrano
-        iniziale e la durata dal database della collezione."""
+    def suona(self, percorso, sottobrano=None):
+        """Avvia un file dall'inizio. Per i SID suona il sottobrano chiesto,
+        o quello iniziale, con la durata dal database della collezione."""
         self._in_corso = percorso
         self.sottobrano = self.sottobrani = None
-        if formati.e_sid(percorso):
-            info = songlengths.leggi_intestazione(percorso)
-            self.sottobrani = info["sottobrani"]
-            self.sottobrano = info["iniziale"] or 1
-            durate = songlengths.durate_del_file(percorso)
-            secondi = durate[self.sottobrano - 1] if durate and self.sottobrano <= len(durate) else DURATA_SID_PREDEFINITA
+        info = songlengths.info_del_sid(percorso) if formati.e_sid(percorso) else None
+        if info:
+            self.sottobrani = max(1, info["sottobrani"])
+            self.sottobrano = min(sottobrano or info["iniziale"] or 1, self.sottobrani)
+            secondi = durata_del_sottobrano(percorso, self.sottobrano)
             self._lettore.loadfile(f"sid://{self.sottobrano}/{max(1.0, secondi)}/{percorso}", demuxer_lavf_format="wav", cache="no",
                 demuxer_readahead_secs="1")
         else:

@@ -1,6 +1,6 @@
 # MeTeOra, le playlist: brani, playlist, archivio e coda di riproduzione.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 il sottobrano dei SID, nella 1.3.0 il loop A-B.
 
 """Il modello dei dati, senza finestre e senza suono.
 
@@ -9,7 +9,8 @@ JSON di MeTeOra; quelle temporanee nascono da una cartella di Questo PC, o
 dal file aperto con Apri file, e si perdono alla chiusura.
 La Coda dice cosa sta suonando: la playlist di provenienza e il brano. Tiene
 il brano e non la sua posizione, cosi' spostare o togliere altri brani
-mentre suona non la confonde.
+mentre suona non la confonde. Tiene anche il loop A-B: due brani di una
+playlist fra i quali la riproduzione gira in tondo.
 """
 
 import json
@@ -20,9 +21,11 @@ VERSIONE_DEL_FILE = 1
 
 
 class Brano:
-    def __init__(self, percorso, saltato=False):
+    def __init__(self, percorso, saltato=False, sottobrano=None):
         self.percorso = percorso
         self.saltato = saltato
+        # Per un SID, il sottobrano da suonare; None vuol dire quello iniziale.
+        self.sottobrano = sottobrano
 
     @property
     def nome(self):
@@ -35,11 +38,15 @@ class Brano:
         return os.path.basename(self.percorso)
 
     def come_dati(self):
-        return {"percorso": self.percorso, "saltato": self.saltato}
+        dati = {"percorso": self.percorso, "saltato": self.saltato}
+        if self.sottobrano is not None:
+            dati["sottobrano"] = self.sottobrano
+        return dati
 
     @classmethod
     def da_dati(cls, dati):
-        return cls(dati["percorso"], bool(dati.get("saltato", False)))
+        sottobrano = dati.get("sottobrano")
+        return cls(dati["percorso"], bool(dati.get("saltato", False)), sottobrano if isinstance(sottobrano, int) and sottobrano > 0 else None)
 
 
 class Playlist:
@@ -135,28 +142,76 @@ class Archivio:
 
 
 class Coda:
-    """Cosa suona: una playlist e il suo brano corrente."""
+    """Cosa suona: una playlist e il suo brano corrente, e il loop A-B."""
 
     def __init__(self):
         self.playlist = None
         self.corrente = None
+        # Il loop: la playlist e i due brani, A e B; B e' None finche' non
+        # viene scelto, e fino ad allora il loop non limita niente.
+        self.loop_playlist = None
+        self.punto_a = None
+        self.punto_b = None
 
     def imposta(self, playlist, brano):
         self.playlist = playlist
         self.corrente = brano
 
+    def togli_loop(self):
+        self.loop_playlist = self.punto_a = self.punto_b = None
+
+    def intervallo(self, playlist=None):
+        """(primo, ultimo) indice del loop completo sulla playlist, o None se
+        su quella playlist non c'e' un loop con tutti e due i punti."""
+        playlist = playlist or self.playlist
+        if playlist is None or self.loop_playlist is not playlist or self.punto_b is None:
+            return None
+        a, b = playlist.indice(self.punto_a), playlist.indice(self.punto_b)
+        if a is None or b is None:
+            return None
+        return (min(a, b), max(a, b))
+
+    def nel_loop(self, playlist, brano):
+        """Vero se il brano si puo' suonare con il loop attuale: sempre, se
+        su quella playlist non c'e' un loop completo."""
+        limiti = self.intervallo(playlist)
+        if limiti is None:
+            return True
+        i = playlist.indice(brano)
+        return i is not None and limiti[0] <= i <= limiti[1]
+
+    def _campo(self, playlist):
+        """Gli indici fra cui si suona: tutta la playlist, o il loop."""
+        return self.intervallo(playlist) or (0, len(playlist.brani) - 1)
+
     def _suonabili(self):
-        return [b for b in self.playlist.brani if not b.saltato] if self.playlist else []
+        if not self.playlist:
+            return []
+        primo, ultimo = self._campo(self.playlist)
+        return [b for b in self.playlist.brani[primo:ultimo + 1] if not b.saltato]
 
     def primo(self, playlist):
-        """Il primo brano non saltato della playlist, o None."""
-        return next((b for b in playlist.brani if not b.saltato), None)
+        """Il primo brano non saltato della playlist, o del suo loop; None se non ce n'e'."""
+        primo, ultimo = self._campo(playlist)
+        return next((b for b in playlist.brani[primo:ultimo + 1] if not b.saltato), None)
 
     def _vicino(self, passo):
         if not self.playlist:
             return None
         brani = self.playlist.brani
+        limiti = self.intervallo()
         i = self.playlist.indice(self.corrente)
+        if limiti is not None:
+            # Nel loop si gira in tondo: dopo B si torna ad A, e prima di A si va a B.
+            primo, ultimo = limiti
+            if i is None or not primo <= i <= ultimo:
+                return self.primo(self.playlist)
+            larghezza = ultimo - primo + 1
+            for passi in range(1, larghezza + 1):
+                candidato = brani[primo + (i - primo + passo * passi) % larghezza]
+                if not candidato.saltato:
+                    return candidato
+            return None
         if i is None:
             # Il brano corrente e' stato tolto: si riparte dal primo.
             return self.primo(self.playlist) if passo > 0 else None

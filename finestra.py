@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B.
 
 """La finestra di MeTeOra.
 
@@ -21,9 +21,11 @@ import wx
 import formati
 import percorsi
 import questo_pc
+import songlengths
 import suoni
 import version
 from impostazioni import Impostazioni
+from motore import durata_del_sottobrano
 from playlist import Archivio, Brano, Coda, Playlist
 
 FILE_PLAYLIST = "MeTeOra - Playlist.json"
@@ -34,6 +36,9 @@ RIGHE_DELLA_CONSOLE = 2000
 TASTI = {
     ("z", False): "precedente",
     ("x", False): "play",
+    ("x", True): "loop",
+    ("z", True): "sottobrano_precedente",
+    ("b", True): "sottobrano_successivo",
     ("c", False): "pausa",
     ("v", False): "stop",
     ("b", False): "successivo",
@@ -63,6 +68,7 @@ FUTURI_MAIUSCOLI = {"l": "durata della dissolvenza"}
 TASTI_COMUNI = [
     "X riproduce la voce selezionata o riprende, C pausa, V stop, Z e B brano precedente e successivo, N brano a caso.",
     "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, + e - volume, Maiuscolo+M il passo del volume, M muto.",
+    "Maiuscolo con Z e con B sottobrano precedente e successivo di un SID, Maiuscolo+X mette e toglie i punti A e B del loop sul brano selezionato.",
     "F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione sul brano in riproduzione, F9 dice cosa suona.",
     "F1 manuale, F2 novità, F3 crediti, Esc esce salvando tutto.",
 ]
@@ -70,11 +76,12 @@ TASTI_COMUNI = [
 TASTI_DEL_CONTESTO = {
     "radice_playlist": ("il ramo Playlist", "Invio, Applicazioni o Spazio: menu con Nuova playlist."),
     "playlist": ("una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci e Rinomina. Canc elimina la playlist, dopo una conferma."),
-    "brano": ("un brano di una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Sposta e Saltato. Canc toglie il brano dalla playlist."),
+    "brano": ("un brano di una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Sposta e Saltato. Canc toglie il brano dalla playlist. Un SID con più sottobrani si apre con freccia destra."),
     "pc": ("Questo PC", "Freccia destra mostra le unità. Invio, Applicazioni o Spazio: menu con Aggiorna."),
     "unita": ("un'unità", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Crea playlist da qui."),
     "cartella": ("una cartella", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Riproduci e Crea playlist da qui."),
-    "file": ("un file", "Invio, Applicazioni o Spazio: menu con Riproduci e Aggiungi alla playlist."),
+    "file": ("un file", "Invio, Applicazioni o Spazio: menu con Riproduci e Aggiungi alla playlist. Un SID con più sottobrani si apre con freccia destra."),
+    "sottobrano": ("un sottobrano di un SID", "Invio, Applicazioni o Spazio: menu con Riproduci e Aggiungi alla playlist."),
     "comando": ("un comando", "Invio esegue il comando."),
 }
 
@@ -352,44 +359,74 @@ class Finestra(wx.Frame):
             yield figlio
             yield from self._tutte_le_voci(figlio)
 
-    def _etichetta_del_brano(self, brano):
+    def _ha_sottobrani(self, brano):
+        """Vero per un SID con piu' sottobrani, che nella plancia diventa un ramo."""
+        if brano.sottobrano is not None or not formati.e_sid(brano.percorso):
+            return False
+        info = songlengths.info_del_sid(brano.percorso)
+        return bool(info) and info["sottobrani"] > 1
+
+    def _etichetta(self, dati):
+        """L'etichetta di un brano, di un file o di un sottobrano, con le sue indicazioni."""
+        brano = dati["brano"]
+        suona = bool(self.motore.in_corso) and brano is self.coda.corrente
+        if dati["tipo"] == "sottobrano":
+            n = dati["numero"]
+            parti = [f"Sottobrano {n} di {dati['totale']}, {tempo(durata_del_sottobrano(brano.percorso, n))}"]
+            if suona and self.motore.sottobrano == n:
+                parti.append("in riproduzione")
+            return ", ".join(parti)
         parti = [brano.nome_del_file]
+        if brano.sottobrano:
+            info = songlengths.info_del_sid(brano.percorso)
+            parti[0] += f", sottobrano {brano.sottobrano} di {info['sottobrani'] if info else '?'}"
         if brano.saltato:
             parti.append("saltato")
-        if self.motore.in_corso and brano is self.coda.corrente:
+        if self.coda.loop_playlist is dati["playlist"]:
+            if brano is self.coda.punto_a:
+                parti.append("punto A del loop")
+            if brano is self.coda.punto_b:
+                parti.append("punto B del loop")
+        if suona:
             parti.append("in riproduzione")
         return ", ".join(parti)
 
-    def _etichetta_del_file(self, percorso, cartella):
-        etichetta = os.path.basename(percorso)
-        pl = self.coda.playlist
-        if self.motore.in_corso and pl is not None and pl.cartella == cartella and self.coda.corrente and self.coda.corrente.percorso == percorso:
-            etichetta += ", in riproduzione"
-        return etichetta
+    def _aggiungi_voce(self, genitore, tipo, pl, brano):
+        """Aggiunge alla plancia un brano (di una playlist) o un file (di una
+        cartella); un SID con piu' sottobrani diventa un ramo da aprire."""
+        dati = {"tipo": tipo, "playlist": pl, "brano": brano}
+        voce = self.albero.AppendItem(genitore, self._etichetta(dati), data=dati)
+        if self._ha_sottobrani(brano):
+            dati["caricato"] = False
+            self.albero.SetItemHasChildren(voce, True)
+        return voce
 
     def _aggiorna_etichette(self):
-        """Rinfresca le etichette di brani e file: saltato, in riproduzione."""
+        """Rinfresca le etichette di brani, file e sottobrani: saltato, loop, in riproduzione."""
         for voce in self._tutte_le_voci():
             dati = self._dati(voce)
-            if not dati:
+            if not dati or dati["tipo"] not in ("brano", "file", "sottobrano"):
                 continue
-            if dati["tipo"] == "brano":
-                nuova = self._etichetta_del_brano(dati["brano"])
-            elif dati["tipo"] == "file":
-                nuova = self._etichetta_del_file(dati["percorso"], dati["cartella"])
-            else:
-                continue
+            nuova = self._etichetta(dati)
             if self.albero.GetItemText(voce) != nuova:
                 self.albero.SetItemText(voce, nuova)
 
     def _etichetta_della_playlist(self, pl):
         return f"{pl.nome}, {brani_al_plurale(len(pl.brani))}"
 
+    def _sotto(self, voce, radice):
+        """Vero se la voce sta dentro il ramo radice."""
+        while voce.IsOk():
+            if voce == radice:
+                return True
+            voce = self.albero.GetItemParent(voce)
+        return False
+
     def _popola_playlist(self, seleziona=None):
         """Ricostruisce il ramo Playlist dall'archivio. Tiene aperte le
         playlist che lo erano, e se la selezione stava nel ramo la rimette
         sulla stessa voce, o su seleziona quando e' dato (una playlist o un
-        brano)."""
+        brano). I brani di una playlist si caricano quando la si apre."""
         aperte = set()
         selezionato = None
         voce_selezionata = self.albero.GetSelection()
@@ -398,12 +435,10 @@ class Finestra(wx.Frame):
             dati = self._dati(voce)
             if dati.get("tipo") == "playlist" and self.albero.IsExpanded(voce):
                 aperte.add(id(dati["playlist"]))
-        if voce_selezionata.IsOk():
+        if voce_selezionata.IsOk() and voce_selezionata != self.nodo_playlist and self._sotto(voce_selezionata, self.nodo_playlist):
             dati = self._dati(voce_selezionata) or {}
-            dentro = dati.get("tipo") in ("playlist", "brano") or (dati.get("tipo") == "comando" and dati.get("comando") == "nuova_playlist")
-            selezionato = dati.get("brano") or dati.get("playlist")
-            if dati.get("comando") == "nuova_playlist":
-                selezionato = "nuova_playlist"
+            dentro = True
+            selezionato = "nuova_playlist" if dati.get("comando") == "nuova_playlist" else (dati.get("brano") or dati.get("playlist"))
         if seleziona is not None:
             selezionato, dentro = seleziona, True
         if dentro:
@@ -413,16 +448,16 @@ class Finestra(wx.Frame):
         self.albero.DeleteChildren(self.nodo_playlist)
         da_selezionare = None
         for pl in self.archivio.playlist:
-            nodo = self.albero.AppendItem(self.nodo_playlist, self._etichetta_della_playlist(pl), data={"tipo": "playlist", "playlist": pl})
+            nodo = self.albero.AppendItem(self.nodo_playlist, self._etichetta_della_playlist(pl), data={"tipo": "playlist", "playlist": pl, "caricato": False})
+            self.albero.SetItemHasChildren(nodo, bool(pl.brani))
             if pl is selezionato:
                 da_selezionare = nodo
-            for brano in pl.brani:
-                figlio = self.albero.AppendItem(nodo, self._etichetta_del_brano(brano), data={"tipo": "brano", "playlist": pl, "brano": brano})
-                if brano is selezionato:
-                    da_selezionare = figlio
-                    aperte.add(id(pl))
+            elif isinstance(selezionato, Brano) and pl.indice(selezionato) is not None:
+                aperte.add(id(pl))
             if id(pl) in aperte:
                 self.albero.Expand(nodo)
+                if isinstance(selezionato, Brano):
+                    da_selezionare = next((v for v in self._figli(nodo) if self._dati(v)["brano"] is selezionato), da_selezionare)
         comando = self.albero.AppendItem(self.nodo_playlist, "Nuova playlist", data={"tipo": "comando", "comando": "nuova_playlist"})
         if selezionato == "nuova_playlist":
             da_selezionare = comando
@@ -437,13 +472,26 @@ class Finestra(wx.Frame):
             self._carica(voce, dati)
 
     def _carica(self, voce, dati):
-        """Riempie un ramo di Questo PC: le unita', o il contenuto di una cartella."""
+        """Riempie un ramo quando si apre: le unita' di Questo PC, il contenuto
+        di una cartella, i brani di una playlist, i sottobrani di un SID."""
         self.albero.DeleteChildren(voce)
         dati["caricato"] = True
-        if dati["tipo"] == "pc":
+        tipo = dati["tipo"]
+        if tipo == "pc":
             for radice, etichetta in questo_pc.unita():
                 figlio = self.albero.AppendItem(voce, etichetta, data={"tipo": "unita", "percorso": radice, "etichetta": etichetta, "caricato": False})
                 self.albero.SetItemHasChildren(figlio, True)
+            return
+        if tipo == "playlist":
+            for brano in dati["playlist"].brani:
+                self._aggiungi_voce(voce, "brano", dati["playlist"], brano)
+            return
+        if tipo in ("brano", "file"):
+            brano = dati["brano"]
+            totale = songlengths.info_del_sid(brano.percorso)["sottobrani"]
+            for n in range(1, totale + 1):
+                figlio = {"tipo": "sottobrano", "playlist": dati["playlist"], "brano": brano, "numero": n, "totale": totale}
+                self.albero.AppendItem(voce, self._etichetta(figlio), data=figlio)
             return
         try:
             cartelle, files = questo_pc.contenuto(dati["percorso"])
@@ -454,8 +502,9 @@ class Finestra(wx.Frame):
         for cartella in cartelle:
             figlio = self.albero.AppendItem(voce, os.path.basename(cartella), data={"tipo": "cartella", "percorso": cartella, "caricato": False})
             self.albero.SetItemHasChildren(figlio, True)
-        for percorso in files:
-            self.albero.AppendItem(voce, self._etichetta_del_file(percorso, dati["percorso"]), data={"tipo": "file", "percorso": percorso, "cartella": dati["percorso"]})
+        pl = self._temporanea(dati["percorso"], files)
+        for brano in pl.brani:
+            self._aggiungi_voce(voce, "file", pl, brano)
         if not cartelle and not files:
             self.albero.SetItemHasChildren(voce, False)
             self._riscontro("cartella_aperta", "Niente da suonare qui dentro.")
@@ -517,10 +566,12 @@ class Finestra(wx.Frame):
                 voce = menu.Append(wx.ID_ANY, etichetta)
                 menu.Bind(wx.EVT_MENU, lambda _e, f=azione: f(), voce)
 
-    def _menu_aggiungi(self, percorsi_da_aggiungere):
-        """Il sottomenu Aggiungi alla playlist: le playlist dell'archivio e una nuova."""
-        voci = [(pl.nome, lambda pl=pl: self._aggiungi(pl, percorsi_da_aggiungere())) for pl in self.archivio.playlist]
-        voci.append(("Nuova playlist", lambda: self._aggiungi(None, percorsi_da_aggiungere())))
+    def _menu_aggiungi(self, brani_da_aggiungere):
+        """Il sottomenu Aggiungi alla playlist: le playlist dell'archivio e una
+        nuova. brani_da_aggiungere e' una funzione che da' i brani, chiamata
+        solo quando la voce viene scelta."""
+        voci = [(pl.nome, lambda pl=pl: self._aggiungi(pl, brani_da_aggiungere())) for pl in self.archivio.playlist]
+        voci.append(("Nuova playlist", lambda: self._aggiungi(None, brani_da_aggiungere())))
         return voci
 
     def _voci_del_menu(self, dati):
@@ -533,7 +584,7 @@ class Finestra(wx.Frame):
                 ("Elimina", lambda: self._elimina_playlist(pl))]
         if tipo == "brano":
             pl, brano = dati["playlist"], dati["brano"]
-            return [("Riproduci", lambda: self._suona(pl, brano)),
+            return [("Riproduci", lambda: self._riproduci(pl, brano)),
                 ("Sposta su", lambda: self._sposta(pl, brano, "su")), ("Sposta giù", lambda: self._sposta(pl, brano, "giu")),
                 ("Sposta in cima", lambda: self._sposta(pl, brano, "cima")), ("Sposta in fondo", lambda: self._sposta(pl, brano, "fondo")),
                 ("Saltato", (lambda: self._salta(pl, brano), brano.saltato)), ("Togli dalla playlist", lambda: self._togli(pl, brano))]
@@ -544,10 +595,14 @@ class Finestra(wx.Frame):
             cartella = dati["percorso"]
             nome = dati.get("etichetta", "").split("\\", 1)[-1] if tipo == "unita" else os.path.basename(cartella)
             return [("Riproduci", lambda: self._riproduci_cartella(cartella)), ("Crea playlist da qui", lambda: self._crea_da_qui(cartella, nome)),
-                ("Aggiungi alla playlist", self._menu_aggiungi(lambda: questo_pc.file_ricorsivi(cartella))), ("Aggiorna", lambda: self._aggiorna_ramo(voce))]
+                ("Aggiungi alla playlist", self._menu_aggiungi(lambda: [Brano(p) for p in questo_pc.file_ricorsivi(cartella)])), ("Aggiorna", lambda: self._aggiorna_ramo(voce))]
         if tipo == "file":
-            percorso = dati["percorso"]
-            return [("Riproduci", lambda: self._suona_file(percorso, dati["cartella"])), ("Aggiungi alla playlist", self._menu_aggiungi(lambda: [percorso]))]
+            pl, brano = dati["playlist"], dati["brano"]
+            return [("Riproduci", lambda: self._riproduci(pl, brano)), ("Aggiungi alla playlist", self._menu_aggiungi(lambda: [Brano(brano.percorso)]))]
+        if tipo == "sottobrano":
+            pl, brano, n = dati["playlist"], dati["brano"], dati["numero"]
+            return [("Riproduci", lambda: self._riproduci(pl, brano, n)),
+                ("Aggiungi alla playlist", self._menu_aggiungi(lambda: [Brano(brano.percorso, sottobrano=n)]))]
         return []
 
     def _cancella(self, voce):
@@ -586,7 +641,7 @@ class Finestra(wx.Frame):
         nuova = pl is None
         if nuova:
             pl = self.archivio.nuova()
-        pl.brani.extend(Brano(p) for p in percorsi_da_aggiungere)
+        pl.brani.extend(b if isinstance(b, Brano) else Brano(b) for b in percorsi_da_aggiungere)
         self._salva_archivio()
         self._popola_playlist()
         cosa = "Creata la playlist" if nuova else "Aggiunti alla playlist"
@@ -654,6 +709,10 @@ class Finestra(wx.Frame):
         i = pl.togli(brano)
         if i is None:
             return
+        if self.coda.loop_playlist is pl and brano is self.coda.punto_a:
+            self.coda.togli_loop()
+        elif self.coda.loop_playlist is pl and brano is self.coda.punto_b:
+            self.coda.punto_b = None
         self._salva_archivio()
         vicino = pl.brani[min(i, len(pl.brani) - 1)] if pl.brani else pl
         self._popola_playlist(seleziona=vicino)
@@ -661,21 +720,27 @@ class Finestra(wx.Frame):
 
     # La riproduzione.
 
-    def _temporanea(self, cartella):
-        """La playlist temporanea di una cartella: i suoi file supportati."""
+    def _temporanea(self, cartella, files=None):
+        """La playlist temporanea di una cartella: i suoi file supportati.
+        Se i file sono gli stessi resta la stessa playlist, con gli stessi
+        brani: cosi' il brano che suona, e il loop, non si perdono quando la
+        cartella si riapre o si aggiorna."""
         pl = self._temporanee.get(cartella)
-        if pl is None:
+        if files is None:
+            if pl is not None:
+                return pl
             try:
                 files = questo_pc.contenuto(cartella)[1]
             except OSError:
                 files = []
+        if pl is None or [b.percorso for b in pl.brani] != files:
             nome = os.path.basename(cartella.rstrip("\\")) or cartella
             pl = self._temporanee[cartella] = Playlist.da_percorsi(nome, files, cartella)
         return pl
 
-    def _suona(self, pl, brano, evento="play"):
+    def _suona(self, pl, brano, evento="play", sottobrano=None):
         self.coda.imposta(pl, brano)
-        self.motore.suona(brano.percorso)
+        self.motore.suona(brano.percorso, sottobrano or brano.sottobrano)
         numero, totale = self.coda.posizione()
         dove = f"{numero} di {totale}, {'cartella' if pl.temporanea else 'playlist'} {pl.nome}" if totale > 1 else pl.nome
         testo = f"In riproduzione: {brano.percorso}, {dove}."
@@ -684,18 +749,24 @@ class Finestra(wx.Frame):
         self._riscontro(evento, testo)
         self._aggiorna_etichette()
 
+    def _riproduci(self, pl, brano, sottobrano=None):
+        """Suona un brano scelto nella plancia, se il loop lo permette."""
+        if not self.coda.nel_loop(pl, brano):
+            self._riscontro("fuori_dal_loop", f"{brano.nome_del_file} è fuori dal loop: si suona solo fra il punto A e il punto B.")
+            return
+        self._suona(pl, brano, sottobrano=sottobrano)
+
     def _suona_file(self, percorso, cartella):
         pl = self._temporanea(cartella)
         brano = next((b for b in pl.brani if b.percorso == percorso), None)
         if brano is None:
             # La cartella e' cambiata sul disco da quando la si e' letta.
-            self._temporanee.pop(cartella, None)
-            pl = self._temporanea(cartella)
+            pl = self._temporanea(cartella, questo_pc.contenuto(cartella)[1])
             brano = next((b for b in pl.brani if b.percorso == percorso), None)
         if brano is None:
             self._riscontro("errore", f"{os.path.basename(percorso)} non c'è più.")
             return
-        self._suona(pl, brano)
+        self._riproduci(pl, brano)
 
     def _riproduci_playlist(self, pl):
         brano = self.coda.primo(pl)
@@ -705,8 +776,12 @@ class Finestra(wx.Frame):
         self._suona(pl, brano)
 
     def _riproduci_cartella(self, cartella):
-        self._temporanee.pop(cartella, None)
-        pl = self._temporanea(cartella)
+        try:
+            files = questo_pc.contenuto(cartella)[1]
+        except OSError as e:
+            self._riscontro("errore", f"Non riesco a leggere {cartella}: {e.strerror or e}")
+            return
+        pl = self._temporanea(cartella, files)
         brano = self.coda.primo(pl)
         if brano is None:
             self._riscontro("niente_da_suonare", "In questa cartella non ci sono file da suonare; le sottocartelle si suonano con Crea playlist da qui.")
@@ -716,12 +791,17 @@ class Finestra(wx.Frame):
     def _brano_finito(self):
         if self._chiusa:
             return
+        pl = self.coda.playlist
+        prima = pl.indice(self.coda.corrente) if pl else None
         seguente = self.coda.successivo()
         if seguente:
-            self._suona(self.coda.playlist, seguente, "brano_seguente_da_solo")
+            # Nel loop, dopo il punto B si torna al punto A: ha un suono suo.
+            dopo = pl.indice(seguente)
+            evento = "ritorno_al_punto_a" if self.coda.intervallo() and prima is not None and dopo is not None and dopo <= prima else "brano_seguente_da_solo"
+            self._suona(pl, seguente, evento)
         else:
             self._aggiorna_etichette()
-            self._riscontro("fine_playlist", f"Fine di {self.coda.playlist.nome}.")
+            self._riscontro("fine_playlist", f"Fine di {pl.nome}.")
 
     def _brano_in_errore(self, percorso):
         if self._chiusa:
@@ -743,24 +823,75 @@ class Finestra(wx.Frame):
         dati = self._dati(self.albero.GetSelection()) or {}
         tipo = dati.get("tipo")
         corrente = self.coda.corrente
-        if tipo == "brano" and not (dati["brano"] is corrente and self.motore.in_corso):
-            self._suona(dati["playlist"], dati["brano"])
-        elif tipo == "file" and not (self.motore.in_corso and corrente and corrente.percorso == dati["percorso"]
-                and self.coda.playlist.cartella == dati["cartella"]):
-            self._suona_file(dati["percorso"], dati["cartella"])
+        if tipo in ("brano", "file", "sottobrano"):
+            numero = dati.get("numero")
+            gia_suona = self.motore.in_corso and dati["brano"] is corrente and (numero is None or self.motore.sottobrano == numero)
+            if not gia_suona:
+                self._riproduci(dati["playlist"], dati["brano"], numero)
+                return
         elif tipo == "playlist" and self.coda.playlist is not dati["playlist"]:
             self._riproduci_playlist(dati["playlist"])
+            return
         elif tipo in ("cartella", "unita") and not (self.coda.playlist and self.coda.playlist.cartella == dati["percorso"]):
             self._riproduci_cartella(dati["percorso"])
-        elif self.motore.in_corso and self.motore.in_pausa:
+            return
+        if self.motore.in_corso and self.motore.in_pausa:
             self.motore.pausa(False)
             self._riscontro("ripresa", f"Riprende da {tempo(self.motore.posizione)}.")
         elif self.motore.in_corso:
-            self._riscontro("niente_da_suonare", f"Sta già suonando {corrente.nome}.")
+            self._riscontro("niente_da_suonare", f"Sta già suonando {corrente.nome_del_file}.")
         elif corrente:
             self._suona(self.coda.playlist, corrente)
         else:
             self._riscontro("niente_da_suonare", "Niente da riprodurre: scegli un brano, una playlist o una cartella nella plancia.")
+
+    def _comando_sottobrano(self, passo):
+        if self._niente_in_corso():
+            return
+        totale = self.motore.sottobrani
+        if not totale or totale == 1:
+            self._riscontro("nessun_altro_brano", "Il brano che suona non ha sottobrani.")
+            return
+        n = self.motore.sottobrano + passo
+        if not 1 <= n <= totale:
+            quale = "il primo" if passo < 0 else "l'ultimo"
+            self._riscontro("nessun_altro_brano", f"È {quale} sottobrano, {self.motore.sottobrano} di {totale}.")
+            return
+        percorso = self.motore.in_corso
+        self.motore.suona(percorso, n)
+        evento = "sottobrano_successivo" if passo > 0 else "sottobrano_precedente"
+        self._riscontro(evento, f"Sottobrano {n} di {totale}, {tempo(durata_del_sottobrano(percorso, n))}.")
+        self._aggiorna_etichette()
+
+    def _comando_sottobrano_precedente(self):
+        self._comando_sottobrano(-1)
+
+    def _comando_sottobrano_successivo(self):
+        self._comando_sottobrano(1)
+
+    def _comando_loop(self):
+        dati = self._dati(self.albero.GetSelection()) or {}
+        if dati.get("tipo") not in ("brano", "file", "sottobrano"):
+            self._riscontro("loop_non_qui", "Il loop si mette su un brano: scegline uno in una playlist o in una cartella.")
+            return
+        pl, brano = dati["playlist"], dati["brano"]
+        coda = self.coda
+        if coda.loop_playlist is pl and brano is coda.punto_a:
+            coda.togli_loop()
+            self._riscontro("loop_tolto", "Loop tolto: si suona di nuovo tutta la lista.")
+        elif coda.loop_playlist is pl and brano is coda.punto_b:
+            coda.punto_b = None
+            self._riscontro("loop_b_tolto", f"Punto B tolto; resta il punto A su {coda.punto_a.nome_del_file}.")
+        elif coda.loop_playlist is pl:
+            coda.punto_b = brano
+            primo, ultimo = coda.intervallo(pl)
+            self._riscontro("loop_b_messo", f"Loop fra {coda.punto_a.nome_del_file} e {brano.nome_del_file}: {brani_al_plurale(ultimo - primo + 1)}.")
+        else:
+            prima = coda.loop_playlist is not None
+            coda.loop_playlist, coda.punto_a, coda.punto_b = pl, brano, None
+            tolto = " Il loop di prima è tolto." if prima else ""
+            self._riscontro("loop_a_messo", f"Punto A del loop su {brano.nome_del_file}.{tolto} Maiuscolo+X su un altro brano mette il punto B.")
+        self._aggiorna_etichette()
 
     def _comando_pausa(self):
         if self._niente_in_corso():
@@ -907,15 +1038,19 @@ class Finestra(wx.Frame):
         if not corrente or not self.motore.in_corso:
             self._riscontro("niente_da_suonare", "Non sta suonando niente.")
             return
-        voce = None
         if not pl.temporanea:
-            voce = next((v for v in self._tutte_le_voci(self.nodo_playlist) if (self._dati(v) or {}).get("brano") is corrente), None)
-        elif pl.cartella:
-            voce = next((v for v in self._tutte_le_voci(self.nodo_pc) if (self._dati(v) or {}).get("tipo") == "file"
-                and self._dati(v)["percorso"] == corrente.percorso and self._dati(v)["cartella"] == pl.cartella), None)
+            # Una playlist mai aperta non ha ancora i suoi brani nella plancia.
+            nodo = next((v for v in self._figli(self.nodo_playlist) if self._dati(v).get("playlist") is pl), None)
+            if nodo is not None and self._dati(nodo).get("caricato") is False:
+                self._carica(nodo, self._dati(nodo))
+        voce = next((v for v in self._tutte_le_voci() if (self._dati(v) or {}).get("tipo") in ("brano", "file")
+            and self._dati(v)["brano"] is corrente), None)
         if voce is None:
-            self._riscontro("niente_da_suonare", f"{corrente.nome} non è nella plancia: è stato aperto con Apri file.")
+            self._riscontro("niente_da_suonare", f"{corrente.nome_del_file} non è nella plancia: è stato aperto con Apri file.")
             return
+        # Se i sottobrani del SID sono aperti, la selezione va su quello che suona.
+        if self.albero.IsExpanded(voce):
+            voce = next((v for v in self._figli(voce) if self._dati(v).get("numero") == self.motore.sottobrano), voce)
         self.albero.EnsureVisible(voce)
         self.albero.SelectItem(voce)
         self._suono("vai_al_brano")
@@ -933,6 +1068,9 @@ class Finestra(wx.Frame):
             testo += f" Sottobrano {self.motore.sottobrano} di {self.motore.sottobrani}."
         if totale > 1:
             testo += f" Brano {numero} di {totale}, {'cartella' if pl.temporanea else 'playlist'} {pl.nome}."
+        limiti = self.coda.intervallo()
+        if limiti:
+            testo += f" Loop fra il brano {limiti[0] + 1} e il {limiti[1] + 1}."
         testo += f" Volume {self.motore.volume}{', muto' if self.motore.muto else ''}."
         self._riscontro("informazioni", testo)
 

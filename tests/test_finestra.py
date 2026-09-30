@@ -8,6 +8,7 @@ import pytest
 import wx
 
 import finestra as modulo
+from playlist import Brano
 
 HVSC = r"E:\C64Music"
 TURBO_OUTRUN = os.path.join(HVSC, r"MUSICIANS\T\Tel_Jeroen\Turbo_Outrun.sid")
@@ -173,3 +174,74 @@ def test_cruscotto_ricorda_il_cursore(finestra):
     finestra._area_precedente = "albero"
     finestra._rinfresca_cruscotto()
     assert finestra.cruscotto.GetInsertionPoint() == 0
+
+
+def _voce(f, radice, condizione):
+    return next(v for v in f._tutte_le_voci(radice) if condizione(f._dati(v) or {}))
+
+
+def _premi(f, carattere, maiuscolo=False):
+    _tasto(f, carattere, maiuscolo=maiuscolo)
+    return _ultima(f)
+
+
+@pytest.mark.skipif(not os.path.isfile(TURBO_OUTRUN), reason="serve la collezione HVSC")
+def test_sottobrani_nella_plancia(finestra, suoni_annotati, tmp_path):
+    import shutil
+
+    cartella = tmp_path / "sid"
+    cartella.mkdir()
+    shutil.copy(TURBO_OUTRUN, cartella)
+    # Questo PC si carica prima: aprendosi dopo, cancellerebbe la cartella finta.
+    finestra.albero.Expand(finestra.nodo_pc)
+    nodo = finestra.albero.AppendItem(finestra.nodo_pc, "sid", data={"tipo": "cartella", "percorso": str(cartella), "caricato": False})
+    finestra.albero.SetItemHasChildren(nodo, True)
+    finestra.albero.Expand(nodo)
+    voce_file = next(finestra._figli(nodo))
+    assert finestra.albero.ItemHasChildren(voce_file)
+    finestra.albero.Expand(voce_file)
+    sottobrani = _etichette(finestra, voce_file)
+    assert len(sottobrani) == 12 and sottobrani[2] == "Sottobrano 3 di 12, 3:00"
+    finestra.albero.SelectItem(list(finestra._figli(voce_file))[2])
+    assert "Sottobrano 3 di 12." in _premi(finestra, "x")
+    assert _etichette(finestra, voce_file)[2].endswith(", in riproduzione")
+    assert _premi(finestra, "b", maiuscolo=True) == "Sottobrano 4 di 12, 3:00."
+    assert suoni_annotati[-1] == "sottobrano_successivo"
+    _premi(finestra, "z", maiuscolo=True)
+    assert finestra.motore.sottobrano == 3
+    finestra.motore.stop()
+    brano = finestra._dati(voce_file)["brano"]
+    finestra._aggiungi(None, [Brano(brano.percorso, sottobrano=5)])
+    pl = finestra.archivio.playlist[0]
+    nodo_pl = next(finestra._figli(finestra.nodo_playlist))
+    finestra.albero.Expand(nodo_pl)
+    assert _etichette(finestra, nodo_pl) == ["Turbo_Outrun.sid, sottobrano 5 di 12"]
+    assert not finestra.albero.ItemHasChildren(next(finestra._figli(nodo_pl)))
+    assert pl.brani[0].sottobrano == 5
+
+
+def test_loop_a_b_con_maiuscolo_x(finestra, suoni_annotati):
+    finestra._aggiungi(None, [os.path.join(r"C:\m", f"{n}.mp3") for n in range(1, 6)])
+    pl = finestra.archivio.playlist[0]
+    nodo = next(finestra._figli(finestra.nodo_playlist))
+    finestra.albero.Expand(nodo)
+
+    def scegli(n):
+        finestra.albero.SelectItem(_voce(finestra, nodo, lambda d: d.get("brano") is pl.brani[n - 1]))
+
+    scegli(2)
+    assert _premi(finestra, "x", maiuscolo=True).startswith("Punto A del loop su 2.mp3.")
+    scegli(4)
+    assert _premi(finestra, "x", maiuscolo=True) == "Loop fra 2.mp3 e 4.mp3: 3 brani."
+    assert _etichette(finestra, nodo)[1] == "2.mp3, punto A del loop"
+    assert _etichette(finestra, nodo)[3] == "4.mp3, punto B del loop"
+    scegli(5)
+    assert "fuori dal loop" in _premi(finestra, "x")
+    assert suoni_annotati[-1] == "fuori_dal_loop"
+    scegli(4)
+    assert _premi(finestra, "x", maiuscolo=True) == "Punto B tolto; resta il punto A su 2.mp3."
+    scegli(2)
+    assert _premi(finestra, "x", maiuscolo=True).startswith("Loop tolto")
+    assert _etichette(finestra, nodo)[1] == "2.mp3"
+    finestra.albero.SelectItem(finestra.nodo_pc)
+    assert _premi(finestra, "x", maiuscolo=True).startswith("Il loop si mette su un brano")

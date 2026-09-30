@@ -89,3 +89,39 @@ def test_temporanea():
     assert Playlist("x", cartella="C:\\").temporanea
     assert Playlist("x", cartella="").temporanea
     assert not Playlist("x").temporanea
+
+
+def test_loop_gira_in_tondo_fra_a_e_b():
+    pl = _pl(6, saltati=(3,))
+    coda = Coda()
+    coda.loop_playlist, coda.punto_a, coda.punto_b = pl, pl.brani[4], pl.brani[1]
+    assert coda.intervallo(pl) == (1, 4)
+    coda.imposta(pl, pl.brani[4])
+    assert coda.successivo() is pl.brani[1]
+    coda.imposta(pl, pl.brani[2])
+    assert coda.successivo() is pl.brani[4]
+    coda.imposta(pl, pl.brani[1])
+    assert coda.precedente() is pl.brani[4]
+    assert coda.primo(pl) is pl.brani[1]
+    assert not coda.nel_loop(pl, pl.brani[5])
+    assert coda.nel_loop(pl, pl.brani[2])
+    assert coda.casuale(scelta=lambda c: c[0]) in pl.brani[1:5]
+    assert coda.casuale(scelta=lambda c: c[-1]) in pl.brani[1:5]
+
+
+def test_loop_senza_b_non_limita_e_vale_solo_sulla_sua_playlist():
+    pl, altra = _pl(3), _pl(3)
+    coda = Coda()
+    coda.loop_playlist, coda.punto_a = pl, pl.brani[1]
+    assert coda.intervallo(pl) is None
+    coda.punto_b = pl.brani[2]
+    assert coda.nel_loop(altra, altra.brani[0])
+    coda.imposta(pl, pl.brani[0])
+    assert coda.successivo() is pl.brani[1]
+
+
+def test_sottobrano_si_salva():
+    b = Brano.da_dati(Brano("x.sid", sottobrano=3).come_dati())
+    assert b.sottobrano == 3
+    assert "sottobrano" not in Brano("y.sid").come_dati()
+    assert Brano.da_dati({"percorso": "z.sid", "sottobrano": "tre"}).sottobrano is None

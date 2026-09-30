@@ -55,6 +55,15 @@ EVENTI = {
     "non_disponibile": "rifiuto",
     "errore": "errore_secco",
     "niente_da_suonare": "arpeggio_pensoso",
+    "sottobrano_precedente": "menu_tripletta_in_basso_5",
+    "sottobrano_successivo": "menu_triplicato_su_4",
+    "loop_a_messo": "notifica_tramite_interfaccia_utente_2",
+    "loop_b_messo": "notifica_tramite_interfaccia_utente_3",
+    "loop_b_tolto": "colpo_d_impatto_1",
+    "loop_tolto": "colpo_d_impatto_2",
+    "loop_non_qui": "colpo_d_impatto_5",
+    "fuori_dal_loop": "avviso_di_sistema",
+    "ritorno_al_punto_a": "scintillio_di_ghiaccio",
     "nessun_altro_brano": "il_gioco_spunta_a_met",
 }
 
