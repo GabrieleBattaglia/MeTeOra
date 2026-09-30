@@ -36,8 +36,8 @@ def _ultima(f):
 
 def test_aree_nell_ordine_di_tabulazione(finestra):
     focalizzabili = [c for c in finestra.albero.GetParent().GetChildren() if c.AcceptsFocus()]
-    assert focalizzabili == [finestra.albero, finestra.messaggi, finestra.barra]
-    assert [c.GetName() for c in focalizzabili] == ["Plancia dei comandi", "Messaggi", "Barra di stato"]
+    assert focalizzabili == [finestra.albero, finestra.console, finestra.cruscotto]
+    assert [c.GetName() for c in focalizzabili] == ["Plancia dei comandi", "Console", "Cruscotto"]
 
 
 def test_rami_principali(finestra):
@@ -60,17 +60,16 @@ def test_nuova_playlist_aggiungi_sposta_togli(finestra, suoni_annotati):
     assert _ultima(finestra) == "Aggiunti alla playlist Playlist: 3 brani, ora 3 brani."
     nodo = next(finestra._figli(finestra.nodo_playlist))
     finestra.albero.Expand(nodo)
-    assert _etichette(finestra, nodo) == ["uno", "due", "tre"]
+    assert _etichette(finestra, nodo) == ["uno.mp3", "due.mp3", "tre.mp3"]
     finestra._sposta(pl, pl.brani[2], "cima")
     nodo = next(finestra._figli(finestra.nodo_playlist))
-    assert _etichette(finestra, nodo) == ["tre", "uno", "due"]
-    assert finestra.albero.GetItemText(finestra.albero.GetSelection()) == "tre"
+    assert _etichette(finestra, nodo) == ["tre.mp3", "uno.mp3", "due.mp3"]
+    assert finestra.albero.GetItemText(finestra.albero.GetSelection()) == "tre.mp3"
     finestra._salta(pl, pl.brani[1])
-    assert _etichette(finestra, nodo)[1] == "uno, saltato"
+    assert _etichette(finestra, nodo)[1] == "uno.mp3, saltato"
     finestra._togli(pl, pl.brani[0])
-    assert finestra.albero.GetItemText(finestra.albero.GetSelection()) == "uno, saltato"
+    assert finestra.albero.GetItemText(finestra.albero.GetSelection()) == "uno.mp3, saltato"
     assert os.path.isfile(finestra.archivio.percorso)
-    assert suoni_annotati[-5:] == ["nuova_playlist", "brano_aggiunto", "brano_spostato", "saltato_acceso", "brano_tolto"][-5:] or True
     assert "brano_tolto" in suoni_annotati
 
 
@@ -105,23 +104,23 @@ def test_volume_e_muto(finestra):
     assert finestra.impostazioni["volume"] == 100
 
 
-def test_messaggi_tengono_le_ultime_righe_e_il_cursore(finestra):
-    finestra.messaggi.SetInsertionPoint(0)
-    for i in range(modulo.RIGHE_DEI_MESSAGGI + 150):
+def test_console_tiene_le_ultime_righe_e_il_cursore(finestra):
+    finestra.console.SetInsertionPoint(0)
+    for i in range(modulo.RIGHE_DELLA_CONSOLE + 150):
         finestra.scrivi(f"riga {i}")
-    assert len(finestra._righe) <= modulo.RIGHE_DEI_MESSAGGI + 100
-    testo = finestra.messaggi.GetValue().replace("\r\n", "\n").replace("\r", "\n")
+    assert len(finestra._righe) <= modulo.RIGHE_DELLA_CONSOLE + 100
+    testo = finestra.console.GetValue().replace("\r\n", "\n").replace("\r", "\n")
     assert testo.split("\n") == finestra._righe
-    assert finestra.messaggi.GetInsertionPoint() == 0
+    assert finestra.console.GetInsertionPoint() == 0
 
 
-def test_barra_di_stato_secondo_il_contesto(finestra):
+def test_cruscotto_secondo_il_contesto(finestra):
     finestra._area_precedente = "albero"
     finestra.albero.SelectItem(finestra.nodo_pc)
-    assert finestra.righe_della_barra()[0] == "Tasti per Questo PC."
-    finestra._area_precedente = "messaggi"
-    assert finestra.righe_della_barra()[0] == "Tasti per l'area dei messaggi."
-    assert len(finestra.righe_della_barra()) >= 5
+    assert finestra.righe_del_cruscotto()[0] == "Tasti per Questo PC."
+    finestra._area_precedente = "console"
+    assert finestra.righe_del_cruscotto()[0] == "Tasti per la console."
+    assert len(finestra.righe_del_cruscotto()) >= 5
 
 
 def _aspetta(condizione, secondi=5):
@@ -139,7 +138,7 @@ def test_riproduzione_di_una_cartella_e_selezione_ferma(finestra, suoni_annotati
     cartella = os.path.dirname(TURBO_OUTRUN)
     finestra.albero.SelectItem(finestra.nodo_pc)
     finestra._suona_file(TURBO_OUTRUN, cartella)
-    assert _ultima(finestra).startswith("In riproduzione: Turbo_Outrun, ")
+    assert _ultima(finestra).startswith(f"In riproduzione: {TURBO_OUTRUN}, ")
     assert "Sottobrano 1 di 12." in _ultima(finestra)
     assert _aspetta(lambda: (finestra.motore.posizione or 0) > 0.2)
     finestra._informazioni()
@@ -163,3 +162,14 @@ def test_esc_chiude_e_salva(finestra, suoni_annotati):
     assert finestra._chiusa
     assert suoni_annotati[-1] == "uscita"
     assert os.path.isfile(finestra.impostazioni.percorso)
+
+
+def test_cruscotto_ricorda_il_cursore(finestra):
+    finestra._area_precedente = "console"
+    finestra._rinfresca_cruscotto()
+    finestra.cruscotto.SetInsertionPoint(20)
+    finestra._rinfresca_cruscotto()
+    assert finestra.cruscotto.GetInsertionPoint() == 20
+    finestra._area_precedente = "albero"
+    finestra._rinfresca_cruscotto()
+    assert finestra.cruscotto.GetInsertionPoint() == 0

@@ -14,7 +14,7 @@ In sviluppo, senza ancora una release. La versione 1.0.0 chiude la tappa 1: la f
 
 - Riproduzione con libmpv, tramite python-mpv.
 - I SID sono emulati in tempo reale da libsidplayfp, con una piccola DLL scritta per MeTeOra (`sidshim/sidshim.cpp`): il brano si rende in memoria mentre suona, e libmpv lo riceve come un normale file WAV. Le durate e i sottobrani vengono dal database Songlengths della High Voltage SID Collection.
-- Interfaccia in wxPython con un albero dei comandi, un'area dei messaggi e una barra di stato.
+- Interfaccia in wxPython con un albero dei comandi, la console e il cruscotto.
 
 ## Preparare l'ambiente di sviluppo
 

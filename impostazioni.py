@@ -15,8 +15,8 @@ import os
 PREDEFINITE = {
     "volume": 80,
     "passo_volume": 5,
-    "passo_indietro": 10,
-    "passo_avanti": 10,
+    "passo_indietro": 10.0,
+    "passo_avanti": 10.0,
     "volume_effetti": 0.5,
 }
 

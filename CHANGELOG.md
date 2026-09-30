@@ -2,6 +2,20 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.1.0] - 2026-09-30
+
+- Maiuscolo con M chiede di quanto cambiano il volume più e meno, da 1 a 50. Il valore resta anche alla riapertura.
+
+## [1.0.5] - 2026-09-30
+
+Le correzioni del collaudo della tappa 1.
+
+- L'area dei messaggi ora si chiama console, e la barra di stato cruscotto: nella finestra, nel manuale e nel codice.
+- Il cruscotto ricorda il cursore: tornando con F7 dallo stesso punto non si riparte dalla prima riga.
+- Il messaggio del brano in riproduzione, e quello di F9, danno il percorso completo del file.
+- Nelle playlist i brani si vedono con l'estensione.
+- I secondi del salto e il tempo di W accettano i decimali, con il punto o con la virgola: 1.2 vuol dire un secondo e due decimi, non più un minuto e due secondi.
+
 ## [1.0.0] - 2026-09-30
 
 Nasce il programma: MeTeOra si apre, suona e si comanda da tastiera. È la tappa 1 del piano, lo scheletro su cui cresceranno le altre.

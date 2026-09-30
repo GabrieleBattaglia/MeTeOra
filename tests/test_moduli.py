@@ -11,7 +11,7 @@ import formati
 import questo_pc
 import songlengths
 import suoni
-from finestra import leggi_tempo, tempo
+from finestra import leggi_tempo, secondi_da_leggere, tempo
 from impostazioni import PREDEFINITE, Impostazioni
 
 HVSC = r"E:\C64Music"
@@ -72,9 +72,14 @@ def test_tempi():
     assert tempo(75) == "1:15"
     assert tempo(3725) == "1:02:05"
     assert tempo(None) == "?"
+    assert secondi_da_leggere(10.0) == "10"
+    assert secondi_da_leggere(1.25) == "1,25"
     assert leggi_tempo("1:30") == 90
     assert leggi_tempo("90") == 90
-    assert leggi_tempo("1.30") == 90
+    assert leggi_tempo("1.2") == 1.2
+    assert leggi_tempo("2,5") == 2.5
+    assert leggi_tempo("1:30,25") == 90.25
+    assert leggi_tempo("1:75") is None
     assert leggi_tempo("a") is None
     assert leggi_tempo("-5") is None
 

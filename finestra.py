@@ -1,12 +1,12 @@
-# MeTeOra, la finestra principale: plancia dei comandi, messaggi e barra di stato.
+# MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 # 30/09/2026: nasce con la tappa 1.
 
 """La finestra di MeTeOra.
 
 Tre aree, nell'ordine di tabulazione: la plancia dei comandi (F5), un albero;
-l'area dei messaggi (F6), dove scorrono i riscontri di ogni azione; la barra
-di stato (F7), che mostra i tasti del contesto da cui ci si e' arrivati.
+la console (F6), dove scorrono i riscontri di ogni azione; il cruscotto
+(F7), che mostra i tasti del contesto da cui ci si e' arrivati.
 I tasti a lettera valgono in tutta la finestra e li intercetta EVT_CHAR_HOOK,
 prima dei controlli: per questo l'albero non ha la ricerca per iniziale.
 Il brano in riproduzione e la voce selezionata sono due cose distinte: la
@@ -28,7 +28,7 @@ from playlist import Archivio, Brano, Coda, Playlist
 
 FILE_PLAYLIST = "MeTeOra - Playlist.json"
 FILE_IMPOSTAZIONI = "MeTeOra - Impostazioni.json"
-RIGHE_DEI_MESSAGGI = 2000
+RIGHE_DELLA_CONSOLE = 2000
 
 # I tasti a lettera: (carattere, maiuscolo) -> comando.
 TASTI = {
@@ -46,6 +46,7 @@ TASTI = {
     ("w", False): "vai_a_tempo",
     ("+", False): "volume_su",
     ("-", False): "volume_giu",
+    ("m", True): "passo_volume",
 }
 # I tasti gia' assegnati nel piano a funzioni delle tappe successive: per ora
 # dicono di non essere ancora disponibili.
@@ -61,11 +62,11 @@ FUTURI_MAIUSCOLI = {"l": "durata della dissolvenza"}
 
 TASTI_COMUNI = [
     "X riproduce la voce selezionata o riprende, C pausa, V stop, Z e B brano precedente e successivo, N brano a caso.",
-    "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, + e - volume, M muto.",
-    "F5 plancia, F6 messaggi, F7 barra di stato, F8 porta la selezione sul brano in riproduzione, F9 dice cosa suona.",
+    "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, + e - volume, Maiuscolo+M il passo del volume, M muto.",
+    "F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione sul brano in riproduzione, F9 dice cosa suona.",
     "F1 manuale, F2 novità, F3 crediti, Esc esce salvando tutto.",
 ]
-# Le righe della barra di stato proprie di ogni tipo di voce della plancia.
+# Le righe del cruscotto proprie di ogni tipo di voce della plancia.
 TASTI_DEL_CONTESTO = {
     "radice_playlist": ("il ramo Playlist", "Invio, Applicazioni o Spazio: menu con Nuova playlist."),
     "playlist": ("una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci e Rinomina. Canc elimina la playlist, dopo una conferma."),
@@ -89,18 +90,26 @@ def tempo(secondi):
 
 
 def leggi_tempo(testo):
-    """Da '90', '1:30' o '1:02:03' a secondi; None se non si capisce."""
-    parti = testo.strip().replace(".", ":").split(":")
+    """Da '90', '1.5', '1:30', '1:30,25' o '1:02:03' a secondi; None se non si
+    capisce. I due punti separano ore, minuti e secondi; il punto o la
+    virgola separano i decimali, solo nell'ultima parte."""
+    parti = testo.strip().replace(",", ".").split(":")
     try:
-        numeri = [float(p) for p in parti]
+        numeri = [int(p) for p in parti[:-1]] + [float(parti[-1])]
     except ValueError:
         return None
-    if not 1 <= len(numeri) <= 3 or any(n < 0 for n in numeri):
+    if not 1 <= len(numeri) <= 3 or any(n < 0 for n in numeri) or any(n >= 60 for n in numeri[1:]):
         return None
     totale = 0.0
     for n in numeri:
         totale = totale * 60 + n
     return totale
+
+
+def secondi_da_leggere(secondi):
+    """Un numero di secondi come si legge in italiano: 10, oppure 1,5."""
+    testo = f"{secondi:.3f}".rstrip("0").rstrip(".")
+    return testo.replace(".", ",")
 
 
 def brani_al_plurale(n):
@@ -152,14 +161,14 @@ class Finestra(wx.Frame):
         # rigiocando un file della stessa cartella si riusa la stessa.
         self._temporanee = {}
         self._area_precedente = None
-        self._posizione_dei_messaggi = None
+        self._posizione_della_console = None
         self._righe = []
         self._chiusa = False
         self._costruisci()
         self._popola_albero()
         self.Bind(wx.EVT_CHAR_HOOK, self._tasto)
         self.Bind(wx.EVT_CLOSE, self._alla_chiusura)
-        self.scrivi(f"MeTeOra {version.VERSION} del {version.DATE}. Pronto: F1 apre il manuale, F7 dice i tasti del punto in cui ti trovi.")
+        self.scrivi(f"MeTeOra {version.VERSION} del {version.DATE}. Pronto: F1 apre il manuale, F7 apre il cruscotto con i tasti del punto in cui ti trovi.")
         if errore_archivio:
             self.scrivi(f"Il file delle playlist non si legge, e parto senza playlist: {errore_archivio}")
             # Il file illeggibile non va sovrascritto alla prima modifica.
@@ -176,29 +185,29 @@ class Finestra(wx.Frame):
         self.albero.SetName("Plancia dei comandi")
         colonna_sinistra.Add(self.albero, 1, wx.EXPAND)
         colonna_destra = wx.BoxSizer(wx.VERTICAL)
-        colonna_destra.Add(wx.StaticText(pannello, label="Messaggi"), 0, wx.ALL, 2)
-        self.messaggi = wx.TextCtrl(pannello, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2)
-        self.messaggi.SetName("Messaggi")
-        colonna_destra.Add(self.messaggi, 1, wx.EXPAND)
+        colonna_destra.Add(wx.StaticText(pannello, label="Console"), 0, wx.ALL, 2)
+        self.console = wx.TextCtrl(pannello, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2)
+        self.console.SetName("Console")
+        colonna_destra.Add(self.console, 1, wx.EXPAND)
         sopra.Add(colonna_sinistra, 1, wx.EXPAND | wx.ALL, 4)
         sopra.Add(colonna_destra, 1, wx.EXPAND | wx.ALL, 4)
         tutto = wx.BoxSizer(wx.VERTICAL)
         tutto.Add(sopra, 1, wx.EXPAND)
-        tutto.Add(wx.StaticText(pannello, label="Barra di stato"), 0, wx.LEFT | wx.RIGHT, 6)
-        self.barra = wx.TextCtrl(pannello, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2)
-        self.barra.SetName("Barra di stato")
+        tutto.Add(wx.StaticText(pannello, label="Cruscotto"), 0, wx.LEFT | wx.RIGHT, 6)
+        self.cruscotto = wx.TextCtrl(pannello, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2)
+        self.cruscotto.SetName("Cruscotto")
         # Almeno cinque righe, misurate sul carattere e non in pixel.
-        self.barra.SetMinSize(wx.Size(-1, self.barra.GetCharHeight() * 6 + 8))
-        tutto.Add(self.barra, 0, wx.EXPAND | wx.ALL, 4)
+        self.cruscotto.SetMinSize(wx.Size(-1, self.cruscotto.GetCharHeight() * 6 + 8))
+        tutto.Add(self.cruscotto, 0, wx.EXPAND | wx.ALL, 4)
         pannello.SetSizer(tutto)
         self.albero.Bind(wx.EVT_TREE_ITEM_EXPANDING, self._in_espansione)
         self.albero.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self._invio)
         self.albero.Bind(wx.EVT_TREE_ITEM_MENU, self._menu_da_evento)
         self.albero.Bind(wx.EVT_KEY_DOWN, self._tasto_nell_albero)
         self.albero.Bind(wx.EVT_SET_FOCUS, self._fuoco_all_albero)
-        self.messaggi.Bind(wx.EVT_SET_FOCUS, self._fuoco_ai_messaggi)
-        self.messaggi.Bind(wx.EVT_KILL_FOCUS, self._messaggi_lasciati)
-        self.barra.Bind(wx.EVT_SET_FOCUS, self._fuoco_alla_barra)
+        self.console.Bind(wx.EVT_SET_FOCUS, self._fuoco_alla_console)
+        self.console.Bind(wx.EVT_KILL_FOCUS, self._console_lasciata)
+        self.cruscotto.Bind(wx.EVT_SET_FOCUS, self._fuoco_al_cruscotto)
 
     def _popola_albero(self):
         radice = self.albero.AddRoot("MeTeOra")
@@ -210,23 +219,23 @@ class Finestra(wx.Frame):
         self._popola_playlist()
         self.albero.SelectItem(self.nodo_playlist)
 
-    # I messaggi.
+    # La console.
 
     def scrivi(self, testo):
-        """Aggiunge una riga in fondo all'area dei messaggi senza spostarne il
-        cursore, e tiene le ultime RIGHE_DEI_MESSAGGI righe."""
-        posizione = self.messaggi.GetInsertionPoint()
-        self.messaggi.AppendText(("\n" if self._righe else "") + testo)
+        """Aggiunge una riga in fondo alla console senza spostarne il
+        cursore, e tiene le ultime RIGHE_DELLA_CONSOLE righe."""
+        posizione = self.console.GetInsertionPoint()
+        self.console.AppendText(("\n" if self._righe else "") + testo)
         self._righe.append(testo)
-        if len(self._righe) > RIGHE_DEI_MESSAGGI + 100:
-            togliere = len(self._righe) - RIGHE_DEI_MESSAGGI
+        if len(self._righe) > RIGHE_DELLA_CONSOLE + 100:
+            togliere = len(self._righe) - RIGHE_DELLA_CONSOLE
             caratteri = sum(len(r) for r in self._righe[:togliere]) + togliere
-            self.messaggi.Remove(0, caratteri)
+            self.console.Remove(0, caratteri)
             del self._righe[:togliere]
             posizione = max(0, posizione - caratteri)
-            if self._posizione_dei_messaggi is not None:
-                self._posizione_dei_messaggi = max(0, self._posizione_dei_messaggi - caratteri)
-        self.messaggi.SetInsertionPoint(posizione)
+            if self._posizione_della_console is not None:
+                self._posizione_della_console = max(0, self._posizione_della_console - caratteri)
+        self.console.SetInsertionPoint(posizione)
 
     def _suono(self, evento):
         suoni.suona(evento, self.impostazioni["volume_effetti"])
@@ -235,35 +244,43 @@ class Finestra(wx.Frame):
         self._suono(evento)
         self.scrivi(testo)
 
-    # Il fuoco e la barra di stato.
+    # Il fuoco e il cruscotto.
 
     def _fuoco_all_albero(self, evento):
         evento.Skip()
         self._area_precedente = "albero"
 
-    def _fuoco_ai_messaggi(self, evento):
+    def _fuoco_alla_console(self, evento):
         evento.Skip()
-        self._area_precedente = "messaggi"
-        if self._posizione_dei_messaggi is not None:
-            wx.CallAfter(self._rimetti_posizione_dei_messaggi, self._posizione_dei_messaggi)
+        self._area_precedente = "console"
+        if self._posizione_della_console is not None:
+            wx.CallAfter(self._rimetti_posizione_della_console, self._posizione_della_console)
 
-    def _rimetti_posizione_dei_messaggi(self, posizione):
-        if self and self.messaggi:
-            self.messaggi.SetInsertionPoint(min(posizione, self.messaggi.GetLastPosition()))
+    def _rimetti_posizione_della_console(self, posizione):
+        if self and self.console:
+            self.console.SetInsertionPoint(min(posizione, self.console.GetLastPosition()))
 
-    def _messaggi_lasciati(self, evento):
+    def _console_lasciata(self, evento):
         evento.Skip()
-        self._posizione_dei_messaggi = self.messaggi.GetInsertionPoint()
+        self._posizione_della_console = self.console.GetInsertionPoint()
 
-    def _fuoco_alla_barra(self, evento):
+    def _fuoco_al_cruscotto(self, evento):
         evento.Skip()
-        self.barra.SetValue("\n".join(self.righe_della_barra()))
-        self.barra.SetInsertionPoint(0)
+        self._rinfresca_cruscotto()
 
-    def righe_della_barra(self):
-        """Le righe della barra di stato per l'area da cui si arriva."""
-        if self._area_precedente == "messaggi":
-            righe = ["Tasti per l'area dei messaggi.", "Frecce, Pagina su e giù, Home e Fine per leggere; i messaggi nuovi arrivano in fondo."]
+    def _rinfresca_cruscotto(self):
+        """Riscrive il cruscotto solo se il testo cambia: tornando dallo stesso
+        punto il cursore resta dove era."""
+        testo = "\n".join(self.righe_del_cruscotto())
+        attuale = self.cruscotto.GetValue().replace("\r\n", "\n").replace("\r", "\n")
+        if attuale != testo:
+            self.cruscotto.SetValue(testo)
+            self.cruscotto.SetInsertionPoint(0)
+
+    def righe_del_cruscotto(self):
+        """Le righe del cruscotto per l'area da cui si arriva."""
+        if self._area_precedente == "console":
+            righe = ["Tasti per la console.", "Frecce, Pagina su e giù, Home e Fine per leggere; i messaggi nuovi arrivano in fondo."]
         else:
             dati = self._dati(self.albero.GetSelection()) or {}
             nome, riga = TASTI_DEL_CONTESTO.get(dati.get("tipo"), ("la plancia", ""))
@@ -272,8 +289,8 @@ class Finestra(wx.Frame):
 
     def _vai(self, controllo, evento):
         self._suono(evento)
-        if controllo is self.barra and self.barra.HasFocus():
-            self.barra.SetValue("\n".join(self.righe_della_barra()))
+        if controllo is self.cruscotto and self.cruscotto.HasFocus():
+            self._rinfresca_cruscotto()
         controllo.SetFocus()
 
     # I tasti.
@@ -283,8 +300,8 @@ class Finestra(wx.Frame):
         modificatori = evento.GetModifiers()
         tasti_funzione = {
             wx.WXK_F1: self._manuale, wx.WXK_F2: self._changelog, wx.WXK_F3: self._crediti,
-            wx.WXK_F5: lambda: self._vai(self.albero, "plancia"), wx.WXK_F6: lambda: self._vai(self.messaggi, "messaggi"),
-            wx.WXK_F7: lambda: self._vai(self.barra, "barra_di_stato"), wx.WXK_F8: self._vai_al_brano, wx.WXK_F9: self._informazioni,
+            wx.WXK_F5: lambda: self._vai(self.albero, "plancia"), wx.WXK_F6: lambda: self._vai(self.console, "console"),
+            wx.WXK_F7: lambda: self._vai(self.cruscotto, "cruscotto"), wx.WXK_F8: self._vai_al_brano, wx.WXK_F9: self._informazioni,
             wx.WXK_ESCAPE: self.Close,
         }
         if modificatori == wx.MOD_NONE and codice in tasti_funzione:
@@ -336,7 +353,7 @@ class Finestra(wx.Frame):
             yield from self._tutte_le_voci(figlio)
 
     def _etichetta_del_brano(self, brano):
-        parti = [brano.nome]
+        parti = [brano.nome_del_file]
         if brano.saltato:
             parti.append("saltato")
         if self.motore.in_corso and brano is self.coda.corrente:
@@ -550,6 +567,12 @@ class Finestra(wx.Frame):
         except OSError as e:
             self._riscontro("errore", f"Non riesco a salvare le playlist: {e}")
 
+    def _salva_impostazioni(self):
+        try:
+            self.impostazioni.salva()
+        except OSError as e:
+            self._riscontro("errore", f"Non riesco a salvare le impostazioni: {e}")
+
     def _comando_nuova_playlist(self):
         pl = self.archivio.nuova()
         self._salva_archivio()
@@ -655,7 +678,7 @@ class Finestra(wx.Frame):
         self.motore.suona(brano.percorso)
         numero, totale = self.coda.posizione()
         dove = f"{numero} di {totale}, {'cartella' if pl.temporanea else 'playlist'} {pl.nome}" if totale > 1 else pl.nome
-        testo = f"In riproduzione: {brano.nome}, {dove}."
+        testo = f"In riproduzione: {brano.percorso}, {dove}."
         if self.motore.sottobrani:
             testo += f" Sottobrano {self.motore.sottobrano} di {self.motore.sottobrani}."
         self._riscontro(evento, testo)
@@ -793,16 +816,17 @@ class Finestra(wx.Frame):
     def _chiedi_secondi(self, chiave, verso):
         self._suono("domanda")
         attuale = self.impostazioni[chiave]
-        with wx.TextEntryDialog(self, f"Di quanti secondi salta {verso}?", "Passo di salto", str(attuale)) as dialogo:
+        with wx.TextEntryDialog(self, f"Di quanti secondi salta {verso}? Anche con i decimali, per esempio 2,5.", "Passo di salto", secondi_da_leggere(attuale)) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
                 return
             testo = dialogo.GetValue()
         secondi = leggi_tempo(testo)
-        if not secondi or secondi < 1:
-            self._riscontro("errore", f"{testo} non è un numero di secondi valido; il passo resta {attuale}.")
+        if not secondi or secondi < 0.1:
+            self._riscontro("errore", f"{testo} non è un numero di secondi valido; il passo resta {secondi_da_leggere(attuale)}.")
             return
-        self.impostazioni[chiave] = int(secondi)
-        self._riscontro("passo_di_salto", f"Il salto {verso} ora è di {int(secondi)} secondi.")
+        self.impostazioni[chiave] = round(secondi, 3)
+        self._salva_impostazioni()
+        self._riscontro("passo_di_salto", f"Il salto {verso} ora è di {secondi_da_leggere(secondi)} secondi.")
 
     def _comando_passo_indietro(self):
         self._chiedi_secondi("passo_indietro", "indietro")
@@ -841,6 +865,20 @@ class Finestra(wx.Frame):
 
     def _comando_volume_giu(self):
         self._volume(-self.impostazioni["passo_volume"])
+
+    def _comando_passo_volume(self):
+        self._suono("domanda")
+        attuale = self.impostazioni["passo_volume"]
+        with wx.TextEntryDialog(self, "Di quanto cambiano il volume più e meno? Da 1 a 50.", "Passo del volume", str(attuale)) as dialogo:
+            if dialogo.ShowModal() != wx.ID_OK:
+                return
+            testo = dialogo.GetValue().strip()
+        if not testo.isdigit() or not 1 <= int(testo) <= 50:
+            self._riscontro("errore", f"{testo} non è un passo da 1 a 50; resta {attuale}.")
+            return
+        self.impostazioni["passo_volume"] = int(testo)
+        self._salva_impostazioni()
+        self._riscontro("passo_del_volume", f"Più e meno ora cambiano il volume di {testo}.")
 
     def _comando_muto(self):
         self.motore.muto = not self.motore.muto
@@ -890,7 +928,7 @@ class Finestra(wx.Frame):
             return
         stato = "In pausa" if self.motore.in_pausa else "In riproduzione"
         numero, totale = self.coda.posizione()
-        testo = f"{stato}: {corrente.nome}, {tempo(self.motore.posizione)} di {tempo(self.motore.durata)}."
+        testo = f"{stato}: {corrente.percorso}, {tempo(self.motore.posizione)} di {tempo(self.motore.durata)}."
         if self.motore.sottobrani:
             testo += f" Sottobrano {self.motore.sottobrano} di {self.motore.sottobrani}."
         if totale > 1:

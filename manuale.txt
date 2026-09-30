@@ -1,13 +1,13 @@
 Manuale di MeTeOra
-MeTeOra è un lettore audio pensato per chi usa uno screen reader e un display braille. Suona quasi tutti i formati audio, compresa la musica del Commodore 64 in formato SID, e si comanda tutto da tastiera. Ogni azione ha un suono suo e scrive una riga nell'area dei messaggi.
+MeTeOra è un lettore audio pensato per chi usa uno screen reader e un display braille. Suona quasi tutti i formati audio, compresa la musica del Commodore 64 in formato SID, e si comanda tutto da tastiera. Ogni azione ha un suono suo e scrive una riga nella console.
 Questo manuale è quello della tappa 1: descrive ciò che c'è adesso. Crescerà insieme al programma.
 La finestra
 La finestra ha tre aree, nell'ordine in cui le raggiunge il tasto Tab.
 La plancia dei comandi, F5: un albero con tutti i comandi e i contenuti. I rami si aprono con freccia destra e si chiudono con freccia sinistra.
-L'area dei messaggi, F6: una riga per ogni azione, la più recente in fondo. Quando torni nell'area il cursore è dove l'avevi lasciato.
-La barra di stato, F7: i tasti del punto da cui sei arrivato. Da una voce della plancia elenca i tasti di quella voce, dall'area dei messaggi quelli dei messaggi.
+La console, F6: una riga per ogni azione, la più recente in fondo. Quando ci torni il cursore è dove l'avevi lasciato.
+Il cruscotto, F7: i tasti del punto da cui sei arrivato. Da una voce della plancia elenca i tasti di quella voce, dalla console quelli della console. Se torni dallo stesso punto il cursore resta dove l'avevi lasciato.
 La plancia dei comandi
-Playlist: le tue playlist, ciascuna con i suoi brani, e in fondo il comando Nuova playlist. Le playlist si salvano da sole a ogni modifica.
+Playlist: le tue playlist, ciascuna con i suoi brani, mostrati con il nome del file e l'estensione, e in fondo il comando Nuova playlist. Le playlist si salvano da sole a ogni modifica.
 Questo PC: le unità del computer, con la lettera e il nome del volume. Dentro le unità ci sono le cartelle e i file che MeTeOra sa suonare. Una cartella funziona come una playlist temporanea: dal suo menu la si suona, oppure si crea una playlist vera con tutti i file della cartella e delle sue sottocartelle.
 Apri file: sceglie un file qualsiasi e lo suona, senza metterlo in nessuna playlist.
 Impostazioni: arriverà con una delle prossime tappe.
@@ -24,12 +24,12 @@ C: pausa, e di nuovo C riprende.
 V: stop. Poi X riparte dall'inizio del brano.
 Z e B: brano precedente e successivo.
 N: un brano a caso della playlist.
-Q ed E: indietro e avanti nel brano, di dieci secondi. Maiuscolo con Q e Maiuscolo con E chiedono di quanti secondi saltare, indietro e avanti.
-W: va a un tempo del brano, scritto come minuti e secondi, per esempio 1:30, oppure in secondi.
-Più e meno, sulla tastiera principale: volume su e giù di cinque.
+Q ed E: indietro e avanti nel brano, di dieci secondi. Maiuscolo con Q e Maiuscolo con E chiedono di quanti secondi saltare, indietro e avanti; valgono anche i decimali, come 2,5.
+W: va a un tempo del brano, scritto come minuti e secondi, per esempio 1:30, oppure in secondi, anche con i decimali: 1:30,5 oppure 90.5.
+Più e meno, sulla tastiera principale: volume su e giù, di cinque se non lo cambi. Maiuscolo con M chiede di quanto, da 1 a 50, e MeTeOra se lo ricorda.
 M: muto, e di nuovo M riaccende l'audio.
 F8: porta la selezione della plancia sul brano in riproduzione.
-F9: scrive nei messaggi cosa suona, a che punto è, e il volume.
+F9: scrive nella console cosa suona, con il percorso completo del file, a che punto è, e il volume.
 F1: questo manuale. F2: le novità di ogni versione. F3: i crediti. Esc chiude queste finestre.
 Esc nella finestra principale esce da MeTeOra salvando tutto.
 Gli altri tasti a lettera sono già assegnati a funzioni che arriveranno, come la velocità, il tono, l'equalizzatore e i segnalibri: per ora dicono che non sono ancora disponibili.

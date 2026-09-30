@@ -1,14 +1,14 @@
 METEORA - PIANO
 MeTeOra: tre parole italiane, dedica di Gabriele alla sua ragazza Ginevra, che insieme formano una parola luminosa.
-Prima bozza del 29 settembre 2026, riordinata la sera stessa con la bozza della GUI di Gabriele e le risposte alle domande aperte. Stato: tappa 1 scritta nella versione 1.0.0 del 30 settembre 2026, in attesa del collaudo con NVDA.
+Prima bozza del 29 settembre 2026, riordinata la sera stessa con la bozza della GUI di Gabriele e le risposte alle domande aperte. Stato: tappa 1 collaudata; seguono le issue aperte su GitHub.
 1. OBIETTIVO
 Un lettore audio/video per Windows pensato per screen reader (NVDA) e display braille. Motore di riproduzione solido, molti formati (SID compresi), controllo totale da tastiera, ogni azione con un riscontro scritto e sonoro. Niente streaming, skin, copertine, equalizzazione avanzata.
 Il programma e fortemente orientato alle playlist. La riproduzione di singoli brani o singole cartelle e prevista ma secondaria.
 2. REQUISITI DI ACCESSIBILITA (nati dalle frustrazioni con foobar2000)
 2.1 Tre sole aree nella finestra principale (vedi 3), tutte etichettate. Nessun controllo muto per NVDA.
-2.2 Ordine di tabulazione fisso: plancia dei comandi, area dei messaggi, barra di stato. Mai posizioni casuali.
+2.2 Ordine di tabulazione fisso: plancia dei comandi, console, cruscotto. Mai posizioni casuali.
 2.3 Due concetti distinti e sempre distinguibili: il brano in riproduzione e il brano selezionato nell'albero. Il fuoco non viene mai spostato di iniziativa. Un tasto porta la selezione sul brano in riproduzione; un altro annuncia titolo, posizione e durata di cio che suona.
-2.4 Ogni azione produce un riscontro scritto nell'area dei messaggi e un effetto sonoro proprio (vedi 5.7). Esempi di messaggi: "Aggiunti 12 brani, ora 340", "Volume 60", "Segnalibro salvato a 12:31".
+2.4 Ogni azione produce un riscontro scritto nella console e un effetto sonoro proprio (vedi 5.7). Esempi di messaggi: "Aggiunti 12 brani, ora 340", "Volume 60", "Segnalibro salvato a 12:31".
 2.5 Statistiche della playlist a richiesta e sempre a portata: numero brani, durata totale, durata residua, brano corrente su totale, tempo trascorso e mancante.
 2.6 Modifica della playlist dall'albero con Canc e con il menu contestuale della voce, al massimo un sottomenu (Ordina). Nessun percorso annidato per le operazioni comuni.
 2.7 Impostazioni in una sola finestra piatta, a schede al massimo di primo livello, ogni opzione con etichetta e valore leggibili.
@@ -19,8 +19,8 @@ Il programma e fortemente orientato alle playlist. La riproduzione di singoli br
 3. INTERFACCIA
 3.1 La finestra parte sempre massimizzata. Barra dei menu solo se serve a far funzionare gli acceleratori.
 3.2 Plancia dei comandi (F5): un grande albero dal bordo sinistro al centro, con rami espandibili, tutti collassati alla partenza. Ogni voce ha un menu contestuale che si apre con Invio, tasto Applicazioni o barra spaziatrice. Le lettere sono comandi (vedi 4), quindi l'albero non ha la ricerca per iniziale: al suo posto il tasto \ apre un campo di input e cerca in tutta la plancia.
-3.3 Area dei messaggi (F6): testo dal centro al bordo destro, che scorre come una console. In fondo si aggiungono i riscontri di tutte le operazioni del programma. Buffer di circa 2000 righe.
-3.4 Barra di stato (F7): su tutta la larghezza, in basso, alta almeno cinque righe. Mostra i tasti rapidi validi nel contesto in cui si trovava il fuoco prima di arrivarci.
+3.3 Console (F6), che nella prima bozza era l'area dei messaggi: testo dal centro al bordo destro, che scorre. In fondo si aggiungono i riscontri di tutte le operazioni del programma. Buffer di circa 2000 righe.
+3.4 Cruscotto (F7), che nella prima bozza era la barra di stato: su tutta la larghezza, in basso, alta almeno cinque righe. Mostra i tasti rapidi validi nel contesto in cui si trovava il fuoco prima di arrivarci.
 3.5 Memoria del fuoco: ogni area ricorda la posizione del fuoco quando lo perde e ce lo riporta quando si torna su di essa.
 3.6 F1 manuale, F2 changelog, F3 crediti: ciascuno in una grande area di testo navigabile. Esc la chiude.
 3.7 Esc sulla finestra principale chiude il programma salvando tutto, senza conferma.
@@ -38,7 +38,7 @@ Apri file (comando). Il file scelto va solo in riproduzione, senza entrare in ne
 Impostazioni (comando)
 4. TASTI RAPIDI
 Tutti i tasti valgono in tutto il programma, qualunque area abbia il fuoco, ma solo con la finestra in primo piano: niente tasti di sistema validi in secondo piano. Le 26 lettere sono tutte assegnate: i comandi futuri useranno Maiuscolo, Ctrl, Alt o i tasti funzione. Lista in espansione.
-4.1 Aree e finestre: F5 plancia, F6 messaggi, F7 barra di stato, F1 manuale, F2 changelog, F3 crediti, Esc chiude la finestra aperta o, dalla principale, esce salvando.
+4.1 Aree e finestre: F5 plancia, F6 console, F7 cruscotto, F1 manuale, F2 changelog, F3 crediti, Esc chiude la finestra aperta o, dalla principale, esce salvando.
 4.2 Trasporto: Z brano precedente, X play, C pausa, V stop, B brano successivo, N brano a caso nella playlist, M muto attivo o disattivo.
 4.3 Posizione nel brano: Q indietro, E avanti, Maiuscolo+Q e Maiuscolo+E impostano i secondi di salto, W salta a un tempo digitato.
 4.4 Velocita e tono: A piu lento, S velocita normale, D piu veloce, F tono piu alto, G tono normale, H tono piu basso.
@@ -60,13 +60,13 @@ Tutti i tasti valgono in tutto il programma, qualunque area abbia il fuoco, ma s
 6.1 Motore: libmpv tramite python-mpv. Verificato nella tappa 0: formati, seek, velocita, equalizzatore al volo, eventi di fine brano, dispositivi.
 6.2 SID: DLL propria su libsidplayfp, emulazione in tempo reale in un filo che rende in anticipo in RAM, passata a libmpv come WAV virtuale. Niente disco. Approvato all'ascolto il 29 settembre 2026.
 6.3 Altri formati che mpv non legge: stesso schema del SID (chip con libgme, Amiga con libuade, MIDI con FluidSynth). I tracker li legge gia libmpv tramite libopenmpt.
-6.4 Interfaccia: wxPython, controlli nativi (TreeCtrl per la plancia, TextCtrl in sola lettura per messaggi e barra di stato). I rami di Questo PC si riempiono solo quando vengono espansi.
+6.4 Interfaccia: wxPython, controlli nativi (TreeCtrl per la plancia, TextCtrl in sola lettura per console e cruscotto). I rami di Questo PC si riempiono solo quando vengono espansi.
 6.5 Effetti sonori con Acusticator, importato da GBUtils e mai copiato.
 6.6 Dati: JSON per playlist, segnalibri, impostazioni, tasti e stato di riapertura. Percorsi con il modulo nella radice, come negli altri progetti.
 6.7 Pacchetto: PyInstaller onedir.
 7. TAPPE
 Tappa 0 (conclusa): prove di fattibilita del motore e del SID in tempo reale. Dettagli in tappa0-risultati.txt.
-Tappa 1 (fatta nella 1.0.0, issue 1, da collaudare con NVDA): scheletro con le tre aree, memoria del fuoco, albero con playlist e Questo PC, Apri file, riproduzione, area dei messaggi, tasti di trasporto, primi effetti sonori. Prova con NVDA.
+Tappa 1 (fatta nella 1.0.0, issue 1, collaudata da Gabriele il 30 settembre 2026, correzioni nella 1.0.5 e 1.1.0): scheletro con le tre aree, memoria del fuoco, albero con playlist e Questo PC, Apri file, riproduzione, area dei messaggi, tasti di trasporto, primi effetti sonori. Prova con NVDA.
 Tappa 2: gestione playlist completa dall'albero, ricerca con \, statistiche, salvataggio e caricamento, stato di riapertura.
 Tappa 3: segnalibri nell'albero, tabella tasti modificabile, impostazioni, F1 F2 F3.
 Tappa 4: equalizzatore, velocita, tono, dissolvenza, loop A-B.

@@ -29,6 +29,11 @@ class Brano:
         """Il nome del file senza estensione."""
         return os.path.splitext(os.path.basename(self.percorso))[0]
 
+    @property
+    def nome_del_file(self):
+        """Il nome del file con l'estensione, come compare nella plancia."""
+        return os.path.basename(self.percorso)
+
     def come_dati(self):
         return {"percorso": self.percorso, "saltato": self.saltato}
 
