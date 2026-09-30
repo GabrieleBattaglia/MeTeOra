@@ -18,6 +18,7 @@ import json
 import os
 import queue
 import threading
+import time
 
 import formati
 import songlengths
@@ -25,8 +26,8 @@ import songlengths
 VERSIONE_DEL_FILE = 1
 # Le chiavi dei tag, come le usa il filtro.
 TAG = ("titolo", "autore", "album", "genere", "anno")
-# Ogni quante schede lette si avvisa chi aspetta.
-BLOCCO = 200
+# Si avvisa chi aspetta al massimo una volta ogni tanti secondi, e alla fine.
+INTERVALLO_DEGLI_AVVISI = 1.0
 
 
 def _anno(testo):
@@ -164,6 +165,7 @@ class Schedario:
 
     def _lavora(self):
         fatti = 0
+        ultimo_avviso = time.monotonic()
         while not self._fermo:
             try:
                 percorso = self._coda.get(timeout=0.5)
@@ -184,8 +186,9 @@ class Schedario:
             with self._lucchetto:
                 self._verificati.add(percorso)
                 self._in_coda.discard(percorso)
-            if fatti >= BLOCCO or (fatti and self._coda.empty()):
+            if fatti and time.monotonic() - ultimo_avviso >= INTERVALLO_DEGLI_AVVISI:
                 fatti = 0
+                ultimo_avviso = time.monotonic()
                 if self.avvisa:
                     self.avvisa()
         if self.avvisa and not self._fermo:

@@ -1,7 +1,7 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 # 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino,
-# nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist.
+# nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro.
 
 """La finestra di MeTeOra.
 
@@ -25,6 +25,7 @@ import questo_pc
 import songlengths
 import suoni
 import version
+from filtro import ErroreFiltro, Filtro
 from impostazioni import Impostazioni
 from motore import durata_del_sottobrano
 from playlist import Archivio, Brano, Coda, Playlist
@@ -77,6 +78,7 @@ TASTI_COMUNI = [
 ]
 # Le righe del cruscotto proprie di ogni tipo di voce della plancia.
 TASTI_DEL_CONTESTO = {
+    "filtro": ("il filtro di una playlist", "Invio o freccia destra modificano il filtro: nel campo Invio conferma, Ctrl+Invio va a capo, Esc annulla. Canc svuota il filtro."),
     "preferiti": ("i Preferiti", "Invio, Applicazioni o Spazio: menu con Riproduci. Canc su un loro brano lo toglie dai Preferiti."),
     "radice_playlist": ("il ramo Playlist", "Invio, Applicazioni o Spazio: menu con Nuova playlist."),
     "playlist": ("una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci e Rinomina. Canc elimina la playlist, dopo una conferma."),
@@ -162,6 +164,57 @@ class FinestraTesto(wx.Dialog):
         self.testo.SetFocus()
 
 
+class FinestraFiltro(wx.Dialog):
+    """Il campo del filtro: Invio conferma, Ctrl+Invio va a capo, Esc annulla."""
+
+    SPIEGAZIONE = (
+        "Spazio: tutti i termini insieme. Barra verticale: l'uno o l'altro, come hubbard|galway. Meno davanti: escluso. "
+        "Asterisco: qualsiasi testo; cancelletto: numeri. Virgolette: sequenza esatta. "
+        "Comandi con < > = <= >=: t tempo (t<=3:00), d dimensione (d>5m), k tipo (k=sid, k=audio, k=video, k=tracker, k=midi), "
+        "a autore, n titolo, l album, g genere, y anno (y<1990), p percorso, s saltato (s=1), r sottobrani (r>1)."
+    )
+
+    def __init__(self, genitore, nome_playlist, testo):
+        from GBwx import STILE_ADATTABILE, adatta_finestra, pannello_scorrevole
+
+        super().__init__(genitore, title=f"Filtro di {nome_playlist}", style=STILE_ADATTABILE)
+        pannello = pannello_scorrevole(self)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        etichetta = wx.StaticText(pannello, label=f"Filtro di {nome_playlist}. Invio conferma, Ctrl+Invio va a capo, Esc annulla.")
+        self.campo = wx.TextCtrl(pannello, value=testo, style=wx.TE_MULTILINE)
+        self.campo.SetName(f"Filtro di {nome_playlist}")
+        self.campo.SetMinSize(wx.Size(-1, self.campo.GetCharHeight() * 5))
+        spiegazione = wx.TextCtrl(pannello, value=self.SPIEGAZIONE, style=wx.TE_MULTILINE | wx.TE_READONLY)
+        spiegazione.SetName("Come si scrive il filtro")
+        spiegazione.SetMinSize(wx.Size(-1, spiegazione.GetCharHeight() * 5))
+        pulsanti = wx.StdDialogButtonSizer()
+        pulsanti.AddButton(wx.Button(pannello, wx.ID_OK, "Conferma"))
+        pulsanti.AddButton(wx.Button(pannello, wx.ID_CANCEL, "Annulla"))
+        pulsanti.Realize()
+        sizer.Add(etichetta, 0, wx.ALL, 5)
+        sizer.Add(self.campo, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
+        sizer.Add(spiegazione, 0, wx.EXPAND | wx.ALL, 5)
+        sizer.Add(pulsanti, 0, wx.ALL | wx.ALIGN_RIGHT, 5)
+        pannello.SetSizer(sizer)
+        adatta_finestra(self, pannello, (600, 320))
+        self.campo.Bind(wx.EVT_KEY_DOWN, self._tasto)
+        self.campo.SetInsertionPointEnd()
+        self.campo.SetFocus()
+
+    def _tasto(self, evento):
+        if evento.GetKeyCode() in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER):
+            if evento.GetModifiers() == wx.MOD_CONTROL:
+                self.campo.WriteText("\n")
+            elif evento.GetModifiers() == wx.MOD_NONE:
+                self.EndModal(wx.ID_OK)
+            return
+        evento.Skip()
+
+    @property
+    def testo(self):
+        return self.campo.GetValue()
+
+
 class Finestra(wx.Frame):
     def __init__(self, ao="wasapi", cartella_dati=None):
         super().__init__(None, title=f"MeTeOra {version.VERSION}")
@@ -179,6 +232,9 @@ class Finestra(wx.Frame):
         self.motore = Motore(alla_fine=lambda: wx.CallAfter(self._brano_finito),
             all_errore=lambda p: wx.CallAfter(self._brano_in_errore, p), ao=ao, volume=self.impostazioni["volume"])
         self.coda = Coda()
+        self.coda.ammesso = self._ammesso
+        # I filtri compilati, per playlist: (testo, Filtro).
+        self._filtri = {}
         self.schedario = Schedario(os.path.join(cartella_dati, FILE_SCHEDARIO), avvisa=lambda: wx.CallAfter(self._schede_arrivate))
         self.schedario.carica()
         # Le playlist temporanee nate dalle cartelle di Questo PC, per cartella:
@@ -360,6 +416,8 @@ class Finestra(wx.Frame):
             self._menu(self.albero.GetSelection())
         elif codice == wx.WXK_DELETE and evento.GetModifiers() == wx.MOD_NONE:
             self._cancella(self.albero.GetSelection())
+        elif codice == wx.WXK_RIGHT and evento.GetModifiers() == wx.MOD_NONE and (self._dati(self.albero.GetSelection()) or {}).get("tipo") == "filtro":
+            self._modifica_filtro(self._dati(self.albero.GetSelection())["playlist"])
         elif codice == wx.WXK_DELETE and evento.GetModifiers() == wx.MOD_SHIFT:
             self._al_cestino(self.albero.GetSelection())
         else:
@@ -433,9 +491,63 @@ class Finestra(wx.Frame):
             if self.albero.GetItemText(voce) != nuova:
                 self.albero.SetItemText(voce, nuova)
 
+    def _filtro_di(self, pl):
+        """Il filtro compilato della playlist, o None se non ne ha. Un testo
+        che non si capisce, arrivato per esempio da un file scritto a mano,
+        vale come nessun filtro."""
+        if not pl.filtro:
+            return None
+        testo, compilato = self._filtri.get(id(pl), (None, None))
+        if testo != pl.filtro:
+            try:
+                compilato = Filtro(pl.filtro)
+            except ErroreFiltro:
+                compilato = None
+            self._filtri[id(pl)] = (pl.filtro, compilato)
+        return compilato
+
     def _ammesso(self, pl, brano):
         """Vero se il brano passa il filtro della sua playlist."""
-        return True
+        filtro = self._filtro_di(pl)
+        return filtro is None or filtro.ammette(brano, self.schedario.scheda(brano.percorso))
+
+    def _etichetta_del_filtro(self, pl):
+        return f"Filtro: {pl.filtro}" if pl.filtro else "Filtro (Tutto)"
+
+    def _modifica_filtro(self, pl):
+        """Il campo del filtro; se il testo non si capisce lo spiega e lo ripropone."""
+        testo = pl.filtro
+        while True:
+            self._suono("domanda")
+            with FinestraFiltro(self, pl.nome, testo) as dialogo:
+                if dialogo.ShowModal() != wx.ID_OK:
+                    self.scrivi("Filtro non cambiato.")
+                    return
+                testo = " ".join(dialogo.testo.split())
+            try:
+                Filtro(testo)
+            except ErroreFiltro as e:
+                self._riscontro("errore", f"Nel filtro non capisco: {e}")
+                continue
+            break
+        self._imposta_filtro(pl, testo)
+
+    def _imposta_filtro(self, pl, testo):
+        pl.filtro = testo
+        self._salva_archivio()
+        self._chiedi_schede(pl)
+        self._popola_playlist(seleziona=pl)
+        # La selezione torna sulla voce Filtro, da cui si era partiti.
+        nodo = self.albero.GetSelection()
+        self.albero.Expand(nodo)
+        primo = next(self._figli(nodo), None)
+        if primo is not None:
+            self.albero.SelectItem(primo)
+        passano = sum(1 for b in pl.brani if self._ammesso(pl, b))
+        if testo:
+            self._riscontro("filtro_messo", f"Filtro di {pl.nome}: {testo}. Passano {brani_al_plurale(passano)} su {len(pl.brani)}.")
+        else:
+            self._riscontro("filtro_tolto", f"Filtro di {pl.nome} svuotato: passano tutti i {brani_al_plurale(len(pl.brani))}.")
 
     def _conto(self, brani):
         """'numero (durata)' di una lista di brani; i brani di cui la durata
@@ -462,6 +574,10 @@ class Finestra(wx.Frame):
         delle playlist e, a coda vuota, lo schedario si salva."""
         if self._chiusa:
             return
+        # Le schede nuove possono cambiare cosa passa i filtri che guardano
+        # durate e tag: per non cambiare la plancia sotto le mani di chi la
+        # sta leggendo si rinfrescano solo i conti; l'elenco dei brani si
+        # aggiorna riaprendo la playlist.
         for voce in [self.nodo_preferiti, *self._figli(self.nodo_playlist)]:
             dati = self._dati(voce) or {}
             if dati.get("tipo") == "playlist":
@@ -514,18 +630,18 @@ class Finestra(wx.Frame):
         self.albero.SetItemText(self.nodo_preferiti, self._etichetta_della_playlist(preferiti))
         self.albero.DeleteChildren(self.nodo_preferiti)
         self._dati(self.nodo_preferiti)["caricato"] = False
-        self.albero.SetItemHasChildren(self.nodo_preferiti, bool(preferiti.brani))
+        self.albero.SetItemHasChildren(self.nodo_preferiti, True)
         da_selezionare = None
         if selezionato is preferiti:
             da_selezionare = self.nodo_preferiti
         if preferiti_aperti or (isinstance(selezionato, Brano) and preferiti.indice(selezionato) is not None):
             self.albero.Expand(self.nodo_preferiti)
             if isinstance(selezionato, Brano):
-                da_selezionare = next((v for v in self._figli(self.nodo_preferiti) if self._dati(v)["brano"] is selezionato), da_selezionare)
+                da_selezionare = next((v for v in self._figli(self.nodo_preferiti) if self._dati(v).get("brano") is selezionato), da_selezionare)
         self.albero.DeleteChildren(self.nodo_playlist)
         for pl in self.archivio.playlist:
             nodo = self.albero.AppendItem(self.nodo_playlist, self._etichetta_della_playlist(pl), data={"tipo": "playlist", "playlist": pl, "caricato": False})
-            self.albero.SetItemHasChildren(nodo, bool(pl.brani))
+            self.albero.SetItemHasChildren(nodo, True)
             if pl is selezionato:
                 da_selezionare = nodo
             elif isinstance(selezionato, Brano) and pl.indice(selezionato) is not None:
@@ -533,7 +649,7 @@ class Finestra(wx.Frame):
             if id(pl) in aperte:
                 self.albero.Expand(nodo)
                 if isinstance(selezionato, Brano):
-                    da_selezionare = next((v for v in self._figli(nodo) if self._dati(v)["brano"] is selezionato), da_selezionare)
+                    da_selezionare = next((v for v in self._figli(nodo) if self._dati(v).get("brano") is selezionato), da_selezionare)
         comando = self.albero.AppendItem(self.nodo_playlist, "Nuova playlist", data={"tipo": "comando", "comando": "nuova_playlist"})
         if selezionato == "nuova_playlist":
             da_selezionare = comando
@@ -560,8 +676,11 @@ class Finestra(wx.Frame):
                 self.albero.SetItemHasChildren(figlio, True)
             return
         if tipo == "playlist":
-            for brano in dati["playlist"].brani:
-                self._aggiungi_voce(voce, "brano", dati["playlist"], brano)
+            pl = dati["playlist"]
+            self.albero.AppendItem(voce, self._etichetta_del_filtro(pl), data={"tipo": "filtro", "playlist": pl})
+            for brano in pl.brani:
+                if self._ammesso(pl, brano):
+                    self._aggiungi_voce(voce, "brano", pl, brano)
             return
         if tipo in ("brano", "file"):
             brano = dati["brano"]
@@ -606,6 +725,8 @@ class Finestra(wx.Frame):
         dati = self._dati(voce)
         if dati and dati["tipo"] == "comando":
             getattr(self, f"_comando_{dati['comando']}")()
+        elif dati and dati["tipo"] == "filtro":
+            self._modifica_filtro(dati["playlist"])
         else:
             self._menu(voce)
 
@@ -655,6 +776,9 @@ class Finestra(wx.Frame):
         tipo = dati["tipo"]
         if tipo == "radice_playlist":
             return [("Nuova playlist", self._comando_nuova_playlist)]
+        if tipo == "filtro":
+            pl = dati["playlist"]
+            return [("Modifica il filtro", lambda: self._modifica_filtro(pl)), ("Svuota il filtro", lambda: self._imposta_filtro(pl, ""))]
         if tipo == "playlist" and dati["playlist"] is self.archivio.preferiti:
             return [("Riproduci", lambda: self._riproduci_playlist(self.archivio.preferiti))]
         if tipo == "playlist":
@@ -734,6 +858,8 @@ class Finestra(wx.Frame):
             self._elimina_playlist(dati["playlist"])
         elif dati.get("tipo") == "brano":
             self._togli(dati["playlist"], dati["brano"])
+        elif dati.get("tipo") == "filtro":
+            self._imposta_filtro(dati["playlist"], "")
         else:
             self._riscontro("non_disponibile", "Qui Canc non cancella niente.")
 

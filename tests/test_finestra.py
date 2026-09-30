@@ -61,13 +61,13 @@ def test_nuova_playlist_aggiungi_sposta_togli(finestra, suoni_annotati):
     assert _ultima(finestra) == "Aggiunti alla playlist Playlist: 3 brani, ora 3 brani."
     nodo = next(finestra._figli(finestra.nodo_playlist))
     finestra.albero.Expand(nodo)
-    assert _etichette(finestra, nodo) == ["uno.mp3", "due.mp3", "tre.mp3"]
+    assert _etichette(finestra, nodo) == ["Filtro (Tutto)", "uno.mp3", "due.mp3", "tre.mp3"]
     finestra._sposta(pl, pl.brani[2], "cima")
     nodo = next(finestra._figli(finestra.nodo_playlist))
-    assert _etichette(finestra, nodo) == ["tre.mp3", "uno.mp3", "due.mp3"]
+    assert _etichette(finestra, nodo) == ["Filtro (Tutto)", "tre.mp3", "uno.mp3", "due.mp3"]
     assert finestra.albero.GetItemText(finestra.albero.GetSelection()) == "tre.mp3"
     finestra._salta(pl, pl.brani[1])
-    assert _etichette(finestra, nodo)[1] == "uno.mp3, saltato"
+    assert _etichette(finestra, nodo)[2] == "uno.mp3, saltato"
     finestra._togli(pl, pl.brani[0])
     assert finestra.albero.GetItemText(finestra.albero.GetSelection()) == "uno.mp3, saltato"
     assert os.path.isfile(finestra.archivio.percorso)
@@ -218,8 +218,8 @@ def test_sottobrani_nella_plancia(finestra, suoni_annotati, tmp_path):
     pl = finestra.archivio.playlist[0]
     nodo_pl = next(finestra._figli(finestra.nodo_playlist))
     finestra.albero.Expand(nodo_pl)
-    assert _etichette(finestra, nodo_pl) == ["Turbo_Outrun.sid, sottobrano 5 di 12"]
-    assert not finestra.albero.ItemHasChildren(next(finestra._figli(nodo_pl)))
+    assert _etichette(finestra, nodo_pl) == ["Filtro (Tutto)", "Turbo_Outrun.sid, sottobrano 5 di 12"]
+    assert not finestra.albero.ItemHasChildren(list(finestra._figli(nodo_pl))[1])
     assert pl.brani[0].sottobrano == 5
 
 
@@ -236,8 +236,8 @@ def test_loop_a_b_con_maiuscolo_x(finestra, suoni_annotati):
     assert _premi(finestra, "x", maiuscolo=True).startswith("Punto A del loop su 2.mp3.")
     scegli(4)
     assert _premi(finestra, "x", maiuscolo=True) == "Loop fra 2.mp3 e 4.mp3: 3 brani."
-    assert _etichette(finestra, nodo)[1] == "2.mp3, punto A del loop"
-    assert _etichette(finestra, nodo)[3] == "4.mp3, punto B del loop"
+    assert _etichette(finestra, nodo)[2] == "2.mp3, punto A del loop"
+    assert _etichette(finestra, nodo)[4] == "4.mp3, punto B del loop"
     scegli(5)
     assert "fuori dal loop" in _premi(finestra, "x")
     assert suoni_annotati[-1] == "fuori_dal_loop"
@@ -245,7 +245,7 @@ def test_loop_a_b_con_maiuscolo_x(finestra, suoni_annotati):
     assert _premi(finestra, "x", maiuscolo=True) == "Punto B tolto; resta il punto A su 2.mp3."
     scegli(2)
     assert _premi(finestra, "x", maiuscolo=True).startswith("Loop tolto")
-    assert _etichette(finestra, nodo)[1] == "2.mp3"
+    assert _etichette(finestra, nodo)[2] == "2.mp3"
     finestra.albero.SelectItem(finestra.nodo_pc)
     assert _premi(finestra, "x", maiuscolo=True).startswith("Il loop si mette su un brano")
 
@@ -263,10 +263,10 @@ def test_maiuscolo_canc_manda_nel_cestino(finestra, suoni_annotati, tmp_path, mo
     pl = finestra.archivio.playlist[0]
     nodo = next(finestra._figli(finestra.nodo_playlist))
     finestra.albero.Expand(nodo)
-    primo = next(finestra._figli(nodo))
+    primo = list(finestra._figli(nodo))[1]
     finestra._al_cestino(primo)
     assert _ultima(finestra) == "Il file resta dov'è." and not cestinati
-    finestra._al_cestino(next(finestra._figli(next(finestra._figli(finestra.nodo_playlist)))))
+    finestra._al_cestino(list(finestra._figli(next(finestra._figli(finestra.nodo_playlist))))[1])
     assert cestinati == [str(tmp_path / "a.mp3")]
     assert [b.nome_del_file for b in pl.brani] == ["b.mp3"]
     assert _ultima(finestra) == "a.mp3 è nel cestino di Windows."
@@ -315,7 +315,7 @@ def test_preferiti(finestra, suoni_annotati):
     pl = finestra.archivio.playlist[0]
     nodo = next(finestra._figli(finestra.nodo_playlist))
     finestra.albero.Expand(nodo)
-    finestra.albero.SelectItem(list(finestra._figli(nodo))[1])
+    finestra.albero.SelectItem(list(finestra._figli(nodo))[2])
     _tasto(finestra, codice=wx.WXK_F4)
     assert _ultima(finestra) == "2.mp3 è nei Preferiti, che ora hanno 1 brano."
     assert finestra.albero.GetItemText(finestra.nodo_preferiti) == "Preferiti, brani: 1 (senza durata), totali: 1 (senza durata)"
@@ -326,7 +326,7 @@ def test_preferiti(finestra, suoni_annotati):
     finestra._cancella(finestra.nodo_preferiti)
     assert _ultima(finestra).startswith("I Preferiti non si eliminano")
     finestra.albero.Expand(finestra.nodo_preferiti)
-    finestra._cancella(next(finestra._figli(finestra.nodo_preferiti)))
+    finestra._cancella(list(finestra._figli(finestra.nodo_preferiti))[1])
     assert not finestra.archivio.preferiti.brani
     assert finestra.albero.GetItemText(finestra.nodo_preferiti) == "Preferiti, brani: 0, totali: 0"
     finestra.archivio.preferiti.brani.append(preferito)
@@ -346,3 +346,56 @@ def test_durate_delle_playlist(finestra):
     nodo = next(finestra._figli(finestra.nodo_playlist))
     assert finestra.albero.GetItemText(nodo) == "Playlist, brani: 2 (8:34), totali: 2 (8:34)"
     assert os.path.isfile(finestra.schedario.percorso)
+
+
+def test_filtro_nella_plancia_e_nella_riproduzione(finestra, suoni_annotati, monkeypatch):
+    finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n in ("rock uno.mp3", "jazz due.mp3", "rock tre.mp3")])
+    pl = finestra.archivio.playlist[0]
+    risposte = iter(["rock|", "rock -tre"])
+
+    class Finto:
+        def __init__(self, *_a):
+            self.testo = next(risposte)
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_a):
+            return False
+
+        def ShowModal(self):
+            return wx.ID_OK
+
+    monkeypatch.setattr(modulo, "FinestraFiltro", Finto)
+    finestra._modifica_filtro(pl)
+    assert any(r.startswith("Nel filtro non capisco") for r in finestra._righe)
+    assert _ultima(finestra) == "Filtro di Playlist: rock -tre. Passano 1 brano su 3."
+    nodo = next(finestra._figli(finestra.nodo_playlist))
+    assert _etichette(finestra, nodo) == ["Filtro: rock -tre", "rock uno.mp3"]
+    assert finestra.albero.GetItemText(finestra.albero.GetSelection()) == "Filtro: rock -tre"
+    assert finestra.albero.GetItemText(nodo).startswith("Playlist, brani: 1 (senza durata), totali: 3")
+    assert finestra.coda.primo(pl) is pl.brani[0]
+    finestra.coda.imposta(pl, pl.brani[0])
+    assert finestra.coda.successivo() is None
+    finestra._cancella(finestra.albero.GetSelection())
+    assert _ultima(finestra).startswith("Filtro di Playlist svuotato")
+    assert pl.filtro == ""
+    from playlist import Archivio
+
+    finestra._imposta_filtro(pl, "jazz")
+    di_nuovo = Archivio(finestra.archivio.percorso)
+    di_nuovo.carica()
+    assert di_nuovo.playlist[0].filtro == "jazz"
+
+
+def test_campo_del_filtro_ctrl_invio_va_a_capo(finestra):
+    dialogo = modulo.FinestraFiltro(finestra, "Prova", "rock")
+    try:
+        evento = wx.KeyEvent(wx.wxEVT_KEY_DOWN)
+        evento.SetKeyCode(wx.WXK_RETURN)
+        evento.SetControlDown(True)
+        dialogo._tasto(evento)
+        assert dialogo.testo.replace(chr(13), "") == "rock" + chr(10)
+        assert dialogo.campo.GetName() == "Filtro di Prova"
+    finally:
+        dialogo.Destroy()

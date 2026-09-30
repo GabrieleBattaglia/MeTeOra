@@ -1,6 +1,6 @@
 # MeTeOra, le playlist: brani, playlist, archivio e coda di riproduzione.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 il sottobrano dei SID, nella 1.3.0 il loop A-B, nella 1.6.0 i Preferiti.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 il sottobrano dei SID, nella 1.3.0 il loop A-B, nella 1.6.0 i Preferiti, nella 1.8.0 il filtro.
 
 """Il modello dei dati, senza finestre e senza suono.
 
@@ -50,9 +50,11 @@ class Brano:
 
 
 class Playlist:
-    def __init__(self, nome, brani=None, cartella=None):
+    def __init__(self, nome, brani=None, cartella=None, filtro=""):
         self.nome = nome
         self.brani = list(brani or [])
+        # Il testo del filtro; vuoto vuol dire tutti i brani.
+        self.filtro = filtro
         # La cartella di Questo PC da cui nasce una playlist temporanea.
         self.cartella = cartella
 
@@ -90,11 +92,15 @@ class Playlist:
         return i
 
     def come_dati(self):
-        return {"nome": self.nome, "brani": [b.come_dati() for b in self.brani]}
+        dati = {"nome": self.nome, "brani": [b.come_dati() for b in self.brani]}
+        if self.filtro:
+            dati["filtro"] = self.filtro
+        return dati
 
     @classmethod
     def da_dati(cls, dati):
-        return cls(dati["nome"], [Brano.da_dati(b) for b in dati.get("brani", [])])
+        filtro = dati.get("filtro")
+        return cls(dati["nome"], [Brano.da_dati(b) for b in dati.get("brani", [])], filtro=filtro if isinstance(filtro, str) else "")
 
 
 class Archivio:
@@ -162,6 +168,12 @@ class Coda:
         self.loop_playlist = None
         self.punto_a = None
         self.punto_b = None
+        # Chi usa la coda puo' sostituirla con il filtro delle playlist: un
+        # brano che non passa si comporta come un brano saltato.
+        self.ammesso = lambda _playlist, _brano: True
+
+    def _suonabile(self, playlist, brano):
+        return not brano.saltato and self.ammesso(playlist, brano)
 
     def imposta(self, playlist, brano):
         self.playlist = playlist
@@ -198,12 +210,12 @@ class Coda:
         if not self.playlist:
             return []
         primo, ultimo = self._campo(self.playlist)
-        return [b for b in self.playlist.brani[primo:ultimo + 1] if not b.saltato]
+        return [b for b in self.playlist.brani[primo:ultimo + 1] if self._suonabile(self.playlist, b)]
 
     def primo(self, playlist):
         """Il primo brano non saltato della playlist, o del suo loop; None se non ce n'e'."""
         primo, ultimo = self._campo(playlist)
-        return next((b for b in playlist.brani[primo:ultimo + 1] if not b.saltato), None)
+        return next((b for b in playlist.brani[primo:ultimo + 1] if self._suonabile(playlist, b)), None)
 
     def _vicino(self, passo):
         if not self.playlist:
@@ -219,7 +231,7 @@ class Coda:
             larghezza = ultimo - primo + 1
             for passi in range(1, larghezza + 1):
                 candidato = brani[primo + (i - primo + passo * passi) % larghezza]
-                if not candidato.saltato:
+                if self._suonabile(self.playlist, candidato):
                     return candidato
             return None
         if i is None:
@@ -227,7 +239,7 @@ class Coda:
             return self.primo(self.playlist) if passo > 0 else None
         i += passo
         while 0 <= i < len(brani):
-            if not brani[i].saltato:
+            if self._suonabile(self.playlist, brani[i]):
                 return brani[i]
             i += passo
         return None

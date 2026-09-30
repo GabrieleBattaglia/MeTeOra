@@ -44,6 +44,8 @@ EVENTI = {
     "playlist_rinominata": "written_ok",
     "brano_aggiunto": "aggiunta_giocatore",
     "preferito_aggiunto": "perfect_match",
+    "filtro_messo": "processo_quartina_1",
+    "filtro_tolto": "processo_quartina_10",
     "gia_nei_preferiti": "doppio_tic_conferma",
     "brano_tolto": "espelli",
     "cestino": "morto",
