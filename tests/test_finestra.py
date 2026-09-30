@@ -102,16 +102,20 @@ def test_senza_niente_in_corso(finestra, suoni_annotati):
 
 
 def test_volume_e_muto(finestra):
-    finestra.motore.volume = 98
+    finestra.motore.volume = 95
     _tasto(finestra, "+")
     assert _ultima(finestra) == "Volume 100."
     _tasto(finestra, "+")
-    assert _ultima(finestra) == "Volume già al massimo, 100."
+    assert _ultima(finestra) == "Volume 105, amplificato oltre il 100."
+    finestra.motore.volume = 298
+    _tasto(finestra, "+")
+    _tasto(finestra, "+")
+    assert _ultima(finestra) == "Volume già al massimo, 300."
     _tasto(finestra, "m")
     assert _ultima(finestra) == "Muto."
     _tasto(finestra, "m")
     assert _ultima(finestra).startswith("Audio di nuovo acceso")
-    assert finestra.impostazioni["volume"] == 100
+    assert finestra.impostazioni["volume"] == 300
 
 
 def test_console_tiene_le_ultime_righe_e_il_cursore(finestra):
@@ -443,6 +447,9 @@ def test_campo_del_filtro_ctrl_invio_va_a_capo(finestra):
         evento = wx.KeyEvent(wx.wxEVT_KEY_DOWN)
         evento.SetKeyCode(wx.WXK_RETURN)
         evento.SetControlDown(True)
+        # Il testo di prima arriva selezionato: si va in fondo prima di andare a capo.
+        assert dialogo.campo.GetStringSelection() == "rock"
+        dialogo.campo.SetInsertionPointEnd()
         dialogo._tasto(evento)
         assert dialogo.testo.replace(chr(13), "") == "rock" + chr(10)
         assert dialogo.campo.GetName() == "Filtro di Prova"
@@ -599,7 +606,7 @@ def test_ricerca_globale(finestra, monkeypatch, suoni_annotati, tmp_path):
     assert len(_etichette(finestra, finestra.nodo_risultati)) == 5
     assert _etichette(finestra, finestra.nodo_risultati)[-1] == "Mostra l'ultimo risultato"
     assert finestra.albero.GetSelection() == list(finestra._figli(finestra.nodo_risultati))[2]
-    monkeypatch.setattr(wx, "TextEntryDialog", _DialogoFinto("rock salvati"))
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("rock salvati"))
     finestra._salva_risultati()
     assert finestra.archivio.playlist[-1].nome == "rock salvati"
     assert len(finestra.archivio.playlist[-1].brani) == 5
@@ -708,7 +715,7 @@ def test_ricerca_nella_console(finestra, suoni_annotati, monkeypatch):
     finestra.scrivi("primo volume")
     finestra.scrivi("niente")
     finestra.scrivi("secondo VOLUME")
-    monkeypatch.setattr(wx, "TextEntryDialog", _DialogoFinto("volume"))
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("volume"))
     _tasto(finestra, "\\", maiuscolo=True)
     testo = "\n".join(finestra._righe).lower()
     primo = testo.find("volume")
@@ -724,7 +731,7 @@ def test_ricerca_nella_console(finestra, suoni_annotati, monkeypatch):
     finestra._tasto_nella_console(invio)
     assert finestra.console.GetInsertionPoint() == primo
     assert suoni_annotati[-1] == "ripartito_in_console"
-    monkeypatch.setattr(wx, "TextEntryDialog", _DialogoFinto("inesistente"))
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("inesistente"))
     finestra._comando_cerca_in_console()
     assert _ultima(finestra) == "Nella console non c'è inesistente."
 

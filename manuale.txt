@@ -42,7 +42,7 @@ N: un brano a caso fra le voci suonabili che si vedono nella plancia; se ciò ch
 Q ed E: indietro e avanti nel brano, di dieci secondi se non lo cambi.
 Maiuscolo con Q e Maiuscolo con E: chiedono di quanti secondi saltare, indietro e avanti, anche con i decimali, come 2.5.
 W: va a un tempo del brano, scritto come minuti e secondi, per esempio 1:30, oppure in secondi, anche con i decimali: 1:30.5 oppure 90.5.
-Più e meno, sulla tastiera principale: volume su e giù, di cinque se non lo cambi.
+Più e meno, sulla tastiera principale: volume su e giù, di cinque se non lo cambi, da 0 a 300. Oltre il 100 il volume amplifica, per gli audio registrati troppo bassi; la console lo dice.
 Maiuscolo con M: chiede di quanto cambiano il volume più e meno, da 1 a 50; MeTeOra se lo ricorda.
 M: muto, e di nuovo M riaccende l'audio.
 Maiuscolo con X: il loop fra due brani. Sul brano selezionato mette il punto A, su un altro brano della stessa lista il punto B; da quel momento la riproduzione resta fra A e B, in tondo, e X, Z, B e N lavorano solo lì dentro. Sul punto B lo toglie, sul punto A toglie il loop intero.

@@ -5,7 +5,8 @@
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
 # nella 1.15.0 la ricerca globale, nella 1.17.0 Z, B e N che seguono la plancia e F12,
-# nella 1.20.0 F1, F2 e F3 nella console, l'ora in fondo alle scritte e la ricerca nella console.
+# nella 1.20.0 F1, F2 e F3 nella console, l'ora in fondo alle scritte e la ricerca nella console;
+# nella 1.21.0 il volume fino a 300.
 
 """La finestra di MeTeOra.
 
@@ -34,7 +35,7 @@ import suoni
 import version
 from filtro import ErroreFiltro, Filtro
 from impostazioni import Impostazioni
-from motore import durata_del_sottobrano
+from motore import VOLUME_MASSIMO, durata_del_sottobrano
 from playlist import Archivio, Brano, Coda, Playlist
 from ricerca import Ricerca
 from schedario import Schedario
@@ -192,6 +193,17 @@ def brani_al_plurale(n):
     return "1 brano" if n == 1 else f"{n} brani"
 
 
+class DialogoTesto(wx.TextEntryDialog):
+    """Un campo da una riga con il testo di prima gia' selezionato: scrivendo
+    lo si sostituisce, con le frecce lo si corregge."""
+
+    def ShowModal(self):
+        campo = next((c for c in self.GetChildren() if isinstance(c, wx.TextCtrl)), None)
+        if campo is not None:
+            wx.CallAfter(campo.SelectAll)
+        return super().ShowModal()
+
+
 class FinestraFiltro(wx.Dialog):
     """Il campo del filtro: Invio conferma, Ctrl+Invio va a capo, Esc annulla."""
 
@@ -227,7 +239,7 @@ class FinestraFiltro(wx.Dialog):
         pannello.SetSizer(sizer)
         adatta_finestra(self, pannello, (600, 320))
         self.campo.Bind(wx.EVT_KEY_DOWN, self._tasto)
-        self.campo.SetInsertionPointEnd()
+        self.campo.SelectAll()
         self.campo.SetFocus()
 
     def _tasto(self, evento):
@@ -1124,7 +1136,7 @@ class Finestra(wx.Frame):
         if not self.risultati or not self.risultati.brani:
             self._riscontro("niente_da_suonare", "Non ci sono risultati da salvare.")
             return
-        with wx.TextEntryDialog(self, "Nome della nuova playlist:", "Salva i risultati", f"Ricerca {self._testo_della_ricerca}") as dialogo:
+        with DialogoTesto(self, "Nome della nuova playlist:", "Salva i risultati", f"Ricerca {self._testo_della_ricerca}") as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
                 return
             nome = dialogo.GetValue().strip() or "Ricerca"
@@ -1144,7 +1156,7 @@ class Finestra(wx.Frame):
         self._riscontro("playlist_da_cartella", f"Creata la playlist {pl.nome} con {brani_al_plurale(len(files))}.")
 
     def _rinomina(self, pl):
-        with wx.TextEntryDialog(self, "Nuovo nome della playlist:", "Rinomina", pl.nome) as dialogo:
+        with DialogoTesto(self, "Nuovo nome della playlist:", "Rinomina", pl.nome) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
                 return
             nome = dialogo.GetValue().strip()
@@ -1564,7 +1576,7 @@ class Finestra(wx.Frame):
     def _chiedi_secondi(self, chiave, verso):
         self._suono("domanda")
         attuale = self.impostazioni[chiave]
-        with wx.TextEntryDialog(self, f"Di quanti secondi salta {verso}? Anche con i decimali, per esempio 2,5.", "Passo di salto", secondi_da_leggere(attuale)) as dialogo:
+        with DialogoTesto(self, f"Di quanti secondi salta {verso}? Anche con i decimali, per esempio 2.5.", "Passo di salto", secondi_da_leggere(attuale)) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
                 return
             testo = dialogo.GetValue()
@@ -1587,7 +1599,7 @@ class Finestra(wx.Frame):
             return
         self._suono("domanda")
         durata = self.motore.durata
-        with wx.TextEntryDialog(self, f"A che tempo andare? Minuti e secondi, per esempio 1:30. Il brano dura {tempo(durata)}.", "Vai al tempo") as dialogo:
+        with DialogoTesto(self, f"A che tempo andare? Minuti e secondi, per esempio 1:30. Il brano dura {tempo(durata)}.", "Vai al tempo") as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
                 return
             testo = dialogo.GetValue()
@@ -1600,13 +1612,14 @@ class Finestra(wx.Frame):
 
     def _volume(self, passo):
         attuale = self.motore.volume
-        nuovo = max(0, min(100, attuale + passo))
+        nuovo = max(0, min(VOLUME_MASSIMO, attuale + passo))
         if nuovo == attuale:
             self._riscontro("volume_al_limite", f"Volume già al {'massimo' if passo > 0 else 'minimo'}, {attuale}.", "volume")
             return
         self.motore.volume = nuovo
         self.impostazioni["volume"] = nuovo
-        self._riscontro("volume_su" if passo > 0 else "volume_giu", f"Volume {nuovo}.", "volume")
+        amplificato = ", amplificato oltre il 100" if nuovo > 100 else ""
+        self._riscontro("volume_su" if passo > 0 else "volume_giu", f"Volume {nuovo}{amplificato}.", "volume")
 
     def _comando_volume_su(self):
         self._volume(self.impostazioni["passo_volume"])
@@ -1617,7 +1630,7 @@ class Finestra(wx.Frame):
     def _comando_passo_volume(self):
         self._suono("domanda")
         attuale = self.impostazioni["passo_volume"]
-        with wx.TextEntryDialog(self, "Di quanto cambiano il volume più e meno? Da 1 a 50.", "Passo del volume", str(attuale)) as dialogo:
+        with DialogoTesto(self, "Di quanto cambiano il volume più e meno? Da 1 a 50.", "Passo del volume", str(attuale)) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
                 return
             testo = dialogo.GetValue().strip()
@@ -1783,7 +1796,7 @@ class Finestra(wx.Frame):
 
     def _comando_cerca_in_console(self):
         self._suono("domanda")
-        with wx.TextEntryDialog(self, "Cosa cercare nella console? Invio, dalla console, passa all'occorrenza seguente.", "Cerca nella console",
+        with DialogoTesto(self, "Cosa cercare nella console? Invio, dalla console, passa all'occorrenza seguente.", "Cerca nella console",
                 self._cercato_in_console) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
                 return

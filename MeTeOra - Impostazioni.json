@@ -1,8 +1,8 @@
 {
  "volume": 100,
  "passo_volume": 2,
- "passo_indietro": 1.21,
- "passo_avanti": 1.362,
+ "passo_indietro": 0.23,
+ "passo_avanti": 2.91,
  "volume_effetti": 0.5,
  "insegui": true
 }

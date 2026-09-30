@@ -24,6 +24,8 @@ import songlengths
 # La durata di un SID che non sta in nessun database: tre minuti, come fanno
 # i lettori di SID.
 DURATA_SID_PREDEFINITA = 180.0
+# Oltre il 100 il volume amplifica, per gli audio registrati troppo bassi.
+VOLUME_MASSIMO = 300
 
 
 def durata_del_sottobrano(percorso, sottobrano):
@@ -43,7 +45,7 @@ class Motore:
         # all'avvio eccezioni di Windows che gestisce da se', ma che il
         # faulthandler di Python stampa come errori fatali.
         self._lettore = mpv.MPV(ao=ao, vo="null", video="no", config=False, ytdl=False, input_default_bindings=False,
-            keep_open="no", volume=volume, osc=False, load_stats_overlay=False, load_console=False, load_auto_profiles=False,
+            keep_open="no", volume=volume, volume_max=VOLUME_MASSIMO, osc=False, load_stats_overlay=False, load_console=False, load_auto_profiles=False,
             load_select=False, load_commands=False, load_positioning=False, load_context_menu=False)
         self._in_corso = None
         self.sottobrano = None
@@ -126,7 +128,7 @@ class Motore:
 
     @volume.setter
     def volume(self, valore):
-        self._lettore.volume = max(0, min(100, valore))
+        self._lettore.volume = max(0, min(VOLUME_MASSIMO, valore))
 
     @property
     def muto(self):

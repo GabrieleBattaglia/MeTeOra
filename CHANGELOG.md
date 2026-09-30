@@ -2,6 +2,15 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.21.2] - 2026-09-30
+
+- Nei campi da riempire, come il passo del salto, il volume, il tempo di W, i nomi e i filtri, il testo di prima arriva selezionato: scrivendo lo si sostituisce, senza doverlo cancellare.
+- L'esempio del passo del salto usa il punto decimale, 2.5, non più la virgola.
+
+## [1.21.0] - 2026-09-30
+
+- Il volume sale fino a 300: oltre il 100 amplifica gli audio registrati troppo bassi, e la console lo dice.
+
 ## [1.20.0] - 2026-09-30
 
 - F1, F2 e F3 scrivono manuale, novità e crediti nella console, come F12, e ci portano il fuoco con il cursore sulla prima riga: niente più finestre a parte. Le novità arrivano senza i segni del Markdown, con le versioni scritte come frasi.
