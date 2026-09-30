@@ -43,6 +43,8 @@ EVENTI = {
     "playlist_eliminata": "cancellato",
     "playlist_rinominata": "written_ok",
     "brano_aggiunto": "aggiunta_giocatore",
+    "preferito_aggiunto": "perfect_match",
+    "gia_nei_preferiti": "doppio_tic_conferma",
     "brano_tolto": "espelli",
     "cestino": "morto",
     "brano_spostato": "scudisciata",

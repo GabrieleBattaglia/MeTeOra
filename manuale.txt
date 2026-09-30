@@ -7,17 +7,18 @@ La plancia dei comandi, F5: un albero con tutti i comandi e i contenuti. I rami 
 La console, F6: una riga per ogni azione, la più recente in fondo. Quando ci torni il cursore è dove l'avevi lasciato.
 Il cruscotto, F7: i tasti del punto da cui sei arrivato. Da una voce della plancia elenca i tasti di quella voce, dalla console quelli della console. Se torni dallo stesso punto il cursore resta dove l'avevi lasciato.
 La plancia dei comandi
+Preferiti: la prima voce, una playlist speciale con i brani che ci mandi da qualsiasi playlist o cartella, con F4 o con la voce Aggiungi ai preferiti del menu del brano. Canc su un brano dei Preferiti lo toglie; i Preferiti non si rinominano e non si eliminano.
 Playlist: le tue playlist, ciascuna con i suoi brani, mostrati con il nome del file e l'estensione, e in fondo il comando Nuova playlist. Le playlist si salvano da sole a ogni modifica.
 Questo PC: le unità del computer, con la lettera e il nome del volume. Dentro le unità ci sono le cartelle e i file che MeTeOra sa suonare. Una cartella funziona come una playlist temporanea: dal suo menu la si suona, oppure si crea una playlist vera con tutti i file della cartella e delle sue sottocartelle.
 Apri file: sceglie un file qualsiasi e lo suona, senza metterlo in nessuna playlist.
 Impostazioni: arriverà con una delle prossime tappe.
 Su ogni voce Invio, il tasto Applicazioni e la barra spaziatrice aprono il menu della voce; sui comandi Invio li esegue. Canc elimina una playlist, dopo una conferma, o toglie un brano da una playlist. Maiuscolo con Canc, su un brano di una playlist o su un file di una cartella, manda il file nel cestino di Windows dopo una conferma, con No come risposta predefinita, e lo toglie dalla playlist o dalla cartella.
 Menu di una playlist: Riproduci, Rinomina, Elimina.
-Menu di un brano: Riproduci, Sposta su, Sposta giù, Sposta in cima, Sposta in fondo, Saltato, Togli dalla playlist, Manda nel cestino. Un brano saltato resta nella playlist ma non viene suonato.
+Menu di un brano: Riproduci, Sposta su, Sposta giù, Sposta in cima, Sposta in fondo, Saltato, Togli dalla playlist, Aggiungi ai preferiti, Manda nel cestino. Un brano saltato resta nella playlist ma non viene suonato.
 Menu di un'unità o di una cartella: Riproduci, Crea playlist da qui, Aggiungi alla playlist, Aggiorna.
-Menu di un file: Riproduci, Aggiungi alla playlist, Manda nel cestino.
+Menu di un file: Riproduci, Aggiungi alla playlist, Aggiungi ai preferiti, Manda nel cestino.
 Un SID con più sottobrani, in una cartella o in una playlist, è un ramo: freccia destra mostra i suoi sottobrani, ciascuno con la sua durata. Un sottobrano si suona e si aggiunge alle playlist come un brano a sé; nella playlist compare con il nome del file e il numero del sottobrano.
-Menu di un sottobrano: Riproduci, Aggiungi alla playlist.
+Menu di un sottobrano: Riproduci, Aggiungi alla playlist, Aggiungi ai preferiti.
 Il brano in riproduzione e la voce selezionata sono due cose diverse: quando un brano finisce e ne parte un altro, la selezione resta dov'è. Nella plancia il brano che suona ha l'indicazione "in riproduzione" dopo il nome.
 I tasti
 I tasti a lettera funzionano in tutta la finestra, qualunque area abbia il fuoco. Per questo nella plancia non si salta alle voci digitandone l'iniziale.
@@ -32,6 +33,7 @@ Q ed E: indietro e avanti nel brano, di dieci secondi. Maiuscolo con Q e Maiusco
 W: va a un tempo del brano, scritto come minuti e secondi, per esempio 1:30, oppure in secondi, anche con i decimali: 1:30,5 oppure 90.5.
 Più e meno, sulla tastiera principale: volume su e giù, di cinque se non lo cambi. Maiuscolo con M chiede di quanto, da 1 a 50, e MeTeOra se lo ricorda.
 M: muto, e di nuovo M riaccende l'audio.
+F4: mette nei Preferiti il brano, il file o il sottobrano selezionato. Se c'è già lo dice.
 F8: porta la selezione della plancia sul brano in riproduzione, aprendo se serve le cartelle fino a lui.
 F9: scrive nella console cosa suona, con il percorso completo del file, a che punto è, e il volume.
 F1: questo manuale. F2: le novità di ogni versione. F3: i crediti. Esc chiude queste finestre.

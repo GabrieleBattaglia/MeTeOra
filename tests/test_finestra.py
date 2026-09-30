@@ -42,7 +42,7 @@ def test_aree_nell_ordine_di_tabulazione(finestra):
 
 
 def test_rami_principali(finestra):
-    assert _etichette(finestra, finestra.albero.GetRootItem()) == ["Playlist", "Questo PC", "Apri file", "Impostazioni"]
+    assert _etichette(finestra, finestra.albero.GetRootItem()) == ["Preferiti, 0 brani", "Playlist", "Questo PC", "Apri file", "Impostazioni"]
     assert _etichette(finestra, finestra.nodo_playlist) == ["Nuova playlist"]
 
 
@@ -86,6 +86,9 @@ def test_tasti_futuri_e_numpad(finestra, suoni_annotati):
 def test_senza_niente_in_corso(finestra, suoni_annotati):
     _tasto(finestra, "c")
     assert _ultima(finestra) == "Non sta suonando niente."
+    _tasto(finestra, "x")
+    assert _ultima(finestra) == "I Preferiti sono vuoti: F4 ci mette il brano selezionato."
+    finestra.albero.SelectItem(finestra.nodo_pc)
     _tasto(finestra, "x")
     assert _ultima(finestra).startswith("Niente da riprodurre")
     _tasto(finestra, "b")
@@ -305,3 +308,31 @@ def test_cartella_suona_con_le_sottocartelle_e_f8_la_ritrova(finestra, monkeypat
         assert finestra.albero.GetItemText(selezione) == "due.mp3, in riproduzione"
         assert finestra._dati(finestra.albero.GetItemParent(selezione))["percorso"] == os.path.join(base, "Dentro")
         finestra.motore._in_corso = None
+
+
+def test_preferiti(finestra, suoni_annotati):
+    finestra._aggiungi(None, [os.path.join(r"C:\m", f"{n}.mp3") for n in range(1, 4)])
+    pl = finestra.archivio.playlist[0]
+    nodo = next(finestra._figli(finestra.nodo_playlist))
+    finestra.albero.Expand(nodo)
+    finestra.albero.SelectItem(list(finestra._figli(nodo))[1])
+    _tasto(finestra, codice=wx.WXK_F4)
+    assert _ultima(finestra) == "2.mp3 è nei Preferiti, che ora hanno 1 brano."
+    assert finestra.albero.GetItemText(finestra.nodo_preferiti) == "Preferiti, 1 brano"
+    _tasto(finestra, codice=wx.WXK_F4)
+    assert _ultima(finestra) == "2.mp3 è già nei Preferiti."
+    preferito = finestra.archivio.preferiti.brani[0]
+    assert preferito is not pl.brani[1] and preferito.percorso == pl.brani[1].percorso
+    finestra._cancella(finestra.nodo_preferiti)
+    assert _ultima(finestra).startswith("I Preferiti non si eliminano")
+    finestra.albero.Expand(finestra.nodo_preferiti)
+    finestra._cancella(next(finestra._figli(finestra.nodo_preferiti)))
+    assert not finestra.archivio.preferiti.brani
+    assert finestra.albero.GetItemText(finestra.nodo_preferiti) == "Preferiti, 0 brani"
+    finestra.archivio.preferiti.brani.append(preferito)
+    finestra._salva_archivio()
+    from playlist import Archivio
+
+    di_nuovo = Archivio(finestra.archivio.percorso)
+    di_nuovo.carica()
+    assert [b.percorso for b in di_nuovo.preferiti.brani] == [preferito.percorso]

@@ -1,7 +1,7 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 # 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino,
-# nella 1.5.0 le cartelle suonate con le sottocartelle.
+# nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti.
 
 """La finestra di MeTeOra.
 
@@ -70,11 +70,12 @@ TASTI_COMUNI = [
     "X riproduce la voce selezionata o riprende, C pausa, V stop, Z e B brano precedente e successivo, N brano a caso.",
     "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, + e - volume, Maiuscolo+M il passo del volume, M muto.",
     "Maiuscolo con Z e con B sottobrano precedente e successivo di un SID, Maiuscolo+X mette e toglie i punti A e B del loop sul brano selezionato.",
-    "F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione sul brano in riproduzione, F9 dice cosa suona.",
+    "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione sul brano in riproduzione, F9 dice cosa suona.",
     "F1 manuale, F2 novità, F3 crediti, Esc esce salvando tutto.",
 ]
 # Le righe del cruscotto proprie di ogni tipo di voce della plancia.
 TASTI_DEL_CONTESTO = {
+    "preferiti": ("i Preferiti", "Invio, Applicazioni o Spazio: menu con Riproduci. Canc su un loro brano lo toglie dai Preferiti."),
     "radice_playlist": ("il ramo Playlist", "Invio, Applicazioni o Spazio: menu con Nuova playlist."),
     "playlist": ("una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci e Rinomina. Canc elimina la playlist, dopo una conferma."),
     "brano": ("un brano di una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Sposta e Saltato. Canc toglie il brano dalla playlist, Maiuscolo+Canc manda il file nel cestino. Un SID con più sottobrani si apre con freccia destra."),
@@ -219,13 +220,14 @@ class Finestra(wx.Frame):
 
     def _popola_albero(self):
         radice = self.albero.AddRoot("MeTeOra")
+        self.nodo_preferiti = self.albero.AppendItem(radice, "Preferiti", data={"tipo": "playlist", "playlist": self.archivio.preferiti, "caricato": False})
         self.nodo_playlist = self.albero.AppendItem(radice, "Playlist", data={"tipo": "radice_playlist"})
         self.nodo_pc = self.albero.AppendItem(radice, "Questo PC", data={"tipo": "pc", "caricato": False})
         self.albero.SetItemHasChildren(self.nodo_pc, True)
         self.albero.AppendItem(radice, "Apri file", data={"tipo": "comando", "comando": "apri_file"})
         self.albero.AppendItem(radice, "Impostazioni", data={"tipo": "comando", "comando": "impostazioni"})
         self._popola_playlist()
-        self.albero.SelectItem(self.nodo_playlist)
+        self.albero.SelectItem(self.nodo_preferiti)
 
     # La console.
 
@@ -291,7 +293,8 @@ class Finestra(wx.Frame):
             righe = ["Tasti per la console.", "Frecce, Pagina su e giù, Home e Fine per leggere; i messaggi nuovi arrivano in fondo."]
         else:
             dati = self._dati(self.albero.GetSelection()) or {}
-            nome, riga = TASTI_DEL_CONTESTO.get(dati.get("tipo"), ("la plancia", ""))
+            tipo = "preferiti" if dati.get("tipo") == "playlist" and dati["playlist"] is self.archivio.preferiti else dati.get("tipo")
+            nome, riga = TASTI_DEL_CONTESTO.get(tipo, ("la plancia", ""))
             righe = [f"Tasti per {nome}."] + ([riga] if riga else [])
         return righe + TASTI_COMUNI
 
@@ -309,7 +312,7 @@ class Finestra(wx.Frame):
         tasti_funzione = {
             wx.WXK_F1: self._manuale, wx.WXK_F2: self._changelog, wx.WXK_F3: self._crediti,
             wx.WXK_F5: lambda: self._vai(self.albero, "plancia"), wx.WXK_F6: lambda: self._vai(self.console, "console"),
-            wx.WXK_F7: lambda: self._vai(self.cruscotto, "cruscotto"), wx.WXK_F8: self._vai_al_brano, wx.WXK_F9: self._informazioni,
+            wx.WXK_F7: lambda: self._vai(self.cruscotto, "cruscotto"), wx.WXK_F4: lambda: self._ai_preferiti(self._preferito_selezionato()), wx.WXK_F8: self._vai_al_brano, wx.WXK_F9: self._informazioni,
             wx.WXK_ESCAPE: self.Close,
         }
         if modificatori == wx.MOD_NONE and codice in tasti_funzione:
@@ -438,7 +441,12 @@ class Finestra(wx.Frame):
             dati = self._dati(voce)
             if dati.get("tipo") == "playlist" and self.albero.IsExpanded(voce):
                 aperte.add(id(dati["playlist"]))
-        if voce_selezionata.IsOk() and voce_selezionata != self.nodo_playlist and self._sotto(voce_selezionata, self.nodo_playlist):
+        preferiti_aperti = self.albero.IsExpanded(self.nodo_preferiti)
+        if voce_selezionata.IsOk() and self._sotto(voce_selezionata, self.nodo_preferiti):
+            dati = self._dati(voce_selezionata) or {}
+            dentro = True
+            selezionato = dati.get("brano") or dati.get("playlist")
+        elif voce_selezionata.IsOk() and voce_selezionata != self.nodo_playlist and self._sotto(voce_selezionata, self.nodo_playlist):
             dati = self._dati(voce_selezionata) or {}
             dentro = True
             selezionato = "nuova_playlist" if dati.get("comando") == "nuova_playlist" else (dati.get("brano") or dati.get("playlist"))
@@ -448,8 +456,19 @@ class Finestra(wx.Frame):
             # La selezione passa sul ramo mentre i figli spariscono, senza
             # rimbalzi su voci che stanno per essere cancellate.
             self.albero.SelectItem(self.nodo_playlist)
-        self.albero.DeleteChildren(self.nodo_playlist)
+        preferiti = self.archivio.preferiti
+        self.albero.SetItemText(self.nodo_preferiti, self._etichetta_della_playlist(preferiti))
+        self.albero.DeleteChildren(self.nodo_preferiti)
+        self._dati(self.nodo_preferiti)["caricato"] = False
+        self.albero.SetItemHasChildren(self.nodo_preferiti, bool(preferiti.brani))
         da_selezionare = None
+        if selezionato is preferiti:
+            da_selezionare = self.nodo_preferiti
+        if preferiti_aperti or (isinstance(selezionato, Brano) and preferiti.indice(selezionato) is not None):
+            self.albero.Expand(self.nodo_preferiti)
+            if isinstance(selezionato, Brano):
+                da_selezionare = next((v for v in self._figli(self.nodo_preferiti) if self._dati(v)["brano"] is selezionato), da_selezionare)
+        self.albero.DeleteChildren(self.nodo_playlist)
         for pl in self.archivio.playlist:
             nodo = self.albero.AppendItem(self.nodo_playlist, self._etichetta_della_playlist(pl), data={"tipo": "playlist", "playlist": pl, "caricato": False})
             self.albero.SetItemHasChildren(nodo, bool(pl.brani))
@@ -465,7 +484,8 @@ class Finestra(wx.Frame):
         if selezionato == "nuova_playlist":
             da_selezionare = comando
         if dentro:
-            self.albero.Expand(self.nodo_playlist)
+            if da_selezionare is None or self._sotto(da_selezionare, self.nodo_playlist):
+                self.albero.Expand(self.nodo_playlist)
             self.albero.SelectItem(da_selezionare or self.nodo_playlist)
 
     def _in_espansione(self, evento):
@@ -581,6 +601,8 @@ class Finestra(wx.Frame):
         tipo = dati["tipo"]
         if tipo == "radice_playlist":
             return [("Nuova playlist", self._comando_nuova_playlist)]
+        if tipo == "playlist" and dati["playlist"] is self.archivio.preferiti:
+            return [("Riproduci", lambda: self._riproduci_playlist(self.archivio.preferiti))]
         if tipo == "playlist":
             pl = dati["playlist"]
             return [("Riproduci", lambda: self._riproduci_playlist(pl)), ("Rinomina", lambda: self._rinomina(pl)),
@@ -591,7 +613,7 @@ class Finestra(wx.Frame):
                 ("Sposta su", lambda: self._sposta(pl, brano, "su")), ("Sposta giù", lambda: self._sposta(pl, brano, "giu")),
                 ("Sposta in cima", lambda: self._sposta(pl, brano, "cima")), ("Sposta in fondo", lambda: self._sposta(pl, brano, "fondo")),
                 ("Saltato", (lambda: self._salta(pl, brano), brano.saltato)), ("Togli dalla playlist", lambda: self._togli(pl, brano)),
-                ("Manda nel cestino", lambda: self._al_cestino(self.albero.GetSelection()))]
+                ("Aggiungi ai preferiti", lambda: self._ai_preferiti(brano)), ("Manda nel cestino", lambda: self._al_cestino(self.albero.GetSelection()))]
         if tipo == "pc":
             return [("Aggiorna", lambda: self._aggiorna_ramo(self.nodo_pc))]
         if tipo in ("unita", "cartella"):
@@ -603,11 +625,12 @@ class Finestra(wx.Frame):
         if tipo == "file":
             pl, brano = dati["playlist"], dati["brano"]
             return [("Riproduci", lambda: self._riproduci(pl, brano)), ("Aggiungi alla playlist", self._menu_aggiungi(lambda: [Brano(brano.percorso)])),
-                ("Manda nel cestino", lambda: self._al_cestino(self.albero.GetSelection()))]
+                ("Aggiungi ai preferiti", lambda: self._ai_preferiti(brano)), ("Manda nel cestino", lambda: self._al_cestino(self.albero.GetSelection()))]
         if tipo == "sottobrano":
             pl, brano, n = dati["playlist"], dati["brano"], dati["numero"]
             return [("Riproduci", lambda: self._riproduci(pl, brano, n)),
-                ("Aggiungi alla playlist", self._menu_aggiungi(lambda: [Brano(brano.percorso, sottobrano=n)]))]
+                ("Aggiungi alla playlist", self._menu_aggiungi(lambda: [Brano(brano.percorso, sottobrano=n)])),
+                ("Aggiungi ai preferiti", lambda: self._ai_preferiti(Brano(brano.percorso, sottobrano=n)))]
         return []
 
     def _conferma(self, domanda, titolo):
@@ -651,7 +674,9 @@ class Finestra(wx.Frame):
 
     def _cancella(self, voce):
         dati = self._dati(voce) or {}
-        if dati.get("tipo") == "playlist":
+        if dati.get("tipo") == "playlist" and dati["playlist"] is self.archivio.preferiti:
+            self._riscontro("non_disponibile", "I Preferiti non si eliminano; Canc su un loro brano lo toglie.")
+        elif dati.get("tipo") == "playlist":
             self._elimina_playlist(dati["playlist"])
         elif dati.get("tipo") == "brano":
             self._togli(dati["playlist"], dati["brano"])
@@ -690,6 +715,28 @@ class Finestra(wx.Frame):
         self._popola_playlist()
         cosa = "Creata la playlist" if nuova else "Aggiunti alla playlist"
         self._riscontro("brano_aggiunto", f"{cosa} {pl.nome}: {brani_al_plurale(len(percorsi_da_aggiungere))}, ora {brani_al_plurale(len(pl.brani))}.")
+
+    def _ai_preferiti(self, brano):
+        """Mette nei Preferiti una copia del brano: stesso file e sottobrano."""
+        if brano is None:
+            self._riscontro("non_disponibile", "F4 mette nei Preferiti il brano selezionato: scegline uno in una playlist o in una cartella.")
+            return
+        if self.archivio.nei_preferiti(brano):
+            self._riscontro("gia_nei_preferiti", f"{brano.nome_del_file} è già nei Preferiti.")
+            return
+        self.archivio.preferiti.brani.append(Brano(brano.percorso, sottobrano=brano.sottobrano))
+        self._salva_archivio()
+        self._popola_playlist()
+        self._riscontro("preferito_aggiunto", f"{brano.nome_del_file} è nei Preferiti, che ora hanno {brani_al_plurale(len(self.archivio.preferiti.brani))}.")
+
+    def _preferito_selezionato(self):
+        """F4: il brano da mettere nei Preferiti, dalla voce selezionata."""
+        dati = self._dati(self.albero.GetSelection()) or {}
+        if dati.get("tipo") == "sottobrano":
+            return Brano(dati["brano"].percorso, sottobrano=dati["numero"])
+        if dati.get("tipo") in ("brano", "file"):
+            return dati["brano"]
+        return None
 
     def _crea_da_qui(self, cartella, nome):
         with wx.BusyCursor():
@@ -813,6 +860,9 @@ class Finestra(wx.Frame):
 
     def _riproduci_playlist(self, pl):
         brano = self.coda.primo(pl)
+        if brano is None and pl is self.archivio.preferiti:
+            self._riscontro("niente_da_suonare", "I Preferiti sono vuoti: F4 ci mette il brano selezionato.")
+            return
         if brano is None:
             self._riscontro("niente_da_suonare", f"La playlist {pl.nome} non ha brani da suonare.")
             return
@@ -1105,7 +1155,7 @@ class Finestra(wx.Frame):
             return
         if not pl.temporanea:
             # Una playlist mai aperta non ha ancora i suoi brani nella plancia.
-            nodo = next((v for v in self._figli(self.nodo_playlist) if self._dati(v).get("playlist") is pl), None)
+            nodo = self.nodo_preferiti if pl is self.archivio.preferiti else next((v for v in self._figli(self.nodo_playlist) if self._dati(v).get("playlist") is pl), None)
             if nodo is not None and self._dati(nodo).get("caricato") is False:
                 self._carica(nodo, self._dati(nodo))
         voce = next((v for v in self._tutte_le_voci() if (self._dati(v) or {}).get("tipo") in ("brano", "file")

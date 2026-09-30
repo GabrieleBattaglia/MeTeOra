@@ -1,6 +1,6 @@
 # MeTeOra, le playlist: brani, playlist, archivio e coda di riproduzione.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 il sottobrano dei SID, nella 1.3.0 il loop A-B.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 il sottobrano dei SID, nella 1.3.0 il loop A-B, nella 1.6.0 i Preferiti.
 
 """Il modello dei dati, senza finestre e senza suono.
 
@@ -98,25 +98,35 @@ class Playlist:
 
 
 class Archivio:
-    """Le playlist salvate, nell'ordine in cui compaiono nella plancia."""
+    """Le playlist salvate, nell'ordine in cui compaiono nella plancia, e i
+    Preferiti, una playlist speciale che non si rinomina e non si elimina."""
 
     def __init__(self, percorso):
         self.percorso = percorso
         self.playlist = []
+        self.preferiti = Playlist("Preferiti")
 
     def carica(self):
         """Legge il file; se non c'e' l'archivio resta vuoto."""
+        self.preferiti = Playlist("Preferiti")
         if not os.path.isfile(self.percorso):
             self.playlist = []
             return
         with open(self.percorso, encoding="utf-8") as f:
             dati = json.load(f)
         self.playlist = [Playlist.da_dati(p) for p in dati.get("playlist", [])]
+        if isinstance(dati.get("preferiti"), dict):
+            self.preferiti = Playlist.da_dati(dati["preferiti"])
+            self.preferiti.nome = "Preferiti"
+
+    def nei_preferiti(self, brano):
+        """Il brano dei Preferiti con lo stesso file e sottobrano, o None."""
+        return next((b for b in self.preferiti.brani if b.percorso == brano.percorso and b.sottobrano == brano.sottobrano), None)
 
     def salva(self):
         """Scrive su un file accanto e poi lo sostituisce, cosi' un'uscita a
         meta' scrittura non lascia un archivio troncato."""
-        dati = {"versione": VERSIONE_DEL_FILE, "playlist": [p.come_dati() for p in self.playlist]}
+        dati = {"versione": VERSIONE_DEL_FILE, "playlist": [p.come_dati() for p in self.playlist], "preferiti": self.preferiti.come_dati()}
         provvisorio = self.percorso + ".tmp"
         with open(provvisorio, "w", encoding="utf-8") as f:
             json.dump(dati, f, ensure_ascii=False, indent=1)
