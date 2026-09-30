@@ -83,7 +83,7 @@ TASTI_COMUNI = [
     "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, + e - volume, Maiuscolo+M il passo del volume, M muto.",
     "Maiuscolo+X mette e toglie i punti A e B del loop sul brano selezionato, Maiuscolo+C toglie il loop.",
     "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione sul brano in riproduzione e Maiuscolo+F8 ce la tiene agganciata, F9 chiude e F10 apre tutto il ramo selezionato.",
-    "Barra rovesciata: ricerca in tutte le playlist e in tutte le unità. F1 manuale, F2 novità, F3 crediti, F12 elenca tutti i tasti nella console, Esc esce salvando tutto.",
+    "Barra rovesciata: ricerca in tutte le playlist e in tutte le unità. F1 manuale, F2 novità, F3 crediti, F12 elenca tutti i tasti nella console e ci porta il fuoco, Esc esce salvando tutto.",
 ]
 # Le righe del cruscotto proprie di ogni tipo di voce della plancia.
 TASTI_DEL_CONTESTO = {
@@ -1758,7 +1758,8 @@ class Finestra(wx.Frame):
 
     def _elenco_dei_tasti(self):
         """F12: scrive nella console la sezione I tasti del manuale, cosi' la
-        documentazione dei tasti e' una sola. F6 porta il cursore al suo inizio."""
+        documentazione dei tasti e' una sola, e porta il fuoco nella console,
+        con il cursore sulla prima riga dell'elenco."""
         righe = sezione_del_manuale(self._leggi_risorsa("manuale.txt"), "I tasti")
         if not righe:
             self._riscontro("errore", "Nel manuale non trovo la sezione I tasti.")
@@ -1767,7 +1768,14 @@ class Finestra(wx.Frame):
         self._suono("elenco_dei_tasti")
         for riga in righe:
             self.scrivi(riga)
+        # Arrivando nella console il cursore torna dove era rimasto: qui lo
+        # si fa tornare all'inizio dell'elenco.
         self._posizione_della_console = inizio
+        if self.console.HasFocus():
+            self.console.SetInsertionPoint(inizio)
+        else:
+            self.console.SetFocus()
+        self.console.ShowPosition(inizio)
 
     def _manuale(self):
         self._mostra_testo("manuale", "Manuale di MeTeOra", self._leggi_risorsa("manuale.txt"))

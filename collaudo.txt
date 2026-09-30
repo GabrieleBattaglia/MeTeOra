@@ -14,4 +14,4 @@ Dal menu di Risultati: Salva come playlist, Ferma la ricerca, Nuova ricerca.
 Mentre la ricerca lavora sui dischi, la finestra resta pronta e NVDA non si blocca.
 Con una playlist aperta, B e Z passano alla voce dopo e prima nella plancia, anche in un'altra playlist aperta; con un SID aperto passano da un sottobrano all'altro.
 N sceglie a caso fra le voci che si vedono nella plancia.
-F12 scrive nella console l'elenco dei tasti; F6 porta il cursore sulla sua prima riga, I tasti.
+F12 scrive nella console l'elenco dei tasti e ci porta il fuoco, con il cursore sulla prima riga, I tasti.

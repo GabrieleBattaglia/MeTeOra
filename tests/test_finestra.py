@@ -668,3 +668,14 @@ def test_ogni_tasto_e_nel_manuale(finestra):
             nome = f"Maiuscolo con {carattere.upper()}" if maiuscolo else carattere.upper()
             assert any(r.startswith(nome) or f" {nome} " in r or f"{nome}:" in r or f" e {carattere.upper()}" in r for r in righe), nome
 
+
+def test_f12_porta_il_cursore_all_inizio_dell_elenco(finestra):
+    finestra.scrivi("una riga qualsiasi")
+    finestra.console.SetInsertionPoint(0)
+    _tasto(finestra, codice=wx.WXK_F12)
+    for _ in range(5):
+        wx.Yield()
+    inizio = finestra._posizione_della_console
+    assert finestra.console.GetInsertionPoint() == inizio
+    testo = finestra.console.GetValue().replace("\r\n", "\n").replace("\r", "\n")
+    assert testo[inizio:].startswith("I tasti")
