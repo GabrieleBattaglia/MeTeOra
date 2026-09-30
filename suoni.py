@@ -55,6 +55,8 @@ EVENTI = {
     "cartella_aperta": "carta_pescata",
     "file_aperto": "carta_girata",
     "vai_al_brano": "grosse_biglie",
+    "insegui_acceso": "laser_da_gioco_3",
+    "insegui_spento": "laser_da_gioco_4",
     "chiudi_tutto": "menu_tripletta_gi_7",
     "apri_tutto": "menu_tripletta_su_10",
     "domanda": "campanellino",

@@ -42,6 +42,7 @@ Più e meno, sulla tastiera principale: volume su e giù, di cinque se non lo ca
 M: muto, e di nuovo M riaccende l'audio.
 F4: mette nei Preferiti il brano, il file o il sottobrano selezionato. Se c'è già lo dice.
 F8: porta la selezione della plancia sul brano in riproduzione, aprendo se serve le cartelle fino a lui.
+Maiuscolo con F8: aggancia o sgancia l'inseguimento. Agganciato, a ogni cambio di brano la selezione della plancia va da sola su ciò che suona, senza spostare il fuoco. MeTeOra se lo ricorda alla riapertura.
 F9: chiude la voce selezionata e tutto ciò che ha dentro; se la voce non ha niente dentro, chiude quella che la contiene.
 F10: apre la voce selezionata e tutti i rami che ha dentro, caricandoli; sotto Questo PC si ferma dopo duemila rami, per non leggere dischi interi.
 F1: questo manuale. F2: le novità di ogni versione. F3: i crediti. Esc chiude queste finestre.

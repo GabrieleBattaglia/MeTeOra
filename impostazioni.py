@@ -18,6 +18,8 @@ PREDEFINITE = {
     "passo_indietro": 10.0,
     "passo_avanti": 10.0,
     "volume_effetti": 0.5,
+    # Maiuscolo+F8: la selezione della plancia segue il brano che suona.
+    "insegui": False,
 }
 
 
@@ -36,7 +38,7 @@ class Impostazioni(dict):
             return
         for chiave, predefinito in PREDEFINITE.items():
             valore = dati.get(chiave)
-            if isinstance(valore, bool):
+            if isinstance(valore, bool) != isinstance(predefinito, bool):
                 continue
             if isinstance(predefinito, float) and isinstance(valore, int | float):
                 self[chiave] = float(valore)

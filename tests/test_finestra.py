@@ -540,3 +540,25 @@ def test_avanzamento_nei_sottobrani_aperti(finestra, monkeypatch, tmp_path):
     finestra._suona(dati["playlist"], dati["brano"])
     finestra._brano_finito()
     assert suonati[-1] == ("zeta.mp3", None)
+
+
+def test_maiuscolo_f8_aggancia_la_selezione(finestra, monkeypatch, suoni_annotati):
+    _finto_motore(finestra, monkeypatch)
+    finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n in ("a.mp3", "b.mp3")])
+    pl = finestra.archivio.playlist[0]
+    finestra.albero.SelectItem(finestra.nodo_pc)
+    _tasto(finestra, codice=wx.WXK_F8, maiuscolo=True)
+    assert finestra.impostazioni["insegui"] is True
+    assert suoni_annotati[-1] == "insegui_acceso"
+    finestra._suona(pl, pl.brani[1])
+    assert finestra.albero.GetItemText(finestra.albero.GetSelection()) == "b.mp3, in riproduzione"
+    _tasto(finestra, codice=wx.WXK_F8, maiuscolo=True)
+    assert finestra.impostazioni["insegui"] is False
+    finestra.albero.SelectItem(finestra.nodo_pc)
+    finestra._suona(pl, pl.brani[0])
+    assert finestra.albero.GetSelection() == finestra.nodo_pc
+    from impostazioni import Impostazioni
+
+    salvate = Impostazioni(finestra.impostazioni.percorso)
+    salvate.carica()
+    assert salvate["insegui"] is False

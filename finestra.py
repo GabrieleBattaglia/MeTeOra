@@ -3,7 +3,7 @@
 # 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino,
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
-# nella 1.13.0 l'avanzamento automatico che segue la plancia.
+# nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8.
 
 """La finestra di MeTeOra.
 
@@ -78,7 +78,7 @@ TASTI_COMUNI = [
     "X riproduce la voce selezionata o riprende, C pausa, V stop, Z e B brano precedente e successivo, N brano a caso.",
     "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, + e - volume, Maiuscolo+M il passo del volume, M muto.",
     "Maiuscolo con Z e con B sottobrano precedente e successivo di un SID, Maiuscolo+X mette e toglie i punti A e B del loop sul brano selezionato, Maiuscolo+C toglie il loop.",
-    "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione sul brano in riproduzione, F9 chiude e F10 apre tutto il ramo selezionato.",
+    "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione sul brano in riproduzione e Maiuscolo+F8 ce la tiene agganciata, F9 chiude e F10 apre tutto il ramo selezionato.",
     "F1 manuale, F2 novità, F3 crediti, Esc esce salvando tutto.",
 ]
 # Le righe del cruscotto proprie di ogni tipo di voce della plancia.
@@ -418,6 +418,9 @@ class Finestra(wx.Frame):
         }
         if modificatori == wx.MOD_NONE and codice in tasti_funzione:
             tasti_funzione[codice]()
+            return
+        if modificatori == wx.MOD_SHIFT and codice == wx.WXK_F8:
+            self._aggancia()
             return
         # Il tastierino numerico resta a NVDA, e Ctrl e Alt ai comandi di Windows.
         if modificatori not in (wx.MOD_NONE, wx.MOD_SHIFT) or wx.WXK_NUMPAD0 <= codice <= wx.WXK_NUMPAD_DIVIDE:
@@ -1063,6 +1066,7 @@ class Finestra(wx.Frame):
             testo += f" Sottobrano {self.motore.sottobrano} di {self.motore.sottobrani}."
         self._riscontro(evento, testo)
         self._aggiorna_etichette()
+        self._insegui()
 
     def _riproduci(self, pl, brano, sottobrano=None):
         """Suona un brano scelto nella plancia, se il loop lo permette."""
@@ -1455,11 +1459,11 @@ class Finestra(wx.Frame):
 
     # F8.
 
-    def _vai_al_brano(self):
+    def _trova_voce_che_suona(self):
+        """La voce della plancia di cio' che suona, caricando la playlist o
+        aprendo le cartelle se serve; None se non c'e', per esempio per un
+        file aperto con Apri file."""
         corrente, pl = self.coda.corrente, self.coda.playlist
-        if not corrente or not self.motore.in_corso:
-            self._riscontro("niente_da_suonare", "Non sta suonando niente.")
-            return
         if not pl.temporanea:
             # Una playlist mai aperta non ha ancora i suoi brani nella plancia.
             nodo = self.nodo_preferiti if pl is self.archivio.preferiti else next((v for v in self._figli(self.nodo_playlist) if self._dati(v).get("playlist") is pl), None)
@@ -1473,16 +1477,44 @@ class Finestra(wx.Frame):
             cartella = self._apri_fino_a(os.path.dirname(corrente.percorso))
             if cartella is not None:
                 voce = next((v for v in self._figli(cartella) if (self._dati(v) or {}).get("brano") is corrente), None)
+        # Se i sottobrani del SID sono aperti, la voce e' quella del sottobrano che suona.
+        if voce is not None and self.albero.IsExpanded(voce):
+            voce = next((v for v in self._figli(voce) if self._dati(v).get("numero") == self.motore.sottobrano), voce)
+        return voce
+
+    def _vai_al_brano(self):
+        corrente = self.coda.corrente
+        if not corrente or not self.motore.in_corso:
+            self._riscontro("niente_da_suonare", "Non sta suonando niente.")
+            return
+        voce = self._trova_voce_che_suona()
         if voce is None:
             self._riscontro("niente_da_suonare", f"{corrente.nome_del_file} non è nella plancia: è stato aperto con Apri file.")
             return
-        # Se i sottobrani del SID sono aperti, la selezione va su quello che suona.
-        if self.albero.IsExpanded(voce):
-            voce = next((v for v in self._figli(voce) if self._dati(v).get("numero") == self.motore.sottobrano), voce)
         self.albero.EnsureVisible(voce)
         self.albero.SelectItem(voce)
         self._suono("vai_al_brano")
         self.albero.SetFocus()
+
+    def _insegui(self):
+        """Con l'inseguimento agganciato porta la selezione su cio' che suona,
+        senza spostare il fuoco e senza suoni: il suono del brano nuovo c'e' gia'."""
+        if not self.impostazioni["insegui"] or not self.coda.corrente:
+            return
+        voce = self._trova_voce_che_suona()
+        if voce is not None and voce != self.albero.GetSelection():
+            self.albero.EnsureVisible(voce)
+            self.albero.SelectItem(voce)
+
+    def _aggancia(self):
+        self.impostazioni["insegui"] = not self.impostazioni["insegui"]
+        self._salva_impostazioni()
+        if self.impostazioni["insegui"]:
+            self._riscontro("insegui_acceso", "Inseguimento agganciato: la selezione della plancia segue il brano che suona.")
+            if self.motore.in_corso:
+                self._insegui()
+        else:
+            self._riscontro("insegui_spento", "Inseguimento sganciato: la selezione resta dove la lasci.")
 
     # F9 e F10.
 

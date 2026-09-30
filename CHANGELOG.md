@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.14.0] - 2026-09-30
+
+- Maiuscolo con F8 aggancia e sgancia l'inseguimento (issue 9): agganciato, a ogni cambio di brano la selezione della plancia va su ciò che suona, senza spostare il fuoco. Due suoni nuovi per agganciare e sganciare; la scelta resta alla riapertura.
+
 ## [1.13.0] - 2026-09-30
 
 - Quando un brano finisce da solo, il successivo lo decide la plancia (issue 11). Se ciò che suona si vede, si passa alla voce suonabile che viene dopo scendendo nella plancia: dentro i rami aperti tutto ciò che contengono, sottobrani compresi, anche in un'altra cartella o playlist aperta più avanti. Un SID chiuso lascia il posto al file dopo. Se davanti non c'è niente di aperto, la riproduzione si ferma. Se ciò che suona non si vede, si segue la sua lista come prima; con il loop decide il loop.
