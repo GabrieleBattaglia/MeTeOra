@@ -2,7 +2,8 @@
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 # 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino,
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
-# nella 1.9.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C.
+# nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
+# nella 1.13.0 l'avanzamento automatico che segue la plancia.
 
 """La finestra di MeTeOra.
 
@@ -1127,28 +1128,102 @@ class Finestra(wx.Frame):
                 return figlio
             voce = figlio
 
+    def _visibile(self, voce):
+        """Vero se tutti i rami che contengono la voce sono aperti."""
+        radice = self.albero.GetRootItem()
+        genitore = self.albero.GetItemParent(voce)
+        while genitore.IsOk() and genitore != radice:
+            if not self.albero.IsExpanded(genitore):
+                return False
+            genitore = self.albero.GetItemParent(genitore)
+        return True
+
+    def _dopo(self, voce):
+        """La voce che viene dopo nella plancia, come la si legge scendendo
+        con la freccia giu': dentro i rami aperti, poi avanti e fuori. None
+        alla fine."""
+        if self.albero.IsExpanded(voce):
+            figlio = next(self._figli(voce), None)
+            if figlio is not None:
+                return figlio
+        radice = self.albero.GetRootItem()
+        while voce.IsOk() and voce != radice:
+            fratello = self.albero.GetNextSibling(voce)
+            if fratello.IsOk():
+                return fratello
+            voce = self.albero.GetItemParent(voce)
+        return None
+
+    def _suonabile_in_plancia(self, voce):
+        """Vero per un brano, un file o un sottobrano che l'avanzamento puo'
+        suonare. Un SID con i sottobrani aperti lascia il posto a loro."""
+        dati = self._dati(voce) or {}
+        tipo = dati.get("tipo")
+        if tipo == "sottobrano":
+            return not dati["brano"].saltato
+        if tipo in ("brano", "file"):
+            return not dati["brano"].saltato and not (self.albero.IsExpanded(voce) and self.albero.GetChildrenCount(voce, False))
+        return False
+
+    def _voce_che_suona(self):
+        """La voce visibile della plancia che corrisponde a cio' che suona, o
+        None se non si vede: il sottobrano, se il SID e' aperto, altrimenti il
+        brano o il file."""
+        corrente = self.coda.corrente
+        if corrente is None:
+            return None
+        for voce in self._tutte_le_voci():
+            dati = self._dati(voce) or {}
+            if dati.get("tipo") in ("brano", "file") and dati["brano"] is corrente and self._visibile(voce):
+                if self.albero.IsExpanded(voce):
+                    return next((v for v in self._figli(voce) if self._dati(v).get("numero") == self.motore.sottobrano), voce)
+                return voce
+        return None
+
+    def _seguente_automatico(self):
+        """Cosa suonare quando un brano finisce da solo: (playlist, brano,
+        sottobrano) o None. Se cio' che suona si vede nella plancia, decide la
+        plancia: la voce suonabile che viene dopo, dentro i rami aperti,
+        sottobrani compresi, anche in un'altra cartella o playlist. Se non si
+        vede, per esempio una cartella suonata chiusa o un file aperto con
+        Apri file, decide la lista. Con il loop A-B decide il loop."""
+        if self.coda.intervallo() is None:
+            voce = self._voce_che_suona()
+            if voce is not None:
+                voce = self._dopo(voce)
+                while voce is not None and not self._suonabile_in_plancia(voce):
+                    voce = self._dopo(voce)
+                if voce is None:
+                    return None
+                dati = self._dati(voce)
+                return dati["playlist"], dati["brano"], dati.get("numero")
+        seguente = self.coda.successivo()
+        return (self.coda.playlist, seguente, None) if seguente else None
+
     def _brano_finito(self):
         if self._chiusa:
             return
         pl = self.coda.playlist
         prima = pl.indice(self.coda.corrente) if pl else None
-        seguente = self.coda.successivo()
+        seguente = self._seguente_automatico()
         if seguente:
+            nuova, brano, sottobrano = seguente
             # Nel loop, dopo il punto B si torna al punto A: ha un suono suo.
-            dopo = pl.indice(seguente)
-            evento = "ritorno_al_punto_a" if self.coda.intervallo() and prima is not None and dopo is not None and dopo <= prima else "brano_seguente_da_solo"
-            self._suona(pl, seguente, evento)
+            dopo = nuova.indice(brano)
+            ritorno = self.coda.intervallo() and nuova is pl and prima is not None and dopo is not None and dopo <= prima
+            self._suona(nuova, brano, "ritorno_al_punto_a" if ritorno else "brano_seguente_da_solo", sottobrano)
         else:
             self._aggiorna_etichette()
-            self._riscontro("fine_playlist", f"Fine di {pl.nome}.")
+            self._riscontro("fine_playlist", "Fine: davanti non c'è altro da suonare.")
 
     def _brano_in_errore(self, percorso):
         if self._chiusa:
             return
         self._riscontro("errore", f"Non riesco a suonare {os.path.basename(percorso or '')}.")
-        seguente = self.coda.successivo()
+        seguente = self._seguente_automatico()
         if seguente:
-            self._suona(self.coda.playlist, seguente, "brano_seguente_da_solo")
+            nuova, brano, sottobrano = seguente
+            self._suona(nuova, brano, "brano_seguente_da_solo", sottobrano)
         else:
             self._aggiorna_etichette()
 

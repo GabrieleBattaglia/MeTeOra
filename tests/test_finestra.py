@@ -452,3 +452,91 @@ def test_durate_nella_plancia(finestra):
     finestra.schedario.schede[percorso] = {"dim": 1, "mod": 0, "durata": 125.5, "tag": {}, "sottobrani": None, "durate_sid": None}
     finestra._schede_arrivate()
     assert _etichette(finestra, nodo)[1] == "lungo.mp3, 2:05.500"
+
+
+def _finto_motore(finestra, monkeypatch):
+    suonati = []
+
+    def suona(percorso, sottobrano=None):
+        suonati.append((os.path.basename(percorso), sottobrano))
+        finestra.motore._in_corso = percorso
+        finestra.motore.sottobrano = sottobrano
+
+    monkeypatch.setattr(finestra.motore, "suona", suona)
+    return suonati
+
+
+def test_avanzamento_segue_la_plancia(finestra, monkeypatch):
+    suonati = _finto_motore(finestra, monkeypatch)
+    finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n in ("a.mp3", "b.mp3")])
+    finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n in ("c.mp3", "d.mp3")])
+    prima, seconda = finestra.archivio.playlist
+    # Si vede cio' che sta dentro rami tutti aperti, compreso il ramo Playlist.
+    finestra.albero.Expand(finestra.nodo_playlist)
+    nodi = list(finestra._figli(finestra.nodo_playlist))
+    finestra.albero.Expand(nodi[0])
+    finestra.albero.Expand(nodi[1])
+    finestra._suona(prima, prima.brani[0])
+    finestra._brano_finito()
+    assert suonati[-1] == ("b.mp3", None)
+    # Finita la prima playlist aperta, si entra nella seconda, aperta anche lei.
+    finestra._brano_finito()
+    assert suonati[-1] == ("c.mp3", None)
+    assert finestra.coda.playlist is seconda
+    finestra._brano_finito()
+    finestra._brano_finito()
+    assert suonati[-1] == ("d.mp3", None)
+    assert _ultima(finestra) == "Fine: davanti non c'è altro da suonare."
+
+
+def test_avanzamento_con_la_playlist_chiusa_segue_la_lista(finestra, monkeypatch):
+    suonati = _finto_motore(finestra, monkeypatch)
+    finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n in ("a.mp3", "b.mp3")])
+    finestra._aggiungi(None, [os.path.join(r"C:\m", "c.mp3")])
+    prima = finestra.archivio.playlist[0]
+    finestra._suona(prima, prima.brani[0])
+    finestra._brano_finito()
+    assert suonati[-1] == ("b.mp3", None)
+    finestra._brano_finito()
+    assert _ultima(finestra).startswith("Fine")
+
+
+def test_avanzamento_con_la_playlist_aperta_si_ferma_dove_non_c_e_altro_di_aperto(finestra, monkeypatch):
+    suonati = _finto_motore(finestra, monkeypatch)
+    finestra._aggiungi(None, [os.path.join(r"C:\m", "a.mp3")])
+    finestra._aggiungi(None, [os.path.join(r"C:\m", "c.mp3")])
+    prima = finestra.archivio.playlist[0]
+    finestra.albero.Expand(finestra.nodo_playlist)
+    finestra.albero.Expand(next(finestra._figli(finestra.nodo_playlist)))
+    finestra._suona(prima, prima.brani[0])
+    finestra._brano_finito()
+    # La seconda playlist e' chiusa: davanti non c'e' niente di aperto.
+    assert suonati == [("a.mp3", None)]
+
+
+@pytest.mark.skipif(not os.path.isfile(TURBO_OUTRUN), reason="serve la collezione HVSC")
+def test_avanzamento_nei_sottobrani_aperti(finestra, monkeypatch, tmp_path):
+    import shutil
+
+    suonati = _finto_motore(finestra, monkeypatch)
+    cartella = tmp_path / "sid"
+    cartella.mkdir()
+    shutil.copy(TURBO_OUTRUN, cartella)
+    (cartella / "zeta.mp3").write_bytes(b"")
+    finestra.albero.Expand(finestra.nodo_pc)
+    nodo = finestra.albero.AppendItem(finestra.nodo_pc, "sid", data={"tipo": "cartella", "percorso": str(cartella), "caricato": False})
+    finestra.albero.SetItemHasChildren(nodo, True)
+    finestra.albero.Expand(nodo)
+    voce_sid = next(finestra._figli(nodo))
+    dati = finestra._dati(voce_sid)
+    finestra.albero.Expand(voce_sid)
+    finestra._suona(dati["playlist"], dati["brano"], sottobrano=11)
+    finestra._brano_finito()
+    assert suonati[-1] == ("Turbo_Outrun.sid", 12)
+    finestra._brano_finito()
+    assert suonati[-1] == ("zeta.mp3", None)
+    # Con il SID chiuso, dal SID si passa subito al file dopo.
+    finestra.albero.Collapse(voce_sid)
+    finestra._suona(dati["playlist"], dati["brano"])
+    finestra._brano_finito()
+    assert suonati[-1] == ("zeta.mp3", None)

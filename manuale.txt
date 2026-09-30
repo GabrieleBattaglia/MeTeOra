@@ -24,6 +24,9 @@ Menu di un file: Riproduci, Aggiungi alla playlist, Aggiungi ai preferiti, Manda
 Un SID con più sottobrani, in una cartella o in una playlist, è un ramo: freccia destra mostra i suoi sottobrani, ciascuno con la sua durata. Un sottobrano si suona e si aggiunge alle playlist come un brano a sé; nella playlist compare con il nome del file e il numero del sottobrano.
 Menu di un sottobrano: Riproduci, Aggiungi alla playlist, Aggiungi ai preferiti.
 Il brano in riproduzione e la voce selezionata sono due cose diverse: quando un brano finisce e ne parte un altro, la selezione resta dov'è. Nella plancia il brano che suona ha l'indicazione "in riproduzione" dopo il nome.
+Quando un brano finisce da solo
+Il brano che segue lo decide la plancia, come la leggeresti scendendo con la freccia giù. Se ciò che suona si vede nella plancia, cioè sta dentro rami tutti aperti, si passa alla voce suonabile che viene dopo: il file o il brano seguente, e dentro i rami aperti tutto ciò che contengono, sottobrani compresi. Un SID con i sottobrani aperti suona i sottobrani uno dopo l'altro; chiuso, lascia il posto al file che viene dopo. Finita una cartella o una playlist, se più avanti ce n'è un'altra aperta si entra lì; se davanti non c'è più niente di aperto, la riproduzione si ferma.
+Se ciò che suona non si vede, per esempio una cartella suonata con X da chiusa o un file aperto con Apri file, si segue la lista da cui è partito. Con il loop A-B attivo decide il loop.
 I tasti
 I tasti a lettera funzionano in tutta la finestra, qualunque area abbia il fuoco. Per questo nella plancia non si salta alle voci digitandone l'iniziale.
 X: riproduce la voce selezionata, cioè un brano, un file, una playlist o una cartella. Una cartella, o un'unità, si suona con tutto ciò che ha sotto: prima i suoi file, poi quelli delle sottocartelle, e Z, B e N girano su tutti. Se la voce è quella che sta già suonando in pausa, riprende.
@@ -31,7 +34,7 @@ C: pausa, e di nuovo C riprende.
 V: stop. Poi X riparte dall'inizio del brano.
 Z e B: brano precedente e successivo.
 N: un brano a caso della playlist.
-Maiuscolo con Z e Maiuscolo con B: sottobrano precedente e successivo del SID che suona. Quando un sottobrano finisce da solo si passa al brano successivo della lista.
+Maiuscolo con Z e Maiuscolo con B: sottobrano precedente e successivo del SID che suona.
 Maiuscolo con X: il loop fra due brani. Sul brano selezionato mette il punto A; su un altro brano della stessa lista mette il punto B. Da quel momento la riproduzione resta fra A e B, in tondo: dopo B si torna ad A, e X, Z, B e N lavorano solo sui brani del loop. Maiuscolo con X sul punto B lo toglie, sul punto A toglie il loop intero. Maiuscolo con C toglie il loop da qualsiasi punto. Nella plancia i due brani portano l'indicazione punto A e punto B del loop.
 Q ed E: indietro e avanti nel brano, di dieci secondi. Maiuscolo con Q e Maiuscolo con E chiedono di quanti secondi saltare, indietro e avanti; valgono anche i decimali, con il punto o con la virgola, come 2.5.
 W: va a un tempo del brano, scritto come minuti e secondi, per esempio 1:30, oppure in secondi, anche con i decimali: 1:30,5 oppure 90.5.
