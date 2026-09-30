@@ -250,9 +250,10 @@ def test_sottobrani_nella_plancia(finestra, suoni_annotati, tmp_path):
     finestra.albero.SelectItem(list(finestra._figli(voce_file))[2])
     assert "Sottobrano 3 di 12." in _premi(finestra, "x")
     assert _etichette(finestra, voce_file)[2].endswith(", in riproduzione")
-    assert _premi(finestra, "b", maiuscolo=True) == "Sottobrano 4 di 12, 3:00."
-    assert suoni_annotati[-1] == "sottobrano_successivo"
-    _premi(finestra, "z", maiuscolo=True)
+    # Con il SID aperto, B e Z passano da un sottobrano all'altro.
+    assert _premi(finestra, "b").endswith("Sottobrano 4 di 12.")
+    assert suoni_annotati[-1] == "successivo"
+    _premi(finestra, "z")
     assert finestra.motore.sottobrano == 3
     finestra.motore.stop()
     brano = finestra._dati(voce_file)["brano"]
@@ -621,3 +622,49 @@ class _DialogoFinto:
 
     def GetValue(self):
         return self.risposta
+
+
+def test_z_b_n_seguono_la_plancia(finestra, monkeypatch):
+    suonati = _finto_motore(finestra, monkeypatch)
+    finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n in ("a.mp3", "b.mp3")])
+    finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n in ("c.mp3", "d.mp3")])
+    prima, seconda = finestra.archivio.playlist
+    finestra.albero.Expand(finestra.nodo_playlist)
+    for nodo in list(finestra._figli(finestra.nodo_playlist))[:2]:
+        finestra.albero.Expand(nodo)
+    finestra._suona(prima, prima.brani[1])
+    _tasto(finestra, "b")
+    assert suonati[-1] == ("c.mp3", None)
+    _tasto(finestra, "z")
+    assert suonati[-1] == ("b.mp3", None)
+    _tasto(finestra, "z")
+    _tasto(finestra, "z")
+    assert _ultima(finestra) == "È il primo brano."
+    finestra._comando_casuale(scelta=lambda candidati: candidati[-1])
+    assert suonati[-1] == ("d.mp3", None)
+    assert finestra.coda.playlist is seconda
+
+
+def test_f12_scrive_i_tasti_dal_manuale(finestra, suoni_annotati):
+    _tasto(finestra, codice=wx.WXK_F12)
+    righe = modulo.sezione_del_manuale(finestra._leggi_risorsa("manuale.txt"), "I tasti")
+    assert finestra._righe[-len(righe):] == righe
+    assert righe[0] == "I tasti" and any(r.startswith("F12:") for r in righe)
+    assert not any(r == "I SID" for r in righe)
+    assert suoni_annotati[-1] == "elenco_dei_tasti"
+    inizio = finestra._posizione_della_console
+    testo = finestra.console.GetValue().replace("\r\n", "\n").replace("\r", "\n")
+    assert testo[inizio:].startswith("I tasti")
+
+
+def test_ogni_tasto_e_nel_manuale(finestra):
+    """Ogni tasto a lettera e ogni tasto funzione ha la sua riga nella sezione I tasti."""
+    righe = modulo.sezione_del_manuale(finestra._leggi_risorsa("manuale.txt"), "I tasti")
+    testo = " ".join(righe)
+    for tasto in ("F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F12", "Esc", "Barra rovesciata", "Canc"):
+        assert tasto in testo, tasto
+    for (carattere, maiuscolo), _comando in modulo.TASTI.items():
+        if carattere.isalpha():
+            nome = f"Maiuscolo con {carattere.upper()}" if maiuscolo else carattere.upper()
+            assert any(r.startswith(nome) or f" {nome} " in r or f"{nome}:" in r or f" e {carattere.upper()}" in r for r in righe), nome
+

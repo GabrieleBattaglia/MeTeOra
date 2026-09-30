@@ -2,6 +2,15 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.17.1] - 2026-09-30
+
+- Tolti Maiuscolo con Z e Maiuscolo con B: con Z e B che seguono la plancia, i sottobrani si scorrono aprendo il ramo del SID.
+
+## [1.17.0] - 2026-09-30
+
+- Z, B e N seguono la plancia, come l'avanzamento automatico: se ciò che suona si vede, Z e B vanno alla voce suonabile prima o dopo, sottobrani compresi, anche in un'altra cartella o playlist aperta; N ne sceglie una a caso fra quelle che si vedono. Se ciò che suona non si vede, decide la sua lista; con il loop decide il loop.
+- F12 scrive nella console l'elenco di tutti i tasti, preso dalla sezione I tasti del manuale, riscritta perché li raccolga tutti, una riga per tasto; poi F6 porta il cursore al suo inizio. Il cruscotto lo ricorda.
+
 ## [1.15.0] - 2026-09-30
 
 - La ricerca globale (issue 10). La barra rovesciata apre un campo uguale a quello del filtro, con la stessa grammatica. Con Invio la ricerca parte in sottofondo, prima nei Preferiti e nelle playlist, poi in tutte le unità (dischi e chiavette; niente unità di rete e CD), e raccoglie ciò che trova nel ramo Risultati, fra i Preferiti e le playlist, che si riempie mentre cerca. Mille risultati alla volta, con la voce Mostra altri risultati in fondo; il menu ha Riproduci, Salva come playlist, Nuova ricerca e Ferma la ricerca. I Risultati sono temporanei: la ricerca seguente li sostituisce.

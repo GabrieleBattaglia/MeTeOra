@@ -4,7 +4,7 @@
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
-# nella 1.15.0 la ricerca globale.
+# nella 1.15.0 la ricerca globale, nella 1.17.0 Z, B e N che seguono la plancia e F12.
 
 """La finestra di MeTeOra.
 
@@ -19,6 +19,7 @@ riproduzione non sposta mai la selezione; lo fa F8, su richiesta.
 
 import contextlib
 import os
+import random
 
 import wx
 
@@ -49,8 +50,6 @@ TASTI = {
     ("z", False): "precedente",
     ("x", False): "play",
     ("x", True): "loop",
-    ("z", True): "sottobrano_precedente",
-    ("b", True): "sottobrano_successivo",
     ("c", False): "pausa",
     ("c", True): "togli_loop",
     ("v", False): "stop",
@@ -82,9 +81,9 @@ FUTURI_MAIUSCOLI = {"l": "durata della dissolvenza"}
 TASTI_COMUNI = [
     "X riproduce la voce selezionata o riprende, C pausa, V stop, Z e B brano precedente e successivo, N brano a caso.",
     "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, + e - volume, Maiuscolo+M il passo del volume, M muto.",
-    "Maiuscolo con Z e con B sottobrano precedente e successivo di un SID, Maiuscolo+X mette e toglie i punti A e B del loop sul brano selezionato, Maiuscolo+C toglie il loop.",
+    "Maiuscolo+X mette e toglie i punti A e B del loop sul brano selezionato, Maiuscolo+C toglie il loop.",
     "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione sul brano in riproduzione e Maiuscolo+F8 ce la tiene agganciata, F9 chiude e F10 apre tutto il ramo selezionato.",
-    "Barra rovesciata: ricerca in tutte le playlist e in tutte le unità. F1 manuale, F2 novità, F3 crediti, Esc esce salvando tutto.",
+    "Barra rovesciata: ricerca in tutte le playlist e in tutte le unità. F1 manuale, F2 novità, F3 crediti, F12 elenca tutti i tasti nella console, Esc esce salvando tutto.",
 ]
 # Le righe del cruscotto proprie di ogni tipo di voce della plancia.
 TASTI_DEL_CONTESTO = {
@@ -145,6 +144,24 @@ def durata_lunga(secondi):
     secondi, millesimi = divmod(resto, 1000)
     testo = f"{ore}:{minuti:02d}:{secondi:02d}" if ore else f"{minuti}:{secondi:02d}"
     return testo + (f".{millesimi:03d}" if millesimi else "")
+
+
+def e_un_titolo(riga):
+    """Nel manuale i titoli sono le righe che non finiscono con un segno di
+    punteggiatura: tutte le altre sono frasi."""
+    riga = riga.strip()
+    return bool(riga) and riga[-1] not in ".:;!?)"
+
+
+def sezione_del_manuale(testo, titolo):
+    """Le righe della sezione del manuale che ha quel titolo, titolo
+    compreso, fino al titolo seguente; lista vuota se non c'e'."""
+    righe = [r.strip() for r in testo.splitlines()]
+    if titolo not in righe:
+        return []
+    inizio = righe.index(titolo)
+    fine = next((i for i in range(inizio + 1, len(righe)) if e_un_titolo(righe[i])), len(righe))
+    return [r for r in righe[inizio:fine] if r]
 
 
 def brani_al_plurale(n):
@@ -430,7 +447,7 @@ class Finestra(wx.Frame):
         tasti_funzione = {
             wx.WXK_F1: self._manuale, wx.WXK_F2: self._changelog, wx.WXK_F3: self._crediti,
             wx.WXK_F5: lambda: self._vai(self.albero, "plancia"), wx.WXK_F6: lambda: self._vai(self.console, "console"),
-            wx.WXK_F7: lambda: self._vai(self.cruscotto, "cruscotto"), wx.WXK_F4: lambda: self._ai_preferiti(self._preferito_selezionato()), wx.WXK_F8: self._vai_al_brano, wx.WXK_F9: self._chiudi_tutto, wx.WXK_F10: self._apri_tutto,
+            wx.WXK_F7: lambda: self._vai(self.cruscotto, "cruscotto"), wx.WXK_F4: lambda: self._ai_preferiti(self._preferito_selezionato()), wx.WXK_F8: self._vai_al_brano, wx.WXK_F9: self._chiudi_tutto, wx.WXK_F10: self._apri_tutto, wx.WXK_F12: self._elenco_dei_tasti,
             wx.WXK_ESCAPE: self.Close,
         }
         if modificatori == wx.MOD_NONE and codice in tasti_funzione:
@@ -1300,6 +1317,18 @@ class Finestra(wx.Frame):
             voce = self.albero.GetItemParent(voce)
         return None
 
+    def _prima(self, voce):
+        """La voce che viene prima nella plancia, come la si legge salendo con
+        la freccia su: la precedente, o l'ultima voce visibile dentro di lei se
+        e' aperta, oppure il ramo che la contiene. None all'inizio."""
+        precedente = self.albero.GetPrevSibling(voce)
+        if not precedente.IsOk():
+            genitore = self.albero.GetItemParent(voce)
+            return genitore if genitore.IsOk() and genitore != self.albero.GetRootItem() else None
+        while self.albero.IsExpanded(precedente) and self.albero.GetChildrenCount(precedente, False):
+            precedente = self.albero.GetLastChild(precedente)
+        return precedente
+
     def _suonabile_in_plancia(self, voce):
         """Vero per un brano, un file o un sottobrano che l'avanzamento puo'
         suonare. Un SID con i sottobrani aperti lascia il posto a loro."""
@@ -1326,6 +1355,24 @@ class Finestra(wx.Frame):
                 return voce
         return None
 
+    def _voce_da_seguire(self):
+        """La voce visibile di cio' che suona, se a decidere il brano dopo e'
+        la plancia; None se decide la lista, perche' non si vede o perche'
+        c'e' il loop A-B."""
+        return self._voce_che_suona() if self.coda.intervallo() is None else None
+
+    def _passo_in_plancia(self, voce, verso):
+        """La voce suonabile prima (verso -1) o dopo (verso 1), come dati
+        (playlist, brano, sottobrano); None se non ce n'e'."""
+        muovi = self._dopo if verso > 0 else self._prima
+        voce = muovi(voce)
+        while voce is not None and not self._suonabile_in_plancia(voce):
+            voce = muovi(voce)
+        if voce is None:
+            return None
+        dati = self._dati(voce)
+        return dati["playlist"], dati["brano"], dati.get("numero")
+
     def _seguente_automatico(self):
         """Cosa suonare quando un brano finisce da solo: (playlist, brano,
         sottobrano) o None. Se cio' che suona si vede nella plancia, decide la
@@ -1333,16 +1380,9 @@ class Finestra(wx.Frame):
         sottobrani compresi, anche in un'altra cartella o playlist. Se non si
         vede, per esempio una cartella suonata chiusa o un file aperto con
         Apri file, decide la lista. Con il loop A-B decide il loop."""
-        if self.coda.intervallo() is None:
-            voce = self._voce_che_suona()
-            if voce is not None:
-                voce = self._dopo(voce)
-                while voce is not None and not self._suonabile_in_plancia(voce):
-                    voce = self._dopo(voce)
-                if voce is None:
-                    return None
-                dati = self._dati(voce)
-                return dati["playlist"], dati["brano"], dati.get("numero")
+        voce = self._voce_da_seguire()
+        if voce is not None:
+            return self._passo_in_plancia(voce, 1)
         seguente = self.coda.successivo()
         return (self.coda.playlist, seguente, None) if seguente else None
 
@@ -1405,30 +1445,6 @@ class Finestra(wx.Frame):
         else:
             self._riscontro("niente_da_suonare", "Niente da riprodurre: scegli un brano, una playlist o una cartella nella plancia.")
 
-    def _comando_sottobrano(self, passo):
-        if self._niente_in_corso():
-            return
-        totale = self.motore.sottobrani
-        if not totale or totale == 1:
-            self._riscontro("nessun_altro_brano", "Il brano che suona non ha sottobrani.")
-            return
-        n = self.motore.sottobrano + passo
-        if not 1 <= n <= totale:
-            quale = "il primo" if passo < 0 else "l'ultimo"
-            self._riscontro("nessun_altro_brano", f"È {quale} sottobrano, {self.motore.sottobrano} di {totale}.")
-            return
-        percorso = self.motore.in_corso
-        self.motore.suona(percorso, n)
-        evento = "sottobrano_successivo" if passo > 0 else "sottobrano_precedente"
-        self._riscontro(evento, f"Sottobrano {n} di {totale}, {tempo(durata_del_sottobrano(percorso, n))}.")
-        self._aggiorna_etichette()
-
-    def _comando_sottobrano_precedente(self):
-        self._comando_sottobrano(-1)
-
-    def _comando_sottobrano_successivo(self):
-        self._comando_sottobrano(1)
-
     def _comando_togli_loop(self):
         if self.coda.loop_playlist is None:
             self._riscontro("loop_non_qui", "Non c'è un loop da togliere.")
@@ -1476,24 +1492,50 @@ class Finestra(wx.Frame):
         self._aggiorna_etichette()
         self._riscontro("stop", "Stop. X riparte dall'inizio del brano.")
 
-    def _vicino(self, trova, evento, limite):
+    def _vicino(self, verso, evento, limite):
+        """Z e B: il brano prima o dopo, dalla plancia se cio' che suona si
+        vede, altrimenti dalla lista."""
         if not self.coda.playlist:
             self._riscontro("niente_da_suonare", "Non c'è una playlist in riproduzione.")
             return
-        brano = trova()
-        if brano is None:
+        voce = self._voce_da_seguire()
+        if voce is not None:
+            scelta = self._passo_in_plancia(voce, verso)
+        else:
+            brano = self.coda.successivo() if verso > 0 else self.coda.precedente()
+            scelta = (self.coda.playlist, brano, None) if brano else None
+        if scelta is None:
             self._riscontro("nessun_altro_brano", limite)
             return
-        self._suona(self.coda.playlist, brano, evento)
+        playlist, brano, sottobrano = scelta
+        self._suona(playlist, brano, evento, sottobrano)
 
     def _comando_successivo(self):
-        self._vicino(self.coda.successivo, "successivo", "È l'ultimo brano.")
+        self._vicino(1, "successivo", "È l'ultimo brano.")
 
     def _comando_precedente(self):
-        self._vicino(self.coda.precedente, "precedente", "È il primo brano.")
+        self._vicino(-1, "precedente", "È il primo brano.")
 
-    def _comando_casuale(self):
-        self._vicino(self.coda.casuale, "casuale", "Non ci sono brani da scegliere.")
+    def _comando_casuale(self, scelta=random.choice):
+        """N: a caso fra le voci suonabili che si vedono nella plancia, se cio'
+        che suona si vede; altrimenti a caso nella sua lista."""
+        if not self.coda.playlist:
+            self._riscontro("niente_da_suonare", "Non c'è una playlist in riproduzione.")
+            return
+        voce = self._voce_da_seguire()
+        if voce is None:
+            brano = self.coda.casuale(scelta)
+            if brano is None:
+                self._riscontro("nessun_altro_brano", "Non ci sono brani da scegliere.")
+                return
+            self._suona(self.coda.playlist, brano, "casuale")
+            return
+        candidati = [v for v in self._tutte_le_voci() if v != voce and self._visibile(v) and self._suonabile_in_plancia(v)]
+        if not candidati:
+            self._riscontro("nessun_altro_brano", "Nella plancia non si vede nient'altro da suonare.")
+            return
+        dati = self._dati(scelta(candidati))
+        self._suona(dati["playlist"], dati["brano"], "casuale", dati.get("numero"))
 
     def _salto(self, secondi, evento):
         if self._niente_in_corso():
@@ -1713,6 +1755,19 @@ class Finestra(wx.Frame):
                 return f.read()
         except OSError as e:
             return f"Non riesco a leggere {nome}: {e}"
+
+    def _elenco_dei_tasti(self):
+        """F12: scrive nella console la sezione I tasti del manuale, cosi' la
+        documentazione dei tasti e' una sola. F6 porta il cursore al suo inizio."""
+        righe = sezione_del_manuale(self._leggi_risorsa("manuale.txt"), "I tasti")
+        if not righe:
+            self._riscontro("errore", "Nel manuale non trovo la sezione I tasti.")
+            return
+        inizio = sum(len(r) for r in self._righe) + len(self._righe)
+        self._suono("elenco_dei_tasti")
+        for riga in righe:
+            self.scrivi(riga)
+        self._posizione_della_console = inizio
 
     def _manuale(self):
         self._mostra_testo("manuale", "Manuale di MeTeOra", self._leggi_risorsa("manuale.txt"))
