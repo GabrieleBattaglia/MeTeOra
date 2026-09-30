@@ -54,8 +54,9 @@ class Prova(wx.Frame):
     def _cambiata(self, evento):
         if evento is not None:
             evento.Skip()
-        # Mentre la finestra si chiude l'albero manda ancora qualche evento.
-        if self.IsBeingDeleted() or not self.albero:
+        # Mentre la finestra si chiude l'albero manda ancora qualche evento,
+        # quando finestra e albero sono gia' distrutti: allora valgono falso.
+        if not self or not self.albero:
             return
         selezionate = [self.albero.GetItemText(v) for v in self.albero.GetSelections()]
         fuoco = self.albero.GetFocusedItem()
