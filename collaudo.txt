@@ -1,20 +1,11 @@
 Collaudo di MeTeOra 1.15.0, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra. Scrivi le note sulla riga della voce; le voci superate si cancellano.
 Brani delle playlist e file di Questo PC hanno la durata dopo il nome; un SID con più sottobrani dice quanti sono e quanto durano in tutto.
+Sì, però manca nelle pl e nelle cartelle dell'OS. Lo voglio anche lì.
+
 Maiuscolo+E, scrivi 1.2: il messaggio dice 1.2 secondi, con il punto.
+Sì, però il campo va in editazione senza il contenuto pregresso selezionato e mi costringe a cancellarlo. Fai che sia selezionato di default.
+
 Premi più volte + e -: nella console resta una riga sola del volume, riscritta.
-F10 su una playlist, o su una cartella, apre tutto ciò che ha dentro; F9 richiude tutto e la selezione resta sulla voce.
-Apri una cartella di SID e i sottobrani di un SID, suona il primo sottobrano: quando finisce passa al secondo, e finiti i sottobrani al file dopo.
-Con un SID chiuso, finito il brano si passa al file dopo.
-Due playlist aperte una sotto l'altra: finita la prima si passa alla seconda. Se davanti non c'è niente di aperto, la riproduzione si ferma e la console lo dice.
-Maiuscolo+C toglie il loop A-B da qualsiasi punto.
-Maiuscolo+F8 aggancia l'inseguimento: a ogni cambio di brano la selezione va su ciò che suona. Di nuovo Maiuscolo+F8 lo sgancia. Due suoni diversi.
-Barra rovesciata: scrivi hubbard e Invio. Compare Risultati fra Preferiti e Playlist; l'etichetta dice quanti ne ha trovati e che la ricerca è in corso, poi finita.
-Apri Risultati: ogni voce ha il percorso completo; in fondo, se sono più di mille, Mostra altri risultati con Invio fa vedere i seguenti.
-Dal menu di Risultati: Salva come playlist, Ferma la ricerca, Nuova ricerca.
-Mentre la ricerca lavora sui dischi, la finestra resta pronta e NVDA non si blocca.
-Con una playlist aperta, B e Z passano alla voce dopo e prima nella plancia, anche in un'altra playlist aperta; con un SID aperto passano da un sottobrano all'altro.
-N sceglie a caso fra le voci che si vedono nella plancia.
-F12 scrive nella console l'elenco dei tasti e ci porta il fuoco, con il cursore sulla prima riga, I tasti.
-F1, F2 e F3 scrivono nella console e ci portano il fuoco, con il cursore sulla prima riga del testo.
-Ogni scritta della console ha l'ora in fondo; F1 e F12 solo in fondo all'ultima riga.
-Barra verticale: scrivi volume e Invio; il fuoco va nella console sulla prima occorrenza, e Invio passa alle seguenti, ripartendo dall'inizio.
+Sì. Vedi se sia possibile andare oltre al 100. In VLC ad esempio si può salire molto oltre il 100%. Amplifica quegli audio con problemi di volume.
+
+Note: nell'esempio di imposta passo shift+q shift +e riporti ancora la virgola: sostituire col punto.
