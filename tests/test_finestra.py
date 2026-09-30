@@ -735,3 +735,22 @@ def test_ricerca_nella_console(finestra, suoni_annotati, monkeypatch):
     finestra._comando_cerca_in_console()
     assert _ultima(finestra) == "Nella console non c'è inesistente."
 
+
+def test_conti_delle_cartelle(finestra, tmp_path):
+    base = tmp_path / "Disco"
+    (base / "Barzellette" / "Vecchie").mkdir(parents=True)
+    (base / "Vuota").mkdir()
+    for nome in ("Barzellette/una.mp3", "Barzellette/due.mp3", "Barzellette/Vecchie/tre.mp3", "Barzellette/nota.txt"):
+        (base / nome).write_bytes(b"")
+    finestra.albero.Expand(finestra.nodo_pc)
+    nodo = finestra.albero.AppendItem(finestra.nodo_pc, "Disco", data={"tipo": "cartella", "percorso": str(base), "caricato": False})
+    finestra.albero.SetItemHasChildren(nodo, True)
+    finestra.albero.Expand(nodo)
+    finestra.contatore.aspetta()
+    finestra.schedario.aspetta()
+    finestra._conti_arrivati()
+    assert _etichette(finestra, nodo) == ["Barzellette, 3 file", "Vuota, nessun file da suonare"]
+    una = str(base / "Barzellette" / "una.mp3")
+    finestra.schedario.schede[una] = {"dim": 1, "mod": 0, "durata": 61.5, "tag": {}, "sottobrani": None, "durate_sid": None}
+    finestra._schede_arrivate()
+    assert _etichette(finestra, nodo)[0] == "Barzellette, 3 file, 1:01.500 in tutto, 2 senza durata"

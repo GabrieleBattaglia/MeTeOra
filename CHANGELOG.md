@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.22.0] - 2026-09-30
+
+- Le cartelle di Questo PC, dopo il nome, dicono quanti file suonabili contengono, sottocartelle comprese, e quanto durano in tutto; se una cartella non ha niente da suonare lo dice. Il conto si fa in sottofondo, ogni cartella del disco si legge una volta sola, e le durate arrivano mentre lo schedario le legge. Aggiorna rifà il conto.
+
 ## [1.21.2] - 2026-09-30
 
 - Nei campi da riempire, come il passo del salto, il volume, il tempo di W, i nomi e i filtri, il testo di prima arriva selezionato: scrivendo lo si sostituisce, senza doverlo cancellare.

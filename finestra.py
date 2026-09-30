@@ -6,7 +6,7 @@
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
 # nella 1.15.0 la ricerca globale, nella 1.17.0 Z, B e N che seguono la plancia e F12,
 # nella 1.20.0 F1, F2 e F3 nella console, l'ora in fondo alle scritte e la ricerca nella console;
-# nella 1.21.0 il volume fino a 300.
+# nella 1.21.0 il volume fino a 300, nella 1.22.0 i conti delle cartelle.
 
 """La finestra di MeTeOra.
 
@@ -33,6 +33,7 @@ import questo_pc
 import songlengths
 import suoni
 import version
+from contatore import Contatore
 from filtro import ErroreFiltro, Filtro
 from impostazioni import Impostazioni
 from motore import VOLUME_MASSIMO, durata_del_sottobrano
@@ -287,6 +288,7 @@ class Finestra(wx.Frame):
         self._pagina = PAGINA_DEI_RISULTATI
         self.schedario = Schedario(os.path.join(cartella_dati, FILE_SCHEDARIO), avvisa=lambda: wx.CallAfter(self._schede_arrivate))
         self.schedario.carica()
+        self.contatore = Contatore(self.schedario, avvisa=lambda: wx.CallAfter(self._conti_arrivati))
         # Le playlist temporanee nate dalle cartelle di Questo PC, per cartella:
         # rigiocando un file della stessa cartella si riusa la stessa.
         self._temporanee = {}
@@ -660,6 +662,38 @@ class Finestra(wx.Frame):
         ignote = len(durate) - len(note)
         return f"{len(brani)} ({durata_lunga(sum(note))}{f', {ignote} senza durata' if ignote else ''})"
 
+    def _etichetta_della_cartella(self, cartella):
+        """Il nome della cartella con quanti file suonabili ha, sottocartelle
+        comprese, e quanto durano in tutto, appena il contatore e lo schedario
+        lo sanno."""
+        nome = os.path.basename(cartella.rstrip("\\")) or cartella
+        files = self.contatore.files(cartella)
+        if files is None:
+            return nome
+        if not files:
+            return f"{nome}, nessun file da suonare"
+        durate = [(self.schedario.scheda(f) or {}).get("durata") for f in files]
+        note = [d for d in durate if d is not None]
+        testo = f"{nome}, {len(files)} file"
+        if note:
+            testo += f", {durata_lunga(sum(note))} in tutto"
+            if len(note) < len(files):
+                testo += f", {len(files) - len(note)} senza durata"
+        return testo
+
+    def _aggiorna_cartelle(self):
+        """Rinfresca le etichette delle cartelle caricate nella plancia."""
+        for voce in self._tutte_le_voci(self.nodo_pc):
+            dati = self._dati(voce) or {}
+            if dati.get("tipo") == "cartella":
+                nuova = self._etichetta_della_cartella(dati["percorso"])
+                if self.albero.GetItemText(voce) != nuova:
+                    self.albero.SetItemText(voce, nuova)
+
+    def _conti_arrivati(self):
+        if not self._chiusa:
+            self._aggiorna_cartelle()
+
     def _etichetta_della_playlist(self, pl):
         filtrati = [b for b in pl.brani if self._ammesso(pl, b)]
         return f"{pl.nome}, brani: {self._conto(filtrati)}, totali: {self._conto(pl.brani)}"
@@ -684,6 +718,7 @@ class Finestra(wx.Frame):
                 if self.albero.GetItemText(voce) != nuova:
                     self.albero.SetItemText(voce, nuova)
         self._aggiorna_etichette()
+        self._aggiorna_cartelle()
         if not self.schedario.in_attesa():
             try:
                 self.schedario.salva()
@@ -799,8 +834,9 @@ class Finestra(wx.Frame):
             self.albero.SetItemHasChildren(voce, False)
             return
         for cartella in cartelle:
-            figlio = self.albero.AppendItem(voce, os.path.basename(cartella), data={"tipo": "cartella", "percorso": cartella, "caricato": False})
+            figlio = self.albero.AppendItem(voce, self._etichetta_della_cartella(cartella), data={"tipo": "cartella", "percorso": cartella, "caricato": False})
             self.albero.SetItemHasChildren(figlio, True)
+        self.contatore.chiedi(cartelle)
         pl = self._temporanea(dati["percorso"], files)
         self._chiedi_schede(pl)
         for brano in pl.brani:
@@ -813,6 +849,8 @@ class Finestra(wx.Frame):
 
     def _aggiorna_ramo(self, voce):
         dati = self._dati(voce)
+        if dati.get("percorso"):
+            self.contatore.dimentica(dati["percorso"])
         aperto = self.albero.IsExpanded(voce)
         self.albero.Collapse(voce)
         self.albero.DeleteChildren(voce)
@@ -1869,6 +1907,7 @@ class Finestra(wx.Frame):
         if self._ricerca is not None:
             self._ricerca.ferma()
         self._salva_archivio()
+        self.contatore.ferma()
         self.schedario.ferma()
         with contextlib.suppress(OSError):
             self.schedario.salva()
