@@ -11,11 +11,11 @@ Playlist: le tue playlist, ciascuna con i suoi brani, mostrati con il nome del f
 Questo PC: le unità del computer, con la lettera e il nome del volume. Dentro le unità ci sono le cartelle e i file che MeTeOra sa suonare. Una cartella funziona come una playlist temporanea: dal suo menu la si suona, oppure si crea una playlist vera con tutti i file della cartella e delle sue sottocartelle.
 Apri file: sceglie un file qualsiasi e lo suona, senza metterlo in nessuna playlist.
 Impostazioni: arriverà con una delle prossime tappe.
-Su ogni voce Invio, il tasto Applicazioni e la barra spaziatrice aprono il menu della voce; sui comandi Invio li esegue. Canc elimina una playlist, dopo una conferma, o toglie un brano da una playlist.
+Su ogni voce Invio, il tasto Applicazioni e la barra spaziatrice aprono il menu della voce; sui comandi Invio li esegue. Canc elimina una playlist, dopo una conferma, o toglie un brano da una playlist. Maiuscolo con Canc, su un brano di una playlist o su un file di una cartella, manda il file nel cestino di Windows dopo una conferma, con No come risposta predefinita, e lo toglie dalla playlist o dalla cartella.
 Menu di una playlist: Riproduci, Rinomina, Elimina.
-Menu di un brano: Riproduci, Sposta su, Sposta giù, Sposta in cima, Sposta in fondo, Saltato, Togli dalla playlist. Un brano saltato resta nella playlist ma non viene suonato.
+Menu di un brano: Riproduci, Sposta su, Sposta giù, Sposta in cima, Sposta in fondo, Saltato, Togli dalla playlist, Manda nel cestino. Un brano saltato resta nella playlist ma non viene suonato.
 Menu di un'unità o di una cartella: Riproduci, Crea playlist da qui, Aggiungi alla playlist, Aggiorna.
-Menu di un file: Riproduci, Aggiungi alla playlist.
+Menu di un file: Riproduci, Aggiungi alla playlist, Manda nel cestino.
 Un SID con più sottobrani, in una cartella o in una playlist, è un ramo: freccia destra mostra i suoi sottobrani, ciascuno con la sua durata. Un sottobrano si suona e si aggiunge alle playlist come un brano a sé; nella playlist compare con il nome del file e il numero del sottobrano.
 Menu di un sottobrano: Riproduci, Aggiungi alla playlist.
 Il brano in riproduzione e la voce selezionata sono due cose diverse: quando un brano finisce e ne parte un altro, la selezione resta dov'è. Nella plancia il brano che suona ha l'indicazione "in riproduzione" dopo il nome.

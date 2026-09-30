@@ -1,6 +1,6 @@
 # MeTeOra, Questo PC: unita', cartelle e file supportati.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1.
+# 30/09/2026: nasce con la tappa 1. Nella 1.4.0 il cestino.
 
 """Cosa mostra il ramo Questo PC della plancia.
 
@@ -89,3 +89,35 @@ def file_ricorsivi(cartella):
     for sotto in cartelle:
         files.extend(file_ricorsivi(sotto))
     return files
+
+
+class _SHFILEOPSTRUCTW(ctypes.Structure):
+    _fields_ = [
+        ("hwnd", wintypes.HWND),
+        ("wFunc", wintypes.UINT),
+        ("pFrom", wintypes.LPCWSTR),
+        ("pTo", wintypes.LPCWSTR),
+        ("fFlags", ctypes.c_uint16),
+        ("fAnyOperationsAborted", wintypes.BOOL),
+        ("hNameMappings", ctypes.c_void_p),
+        ("lpszProgressTitle", wintypes.LPCWSTR),
+    ]
+
+
+_FO_DELETE = 3
+# Nel cestino, senza le domande e le finestre di Windows: la conferma la
+# chiede MeTeOra, e un errore torna come esito.
+_FOF_ALLOWUNDO = 0x40
+_FOF_NOCONFIRMATION = 0x10
+_FOF_SILENT = 0x4
+_FOF_NOERRORUI = 0x400
+
+
+def nel_cestino(percorso):
+    """Manda un file nel cestino di Windows. Vero se ci e' andato."""
+    operazione = _SHFILEOPSTRUCTW(
+        hwnd=None, wFunc=_FO_DELETE, pFrom=os.path.abspath(percorso) + "\0", pTo=None,
+        fFlags=_FOF_ALLOWUNDO | _FOF_NOCONFIRMATION | _FOF_SILENT | _FOF_NOERRORUI,
+    )
+    esito = ctypes.windll.shell32.SHFileOperationW(ctypes.byref(operazione))
+    return esito == 0 and not operazione.fAnyOperationsAborted and not os.path.exists(percorso)

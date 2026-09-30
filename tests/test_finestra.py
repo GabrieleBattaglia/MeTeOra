@@ -245,3 +245,34 @@ def test_loop_a_b_con_maiuscolo_x(finestra, suoni_annotati):
     assert _etichette(finestra, nodo)[1] == "2.mp3"
     finestra.albero.SelectItem(finestra.nodo_pc)
     assert _premi(finestra, "x", maiuscolo=True).startswith("Il loop si mette su un brano")
+
+
+def test_maiuscolo_canc_manda_nel_cestino(finestra, suoni_annotati, tmp_path, monkeypatch):
+    import questo_pc
+
+    cestinati = []
+    monkeypatch.setattr(questo_pc, "nel_cestino", lambda p: cestinati.append(p) or True)
+    risposte = [False, True, True]
+    monkeypatch.setattr(finestra, "_conferma", lambda domanda, titolo: risposte.pop(0))
+    for nome in ("a.mp3", "b.mp3"):
+        (tmp_path / nome).write_bytes(b"")
+    finestra._aggiungi(None, [str(tmp_path / "a.mp3"), str(tmp_path / "b.mp3")])
+    pl = finestra.archivio.playlist[0]
+    nodo = next(finestra._figli(finestra.nodo_playlist))
+    finestra.albero.Expand(nodo)
+    primo = next(finestra._figli(nodo))
+    finestra._al_cestino(primo)
+    assert _ultima(finestra) == "Il file resta dov'è." and not cestinati
+    finestra._al_cestino(next(finestra._figli(next(finestra._figli(finestra.nodo_playlist)))))
+    assert cestinati == [str(tmp_path / "a.mp3")]
+    assert [b.nome_del_file for b in pl.brani] == ["b.mp3"]
+    assert _ultima(finestra) == "a.mp3 è nel cestino di Windows."
+    finestra.albero.Expand(finestra.nodo_pc)
+    cartella = finestra.albero.AppendItem(finestra.nodo_pc, "prova", data={"tipo": "cartella", "percorso": str(tmp_path), "caricato": False})
+    finestra.albero.SetItemHasChildren(cartella, True)
+    finestra.albero.Expand(cartella)
+    assert _etichette(finestra, cartella) == ["a.mp3", "b.mp3"]
+    finestra._al_cestino(next(finestra._figli(cartella)))
+    assert _etichette(finestra, cartella) == ["b.mp3"]
+    assert finestra.albero.GetItemText(finestra.albero.GetSelection()) == "b.mp3"
+    assert suoni_annotati[-1] == "cestino"

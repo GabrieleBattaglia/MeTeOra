@@ -44,6 +44,7 @@ EVENTI = {
     "playlist_rinominata": "written_ok",
     "brano_aggiunto": "aggiunta_giocatore",
     "brano_tolto": "espelli",
+    "cestino": "morto",
     "brano_spostato": "scudisciata",
     "saltato_acceso": "salto_del_gioco_1",
     "saltato_spento": "salto_del_gioco_10",

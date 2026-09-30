@@ -76,11 +76,11 @@ TASTI_COMUNI = [
 TASTI_DEL_CONTESTO = {
     "radice_playlist": ("il ramo Playlist", "Invio, Applicazioni o Spazio: menu con Nuova playlist."),
     "playlist": ("una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci e Rinomina. Canc elimina la playlist, dopo una conferma."),
-    "brano": ("un brano di una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Sposta e Saltato. Canc toglie il brano dalla playlist. Un SID con più sottobrani si apre con freccia destra."),
+    "brano": ("un brano di una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Sposta e Saltato. Canc toglie il brano dalla playlist, Maiuscolo+Canc manda il file nel cestino. Un SID con più sottobrani si apre con freccia destra."),
     "pc": ("Questo PC", "Freccia destra mostra le unità. Invio, Applicazioni o Spazio: menu con Aggiorna."),
     "unita": ("un'unità", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Crea playlist da qui."),
     "cartella": ("una cartella", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Riproduci e Crea playlist da qui."),
-    "file": ("un file", "Invio, Applicazioni o Spazio: menu con Riproduci e Aggiungi alla playlist. Un SID con più sottobrani si apre con freccia destra."),
+    "file": ("un file", "Invio, Applicazioni o Spazio: menu con Riproduci e Aggiungi alla playlist. Maiuscolo+Canc manda il file nel cestino. Un SID con più sottobrani si apre con freccia destra."),
     "sottobrano": ("un sottobrano di un SID", "Invio, Applicazioni o Spazio: menu con Riproduci e Aggiungi alla playlist."),
     "comando": ("un comando", "Invio esegue il comando."),
 }
@@ -340,6 +340,8 @@ class Finestra(wx.Frame):
             self._menu(self.albero.GetSelection())
         elif codice == wx.WXK_DELETE and evento.GetModifiers() == wx.MOD_NONE:
             self._cancella(self.albero.GetSelection())
+        elif codice == wx.WXK_DELETE and evento.GetModifiers() == wx.MOD_SHIFT:
+            self._al_cestino(self.albero.GetSelection())
         else:
             evento.Skip()
 
@@ -587,7 +589,8 @@ class Finestra(wx.Frame):
             return [("Riproduci", lambda: self._riproduci(pl, brano)),
                 ("Sposta su", lambda: self._sposta(pl, brano, "su")), ("Sposta giù", lambda: self._sposta(pl, brano, "giu")),
                 ("Sposta in cima", lambda: self._sposta(pl, brano, "cima")), ("Sposta in fondo", lambda: self._sposta(pl, brano, "fondo")),
-                ("Saltato", (lambda: self._salta(pl, brano), brano.saltato)), ("Togli dalla playlist", lambda: self._togli(pl, brano))]
+                ("Saltato", (lambda: self._salta(pl, brano), brano.saltato)), ("Togli dalla playlist", lambda: self._togli(pl, brano)),
+                ("Manda nel cestino", lambda: self._al_cestino(self.albero.GetSelection()))]
         if tipo == "pc":
             return [("Aggiorna", lambda: self._aggiorna_ramo(self.nodo_pc))]
         if tipo in ("unita", "cartella"):
@@ -598,12 +601,52 @@ class Finestra(wx.Frame):
                 ("Aggiungi alla playlist", self._menu_aggiungi(lambda: [Brano(p) for p in questo_pc.file_ricorsivi(cartella)])), ("Aggiorna", lambda: self._aggiorna_ramo(voce))]
         if tipo == "file":
             pl, brano = dati["playlist"], dati["brano"]
-            return [("Riproduci", lambda: self._riproduci(pl, brano)), ("Aggiungi alla playlist", self._menu_aggiungi(lambda: [Brano(brano.percorso)]))]
+            return [("Riproduci", lambda: self._riproduci(pl, brano)), ("Aggiungi alla playlist", self._menu_aggiungi(lambda: [Brano(brano.percorso)])),
+                ("Manda nel cestino", lambda: self._al_cestino(self.albero.GetSelection()))]
         if tipo == "sottobrano":
             pl, brano, n = dati["playlist"], dati["brano"], dati["numero"]
             return [("Riproduci", lambda: self._riproduci(pl, brano, n)),
                 ("Aggiungi alla playlist", self._menu_aggiungi(lambda: [Brano(brano.percorso, sottobrano=n)]))]
         return []
+
+    def _conferma(self, domanda, titolo):
+        """Una domanda con Si' e No, e No come risposta predefinita."""
+        self._suono("domanda")
+        with wx.MessageDialog(self, domanda, titolo, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION) as dialogo:
+            return dialogo.ShowModal() == wx.ID_YES
+
+    def _al_cestino(self, voce):
+        """Maiuscolo+Canc: il file del brano va nel cestino di Windows, e il
+        brano esce dalla playlist o dalla cartella in cui sta."""
+        dati = self._dati(voce) or {}
+        tipo = dati.get("tipo")
+        if tipo == "sottobrano":
+            self._riscontro("non_disponibile", "Un sottobrano non si cestina da solo: Maiuscolo+Canc si usa sul file del SID.")
+            return
+        if tipo not in ("brano", "file"):
+            self._riscontro("non_disponibile", "Maiuscolo+Canc manda nel cestino un file, da una playlist o da una cartella.")
+            return
+        pl, brano = dati["playlist"], dati["brano"]
+        dove = "" if pl.temporanea else f" Si toglie anche dalla playlist {pl.nome}."
+        if not self._conferma(f"Mandare nel cestino di Windows il file {brano.percorso}?{dove}", "Manda nel cestino"):
+            self.scrivi("Il file resta dov'è.")
+            return
+        if self.motore.in_corso == brano.percorso:
+            self.motore.stop()
+        if not questo_pc.nel_cestino(brano.percorso):
+            self._riscontro("errore", f"Non riesco a mandare nel cestino {brano.percorso}.")
+            return
+        if pl.temporanea:
+            genitore = self.albero.GetItemParent(voce)
+            vicina = self.albero.GetNextSibling(voce)
+            if not vicina.IsOk():
+                vicina = self.albero.GetPrevSibling(voce)
+            pl.togli(brano)
+            self.albero.SelectItem(vicina if vicina.IsOk() else genitore)
+            self.albero.Delete(voce)
+        else:
+            self._togli(pl, brano, annuncia=False)
+        self._riscontro("cestino", f"{brano.nome_del_file} è nel cestino di Windows.")
 
     def _cancella(self, voce):
         dati = self._dati(voce) or {}
@@ -674,12 +717,10 @@ class Finestra(wx.Frame):
         self._riscontro("playlist_rinominata", f"La playlist {vecchio} ora si chiama {nome}.")
 
     def _elimina_playlist(self, pl):
-        self._suono("domanda")
         domanda = f"Eliminare la playlist {pl.nome}, con {brani_al_plurale(len(pl.brani))}? I file restano sul disco."
-        with wx.MessageDialog(self, domanda, "Elimina playlist", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION) as dialogo:
-            if dialogo.ShowModal() != wx.ID_YES:
-                self.scrivi("Eliminazione annullata.")
-                return
+        if not self._conferma(domanda, "Elimina playlist"):
+            self.scrivi("Eliminazione annullata.")
+            return
         indice = self.archivio.playlist.index(pl)
         self.archivio.elimina(pl)
         self._salva_archivio()
@@ -705,7 +746,7 @@ class Finestra(wx.Frame):
         else:
             self._riscontro("saltato_spento", f"{brano.nome} torna a essere suonato.")
 
-    def _togli(self, pl, brano):
+    def _togli(self, pl, brano, annuncia=True):
         i = pl.togli(brano)
         if i is None:
             return
@@ -716,7 +757,8 @@ class Finestra(wx.Frame):
         self._salva_archivio()
         vicino = pl.brani[min(i, len(pl.brani) - 1)] if pl.brani else pl
         self._popola_playlist(seleziona=vicino)
-        self._riscontro("brano_tolto", f"Tolto {brano.nome}; nella playlist {pl.nome} restano {brani_al_plurale(len(pl.brani))}.")
+        if annuncia:
+            self._riscontro("brano_tolto", f"Tolto {brano.nome_del_file}; nella playlist {pl.nome} restano {brani_al_plurale(len(pl.brani))}.")
 
     # La riproduzione.
 
