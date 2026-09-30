@@ -4,7 +4,7 @@ Questo manuale descrive ciò che c'è adesso, e cresce insieme al programma. La 
 La finestra
 La finestra ha tre aree, nell'ordine in cui le raggiunge il tasto Tab.
 La plancia dei comandi, F5: un albero con tutti i comandi e i contenuti. I rami si aprono con freccia destra e si chiudono con freccia sinistra.
-La console, F6: una riga per ogni azione, la più recente in fondo. Quando ci torni il cursore è dove l'avevi lasciato. Le informazioni che si ripetono, come il volume o i salti nel brano, riscrivono la loro riga invece di aggiungerne sempre una nuova.
+La console, F6: una riga per ogni azione, la più recente in fondo, con l'ora in fondo alla riga; un testo lungo, come questo manuale, ha l'ora solo in fondo all'ultima riga. Quando ci torni il cursore è dove l'avevi lasciato. Le informazioni che si ripetono, come il volume o i salti nel brano, riscrivono la loro riga invece di aggiungerne sempre una nuova.
 Il cruscotto, F7: i tasti del punto da cui sei arrivato. Da una voce della plancia elenca i tasti di quella voce, dalla console quelli della console. Se torni dallo stesso punto il cursore resta dove l'avevi lasciato.
 La plancia dei comandi
 Preferiti: la prima voce, una playlist speciale con i brani che ci mandi da qualsiasi playlist o cartella, con F4 o con la voce Aggiungi ai preferiti del menu del brano. Canc su un brano dei Preferiti lo toglie; i Preferiti non si rinominano e non si eliminano.
@@ -31,9 +31,9 @@ Se ciò che suona non si vede, per esempio una cartella suonata con X da chiusa 
 I tasti
 Tutti i tasti funzionano in tutta la finestra, qualunque area abbia il fuoco. Quelli a lettera valgono anche nella plancia, dove per questo non si salta alle voci digitandone l'iniziale. F12 scrive questo elenco nella console.
 F5: la plancia dei comandi. F6: la console. F7: il cruscotto, con i tasti del punto da cui arrivi. Tab e Maiuscolo con Tab passano da un'area all'altra.
-F1: questo manuale. F2: le novità di ogni versione. F3: i crediti. Si chiudono con il pulsante Chiudi.
+F1: questo manuale. F2: le novità di ogni versione. F3: i crediti. Come F12, li scrivono nella console e ci portano il fuoco, con il cursore sulla prima riga.
 F12: scrive nella console questo elenco dei tasti e ci porta il fuoco, con il cursore sulla sua prima riga, I tasti.
-Esc: esce da MeTeOra salvando tutto, anche mentre sono aperti il manuale, le novità o i crediti.
+Esc: esce da MeTeOra salvando tutto.
 X: riproduce la voce selezionata, cioè un brano, un file, un sottobrano, una playlist o una cartella. Una cartella, o un'unità, si suona con tutto ciò che ha sotto: prima i suoi file, poi quelli delle sottocartelle. Se la voce è quella che sta già suonando in pausa, riprende.
 C: pausa, e di nuovo C riprende.
 V: stop. Poi X riparte dall'inizio del brano.
@@ -53,6 +53,8 @@ Maiuscolo con F8: aggancia o sgancia l'inseguimento; agganciato, a ogni cambio d
 F9: chiude la voce selezionata e tutto ciò che ha dentro; se la voce non ha niente dentro, chiude quella che la contiene.
 F10: apre la voce selezionata e tutti i rami che ha dentro, caricandoli; sotto Questo PC si ferma dopo duemila rami.
 Barra rovesciata: la ricerca in tutte le playlist e in tutte le unità, con i risultati nel ramo Risultati.
+Barra verticale, cioè Maiuscolo con la barra rovesciata: cerca un testo nella console e ci porta il fuoco, con il cursore sulla prima occorrenza. Maiuscole e minuscole non contano.
+Nella console, Invio: passa all'occorrenza seguente dell'ultima ricerca; arrivato in fondo riparte dall'inizio, con un suono diverso.
 Nella plancia, Invio, il tasto Applicazioni e la barra spaziatrice: aprono il menu della voce. Sui comandi Invio li esegue, sulla voce Filtro apre il campo del filtro, sulla voce Mostra altri risultati mostra i seguenti.
 Nella plancia, freccia destra e freccia sinistra: aprono e chiudono i rami. Sulla voce Filtro freccia destra apre il campo del filtro.
 Nella plancia, Canc: elimina una playlist dopo una conferma, toglie un brano da una playlist o dai Preferiti, svuota il filtro.

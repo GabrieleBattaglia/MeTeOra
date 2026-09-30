@@ -15,3 +15,6 @@ Mentre la ricerca lavora sui dischi, la finestra resta pronta e NVDA non si bloc
 Con una playlist aperta, B e Z passano alla voce dopo e prima nella plancia, anche in un'altra playlist aperta; con un SID aperto passano da un sottobrano all'altro.
 N sceglie a caso fra le voci che si vedono nella plancia.
 F12 scrive nella console l'elenco dei tasti e ci porta il fuoco, con il cursore sulla prima riga, I tasti.
+F1, F2 e F3 scrivono nella console e ci portano il fuoco, con il cursore sulla prima riga del testo.
+Ogni scritta della console ha l'ora in fondo; F1 e F12 solo in fondo all'ultima riga.
+Barra verticale: scrivi volume e Invio; il fuoco va nella console sulla prima occorrenza, e Invio passa alle seguenti, ripartendo dall'inizio.

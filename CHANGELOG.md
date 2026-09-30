@@ -2,6 +2,12 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.20.0] - 2026-09-30
+
+- F1, F2 e F3 scrivono manuale, novità e crediti nella console, come F12, e ci portano il fuoco con il cursore sulla prima riga: niente più finestre a parte. Le novità arrivano senza i segni del Markdown, con le versioni scritte come frasi.
+- Ogni scritta della console ha in fondo l'ora, ore e minuti; un testo lungo la ha solo in fondo all'ultima riga.
+- La barra verticale, cioè Maiuscolo con la barra rovesciata, cerca un testo nella console e ci porta il fuoco sulla prima occorrenza; nella console Invio passa alla seguente e, arrivato in fondo, riparte dall'inizio con un suono suo.
+
 ## [1.17.4] - 2026-09-30
 
 - F12, dopo aver scritto l'elenco dei tasti, porta il fuoco nella console con il cursore sulla prima riga dell'elenco: non serve più F6.

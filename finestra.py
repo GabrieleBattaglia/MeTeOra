@@ -4,7 +4,8 @@
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
-# nella 1.15.0 la ricerca globale, nella 1.17.0 Z, B e N che seguono la plancia e F12.
+# nella 1.15.0 la ricerca globale, nella 1.17.0 Z, B e N che seguono la plancia e F12,
+# nella 1.20.0 F1, F2 e F3 nella console, l'ora in fondo alle scritte e la ricerca nella console.
 
 """La finestra di MeTeOra.
 
@@ -18,8 +19,10 @@ riproduzione non sposta mai la selezione; lo fa F8, su richiesta.
 """
 
 import contextlib
+import datetime
 import os
 import random
+import re
 
 import wx
 
@@ -64,6 +67,9 @@ TASTI = {
     ("+", False): "volume_su",
     ("-", False): "volume_giu",
     ("\\", False): "ricerca",
+    ("\\", True): "cerca_in_console",
+    ("|", False): "cerca_in_console",
+    ("|", True): "cerca_in_console",
     ("m", True): "passo_volume",
 }
 # I tasti gia' assegnati nel piano a funzioni delle tappe successive: per ora
@@ -83,7 +89,7 @@ TASTI_COMUNI = [
     "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, + e - volume, Maiuscolo+M il passo del volume, M muto.",
     "Maiuscolo+X mette e toglie i punti A e B del loop sul brano selezionato, Maiuscolo+C toglie il loop.",
     "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione sul brano in riproduzione e Maiuscolo+F8 ce la tiene agganciata, F9 chiude e F10 apre tutto il ramo selezionato.",
-    "Barra rovesciata: ricerca in tutte le playlist e in tutte le unità. F1 manuale, F2 novità, F3 crediti, F12 elenca tutti i tasti nella console e ci porta il fuoco, Esc esce salvando tutto.",
+    "Barra rovesciata: ricerca in tutte le playlist e in tutte le unità; barra verticale: ricerca nella console. F1 manuale, F2 novità, F3 crediti e F12 elenco dei tasti, tutti nella console. Esc esce salvando tutto.",
 ]
 # Le righe del cruscotto proprie di ogni tipo di voce della plancia.
 TASTI_DEL_CONTESTO = {
@@ -164,32 +170,26 @@ def sezione_del_manuale(testo, titolo):
     return [r for r in righe[inizio:fine] if r]
 
 
+def righe_del_changelog(testo):
+    """Il changelog da leggere nella console: senza i segni del Markdown, con
+    i titoli delle versioni scritti come frasi."""
+    righe = []
+    for riga in testo.splitlines():
+        riga = riga.strip()
+        versione = re.match(r"^#+\s*\[([^\]]+)\]\s*-\s*(\S+)", riga)
+        if versione:
+            riga = f"Versione {versione.group(1)} del {versione.group(2)}"
+        elif riga.startswith("#"):
+            continue
+        elif riga.startswith("- "):
+            riga = riga[2:]
+        if riga:
+            righe.append(riga)
+    return righe
+
+
 def brani_al_plurale(n):
     return "1 brano" if n == 1 else f"{n} brani"
-
-
-class FinestraTesto(wx.Dialog):
-    """Una grande area di testo da leggere: manuale, novita', crediti. Esc chiude."""
-
-    def __init__(self, genitore, titolo, testo):
-        from GBwx import STILE_ADATTABILE, adatta_finestra, pannello_scorrevole
-
-        super().__init__(genitore, title=titolo, style=STILE_ADATTABILE)
-        pannello = pannello_scorrevole(self)
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        etichetta = wx.StaticText(pannello, label=titolo)
-        self.testo = wx.TextCtrl(pannello, value=testo, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2)
-        self.testo.SetName(titolo)
-        chiudi = wx.Button(pannello, wx.ID_CANCEL, "Chiudi")
-        sizer.Add(etichetta, 0, wx.ALL, 5)
-        sizer.Add(self.testo, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
-        sizer.Add(chiudi, 0, wx.ALL | wx.ALIGN_RIGHT, 5)
-        pannello.SetSizer(sizer)
-        adatta_finestra(self, pannello, (700, 500))
-        self.SetEscapeId(wx.ID_CANCEL)
-        self.Maximize()
-        self.testo.SetInsertionPoint(0)
-        self.testo.SetFocus()
 
 
 class FinestraFiltro(wx.Dialog):
@@ -284,6 +284,8 @@ class Finestra(wx.Frame):
         # La categoria dell'ultima riga della console: una riga nuova della
         # stessa categoria la sostituisce invece di aggiungersi.
         self._categoria = None
+        # Il testo dell'ultima ricerca nella console, per Invio.
+        self._cercato_in_console = ""
         self._righe = []
         self._chiusa = False
         self._costruisci()
@@ -330,6 +332,7 @@ class Finestra(wx.Frame):
         self.albero.Bind(wx.EVT_SET_FOCUS, self._fuoco_all_albero)
         self.console.Bind(wx.EVT_SET_FOCUS, self._fuoco_alla_console)
         self.console.Bind(wx.EVT_KILL_FOCUS, self._console_lasciata)
+        self.console.Bind(wx.EVT_KEY_DOWN, self._tasto_nella_console)
         self.cruscotto.Bind(wx.EVT_SET_FOCUS, self._fuoco_al_cruscotto)
         self.cruscotto.Bind(wx.EVT_KILL_FOCUS, self._cruscotto_lasciato)
 
@@ -346,11 +349,15 @@ class Finestra(wx.Frame):
 
     # La console.
 
-    def scrivi(self, testo, categoria=None):
+    def scrivi(self, testo, categoria=None, ora=True):
         """Aggiunge una riga in fondo alla console senza spostarne il
         cursore, e tiene le ultime RIGHE_DELLA_CONSOLE righe. Con una
         categoria, per esempio il volume, se anche l'ultima riga era di quella
-        categoria la riga si riscrive invece di aggiungersene un'altra."""
+        categoria la riga si riscrive invece di aggiungersene un'altra.
+        In fondo alla riga va l'ora, ore e minuti; chi scrive piu' righe di
+        seguito la chiede solo per l'ultima."""
+        if ora:
+            testo = f"{testo} {datetime.datetime.now():%H:%M}"
         posizione = self.console.GetInsertionPoint()
         if categoria is not None and categoria == self._categoria and self._righe:
             inizio = sum(len(r) for r in self._righe[:-1]) + len(self._righe) - 1
@@ -425,7 +432,7 @@ class Finestra(wx.Frame):
     def righe_del_cruscotto(self):
         """Le righe del cruscotto per l'area da cui si arriva."""
         if self._area_precedente == "console":
-            righe = ["Tasti per la console.", "Frecce, Pagina su e giù, Home e Fine per leggere; i messaggi nuovi arrivano in fondo."]
+            righe = ["Tasti per la console.", "Frecce, Pagina su e giù, Home e Fine per leggere; i messaggi nuovi arrivano in fondo, con l'ora. La barra verticale cerca nella console, e Invio passa all'occorrenza seguente."]
         else:
             dati = self._dati(self.albero.GetSelection()) or {}
             tipo = "preferiti" if dati.get("tipo") == "playlist" and dati["playlist"] is self.archivio.preferiti else dati.get("tipo")
@@ -1744,10 +1751,28 @@ class Finestra(wx.Frame):
 
     # F1, F2, F3.
 
-    def _mostra_testo(self, evento, titolo, testo):
+    def _stampa(self, evento, righe):
+        """Scrive nella console un testo lungo, riga per riga, con l'ora solo
+        in fondo, e ci porta il fuoco con il cursore sulla prima riga."""
+        righe = [r for r in righe if r.strip()]
+        if not righe:
+            return
         self._suono(evento)
-        with FinestraTesto(self, titolo, testo) as finestra:
-            finestra.ShowModal()
+        for i, riga in enumerate(righe):
+            self.scrivi(riga, ora=i == len(righe) - 1)
+        inizio = sum(len(r) for r in self._righe[:-len(righe)]) + len(self._righe) - len(righe)
+        self._porta_il_cursore(inizio)
+
+    def _porta_il_cursore(self, posizione):
+        """Porta il fuoco nella console con il cursore sulla posizione data.
+        Arrivando nella console il cursore torna dove era rimasto: per questo
+        la posizione si mette anche in quella da ricordare."""
+        self._posizione_della_console = posizione
+        if self.console.HasFocus():
+            self.console.SetInsertionPoint(posizione)
+        else:
+            self.console.SetFocus()
+        self.console.ShowPosition(posizione)
 
     def _leggi_risorsa(self, nome):
         try:
@@ -1755,6 +1780,39 @@ class Finestra(wx.Frame):
                 return f.read()
         except OSError as e:
             return f"Non riesco a leggere {nome}: {e}"
+
+    def _comando_cerca_in_console(self):
+        self._suono("domanda")
+        with wx.TextEntryDialog(self, "Cosa cercare nella console? Invio, dalla console, passa all'occorrenza seguente.", "Cerca nella console",
+                self._cercato_in_console) as dialogo:
+            if dialogo.ShowModal() != wx.ID_OK:
+                return
+            testo = dialogo.GetValue().strip()
+        if not testo:
+            return
+        self._cercato_in_console = testo
+        self._cerca_in_console(0)
+
+    def _cerca_in_console(self, da):
+        """Porta il cursore sulla prima occorrenza del testo cercato dalla
+        posizione da in poi; arrivata in fondo riparte dall'inizio."""
+        testo = "\n".join(self._righe).lower()
+        cercato = self._cercato_in_console.lower()
+        trovato = testo.find(cercato, da)
+        ripartito = trovato < 0 and da > 0
+        if ripartito:
+            trovato = testo.find(cercato)
+        if trovato < 0:
+            self._riscontro("non_trovato_in_console", f"Nella console non c'è {self._cercato_in_console}.")
+            return
+        self._suono("ripartito_in_console" if ripartito else "trovato_in_console")
+        self._porta_il_cursore(trovato)
+
+    def _tasto_nella_console(self, evento):
+        if evento.GetKeyCode() in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER) and evento.GetModifiers() == wx.MOD_NONE and self._cercato_in_console:
+            self._cerca_in_console(self.console.GetInsertionPoint() + 1)
+        else:
+            evento.Skip()
 
     def _elenco_dei_tasti(self):
         """F12: scrive nella console la sezione I tasti del manuale, cosi' la
@@ -1764,27 +1822,17 @@ class Finestra(wx.Frame):
         if not righe:
             self._riscontro("errore", "Nel manuale non trovo la sezione I tasti.")
             return
-        inizio = sum(len(r) for r in self._righe) + len(self._righe)
-        self._suono("elenco_dei_tasti")
-        for riga in righe:
-            self.scrivi(riga)
-        # Arrivando nella console il cursore torna dove era rimasto: qui lo
-        # si fa tornare all'inizio dell'elenco.
-        self._posizione_della_console = inizio
-        if self.console.HasFocus():
-            self.console.SetInsertionPoint(inizio)
-        else:
-            self.console.SetFocus()
-        self.console.ShowPosition(inizio)
+        self._stampa("elenco_dei_tasti", righe)
 
     def _manuale(self):
-        self._mostra_testo("manuale", "Manuale di MeTeOra", self._leggi_risorsa("manuale.txt"))
+        self._stampa("manuale", self._leggi_risorsa("manuale.txt").splitlines())
 
     def _changelog(self):
-        self._mostra_testo("changelog", "Novità di MeTeOra", self._leggi_risorsa("CHANGELOG.md"))
+        self._stampa("changelog", ["Novità di MeTeOra", *righe_del_changelog(self._leggi_risorsa("CHANGELOG.md"))])
 
     def _crediti(self):
-        testo = "\n".join([
+        righe = [
+            "Crediti di MeTeOra",
             f"MeTeOra {version.VERSION} del {version.DATE}.",
             f"Autori: {version.AUTHOR}.",
             "MeTeOra è formato da tre parole italiane, una dedica di Gabriele alla sua ragazza Ginevra.",
@@ -1795,8 +1843,8 @@ class Finestra(wx.Frame):
             "Durate e tag dei file audio: mutagen.",
             "Interfaccia: wxPython.",
             "Licenza: GPL 3.",
-        ])
-        self._mostra_testo("crediti", "Crediti", testo)
+        ]
+        self._stampa("crediti", righe)
 
     # L'uscita.
 

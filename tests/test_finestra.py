@@ -2,6 +2,7 @@
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 
 import os
+import re
 import time
 
 import pytest
@@ -31,8 +32,13 @@ def _etichette(f, voce):
     return [f.albero.GetItemText(v) for v in f._figli(voce)]
 
 
+def _senza_ora(riga):
+    """Una riga della console senza l'ora che ha in fondo."""
+    return re.sub(r" \d\d:\d\d$", "", riga)
+
+
 def _ultima(f):
-    return f._righe[-1]
+    return _senza_ora(f._righe[-1])
 
 
 def test_aree_nell_ordine_di_tabulazione(finestra):
@@ -196,7 +202,7 @@ def test_console_riscrive_la_riga_della_stessa_categoria(finestra):
     assert testo.split("\n") == finestra._righe
     finestra.scrivi("altro")
     _tasto(finestra, "+")
-    assert finestra._righe[-2:] == ["altro", "Volume 60."]
+    assert [_senza_ora(r) for r in finestra._righe[-2:]] == ["altro", "Volume 60."]
 
 
 def test_f9_e_f10(finestra, suoni_annotati):
@@ -648,7 +654,9 @@ def test_z_b_n_seguono_la_plancia(finestra, monkeypatch):
 def test_f12_scrive_i_tasti_dal_manuale(finestra, suoni_annotati):
     _tasto(finestra, codice=wx.WXK_F12)
     righe = modulo.sezione_del_manuale(finestra._leggi_risorsa("manuale.txt"), "I tasti")
-    assert finestra._righe[-len(righe):] == righe
+    stampate = finestra._righe[-len(righe):]
+    assert stampate[:-1] == righe[:-1] and _senza_ora(stampate[-1]) == righe[-1]
+    assert re.search(r" \d\d:\d\d$", stampate[-1]) and not re.search(r" \d\d:\d\d$", stampate[0])
     assert righe[0] == "I tasti" and any(r.startswith("F12:") for r in righe)
     assert not any(r == "I SID" for r in righe)
     assert suoni_annotati[-1] == "elenco_dei_tasti"
@@ -679,3 +687,44 @@ def test_f12_porta_il_cursore_all_inizio_dell_elenco(finestra):
     assert finestra.console.GetInsertionPoint() == inizio
     testo = finestra.console.GetValue().replace("\r\n", "\n").replace("\r", "\n")
     assert testo[inizio:].startswith("I tasti")
+
+
+def test_f1_f2_f3_scrivono_nella_console(finestra):
+    for codice, prima in ((wx.WXK_F1, "Manuale di MeTeOra"), (wx.WXK_F2, "Novità di MeTeOra"), (wx.WXK_F3, "Crediti di MeTeOra")):
+        _tasto(finestra, codice=codice)
+        for _ in range(5):
+            wx.Yield()
+        inizio = finestra._posizione_della_console
+        testo = finestra.console.GetValue().replace("\r\n", "\n").replace("\r", "\n")
+        assert testo[inizio:].startswith(prima)
+        assert finestra.console.GetInsertionPoint() == inizio
+    novita = modulo.righe_del_changelog(finestra._leggi_risorsa("CHANGELOG.md"))
+    assert novita[0] == "Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra."
+    assert any(r.startswith("Versione 1.17.4 del 2026-09-30") for r in novita)
+    assert not any(r.startswith(("#", "- ")) for r in novita)
+
+
+def test_ricerca_nella_console(finestra, suoni_annotati, monkeypatch):
+    finestra.scrivi("primo volume")
+    finestra.scrivi("niente")
+    finestra.scrivi("secondo VOLUME")
+    monkeypatch.setattr(wx, "TextEntryDialog", _DialogoFinto("volume"))
+    _tasto(finestra, "\\", maiuscolo=True)
+    testo = "\n".join(finestra._righe).lower()
+    primo = testo.find("volume")
+    for _ in range(5):
+        wx.Yield()
+    assert finestra.console.GetInsertionPoint() == primo
+    assert suoni_annotati[-1] == "trovato_in_console"
+    invio = wx.KeyEvent(wx.wxEVT_KEY_DOWN)
+    invio.SetKeyCode(wx.WXK_RETURN)
+    finestra._tasto_nella_console(invio)
+    secondo = testo.find("volume", primo + 1)
+    assert finestra.console.GetInsertionPoint() == secondo
+    finestra._tasto_nella_console(invio)
+    assert finestra.console.GetInsertionPoint() == primo
+    assert suoni_annotati[-1] == "ripartito_in_console"
+    monkeypatch.setattr(wx, "TextEntryDialog", _DialogoFinto("inesistente"))
+    finestra._comando_cerca_in_console()
+    assert _ultima(finestra) == "Nella console non c'è inesistente."
+
