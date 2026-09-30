@@ -1,0 +1,7 @@
+Collaudo di MeTeOra 1.26.0, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Suona un brano di una playlist, portalo a metà, esci con Esc e riapri: la console dice da dove riprende, il brano è in pausa al suo punto, la selezione è su di lui, e X riparte.
+Lo stesso con un sottobrano di un SID, con un file di una cartella di Questo PC e con una cartella suonata con X.
+K da una voce qualsiasi: il fuoco va sulla prima playlist, che si apre tutta, e parte il suo primo elemento. K e J passano alle altre; alle estremità la console dice che è la prima o l'ultima.
+Una playlist vuota con J o K: il fuoco ci va, e la console dice che non ha niente da suonare.
+Le cifre da 1 a 0 aprono e suonano le prime dieci playlist; una cifra oltre le playlist che hai lo dice.
+L'apostrofo e la ì dicono che serviranno per la traccia audio.

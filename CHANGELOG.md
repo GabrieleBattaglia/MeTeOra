@@ -2,6 +2,15 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.26.0] - 2026-10-01
+
+Chiude la tappa 2 del piano (issue 13).
+
+- Alla riapertura MeTeOra ritrova ciò che suonava all'uscita: la stessa playlist, cartella o file, lo stesso brano e sottobrano, allo stesso punto, in pausa, con la selezione della plancia su di lui. X riparte.
+- J e K portano il fuoco nella plancia sulla playlist precedente e successiva, la aprono tutta, sottobrani compresi, e suonano il suo primo elemento, se ne ha. Senza una playlist di partenza K va alla prima e J all'ultima.
+- Le cifre da 1 a 9, e lo 0 per la decima, fanno lo stesso con le prime dieci playlist salvate.
+- L'apostrofo e la ì sono riservati alla scelta della traccia audio, che arriverà.
+
 ## [1.23.0] - 2026-09-30
 
 - I Risultati della ricerca sono un albero che ricrea la provenienza: sotto il nome della playlist, o sotto Preferiti, quelli trovati nelle playlist; lungo il percorso della cartella, unità per unità e cartella per cartella, quelli trovati sul disco. Ogni ramo dice quanti risultati contiene, e dal suo menu si salva da solo come playlist. Le pagine da mille restano come riserva, dentro ogni ramo. F8 apre i rami fino al brano che suona.

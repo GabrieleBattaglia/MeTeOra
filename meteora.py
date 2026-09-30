@@ -22,6 +22,7 @@ def main():
     finestra.Show()
     finestra.albero.SetFocus()
     suoni.suona("avvio", finestra.impostazioni["volume_effetti"])
+    finestra.riprendi()
     app.MainLoop()
     return 0
 

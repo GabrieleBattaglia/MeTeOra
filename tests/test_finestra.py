@@ -768,3 +768,72 @@ def test_conti_delle_cartelle(finestra, tmp_path):
     finestra.schedario.schede[una] = {"dim": 1, "mod": 0, "durata": 61.5, "tag": {}, "sottobrani": None, "durate_sid": None}
     finestra._schede_arrivate()
     assert _etichette(finestra, nodo)[0] == "Barzellette, 3 file, 1:01.500 in tutto, 2 senza durata"
+
+
+def test_j_k_e_cifre_aprono_e_suonano(finestra, monkeypatch):
+    suonati = _finto_motore(finestra, monkeypatch)
+    finestra._aggiungi(None, [os.path.join(r"C:\m", "a.mp3")])
+    finestra.archivio.nuova("Vuota")
+    finestra.archivio.nuova("Terza", [os.path.join(r"C:\m", "c.mp3")])
+    finestra._popola_playlist()
+    prima, vuota, _terza = finestra.archivio.playlist
+    finestra.albero.SelectItem(finestra.nodo_pc)
+    _tasto(finestra, "k")
+    assert suonati[-1] == ("a.mp3", None)
+    nodo = finestra._nodo_della_playlist(prima)
+    assert finestra.albero.GetSelection() == nodo and finestra.albero.IsExpanded(nodo)
+    _tasto(finestra, "k")
+    assert _ultima(finestra) == f"La playlist {vuota.nome} non ha niente da suonare."
+    assert finestra.albero.GetSelection() == finestra._nodo_della_playlist(vuota)
+    _tasto(finestra, "k")
+    assert suonati[-1] == ("c.mp3", None)
+    _tasto(finestra, "k")
+    assert _ultima(finestra) == "È l'ultima playlist."
+    _tasto(finestra, "j")
+    _tasto(finestra, "j")
+    assert suonati[-1] == ("a.mp3", None)
+    _tasto(finestra, "3")
+    assert suonati[-1] == ("c.mp3", None)
+    _tasto(finestra, "0")
+    assert _ultima(finestra) == "Non c'è la playlist numero 10: ne hai 3."
+
+
+def _wav(percorso, secondi=3):
+    import wave
+
+    with wave.open(str(percorso), "wb") as f:
+        f.setnchannels(1)
+        f.setsampwidth(2)
+        f.setframerate(8000)
+        f.writeframes(b"\0\0" * 8000 * secondi)
+
+
+def test_ripresa_all_avvio_in_pausa(app, tmp_path):
+    from finestra import Finestra
+
+    brano = tmp_path / "canzone.wav"
+    _wav(brano)
+    dati = tmp_path / "dati"
+    dati.mkdir()
+    prima = Finestra(ao="null", cartella_dati=str(dati))
+    try:
+        prima._aggiungi(None, [str(tmp_path / "altro.wav"), str(brano)])
+        pl = prima.archivio.playlist[0]
+        prima._suona(pl, pl.brani[1])
+        assert _aspetta(lambda: (prima.motore.posizione or 0) > 0.3)
+        prima.Close(force=True)
+    finally:
+        prima.Destroy()
+    stato = prima.impostazioni["ripresa"]
+    assert stato["tipo"] == "playlist" and stato["indice"] == 0 and stato["numero"] == 1 and stato["posizione"] > 0.3
+    dopo = Finestra(ao="null", cartella_dati=str(dati))
+    try:
+        dopo.riprendi()
+        assert dopo.coda.corrente is dopo.archivio.playlist[0].brani[1]
+        assert dopo.motore.in_pausa
+        assert _aspetta(lambda: (dopo.motore.posizione or 0) > 0.3)
+        assert _ultima(dopo).startswith(f"Riprendo da dove eri: {brano}, in pausa a 0:0")
+        assert dopo.albero.GetItemText(dopo.albero.GetSelection()) == "canzone.wav, 0:03, in riproduzione"
+    finally:
+        dopo.Close(force=True)
+        dopo.Destroy()

@@ -72,21 +72,25 @@ class Motore:
         elif motivo == mpv.MpvEventEndFile.ERROR and self._all_errore:
             self._all_errore(percorso)
 
-    def suona(self, percorso, sottobrano=None):
-        """Avvia un file dall'inizio. Per i SID suona il sottobrano chiesto,
-        o quello iniziale, con la durata dal database della collezione."""
+    def suona(self, percorso, sottobrano=None, inizio=None, in_pausa=False):
+        """Avvia un file, dall'inizio o dai secondi inizio, e in pausa se
+        chiesto. Per i SID suona il sottobrano chiesto, o quello iniziale,
+        con la durata dal database della collezione."""
         self._in_corso = percorso
         self.sottobrano = self.sottobrani = None
+        # La pausa si mette prima di caricare: il brano non deve suonare
+        # nemmeno un istante.
+        self._lettore.pause = in_pausa
+        opzioni = {"start": f"{inizio:.3f}"} if inizio else {}
         info = songlengths.info_del_sid(percorso) if formati.e_sid(percorso) else None
         if info:
             self.sottobrani = max(1, info["sottobrani"])
             self.sottobrano = min(sottobrano or info["iniziale"] or 1, self.sottobrani)
             secondi = durata_del_sottobrano(percorso, self.sottobrano)
             self._lettore.loadfile(f"sid://{self.sottobrano}/{max(1.0, secondi)}/{percorso}", demuxer_lavf_format="wav", cache="no",
-                demuxer_readahead_secs="1")
+                demuxer_readahead_secs="1", **opzioni)
         else:
-            self._lettore.loadfile(percorso)
-        self._lettore.pause = False
+            self._lettore.loadfile(percorso, **opzioni)
 
     @property
     def in_corso(self):

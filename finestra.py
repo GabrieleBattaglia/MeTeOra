@@ -6,7 +6,8 @@
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
 # nella 1.15.0 la ricerca globale, nella 1.17.0 Z, B e N che seguono la plancia e F12,
 # nella 1.20.0 F1, F2 e F3 nella console, l'ora in fondo alle scritte e la ricerca nella console;
-# nella 1.21.0 il volume fino a 300, nella 1.22.0 i conti delle cartelle, nella 1.23.0 i Risultati ad albero.
+# nella 1.21.0 il volume fino a 300, nella 1.22.0 i conti delle cartelle, nella 1.23.0 i Risultati ad albero;
+# nella 1.26.0 la ripresa all'avvio, J e K e i tasti da 1 a 0.
 
 """La finestra di MeTeOra.
 
@@ -54,6 +55,8 @@ PAGINA_DEI_RISULTATI = 1000
 TASTI = {
     ("z", False): "precedente",
     ("x", False): "play",
+    ("j", False): "playlist_precedente",
+    ("k", False): "playlist_successiva",
     ("x", True): "loop",
     ("c", False): "pausa",
     ("c", True): "togli_loop",
@@ -78,11 +81,10 @@ TASTI = {
 # dicono di non essere ancora disponibili.
 FUTURI = {
     "a": "velocità", "s": "velocità", "d": "velocità", "f": "tono", "g": "tono", "h": "tono",
-    "j": "playlist precedente", "k": "playlist successiva", "l": "dissolvenza",
+    "l": "dissolvenza",
     "r": "segnalibri", "t": "segnalibri", "y": "segnalibri",
     "u": "equalizzatore", "i": "equalizzatore", "o": "equalizzatore", "p": "equalizzatore", "è": "equalizzatore",
-    "'": "playlist precedente", "ì": "playlist successiva",
-    **{str(n): "scelta della playlist" for n in range(10)},
+    "'": "scelta della traccia audio", "ì": "scelta della traccia audio",
 }
 FUTURI_MAIUSCOLI = {"l": "durata della dissolvenza"}
 
@@ -90,6 +92,7 @@ TASTI_COMUNI = [
     "X riproduce la voce selezionata o riprende, C pausa, V stop, Z e B brano precedente e successivo, N brano a caso.",
     "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, + e - volume, Maiuscolo+M il passo del volume, M muto.",
     "Maiuscolo+X mette e toglie i punti A e B del loop sul brano selezionato, Maiuscolo+C toglie il loop.",
+    "J e K aprono e suonano la playlist precedente e successiva, le cifre da 1 a 0 le prime dieci playlist.",
     "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione sul brano in riproduzione e Maiuscolo+F8 ce la tiene agganciata, F9 chiude e F10 apre tutto il ramo selezionato.",
     "Barra rovesciata: ricerca in tutte le playlist e in tutte le unità; barra verticale: ricerca nella console. F1 manuale, F2 novità, F3 crediti e F12 elenco dei tasti, tutti nella console. Esc esce salvando tutto.",
 ]
@@ -486,6 +489,9 @@ class Finestra(wx.Frame):
             return
         carattere = chr(unicode).lower()
         maiuscolo = modificatori == wx.MOD_SHIFT
+        if carattere.isdigit() and not maiuscolo:
+            self._playlist_numero(int(carattere) or 10)
+            return
         comando = TASTI.get((carattere, maiuscolo))
         if comando:
             getattr(self, f"_comando_{comando}")()
@@ -1365,6 +1371,7 @@ class Finestra(wx.Frame):
         brani = [b for sotto, files in contenuti for b in self._temporanea(sotto, files).brani]
         nome = os.path.basename(cartella.rstrip("\\")) or cartella
         pl = Playlist(nome, brani, cartella=cartella)
+        pl.ricorsiva = True
         brano = self.coda.primo(pl)
         if brano is None:
             self._riscontro("niente_da_suonare", "Né in questa cartella né nelle sue sottocartelle ci sono file da suonare.")
@@ -1560,6 +1567,63 @@ class Finestra(wx.Frame):
             self._suona(self.coda.playlist, corrente)
         else:
             self._riscontro("niente_da_suonare", "Niente da riprodurre: scegli un brano, una playlist o una cartella nella plancia.")
+
+    def _nodo_della_playlist(self, pl):
+        return next((v for v in self._figli(self.nodo_playlist) if (self._dati(v) or {}).get("playlist") is pl), None)
+
+    def _playlist_selezionata(self):
+        """La playlist salvata in cui sta la selezione, o quella che suona."""
+        voce = self.albero.GetSelection()
+        while voce.IsOk() and voce != self.albero.GetRootItem():
+            dati = self._dati(voce) or {}
+            if dati.get("tipo") == "playlist" and dati["playlist"] in self.archivio.playlist:
+                return dati["playlist"]
+            voce = self.albero.GetItemParent(voce)
+        return self.coda.playlist if self.coda.playlist in self.archivio.playlist else None
+
+    def _apri_e_suona(self, pl, evento):
+        """Porta il fuoco sulla playlist, la apre tutta e suona il primo
+        elemento che si puo' suonare, sottobrani compresi."""
+        self.albero.Expand(self.nodo_playlist)
+        nodo = self._nodo_della_playlist(pl)
+        self._apri_ramo(nodo)
+        self.albero.SelectItem(nodo)
+        self.albero.EnsureVisible(nodo)
+        self.albero.SetFocus()
+        voce = self._dopo(nodo)
+        while voce is not None and self._sotto(voce, nodo) and not self._suonabile_in_plancia(voce):
+            voce = self._dopo(voce)
+        if voce is None or not self._sotto(voce, nodo):
+            self._riscontro("niente_da_suonare", f"La playlist {pl.nome} non ha niente da suonare.")
+            return
+        dati = self._dati(voce)
+        self._suona(dati["playlist"], dati["brano"], evento, dati.get("numero"))
+
+    def _playlist_vicina(self, passo):
+        playlist = self.archivio.playlist
+        if not playlist:
+            self._riscontro("niente_da_suonare", "Non ci sono playlist salvate.")
+            return
+        attuale = self._playlist_selezionata()
+        # Senza una playlist di partenza, K parte dalla prima e J dall'ultima.
+        partenza = playlist.index(attuale) if attuale is not None else (-1 if passo > 0 else len(playlist))
+        indice = partenza + passo
+        if not 0 <= indice < len(playlist):
+            self._riscontro("nessun_altro_brano", "È la prima playlist." if passo < 0 else "È l'ultima playlist.")
+            return
+        self._apri_e_suona(playlist[indice], "playlist_precedente" if passo < 0 else "playlist_successiva")
+
+    def _comando_playlist_precedente(self):
+        self._playlist_vicina(-1)
+
+    def _comando_playlist_successiva(self):
+        self._playlist_vicina(1)
+
+    def _playlist_numero(self, numero):
+        if numero > len(self.archivio.playlist):
+            self._riscontro("nessun_altro_brano", f"Non c'è la playlist numero {numero}: ne hai {len(self.archivio.playlist)}.")
+            return
+        self._apri_e_suona(self.archivio.playlist[numero - 1], "playlist_numero")
 
     def _comando_togli_loop(self):
         if self.coda.loop_playlist is None:
@@ -1838,13 +1902,9 @@ class Finestra(wx.Frame):
         self.albero.SelectItem(voce)
         self._riscontro("chiudi_tutto", f"Chiuso tutto dentro {self.albero.GetItemText(voce)}.")
 
-    def _apri_tutto(self):
-        """Apre la voce e tutti i rami che ha dentro, caricandoli; si ferma a
-        MASSIMO_DI_RAMI, perche' sotto Questo PC ci sono dischi interi."""
-        voce = self._ramo_di_lavoro()
-        if voce is None:
-            self._riscontro("non_disponibile", "Qui non c'è niente da aprire.")
-            return
+    def _apri_ramo(self, voce):
+        """Apre la voce e tutti i rami che ha dentro, caricandoli, fino a
+        MASSIMO_DI_RAMI. Torna (rami aperti, vero se si e' fermato prima)."""
         aperti = 0
         da_aprire = [voce]
         with wx.BusyCursor():
@@ -1855,8 +1915,18 @@ class Finestra(wx.Frame):
                 self.albero.Expand(ramo)
                 aperti += 1
                 da_aprire.extend(self._figli(ramo))
+        return aperti, bool(da_aprire)
+
+    def _apri_tutto(self):
+        """Apre la voce e tutti i rami che ha dentro, caricandoli; si ferma a
+        MASSIMO_DI_RAMI, perche' sotto Questo PC ci sono dischi interi."""
+        voce = self._ramo_di_lavoro()
+        if voce is None:
+            self._riscontro("non_disponibile", "Qui non c'è niente da aprire.")
+            return
+        aperti, fermato = self._apri_ramo(voce)
         nome = self.albero.GetItemText(voce)
-        if da_aprire:
+        if fermato:
             self._riscontro("apri_tutto", f"Aperti {aperti} rami dentro {nome}; mi fermo qui, gli altri restano chiusi.")
         else:
             self._riscontro("apri_tutto", f"Aperto tutto dentro {nome}: {aperti} rami.")
@@ -1958,6 +2028,74 @@ class Finestra(wx.Frame):
         ]
         self._stampa("crediti", righe)
 
+    # La ripresa all'avvio.
+
+    def _stato_da_riprendere(self):
+        """Cosa suonava, per ritrovarlo alla riapertura: da quale lista, quale
+        brano e a che punto. Vuoto se non c'era niente."""
+        pl, brano = self.coda.playlist, self.coda.corrente
+        if pl is None or brano is None:
+            return {}
+        stato = {"percorso": brano.percorso, "sottobrano": self.motore.sottobrano if self.motore.sottobrani else None,
+            "numero": pl.indice(brano), "posizione": (self.motore.posizione or 0) if self.motore.in_corso else 0}
+        if pl is self.archivio.preferiti:
+            stato["tipo"] = "preferiti"
+        elif pl in self.archivio.playlist:
+            stato.update(tipo="playlist", indice=self.archivio.playlist.index(pl))
+        elif pl.cartella:
+            stato.update(tipo="ricorsiva" if getattr(pl, "ricorsiva", False) else "cartella", cartella=pl.cartella)
+        else:
+            stato["tipo"] = "file"
+        return stato
+
+    def _lista_da_riprendere(self, stato):
+        tipo = stato.get("tipo")
+        if tipo == "preferiti":
+            return self.archivio.preferiti
+        if tipo == "playlist" and isinstance(stato.get("indice"), int) and 0 <= stato["indice"] < len(self.archivio.playlist):
+            return self.archivio.playlist[stato["indice"]]
+        if tipo == "cartella" and os.path.isdir(stato.get("cartella", "")):
+            return self._temporanea(stato["cartella"])
+        if tipo == "ricorsiva" and os.path.isdir(stato.get("cartella", "")):
+            contenuti = questo_pc.contenuti_ricorsivi(stato["cartella"])
+            brani = [b for sotto, files in contenuti for b in self._temporanea(sotto, files).brani]
+            pl = Playlist(os.path.basename(stato["cartella"].rstrip("\\")) or stato["cartella"], brani, cartella=stato["cartella"])
+            pl.ricorsiva = True
+            return pl
+        return None
+
+    def riprendi(self):
+        """All'avvio: rimette in pausa, al suo punto, cio' che suonava
+        all'uscita, e ci porta la selezione della plancia. X riparte."""
+        stato = self.impostazioni.get("ripresa") or {}
+        percorso = stato.get("percorso")
+        if not percorso:
+            return
+        if not os.path.isfile(percorso):
+            self.scrivi(f"Non trovo più {percorso}, che suonava l'ultima volta.")
+            return
+        pl = self._lista_da_riprendere(stato)
+        brano = None
+        if pl is not None:
+            numero = stato.get("numero")
+            if isinstance(numero, int) and 0 <= numero < len(pl.brani) and pl.brani[numero].percorso == percorso:
+                brano = pl.brani[numero]
+            else:
+                brano = next((b for b in pl.brani if b.percorso == percorso), None)
+        if brano is None:
+            pl = Playlist("file aperto", [Brano(percorso)], cartella="")
+            brano = pl.brani[0]
+        posizione = stato.get("posizione") or 0
+        self.coda.imposta(pl, brano)
+        sottobrano = stato.get("sottobrano") if isinstance(stato.get("sottobrano"), int) else None
+        self.motore.suona(percorso, sottobrano, inizio=posizione, in_pausa=True)
+        voce = self._trova_voce_che_suona()
+        if voce is not None:
+            self.albero.EnsureVisible(voce)
+            self.albero.SelectItem(voce)
+        self._aggiorna_etichette()
+        self._riscontro("ripresa_all_avvio", f"Riprendo da dove eri: {percorso}, in pausa a {tempo(posizione)}. X riparte.")
+
     # L'uscita.
 
     def _alla_chiusura(self, evento):
@@ -1967,6 +2105,7 @@ class Finestra(wx.Frame):
         self._chiusa = True
         if self._ricerca is not None:
             self._ricerca.ferma()
+        self.impostazioni["ripresa"] = self._stato_da_riprendere()
         self._salva_archivio()
         self.contatore.ferma()
         self.schedario.ferma()

@@ -33,12 +33,14 @@ Tutti i tasti funzionano in tutta la finestra, qualunque area abbia il fuoco. Qu
 F5: la plancia dei comandi. F6: la console. F7: il cruscotto, con i tasti del punto da cui arrivi. Tab e Maiuscolo con Tab passano da un'area all'altra.
 F1: questo manuale. F2: le novità di ogni versione. F3: i crediti. Come F12, li scrivono nella console e ci portano il fuoco, con il cursore sulla prima riga.
 F12: scrive nella console questo elenco dei tasti e ci porta il fuoco, con il cursore sulla sua prima riga, I tasti.
-Esc: esce da MeTeOra salvando tutto.
+Esc: esce da MeTeOra salvando tutto. Alla riapertura ritrovi, in pausa, il brano e il punto a cui eri, con la selezione della plancia su di lui: X riparte.
 X: riproduce la voce selezionata, cioè un brano, un file, un sottobrano, una playlist o una cartella. Una cartella, o un'unità, si suona con tutto ciò che ha sotto: prima i suoi file, poi quelli delle sottocartelle. Se la voce è quella che sta già suonando in pausa, riprende.
 C: pausa, e di nuovo C riprende.
 V: stop. Poi X riparte dall'inizio del brano.
 Z e B: il brano precedente e il successivo. Seguono la plancia come l'avanzamento automatico: se ciò che suona si vede, vanno alla voce suonabile prima o dopo, sottobrani compresi; se non si vede, seguono la lista da cui è partito.
 N: un brano a caso fra le voci suonabili che si vedono nella plancia; se ciò che suona non si vede, a caso nella sua lista.
+J e K: portano il fuoco nella plancia sulla playlist precedente e successiva a quella in cui sei, o a quella che suona; la aprono tutta, sottobrani compresi, e suonano il suo primo elemento, se ne ha almeno uno. Senza una playlist di partenza, K va alla prima e J all'ultima.
+Le cifre da 1 a 9, e lo 0 per la decima: come J e K, con le prime dieci playlist salvate.
 Q ed E: indietro e avanti nel brano, di dieci secondi se non lo cambi.
 Maiuscolo con Q e Maiuscolo con E: chiedono di quanti secondi saltare, indietro e avanti, anche con i decimali, come 2.5.
 W: va a un tempo del brano, scritto come minuti e secondi, per esempio 1:30, oppure in secondi, anche con i decimali: 1:30.5 oppure 90.5.
@@ -60,6 +62,6 @@ Nella plancia, freccia destra e freccia sinistra: aprono e chiudono i rami. Sull
 Nella plancia, Canc: elimina una playlist dopo una conferma, toglie un brano da una playlist o dai Preferiti, svuota il filtro.
 Nella plancia, Maiuscolo con Canc: manda nel cestino di Windows il file di un brano o di una cartella, dopo una conferma con No come risposta predefinita.
 Nei campi del filtro e della ricerca: Invio conferma, Ctrl con Invio va a capo, Esc annulla.
-Gli altri tasti a lettera e le cifre sono già assegnati a funzioni che arriveranno, come la velocità, il tono, l'equalizzatore, i segnalibri e la scelta delle playlist: per ora dicono che non sono ancora disponibili.
+Gli altri tasti a lettera, l'apostrofo e la ì sono già assegnati a funzioni che arriveranno, come la velocità, il tono, l'equalizzatore, i marker e la scelta della traccia audio: per ora dicono che non sono ancora disponibili.
 I SID
 MeTeOra suona i SID emulando il Commodore 64 mentre suonano, senza scrivere niente su disco. Per ogni SID usa la durata del database della High Voltage SID Collection, se il file sta in una collezione HVSC; altrimenti lo suona per tre minuti. Suonando il file suona il sottobrano iniziale; gli altri si scelgono aprendo il ramo del SID, e con il ramo aperto Z e B passano da un sottobrano all'altro.

@@ -20,6 +20,8 @@ PREDEFINITE = {
     "volume_effetti": 0.5,
     # Maiuscolo+F8: la selezione della plancia segue il brano che suona.
     "insegui": False,
+    # Cosa suonava all'uscita, per riprendere da li' in pausa.
+    "ripresa": {},
 }
 
 

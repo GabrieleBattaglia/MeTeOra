@@ -60,6 +60,10 @@ EVENTI = {
     "cartella_aperta": "carta_pescata",
     "file_aperto": "carta_girata",
     "vai_al_brano": "grosse_biglie",
+    "playlist_precedente": "menu_triplicato_su_6",
+    "playlist_successiva": "menu_tripletta_in_basso_9",
+    "playlist_numero": "notifica_tramite_interfaccia_utente_4",
+    "ripresa_all_avvio": "notifica_tramite_interfaccia_utente_5",
     # Lo stesso laser: sale quando aggancia, scende quando sgancia.
     "insegui_acceso": "meteora_aggancio",
     "insegui_spento": "laser_da_gioco_3",
