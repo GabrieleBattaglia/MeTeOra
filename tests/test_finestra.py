@@ -584,32 +584,46 @@ def test_ricerca_globale(finestra, monkeypatch, suoni_annotati, tmp_path):
     monkeypatch.setattr(modulo, "PAGINA_DEI_RISULTATI", 2)
     cartella = tmp_path / "Musica"
     (cartella / "Dentro").mkdir(parents=True)
-    for nome in ("rock uno.mp3", "jazz.mp3", "rock due.mp3", "Dentro/rock tre.flac", "Dentro/rock quattro.mp3"):
+    for nome in ("rock uno.mp3", "jazz.mp3", "rock due.mp3", "Dentro/rock tre.flac", "Dentro/rock quattro.mp3", "Dentro/rock cinque.mp3"):
         (cartella / nome).write_bytes(b"")
     finestra._aggiungi(None, [str(cartella / "rock uno.mp3"), os.path.join(r"C:\m", "rock in playlist.mp3")])
     finestra._avvia_ricerca("rock", Filtro("rock"), unita=[str(cartella)])
     finestra._ricerca.aspetta()
     finestra._risultati_arrivati()
     radice = finestra.albero.GetRootItem()
-    assert _etichette(finestra, radice)[:2] == ["Preferiti, brani: 0, totali: 0", "Risultati di rock: 5 trovati"]
-    assert _ultima(finestra) == "Ricerca di rock finita: 5 risultati."
-    # Prima quelli delle playlist, senza doppioni con quelli del disco.
-    percorsi = [b.percorso for b in finestra.risultati.brani]
-    assert percorsi[:2] == [str(cartella / "rock uno.mp3"), os.path.join(r"C:\m", "rock in playlist.mp3")]
-    assert len(set(percorsi)) == 5
+    assert _etichette(finestra, radice)[:2] == ["Preferiti, brani: 0, totali: 0", "Risultati di rock: 6 trovati"]
+    assert _ultima(finestra) == "Ricerca di rock finita: 6 risultati."
+    # I risultati stanno dove stavano: sotto la loro playlist, o lungo il percorso della cartella.
     finestra.albero.Expand(finestra.nodo_risultati)
-    etichette = _etichette(finestra, finestra.nodo_risultati)
-    assert etichette == [str(cartella / "rock uno.mp3"), os.path.join(r"C:\m", "rock in playlist.mp3"), "Mostra altri 2 risultati, ne restano 3"]
-    altri = list(finestra._figli(finestra.nodo_risultati))[-1]
-    finestra.albero.SelectItem(altri)
+    rami = _etichette(finestra, finestra.nodo_risultati)
+    assert rami[0] == "Playlist Playlist, 2 risultati"
+    assert rami[1].endswith(", 4 risultati") and len(rami) == 2
+    playlist = next(finestra._figli(finestra.nodo_risultati))
+    finestra.albero.Expand(playlist)
+    assert _etichette(finestra, playlist) == ["rock uno.mp3", "rock in playlist.mp3"]
+    # Fino a Dentro con i rami veri: tre risultati, due alla volta.
+    def risultato(nome):
+        return next(b for b in finestra.risultati.brani if b.nome_del_file == nome)
+
+    cinque = risultato("rock cinque.mp3")
+    gruppo = finestra._albero_dei_risultati.gruppo_del_brano[id(cinque)]
+    assert [g.nome for g in finestra._albero_dei_risultati.catena(gruppo)][-2:] == ["Musica", "Dentro"]
+    dentro = finestra.albero.GetItemParent(finestra._apri_fino_al_risultato(cinque))
+    assert finestra.albero.GetItemText(dentro) == "Dentro, 3 risultati"
+    assert _etichette(finestra, dentro) == ["rock cinque.mp3", "rock quattro.mp3", "Mostra l'ultimo risultato"]
+    musica = finestra.albero.GetItemParent(dentro)
+    assert _etichette(finestra, musica) == ["Dentro, 3 risultati", "rock due.mp3"]
+    finestra.albero.SelectItem(list(finestra._figli(dentro))[-1])
     finestra._altri_risultati()
-    assert len(_etichette(finestra, finestra.nodo_risultati)) == 5
-    assert _etichette(finestra, finestra.nodo_risultati)[-1] == "Mostra l'ultimo risultato"
-    assert finestra.albero.GetSelection() == list(finestra._figli(finestra.nodo_risultati))[2]
-    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("rock salvati"))
+    assert _etichette(finestra, dentro) == ["rock cinque.mp3", "rock quattro.mp3", "rock tre.flac"]
+    assert finestra.albero.GetItemText(finestra.albero.GetSelection()) == "rock tre.flac"
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("rock di dentro"))
+    finestra._salva_risultati(finestra._dati(dentro)["gruppo"])
+    assert finestra.archivio.playlist[-1].nome == "rock di dentro"
+    assert len(finestra.archivio.playlist[-1].brani) == 3
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("tutti i rock"))
     finestra._salva_risultati()
-    assert finestra.archivio.playlist[-1].nome == "rock salvati"
-    assert len(finestra.archivio.playlist[-1].brani) == 5
+    assert len(finestra.archivio.playlist[-1].brani) == 6
     # Una nuova ricerca sostituisce i Risultati.
     finestra._avvia_ricerca("jazz", Filtro("jazz"), unita=[str(cartella)])
     finestra._ricerca.aspetta()

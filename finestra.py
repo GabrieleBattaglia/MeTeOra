@@ -6,7 +6,7 @@
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
 # nella 1.15.0 la ricerca globale, nella 1.17.0 Z, B e N che seguono la plancia e F12,
 # nella 1.20.0 F1, F2 e F3 nella console, l'ora in fondo alle scritte e la ricerca nella console;
-# nella 1.21.0 il volume fino a 300, nella 1.22.0 i conti delle cartelle.
+# nella 1.21.0 il volume fino a 300, nella 1.22.0 i conti delle cartelle, nella 1.23.0 i Risultati ad albero.
 
 """La finestra di MeTeOra.
 
@@ -38,7 +38,7 @@ from filtro import ErroreFiltro, Filtro
 from impostazioni import Impostazioni
 from motore import VOLUME_MASSIMO, durata_del_sottobrano
 from playlist import Archivio, Brano, Coda, Playlist
-from ricerca import Ricerca
+from ricerca import AlberoDeiRisultati, Ricerca
 from schedario import Schedario
 
 FILE_PLAYLIST = "MeTeOra - Playlist.json"
@@ -98,6 +98,7 @@ TASTI_DEL_CONTESTO = {
     "filtro": ("il filtro di una playlist", "Invio o freccia destra modificano il filtro: nel campo Invio conferma, Ctrl+Invio va a capo, Esc annulla. Canc svuota il filtro."),
     "risultati": ("i Risultati della ricerca", "Invio, Applicazioni o Spazio: menu con Riproduci, Salva come playlist, Nuova ricerca e Ferma la ricerca."),
     "altri": ("la voce che mostra altri risultati", "Invio mostra i risultati seguenti."),
+    "gruppo_risultati": ("un ramo dei Risultati", "Freccia destra lo apre: i risultati stanno come stavano, sotto la loro playlist o lungo il percorso della loro cartella."),
     "preferiti": ("i Preferiti", "Invio, Applicazioni o Spazio: menu con Riproduci. Canc su un loro brano lo toglie dai Preferiti."),
     "radice_playlist": ("il ramo Playlist", "Invio, Applicazioni o Spazio: menu con Nuova playlist."),
     "playlist": ("una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci e Rinomina. Canc elimina la playlist, dopo una conferma."),
@@ -283,9 +284,7 @@ class Finestra(wx.Frame):
         self._testo_della_ricerca = ""
         self.risultati = None
         self.nodo_risultati = None
-        # Quanti risultati si possono mostrare: una pagina, e una in piu' a
-        # ogni Mostra altri risultati.
-        self._pagina = PAGINA_DEI_RISULTATI
+        self._albero_dei_risultati = None
         self.schedario = Schedario(os.path.join(cartella_dati, FILE_SCHEDARIO), avvisa=lambda: wx.CallAfter(self._schede_arrivate))
         self.schedario.carica()
         self.contatore = Contatore(self.schedario, avvisa=lambda: wx.CallAfter(self._conti_arrivati))
@@ -810,8 +809,8 @@ class Finestra(wx.Frame):
                 figlio = self.albero.AppendItem(voce, etichetta, data={"tipo": "unita", "percorso": radice, "etichetta": etichetta, "caricato": False})
                 self.albero.SetItemHasChildren(figlio, True)
             return
-        if tipo == "risultati":
-            self._mostra_risultati()
+        if tipo in ("risultati", "gruppo_risultati"):
+            self._riempi_gruppo(voce)
             return
         if tipo == "playlist":
             pl = dati["playlist"]
@@ -925,6 +924,9 @@ class Finestra(wx.Frame):
                 ("Nuova ricerca", self._comando_ricerca), ("Ferma la ricerca", self._ferma_ricerca)]
         if tipo == "altri":
             return [("Mostra altri risultati", self._altri_risultati)]
+        if tipo == "gruppo_risultati":
+            gruppo = dati["gruppo"]
+            return [("Salva come playlist", lambda: self._salva_risultati(gruppo))]
         if tipo == "filtro":
             pl = dati["playlist"]
             return [("Modifica il filtro", lambda: self._modifica_filtro(pl)), ("Svuota il filtro", lambda: self._imposta_filtro(pl, ""))]
@@ -1098,16 +1100,17 @@ class Finestra(wx.Frame):
             self._ricerca.ferma()
         self._testo_della_ricerca = testo
         self.risultati = Playlist("Risultati", cartella="")
-        brani = [b for pl in (self.archivio.preferiti, *self.archivio.playlist) for b in pl.brani]
+        brani = [(b, "Preferiti") for b in self.archivio.preferiti.brani]
+        brani += [(b, f"Playlist {pl.nome}") for pl in self.archivio.playlist for b in pl.brani]
         self._ricerca = Ricerca(filtro, brani, self.schedario, avvisa=lambda: wx.CallAfter(self._risultati_arrivati), unita=unita)
+        self._albero_dei_risultati = AlberoDeiRisultati(dict(questo_pc.unita()))
         if self.nodo_risultati is None:
             self.nodo_risultati = self.albero.InsertItem(self.albero.GetRootItem(), self.nodo_preferiti, "Risultati")
         else:
             self.albero.Collapse(self.nodo_risultati)
             self.albero.DeleteChildren(self.nodo_risultati)
-        self.albero.SetItemData(self.nodo_risultati, {"tipo": "risultati", "playlist": self.risultati, "caricato": False})
+        self.albero.SetItemData(self.nodo_risultati, self._dati_del_gruppo("risultati", self._albero_dei_risultati.radice))
         self.albero.SetItemHasChildren(self.nodo_risultati, True)
-        self._pagina = PAGINA_DEI_RISULTATI
         self._aggiorna_risultati()
         self._ricerca.avvia()
         self._riscontro("ricerca_avviata", f"Cerco {testo} nelle playlist e nelle unità. I Risultati si riempiono mentre cerco.")
@@ -1117,42 +1120,68 @@ class Finestra(wx.Frame):
         stato = "" if self._ricerca is None or self._ricerca.finita else (", ricerca fermata" if self._ricerca.fermata else ", ricerca in corso")
         return f"Risultati di {self._testo_della_ricerca}: {trovati} {'trovato' if trovati == 1 else 'trovati'}{stato}"
 
+    def _dati_del_gruppo(self, tipo, gruppo):
+        """I dati di un ramo dei Risultati: quanti suoi rami e brani sono gia'
+        nella plancia, e fin dove arriva la sua pagina."""
+        return {"tipo": tipo, "playlist": self.risultati, "gruppo": gruppo, "caricato": False, "rami": 0, "brani": 0,
+            "pagina": PAGINA_DEI_RISULTATI}
+
+    def _etichetta_del_gruppo(self, gruppo):
+        return f"{gruppo.nome}, {gruppo.totale} {'risultato' if gruppo.totale == 1 else 'risultati'}"
+
     def _aggiorna_risultati(self):
-        """Allinea i Risultati alla ricerca: la playlist, l'etichetta e,
-        se il ramo e' caricato, le voci nuove fino alla pagina corrente."""
+        """Porta dentro i risultati nuovi della ricerca: nella playlist, nel
+        loro ramo dell'albero e, per i rami gia' aperti, nella plancia."""
         if self._ricerca is None:
             return
-        nuovi = self._ricerca.pezzo(len(self.risultati.brani), self._ricerca.quanti())
-        self.risultati.brani.extend(nuovi)
+        for brano, origine in self._ricerca.pezzo(len(self.risultati.brani), self._ricerca.quanti()):
+            self.risultati.brani.append(brano)
+            self._albero_dei_risultati.aggiungi(brano, origine)
         self.albero.SetItemText(self.nodo_risultati, self._etichetta_dei_risultati())
-        if self._dati(self.nodo_risultati).get("caricato"):
-            self._mostra_risultati()
+        for voce in [self.nodo_risultati, *self._tutte_le_voci(self.nodo_risultati)]:
+            dati = self._dati(voce) or {}
+            if dati.get("tipo") == "gruppo_risultati":
+                self.albero.SetItemText(voce, self._etichetta_del_gruppo(dati["gruppo"]))
+            if dati.get("tipo") in ("risultati", "gruppo_risultati") and dati.get("caricato"):
+                self._riempi_gruppo(voce)
 
-    def _mostra_risultati(self):
-        """Porta il ramo dei Risultati fino alla pagina corrente, con in fondo
-        la voce per vederne altri se ce ne sono."""
-        voce = self.nodo_risultati
+    def _riempi_gruppo(self, voce):
+        """Porta nella plancia cio' che manca di un ramo dei Risultati: prima
+        i rami che contiene, poi i suoi brani fino alla pagina, e in fondo la
+        voce per vederne altri se ce ne sono. Si puo' chiamare di nuovo quando
+        arrivano risultati nuovi: aggiunge soltanto."""
+        dati = self._dati(voce)
+        dati["caricato"] = True
+        gruppo = dati["gruppo"]
         figli = list(self._figli(voce))
         if figli and (self._dati(figli[-1]) or {}).get("tipo") == "altri":
             self.albero.Delete(figli[-1])
-        presenti = self.albero.GetChildrenCount(voce, False)
-        for brano in self.risultati.brani[presenti:self._pagina]:
-            self._aggiungi_voce(voce, "file", self.risultati, brano, completo=True)
-        restano = len(self.risultati.brani) - self.albero.GetChildrenCount(voce, False)
+        for sotto in gruppo.elenco_dei_gruppi[dati["rami"]:]:
+            ramo = self.albero.InsertItem(voce, dati["rami"], self._etichetta_del_gruppo(sotto), data=self._dati_del_gruppo("gruppo_risultati", sotto))
+            self.albero.SetItemHasChildren(ramo, True)
+            dati["rami"] += 1
+        for brano in gruppo.brani[dati["brani"]:dati["pagina"]]:
+            self._aggiungi_voce(voce, "file", self.risultati, brano)
+            dati["brani"] += 1
+        restano = len(gruppo.brani) - dati["brani"]
         if restano > 0:
             testo = "Mostra l'ultimo risultato" if restano == 1 else f"Mostra altri {min(restano, PAGINA_DEI_RISULTATI)} risultati, ne restano {restano}"
-            self.albero.AppendItem(voce, testo, data={"tipo": "altri"})
+            self.albero.AppendItem(voce, testo, data={"tipo": "altri", "ramo": voce})
 
     def _altri_risultati(self):
-        prima = self._pagina
-        self._pagina += PAGINA_DEI_RISULTATI
-        self._mostra_risultati()
+        altri = self.albero.GetSelection()
+        ramo = (self._dati(altri) or {}).get("ramo")
+        if ramo is None:
+            return
+        dati = self._dati(ramo)
+        prima = dati["rami"] + dati["brani"]
+        dati["pagina"] += PAGINA_DEI_RISULTATI
+        self._riempi_gruppo(ramo)
         # La selezione va sul primo dei risultati appena mostrati.
-        figli = list(self._figli(self.nodo_risultati))
+        figli = list(self._figli(ramo))
         if len(figli) > prima:
             self.albero.SelectItem(figli[prima])
-        mostrati = min(self._pagina, len(self.risultati.brani))
-        self._riscontro("altri_risultati", f"Mostrati {mostrati} risultati su {len(self.risultati.brani)}.")
+        self._riscontro("altri_risultati", f"Mostrati {dati['brani']} risultati su {len(dati['gruppo'].brani)} in {dati['gruppo'].nome}.")
 
     def _risultati_arrivati(self):
         if self._chiusa or self._ricerca is None:
@@ -1170,16 +1199,26 @@ class Finestra(wx.Frame):
         self._aggiorna_risultati()
         self._riscontro("ricerca_fermata", f"Ricerca fermata: {len(self.risultati.brani)} risultati.")
 
-    def _salva_risultati(self):
+    def _brani_del_gruppo(self, gruppo):
+        """I risultati di un ramo e di tutti quelli che contiene, in ordine."""
+        brani = list(gruppo.brani)
+        for sotto in gruppo.elenco_dei_gruppi:
+            brani.extend(self._brani_del_gruppo(sotto))
+        return brani
+
+    def _salva_risultati(self, gruppo=None):
+        """Salva come playlist tutti i Risultati, o soltanto un loro ramo."""
         if not self.risultati or not self.risultati.brani:
             self._riscontro("niente_da_suonare", "Non ci sono risultati da salvare.")
             return
-        with DialogoTesto(self, "Nome della nuova playlist:", "Salva i risultati", f"Ricerca {self._testo_della_ricerca}") as dialogo:
+        proposta = f"Ricerca {self._testo_della_ricerca}" if gruppo is None else f"{gruppo.nome} {self._testo_della_ricerca}"
+        with DialogoTesto(self, "Nome della nuova playlist:", "Salva i risultati", proposta) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
                 return
             nome = dialogo.GetValue().strip() or "Ricerca"
         self._aggiorna_risultati()
-        self._aggiungi(None, [Brano(b.percorso, sottobrano=b.sottobrano) for b in self.risultati.brani], nome=nome)
+        brani = self.risultati.brani if gruppo is None else self._brani_del_gruppo(gruppo)
+        self._aggiungi(None, [Brano(b.percorso, sottobrano=b.sottobrano) for b in brani], nome=nome)
 
     def _crea_da_qui(self, cartella, nome):
         with wx.BusyCursor():
@@ -1331,6 +1370,26 @@ class Finestra(wx.Frame):
             self._riscontro("niente_da_suonare", "Né in questa cartella né nelle sue sottocartelle ci sono file da suonare.")
             return
         self._suona(pl, brano)
+
+    def _apri_fino_al_risultato(self, brano):
+        """Apre i rami dei Risultati fino a quello del brano, con le pagine
+        che servono per vederlo, e ne restituisce la voce."""
+        gruppo = self._albero_dei_risultati.gruppo_del_brano.get(id(brano))
+        if gruppo is None:
+            return None
+        voce = self.nodo_risultati
+        self.albero.Expand(voce)
+        for anello in self._albero_dei_risultati.catena(gruppo):
+            voce = next((v for v in self._figli(voce) if (self._dati(v) or {}).get("gruppo") is anello), None)
+            if voce is None:
+                return None
+            self.albero.Expand(voce)
+        dati = self._dati(voce)
+        posizione = gruppo.brani.index(brano)
+        if posizione >= dati["pagina"]:
+            dati["pagina"] = (posizione // PAGINA_DEI_RISULTATI + 1) * PAGINA_DEI_RISULTATI
+            self._riempi_gruppo(voce)
+        return next((v for v in self._figli(voce) if (self._dati(v) or {}).get("brano") is brano), None)
 
     def _apri_fino_a(self, cartella):
         """Apre in Questo PC i rami fino alla cartella e ne restituisce la
@@ -1713,6 +1772,8 @@ class Finestra(wx.Frame):
                 self._carica(nodo, self._dati(nodo))
         voce = next((v for v in self._tutte_le_voci() if (self._dati(v) or {}).get("tipo") in ("brano", "file")
             and self._dati(v)["brano"] is corrente), None)
+        if voce is None and pl is self.risultati and self._albero_dei_risultati is not None:
+            voce = self._apri_fino_al_risultato(corrente)
         if voce is None and pl.temporanea and pl.cartella:
             # Suonando una cartella con le sottocartelle, il brano puo' stare
             # in una sottocartella mai aperta nella plancia.

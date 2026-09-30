@@ -8,4 +8,8 @@ Sì, però il campo va in editazione senza il contenuto pregresso selezionato e 
 Premi più volte + e -: nella console resta una riga sola del volume, riscritta.
 Sì. Vedi se sia possibile andare oltre al 100. In VLC ad esempio si può salire molto oltre il 100%. Amplifica quegli audio con problemi di volume.
 
-Note: nell'esempio di imposta passo shift+q shift +e riporti ancora la virgola: sostituire col punto.
+Note: nell'esempio di imposta passo shift+q shift +e riporti ancora la virgola: sostituire col punto.Nei campi, per esempio con Maiuscolo+E, il testo di prima arriva selezionato: scrivendo lo sostituisci.
+Più sopra il 100: il volume sale fino a 300 e la console dice che amplifica.
+Le cartelle di Questo PC dicono quanti file contengono, sottocartelle comprese, e quanto durano in tutto; per esempio 13 il barzellettiere su E.
+Una ricerca con risultati in più cartelle: i Risultati sono un albero con le playlist e con il percorso delle cartelle, e ogni ramo dice quanti risultati ha.
+Dal menu di un ramo dei Risultati, Salva come playlist salva solo quel ramo.
