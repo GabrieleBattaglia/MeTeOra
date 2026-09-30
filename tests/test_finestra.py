@@ -145,8 +145,6 @@ def test_riproduzione_di_una_cartella_e_selezione_ferma(finestra, suoni_annotati
     assert _ultima(finestra).startswith(f"In riproduzione: {TURBO_OUTRUN}, ")
     assert "Sottobrano 1 di 12." in _ultima(finestra)
     assert _aspetta(lambda: (finestra.motore.posizione or 0) > 0.2)
-    finestra._informazioni()
-    assert "di 7:55" in _ultima(finestra)
     selezione = finestra.albero.GetSelection()
     _tasto(finestra, "b")
     assert finestra.albero.GetSelection() == selezione
@@ -177,6 +175,50 @@ def test_cruscotto_ricorda_il_cursore(finestra):
     finestra._area_precedente = "albero"
     finestra._rinfresca_cruscotto()
     assert finestra.cruscotto.GetInsertionPoint() == 0
+    # Il fuoco che se ne va e ritorna: il cursore torna dove era.
+    finestra.cruscotto.SetInsertionPoint(30)
+    finestra._cruscotto_lasciato(wx.FocusEvent(wx.wxEVT_KILL_FOCUS))
+    finestra.cruscotto.SetInsertionPoint(0)
+    finestra._fuoco_al_cruscotto(wx.FocusEvent(wx.wxEVT_SET_FOCUS))
+    wx.Yield()
+    assert finestra.cruscotto.GetInsertionPoint() == 30
+
+
+def test_console_riscrive_la_riga_della_stessa_categoria(finestra):
+    finestra.motore.volume = 50
+    righe = len(finestra._righe)
+    _tasto(finestra, "+")
+    _tasto(finestra, "+")
+    _tasto(finestra, "-")
+    assert len(finestra._righe) == righe + 1
+    assert _ultima(finestra) == "Volume 55."
+    testo = finestra.console.GetValue().replace("\r\n", "\n").replace("\r", "\n")
+    assert testo.split("\n") == finestra._righe
+    finestra.scrivi("altro")
+    _tasto(finestra, "+")
+    assert finestra._righe[-2:] == ["altro", "Volume 60."]
+
+
+def test_f9_e_f10(finestra, suoni_annotati):
+    finestra._aggiungi(None, [os.path.join(r"C:\m", "uno.mp3")])
+    finestra.albero.SelectItem(finestra.nodo_playlist)
+    _tasto(finestra, codice=wx.WXK_F10)
+    nodo = next(finestra._figli(finestra.nodo_playlist))
+    assert finestra.albero.IsExpanded(nodo)
+    assert _ultima(finestra).startswith("Aperto tutto dentro Playlist")
+    finestra.albero.SelectItem(list(finestra._figli(nodo))[1])
+    _tasto(finestra, codice=wx.WXK_F9)
+    assert not finestra.albero.IsExpanded(nodo)
+    assert finestra.albero.GetSelection() == nodo
+    assert suoni_annotati[-1] == "chiudi_tutto"
+
+
+def test_maiuscolo_c_toglie_il_loop(finestra):
+    _tasto(finestra, "c", maiuscolo=True)
+    assert _ultima(finestra) == "Non c'è un loop da togliere."
+    finestra.coda.loop_playlist = finestra.archivio.preferiti
+    _tasto(finestra, "c", maiuscolo=True)
+    assert finestra.coda.loop_playlist is None
 
 
 def _voce(f, radice, condizione):
@@ -399,3 +441,14 @@ def test_campo_del_filtro_ctrl_invio_va_a_capo(finestra):
         assert dialogo.campo.GetName() == "Filtro di Prova"
     finally:
         dialogo.Destroy()
+
+
+def test_durate_nella_plancia(finestra):
+    percorso = os.path.join(r"C:\m", "lungo.mp3")
+    finestra._aggiungi(None, [percorso])
+    nodo = next(finestra._figli(finestra.nodo_playlist))
+    finestra.albero.Expand(nodo)
+    assert _etichette(finestra, nodo)[1] == "lungo.mp3"
+    finestra.schedario.schede[percorso] = {"dim": 1, "mod": 0, "durata": 125.5, "tag": {}, "sottobrani": None, "durate_sid": None}
+    finestra._schede_arrivate()
+    assert _etichette(finestra, nodo)[1] == "lungo.mp3, 2:05.500"

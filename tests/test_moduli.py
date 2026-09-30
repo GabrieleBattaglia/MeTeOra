@@ -76,7 +76,7 @@ def test_tempi():
     assert durata_lunga(3723.456) == "1:02:03.456"
     assert durata_lunga(245) == "4:05"
     assert durata_lunga(7.25) == "0:07.250"
-    assert secondi_da_leggere(1.25) == "1,25"
+    assert secondi_da_leggere(1.25) == "1.25"
     assert leggi_tempo("1:30") == 90
     assert leggi_tempo("90") == 90
     assert leggi_tempo("1.2") == 1.2

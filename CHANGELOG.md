@@ -2,6 +2,22 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.12.2] - 2026-09-30
+
+Correzioni dal collaudo della 1.8.0.
+
+- Il cruscotto ricorda davvero il cursore: il controllo, ricevendo il fuoco, lo rimetteva in cima, e ora lo si riporta dove era.
+- I secondi si scrivono con il punto decimale, come sei abituato: 1.2, non più 1,2. La virgola si accetta ancora.
+
+## [1.12.0] - 2026-09-30
+
+Novità dal collaudo della 1.8.0.
+
+- La durata accanto a ogni brano, nelle playlist e nei file di Questo PC, appena lo schedario la conosce. Un SID con più sottobrani dice quanti sono e quanto durano in tutto.
+- Nella console le informazioni che si ripetono, volume, muto, salti nel brano e passi, riscrivono la loro riga invece di aggiungerne sempre un'altra.
+- F9 chiude e F10 apre tutto il ramo selezionato, con due suoni nuovi (issue 11). F10 carica cartelle, playlist e sottobrani, e sotto Questo PC si ferma dopo duemila rami. F9 non dice più cosa suona: lo dice già la console.
+- Maiuscolo con C toglie il loop A-B da qualsiasi punto.
+
 ## [1.8.0] - 2026-09-30
 
 - Il filtro delle playlist e dei Preferiti (issue 2). È la prima voce di ogni playlist: Filtro (Tutto), o il testo del filtro. Invio o freccia destra aprono il campo, dove Invio conferma, Ctrl più Invio va a capo ed Esc annulla; Canc sulla voce lo svuota. Decide cosa si vede, cosa si conta e cosa si suona. Spazio per tutti i termini, barra verticale per le alternative, meno per escludere, asterisco e cancelletto come jolly, virgolette per le sequenze esatte, e i comandi t tempo, d dimensione, k tipo, a autore, n titolo, l album, g genere, y anno, p percorso, s saltato, r sottobrani. Un filtro che non si capisce viene spiegato e riproposto. Si salva con la playlist.

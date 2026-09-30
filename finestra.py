@@ -1,7 +1,8 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 # 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino,
-# nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro.
+# nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
+# nella 1.9.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C.
 
 """La finestra di MeTeOra.
 
@@ -35,6 +36,8 @@ FILE_PLAYLIST = "MeTeOra - Playlist.json"
 FILE_IMPOSTAZIONI = "MeTeOra - Impostazioni.json"
 FILE_SCHEDARIO = "MeTeOra - Schedario.json"
 RIGHE_DELLA_CONSOLE = 2000
+# Quanti rami al massimo apre F10 in una volta.
+MASSIMO_DI_RAMI = 2000
 
 # I tasti a lettera: (carattere, maiuscolo) -> comando.
 TASTI = {
@@ -44,6 +47,7 @@ TASTI = {
     ("z", True): "sottobrano_precedente",
     ("b", True): "sottobrano_successivo",
     ("c", False): "pausa",
+    ("c", True): "togli_loop",
     ("v", False): "stop",
     ("b", False): "successivo",
     ("n", False): "casuale",
@@ -72,8 +76,8 @@ FUTURI_MAIUSCOLI = {"l": "durata della dissolvenza"}
 TASTI_COMUNI = [
     "X riproduce la voce selezionata o riprende, C pausa, V stop, Z e B brano precedente e successivo, N brano a caso.",
     "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, + e - volume, Maiuscolo+M il passo del volume, M muto.",
-    "Maiuscolo con Z e con B sottobrano precedente e successivo di un SID, Maiuscolo+X mette e toglie i punti A e B del loop sul brano selezionato.",
-    "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione sul brano in riproduzione, F9 dice cosa suona.",
+    "Maiuscolo con Z e con B sottobrano precedente e successivo di un SID, Maiuscolo+X mette e toglie i punti A e B del loop sul brano selezionato, Maiuscolo+C toglie il loop.",
+    "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione sul brano in riproduzione, F9 chiude e F10 apre tutto il ramo selezionato.",
     "F1 manuale, F2 novità, F3 crediti, Esc esce salvando tutto.",
 ]
 # Le righe del cruscotto proprie di ogni tipo di voce della plancia.
@@ -120,9 +124,8 @@ def leggi_tempo(testo):
 
 
 def secondi_da_leggere(secondi):
-    """Un numero di secondi come si legge in italiano: 10, oppure 1,5."""
-    testo = f"{secondi:.3f}".rstrip("0").rstrip(".")
-    return testo.replace(".", ",")
+    """Un numero di secondi da leggere: 10, oppure 1.5."""
+    return f"{secondi:.3f}".rstrip("0").rstrip(".")
 
 
 def durata_lunga(secondi):
@@ -242,6 +245,10 @@ class Finestra(wx.Frame):
         self._temporanee = {}
         self._area_precedente = None
         self._posizione_della_console = None
+        self._posizione_del_cruscotto = None
+        # La categoria dell'ultima riga della console: una riga nuova della
+        # stessa categoria la sostituisce invece di aggiungersi.
+        self._categoria = None
         self._righe = []
         self._chiusa = False
         self._costruisci()
@@ -289,6 +296,7 @@ class Finestra(wx.Frame):
         self.console.Bind(wx.EVT_SET_FOCUS, self._fuoco_alla_console)
         self.console.Bind(wx.EVT_KILL_FOCUS, self._console_lasciata)
         self.cruscotto.Bind(wx.EVT_SET_FOCUS, self._fuoco_al_cruscotto)
+        self.cruscotto.Bind(wx.EVT_KILL_FOCUS, self._cruscotto_lasciato)
 
     def _popola_albero(self):
         radice = self.albero.AddRoot("MeTeOra")
@@ -303,10 +311,20 @@ class Finestra(wx.Frame):
 
     # La console.
 
-    def scrivi(self, testo):
+    def scrivi(self, testo, categoria=None):
         """Aggiunge una riga in fondo alla console senza spostarne il
-        cursore, e tiene le ultime RIGHE_DELLA_CONSOLE righe."""
+        cursore, e tiene le ultime RIGHE_DELLA_CONSOLE righe. Con una
+        categoria, per esempio il volume, se anche l'ultima riga era di quella
+        categoria la riga si riscrive invece di aggiungersene un'altra."""
         posizione = self.console.GetInsertionPoint()
+        if categoria is not None and categoria == self._categoria and self._righe:
+            inizio = sum(len(r) for r in self._righe[:-1]) + len(self._righe) - 1
+            self.console.Remove(inizio, self.console.GetLastPosition())
+            self.console.AppendText(testo)
+            self._righe[-1] = testo
+            self.console.SetInsertionPoint(min(posizione, self.console.GetLastPosition()))
+            return
+        self._categoria = categoria
         self.console.AppendText(("\n" if self._righe else "") + testo)
         self._righe.append(testo)
         if len(self._righe) > RIGHE_DELLA_CONSOLE + 100:
@@ -322,9 +340,9 @@ class Finestra(wx.Frame):
     def _suono(self, evento):
         suoni.suona(evento, self.impostazioni["volume_effetti"])
 
-    def _riscontro(self, evento, testo):
+    def _riscontro(self, evento, testo, categoria=None):
         self._suono(evento)
-        self.scrivi(testo)
+        self.scrivi(testo, categoria)
 
     # Il fuoco e il cruscotto.
 
@@ -336,11 +354,11 @@ class Finestra(wx.Frame):
         evento.Skip()
         self._area_precedente = "console"
         if self._posizione_della_console is not None:
-            wx.CallAfter(self._rimetti_posizione_della_console, self._posizione_della_console)
+            wx.CallAfter(self._rimetti_posizione, self.console, self._posizione_della_console)
 
-    def _rimetti_posizione_della_console(self, posizione):
-        if self and self.console:
-            self.console.SetInsertionPoint(min(posizione, self.console.GetLastPosition()))
+    def _rimetti_posizione(self, controllo, posizione):
+        if self and controllo:
+            controllo.SetInsertionPoint(min(posizione, controllo.GetLastPosition()))
 
     def _console_lasciata(self, evento):
         evento.Skip()
@@ -348,16 +366,26 @@ class Finestra(wx.Frame):
 
     def _fuoco_al_cruscotto(self, evento):
         evento.Skip()
-        self._rinfresca_cruscotto()
+        # Il controllo, quando riceve il fuoco, rimette il cursore in cima:
+        # se il testo non cambia, lo si riporta dove era.
+        if not self._rinfresca_cruscotto() and self._posizione_del_cruscotto is not None:
+            wx.CallAfter(self._rimetti_posizione, self.cruscotto, self._posizione_del_cruscotto)
+
+    def _cruscotto_lasciato(self, evento):
+        evento.Skip()
+        self._posizione_del_cruscotto = self.cruscotto.GetInsertionPoint()
 
     def _rinfresca_cruscotto(self):
         """Riscrive il cruscotto solo se il testo cambia: tornando dallo stesso
         punto il cursore resta dove era."""
         testo = "\n".join(self.righe_del_cruscotto())
         attuale = self.cruscotto.GetValue().replace("\r\n", "\n").replace("\r", "\n")
-        if attuale != testo:
-            self.cruscotto.SetValue(testo)
-            self.cruscotto.SetInsertionPoint(0)
+        if attuale == testo:
+            return False
+        self.cruscotto.SetValue(testo)
+        self.cruscotto.SetInsertionPoint(0)
+        self._posizione_del_cruscotto = None
+        return True
 
     def righe_del_cruscotto(self):
         """Le righe del cruscotto per l'area da cui si arriva."""
@@ -384,7 +412,7 @@ class Finestra(wx.Frame):
         tasti_funzione = {
             wx.WXK_F1: self._manuale, wx.WXK_F2: self._changelog, wx.WXK_F3: self._crediti,
             wx.WXK_F5: lambda: self._vai(self.albero, "plancia"), wx.WXK_F6: lambda: self._vai(self.console, "console"),
-            wx.WXK_F7: lambda: self._vai(self.cruscotto, "cruscotto"), wx.WXK_F4: lambda: self._ai_preferiti(self._preferito_selezionato()), wx.WXK_F8: self._vai_al_brano, wx.WXK_F9: self._informazioni,
+            wx.WXK_F7: lambda: self._vai(self.cruscotto, "cruscotto"), wx.WXK_F4: lambda: self._ai_preferiti(self._preferito_selezionato()), wx.WXK_F8: self._vai_al_brano, wx.WXK_F9: self._chiudi_tutto, wx.WXK_F10: self._apri_tutto,
             wx.WXK_ESCAPE: self.Close,
         }
         if modificatori == wx.MOD_NONE and codice in tasti_funzione:
@@ -460,6 +488,7 @@ class Finestra(wx.Frame):
         if brano.sottobrano:
             info = songlengths.info_del_sid(brano.percorso)
             parti[0] += f", sottobrano {brano.sottobrano} di {info['sottobrani'] if info else '?'}"
+        parti.extend(self._durata_nella_plancia(brano))
         if brano.saltato:
             parti.append("saltato")
         if self.coda.loop_playlist is dati["playlist"]:
@@ -470,6 +499,16 @@ class Finestra(wx.Frame):
         if suona:
             parti.append("in riproduzione")
         return ", ".join(parti)
+
+    def _durata_nella_plancia(self, brano):
+        """La durata da mostrare accanto al brano, se si sa: per un SID con piu'
+        sottobrani, quanti sono e quanto durano in tutto."""
+        if self._ha_sottobrani(brano):
+            totale = songlengths.info_del_sid(brano.percorso)["sottobrani"]
+            durate = (self.schedario.scheda(brano.percorso) or {}).get("durate_sid")
+            return [f"{totale} sottobrani" + (f", {durata_lunga(sum(durate))} in tutto" if durate else "")]
+        durata = self.schedario.durata(brano)
+        return [durata_lunga(durata)] if durata is not None else []
 
     def _aggiungi_voce(self, genitore, tipo, pl, brano):
         """Aggiunge alla plancia un brano (di una playlist) o un file (di una
@@ -584,6 +623,7 @@ class Finestra(wx.Frame):
                 nuova = self._etichetta_della_playlist(dati["playlist"])
                 if self.albero.GetItemText(voce) != nuova:
                     self.albero.SetItemText(voce, nuova)
+        self._aggiorna_etichette()
         if not self.schedario.in_attesa():
             try:
                 self.schedario.salva()
@@ -699,6 +739,7 @@ class Finestra(wx.Frame):
             figlio = self.albero.AppendItem(voce, os.path.basename(cartella), data={"tipo": "cartella", "percorso": cartella, "caricato": False})
             self.albero.SetItemHasChildren(figlio, True)
         pl = self._temporanea(dati["percorso"], files)
+        self._chiedi_schede(pl)
         for brano in pl.brani:
             self._aggiungi_voce(voce, "file", pl, brano)
         if not cartelle and not files:
@@ -1167,6 +1208,14 @@ class Finestra(wx.Frame):
     def _comando_sottobrano_successivo(self):
         self._comando_sottobrano(1)
 
+    def _comando_togli_loop(self):
+        if self.coda.loop_playlist is None:
+            self._riscontro("loop_non_qui", "Non c'è un loop da togliere.")
+            return
+        self.coda.togli_loop()
+        self._aggiorna_etichette()
+        self._riscontro("loop_tolto", "Loop tolto: si suona di nuovo tutta la lista.")
+
     def _comando_loop(self):
         dati = self._dati(self.albero.GetSelection()) or {}
         if dati.get("tipo") not in ("brano", "file", "sottobrano"):
@@ -1234,7 +1283,7 @@ class Finestra(wx.Frame):
         if durata is not None:
             arrivo = min(arrivo, durata)
         self.motore.salta(secondi)
-        self._riscontro(evento, f"{'Avanti' if secondi > 0 else 'Indietro'} a {tempo(arrivo)} di {tempo(durata)}.")
+        self._riscontro(evento, f"{'Avanti' if secondi > 0 else 'Indietro'} a {tempo(arrivo)} di {tempo(durata)}.", "salto")
 
     def _comando_avanti(self):
         self._salto(self.impostazioni["passo_avanti"], "avanti")
@@ -1255,7 +1304,7 @@ class Finestra(wx.Frame):
             return
         self.impostazioni[chiave] = round(secondi, 3)
         self._salva_impostazioni()
-        self._riscontro("passo_di_salto", f"Il salto {verso} ora è di {secondi_da_leggere(secondi)} secondi.")
+        self._riscontro("passo_di_salto", f"Il salto {verso} ora è di {secondi_da_leggere(secondi)} secondi.", "passo_di_salto")
 
     def _comando_passo_indietro(self):
         self._chiedi_secondi("passo_indietro", "indietro")
@@ -1283,11 +1332,11 @@ class Finestra(wx.Frame):
         attuale = self.motore.volume
         nuovo = max(0, min(100, attuale + passo))
         if nuovo == attuale:
-            self._riscontro("volume_al_limite", f"Volume già al {'massimo' if passo > 0 else 'minimo'}, {attuale}.")
+            self._riscontro("volume_al_limite", f"Volume già al {'massimo' if passo > 0 else 'minimo'}, {attuale}.", "volume")
             return
         self.motore.volume = nuovo
         self.impostazioni["volume"] = nuovo
-        self._riscontro("volume_su" if passo > 0 else "volume_giu", f"Volume {nuovo}.")
+        self._riscontro("volume_su" if passo > 0 else "volume_giu", f"Volume {nuovo}.", "volume")
 
     def _comando_volume_su(self):
         self._volume(self.impostazioni["passo_volume"])
@@ -1307,14 +1356,14 @@ class Finestra(wx.Frame):
             return
         self.impostazioni["passo_volume"] = int(testo)
         self._salva_impostazioni()
-        self._riscontro("passo_del_volume", f"Più e meno ora cambiano il volume di {testo}.")
+        self._riscontro("passo_del_volume", f"Più e meno ora cambiano il volume di {testo}.", "passo_del_volume")
 
     def _comando_muto(self):
         self.motore.muto = not self.motore.muto
         if self.motore.muto:
-            self._riscontro("muto_acceso", "Muto.")
+            self._riscontro("muto_acceso", "Muto.", "volume")
         else:
-            self._riscontro("muto_spento", f"Audio di nuovo acceso, volume {self.motore.volume}.")
+            self._riscontro("muto_spento", f"Audio di nuovo acceso, volume {self.motore.volume}.", "volume")
 
     def _comando_apri_file(self):
         with wx.FileDialog(self, "Apri file", wildcard=formati.filtro_dialogo(), style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST) as dialogo:
@@ -1329,7 +1378,7 @@ class Finestra(wx.Frame):
     def _comando_impostazioni(self):
         self._riscontro("non_disponibile", "La finestra delle impostazioni arriva con la tappa 3.")
 
-    # F8 e F9.
+    # F8.
 
     def _vai_al_brano(self):
         corrente, pl = self.coda.corrente, self.coda.playlist
@@ -1360,23 +1409,47 @@ class Finestra(wx.Frame):
         self._suono("vai_al_brano")
         self.albero.SetFocus()
 
-    def _informazioni(self):
-        corrente, pl = self.coda.corrente, self.coda.playlist
-        if not corrente or not self.motore.in_corso:
-            self._riscontro("informazioni", f"Non sta suonando niente. Volume {self.motore.volume}{', muto' if self.motore.muto else ''}.")
+    # F9 e F10.
+
+    def _ramo_di_lavoro(self):
+        """Il ramo su cui lavorano F9 e F10: la voce selezionata, o quella che
+        la contiene se non ha niente dentro."""
+        voce = self.albero.GetSelection()
+        if voce.IsOk() and not self.albero.ItemHasChildren(voce):
+            voce = self.albero.GetItemParent(voce)
+        return voce if voce.IsOk() and voce != self.albero.GetRootItem() else None
+
+    def _chiudi_tutto(self):
+        voce = self._ramo_di_lavoro()
+        if voce is None:
+            self._riscontro("non_disponibile", "Qui non c'è niente da chiudere.")
             return
-        stato = "In pausa" if self.motore.in_pausa else "In riproduzione"
-        numero, totale = self.coda.posizione()
-        testo = f"{stato}: {corrente.percorso}, {tempo(self.motore.posizione)} di {tempo(self.motore.durata)}."
-        if self.motore.sottobrani:
-            testo += f" Sottobrano {self.motore.sottobrano} di {self.motore.sottobrani}."
-        if totale > 1:
-            testo += f" Brano {numero} di {totale}, {'cartella' if pl.temporanea else 'playlist'} {pl.nome}."
-        limiti = self.coda.intervallo()
-        if limiti:
-            testo += f" Loop fra il brano {limiti[0] + 1} e il {limiti[1] + 1}."
-        testo += f" Volume {self.motore.volume}{', muto' if self.motore.muto else ''}."
-        self._riscontro("informazioni", testo)
+        self.albero.CollapseAllChildren(voce)
+        self.albero.SelectItem(voce)
+        self._riscontro("chiudi_tutto", f"Chiuso tutto dentro {self.albero.GetItemText(voce)}.")
+
+    def _apri_tutto(self):
+        """Apre la voce e tutti i rami che ha dentro, caricandoli; si ferma a
+        MASSIMO_DI_RAMI, perche' sotto Questo PC ci sono dischi interi."""
+        voce = self._ramo_di_lavoro()
+        if voce is None:
+            self._riscontro("non_disponibile", "Qui non c'è niente da aprire.")
+            return
+        aperti = 0
+        da_aprire = [voce]
+        with wx.BusyCursor():
+            while da_aprire and aperti < MASSIMO_DI_RAMI:
+                ramo = da_aprire.pop(0)
+                if not self.albero.ItemHasChildren(ramo):
+                    continue
+                self.albero.Expand(ramo)
+                aperti += 1
+                da_aprire.extend(self._figli(ramo))
+        nome = self.albero.GetItemText(voce)
+        if da_aprire:
+            self._riscontro("apri_tutto", f"Aperti {aperti} rami dentro {nome}; mi fermo qui, gli altri restano chiusi.")
+        else:
+            self._riscontro("apri_tutto", f"Aperto tutto dentro {nome}: {aperti} rami.")
 
     # F1, F2, F3.
 
