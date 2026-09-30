@@ -23,6 +23,7 @@ EVENTI = {
     "pausa": "sys_tick_basso",
     "ripresa": "sys_tick_alto",
     "stop": "annullato",
+    "da_capo": "timbratura",
     "successivo": "successivo",
     "precedente": "menu_triplicato_su_2",
     "casuale": "mazzo_mescolato",

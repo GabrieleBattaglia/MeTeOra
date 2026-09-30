@@ -62,7 +62,7 @@ def test_questo_pc_si_carica_all_espansione(finestra):
 def test_nuova_playlist_aggiungi_sposta_togli(finestra, suoni_annotati):
     finestra._comando_nuova_playlist()
     pl = finestra.archivio.playlist[0]
-    assert finestra.albero.GetItemText(finestra.albero.GetSelection()) == "Playlist, brani: 0, totali: 0"
+    assert finestra.albero.GetItemText(finestra._voce_corrente()) == "Playlist, brani: 0, totali: 0"
     finestra._aggiungi(pl, [r"C:\m\uno.mp3", r"C:\m\due.mp3", r"C:\m\tre.mp3"])
     assert _ultima(finestra) == "Aggiunti alla playlist Playlist: 3 brani, ora 3 brani."
     nodo = next(finestra._figli(finestra.nodo_playlist))
@@ -71,11 +71,11 @@ def test_nuova_playlist_aggiungi_sposta_togli(finestra, suoni_annotati):
     finestra._sposta(pl, pl.brani[2], "cima")
     nodo = next(finestra._figli(finestra.nodo_playlist))
     assert _etichette(finestra, nodo) == ["Filtro (Tutto)", "tre.mp3", "uno.mp3", "due.mp3"]
-    assert finestra.albero.GetItemText(finestra.albero.GetSelection()) == "tre.mp3"
+    assert finestra.albero.GetItemText(finestra._voce_corrente()) == "tre.mp3"
     finestra._salta(pl, pl.brani[1])
     assert _etichette(finestra, nodo)[2] == "uno.mp3, saltato"
     finestra._togli(pl, pl.brani[0])
-    assert finestra.albero.GetItemText(finestra.albero.GetSelection()) == "uno.mp3, saltato"
+    assert finestra.albero.GetItemText(finestra._voce_corrente()) == "uno.mp3, saltato"
     assert os.path.isfile(finestra.archivio.percorso)
     assert "brano_tolto" in suoni_annotati
 
@@ -94,7 +94,7 @@ def test_senza_niente_in_corso(finestra, suoni_annotati):
     assert _ultima(finestra) == "Non sta suonando niente."
     _tasto(finestra, "x")
     assert _ultima(finestra) == "I Preferiti sono vuoti: F4 ci mette il brano selezionato."
-    finestra.albero.SelectItem(finestra.nodo_pc)
+    finestra._seleziona(finestra.nodo_pc)
     _tasto(finestra, "x")
     assert _ultima(finestra).startswith("Niente da riprodurre")
     _tasto(finestra, "b")
@@ -130,7 +130,7 @@ def test_console_tiene_le_ultime_righe_e_il_cursore(finestra):
 
 def test_cruscotto_secondo_il_contesto(finestra):
     finestra._area_precedente = "albero"
-    finestra.albero.SelectItem(finestra.nodo_pc)
+    finestra._seleziona(finestra.nodo_pc)
     assert finestra.righe_del_cruscotto()[0] == "Tasti per Questo PC."
     finestra._area_precedente = "console"
     assert finestra.righe_del_cruscotto()[0] == "Tasti per la console."
@@ -150,14 +150,14 @@ def _aspetta(condizione, secondi=5):
 @pytest.mark.skipif(not os.path.isfile(TURBO_OUTRUN), reason="serve la collezione HVSC")
 def test_riproduzione_di_una_cartella_e_selezione_ferma(finestra, suoni_annotati):
     cartella = os.path.dirname(TURBO_OUTRUN)
-    finestra.albero.SelectItem(finestra.nodo_pc)
+    finestra._seleziona(finestra.nodo_pc)
     finestra._suona_file(TURBO_OUTRUN, cartella)
     assert _ultima(finestra).startswith(f"In riproduzione: {TURBO_OUTRUN}, ")
     assert "Sottobrano 1 di 12." in _ultima(finestra)
     assert _aspetta(lambda: (finestra.motore.posizione or 0) > 0.2)
-    selezione = finestra.albero.GetSelection()
+    selezione = finestra._voce_corrente()
     _tasto(finestra, "b")
-    assert finestra.albero.GetSelection() == selezione
+    assert finestra._voce_corrente() == selezione
     assert suoni_annotati[-1] == "successivo"
     _tasto(finestra, "c")
     assert _ultima(finestra).startswith("Pausa a")
@@ -211,15 +211,15 @@ def test_console_riscrive_la_riga_della_stessa_categoria(finestra):
 
 def test_f9_e_f10(finestra, suoni_annotati):
     finestra._aggiungi(None, [os.path.join(r"C:\m", "uno.mp3")])
-    finestra.albero.SelectItem(finestra.nodo_playlist)
+    finestra._seleziona(finestra.nodo_playlist)
     _tasto(finestra, codice=wx.WXK_F10)
     nodo = next(finestra._figli(finestra.nodo_playlist))
     assert finestra.albero.IsExpanded(nodo)
     assert _ultima(finestra).startswith("Aperto tutto dentro Playlist")
-    finestra.albero.SelectItem(list(finestra._figli(nodo))[1])
+    finestra._seleziona(list(finestra._figli(nodo))[1])
     _tasto(finestra, codice=wx.WXK_F9)
     assert not finestra.albero.IsExpanded(nodo)
-    assert finestra.albero.GetSelection() == nodo
+    assert finestra._voce_corrente() == nodo
     assert suoni_annotati[-1] == "chiudi_tutto"
 
 
@@ -257,7 +257,7 @@ def test_sottobrani_nella_plancia(finestra, suoni_annotati, tmp_path):
     finestra.albero.Expand(voce_file)
     sottobrani = _etichette(finestra, voce_file)
     assert len(sottobrani) == 12 and sottobrani[2] == "Sottobrano 3 di 12, 3:00"
-    finestra.albero.SelectItem(list(finestra._figli(voce_file))[2])
+    finestra._seleziona(list(finestra._figli(voce_file))[2])
     assert "Sottobrano 3 di 12." in _premi(finestra, "x")
     assert _etichette(finestra, voce_file)[2].endswith(", in riproduzione")
     # Con il SID aperto, B e Z passano da un sottobrano all'altro.
@@ -283,7 +283,7 @@ def test_loop_a_b_con_maiuscolo_x(finestra, suoni_annotati):
     finestra.albero.Expand(nodo)
 
     def scegli(n):
-        finestra.albero.SelectItem(_voce(finestra, nodo, lambda d: d.get("brano") is pl.brani[n - 1]))
+        finestra._seleziona(_voce(finestra, nodo, lambda d: d.get("brano") is pl.brani[n - 1]))
 
     scegli(2)
     assert _premi(finestra, "x", maiuscolo=True).startswith("Punto A del loop su 2.mp3.")
@@ -299,7 +299,7 @@ def test_loop_a_b_con_maiuscolo_x(finestra, suoni_annotati):
     scegli(2)
     assert _premi(finestra, "x", maiuscolo=True).startswith("Loop tolto")
     assert _etichette(finestra, nodo)[2] == "2.mp3"
-    finestra.albero.SelectItem(finestra.nodo_pc)
+    finestra._seleziona(finestra.nodo_pc)
     assert _premi(finestra, "x", maiuscolo=True).startswith("Il loop si mette su un brano")
 
 
@@ -330,7 +330,7 @@ def test_maiuscolo_canc_manda_nel_cestino(finestra, suoni_annotati, tmp_path, mo
     assert _etichette(finestra, cartella) == ["a.mp3", "b.mp3"]
     finestra._al_cestino(next(finestra._figli(cartella)))
     assert _etichette(finestra, cartella) == ["b.mp3"]
-    assert finestra.albero.GetItemText(finestra.albero.GetSelection()) == "b.mp3"
+    assert finestra.albero.GetItemText(finestra._voce_corrente()) == "b.mp3"
     assert suoni_annotati[-1] == "cestino"
 
 
@@ -357,7 +357,7 @@ def test_cartella_suona_con_le_sottocartelle_e_f8_la_ritrova(finestra, monkeypat
         _tasto(finestra, "b")
         assert suonati[-1] == os.path.join(base, "Dentro", "due.mp3")
         finestra._vai_al_brano()
-        selezione = finestra.albero.GetSelection()
+        selezione = finestra._voce_corrente()
         assert finestra.albero.GetItemText(selezione) == "due.mp3, in riproduzione"
         assert finestra._dati(finestra.albero.GetItemParent(selezione))["percorso"] == os.path.join(base, "Dentro")
         finestra.motore._in_corso = None
@@ -368,7 +368,7 @@ def test_preferiti(finestra, suoni_annotati):
     pl = finestra.archivio.playlist[0]
     nodo = next(finestra._figli(finestra.nodo_playlist))
     finestra.albero.Expand(nodo)
-    finestra.albero.SelectItem(list(finestra._figli(nodo))[2])
+    finestra._seleziona(list(finestra._figli(nodo))[2])
     _tasto(finestra, codice=wx.WXK_F4)
     assert _ultima(finestra) == "2.mp3 è nei Preferiti, che ora hanno 1 brano."
     assert finestra.albero.GetItemText(finestra.nodo_preferiti) == "Preferiti, brani: 1 (senza durata), totali: 1 (senza durata)"
@@ -425,12 +425,12 @@ def test_filtro_nella_plancia_e_nella_riproduzione(finestra, suoni_annotati, mon
     assert _ultima(finestra) == "Filtro di Playlist: rock -tre. Passano 1 brano su 3."
     nodo = next(finestra._figli(finestra.nodo_playlist))
     assert _etichette(finestra, nodo) == ["Filtro: rock -tre", "rock uno.mp3"]
-    assert finestra.albero.GetItemText(finestra.albero.GetSelection()) == "Filtro: rock -tre"
+    assert finestra.albero.GetItemText(finestra._voce_corrente()) == "Filtro: rock -tre"
     assert finestra.albero.GetItemText(nodo).startswith("Playlist, brani: 1 (senza durata), totali: 3")
     assert finestra.coda.primo(pl) is pl.brani[0]
     finestra.coda.imposta(pl, pl.brani[0])
     assert finestra.coda.successivo() is None
-    finestra._cancella(finestra.albero.GetSelection())
+    finestra._cancella(finestra._voce_corrente())
     assert _ultima(finestra).startswith("Filtro di Playlist svuotato")
     assert pl.filtro == ""
     from playlist import Archivio
@@ -560,17 +560,17 @@ def test_maiuscolo_f8_aggancia_la_selezione(finestra, monkeypatch, suoni_annotat
     _finto_motore(finestra, monkeypatch)
     finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n in ("a.mp3", "b.mp3")])
     pl = finestra.archivio.playlist[0]
-    finestra.albero.SelectItem(finestra.nodo_pc)
+    finestra._seleziona(finestra.nodo_pc)
     _tasto(finestra, codice=wx.WXK_F8, maiuscolo=True)
     assert finestra.impostazioni["insegui"] is True
     assert suoni_annotati[-1] == "insegui_acceso"
     finestra._suona(pl, pl.brani[1])
-    assert finestra.albero.GetItemText(finestra.albero.GetSelection()) == "b.mp3, in riproduzione"
+    assert finestra.albero.GetItemText(finestra._voce_corrente()) == "b.mp3, in riproduzione"
     _tasto(finestra, codice=wx.WXK_F8, maiuscolo=True)
     assert finestra.impostazioni["insegui"] is False
-    finestra.albero.SelectItem(finestra.nodo_pc)
+    finestra._seleziona(finestra.nodo_pc)
     finestra._suona(pl, pl.brani[0])
-    assert finestra.albero.GetSelection() == finestra.nodo_pc
+    assert finestra._voce_corrente() == finestra.nodo_pc
     from impostazioni import Impostazioni
 
     salvate = Impostazioni(finestra.impostazioni.percorso)
@@ -613,10 +613,10 @@ def test_ricerca_globale(finestra, monkeypatch, suoni_annotati, tmp_path):
     assert _etichette(finestra, dentro) == ["rock cinque.mp3", "rock quattro.mp3", "Mostra l'ultimo risultato"]
     musica = finestra.albero.GetItemParent(dentro)
     assert _etichette(finestra, musica) == ["Dentro, 3 risultati", "rock due.mp3"]
-    finestra.albero.SelectItem(list(finestra._figli(dentro))[-1])
+    finestra._seleziona(list(finestra._figli(dentro))[-1])
     finestra._altri_risultati()
     assert _etichette(finestra, dentro) == ["rock cinque.mp3", "rock quattro.mp3", "rock tre.flac"]
-    assert finestra.albero.GetItemText(finestra.albero.GetSelection()) == "rock tre.flac"
+    assert finestra.albero.GetItemText(finestra._voce_corrente()) == "rock tre.flac"
     monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("rock di dentro"))
     finestra._salva_risultati(finestra._dati(dentro)["gruppo"])
     assert finestra.archivio.playlist[-1].nome == "rock di dentro"
@@ -777,14 +777,14 @@ def test_j_k_e_cifre_aprono_e_suonano(finestra, monkeypatch):
     finestra.archivio.nuova("Terza", [os.path.join(r"C:\m", "c.mp3")])
     finestra._popola_playlist()
     prima, vuota, _terza = finestra.archivio.playlist
-    finestra.albero.SelectItem(finestra.nodo_pc)
+    finestra._seleziona(finestra.nodo_pc)
     _tasto(finestra, "k")
     assert suonati[-1] == ("a.mp3", None)
     nodo = finestra._nodo_della_playlist(prima)
-    assert finestra.albero.GetSelection() == nodo and finestra.albero.IsExpanded(nodo)
+    assert finestra._voce_corrente() == nodo and finestra.albero.IsExpanded(nodo)
     _tasto(finestra, "k")
     assert _ultima(finestra) == f"La playlist {vuota.nome} non ha niente da suonare."
-    assert finestra.albero.GetSelection() == finestra._nodo_della_playlist(vuota)
+    assert finestra._voce_corrente() == finestra._nodo_della_playlist(vuota)
     _tasto(finestra, "k")
     assert suonati[-1] == ("c.mp3", None)
     _tasto(finestra, "k")
@@ -812,7 +812,7 @@ def test_ripresa_all_avvio_in_pausa(app, tmp_path):
     from finestra import Finestra
 
     brano = tmp_path / "canzone.wav"
-    _wav(brano)
+    _wav(brano, secondi=5)
     dati = tmp_path / "dati"
     dati.mkdir()
     prima = Finestra(ao="null", cartella_dati=str(dati))
@@ -820,20 +820,108 @@ def test_ripresa_all_avvio_in_pausa(app, tmp_path):
         prima._aggiungi(None, [str(tmp_path / "altro.wav"), str(brano)])
         pl = prima.archivio.playlist[0]
         prima._suona(pl, pl.brani[1])
-        assert _aspetta(lambda: (prima.motore.posizione or 0) > 0.3)
+        # Un secondo pieno: la ripresa riparte dal punto salvato, e un margine
+        # largo tiene la prova ferma anche sotto carico.
+        assert _aspetta(lambda: (prima.motore.posizione or 0) > 1.0)
         prima.Close(force=True)
     finally:
         prima.Destroy()
     stato = prima.impostazioni["ripresa"]
-    assert stato["tipo"] == "playlist" and stato["indice"] == 0 and stato["numero"] == 1 and stato["posizione"] > 0.3
+    assert stato["tipo"] == "playlist" and stato["indice"] == 0 and stato["numero"] == 1 and stato["posizione"] > 1.0
     dopo = Finestra(ao="null", cartella_dati=str(dati))
     try:
         dopo.riprendi()
         assert dopo.coda.corrente is dopo.archivio.playlist[0].brani[1]
         assert dopo.motore.in_pausa
-        assert _aspetta(lambda: (dopo.motore.posizione or 0) > 0.3)
+        assert _aspetta(lambda: (dopo.motore.posizione or 0) > 0.5)
         assert _ultima(dopo).startswith(f"Riprendo da dove eri: {brano}, in pausa a 0:0")
-        assert dopo.albero.GetItemText(dopo.albero.GetSelection()) == "canzone.wav, 0:03, in riproduzione"
+        assert dopo.albero.GetItemText(dopo._voce_corrente()) == "canzone.wav, 0:05, in riproduzione"
     finally:
         dopo.Close(force=True)
         dopo.Destroy()
+
+
+def _playlist_di_prova(finestra, *gruppi):
+    for nomi in gruppi:
+        finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n in nomi])
+    finestra.albero.Expand(finestra.nodo_playlist)
+    nodi = [finestra._nodo_della_playlist(pl) for pl in finestra.archivio.playlist]
+    for nodo in nodi:
+        finestra.albero.Expand(nodo)
+    return nodi
+
+
+def _voce_di(finestra, nodo, nome):
+    return next(v for v in finestra._figli(nodo) if finestra.albero.GetItemText(v).startswith(nome))
+
+
+def test_selezione_multipla_suona_come_playlist_invisibile(finestra, monkeypatch):
+    suonati = _finto_motore(finestra, monkeypatch)
+    rock, jazz = _playlist_di_prova(finestra, ("a.mp3", "b.mp3", "c.mp3"), ("x.mp3", "y.mp3"))
+    finestra._seleziona(_voce_di(finestra, rock, "c.mp3"))
+    # Un ramo selezionato vale per tutto cio' che contiene.
+    finestra.albero.SelectItem(jazz)
+    _tasto(finestra, "x")
+    assert suonati[-1] == ("c.mp3", None)
+    assert "1 di 3 della selezione" in _ultima(finestra)
+    _tasto(finestra, "b")
+    assert suonati[-1] == ("x.mp3", None)
+    _tasto(finestra, "b")
+    _tasto(finestra, "b")
+    assert _ultima(finestra) == "È l'ultimo brano."
+    finestra._brano_finito()
+    assert _ultima(finestra).startswith("Fine")
+    _tasto(finestra, "v")
+    assert finestra.coda.playlist is None
+    assert _ultima(finestra).startswith("Stop. La selezione suonata è chiusa")
+
+
+def test_x_su_cio_che_suona_riparte_da_capo(finestra, monkeypatch, suoni_annotati):
+    suonati = _finto_motore(finestra, monkeypatch)
+    rock, = _playlist_di_prova(finestra, ("a.mp3", "b.mp3"))
+    voce = _voce_di(finestra, rock, "a.mp3")
+    finestra._seleziona(voce)
+    _tasto(finestra, "x")
+    _tasto(finestra, "x")
+    assert suonati == [("a.mp3", None), ("a.mp3", None)]
+    assert suoni_annotati[-1] == "da_capo"
+    # In pausa, X riprende dal punto: e' cio' che usa la ripresa all'avvio.
+    monkeypatch.setattr(type(finestra.motore), "in_pausa", property(lambda _self: True))
+    monkeypatch.setattr(finestra.motore, "pausa", lambda valore=None: False)
+    _tasto(finestra, "x")
+    assert _ultima(finestra).startswith("Riprende da")
+
+
+def test_canc_maiuscolo_canc_f4_e_crea_sulla_selezione(finestra, monkeypatch):
+    import questo_pc
+
+    rock, jazz, _terza = _playlist_di_prova(finestra, ("a.mp3", "b.mp3", "c.mp3"), ("x.mp3",), ("z.mp3",))
+    pl_rock = finestra.archivio.playlist[0]
+    finestra._seleziona(_voce_di(finestra, rock, "a.mp3"))
+    finestra.albero.SelectItem(_voce_di(finestra, rock, "c.mp3"))
+    finestra.albero.SelectItem(jazz)
+    _tasto(finestra, codice=wx.WXK_F4)
+    assert _ultima(finestra) == "Aggiunti ai Preferiti 3 brani."
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("mix"))
+    finestra._crea_dalla_selezione()
+    assert [b.nome_del_file for b in finestra.archivio.playlist[-1].brani] == ["a.mp3", "c.mp3", "x.mp3"]
+    risposte = iter([True, True])
+    monkeypatch.setattr(finestra, "_conferma", lambda *_a: next(risposte))
+    rock = finestra._nodo_della_playlist(pl_rock)
+    finestra.albero.Expand(rock)
+    finestra._seleziona(_voce_di(finestra, rock, "a.mp3"))
+    finestra.albero.SelectItem(_voce_di(finestra, rock, "b.mp3"))
+    finestra.albero.SelectItem(finestra._nodo_della_playlist(finestra.archivio.playlist[2]))
+    finestra._cancella_selezione()
+    assert _ultima(finestra) == "Tolti 2 brani, eliminate 1 playlist."
+    assert [b.nome_del_file for b in pl_rock.brani] == ["c.mp3"]
+    cestinati = []
+    monkeypatch.setattr(questo_pc, "nel_cestino", lambda p: cestinati.append(os.path.basename(p)) or True)
+    rock = finestra._nodo_della_playlist(pl_rock)
+    finestra.albero.Expand(rock)
+    finestra._seleziona(_voce_di(finestra, rock, "c.mp3"))
+    finestra.albero.SelectItem(_voce_di(finestra, finestra._nodo_della_playlist(finestra.archivio.playlist[1]), "x.mp3"))
+    finestra._cestina_selezione()
+    assert sorted(cestinati) == ["c.mp3", "x.mp3"]
+    assert _ultima(finestra) == "Nel cestino di Windows 2 file."
+    assert not pl_rock.brani
