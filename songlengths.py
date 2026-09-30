@@ -92,6 +92,7 @@ def trova_database(percorso_sid):
 # decimo di secondo.
 _tabelle = {}
 _database_della_cartella = {}
+_durate_per_file = {}
 
 
 def durate_del_file(percorso_sid):
@@ -106,4 +107,7 @@ def durate_del_file(percorso_sid):
         return None
     if database not in _tabelle:
         _tabelle[database] = carica(database)
-    return durate(percorso_sid, _tabelle[database])
+    # L'impronta del file si calcola una volta sola per sessione.
+    if percorso_sid not in _durate_per_file:
+        _durate_per_file[percorso_sid] = durate(percorso_sid, _tabelle[database])
+    return _durate_per_file[percorso_sid]

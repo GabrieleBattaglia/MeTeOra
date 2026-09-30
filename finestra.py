@@ -1,7 +1,7 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 # 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino,
-# nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti.
+# nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist.
 
 """La finestra di MeTeOra.
 
@@ -28,9 +28,11 @@ import version
 from impostazioni import Impostazioni
 from motore import durata_del_sottobrano
 from playlist import Archivio, Brano, Coda, Playlist
+from schedario import Schedario
 
 FILE_PLAYLIST = "MeTeOra - Playlist.json"
 FILE_IMPOSTAZIONI = "MeTeOra - Impostazioni.json"
+FILE_SCHEDARIO = "MeTeOra - Schedario.json"
 RIGHE_DELLA_CONSOLE = 2000
 
 # I tasti a lettera: (carattere, maiuscolo) -> comando.
@@ -121,6 +123,17 @@ def secondi_da_leggere(secondi):
     return testo.replace(".", ",")
 
 
+def durata_lunga(secondi):
+    """Una durata come ore:minuti:secondi.millesimi, con le ore solo se ci
+    sono e i millesimi solo se non sono zero: 1:02:03.456, 4:05, 0:07.250."""
+    millesimi = round(secondi * 1000)
+    ore, resto = divmod(millesimi, 3600000)
+    minuti, resto = divmod(resto, 60000)
+    secondi, millesimi = divmod(resto, 1000)
+    testo = f"{ore}:{minuti:02d}:{secondi:02d}" if ore else f"{minuti}:{secondi:02d}"
+    return testo + (f".{millesimi:03d}" if millesimi else "")
+
+
 def brani_al_plurale(n):
     return "1 brano" if n == 1 else f"{n} brani"
 
@@ -166,6 +179,8 @@ class Finestra(wx.Frame):
         self.motore = Motore(alla_fine=lambda: wx.CallAfter(self._brano_finito),
             all_errore=lambda p: wx.CallAfter(self._brano_in_errore, p), ao=ao, volume=self.impostazioni["volume"])
         self.coda = Coda()
+        self.schedario = Schedario(os.path.join(cartella_dati, FILE_SCHEDARIO), avvisa=lambda: wx.CallAfter(self._schede_arrivate))
+        self.schedario.carica()
         # Le playlist temporanee nate dalle cartelle di Questo PC, per cartella:
         # rigiocando un file della stessa cartella si riusa la stessa.
         self._temporanee = {}
@@ -182,6 +197,7 @@ class Finestra(wx.Frame):
             self.scrivi(f"Il file delle playlist non si legge, e parto senza playlist: {errore_archivio}")
             # Il file illeggibile non va sovrascritto alla prima modifica.
             self.archivio.percorso += ".nuovo"
+        self._chiedi_schede(*self.archivio.playlist, self.archivio.preferiti)
 
     # La costruzione.
 
@@ -417,8 +433,46 @@ class Finestra(wx.Frame):
             if self.albero.GetItemText(voce) != nuova:
                 self.albero.SetItemText(voce, nuova)
 
+    def _ammesso(self, pl, brano):
+        """Vero se il brano passa il filtro della sua playlist."""
+        return True
+
+    def _conto(self, brani):
+        """'numero (durata)' di una lista di brani; i brani di cui la durata
+        non si sa ancora, o non si sapra', sono detti a parte."""
+        if not brani:
+            return "0"
+        durate = [self.schedario.durata(b) for b in brani]
+        note = [d for d in durate if d is not None]
+        if not note:
+            return f"{len(brani)} (senza durata)"
+        ignote = len(durate) - len(note)
+        return f"{len(brani)} ({durata_lunga(sum(note))}{f', {ignote} senza durata' if ignote else ''})"
+
     def _etichetta_della_playlist(self, pl):
-        return f"{pl.nome}, {brani_al_plurale(len(pl.brani))}"
+        filtrati = [b for b in pl.brani if self._ammesso(pl, b)]
+        return f"{pl.nome}, brani: {self._conto(filtrati)}, totali: {self._conto(pl.brani)}"
+
+    def _chiedi_schede(self, *playlist):
+        """Chiede allo schedario le schede dei brani delle playlist date."""
+        self.schedario.chiedi([b.percorso for pl in playlist for b in pl.brani])
+
+    def _schede_arrivate(self):
+        """Lo schedario ha letto nuove schede: si rinfrescano le etichette
+        delle playlist e, a coda vuota, lo schedario si salva."""
+        if self._chiusa:
+            return
+        for voce in [self.nodo_preferiti, *self._figli(self.nodo_playlist)]:
+            dati = self._dati(voce) or {}
+            if dati.get("tipo") == "playlist":
+                nuova = self._etichetta_della_playlist(dati["playlist"])
+                if self.albero.GetItemText(voce) != nuova:
+                    self.albero.SetItemText(voce, nuova)
+        if not self.schedario.in_attesa():
+            try:
+                self.schedario.salva()
+            except OSError as e:
+                self._riscontro("errore", f"Non riesco a salvare lo schedario: {e}")
 
     def _sotto(self, voce, radice):
         """Vero se la voce sta dentro il ramo radice."""
@@ -711,6 +765,7 @@ class Finestra(wx.Frame):
         if nuova:
             pl = self.archivio.nuova()
         pl.brani.extend(b if isinstance(b, Brano) else Brano(b) for b in percorsi_da_aggiungere)
+        self._chiedi_schede(pl)
         self._salva_archivio()
         self._popola_playlist()
         cosa = "Creata la playlist" if nuova else "Aggiunti alla playlist"
@@ -725,6 +780,7 @@ class Finestra(wx.Frame):
             self._riscontro("gia_nei_preferiti", f"{brano.nome_del_file} è già nei Preferiti.")
             return
         self.archivio.preferiti.brani.append(Brano(brano.percorso, sottobrano=brano.sottobrano))
+        self._chiedi_schede(self.archivio.preferiti)
         self._salva_archivio()
         self._popola_playlist()
         self._riscontro("preferito_aggiunto", f"{brano.nome_del_file} è nei Preferiti, che ora hanno {brani_al_plurale(len(self.archivio.preferiti.brani))}.")
@@ -745,6 +801,7 @@ class Finestra(wx.Frame):
             self._riscontro("niente_da_suonare", f"In {cartella} non c'è niente da suonare.")
             return
         pl = self.archivio.nuova(nome or "Playlist", files)
+        self._chiedi_schede(pl)
         self._salva_archivio()
         self._popola_playlist()
         self._riscontro("playlist_da_cartella", f"Creata la playlist {pl.nome} con {brani_al_plurale(len(files))}.")
@@ -1224,6 +1281,7 @@ class Finestra(wx.Frame):
             "SID del Commodore 64: libsidplayfp, con l'emulazione reSIDfp.",
             "Durate dei SID: il database Songlengths della High Voltage SID Collection.",
             "Effetti sonori: Acusticator, della libreria GBUtils di Gabriele.",
+            "Durate e tag dei file audio: mutagen.",
             "Interfaccia: wxPython.",
             "Licenza: GPL 3.",
         ])
@@ -1237,6 +1295,9 @@ class Finestra(wx.Frame):
             return
         self._chiusa = True
         self._salva_archivio()
+        self.schedario.ferma()
+        with contextlib.suppress(OSError):
+            self.schedario.salva()
         with contextlib.suppress(OSError):
             self.impostazioni.salva()
         self.motore.chiudi()

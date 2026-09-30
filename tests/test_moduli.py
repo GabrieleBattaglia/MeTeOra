@@ -11,7 +11,7 @@ import formati
 import questo_pc
 import songlengths
 import suoni
-from finestra import leggi_tempo, secondi_da_leggere, tempo
+from finestra import durata_lunga, leggi_tempo, secondi_da_leggere, tempo
 from impostazioni import PREDEFINITE, Impostazioni
 
 HVSC = r"E:\C64Music"
@@ -73,6 +73,9 @@ def test_tempi():
     assert tempo(3725) == "1:02:05"
     assert tempo(None) == "?"
     assert secondi_da_leggere(10.0) == "10"
+    assert durata_lunga(3723.456) == "1:02:03.456"
+    assert durata_lunga(245) == "4:05"
+    assert durata_lunga(7.25) == "0:07.250"
     assert secondi_da_leggere(1.25) == "1,25"
     assert leggi_tempo("1:30") == 90
     assert leggi_tempo("90") == 90
@@ -90,3 +93,37 @@ def test_songlengths_della_collezione():
     assert songlengths.durate_del_file(sid)[:2] == [475.0, 218.0]
     info = songlengths.leggi_intestazione(sid)
     assert info["titolo"] == "Turbo Outrun" and info["sottobrani"] == 12
+
+
+MP3 = r"E:\Audio\AudioDescritti\Alla ricerca di Nemo.mp3"
+
+
+@pytest.mark.skipif(not os.path.isfile(MP3), reason="serve un MP3 di prova")
+def test_scheda_di_un_mp3():
+    from schedario import leggi_scheda
+
+    scheda = leggi_scheda(MP3)
+    assert scheda["durata"] and scheda["durata"] > 60
+    assert scheda["dim"] == os.path.getsize(MP3)
+
+
+@pytest.mark.skipif(not os.path.isdir(HVSC), reason="serve la collezione HVSC")
+def test_schedario_ricorda_e_rilegge(tmp_path):
+    import shutil
+
+    from playlist import Brano
+    from schedario import Schedario
+
+    sid = tmp_path / "t.sid"
+    shutil.copy(os.path.join(HVSC, r"MUSICIANS\T\Tel_Jeroen\Turbo_Outrun.sid"), sid)
+    archivio = str(tmp_path / "schede.json")
+    s = Schedario(archivio)
+    s.chiedi([str(sid)])
+    s.aspetta()
+    assert s.scheda(str(sid))["tag"]["autore"] == "Jeroen Tel"
+    # Fuori dalla collezione il database delle durate non si trova.
+    assert s.durata(Brano(str(sid))) is None
+    s.salva()
+    di_nuovo = Schedario(archivio)
+    di_nuovo.carica()
+    assert di_nuovo.scheda(str(sid))["sottobrani"] == 12

@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.7.0] - 2026-09-30
+
+- Conti e durate delle playlist e dei Preferiti (issue 4): dopo il nome, brani: numero (durata), totali: numero (durata), con la durata in ore, minuti, secondi e millesimi, le ore solo se ci sono e i millesimi solo se non sono zero. I brani senza una durata nota sono contati a parte. Il primo conto diventerà quello dei brani filtrati con la issue 2.
+- Lo schedario dei file: durata, dimensione e tag di ogni brano si leggono in sottofondo, senza fermare la finestra, e si ricordano nel file MeTeOra - Schedario.json; un file si rilegge solo se cambia. Per i file audio li legge la libreria mutagen, per i SID l'intestazione e il database di HVSC.
+
 ## [1.6.0] - 2026-09-30
 
 - I Preferiti (issue 3): la prima voce della plancia, una playlist speciale in cui F4, o la voce Aggiungi ai preferiti del menu, manda il brano, il file o il sottobrano selezionato, da qualsiasi playlist o cartella. Un brano che c'è già non si doppia. Canc su un brano dei Preferiti lo toglie; i Preferiti non si rinominano e non si eliminano. Il filtro arriverà con la issue 2.

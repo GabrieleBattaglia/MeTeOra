@@ -1,4 +1,5 @@
 python-mpv
+mutagen
 numpy
 wxPython
 pytest

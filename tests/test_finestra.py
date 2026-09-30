@@ -42,7 +42,7 @@ def test_aree_nell_ordine_di_tabulazione(finestra):
 
 
 def test_rami_principali(finestra):
-    assert _etichette(finestra, finestra.albero.GetRootItem()) == ["Preferiti, 0 brani", "Playlist", "Questo PC", "Apri file", "Impostazioni"]
+    assert _etichette(finestra, finestra.albero.GetRootItem()) == ["Preferiti, brani: 0, totali: 0", "Playlist", "Questo PC", "Apri file", "Impostazioni"]
     assert _etichette(finestra, finestra.nodo_playlist) == ["Nuova playlist"]
 
 
@@ -56,7 +56,7 @@ def test_questo_pc_si_carica_all_espansione(finestra):
 def test_nuova_playlist_aggiungi_sposta_togli(finestra, suoni_annotati):
     finestra._comando_nuova_playlist()
     pl = finestra.archivio.playlist[0]
-    assert finestra.albero.GetItemText(finestra.albero.GetSelection()) == "Playlist, 0 brani"
+    assert finestra.albero.GetItemText(finestra.albero.GetSelection()) == "Playlist, brani: 0, totali: 0"
     finestra._aggiungi(pl, [r"C:\m\uno.mp3", r"C:\m\due.mp3", r"C:\m\tre.mp3"])
     assert _ultima(finestra) == "Aggiunti alla playlist Playlist: 3 brani, ora 3 brani."
     nodo = next(finestra._figli(finestra.nodo_playlist))
@@ -318,7 +318,7 @@ def test_preferiti(finestra, suoni_annotati):
     finestra.albero.SelectItem(list(finestra._figli(nodo))[1])
     _tasto(finestra, codice=wx.WXK_F4)
     assert _ultima(finestra) == "2.mp3 è nei Preferiti, che ora hanno 1 brano."
-    assert finestra.albero.GetItemText(finestra.nodo_preferiti) == "Preferiti, 1 brano"
+    assert finestra.albero.GetItemText(finestra.nodo_preferiti) == "Preferiti, brani: 1 (senza durata), totali: 1 (senza durata)"
     _tasto(finestra, codice=wx.WXK_F4)
     assert _ultima(finestra) == "2.mp3 è già nei Preferiti."
     preferito = finestra.archivio.preferiti.brani[0]
@@ -328,7 +328,7 @@ def test_preferiti(finestra, suoni_annotati):
     finestra.albero.Expand(finestra.nodo_preferiti)
     finestra._cancella(next(finestra._figli(finestra.nodo_preferiti)))
     assert not finestra.archivio.preferiti.brani
-    assert finestra.albero.GetItemText(finestra.nodo_preferiti) == "Preferiti, 0 brani"
+    assert finestra.albero.GetItemText(finestra.nodo_preferiti) == "Preferiti, brani: 0, totali: 0"
     finestra.archivio.preferiti.brani.append(preferito)
     finestra._salva_archivio()
     from playlist import Archivio
@@ -336,3 +336,13 @@ def test_preferiti(finestra, suoni_annotati):
     di_nuovo = Archivio(finestra.archivio.percorso)
     di_nuovo.carica()
     assert [b.percorso for b in di_nuovo.preferiti.brani] == [preferito.percorso]
+
+
+@pytest.mark.skipif(not os.path.isfile(TURBO_OUTRUN), reason="serve la collezione HVSC")
+def test_durate_delle_playlist(finestra):
+    finestra._aggiungi(None, [TURBO_OUTRUN, Brano(TURBO_OUTRUN, sottobrano=3)])
+    finestra.schedario.aspetta()
+    finestra._schede_arrivate()
+    nodo = next(finestra._figli(finestra.nodo_playlist))
+    assert finestra.albero.GetItemText(nodo) == "Playlist, brani: 2 (8:34), totali: 2 (8:34)"
+    assert os.path.isfile(finestra.schedario.percorso)
