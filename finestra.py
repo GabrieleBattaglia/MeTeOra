@@ -3,7 +3,8 @@
 # 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino,
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
-# nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8.
+# nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
+# nella 1.15.0 la ricerca globale.
 
 """La finestra di MeTeOra.
 
@@ -31,6 +32,7 @@ from filtro import ErroreFiltro, Filtro
 from impostazioni import Impostazioni
 from motore import durata_del_sottobrano
 from playlist import Archivio, Brano, Coda, Playlist
+from ricerca import Ricerca
 from schedario import Schedario
 
 FILE_PLAYLIST = "MeTeOra - Playlist.json"
@@ -39,6 +41,8 @@ FILE_SCHEDARIO = "MeTeOra - Schedario.json"
 RIGHE_DELLA_CONSOLE = 2000
 # Quanti rami al massimo apre F10 in una volta.
 MASSIMO_DI_RAMI = 2000
+# Quanti risultati della ricerca si mostrano alla volta.
+PAGINA_DEI_RISULTATI = 1000
 
 # I tasti a lettera: (carattere, maiuscolo) -> comando.
 TASTI = {
@@ -60,6 +64,7 @@ TASTI = {
     ("w", False): "vai_a_tempo",
     ("+", False): "volume_su",
     ("-", False): "volume_giu",
+    ("\\", False): "ricerca",
     ("m", True): "passo_volume",
 }
 # I tasti gia' assegnati nel piano a funzioni delle tappe successive: per ora
@@ -69,7 +74,7 @@ FUTURI = {
     "j": "playlist precedente", "k": "playlist successiva", "l": "dissolvenza",
     "r": "segnalibri", "t": "segnalibri", "y": "segnalibri",
     "u": "equalizzatore", "i": "equalizzatore", "o": "equalizzatore", "p": "equalizzatore", "è": "equalizzatore",
-    "'": "playlist precedente", "ì": "playlist successiva", "\\": "ricerca nella plancia",
+    "'": "playlist precedente", "ì": "playlist successiva",
     **{str(n): "scelta della playlist" for n in range(10)},
 }
 FUTURI_MAIUSCOLI = {"l": "durata della dissolvenza"}
@@ -79,11 +84,13 @@ TASTI_COMUNI = [
     "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, + e - volume, Maiuscolo+M il passo del volume, M muto.",
     "Maiuscolo con Z e con B sottobrano precedente e successivo di un SID, Maiuscolo+X mette e toglie i punti A e B del loop sul brano selezionato, Maiuscolo+C toglie il loop.",
     "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione sul brano in riproduzione e Maiuscolo+F8 ce la tiene agganciata, F9 chiude e F10 apre tutto il ramo selezionato.",
-    "F1 manuale, F2 novità, F3 crediti, Esc esce salvando tutto.",
+    "Barra rovesciata: ricerca in tutte le playlist e in tutte le unità. F1 manuale, F2 novità, F3 crediti, Esc esce salvando tutto.",
 ]
 # Le righe del cruscotto proprie di ogni tipo di voce della plancia.
 TASTI_DEL_CONTESTO = {
     "filtro": ("il filtro di una playlist", "Invio o freccia destra modificano il filtro: nel campo Invio conferma, Ctrl+Invio va a capo, Esc annulla. Canc svuota il filtro."),
+    "risultati": ("i Risultati della ricerca", "Invio, Applicazioni o Spazio: menu con Riproduci, Salva come playlist, Nuova ricerca e Ferma la ricerca."),
+    "altri": ("la voce che mostra altri risultati", "Invio mostra i risultati seguenti."),
     "preferiti": ("i Preferiti", "Invio, Applicazioni o Spazio: menu con Riproduci. Canc su un loro brano lo toglie dai Preferiti."),
     "radice_playlist": ("il ramo Playlist", "Invio, Applicazioni o Spazio: menu con Nuova playlist."),
     "playlist": ("una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci e Rinomina. Canc elimina la playlist, dopo una conferma."),
@@ -178,15 +185,16 @@ class FinestraFiltro(wx.Dialog):
         "a autore, n titolo, l album, g genere, y anno (y<1990), p percorso, s saltato (s=1), r sottobrani (r>1)."
     )
 
-    def __init__(self, genitore, nome_playlist, testo):
+    def __init__(self, genitore, nome_playlist, testo, titolo=None):
         from GBwx import STILE_ADATTABILE, adatta_finestra, pannello_scorrevole
 
-        super().__init__(genitore, title=f"Filtro di {nome_playlist}", style=STILE_ADATTABILE)
+        titolo = titolo or f"Filtro di {nome_playlist}"
+        super().__init__(genitore, title=titolo, style=STILE_ADATTABILE)
         pannello = pannello_scorrevole(self)
         sizer = wx.BoxSizer(wx.VERTICAL)
-        etichetta = wx.StaticText(pannello, label=f"Filtro di {nome_playlist}. Invio conferma, Ctrl+Invio va a capo, Esc annulla.")
+        etichetta = wx.StaticText(pannello, label=f"{titolo}. Invio conferma, Ctrl+Invio va a capo, Esc annulla.")
         self.campo = wx.TextCtrl(pannello, value=testo, style=wx.TE_MULTILINE)
-        self.campo.SetName(f"Filtro di {nome_playlist}")
+        self.campo.SetName(titolo)
         self.campo.SetMinSize(wx.Size(-1, self.campo.GetCharHeight() * 5))
         spiegazione = wx.TextCtrl(pannello, value=self.SPIEGAZIONE, style=wx.TE_MULTILINE | wx.TE_READONLY)
         spiegazione.SetName("Come si scrive il filtro")
@@ -239,6 +247,15 @@ class Finestra(wx.Frame):
         self.coda.ammesso = self._ammesso
         # I filtri compilati, per playlist: (testo, Filtro).
         self._filtri = {}
+        # La ricerca in corso o l'ultima fatta, i suoi risultati come
+        # playlist temporanea, e quanti se ne mostrano nella plancia.
+        self._ricerca = None
+        self._testo_della_ricerca = ""
+        self.risultati = None
+        self.nodo_risultati = None
+        # Quanti risultati si possono mostrare: una pagina, e una in piu' a
+        # ogni Mostra altri risultati.
+        self._pagina = PAGINA_DEI_RISULTATI
         self.schedario = Schedario(os.path.join(cartella_dati, FILE_SCHEDARIO), avvisa=lambda: wx.CallAfter(self._schede_arrivate))
         self.schedario.carica()
         # Le playlist temporanee nate dalle cartelle di Questo PC, per cartella:
@@ -488,7 +505,7 @@ class Finestra(wx.Frame):
             if suona and self.motore.sottobrano == n:
                 parti.append("in riproduzione")
             return ", ".join(parti)
-        parti = [brano.nome_del_file]
+        parti = [brano.percorso if dati.get("completo") else brano.nome_del_file]
         if brano.sottobrano:
             info = songlengths.info_del_sid(brano.percorso)
             parti[0] += f", sottobrano {brano.sottobrano} di {info['sottobrani'] if info else '?'}"
@@ -514,10 +531,13 @@ class Finestra(wx.Frame):
         durata = self.schedario.durata(brano)
         return [durata_lunga(durata)] if durata is not None else []
 
-    def _aggiungi_voce(self, genitore, tipo, pl, brano):
+    def _aggiungi_voce(self, genitore, tipo, pl, brano, completo=False):
         """Aggiunge alla plancia un brano (di una playlist) o un file (di una
-        cartella); un SID con piu' sottobrani diventa un ramo da aprire."""
+        cartella); un SID con piu' sottobrani diventa un ramo da aprire. Con
+        completo l'etichetta ha il percorso intero, come nei Risultati."""
         dati = {"tipo": tipo, "playlist": pl, "brano": brano}
+        if completo:
+            dati["completo"] = True
         voce = self.albero.AppendItem(genitore, self._etichetta(dati), data=dati)
         if self._ha_sottobrani(brano):
             dati["caricato"] = False
@@ -719,6 +739,9 @@ class Finestra(wx.Frame):
                 figlio = self.albero.AppendItem(voce, etichetta, data={"tipo": "unita", "percorso": radice, "etichetta": etichetta, "caricato": False})
                 self.albero.SetItemHasChildren(figlio, True)
             return
+        if tipo == "risultati":
+            self._mostra_risultati()
+            return
         if tipo == "playlist":
             pl = dati["playlist"]
             self.albero.AppendItem(voce, self._etichetta_del_filtro(pl), data={"tipo": "filtro", "playlist": pl})
@@ -772,6 +795,8 @@ class Finestra(wx.Frame):
             getattr(self, f"_comando_{dati['comando']}")()
         elif dati and dati["tipo"] == "filtro":
             self._modifica_filtro(dati["playlist"])
+        elif dati and dati["tipo"] == "altri":
+            self._altri_risultati()
         else:
             self._menu(voce)
 
@@ -821,6 +846,11 @@ class Finestra(wx.Frame):
         tipo = dati["tipo"]
         if tipo == "radice_playlist":
             return [("Nuova playlist", self._comando_nuova_playlist)]
+        if tipo == "risultati":
+            return [("Riproduci", lambda: self._riproduci_playlist(self.risultati)), ("Salva come playlist", self._salva_risultati),
+                ("Nuova ricerca", self._comando_ricerca), ("Ferma la ricerca", self._ferma_ricerca)]
+        if tipo == "altri":
+            return [("Mostra altri risultati", self._altri_risultati)]
         if tipo == "filtro":
             pl = dati["playlist"]
             return [("Modifica il filtro", lambda: self._modifica_filtro(pl)), ("Svuota il filtro", lambda: self._imposta_filtro(pl, ""))]
@@ -928,13 +958,13 @@ class Finestra(wx.Frame):
         self._popola_playlist(seleziona=pl)
         self._riscontro("nuova_playlist", f"Creata la playlist {pl.nome}, vuota. Si riempie da Questo PC, con Aggiungi alla playlist.")
 
-    def _aggiungi(self, pl, percorsi_da_aggiungere):
+    def _aggiungi(self, pl, percorsi_da_aggiungere, nome=None):
         if not percorsi_da_aggiungere:
             self._riscontro("niente_da_suonare", "Non c'è niente da aggiungere: nessun file supportato.")
             return
         nuova = pl is None
         if nuova:
-            pl = self.archivio.nuova()
+            pl = self.archivio.nuova(nome)
         pl.brani.extend(b if isinstance(b, Brano) else Brano(b) for b in percorsi_da_aggiungere)
         self._chiedi_schede(pl)
         self._salva_archivio()
@@ -964,6 +994,118 @@ class Finestra(wx.Frame):
         if dati.get("tipo") in ("brano", "file"):
             return dati["brano"]
         return None
+
+    # La ricerca globale.
+
+    def _comando_ricerca(self):
+        """Il campo della ricerca, uguale a quello del filtro; con Invio parte
+        la ricerca e i Risultati si riempiono mentre procede."""
+        testo = self._testo_della_ricerca
+        while True:
+            self._suono("domanda")
+            with FinestraFiltro(self, "", testo, titolo="Ricerca in tutto MeTeOra") as dialogo:
+                if dialogo.ShowModal() != wx.ID_OK:
+                    self.scrivi("Ricerca annullata.")
+                    return
+                testo = " ".join(dialogo.testo.split())
+            if not testo:
+                self._riscontro("errore", "Scrivi cosa cercare.")
+                continue
+            try:
+                filtro = Filtro(testo)
+            except ErroreFiltro as e:
+                self._riscontro("errore", f"Nella ricerca non capisco: {e}")
+                continue
+            break
+        self._avvia_ricerca(testo, filtro)
+
+    def _avvia_ricerca(self, testo, filtro, unita=None):
+        if self._ricerca is not None:
+            self._ricerca.ferma()
+        self._testo_della_ricerca = testo
+        self.risultati = Playlist("Risultati", cartella="")
+        brani = [b for pl in (self.archivio.preferiti, *self.archivio.playlist) for b in pl.brani]
+        self._ricerca = Ricerca(filtro, brani, self.schedario, avvisa=lambda: wx.CallAfter(self._risultati_arrivati), unita=unita)
+        if self.nodo_risultati is None:
+            self.nodo_risultati = self.albero.InsertItem(self.albero.GetRootItem(), self.nodo_preferiti, "Risultati")
+        else:
+            self.albero.Collapse(self.nodo_risultati)
+            self.albero.DeleteChildren(self.nodo_risultati)
+        self.albero.SetItemData(self.nodo_risultati, {"tipo": "risultati", "playlist": self.risultati, "caricato": False})
+        self.albero.SetItemHasChildren(self.nodo_risultati, True)
+        self._pagina = PAGINA_DEI_RISULTATI
+        self._aggiorna_risultati()
+        self._ricerca.avvia()
+        self._riscontro("ricerca_avviata", f"Cerco {testo} nelle playlist e nelle unità. I Risultati si riempiono mentre cerco.")
+
+    def _etichetta_dei_risultati(self):
+        trovati = self._ricerca.quanti() if self._ricerca else 0
+        stato = "" if self._ricerca is None or self._ricerca.finita else (", ricerca fermata" if self._ricerca.fermata else ", ricerca in corso")
+        return f"Risultati di {self._testo_della_ricerca}: {trovati} {'trovato' if trovati == 1 else 'trovati'}{stato}"
+
+    def _aggiorna_risultati(self):
+        """Allinea i Risultati alla ricerca: la playlist, l'etichetta e,
+        se il ramo e' caricato, le voci nuove fino alla pagina corrente."""
+        if self._ricerca is None:
+            return
+        nuovi = self._ricerca.pezzo(len(self.risultati.brani), self._ricerca.quanti())
+        self.risultati.brani.extend(nuovi)
+        self.albero.SetItemText(self.nodo_risultati, self._etichetta_dei_risultati())
+        if self._dati(self.nodo_risultati).get("caricato"):
+            self._mostra_risultati()
+
+    def _mostra_risultati(self):
+        """Porta il ramo dei Risultati fino alla pagina corrente, con in fondo
+        la voce per vederne altri se ce ne sono."""
+        voce = self.nodo_risultati
+        figli = list(self._figli(voce))
+        if figli and (self._dati(figli[-1]) or {}).get("tipo") == "altri":
+            self.albero.Delete(figli[-1])
+        presenti = self.albero.GetChildrenCount(voce, False)
+        for brano in self.risultati.brani[presenti:self._pagina]:
+            self._aggiungi_voce(voce, "file", self.risultati, brano, completo=True)
+        restano = len(self.risultati.brani) - self.albero.GetChildrenCount(voce, False)
+        if restano > 0:
+            testo = "Mostra l'ultimo risultato" if restano == 1 else f"Mostra altri {min(restano, PAGINA_DEI_RISULTATI)} risultati, ne restano {restano}"
+            self.albero.AppendItem(voce, testo, data={"tipo": "altri"})
+
+    def _altri_risultati(self):
+        prima = self._pagina
+        self._pagina += PAGINA_DEI_RISULTATI
+        self._mostra_risultati()
+        # La selezione va sul primo dei risultati appena mostrati.
+        figli = list(self._figli(self.nodo_risultati))
+        if len(figli) > prima:
+            self.albero.SelectItem(figli[prima])
+        mostrati = min(self._pagina, len(self.risultati.brani))
+        self._riscontro("altri_risultati", f"Mostrati {mostrati} risultati su {len(self.risultati.brani)}.")
+
+    def _risultati_arrivati(self):
+        if self._chiusa or self._ricerca is None:
+            return
+        self._aggiorna_risultati()
+        if self._ricerca.finita:
+            self._riscontro("ricerca_finita", f"Ricerca di {self._testo_della_ricerca} finita: {len(self.risultati.brani)} risultati.")
+            self._chiedi_schede(self.risultati)
+
+    def _ferma_ricerca(self):
+        if self._ricerca is None or self._ricerca.finita or self._ricerca.fermata:
+            self._riscontro("non_disponibile", "Non c'è una ricerca in corso.")
+            return
+        self._ricerca.ferma()
+        self._aggiorna_risultati()
+        self._riscontro("ricerca_fermata", f"Ricerca fermata: {len(self.risultati.brani)} risultati.")
+
+    def _salva_risultati(self):
+        if not self.risultati or not self.risultati.brani:
+            self._riscontro("niente_da_suonare", "Non ci sono risultati da salvare.")
+            return
+        with wx.TextEntryDialog(self, "Nome della nuova playlist:", "Salva i risultati", f"Ricerca {self._testo_della_ricerca}") as dialogo:
+            if dialogo.ShowModal() != wx.ID_OK:
+                return
+            nome = dialogo.GetValue().strip() or "Ricerca"
+        self._aggiorna_risultati()
+        self._aggiungi(None, [Brano(b.percorso, sottobrano=b.sottobrano) for b in self.risultati.brani], nome=nome)
 
     def _crea_da_qui(self, cartella, nome):
         with wx.BusyCursor():
@@ -1600,6 +1742,8 @@ class Finestra(wx.Frame):
             evento.Skip()
             return
         self._chiusa = True
+        if self._ricerca is not None:
+            self._ricerca.ferma()
         self._salva_archivio()
         self.schedario.ferma()
         with contextlib.suppress(OSError):

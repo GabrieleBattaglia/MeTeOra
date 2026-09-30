@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.15.0] - 2026-09-30
+
+- La ricerca globale (issue 10). La barra rovesciata apre un campo uguale a quello del filtro, con la stessa grammatica. Con Invio la ricerca parte in sottofondo, prima nei Preferiti e nelle playlist, poi in tutte le unità (dischi e chiavette; niente unità di rete e CD), e raccoglie ciò che trova nel ramo Risultati, fra i Preferiti e le playlist, che si riempie mentre cerca. Mille risultati alla volta, con la voce Mostra altri risultati in fondo; il menu ha Riproduci, Salva come playlist, Nuova ricerca e Ferma la ricerca. I Risultati sono temporanei: la ricerca seguente li sostituisce.
+
 ## [1.14.0] - 2026-09-30
 
 - Maiuscolo con F8 aggancia e sgancia l'inseguimento (issue 9): agganciato, a ogni cambio di brano la selezione della plancia va su ciò che suona, senza spostare il fuoco. Due suoni nuovi per agganciare e sganciare; la scelta resta alla riapertura.

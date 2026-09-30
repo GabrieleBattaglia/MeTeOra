@@ -562,3 +562,62 @@ def test_maiuscolo_f8_aggancia_la_selezione(finestra, monkeypatch, suoni_annotat
     salvate = Impostazioni(finestra.impostazioni.percorso)
     salvate.carica()
     assert salvate["insegui"] is False
+
+
+def test_ricerca_globale(finestra, monkeypatch, suoni_annotati, tmp_path):
+    from filtro import Filtro
+
+    monkeypatch.setattr(modulo, "PAGINA_DEI_RISULTATI", 2)
+    cartella = tmp_path / "Musica"
+    (cartella / "Dentro").mkdir(parents=True)
+    for nome in ("rock uno.mp3", "jazz.mp3", "rock due.mp3", "Dentro/rock tre.flac", "Dentro/rock quattro.mp3"):
+        (cartella / nome).write_bytes(b"")
+    finestra._aggiungi(None, [str(cartella / "rock uno.mp3"), os.path.join(r"C:\m", "rock in playlist.mp3")])
+    finestra._avvia_ricerca("rock", Filtro("rock"), unita=[str(cartella)])
+    finestra._ricerca.aspetta()
+    finestra._risultati_arrivati()
+    radice = finestra.albero.GetRootItem()
+    assert _etichette(finestra, radice)[:2] == ["Preferiti, brani: 0, totali: 0", "Risultati di rock: 5 trovati"]
+    assert _ultima(finestra) == "Ricerca di rock finita: 5 risultati."
+    # Prima quelli delle playlist, senza doppioni con quelli del disco.
+    percorsi = [b.percorso for b in finestra.risultati.brani]
+    assert percorsi[:2] == [str(cartella / "rock uno.mp3"), os.path.join(r"C:\m", "rock in playlist.mp3")]
+    assert len(set(percorsi)) == 5
+    finestra.albero.Expand(finestra.nodo_risultati)
+    etichette = _etichette(finestra, finestra.nodo_risultati)
+    assert etichette == [str(cartella / "rock uno.mp3"), os.path.join(r"C:\m", "rock in playlist.mp3"), "Mostra altri 2 risultati, ne restano 3"]
+    altri = list(finestra._figli(finestra.nodo_risultati))[-1]
+    finestra.albero.SelectItem(altri)
+    finestra._altri_risultati()
+    assert len(_etichette(finestra, finestra.nodo_risultati)) == 5
+    assert _etichette(finestra, finestra.nodo_risultati)[-1] == "Mostra l'ultimo risultato"
+    assert finestra.albero.GetSelection() == list(finestra._figli(finestra.nodo_risultati))[2]
+    monkeypatch.setattr(wx, "TextEntryDialog", _DialogoFinto("rock salvati"))
+    finestra._salva_risultati()
+    assert finestra.archivio.playlist[-1].nome == "rock salvati"
+    assert len(finestra.archivio.playlist[-1].brani) == 5
+    # Una nuova ricerca sostituisce i Risultati.
+    finestra._avvia_ricerca("jazz", Filtro("jazz"), unita=[str(cartella)])
+    finestra._ricerca.aspetta()
+    finestra._risultati_arrivati()
+    assert finestra.albero.GetItemText(finestra.nodo_risultati) == "Risultati di jazz: 1 trovato"
+
+
+class _DialogoFinto:
+    def __init__(self, risposta):
+        self.risposta = risposta
+
+    def __call__(self, *_a, **_k):
+        return self
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_a):
+        return False
+
+    def ShowModal(self):
+        return wx.ID_OK
+
+    def GetValue(self):
+        return self.risposta

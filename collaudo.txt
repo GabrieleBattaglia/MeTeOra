@@ -1,21 +1,15 @@
-Collaudo di MeTeOra 1.8.0, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Collaudo di MeTeOra 1.15.0, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra. Scrivi le note sulla riga della voce; le voci superate si cancellano.
 Nel cruscotto sposta il cursore, vai altrove e torna con F7 dallo stesso punto: il cursore è dove l'avevi lasciato.
-No, sempre sulla T iniziale.
-
-Nelle playlist i brani hanno l'estensione.
-Confermo, ma manca la durata. E la vorrei anche nei file di questo PC.
-
-Maiuscolo+E, scrivi 1,2: il salto in avanti diventa di un secondo e due decimi.
-Ho scritto 1.2 mi ha preso 1.357. Non è un grosso problema. Il fatto è che sono abituato ad usare il ., non la ,
-
-Maiuscolo+M chiede il passo del volume; dopo averlo cambiato, più e meno usano il nuovo passo, anche riaprendo il programma.
-Funziona. Però, nella console, tutte quelle righe... Non potremmo sovrascrivere la riga, quando l'informazione è la stessa?
-
-In una cartella di SID, un SID con più sottobrani si apre con freccia destra e mostra i sottobrani con la durata.
-I sottobrani hanno la durata ma il brano contenitore no.
-
-Un sottobrano lasciato finire passa al file successivo della cartella, non al sottobrano successivo.
-Questo comportamento va reso migliore. Il tasto f9 non ha senso, tanto la console riporta comunque, il brano in esecuzione. Quindi destiniamo f9 collassa tutto e f10 espandi tutto. Questa coppia funziona ovviamente dove c'è qualcosa da espandere e collassare, con i loro effetti sonori nuovi. Ora, la riproduzione automatica, quella che passa di brano quando quello in play finisce, segue lo stato dell'albero: se è espanso, percorre in modo ricorsivo tutti i rami aperti, sottobrani inclusi, altrimenti va solo sull'oggetto successivo. Se non c'è più niente di espanso davanti, si ferma. Se c'è un'altra cartella o un'altra pl con qualche ramo espanso, iniza a percorrerlo e riproduce ciò che vede.
-
-Maiuscolo+X su un brano mette il punto A, su un altro il punto B; X, Z, B e N restano fra i due, e dopo B si torna ad A con un suono proprio.
-Sì. Serve anche shift+c che elimina A e B.
+Brani delle playlist e file di Questo PC hanno la durata dopo il nome; un SID con più sottobrani dice quanti sono e quanto durano in tutto.
+Maiuscolo+E, scrivi 1.2: il messaggio dice 1.2 secondi, con il punto.
+Premi più volte + e -: nella console resta una riga sola del volume, riscritta.
+F10 su una playlist, o su una cartella, apre tutto ciò che ha dentro; F9 richiude tutto e la selezione resta sulla voce.
+Apri una cartella di SID e i sottobrani di un SID, suona il primo sottobrano: quando finisce passa al secondo, e finiti i sottobrani al file dopo.
+Con un SID chiuso, finito il brano si passa al file dopo.
+Due playlist aperte una sotto l'altra: finita la prima si passa alla seconda. Se davanti non c'è niente di aperto, la riproduzione si ferma e la console lo dice.
+Maiuscolo+C toglie il loop A-B da qualsiasi punto.
+Maiuscolo+F8 aggancia l'inseguimento: a ogni cambio di brano la selezione va su ciò che suona. Di nuovo Maiuscolo+F8 lo sgancia. Due suoni diversi.
+Barra rovesciata: scrivi hubbard e Invio. Compare Risultati fra Preferiti e Playlist; l'etichetta dice quanti ne ha trovati e che la ricerca è in corso, poi finita.
+Apri Risultati: ogni voce ha il percorso completo; in fondo, se sono più di mille, Mostra altri risultati con Invio fa vedere i seguenti.
+Dal menu di Risultati: Salva come playlist, Ferma la ricerca, Nuova ricerca.
+Mentre la ricerca lavora sui dischi, la finestra resta pronta e NVDA non si blocca.
