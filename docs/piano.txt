@@ -25,8 +25,8 @@ Il programma e fortemente orientato alle playlist. La riproduzione di singoli br
 3.6 F1 manuale, F2 changelog, F3 crediti, F12 elenco dei tasti: scritti nella console, con il fuoco portato sulla loro prima riga (dalla 1.20.0; prima F1, F2 e F3 aprivano una finestra a parte).
 3.7 Esc chiude il programma salvando tutto, senza conferma: confermato da Gabriele il 30 settembre 2026.
 3.8 Console: ogni scritta ha in fondo l'ora, ore e minuti; la barra verticale cerca nella console e Invio passa all'occorrenza seguente, a ciclo continuo.
-3.8 Alla riapertura si ritrovano la playlist, il brano e la posizione dell'ultima volta, in pausa: si riparte con X.
-3.9 Struttura della plancia dei comandi:
+3.9 Alla riapertura si ritrovano la playlist, il brano e la posizione dell'ultima volta, in pausa: si riparte con X.
+3.10 Struttura della plancia dei comandi:
 Playlist (ramo)
   Playlist 1, 2, ... (rami). Canc elimina la playlist, con conferma. Menu contestuale: Rinomina, Ordina (sottomenu), Mescola.
     Brano (ramo). Canc lo toglie dalla playlist. Menu contestuale: Sposta su, Sposta giu, Sposta in cima, Sposta in fondo, Saltato (attivo o disattivo: il brano resta in lista ma non viene riprodotto).
