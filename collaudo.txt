@@ -1,0 +1,25 @@
+Collaudo di MeTeOra 1.8.0, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+F6 porta alla console e F7 al cruscotto; NVDA li chiama Console e Cruscotto.
+Nel cruscotto sposta il cursore, vai altrove e torna con F7 dallo stesso punto: il cursore è dove l'avevi lasciato.
+Il messaggio del brano in riproduzione, e F9, danno il percorso completo del file.
+Nelle playlist i brani hanno l'estensione.
+Maiuscolo+E, scrivi 1,2: il salto in avanti diventa di un secondo e due decimi.
+Maiuscolo+M chiede il passo del volume; dopo averlo cambiato, più e meno usano il nuovo passo, anche riaprendo il programma.
+In una cartella di SID, un SID con più sottobrani si apre con freccia destra e mostra i sottobrani con la durata.
+Su un sottobrano, X lo suona; NVDA legge "in riproduzione" su quel sottobrano.
+Maiuscolo+B e Maiuscolo+Z passano al sottobrano successivo e precedente di quello che suona.
+Un sottobrano lasciato finire passa al file successivo della cartella, non al sottobrano successivo.
+Dal menu di un sottobrano, Aggiungi alla playlist: nella playlist compare con il nome del file e il numero del sottobrano.
+Maiuscolo+X su un brano mette il punto A, su un altro il punto B; X, Z, B e N restano fra i due, e dopo B si torna ad A con un suono proprio.
+Maiuscolo+X sul punto B lo toglie, sul punto A toglie il loop; X su un brano fuori dal loop lo rifiuta.
+Maiuscolo+Canc su un file di prova, in una cartella e in una playlist: chiede conferma con No predefinito, e con Sì il file finisce nel cestino di Windows.
+X su una cartella con sottocartelle suona tutto l'albero; F8 ritrova il brano anche in una sottocartella mai aperta.
+Preferiti è la prima voce della plancia; F4 su un brano, un file o un sottobrano lo mette nei Preferiti, e una seconda volta dice che c'è già.
+Canc su un brano dei Preferiti lo toglie; Canc sulla voce Preferiti non la elimina.
+Ogni playlist dice dopo il nome brani e totali con la durata; su una playlist grande di SID le durate arrivano in pochi secondi.
+Dentro ogni playlist la prima voce è Filtro (Tutto); Invio o freccia destra aprono il campo, Invio conferma, Ctrl+Invio va a capo, Esc annulla.
+Prova qualche filtro: hubbard|galway, -k=sid, t<=3:00, a=tel, "turbo outrun". La playlist mostra solo i brani che passano, e il conto brani cambia.
+Scrivi un filtro sbagliato, per esempio t<tre: la console spiega l'errore e il campo si riapre.
+Con un filtro attivo, X, B e N suonano solo i brani che passano.
+Canc sulla voce Filtro lo svuota.
+Gli effetti sonori nuovi (sottobrani, loop, cestino, preferiti, filtro) sono tutti diversi fra loro e da quelli di prima.
