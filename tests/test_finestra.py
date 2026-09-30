@@ -730,7 +730,10 @@ def test_ricerca_nella_console(finestra, suoni_annotati, monkeypatch):
     finestra.scrivi("niente")
     finestra.scrivi("secondo VOLUME")
     monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("volume"))
-    _tasto(finestra, "\\", maiuscolo=True)
+    # La stessa barra rovesciata: con il fuoco nella console cerca li'.
+    finestra.console.SetFocus()
+    wx.Yield()
+    _tasto(finestra, "\\")
     testo = "\n".join(finestra._righe).lower()
     primo = testo.find("volume")
     for _ in range(5):

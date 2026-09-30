@@ -7,7 +7,8 @@
 # nella 1.15.0 la ricerca globale, nella 1.17.0 Z, B e N che seguono la plancia e F12,
 # nella 1.20.0 F1, F2 e F3 nella console, l'ora in fondo alle scritte e la ricerca nella console;
 # nella 1.21.0 il volume fino a 300, nella 1.22.0 i conti delle cartelle, nella 1.23.0 i Risultati ad albero;
-# nella 1.26.0 la ripresa all'avvio, J e K e i tasti da 1 a 0; nella 1.28.0 la selezione multipla e X da capo.
+# nella 1.26.0 la ripresa all'avvio, J e K e i tasti da 1 a 0; nella 1.28.0 la selezione multipla e X da capo;
+# nella 1.28.1 una barra rovesciata sola per le due ricerche.
 
 """La finestra di MeTeOra.
 
@@ -72,9 +73,6 @@ TASTI = {
     ("+", False): "volume_su",
     ("-", False): "volume_giu",
     ("\\", False): "ricerca",
-    ("\\", True): "cerca_in_console",
-    ("|", False): "cerca_in_console",
-    ("|", True): "cerca_in_console",
     ("m", True): "passo_volume",
 }
 # I tasti gia' assegnati nel piano a funzioni delle tappe successive: per ora
@@ -94,7 +92,7 @@ TASTI_COMUNI = [
     "Maiuscolo+X mette e toglie i punti A e B del loop sul brano selezionato, Maiuscolo+C toglie il loop.",
     "J e K aprono e suonano la playlist precedente e successiva, le cifre da 1 a 0 le prime dieci playlist.",
     "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione sul brano in riproduzione e Maiuscolo+F8 ce la tiene agganciata, F9 chiude e F10 apre tutto il ramo selezionato.",
-    "Barra rovesciata: ricerca in tutte le playlist e in tutte le unità; barra verticale: ricerca nella console. F1 manuale, F2 novità, F3 crediti e F12 elenco dei tasti, tutti nella console. Esc esce salvando tutto.",
+    "Barra rovesciata: nella console cerca nella console, altrove in tutte le playlist e in tutte le unità. F1 manuale, F2 novità, F3 crediti e F12 elenco dei tasti, tutti nella console. Esc esce salvando tutto.",
 ]
 # Le righe del cruscotto proprie di ogni tipo di voce della plancia.
 TASTI_DEL_CONTESTO = {
@@ -451,7 +449,7 @@ class Finestra(wx.Frame):
     def righe_del_cruscotto(self):
         """Le righe del cruscotto per l'area da cui si arriva."""
         if self._area_precedente == "console":
-            righe = ["Tasti per la console.", "Frecce, Pagina su e giù, Home e Fine per leggere; i messaggi nuovi arrivano in fondo, con l'ora. La barra verticale cerca nella console, e Invio passa all'occorrenza seguente."]
+            righe = ["Tasti per la console.", "Frecce, Pagina su e giù, Home e Fine per leggere; i messaggi nuovi arrivano in fondo, con l'ora. La barra rovesciata cerca nella console, e Invio passa all'occorrenza seguente."]
         elif len(self._voci_selezionate()) > 1:
             righe = [f"Tasti per {len(self._voci_selezionate())} voci selezionate: un ramo selezionato vale per tutto ciò che contiene.",
                 "X suona la selezione come una playlist invisibile, che resta finché non premi V. Invio, Applicazioni o Spazio: menu della selezione. "
@@ -969,7 +967,7 @@ class Finestra(wx.Frame):
             return [("Nuova playlist", self._comando_nuova_playlist)]
         if tipo == "risultati":
             return [("Riproduci", lambda: self._riproduci_playlist(self.risultati)), ("Salva come playlist", self._salva_risultati),
-                ("Nuova ricerca", self._comando_ricerca), ("Ferma la ricerca", self._ferma_ricerca)]
+                ("Nuova ricerca", self._ricerca_globale), ("Ferma la ricerca", self._ferma_ricerca)]
         if tipo == "altri":
             return [("Mostra altri risultati", self._altri_risultati)]
         if tipo == "gruppo_risultati":
@@ -1286,6 +1284,14 @@ class Finestra(wx.Frame):
     # La ricerca globale.
 
     def _comando_ricerca(self):
+        """La barra rovesciata: dalla console cerca nella console, da ogni
+        altro punto fa la ricerca in tutto MeTeOra."""
+        if wx.Window.FindFocus() is self.console:
+            self._comando_cerca_in_console()
+        else:
+            self._ricerca_globale()
+
+    def _ricerca_globale(self):
         """Il campo della ricerca, uguale a quello del filtro; con Invio parte
         la ricerca e i Risultati si riempiono mentre procede."""
         testo = self._testo_della_ricerca

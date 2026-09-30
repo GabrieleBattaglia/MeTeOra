@@ -54,8 +54,7 @@ F8: porta la selezione della plancia su ciò che suona, aprendo se serve le cart
 Maiuscolo con F8: aggancia o sgancia l'inseguimento; agganciato, a ogni cambio di brano la selezione va da sola su ciò che suona, senza spostare il fuoco.
 F9: chiude la voce selezionata e tutto ciò che ha dentro; se la voce non ha niente dentro, chiude quella che la contiene.
 F10: apre la voce selezionata e tutti i rami che ha dentro, caricandoli; sotto Questo PC si ferma dopo duemila rami.
-Barra rovesciata: la ricerca in tutte le playlist e in tutte le unità, con i risultati nel ramo Risultati.
-Barra verticale, cioè Maiuscolo con la barra rovesciata: cerca un testo nella console e ci porta il fuoco, con il cursore sulla prima occorrenza. Maiuscole e minuscole non contano.
+Barra rovesciata: la ricerca in tutte le playlist e in tutte le unità, con i risultati nel ramo Risultati. Se il fuoco è nella console, invece, cerca un testo nella console e porta il cursore sulla prima occorrenza; maiuscole e minuscole non contano.
 Nella console, Invio: passa all'occorrenza seguente dell'ultima ricerca; arrivato in fondo riparte dall'inizio, con un suono diverso.
 Nella plancia, Invio, il tasto Applicazioni e la barra spaziatrice: aprono il menu della voce. Sui comandi Invio li esegue, sulla voce Filtro apre il campo del filtro, sulla voce Mostra altri risultati mostra i seguenti.
 Nella plancia, freccia destra e freccia sinistra: aprono e chiudono i rami. Sulla voce Filtro freccia destra apre il campo del filtro.

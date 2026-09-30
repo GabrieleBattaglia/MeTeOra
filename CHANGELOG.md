@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.28.1] - 2026-10-01
+
+- Una barra rovesciata sola per le due ricerche: con il fuoco nella console cerca nella console, da ogni altro punto cerca in tutte le playlist e le unità. La barra verticale torna libera.
+
 ## [1.28.0] - 2026-10-01
 
 - La selezione multipla nella plancia, come in Esplora risorse: Maiuscolo con le frecce allarga la selezione, Ctrl con le frecce muove il fuoco senza selezionare, Ctrl con Spazio seleziona e deseleziona la voce col fuoco. Un ramo selezionato vale per tutto ciò che contiene, anche chiuso. Con più voci selezionate: X le suona come una playlist invisibile, che resta finché V non la chiude; Canc toglie i brani dalle playlist, elimina le playlist dopo una conferma e svuota i filtri; Maiuscolo con Canc manda i file nel cestino con una conferma sola; F4 li mette nei Preferiti; il menu ha anche Crea playlist dalla selezione e Aggiungi alla playlist. La selezione resta anche quando la plancia si ricostruisce. Il cruscotto spiega i tasti della selezione.

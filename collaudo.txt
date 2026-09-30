@@ -12,3 +12,4 @@ Canc su più brani li toglie tutti; con una playlist fra i selezionati chiede co
 Maiuscolo+Canc su più file di prova: una sola conferma, e finiscono tutti nel cestino.
 Dopo F4 sulla selezione, la selezione è ancora lì.
 X su un brano che sta suonando lo fa ripartire da capo; in pausa X riprende dal punto.
+La barra rovesciata con il fuoco nella console cerca nella console; con il fuoco nella plancia apre la ricerca in tutto MeTeOra.
