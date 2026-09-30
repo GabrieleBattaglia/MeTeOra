@@ -21,7 +21,7 @@ Menu di un sottobrano: Riproduci, Aggiungi alla playlist.
 Il brano in riproduzione e la voce selezionata sono due cose diverse: quando un brano finisce e ne parte un altro, la selezione resta dov'è. Nella plancia il brano che suona ha l'indicazione "in riproduzione" dopo il nome.
 I tasti
 I tasti a lettera funzionano in tutta la finestra, qualunque area abbia il fuoco. Per questo nella plancia non si salta alle voci digitandone l'iniziale.
-X: riproduce la voce selezionata, cioè un brano, un file, una playlist o una cartella. Se la voce è quella che sta già suonando in pausa, riprende.
+X: riproduce la voce selezionata, cioè un brano, un file, una playlist o una cartella. Una cartella, o un'unità, si suona con tutto ciò che ha sotto: prima i suoi file, poi quelli delle sottocartelle, e Z, B e N girano su tutti. Se la voce è quella che sta già suonando in pausa, riprende.
 C: pausa, e di nuovo C riprende.
 V: stop. Poi X riparte dall'inizio del brano.
 Z e B: brano precedente e successivo.
@@ -32,7 +32,7 @@ Q ed E: indietro e avanti nel brano, di dieci secondi. Maiuscolo con Q e Maiusco
 W: va a un tempo del brano, scritto come minuti e secondi, per esempio 1:30, oppure in secondi, anche con i decimali: 1:30,5 oppure 90.5.
 Più e meno, sulla tastiera principale: volume su e giù, di cinque se non lo cambi. Maiuscolo con M chiede di quanto, da 1 a 50, e MeTeOra se lo ricorda.
 M: muto, e di nuovo M riaccende l'audio.
-F8: porta la selezione della plancia sul brano in riproduzione.
+F8: porta la selezione della plancia sul brano in riproduzione, aprendo se serve le cartelle fino a lui.
 F9: scrive nella console cosa suona, con il percorso completo del file, a che punto è, e il volume.
 F1: questo manuale. F2: le novità di ogni versione. F3: i crediti. Esc chiude queste finestre.
 Esc nella finestra principale esce da MeTeOra salvando tutto.

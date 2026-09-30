@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.5.0] - 2026-09-30
+
+- X su una cartella o su un'unità la suona con tutto l'albero che le sta sotto (issue 5): prima i suoi file, poi quelli delle sottocartelle, in ordine alfabetico, e Z, B e N girano su tutti. F8 ritrova il brano anche in una sottocartella mai aperta, aprendo i rami fino a lui.
+
 ## [1.4.0] - 2026-09-30
 
 - Maiuscolo con Canc, o la voce Manda nel cestino del menu, manda nel cestino di Windows il file di un brano o di un file di una cartella (issue 6). Chiede conferma, con No come risposta predefinita; il brano esce dalla playlist, o il file dalla cartella nella plancia. Se il file sta suonando, prima si ferma.

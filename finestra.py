@@ -1,6 +1,7 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino,
+# nella 1.5.0 le cartelle suonate con le sottocartelle.
 
 """La finestra di MeTeOra.
 
@@ -818,17 +819,39 @@ class Finestra(wx.Frame):
         self._suona(pl, brano)
 
     def _riproduci_cartella(self, cartella):
-        try:
-            files = questo_pc.contenuto(cartella)[1]
-        except OSError as e:
-            self._riscontro("errore", f"Non riesco a leggere {cartella}: {e.strerror or e}")
+        """Suona una cartella con tutto l'albero che le sta sotto: i suoi file,
+        poi quelli delle sottocartelle. Z, B e N girano su tutti. I brani sono
+        quelli delle playlist temporanee di ciascuna cartella, cosi' nella
+        plancia il brano che suona si riconosce anche dentro le sottocartelle."""
+        with wx.BusyCursor():
+            contenuti = questo_pc.contenuti_ricorsivi(cartella)
+        if not contenuti:
+            self._riscontro("errore", f"Non riesco a leggere {cartella}.")
             return
-        pl = self._temporanea(cartella, files)
+        brani = [b for sotto, files in contenuti for b in self._temporanea(sotto, files).brani]
+        nome = os.path.basename(cartella.rstrip("\\")) or cartella
+        pl = Playlist(nome, brani, cartella=cartella)
         brano = self.coda.primo(pl)
         if brano is None:
-            self._riscontro("niente_da_suonare", "In questa cartella non ci sono file da suonare; le sottocartelle si suonano con Crea playlist da qui.")
+            self._riscontro("niente_da_suonare", "Né in questa cartella né nelle sue sottocartelle ci sono file da suonare.")
             return
         self._suona(pl, brano)
+
+    def _apri_fino_a(self, cartella):
+        """Apre in Questo PC i rami fino alla cartella e ne restituisce la
+        voce; None se non la trova."""
+        self.albero.Expand(self.nodo_pc)
+        voce = self.nodo_pc
+        chiave = os.path.normcase(os.path.abspath(cartella))
+        while True:
+            figlio = next((v for v in self._figli(voce) if (self._dati(v) or {}).get("tipo") in ("unita", "cartella")
+                and (chiave == os.path.normcase(self._dati(v)["percorso"].rstrip("\\")) or chiave.startswith(os.path.normcase(self._dati(v)["percorso"].rstrip("\\")) + "\\"))), None)
+            if figlio is None:
+                return None
+            self.albero.Expand(figlio)
+            if os.path.normcase(self._dati(figlio)["percorso"].rstrip("\\")) == chiave.rstrip("\\"):
+                return figlio
+            voce = figlio
 
     def _brano_finito(self):
         if self._chiusa:
@@ -1087,6 +1110,12 @@ class Finestra(wx.Frame):
                 self._carica(nodo, self._dati(nodo))
         voce = next((v for v in self._tutte_le_voci() if (self._dati(v) or {}).get("tipo") in ("brano", "file")
             and self._dati(v)["brano"] is corrente), None)
+        if voce is None and pl.temporanea and pl.cartella:
+            # Suonando una cartella con le sottocartelle, il brano puo' stare
+            # in una sottocartella mai aperta nella plancia.
+            cartella = self._apri_fino_a(os.path.dirname(corrente.percorso))
+            if cartella is not None:
+                voce = next((v for v in self._figli(cartella) if (self._dati(v) or {}).get("brano") is corrente), None)
         if voce is None:
             self._riscontro("niente_da_suonare", f"{corrente.nome_del_file} non è nella plancia: è stato aperto con Apri file.")
             return

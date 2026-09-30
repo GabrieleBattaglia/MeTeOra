@@ -1,6 +1,6 @@
 # MeTeOra, Questo PC: unita', cartelle e file supportati.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.4.0 il cestino.
+# 30/09/2026: nasce con la tappa 1. Nella 1.4.0 il cestino, nella 1.5.0 le cartelle ricorsive.
 
 """Cosa mostra il ramo Questo PC della plancia.
 
@@ -78,17 +78,24 @@ def contenuto(cartella):
     return _in_ordine(cartelle), _in_ordine(files)
 
 
-def file_ricorsivi(cartella):
-    """Tutti i file supportati sotto una cartella, cartella per cartella in
-    ordine alfabetico: i file di una cartella prima delle sue sottocartelle.
-    Le cartelle che non si possono leggere si saltano."""
+def contenuti_ricorsivi(cartella):
+    """Le cartelle sotto una cartella, lei compresa, ciascuna con i suoi file
+    supportati: lista di (cartella, file), in ordine alfabetico, con i file
+    di una cartella prima delle sue sottocartelle. Le cartelle che non si
+    possono leggere si saltano."""
     try:
         cartelle, files = contenuto(cartella)
     except OSError:
         return []
+    elenco = [(cartella, files)]
     for sotto in cartelle:
-        files.extend(file_ricorsivi(sotto))
-    return files
+        elenco.extend(contenuti_ricorsivi(sotto))
+    return elenco
+
+
+def file_ricorsivi(cartella):
+    """Tutti i file supportati sotto una cartella, nell'ordine di contenuti_ricorsivi."""
+    return [f for _cartella, files in contenuti_ricorsivi(cartella) for f in files]
 
 
 class _SHFILEOPSTRUCTW(ctypes.Structure):

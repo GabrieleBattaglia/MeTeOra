@@ -276,3 +276,32 @@ def test_maiuscolo_canc_manda_nel_cestino(finestra, suoni_annotati, tmp_path, mo
     assert _etichette(finestra, cartella) == ["b.mp3"]
     assert finestra.albero.GetItemText(finestra.albero.GetSelection()) == "b.mp3"
     assert suoni_annotati[-1] == "cestino"
+
+
+def test_cartella_suona_con_le_sottocartelle_e_f8_la_ritrova(finestra, monkeypatch):
+    import tempfile
+
+    suonati = []
+
+    def suona(percorso, sottobrano=None):
+        suonati.append(percorso)
+        finestra.motore._in_corso = percorso
+
+    monkeypatch.setattr(finestra.motore, "suona", suona)
+    # Una cartella visibile: le cartelle temporanee di Windows stanno sotto
+    # AppData, che e' nascosta e in Questo PC non compare.
+    with tempfile.TemporaryDirectory(dir=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) as radice:
+        base = os.path.join(radice, "Musica")
+        os.makedirs(os.path.join(base, "Dentro"))
+        for percorso in (os.path.join(base, "uno.mp3"), os.path.join(base, "Dentro", "due.mp3")):
+            open(percorso, "wb").close()
+        finestra._riproduci_cartella(base)
+        assert suonati == [os.path.join(base, "uno.mp3")]
+        assert "1 di 2, cartella Musica" in _ultima(finestra)
+        _tasto(finestra, "b")
+        assert suonati[-1] == os.path.join(base, "Dentro", "due.mp3")
+        finestra._vai_al_brano()
+        selezione = finestra.albero.GetSelection()
+        assert finestra.albero.GetItemText(selezione) == "due.mp3, in riproduzione"
+        assert finestra._dati(finestra.albero.GetItemParent(selezione))["percorso"] == os.path.join(base, "Dentro")
+        finestra.motore._in_corso = None
