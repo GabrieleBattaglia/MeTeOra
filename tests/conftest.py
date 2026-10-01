@@ -66,6 +66,17 @@ def suoni_annotati(monkeypatch):
     return suonati
 
 
+@pytest.fixture(autouse=True)
+def livelli_annotati(monkeypatch):
+    """I beep dei livelli della plancia, che Acusticator crea al momento,
+    finiscono in una lista loro: le profondita' suonate."""
+    import suoni
+
+    livelli = []
+    monkeypatch.setattr(suoni, "livello", lambda profondita, volume=0.5: livelli.append(profondita) or True)
+    return livelli
+
+
 @pytest.fixture(scope="session")
 def app():
     import wx

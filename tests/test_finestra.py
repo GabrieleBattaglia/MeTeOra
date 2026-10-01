@@ -1556,9 +1556,13 @@ def test_maiuscolo_con_le_cifre_va_ai_primi_dieci_marker(finestra, tmp_path, suo
     # Maiuscolo con 2, come lo da' Windows con la cifra.
     assert _premi(finestra, "2", maiuscolo=True) == "M2, 0:02."
     assert _aspetta(lambda: abs((finestra.motore.posizione or -1) - 2.0) < 0.05)
-    assert finestra.albero.GetItemText(finestra._voce_corrente()) == "M2, 0:02"
+    # Il fuoco resta sul brano: X lo fa ancora ripartire da capo.
+    assert finestra._voce_corrente() == voce
+    _tasto(finestra, "x")
+    assert suoni_annotati[-1] == "da_capo"
+    assert _aspetta(lambda: (finestra.motore.posizione or 9) < 1.0)
     finestra.motore.pausa(True)
-    # Maiuscolo con 3, come lo da' con il segno della tastiera italiana; dal marker col fuoco vale lo stesso.
+    # Maiuscolo con 3, come lo da' con il segno della tastiera italiana.
     assert _premi(finestra, "£", maiuscolo=True) == "M3, 0:03."
     finestra.motore.pausa(True)
     assert _premi(finestra, "5", maiuscolo=True) == "Non c'è il marker 5: canzone.wav ne ha 3."
@@ -1583,9 +1587,7 @@ def test_maiuscolo_con_le_cifre_resta_sulla_copia_della_plancia(finestra, tmp_pa
     finestra._seleziona(preferito)
     assert _premi(finestra, "3", maiuscolo=True) == "M3, 0:03."
     finestra.motore.pausa(True)
-    corrente = finestra._voce_corrente()
-    assert finestra.albero.GetItemText(corrente) == "M3, 0:03"
-    assert finestra.albero.GetItemParent(corrente) == preferito
+    assert finestra._voce_corrente() == preferito
     # Con il brano fermo la console dice anche da quale marker parte.
     finestra.motore.stop()
     finestra._seleziona(preferito)
@@ -1611,3 +1613,72 @@ def test_frecce_aprono_e_chiudono_i_rami_con_un_suono(finestra, suoni_annotati):
     finestra.albero.Expand(nodo)
     finestra.albero.Collapse(nodo)
     assert suoni_annotati == ["ramo_aperto", "ramo_chiuso"]
+
+
+def test_beep_del_livello_quando_cambia_livello(finestra, livelli_annotati):
+    import suoni
+
+    assert round(suoni.frequenza_del_livello(1), 2) == 261.63
+    assert round(suoni.frequenza_del_livello(5), 2) == 523.25
+    finestra._aggiungi(None, [os.path.join(r"C:\m", "a.mp3")])
+    finestra.albero.Expand(finestra.nodo_playlist)
+    nodo = next(finestra._figli(finestra.nodo_playlist))
+    finestra.albero.Expand(nodo)
+    # Un tasto che porta il fuoco dal secondo al terzo livello suona il terzo.
+    finestra._seleziona(nodo)
+    _nell_albero(finestra, wx.WXK_DOWN)
+    finestra._seleziona(next(finestra._figli(nodo)))
+    wx.Yield()
+    assert livelli_annotati == [3]
+    # Restando allo stesso livello, niente beep.
+    _nell_albero(finestra, wx.WXK_DOWN)
+    wx.Yield()
+    assert livelli_annotati == [3]
+    # Backspace risale al secondo livello.
+    _nell_albero(finestra, wx.WXK_BACK)
+    wx.Yield()
+    assert livelli_annotati == [3, 2]
+
+
+def test_beep_del_livello_dopo_dialoghi_comandi_e_non_dalla_console(finestra, monkeypatch, tmp_path, livelli_annotati):
+    import questo_pc
+    import suoni
+
+    assert suoni.frequenza_del_livello(30) == suoni.frequenza_del_livello(17)
+    for nome in ("a.mp3", "b.mp3"):
+        (tmp_path / nome).write_bytes(b"")
+    finestra._aggiungi(None, [str(tmp_path / "a.mp3")])
+    finestra._aggiungi(None, [str(tmp_path / "b.mp3")])
+    finestra.albero.Expand(finestra.nodo_playlist)
+    prima, seconda = (finestra._nodo_della_playlist(pl) for pl in finestra.archivio.playlist)
+    finestra.albero.Expand(prima)
+    finestra.albero.Expand(seconda)
+    # Un tasto che apre una conferma: il livello si guarda quando ha finito.
+    monkeypatch.setattr(finestra, "_conferma", lambda *_a: True)
+    monkeypatch.setattr(questo_pc, "nel_cestino", lambda _p: True)
+    finestra._seleziona(next(finestra._figli(prima)))
+    _nell_albero(finestra, wx.WXK_DELETE, maiuscolo=True)
+    assert livelli_annotati == [2]
+    # Un comando della finestra, F9, dal brano alla sua playlist. La
+    # cancellazione ha ricostruito il ramo Playlist: le voci si riprendono.
+    seconda = finestra._nodo_della_playlist(finestra.archivio.playlist[1])
+    finestra.albero.Expand(seconda)
+    finestra._seleziona(next(finestra._figli(seconda)))
+    _tasto(finestra, codice=wx.WXK_F9)
+    assert livelli_annotati == [2, 2]
+    # Dalla console il livello della plancia non suona.
+    finestra.albero.Expand(seconda)
+    finestra._seleziona(next(finestra._figli(seconda)))
+    finestra.console.SetFocus()
+    wx.Yield()
+    _tasto(finestra, codice=wx.WXK_F9)
+    assert livelli_annotati == [2, 2]
+
+
+def test_maiuscolo_con_le_cifre_dal_marker_col_fuoco(finestra, tmp_path):
+    _pl, voce = _brano_con_marker(finestra, tmp_path, (1.0, 2.0, 3.0))
+    marker = list(finestra._figli(voce))
+    finestra._seleziona(marker[0])
+    assert _premi(finestra, "3", maiuscolo=True) == "M3, 0:03."
+    assert finestra._voce_corrente() == marker[0]
+    finestra.motore.pausa(True)

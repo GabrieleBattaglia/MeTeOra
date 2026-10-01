@@ -87,7 +87,7 @@ EVENTI = {
     # Backspace e Maiuscolo con Backspace nella plancia.
     "risali": "menu_triplicato_su_4",
     "scendi": "meteora_scendi",
-    "apri_tutto": "menu_tripletta_su_10",
+    "apri_tutto": "meteora_apri_tutto",
     "domanda": "campanellino",
     "non_disponibile": "rifiuto",
     "errore": "errore_secco",
@@ -103,6 +103,35 @@ EVENTI = {
     "ritorno_al_punto_a": "scintillio_di_ghiaccio",
     "nessun_altro_brano": "il_gioco_spunta_a_met",
 }
+
+
+# Il beep dei livelli della plancia: sinusoide di 150 ms, attacco e rilascio
+# di 25 ms, dal do 4 al primo livello e tre semitoni piu' su per ogni livello.
+DO_4 = 261.6255653005986
+DURATA_DEL_LIVELLO = 0.15
+MORBIDEZZA_DEL_LIVELLO = 0.025
+
+
+# Oltre questo livello l'altezza resta quella del do 8: piu' su il beep
+# diventerebbe inudibile, e oltre i 22 kHz tornerebbe a scendere.
+LIVELLO_MASSIMO = 17
+
+
+def frequenza_del_livello(profondita):
+    return DO_4 * 2 ** (3 * (min(profondita, LIVELLO_MASSIMO) - 1) / 12)
+
+
+def livello(profondita, volume=0.5):
+    """Suona il beep del livello profondita' della plancia, 1 per le voci
+    principali. Non e' un preset della collezione: l'altezza cambia con il
+    livello, e il suono si crea ogni volta con Acusticator."""
+    if volume <= 0:
+        return False
+    from GBUtils import Acusticator
+
+    morbido = MORBIDEZZA_DEL_LIVELLO / DURATA_DEL_LIVELLO * 100
+    Acusticator([frequenza_del_livello(profondita), DURATA_DEL_LIVELLO, 0.0, volume], kind=1, adsr=[morbido, 0.0, 100.0, morbido])
+    return True
 
 
 def suona(evento, volume=0.5, sync=False):

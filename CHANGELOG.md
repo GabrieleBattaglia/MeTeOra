@@ -2,6 +2,15 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.42.2] - 2026-10-01
+
+- Maiuscolo con le cifre suona il brano dal marker ma lascia il fuoco della plancia dov'è: prima lo portava sul marker, e X dopo ripartiva dal marker invece che dall'inizio del brano. Dal collaudo di Gabriele.
+- F10 aveva lo stesso suono di J: ora ha meteora_apri_tutto, nuovo nella collezione di GBUtils V178, lo specchio di F9, le stesse tre note a dente di sega che salgono invece di scendere.
+
+## [1.42.0] - 2026-10-01
+
+- Il beep dei livelli: quando un tasto della plancia porta il fuoco a un livello diverso dell'albero, un beep breve, una sinusoide di 150 millisecondi con attacco e rilascio morbidi, ne dice la profondità: do al primo livello e tre semitoni più su per ogni livello, fino al do 8 del diciassettesimo livello. Vale per le frecce e per ogni comando, anche dopo un dialogo di conferma, ma non mentre si lavora nella console o nel cruscotto. Il suono si crea al momento con Acusticator, perché la sua altezza dipende dal livello. Chiesto da Gabriele.
+
 ## [1.41.0] - 2026-10-01
 
 - Nella plancia, ogni ramo che apri con freccia destra ha il suo suono, carta_pescata, e ogni ramo che chiudi con freccia sinistra ne ha uno nuovo, meteora_ramo_chiuso: lo stesso fruscio, ma di rumore marrone, più scuro, che scende. Prima suonava solo la prima volta che si apriva una cartella. I rami che aprono e chiudono i comandi, come F9, F10, J, K e Backspace, restano con i loro suoni. Chiesto da Gabriele al collaudo; il suono nuovo è nella collezione di GBUtils V177.

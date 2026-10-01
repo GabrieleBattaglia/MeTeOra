@@ -14,7 +14,7 @@
 # cartelle aperte che non spariscono, playlist che si ricaricano, Risultati cestinati, emoji e jolly nella console;
 # nella 1.36.1 Backspace e Maiuscolo con Backspace, e Maiuscolo e Ctrl con le frecce senza il nome della plancia ripetuto da NVDA;
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
-# nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce.
+# nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli.
 
 """La finestra di MeTeOra.
 
@@ -715,6 +715,16 @@ class Finestra(wx.Frame):
     # I tasti.
 
     def _tasto(self, evento):
+        """I tasti di tutta la finestra. Quando un comando ha finito il suo
+        lavoro, dialoghi compresi, il beep dice se ha portato il fuoco della
+        plancia a un altro livello."""
+        prima = self._profondita(self._voce_corrente())
+        if self._esegui_il_tasto(evento):
+            self._controlla_il_livello(prima)
+
+    def _esegui_il_tasto(self, evento):
+        """Esegue il tasto, se e' un comando, e torna vero; altrimenti lo
+        lascia passare e torna falso."""
         codice = evento.GetKeyCode()
         modificatori = evento.GetModifiers()
         tasti_funzione = {
@@ -725,39 +735,52 @@ class Finestra(wx.Frame):
         }
         if modificatori == wx.MOD_NONE and codice in tasti_funzione:
             tasti_funzione[codice]()
-            return
+            return True
         if modificatori == wx.MOD_SHIFT and codice == wx.WXK_F8:
             self._aggancia()
-            return
+            return True
         # Il tastierino numerico resta a NVDA, e Ctrl e Alt ai comandi di Windows.
         if modificatori not in (wx.MOD_NONE, wx.MOD_SHIFT) or wx.WXK_NUMPAD0 <= codice <= wx.WXK_NUMPAD_DIVIDE:
             evento.Skip()
-            return
+            return False
         unicode = evento.GetUnicodeKey()
         if unicode == wx.WXK_NONE or unicode <= 32:
             evento.Skip()
-            return
+            return False
         carattere = chr(unicode).lower()
         maiuscolo = modificatori == wx.MOD_SHIFT
         if carattere.isdigit() and not maiuscolo:
             self._playlist_numero(int(carattere) or 10)
-            return
+            return True
         # Maiuscolo con le cifre: i primi dieci marker. Windows puo' dare la
         # cifra con il Maiuscolo o il segno che la tastiera italiana ci mette sopra.
         if maiuscolo and (carattere.isdigit() or carattere in CIFRE_COL_MAIUSCOLO):
             self._marker_numero((int(carattere) or 10) if carattere.isdigit() else CIFRE_COL_MAIUSCOLO[carattere])
-            return
+            return True
         comando = TASTI.get((carattere, maiuscolo))
         if comando:
             getattr(self, f"_comando_{comando}")()
-            return
+            return True
         futuro = FUTURI_MAIUSCOLI.get(carattere) if maiuscolo else FUTURI.get(carattere)
         if futuro:
             self._riscontro("non_disponibile", f"Il tasto {chr(unicode)} sarà per: {futuro}. Non ancora disponibile.")
-            return
+            return True
         evento.Skip()
+        return False
 
     def _tasto_nell_albero(self, evento):
+        codice = evento.GetKeyCode()
+        prima = self._profondita(self._voce_corrente())
+        if self._esegui_nell_albero(evento):
+            self._controlla_il_livello(prima)
+        elif codice not in _SOLO_MODIFICATORI:
+            # Le frecce e gli altri tasti del controllo spostano il fuoco dopo
+            # questo gestore: si guarda quando hanno finito.
+            wx.CallAfter(self._controlla_il_livello, prima)
+
+    def _esegui_nell_albero(self, evento):
+        """I tasti propri della plancia: torna vero se ne ha eseguito uno,
+        falso se lo lascia al controllo."""
         codice = evento.GetKeyCode()
         modificatori = evento.GetModifiers()
         spostamento = codice in (wx.WXK_UP, wx.WXK_DOWN, wx.WXK_HOME, wx.WXK_END, wx.WXK_PAGEUP, wx.WXK_PAGEDOWN)
@@ -784,6 +807,7 @@ class Finestra(wx.Frame):
         elif codice == wx.WXK_BACK and modificatori == wx.MOD_SHIFT:
             self._scendi()
         elif codice == wx.WXK_SPACE and evento.GetModifiers() == wx.MOD_NONE:
+            # Il livello lo guarda chi ha chiamato, quando il menu ha finito.
             self._menu(self._voce_di_lavoro())
         elif codice == wx.WXK_DELETE and evento.GetModifiers() == wx.MOD_NONE and len(self._voci_selezionate()) > 1:
             self._cancella_selezione()
@@ -795,6 +819,8 @@ class Finestra(wx.Frame):
             self._al_cestino(self._voce_di_lavoro())
         else:
             evento.Skip()
+            return False
+        return True
 
     # L'albero.
 
@@ -803,6 +829,26 @@ class Finestra(wx.Frame):
         c'e' piu' "la voce selezionata": c'e' questa, piu' l'insieme delle
         selezionate."""
         return self.albero.GetFocusedItem()
+
+    def _profondita(self, voce):
+        """Il livello della voce nella plancia: 1 per le voci principali,
+        2 per quelle dentro di loro e cosi' via; 0 se non c'e' una voce."""
+        radice = self.albero.GetRootItem()
+        livello = 0
+        while voce.IsOk() and voce != radice:
+            livello += 1
+            voce = self.albero.GetItemParent(voce)
+        return livello
+
+    def _controlla_il_livello(self, prima):
+        """Se un tasto ha portato il fuoco della plancia a un altro livello,
+        un beep breve ne dice la profondita'. Non quando si lavora nella
+        console o nel cruscotto: li' il livello della plancia non c'entra."""
+        if not self or self._chiusa or wx.Window.FindFocus() in (self.console, self.cruscotto):
+            return
+        dopo = self._profondita(self._voce_corrente())
+        if dopo and dopo != prima:
+            suoni.livello(dopo, self.impostazioni["volume_effetti"])
 
     def _voce_di_lavoro(self):
         """La voce su cui agiscono i comandi per una voce sola, come Canc, X,
@@ -1435,6 +1481,11 @@ class Finestra(wx.Frame):
     # Invio, menu contestuale e Canc.
 
     def _invio(self, evento):
+        prima = self._profondita(self._voce_corrente())
+        self._esegui_invio(evento)
+        self._controlla_il_livello(prima)
+
+    def _esegui_invio(self, evento):
         voce = self._voce_di_lavoro() if evento.GetItem() == self._voce_corrente() else evento.GetItem()
         dati = self._dati(voce)
         if len(self._voci_selezionate()) > 1:
@@ -1451,7 +1502,9 @@ class Finestra(wx.Frame):
     def _menu_da_evento(self, evento):
         # Dalla tastiera la voce dell'evento e' quella col fuoco; col mouse e'
         # quella su cui si e' cliccato.
+        prima = self._profondita(self._voce_corrente())
         self._menu(self._voce_di_lavoro() if evento.GetItem() == self._voce_corrente() else evento.GetItem())
+        self._controlla_il_livello(prima)
 
     def _menu(self, voce):
         dati = self._dati(voce)
@@ -2774,9 +2827,9 @@ class Finestra(wx.Frame):
     def _marker_numero(self, numero):
         """Maiuscolo con le cifre da 1 a 0: il marker numero, nell'ordine del
         tempo, del brano su cui sta il fuoco della plancia, o del brano di cui
-        e' il marker o il sottobrano. Lo suona da li', come X sul marker, e
-        porta il fuoco della plancia sul marker, nella voce su cui si era: lo
-        stesso file puo' stare anche in altre playlist o cartelle."""
+        e' il marker o il sottobrano. Lo suona da li', come X sul marker. Il
+        fuoco della plancia resta dov'e': X sul brano continua a farlo
+        ripartire da capo (Gabriele, collaudo della 1.41.0)."""
         voce = self._voce_di_lavoro()
         dati = self._dati(voce) or {}
         tipo = dati.get("tipo")
@@ -2785,8 +2838,6 @@ class Finestra(wx.Frame):
             return
         brano = dati["brano"]
         multiplo = self._ha_sottobrani(brano)
-        # La voce che ha i marker sotto: il brano, il sottobrano, o il ramo del marker.
-        ramo = self.albero.GetItemParent(voce) if tipo == "marker" else voce
         if tipo in ("sottobrano", "marker"):
             sottobrano = dati.get("numero")
         elif multiplo:
@@ -2794,8 +2845,6 @@ class Finestra(wx.Frame):
             # lui, altrimenti l'iniziale.
             info = songlengths.info_del_sid(brano.percorso) or {}
             sottobrano = self.motore.sottobrano if self.motore.in_corso == brano.percorso else (info.get("iniziale") or 1)
-            self.albero.Expand(voce)
-            ramo = next((v for v in self._figli(voce) if (self._dati(v) or {}).get("numero") == sottobrano), None)
         else:
             sottobrano = brano.sottobrano
         k = dati["chiave"] if tipo == "marker" else self._chiave_dei_marker(brano.percorso, sottobrano, leggi=True)
@@ -2805,9 +2854,7 @@ class Finestra(wx.Frame):
             testo = f"{chi[:1].upper()}{chi[1:]} non ha marker." if not elenco else f"Non c'è il marker {numero}: {chi} ne ha {len(elenco)}."
             self._riscontro("nessun_altro_brano", testo)
             return
-        marker = elenco[numero - 1]
-        if self._vai_al_marker({"playlist": dati["playlist"], "brano": brano, "numero": sottobrano, "marker": marker}) and ramo is not None:
-            self._fuoco_sul_marker_della_voce(ramo, marker)
+        self._vai_al_marker({"playlist": dati["playlist"], "brano": brano, "numero": sottobrano, "marker": elenco[numero - 1]})
 
     def _togli_i_marker(self, quali):
         contesto = self._contesto_dei_marker("Maiuscolo con R, Y e T tolgono i marker del brano che suona; quelli di un altro brano si tolgono con Canc sulla loro voce nella plancia.")
