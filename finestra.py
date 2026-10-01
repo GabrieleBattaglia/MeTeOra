@@ -11,7 +11,9 @@
 # nella 1.28.1 una barra rovesciata sola per le due ricerche; nella 1.34.0 il filtro nel menu della playlist e con la barra
 # verticale, le istruzioni come commenti nei campi, la ricerca nella console con i jolly, le cartelle senza niente da suonare
 # nascoste, i problemi interni nella console e le righe della console impostabili; nella 1.34.6 le correzioni della revisione:
-# cartelle aperte che non spariscono, playlist che si ricaricano, Risultati cestinati, emoji e jolly nella console.
+# cartelle aperte che non spariscono, playlist che si ricaricano, Risultati cestinati, emoji e jolly nella console;
+# nella 1.36.1 Backspace e Maiuscolo con Backspace, e Maiuscolo e Ctrl con le frecce senza il nome della plancia ripetuto da NVDA;
+# nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata.
 
 """La finestra di MeTeOra.
 
@@ -25,6 +27,7 @@ riproduzione non sposta mai la selezione; lo fa F8, su richiesta.
 """
 
 import contextlib
+import ctypes
 import datetime
 import os
 import random
@@ -33,6 +36,7 @@ import sys
 import threading
 import traceback
 import warnings
+from ctypes import wintypes
 
 import wx
 
@@ -53,6 +57,16 @@ from schedario import Schedario
 FILE_PLAYLIST = "MeTeOra - Playlist.json"
 FILE_IMPOSTAZIONI = "MeTeOra - Impostazioni.json"
 FILE_SCHEDARIO = "MeTeOra - Schedario.json"
+# I messaggi dell'albero di Windows che wx non espone come servono: spostare
+# il cursore senza toccare le altre selezioni, e quante voci stanno in una pagina.
+_manda_messaggio = ctypes.WinDLL("user32").SendMessageW
+_manda_messaggio.argtypes = [wintypes.HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM]
+_manda_messaggio.restype = ctypes.c_ssize_t
+_TVM_SELECTITEM = 0x1100 + 11
+_TVM_GETVISIBLECOUNT = 0x1100 + 16
+_TVGN_CARET = 0x0009
+# I tasti che, premuti da soli, arrivano alla plancia ma non sono comandi.
+_SOLO_MODIFICATORI = (wx.WXK_SHIFT, wx.WXK_CONTROL, wx.WXK_RAW_CONTROL, wx.WXK_ALT, wx.WXK_WINDOWS_LEFT, wx.WXK_WINDOWS_RIGHT, wx.WXK_CAPITAL)
 # Quanti caratteri al massimo del messaggio di un problema interno: la
 # console riceve una riga breve, non un registro.
 MESSAGGIO_DEL_PROBLEMA = 200
@@ -105,6 +119,7 @@ TASTI_COMUNI = [
     "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, + e - volume, Maiuscolo+M il passo del volume, M muto.",
     "Maiuscolo+X mette e toglie i punti A e B del loop sul brano selezionato, Maiuscolo+C toglie il loop.",
     "J e K aprono e suonano la playlist precedente e successiva, le cifre da 1 a 0 le prime dieci playlist.",
+    "Nella plancia Backspace chiude il ramo in cui sei e risale, Maiuscolo con Backspace scende fino all'ultimo ramo aperto.",
     "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione sul brano in riproduzione e Maiuscolo+F8 ce la tiene agganciata, F9 chiude e F10 apre tutto il ramo selezionato.",
     "Barra rovesciata: nella console cerca nella console, altrove in tutte le playlist e in tutte le unità. Barra verticale: il filtro della playlist in cui sta la plancia, anche dalla console.",
     "F1 manuale, F2 novità, F3 crediti e F12 elenco dei tasti, tutti nella console. Esc esce salvando tutto.",
@@ -436,6 +451,11 @@ class Finestra(wx.Frame):
         self._da_tenere = 0
         # Quante volte di seguito e' arrivato l'ultimo problema interno.
         self._ripetizioni = 0
+        # Maiuscolo con le frecce allarga la selezione dall'ancora; l'ancora
+        # vale finche' il fuoco resta dove l'hanno lasciato Maiuscolo o Ctrl
+        # con le frecce, o Ctrl+Spazio.
+        self._ancora = None
+        self._fuoco_atteso = None
         self._righe = []
         self._chiusa = False
         self._costruisci()
@@ -712,16 +732,34 @@ class Finestra(wx.Frame):
 
     def _tasto_nell_albero(self, evento):
         codice = evento.GetKeyCode()
-        if codice == wx.WXK_SPACE and evento.GetModifiers() == wx.MOD_NONE:
-            self._menu(self._voce_corrente())
+        modificatori = evento.GetModifiers()
+        spostamento = codice in (wx.WXK_UP, wx.WXK_DOWN, wx.WXK_HOME, wx.WXK_END, wx.WXK_PAGEUP, wx.WXK_PAGEDOWN)
+        con_ancora = spostamento and modificatori in (wx.MOD_SHIFT, wx.MOD_CONTROL)
+        if codice == wx.WXK_SPACE and modificatori == wx.MOD_CONTROL:
+            # Ctrl+Spazio, che seleziona e deseleziona da se', fissa l'ancora
+            # sulla voce col fuoco, come in Esplora risorse.
+            self._ancora = self._fuoco_atteso = self._voce_corrente()
+        elif not con_ancora and codice not in _SOLO_MODIFICATORI:
+            # Gli altri tasti lasciano l'ancora: il prossimo Maiuscolo con le
+            # frecce riparte dalla voce col fuoco. Maiuscolo o Ctrl premuti
+            # da soli arrivano anche loro qui, e non contano.
+            self._ancora = None
+        if con_ancora:
+            self._muovi_il_fuoco(codice, allarga=modificatori == wx.MOD_SHIFT)
+        elif codice == wx.WXK_BACK and modificatori == wx.MOD_NONE:
+            self._risali()
+        elif codice == wx.WXK_BACK and modificatori == wx.MOD_SHIFT:
+            self._scendi()
+        elif codice == wx.WXK_SPACE and evento.GetModifiers() == wx.MOD_NONE:
+            self._menu(self._voce_di_lavoro())
         elif codice == wx.WXK_DELETE and evento.GetModifiers() == wx.MOD_NONE and len(self._voci_selezionate()) > 1:
             self._cancella_selezione()
         elif codice == wx.WXK_DELETE and evento.GetModifiers() == wx.MOD_SHIFT and len(self._voci_selezionate()) > 1:
             self._cestina_selezione()
         elif codice == wx.WXK_DELETE and evento.GetModifiers() == wx.MOD_NONE:
-            self._cancella(self._voce_corrente())
+            self._cancella(self._voce_di_lavoro())
         elif codice == wx.WXK_DELETE and evento.GetModifiers() == wx.MOD_SHIFT:
-            self._al_cestino(self._voce_corrente())
+            self._al_cestino(self._voce_di_lavoro())
         else:
             evento.Skip()
 
@@ -732,6 +770,126 @@ class Finestra(wx.Frame):
         c'e' piu' "la voce selezionata": c'e' questa, piu' l'insieme delle
         selezionate."""
         return self.albero.GetFocusedItem()
+
+    def _voce_di_lavoro(self):
+        """La voce su cui agiscono i comandi per una voce sola, come Canc, X,
+        F4 e il menu: quella col fuoco; ma se Ctrl con le frecce ha portato
+        il fuoco su una voce non selezionata, e di selezionate ce n'e' una,
+        e' lei, come in Esplora risorse."""
+        voce = self._voce_corrente()
+        selezionate = self._voci_selezionate()
+        if len(selezionate) == 1 and voce.IsOk() and not self.albero.IsSelected(voce):
+            return selezionate[0]
+        return voce
+
+    def _sposta_il_cursore(self, voce):
+        """Porta il fuoco della plancia sulla voce come fa Windows con le
+        frecce. wx, per spostarlo da una voce selezionata, toglie per un
+        istante la selezione a tutto l'albero: il fuoco cade sull'albero
+        stesso e NVDA ne legge il nome a ogni pressione. Il messaggio diretto
+        a Windows lo evita; le selezioni le rimette poi chi chiama."""
+        _manda_messaggio(self.albero.GetHandle(), _TVM_SELECTITEM, _TVGN_CARET, int(voce.GetID()))
+
+    def _voci_visibili_per_pagina(self):
+        return max(1, _manda_messaggio(self.albero.GetHandle(), _TVM_GETVISIBLECOUNT, 0, 0))
+
+    def _ultima_visibile(self):
+        """L'ultima voce della plancia che si legge scendendo, dentro i rami aperti."""
+        voce = self.albero.GetLastChild(self.albero.GetRootItem())
+        while voce.IsOk() and self.albero.IsExpanded(voce) and self.albero.GetChildrenCount(voce, False):
+            voce = self.albero.GetLastChild(voce)
+        return voce if voce.IsOk() else None
+
+    def _cammino(self, da, a):
+        """Le voci fra da e a nell'ordine della plancia, estremi compresi, o
+        None se a non si vede da da. Si parte da da e si confronta soltanto
+        a: cosi' a puo' essere una voce che la plancia ha gia' tolto."""
+        for passo in (self._dopo, self._prima):
+            voci = [da]
+            while voci[-1] != a:
+                seguente = passo(voci[-1])
+                if seguente is None:
+                    break
+                voci.append(seguente)
+            if voci[-1] == a:
+                return voci
+        return None
+
+    def _muovi_il_fuoco(self, codice, allarga):
+        """Maiuscolo o Ctrl con le frecce, Inizio, Fine, Pagina su e giu',
+        come in Esplora risorse. Con Maiuscolo la selezione va dall'ancora,
+        la voce da cui si e' cominciato ad allargare, fino alla voce
+        d'arrivo; con Ctrl si muove solo il fuoco e le selezioni restano."""
+        voce = self._voce_corrente()
+        if not voce.IsOk():
+            return
+        if codice in (wx.WXK_HOME, wx.WXK_END):
+            arrivo = next(self._figli(self.albero.GetRootItem()), None) if codice == wx.WXK_HOME else self._ultima_visibile()
+        else:
+            passo = self._dopo if codice in (wx.WXK_DOWN, wx.WXK_PAGEDOWN) else self._prima
+            arrivo = voce
+            for _ in range(self._voci_visibili_per_pagina() if codice in (wx.WXK_PAGEUP, wx.WXK_PAGEDOWN) else 1):
+                seguente = passo(arrivo)
+                if seguente is None:
+                    break
+                arrivo = seguente
+        if arrivo is None or arrivo == voce:
+            return
+        # L'ancora vale finche' il fuoco sta dove l'hanno lasciato Maiuscolo
+        # o Ctrl con le frecce, e finche' si vede ancora: si cerca partendo
+        # dalla voce col fuoco, perche' l'ancora puo' essere sparita.
+        if self._ancora is None or self._fuoco_atteso != voce or self._cammino(voce, self._ancora) is None:
+            self._ancora = voce
+        # Con Maiuscolo la selezione e' l'intervallo dall'ancora; con Ctrl
+        # restano le selezioni di prima.
+        da_selezionare = set(self._cammino(self._ancora, arrivo) or [arrivo]) if allarga else set(self._voci_selezionate())
+        self._sposta_il_cursore(arrivo)
+        self._fuoco_atteso = arrivo
+        if allarga:
+            for altra in self._voci_selezionate():
+                if altra not in da_selezionare:
+                    self.albero.SelectItem(altra, False)
+        elif arrivo not in da_selezionare:
+            self.albero.SelectItem(arrivo, False)
+        for scelta in da_selezionare:
+            self.albero.SelectItem(scelta)
+
+    def _risali(self):
+        """Backspace: chiude il ramo in cui sta la voce col fuoco e ci porta il
+        fuoco; premuto ancora risale di un livello, chiudendo anche quello."""
+        voce = self._voce_corrente()
+        ramo = self.albero.GetItemParent(voce) if voce.IsOk() else None
+        if ramo is None or not ramo.IsOk() or ramo == self.albero.GetRootItem():
+            self._riscontro("nessun_altro_brano", "Sei già al primo livello della plancia.")
+            return
+        self.albero.Collapse(ramo)
+        self._seleziona(ramo)
+        self._riscontro("risali", f"Chiuso {self.albero.GetItemText(ramo)}.", "risali")
+
+    def _scendi(self):
+        """Maiuscolo con Backspace: scende dentro la voce col fuoco, lungo i
+        rami aperti, fino all'ultimo ramo aperto che si incontra leggendo, e
+        ci porta il fuoco, aprendo la voce se e' chiusa. Una voce chiusa
+        ricorda i rami aperti che ha dentro, per esempio dopo Backspace da
+        un ramo aperto; una playlist chiusa no, perche' riaprendosi si
+        ricarica."""
+        voce = self._voce_corrente()
+        ultimo = None
+        dati = self._dati(voce) or {}
+        if voce.IsOk() and (self.albero.IsExpanded(voce) or dati.get("tipo") != "playlist"):
+            # Nell'ordine di lettura, entrando solo nei rami aperti.
+            pila = list(reversed(list(self._figli(voce))))
+            while pila:
+                figlio = pila.pop()
+                if self.albero.IsExpanded(figlio) and self.albero.GetChildrenCount(figlio, False):
+                    ultimo = figlio
+                    pila.extend(reversed(list(self._figli(figlio))))
+        if ultimo is None:
+            self._riscontro("nessun_altro_brano", "Qui dentro non c'è nessun ramo aperto.")
+            return
+        self.albero.EnsureVisible(ultimo)
+        self._seleziona(ultimo)
+        self._riscontro("scendi", f"Ultimo ramo aperto: {self.albero.GetItemText(ultimo)}.", "scendi")
 
     def _seleziona(self, voce):
         """Seleziona soltanto questa voce e le da' il fuoco, come una freccia."""
@@ -1211,7 +1369,7 @@ class Finestra(wx.Frame):
     # Invio, menu contestuale e Canc.
 
     def _invio(self, evento):
-        voce = evento.GetItem()
+        voce = self._voce_di_lavoro() if evento.GetItem() == self._voce_corrente() else evento.GetItem()
         dati = self._dati(voce)
         if len(self._voci_selezionate()) > 1:
             self._menu(voce)
@@ -1223,7 +1381,9 @@ class Finestra(wx.Frame):
             self._menu(voce)
 
     def _menu_da_evento(self, evento):
-        self._menu(evento.GetItem())
+        # Dalla tastiera la voce dell'evento e' quella col fuoco; col mouse e'
+        # quella su cui si e' cliccato.
+        self._menu(self._voce_di_lavoro() if evento.GetItem() == self._voce_corrente() else evento.GetItem())
 
     def _menu(self, voce):
         dati = self._dati(voce)
@@ -1290,7 +1450,7 @@ class Finestra(wx.Frame):
                 ("Sposta su", lambda: self._sposta(pl, brano, "su")), ("Sposta giù", lambda: self._sposta(pl, brano, "giu")),
                 ("Sposta in cima", lambda: self._sposta(pl, brano, "cima")), ("Sposta in fondo", lambda: self._sposta(pl, brano, "fondo")),
                 ("Saltato", (lambda: self._salta(pl, brano), brano.saltato)), ("Togli dalla playlist", lambda: self._togli(pl, brano)),
-                ("Aggiungi ai preferiti", lambda: self._ai_preferiti(brano)), ("Manda nel cestino", lambda: self._al_cestino(self._voce_corrente()))]
+                ("Aggiungi ai preferiti", lambda: self._ai_preferiti(brano)), ("Manda nel cestino", lambda: self._al_cestino(self._voce_di_lavoro()))]
         if tipo == "pc":
             return [("Aggiorna", lambda: self._aggiorna_ramo(self.nodo_pc))]
         if tipo in ("unita", "cartella"):
@@ -1302,7 +1462,7 @@ class Finestra(wx.Frame):
         if tipo == "file":
             pl, brano = dati["playlist"], dati["brano"]
             return [("Riproduci", lambda: self._riproduci(pl, brano)), ("Aggiungi alla playlist", self._menu_aggiungi(lambda: [Brano(brano.percorso)])),
-                ("Aggiungi ai preferiti", lambda: self._ai_preferiti(brano)), ("Manda nel cestino", lambda: self._al_cestino(self._voce_corrente()))]
+                ("Aggiungi ai preferiti", lambda: self._ai_preferiti(brano)), ("Manda nel cestino", lambda: self._al_cestino(self._voce_di_lavoro()))]
         if tipo == "sottobrano":
             pl, brano, n = dati["playlist"], dati["brano"], dati["numero"]
             return [("Riproduci", lambda: self._riproduci(pl, brano, n)),
@@ -1613,7 +1773,7 @@ class Finestra(wx.Frame):
 
     def _preferito_selezionato(self):
         """F4: il brano da mettere nei Preferiti, dalla voce selezionata."""
-        dati = self._dati(self._voce_corrente()) or {}
+        dati = self._dati(self._voce_di_lavoro()) or {}
         if dati.get("tipo") == "sottobrano":
             return Brano(dati["brano"].percorso, sottobrano=dati["numero"])
         if dati.get("tipo") in ("brano", "file"):
@@ -2119,7 +2279,7 @@ class Finestra(wx.Frame):
         if len(self._voci_selezionate()) > 1:
             self._suona_selezione()
             return
-        dati = self._dati(self._voce_corrente()) or {}
+        dati = self._dati(self._voce_di_lavoro()) or {}
         tipo = dati.get("tipo")
         corrente = self.coda.corrente
         if tipo in ("brano", "file", "sottobrano"):
@@ -2211,7 +2371,7 @@ class Finestra(wx.Frame):
         self._riscontro("loop_tolto", "Loop tolto: si suona di nuovo tutta la lista.")
 
     def _comando_loop(self):
-        dati = self._dati(self._voce_corrente()) or {}
+        dati = self._dati(self._voce_di_lavoro()) or {}
         if dati.get("tipo") not in ("brano", "file", "sottobrano"):
             self._riscontro("loop_non_qui", "Il loop si mette su un brano: scegline uno in una playlist o in una cartella.")
             return

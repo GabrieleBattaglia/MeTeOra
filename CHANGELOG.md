@@ -2,6 +2,16 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.36.2] - 2026-10-01
+
+- Dopo Ctrl con le frecce, che muove il fuoco senza selezionare, Canc, Maiuscolo con Canc, X, Maiuscolo con X, F4 e il menu agiscono sulla voce selezionata, se è una sola, e non su quella che ha solo il fuoco, come in Esplora risorse. Prima Canc toglieva dalla playlist, senza conferma, la voce col fuoco.
+
+## [1.36.1] - 2026-10-01
+
+- Backspace nella plancia chiude il ramo in cui sei e ci porta il fuoco; premuto ancora risale di un livello, chiudendo anche quello. Prima saliva soltanto, come freccia sinistra.
+- Maiuscolo con Backspace scende dentro la voce su cui sei, lungo i rami aperti, fino all'ultimo ramo aperto, e ci porta il fuoco. Se la voce è chiusa ma dentro ha rami rimasti aperti, la riapre: per esempio dopo Backspace su una playlist aperta.
+- Con Maiuscolo o Ctrl e le frecce, Inizio, Fine, Pagina su e Pagina giù, NVDA non ripete più il nome della plancia prima di ogni voce. wxWidgets, per spostare il fuoco da una voce selezionata, toglieva per un istante la selezione a tutto l'albero, e il fuoco cadeva sull'albero stesso: ora il fuoco si sposta con il messaggio di Windows, e le selezioni si rimettono dopo. La selezione con Maiuscolo parte sempre dalla stessa ancora, anche lasciando e ripremendo Maiuscolo, dopo Ctrl con le frecce e quando una voce in mezzo sparisce.
+
 ## [1.34.6] - 2026-10-01
 
 Correzioni trovate da una revisione a più agenti della 1.34.1, prima del collaudo.

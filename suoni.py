@@ -73,6 +73,9 @@ EVENTI = {
     "ripartito_in_console": "tripletta_su_giu_rapidissima",
     "non_trovato_in_console": "rifiutato",
     "chiudi_tutto": "menu_tripletta_gi_7",
+    # Backspace e Maiuscolo con Backspace nella plancia.
+    "risali": "menu_triplicato_su_4",
+    "scendi": "menu_tripletta_in_basso_5",
     "apri_tutto": "menu_tripletta_su_10",
     "domanda": "campanellino",
     "non_disponibile": "rifiuto",

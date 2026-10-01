@@ -738,7 +738,7 @@ def test_ogni_tasto_e_nel_manuale(finestra):
     """Ogni tasto a lettera e ogni tasto funzione ha la sua riga nella sezione I tasti."""
     righe = modulo.sezione_del_manuale(finestra._leggi_risorsa("manuale.txt"), "I tasti")
     testo = " ".join(righe)
-    for tasto in ("F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F12", "Esc", "Barra rovesciata", "Barra verticale", "Canc"):
+    for tasto in ("F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F12", "Esc", "Barra rovesciata", "Barra verticale", "Canc", "Backspace"):
         assert tasto in testo, tasto
     for (carattere, maiuscolo), _comando in modulo.TASTI.items():
         if carattere.isalpha():
@@ -1241,3 +1241,79 @@ def test_dopo_canc_il_fuoco_resta_sul_sottobrano(finestra, monkeypatch):
     finestra._cancella_selezione()
     assert [b.nome_del_file for b in pl.brani] == ["Turbo_Outrun.sid"]
     assert finestra.albero.GetItemText(finestra._voce_corrente()).startswith("Sottobrano 4 di 12")
+
+
+def _nell_albero(finestra, codice, maiuscolo=False, ctrl=False):
+    evento = wx.KeyEvent(wx.wxEVT_KEY_DOWN)
+    evento.SetKeyCode(codice)
+    evento.SetShiftDown(maiuscolo)
+    evento.SetControlDown(ctrl)
+    finestra._tasto_nell_albero(evento)
+
+
+def _selezionate(finestra):
+    return sorted(finestra.albero.GetItemText(v) for v in finestra._voci_selezionate())
+
+
+def test_maiuscolo_e_ctrl_con_le_frecce_senza_passare_dall_albero(finestra):
+    rock, = _playlist_di_prova(finestra, ("a.mp3", "b.mp3", "c.mp3", "d.mp3"))
+    finestra.albero.SetFocus()
+    finestra._seleziona(_voce_di(finestra, rock, "b.mp3"))
+    _nell_albero(finestra, wx.WXK_DOWN, maiuscolo=True)
+    # Maiuscolo lasciato e ripremuto arriva da solo alla plancia: l'ancora resta.
+    _nell_albero(finestra, wx.WXK_SHIFT, maiuscolo=True)
+    _nell_albero(finestra, wx.WXK_DOWN, maiuscolo=True)
+    assert _selezionate(finestra) == ["b.mp3", "c.mp3", "d.mp3"]
+    assert finestra.albero.GetItemText(finestra._voce_corrente()) == "d.mp3"
+    # Tornando indietro la selezione si restringe verso l'ancora, e la supera.
+    for _ in range(3):
+        _nell_albero(finestra, wx.WXK_UP, maiuscolo=True)
+    assert _selezionate(finestra) == ["a.mp3", "b.mp3"]
+    assert finestra.albero.GetItemText(finestra._voce_corrente()) == "a.mp3"
+    # Ctrl muove solo il fuoco: le selezioni restano, la voce d'arrivo no.
+    _nell_albero(finestra, wx.WXK_DOWN, ctrl=True)
+    _nell_albero(finestra, wx.WXK_DOWN, ctrl=True)
+    assert _selezionate(finestra) == ["a.mp3", "b.mp3"]
+    assert finestra.albero.GetItemText(finestra._voce_corrente()) == "c.mp3"
+    # Dopo Ctrl l'ancora resta, come in Esplora risorse: Maiuscolo con Fine
+    # seleziona da b fino in fondo.
+    _nell_albero(finestra, wx.WXK_END, maiuscolo=True)
+    assert _selezionate(finestra) == sorted(["b.mp3", "c.mp3", "d.mp3", "Nuova playlist", "Questo PC", "Apri file", "Impostazioni"])
+    assert finestra.albero.GetItemText(finestra._voce_corrente()) == "Impostazioni"
+    # Un altro tasto lascia l'ancora: si riparte dalla voce col fuoco.
+    _nell_albero(finestra, wx.WXK_LEFT)
+    _nell_albero(finestra, wx.WXK_UP, maiuscolo=True)
+    assert _selezionate(finestra) == ["Apri file", "Impostazioni"]
+
+
+def test_dopo_ctrl_i_comandi_agiscono_sulla_voce_selezionata(finestra, monkeypatch):
+    rock, = _playlist_di_prova(finestra, ("a.mp3", "b.mp3", "c.mp3"))
+    pl = finestra.archivio.playlist[0]
+    finestra._seleziona(_voce_di(finestra, rock, "a.mp3"))
+    _nell_albero(finestra, wx.WXK_DOWN, ctrl=True)
+    assert finestra.albero.GetItemText(finestra._voce_corrente()) == "b.mp3"
+    # Canc toglie a, la voce selezionata, non b che ha solo il fuoco.
+    _nell_albero(finestra, wx.WXK_DELETE)
+    assert [b.nome_del_file for b in pl.brani] == ["b.mp3", "c.mp3"]
+
+
+def test_backspace_risale_chiudendo_e_maiuscolo_backspace_scende(finestra, suoni_annotati):
+    rock, _jazz = _playlist_di_prova(finestra, ("a.mp3", "b.mp3"), ("x.mp3",))
+    finestra._seleziona(_voce_di(finestra, rock, "b.mp3"))
+    _nell_albero(finestra, wx.WXK_BACK)
+    assert finestra._voce_corrente() == rock and not finestra.albero.IsExpanded(rock)
+    assert suoni_annotati[-1] == "risali" and _ultima(finestra).startswith("Chiuso Playlist, brani: 2")
+    _nell_albero(finestra, wx.WXK_BACK)
+    assert finestra._voce_corrente() == finestra.nodo_playlist and not finestra.albero.IsExpanded(finestra.nodo_playlist)
+    # Le due righe sono una sola, riscritta.
+    assert sum(r.startswith("Chiuso ") for r in finestra._righe) == 1
+    _nell_albero(finestra, wx.WXK_BACK)
+    assert _ultima(finestra) == "Sei già al primo livello della plancia."
+    # Il ramo Playlist, chiuso, ricorda cosa c'era di aperto dentro: jazz e'
+    # ancora aperta, e Maiuscolo con Backspace riapre il ramo e ci arriva.
+    _nell_albero(finestra, wx.WXK_BACK, maiuscolo=True)
+    assert finestra.albero.IsExpanded(finestra.nodo_playlist)
+    assert finestra._voce_corrente() == finestra._nodo_della_playlist(finestra.archivio.playlist[1])
+    assert suoni_annotati[-1] == "scendi"
+    _nell_albero(finestra, wx.WXK_BACK, maiuscolo=True)
+    assert _ultima(finestra) == "Qui dentro non c'è nessun ramo aperto."
