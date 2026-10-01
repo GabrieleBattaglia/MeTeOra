@@ -152,6 +152,20 @@
      "nome": "M4"
     }
    ]
+  },
+  "aria_figaro.sid|38.667|1": {
+   "file": "Aria_Figaro.sid",
+   "durata": 38.667,
+   "sottobrano": 1,
+   "percorsi": [
+    "E:\\C64Music\\MUSICIANS\\M\\Marquis_Dave\\Aria_Figaro.sid"
+   ],
+   "marker": [
+    {
+     "tempo": 22.57749871731753,
+     "nome": "M1"
+    }
+   ]
   }
  }
 }

@@ -6,12 +6,12 @@
  "volume_effetti": 0.5,
  "insegui": true,
  "ripresa": {
-  "percorso": "E:\\13 ilbarzellettiere\\S\\002 sesso\\023 il mungimucche.mp3",
-  "sottobrano": null,
-  "numero": 0,
+  "percorso": "E:\\C64Music\\MUSICIANS\\M\\Marquis_Dave\\Aria_Figaro.sid",
+  "sottobrano": 1,
+  "numero": 1,
   "posizione": 0,
   "tipo": "playlist",
-  "indice": 0
+  "indice": 1
  },
  "righe_della_console": 2000
 }
