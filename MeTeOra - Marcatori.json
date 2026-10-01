@@ -126,6 +126,32 @@
      "nome": "M4"
     }
    ]
+  },
+  "amore cucina e curry.mp3|7066.056": {
+   "file": "Amore cucina e curry.mp3",
+   "durata": 7066.056,
+   "sottobrano": null,
+   "percorsi": [
+    "E:\\Audio\\AudioDescritti\\Amore cucina e curry.mp3"
+   ],
+   "marker": [
+    {
+     "tempo": 35.527236743936584,
+     "nome": "M1"
+    },
+    {
+     "tempo": 64.81542298613154,
+     "nome": "M2"
+    },
+    {
+     "tempo": 91.49514310546941,
+     "nome": "M3"
+    },
+    {
+     "tempo": 123.5159340918345,
+     "nome": "M4"
+    }
+   ]
   }
  }
 }
