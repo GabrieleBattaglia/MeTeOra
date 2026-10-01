@@ -1,16 +1,17 @@
 {
- "volume": 100,
+ "volume": 108,
  "passo_volume": 2,
  "passo_indietro": 0.23,
- "passo_avanti": 2.91,
+ "passo_avanti": 5.0,
  "volume_effetti": 0.5,
  "insegui": true,
  "ripresa": {
-  "percorso": "E:\\13 ilbarzellettiere\\S\\002 sesso\\014 convegno di sessuologia.mp3",
+  "percorso": "E:\\git\\Mine\\Chitabry\\midi\\La solitudine.mid",
   "sottobrano": null,
-  "numero": null,
+  "numero": 1,
   "posizione": 0,
-  "tipo": "playlist",
-  "indice": 0
- }
+  "tipo": "cartella",
+  "cartella": "E:\\git\\Mine\\Chitabry\\midi"
+ },
+ "righe_della_console": 2000
 }

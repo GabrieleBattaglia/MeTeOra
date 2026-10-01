@@ -1,12 +1,3 @@
 Collaudo di MeTeOra 1.34.6, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra. Scrivi le note sulla riga della voce; le voci superate si cancellano.
 Seleziona due o tre brani di una playlist e premi Canc: il fuoco resta in quella playlist, sul brano che seguiva.
-Dentro una playlist il primo brano è 1 di quanti sono: la voce Filtro non c'è più.
-L'etichetta di una playlist con un filtro finisce con filtro: e il suo testo.
-Il menu della playlist ha Filtro, e Togli il filtro quando un filtro c'è; il menu dei Preferiti anche.
-Con la plancia su un brano di una playlist, passa alla console con F6 e premi la barra verticale: si apre il filtro di quella playlist.
-Nel campo del filtro le istruzioni stanno in cima, con il dollaro davanti, e il cursore è sull'ultima riga, con il filtro di prima selezionato.
-Il campo della ricerca globale dice di comporre la ricerca, quello del filtro di comporre il filtro.
-Nella console cerca un orario, per esempio quello della prima riga, e poi una parola fra virgolette con le maiuscole giuste e sbagliate.
-Apri un'unità con cartelle vuote o con soli file che MeTeOra non suona: spariscono appena contate, anche con il fuoco sopra.
-Nella console cerca volume # e premi Invio più volte: passa da un volume all'altro, senza fermarsi due volte sullo stesso numero.
-Metti a una playlist un filtro che non lascia passare niente, chiudila e riaprila dopo averlo cambiato: l'elenco segue il filtro.
+Sì. Funziona. C'è un piccolo difetto ma forse dipende da NVDA. Quando faccio seleziona con shift + frecce verticali, ad ogni pressione nvda mi ripete prima il titolo della plancia, poi il nuovo file selezionato. In risorse del computer funziona meglio, mi dice solo il nuovo file e poi selezionato. Vedi se capisci perché, ma se non è chiaro o implica troppo lavoro passa oltre. Priorità bassa.
