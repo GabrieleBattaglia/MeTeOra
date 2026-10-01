@@ -6,12 +6,12 @@
  "volume_effetti": 0.5,
  "insegui": true,
  "ripresa": {
-  "percorso": "E:\\git\\Mine\\Chitabry\\midi\\La solitudine.mid",
+  "percorso": "E:\\13 ilbarzellettiere\\S\\003 sposini\\038 pulizia delle scarpe.mp3",
   "sottobrano": null,
-  "numero": 1,
+  "numero": null,
   "posizione": 0,
-  "tipo": "cartella",
-  "cartella": "E:\\git\\Mine\\Chitabry\\midi"
+  "tipo": "playlist",
+  "indice": 0
  },
  "righe_della_console": 2000
 }

@@ -1,7 +1,1 @@
 Collaudo di MeTeOra 1.36.2, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra. Scrivi le note sulla riga della voce; le voci superate si cancellano.
-In una playlist aperta, Maiuscolo con freccia giù e su: NVDA dice solo la voce e se è selezionata, senza il nome della plancia.
-Lo stesso con Ctrl con le frecce, che muove il fuoco senza selezionare, e con Maiuscolo con Fine e con Inizio.
-Backspace su un brano di una playlist aperta: la playlist si chiude e il fuoco va su di lei; un altro Backspace chiude il ramo Playlist; un terzo dice che sei al primo livello.
-Con il fuoco su una playlist aperta premi Backspace: si chiude il ramo Playlist. Poi Maiuscolo con Backspace: il ramo si riapre e il fuoco torna sulla playlist aperta.
-Maiuscolo con freccia giù, lascia i tasti, e di nuovo Maiuscolo con freccia giù: la selezione continua dalla stessa voce.
-Seleziona un brano, porta il fuoco sul brano dopo con Ctrl e freccia giù, e premi Canc: esce il brano selezionato, non quello col fuoco.
