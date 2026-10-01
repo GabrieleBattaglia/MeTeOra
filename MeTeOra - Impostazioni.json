@@ -1,17 +1,53 @@
 {
- "volume": 108,
- "passo_volume": 2,
- "passo_indietro": 0.23,
- "passo_avanti": 5.0,
- "volume_effetti": 0.5,
+ "volume": 89,
+ "passo_volume": 1,
+ "passo_indietro": 3.0,
+ "passo_avanti": 10.0,
+ "volume_effetti": 0.35,
  "insegui": true,
  "ripresa": {
-  "percorso": "E:\\C64Music\\MUSICIANS\\M\\Marquis_Dave\\Aria_Figaro.sid",
-  "sottobrano": 1,
-  "numero": 1,
-  "posizione": 0,
+  "percorso": "H:\\backup20251217 - Da PCGigante\\Music\\883\\Hanno Ucciso L'Uomo Ragno\\03 6_1_ Sfigato.m4a",
+  "sottobrano": null,
+  "numero": 3,
+  "posizione": 2.8841723356009106,
   "tipo": "playlist",
   "indice": 1
  },
- "righe_della_console": 2000
+ "righe_della_console": 2000,
+ "caratteri": {},
+ "colori_testo": {
+  "p": [
+   80,
+   80,
+   14
+  ],
+  "c": [
+   12,
+   88,
+   48
+  ],
+  "t": [
+   60,
+   60,
+   60
+  ]
+ },
+ "colori_sfondo": {
+  "p": [
+   30,
+   8,
+   8
+  ],
+  "c": [
+   0,
+   0,
+   0
+  ],
+  "t": [
+   0,
+   12,
+   4
+  ]
+ },
+ "scheda_audio": {}
 }
