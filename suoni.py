@@ -84,7 +84,7 @@ EVENTI = {
     "marker_eliminato": "meteora_marker_eliminato",
     # Backspace e Maiuscolo con Backspace nella plancia.
     "risali": "menu_triplicato_su_4",
-    "scendi": "menu_tripletta_in_basso_5",
+    "scendi": "meteora_scendi",
     "apri_tutto": "menu_tripletta_su_10",
     "domanda": "campanellino",
     "non_disponibile": "rifiuto",

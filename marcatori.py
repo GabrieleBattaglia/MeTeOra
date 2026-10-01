@@ -131,12 +131,13 @@ class Marcatori:
         return self._tieni(k, lambda m: not (m["tempo"] == marker["tempo"] and m["nome"] == marker["nome"]))
 
     def togli_prima(self, k, tempo):
-        """Toglie i marker dall'inizio del brano fino al tempo compreso."""
-        return self._tieni(k, lambda m: m["tempo"] > tempo + TOLLERANZA)
+        """Toglie i marker prima del tempo; quello che sta sul tempo resta
+        (Gabriele, collaudo della 1.39.1)."""
+        return self._tieni(k, lambda m: m["tempo"] >= tempo - TOLLERANZA)
 
     def togli_dopo(self, k, tempo):
-        """Toglie i marker dal tempo compreso fino alla fine del brano."""
-        return self._tieni(k, lambda m: m["tempo"] < tempo - TOLLERANZA)
+        """Toglie i marker dopo il tempo; quello che sta sul tempo resta."""
+        return self._tieni(k, lambda m: m["tempo"] <= tempo + TOLLERANZA)
 
     def togli_tutti(self, k):
         return self._tieni(k, lambda _m: False)

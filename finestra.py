@@ -13,7 +13,7 @@
 # nascoste, i problemi interni nella console e le righe della console impostabili; nella 1.34.6 le correzioni della revisione:
 # cartelle aperte che non spariscono, playlist che si ricaricano, Risultati cestinati, emoji e jolly nella console;
 # nella 1.36.1 Backspace e Maiuscolo con Backspace, e Maiuscolo e Ctrl con le frecce senza il nome della plancia ripetuto da NVDA;
-# nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console.
+# nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e'.
 
 """La finestra di MeTeOra.
 
@@ -113,6 +113,9 @@ TASTI = {
     ("r", True): "togli_i_marker_prima",
     ("y", True): "togli_i_marker_dopo",
 }
+# I segni sopra le cifre nella tastiera italiana: Maiuscolo con 1 e' il punto
+# esclamativo, e cosi' via fino a Maiuscolo con 0, l'uguale.
+CIFRE_COL_MAIUSCOLO = {"!": 1, '"': 2, "£": 3, "$": 4, "%": 5, "&": 6, "/": 7, "(": 8, ")": 9, "=": 10}
 # I tasti gia' assegnati nel piano a funzioni delle tappe successive: per ora
 # dicono di non essere ancora disponibili.
 FUTURI = {
@@ -129,7 +132,7 @@ TASTI_COMUNI = [
     "Maiuscolo+X mette e toglie i punti A e B del loop sul brano selezionato, Maiuscolo+C toglie il loop.",
     "J e K aprono e suonano la playlist precedente e successiva, le cifre da 1 a 0 le prime dieci playlist.",
     "Nella plancia Backspace chiude il ramo in cui sei e risale, Maiuscolo con Backspace scende fino all'ultimo ramo aperto.",
-    "T mette un marker dove sei, o rinomina quello su cui sei; R e Y vanno al marker precedente e successivo; Maiuscolo con R, Y e T tolgono i marker prima, dopo e tutti.",
+    "T mette un marker dove sei, o rinomina quello su cui sei; R e Y vanno al marker precedente e successivo; Maiuscolo con R, Y e T tolgono i marker prima, dopo e tutti; Maiuscolo con le cifre da 1 a 0 va ai primi dieci marker del brano della plancia.",
     "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione sul brano in riproduzione e Maiuscolo+F8 ce la tiene agganciata, F9 chiude e F10 apre tutto il ramo selezionato.",
     "Barra rovesciata: nella console cerca nella console, altrove in tutte le playlist e in tutte le unità. Barra verticale: il filtro della playlist in cui sta la plancia, anche dalla console.",
     "F1 manuale, F2 novità, F3 crediti e F12 elenco dei tasti, tutti nella console. Esc esce salvando tutto.",
@@ -734,6 +737,11 @@ class Finestra(wx.Frame):
         maiuscolo = modificatori == wx.MOD_SHIFT
         if carattere.isdigit() and not maiuscolo:
             self._playlist_numero(int(carattere) or 10)
+            return
+        # Maiuscolo con le cifre: i primi dieci marker. Windows puo' dare la
+        # cifra con il Maiuscolo o il segno che la tastiera italiana ci mette sopra.
+        if maiuscolo and (carattere.isdigit() or carattere in CIFRE_COL_MAIUSCOLO):
+            self._marker_numero((int(carattere) or 10) if carattere.isdigit() else CIFRE_COL_MAIUSCOLO[carattere])
             return
         comando = TASTI.get((carattere, maiuscolo))
         if comando:
@@ -2741,6 +2749,44 @@ class Finestra(wx.Frame):
     def _comando_marker_successivo(self):
         self._salta_al_marker(1)
 
+    def _marker_numero(self, numero):
+        """Maiuscolo con le cifre da 1 a 0: il marker numero, nell'ordine del
+        tempo, del brano su cui sta il fuoco della plancia, o del brano di cui
+        e' il marker o il sottobrano. Lo suona da li', come X sul marker, e
+        porta il fuoco della plancia sul marker, nella voce su cui si era: lo
+        stesso file puo' stare anche in altre playlist o cartelle."""
+        voce = self._voce_di_lavoro()
+        dati = self._dati(voce) or {}
+        tipo = dati.get("tipo")
+        if tipo not in ("brano", "file", "sottobrano", "marker"):
+            self._riscontro("non_disponibile", "Maiuscolo con le cifre va ai marker del brano su cui sta la plancia: porta il fuoco su un brano.")
+            return
+        brano = dati["brano"]
+        multiplo = self._ha_sottobrani(brano)
+        # La voce che ha i marker sotto: il brano, il sottobrano, o il ramo del marker.
+        ramo = self.albero.GetItemParent(voce) if tipo == "marker" else voce
+        if tipo in ("sottobrano", "marker"):
+            sottobrano = dati.get("numero")
+        elif multiplo:
+            # Di un SID con piu' sottobrani conta quello che suona, se suona
+            # lui, altrimenti l'iniziale.
+            info = songlengths.info_del_sid(brano.percorso) or {}
+            sottobrano = self.motore.sottobrano if self.motore.in_corso == brano.percorso else (info.get("iniziale") or 1)
+            self.albero.Expand(voce)
+            ramo = next((v for v in self._figli(voce) if (self._dati(v) or {}).get("numero") == sottobrano), None)
+        else:
+            sottobrano = brano.sottobrano
+        k = dati["chiave"] if tipo == "marker" else self._chiave_dei_marker(brano.percorso, sottobrano, leggi=True)
+        elenco = self.marcatori.elenco(k)
+        if numero > len(elenco):
+            chi = f"il sottobrano {sottobrano} di {brano.nome_del_file}" if multiplo and sottobrano else brano.nome_del_file
+            testo = f"{chi[:1].upper()}{chi[1:]} non ha marker." if not elenco else f"Non c'è il marker {numero}: {chi} ne ha {len(elenco)}."
+            self._riscontro("nessun_altro_brano", testo)
+            return
+        marker = elenco[numero - 1]
+        if self._vai_al_marker({"playlist": dati["playlist"], "brano": brano, "numero": sottobrano, "marker": marker}) and ramo is not None:
+            self._fuoco_sul_marker_della_voce(ramo, marker)
+
     def _togli_i_marker(self, quali):
         contesto = self._contesto_dei_marker("Maiuscolo con R, Y e T tolgono i marker del brano che suona; quelli di un altro brano si tolgono con Canc sulla loro voce nella plancia.")
         if contesto is None:
@@ -2748,9 +2794,9 @@ class Finestra(wx.Frame):
         k = contesto[0]
         posizione = self.motore.posizione or 0.0
         if quali == "prima":
-            tolti, evento, dove = self.marcatori.togli_prima(k, posizione), "marker_tolti_prima", f"dall'inizio fino a {durata_lunga(posizione)}"
+            tolti, evento, dove = self.marcatori.togli_prima(k, posizione), "marker_tolti_prima", f"prima di {durata_lunga(posizione)}"
         elif quali == "dopo":
-            tolti, evento, dove = self.marcatori.togli_dopo(k, posizione), "marker_tolti_dopo", f"da {durata_lunga(posizione)} alla fine"
+            tolti, evento, dove = self.marcatori.togli_dopo(k, posizione), "marker_tolti_dopo", f"dopo {durata_lunga(posizione)}"
         else:
             tolti, evento, dove = self.marcatori.togli_tutti(k), "marker_tolti_tutti", "in tutto il brano"
         if not tolti:
@@ -2799,7 +2845,8 @@ class Finestra(wx.Frame):
     def _vai_al_marker(self, dati):
         """X o Vai al marker: suona il brano dal marker, rispettando il loop
         A-B. Se il brano e' quello caricato ci salta, e riparte se era in
-        pausa; il suono dice se il salto va avanti o indietro."""
+        pausa; il suono dice se il salto va avanti o indietro. Vero se ha
+        suonato."""
         brano, numero, marker = dati["brano"], dati.get("numero"), dati["marker"]
         stesso = self.motore.in_corso == brano.percorso and (numero is None or self.motore.sottobrano == numero)
         if stesso:
@@ -2808,11 +2855,13 @@ class Finestra(wx.Frame):
             if self.motore.in_pausa:
                 self.motore.pausa(False)
             self._riscontro("marker_avanti" if avanti else "marker_indietro", f"{marker['nome']}, {durata_lunga(marker['tempo'])}.")
-            return
+            return True
         if not self.coda.nel_loop(dati["playlist"], brano):
             self._riscontro("fuori_dal_loop", f"{brano.nome_del_file} è fuori dal loop: si suona solo fra il punto A e il punto B.")
-            return
+            return False
         self._suona(dati["playlist"], brano, sottobrano=numero, inizio=marker["tempo"])
+        self.scrivi(f"Dal marker {marker['nome']}, {durata_lunga(marker['tempo'])}.")
+        return True
 
     def _rinfresca_i_marker(self, k):
         """Dopo un cambio ai marker di una chiave, rinfresca nella plancia
@@ -2853,6 +2902,20 @@ class Finestra(wx.Frame):
                 if figlio is not None:
                     self._seleziona(figlio)
 
+    def _fuoco_sul_marker_della_voce(self, voce, marker):
+        """Apre la voce, un brano, un file o un sottobrano, e porta il fuoco
+        della plancia sul suo marker."""
+        dati = self._dati(voce) or {}
+        if not self.albero.ItemHasChildren(voce):
+            # La voce e' nata prima che si sapesse dei suoi marker.
+            dati["caricato"] = False
+            self.albero.SetItemHasChildren(voce, True)
+        self.albero.Expand(voce)
+        figlio = next((v for v in self._figli(voce) if (self._dati(v) or {}).get("marker", {}).get("tempo") == marker["tempo"]), None)
+        if figlio is not None:
+            self.albero.EnsureVisible(figlio)
+            self._seleziona(figlio)
+
     def _fuoco_sul_marker(self, k, marker):
         """R e Y: il fuoco della plancia va sul marker raggiunto, aprendo i
         rami che servono, se cio' che suona sta nella plancia."""
@@ -2869,15 +2932,7 @@ class Finestra(wx.Frame):
             dati = self._dati(voce)
         if self._chiave_della_voce(dati) != k:
             return
-        if not self.albero.ItemHasChildren(voce):
-            # La voce e' nata prima che si sapesse dei suoi marker.
-            dati["caricato"] = False
-            self.albero.SetItemHasChildren(voce, True)
-        self.albero.Expand(voce)
-        figlio = next((v for v in self._figli(voce) if (self._dati(v) or {}).get("marker", {}).get("tempo") == marker["tempo"]), None)
-        if figlio is not None:
-            self.albero.EnsureVisible(figlio)
-            self._seleziona(figlio)
+        self._fuoco_sul_marker_della_voce(voce, marker)
 
     # F8.
 

@@ -2,6 +2,18 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.40.2] - 2026-10-01
+
+- Maiuscolo con R e Maiuscolo con Y tolgono i marker prima e dopo il punto in cui sei, ma non quello su cui sei: prima toglievano anche lui. Maiuscolo con T continua a toglierli tutti. Dal collaudo di Gabriele.
+
+## [1.40.1] - 2026-10-01
+
+- Il suono di Maiuscolo con Backspace era a onda quadra, che Gabriele trova aggressiva, e quasi uguale a quello di K: ora è meteora_scendi, nuovo nella collezione di GBUtils V176, lo specchio del suono di Backspace, le stesse tre note di seno che scendono da destra a sinistra.
+
+## [1.40.0] - 2026-10-01
+
+- Maiuscolo con le cifre da 1 a 0, cioè i tasti del punto esclamativo, delle virgolette e così via fino all'uguale nella tastiera italiana, va ai primi dieci marker del brano su cui sta la plancia: lo suona da lì e porta il fuoco della plancia sul marker. Se il brano ha meno marker, la console dice quanti ne ha; su un SID con più sottobrani chiuso vale il sottobrano che suona, o l'iniziale. Il fuoco resta sotto la voce su cui eri anche se lo stesso file suona da un'altra playlist, e se il brano era fermo la console dice anche da quale marker parte.
+
 ## [1.39.1] - 2026-10-01
 
 - Le righe della console accordano il singolare: tolto 1 brano, eliminata 1 playlist, tolto ed eliminato 1 marker, invece di tolti ed eliminate.

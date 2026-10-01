@@ -1372,13 +1372,15 @@ def test_marker_t_r_y_e_le_varianti_con_maiuscolo(finestra, monkeypatch, suoni_a
         _in_pausa_a(finestra, t)
         _premi(finestra, "t")
     assert [m["nome"] for m in finestra.marcatori.elenco(finestra._contesto_dei_marker("")[0])] == ["Intro", "M1", "M2"]
+    # Fermi su M1: Maiuscolo con R e con Y tolgono gli altri, ma non lui.
     _in_pausa_a(finestra, 2.5)
-    assert _premi(finestra, "r", maiuscolo=True) == "Tolti 2 marker dall'inizio fino a 0:02.500."
+    assert _premi(finestra, "r", maiuscolo=True) == "Tolto 1 marker prima di 0:02.500."
     assert suoni_annotati[-1] == "marker_tolti_prima"
-    assert _premi(finestra, "y", maiuscolo=True) == "Tolto 1 marker da 0:02.500 alla fine."
+    assert _premi(finestra, "y", maiuscolo=True) == "Tolto 1 marker dopo 0:02.500."
     assert suoni_annotati[-1] == "marker_tolti_dopo"
-    assert _premi(finestra, "t", maiuscolo=True) == "Non ci sono marker da togliere in tutto il brano."
-    _premi(finestra, "t")
+    assert _premi(finestra, "y", maiuscolo=True) == "Non ci sono marker da togliere dopo 0:02.500."
+    assert [m["nome"] for m in finestra.marcatori.elenco(finestra._contesto_dei_marker("")[0])] == ["M1"]
+    # Maiuscolo con T li toglie tutti, anche quello su cui si e'.
     assert _premi(finestra, "t", maiuscolo=True) == "Tolto 1 marker in tutto il brano."
     assert suoni_annotati[-1] == "marker_tolti_tutti"
     etichetta = finestra.albero.GetItemText(next(finestra._figli(finestra._nodo_della_playlist(pl))))
@@ -1546,3 +1548,47 @@ def test_marker_non_salvati_si_salvano_all_uscita(app, tmp_path):
     salvati = Marcatori(str(tmp_path / modulo.FILE_MARCATORI))
     salvati.carica()
     assert [m["nome"] for m in salvati.elenco("a.mp3|1.000")] == ["M1"]
+
+
+def test_maiuscolo_con_le_cifre_va_ai_primi_dieci_marker(finestra, tmp_path, suoni_annotati):
+    pl, voce = _brano_con_marker(finestra, tmp_path, (1.0, 2.0, 3.0))
+    finestra._seleziona(voce)
+    # Maiuscolo con 2, come lo da' Windows con la cifra.
+    assert _premi(finestra, "2", maiuscolo=True) == "M2, 0:02."
+    assert _aspetta(lambda: abs((finestra.motore.posizione or -1) - 2.0) < 0.05)
+    assert finestra.albero.GetItemText(finestra._voce_corrente()) == "M2, 0:02"
+    finestra.motore.pausa(True)
+    # Maiuscolo con 3, come lo da' con il segno della tastiera italiana; dal marker col fuoco vale lo stesso.
+    assert _premi(finestra, "£", maiuscolo=True) == "M3, 0:03."
+    finestra.motore.pausa(True)
+    assert _premi(finestra, "5", maiuscolo=True) == "Non c'è il marker 5: canzone.wav ne ha 3."
+    assert suoni_annotati[-1] == "nessun_altro_brano"
+    # Il brano fermo riparte dal marker.
+    finestra.motore.stop()
+    finestra._seleziona(voce)
+    _tasto(finestra, "!", maiuscolo=True)
+    assert finestra.motore.in_corso == pl.brani[0].percorso
+    assert _aspetta(lambda: abs((finestra.motore.posizione or -1) - 1.0) < 0.05)
+    finestra.motore.pausa(True)
+    finestra._seleziona(finestra.nodo_pc)
+    assert _premi(finestra, "1", maiuscolo=True).startswith("Maiuscolo con le cifre va ai marker del brano su cui sta la plancia")
+
+
+def test_maiuscolo_con_le_cifre_resta_sulla_copia_della_plancia(finestra, tmp_path):
+    pl, _voce_in_playlist = _brano_con_marker(finestra, tmp_path, (1.0, 2.0, 3.0))
+    # Lo stesso file nei Preferiti, mentre suona dalla playlist.
+    finestra._ai_preferiti(pl.brani[0])
+    finestra.albero.Expand(finestra.nodo_preferiti)
+    preferito = next(finestra._figli(finestra.nodo_preferiti))
+    finestra._seleziona(preferito)
+    assert _premi(finestra, "3", maiuscolo=True) == "M3, 0:03."
+    finestra.motore.pausa(True)
+    corrente = finestra._voce_corrente()
+    assert finestra.albero.GetItemText(corrente) == "M3, 0:03"
+    assert finestra.albero.GetItemParent(corrente) == preferito
+    # Con il brano fermo la console dice anche da quale marker parte.
+    finestra.motore.stop()
+    finestra._seleziona(preferito)
+    _tasto(finestra, "1", maiuscolo=True)
+    assert _ultima(finestra) == "Dal marker M1, 0:01."
+    finestra.motore.pausa(True)

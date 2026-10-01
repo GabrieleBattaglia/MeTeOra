@@ -185,8 +185,9 @@ def test_marcatori_nomi_tolleranza_e_salvataggio(tmp_path):
     assert [m["nome"] for m in di_nuovo.elenco(k)] == ["M2", "Ritornello", "M3"]
     assert di_nuovo.forse(r"E:\ovunque\CANZONE.mp3")
     assert di_nuovo.voci[k]["percorsi"] == [r"C:\musica\Canzone.MP3", r"D:\altrove\canzone.mp3"]
-    assert di_nuovo.togli_prima(k, 10.0) == 2 and [m["nome"] for m in di_nuovo.elenco(k)] == ["M3"]
-    assert di_nuovo.togli_dopo(k, 20.0) == 1 and k not in di_nuovo.voci
+    assert di_nuovo.togli_prima(k, 10.0) == 1 and [m["nome"] for m in di_nuovo.elenco(k)] == ["Ritornello", "M3"]
+    assert di_nuovo.togli_dopo(k, 10.0) == 1 and [m["nome"] for m in di_nuovo.elenco(k)] == ["Ritornello"]
+    assert di_nuovo.togli_tutti(k) == 1 and k not in di_nuovo.voci
     assert di_nuovo.togli_tutti(k) == 0
 
 

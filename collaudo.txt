@@ -1,9 +1,4 @@
-Collaudo di MeTeOra 1.40.1, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra. Scrivi le note sulla riga della voce; le voci superate si cancellano.
-Maiuscolo con R, con Y e con T: tolgono i marker prima, dopo e tutti, e la console dice quanti.
-Questo è ok ma shift+r e shift+t toglono anche il marker col focus. Vorrei che questo non fosse coinvolto nella cancellazione.
-
-Con la plancia su un brano che ha dei marker, Maiuscolo con 1, 2 e 3 suonano il brano dal primo, dal secondo e dal terzo marker; un numero oltre i marker che ha lo dice.
-No. Questa non va. Premo e non succede nulla. Numeri con shift da 1 a 0: !"£$%&/()=
-
-Maiuscolo con Backspace ha il suo suono nuovo, meteora_scendi: lo specchio di quello di Backspace.
-No. C'è un suono, un breve beep singolo ma non vedo effetti sulla plancia.
+Collaudo di MeTeOra 1.40.2, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.40.2. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Fermo su un marker, Maiuscolo con R toglie i marker prima e Maiuscolo con Y quelli dopo, ma non quello su cui sei; Maiuscolo con T li toglie tutti, lui compreso.
+Con la plancia su un brano che ha dei marker, Maiuscolo con 1, 2 e 3, cioè punto esclamativo, virgolette e sterlina, suonano il brano dal primo, dal secondo e dal terzo marker; un numero oltre i marker che ha lo dice.
+Con il fuoco su una playlist aperta, Backspace chiude il ramo Playlist; poi Maiuscolo con Backspace lo riapre e torna su quella playlist, con il suono nuovo meteora_scendi, lo specchio di quello di Backspace.
