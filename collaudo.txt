@@ -1,1 +1,0 @@
-Collaudo di MeTeOra 1.51.3, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.51.3. Scrivi le note sulla riga della voce; le voci superate si cancellano.
