@@ -1,1 +1,0 @@
-Collaudo di MeTeOra 1.36.2, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra. Scrivi le note sulla riga della voce; le voci superate si cancellano.
