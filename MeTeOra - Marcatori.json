@@ -1,0 +1,117 @@
+{
+ "versione": 1,
+ "marcatori": {
+  "2400_ad.sid|459.865|1": {
+   "file": "2400_AD.sid",
+   "durata": 459.865,
+   "sottobrano": 1,
+   "percorsi": [
+    "E:\\C64Music\\MUSICIANS\\T\\Tel_Jeroen\\2400_AD.sid"
+   ],
+   "marker": [
+    {
+     "tempo": 83.45349560632665,
+     "nome": "M1"
+    },
+    {
+     "tempo": 95.27822271108923,
+     "nome": "M2"
+    }
+   ]
+  },
+  "alternative_fuel.sid|155.000|1": {
+   "file": "Alternative_Fuel.sid",
+   "durata": 155.0,
+   "sottobrano": 1,
+   "percorsi": [
+    "E:\\C64Music\\MUSICIANS\\T\\Tel_Jeroen\\Alternative_Fuel.sid"
+   ],
+   "marker": [
+    {
+     "tempo": 22.06522494424949,
+     "nome": "M1"
+    }
+   ]
+  },
+  "arpverhaal.sid|173.000|1": {
+   "file": "Arpverhaal.sid",
+   "durata": 173.0,
+   "sottobrano": 1,
+   "percorsi": [
+    "E:\\C64Music\\MUSICIANS\\T\\Tel_Jeroen\\Arpverhaal.sid"
+   ],
+   "marker": [
+    {
+     "tempo": 4.907441066154199,
+     "nome": "M1"
+    },
+    {
+     "tempo": 6.754839164884365,
+     "nome": "M2"
+    },
+    {
+     "tempo": 8.45218551955103,
+     "nome": "M3"
+    },
+    {
+     "tempo": 11.612101091916092,
+     "nome": "M4"
+    }
+   ]
+  },
+  "017 dall'urologo.mp3|40.673": {
+   "file": "017 dall'urologo.mp3",
+   "durata": 40.67275,
+   "sottobrano": null,
+   "percorsi": [
+    "E:\\13 ilbarzellettiere\\S\\002 sesso\\017 dall'urologo.mp3"
+   ],
+   "marker": [
+    {
+     "tempo": 2.682599258392288,
+     "nome": "M1"
+    }
+   ]
+  },
+  "019 due negri ubriachi.mp3|33.489": {
+   "file": "019 due negri ubriachi.mp3",
+   "durata": 33.489,
+   "sottobrano": null,
+   "percorsi": [
+    "E:\\13 ilbarzellettiere\\S\\002 sesso\\019 due negri ubriachi.mp3"
+   ],
+   "marker": [
+    {
+     "tempo": 3.3829176183446656,
+     "nome": "M1"
+    }
+   ]
+  },
+  "020 in una colonia di nudisti.mp3|23.092": {
+   "file": "020 in una colonia di nudisti.mp3",
+   "durata": 23.09225,
+   "sottobrano": null,
+   "percorsi": [
+    "E:\\13 ilbarzellettiere\\S\\002 sesso\\020 in una colonia di nudisti.mp3"
+   ],
+   "marker": [
+    {
+     "tempo": 2.651505022916098,
+     "nome": "M2"
+    },
+    {
+     "tempo": 2.8200890814557797,
+     "nome": "M1"
+    },
+    {
+     "tempo": 7.871874143344714,
+     "nome": "M3"
+    },
+    {
+     "tempo": 13.470493962963829,
+     "nome": "M4"
+    }
+   ]
+  }
+ }
+}

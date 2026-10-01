@@ -1,11 +1,9 @@
-Collaudo di MeTeOra 1.39.1, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra. Scrivi le note sulla riga della voce; le voci superate si cancellano.
-Suona un brano e premi T in due punti: la console dice Marker M1 e Marker M2 con il tempo.
-In pausa e mentre suona, R e Y saltano ai marker, e la plancia va sul marker raggiunto; ai capi la console dice che è il primo o l'ultimo.
-Fermo su un marker, T chiede il nuovo nome; nella plancia, Invio su un marker fa lo stesso.
-Nella plancia il brano dice quanti marker ha, e freccia destra li mostra; X su un marker suona il brano da lì, Canc lo elimina.
+Collaudo di MeTeOra 1.40.1, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra. Scrivi le note sulla riga della voce; le voci superate si cancellano.
 Maiuscolo con R, con Y e con T: tolgono i marker prima, dopo e tutti, e la console dice quanti.
-Una copia dello stesso file in un'altra cartella, o lo stesso file in un'altra playlist, mostra gli stessi marker.
-Un SID con più sottobrani: i marker messi su un sottobrano stanno sotto quel sottobrano.
-I suoni nuovi, uno per azione: brevi, e diversi l'uno dall'altro e da quelli che c'erano.
-Mentre il brano suona, R due volte di seguito: la seconda va al marker prima, non di nuovo allo stesso.
-Con i tasti da 1 a 0, o con J e K, la playlist si apre ma i brani con dei marker restano chiusi.
+Questo è ok ma shift+r e shift+t toglono anche il marker col focus. Vorrei che questo non fosse coinvolto nella cancellazione.
+
+Con la plancia su un brano che ha dei marker, Maiuscolo con 1, 2 e 3 suonano il brano dal primo, dal secondo e dal terzo marker; un numero oltre i marker che ha lo dice.
+No. Questa non va. Premo e non succede nulla. Numeri con shift da 1 a 0: !"£$%&/()=
+
+Maiuscolo con Backspace ha il suo suono nuovo, meteora_scendi: lo specchio di quello di Backspace.
+No. C'è un suono, un breve beep singolo ma non vedo effetti sulla plancia.
