@@ -1,5 +1,9 @@
 Collaudo di MeTeOra 1.41.0, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.41.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
-Fermo su un marker, Maiuscolo con R toglie i marker prima e Maiuscolo con Y quelli dopo, ma non quello su cui sei; Maiuscolo con T li toglie tutti, lui compreso.
 Con la plancia su un brano che ha dei marker, Maiuscolo con 1, 2 e 3, cioè punto esclamativo, virgolette e sterlina, suonano il brano dal primo, dal secondo e dal terzo marker; un numero oltre i marker che ha lo dice.
+Confermo ma rilevo un problema. x non riprende più da inizio brano ma da un marker, nel mio caso dal primo. Poi premendo x ripetutamente, o chiudendo e riaprendo il ramo del brano, x torna normale.
+
 Con il fuoco su una playlist aperta, Backspace chiude il ramo Playlist; poi Maiuscolo con Backspace lo riapre e torna su quella playlist, con il suono nuovo meteora_scendi, lo specchio di quello di Backspace.
+shift+backspace non ha ne suoni nuovi ne alcun effetto.
+
 Nella plancia, freccia destra su un ramo chiuso fa il fruscio che sale, freccia sinistra su un ramo aperto quello scuro che scende; F10, J, K e Backspace hanno i loro suoni.
+f9 f10, confermato. j e f10 mi pare abbiano lo stesso suono, k ed f9 molto simile, il che va bene se ci fosse una correlazione; il caso di j f10 invece è una violazione di regola e va cambiato. backspace con maiuscolo: assolutamente nessun effetto.
