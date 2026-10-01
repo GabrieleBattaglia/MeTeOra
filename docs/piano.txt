@@ -12,7 +12,7 @@ Il programma e fortemente orientato alle playlist. La riproduzione di singoli br
 2.5 Statistiche della playlist a richiesta e sempre a portata: numero brani, durata totale, durata residua, brano corrente su totale, tempo trascorso e mancante.
 2.6 Modifica della playlist dall'albero con Canc e con il menu contestuale della voce, al massimo un sottomenu (Ordina). Nessun percorso annidato per le operazioni comuni.
 2.7 Impostazioni in una sola finestra piatta, a schede al massimo di primo livello, ogni opzione con etichetta e valore leggibili. Come si cambiano: vedi 5.8.
-2.8 Tasti rapidi: tabella unica visibile, modificabile, con avviso di conflitto. Ogni comando ha un nome parlante.
+2.8 Tasti rapidi: tabella unica visibile, F12. I tasti li decide Gabriele e non sono modificabili: la tabella modificabile e' depennata (Gabriele, 1 ottobre 2026). Ogni comando ha un nome parlante.
 2.9 Niente tastierino numerico come tasto di comando (NVDA se lo tiene a blocco spento).
 2.10 Finestre e caratteri grandi: nessuna misura fissa in pixel (modello adatta_finestra di Dadillo).
 2.11 Prove con NVDA reale, non solo con eventi simulati.
@@ -81,7 +81,7 @@ Tutti i tasti valgono in tutto il programma, qualunque area abbia il fuoco, ma s
 Tappa 0 (conclusa): prove di fattibilita del motore e del SID in tempo reale. Dettagli in tappa0-risultati.txt.
 Tappa 1 (fatta nella 1.0.0, issue 1, collaudata da Gabriele il 30 settembre 2026, correzioni nella 1.0.5 e 1.1.0): scheletro con le tre aree, memoria del fuoco, albero con playlist e Questo PC, Apri file, riproduzione, area dei messaggi, tasti di trasporto, primi effetti sonori. Prova con NVDA.
 Tappa 2 (conclusa nella 1.26.0, issue 13): gestione playlist completa dall'albero, ricerca con \, statistiche, salvataggio e caricamento, stato di riapertura, J, K e cifre.
-Tappa 3 (issue 14): segnalibri nell'albero (fatti nella 1.39.0), tabella tasti modificabile, impostazioni come in 5.8 (fatte nella 1.51.0, tutte le voci da 5.8.1 a 5.8.9), F1 F2 F3.
+Tappa 3 (conclusa nella 1.51.3, issue 14): segnalibri nell'albero (fatti nella 1.39.0), impostazioni come in 5.8 (fatte nella 1.51.0, tutte le voci da 5.8.1 a 5.8.9), F1 F2 F3. La tabella dei tasti modificabile e' depennata.
 Tappa 4: equalizzatore, velocita, tono, dissolvenza, loop A-B.
 Tappa 5: SID dal prototipo al programma (libsidplayfp 3.x, partenza piu rapida, seek in avanti).
 Tappa 6: formati audio comuni (MP3 e compagnia): collaudo sistematico di quello che libmpv legge.
