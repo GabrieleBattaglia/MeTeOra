@@ -63,7 +63,8 @@ Tutti i tasti valgono in tutto il programma, qualunque area abbia il fuoco, ma s
 5.8.2 Colori dei caratteri: tre percentuali RGB per area, con la lettera dell'area davanti: p plancia, c console, t cruscotto. Per esempio p31.31.31 e' un bel grigio scuro.
 5.8.3 Colori dello sfondo: come i colori dei caratteri.
 5.8.4 Righe della console: quante ne tiene, 2000 se non lo si cambia, minimo 100. Il valore c'e' dalla 1.34.0, per ora solo nel file delle impostazioni.
-5.8.5 Marcatori: apre una finestra con una lista come la plancia ma piatta, senza rami. Ogni voce riporta percorso\file\nome del marker e tempo. Le voci sono raggruppate per provenienza e si cercano con \. Canc le elimina, Invio ne modifica il nome, c'e' la selezione multipla, e i pulsanti sono Cancella tutto, Esporta selezionati e Chiudi. Esporta selezionati scrive un file JSON in un formato proprio di MeTeOra, che altre copie di MeTeOra possono importare: contiene i nomi dei file, le loro durate e i loro marcatori, ma non i percorsi, perche' su un'altra macchina gli stessi file possono stare altrove.
+5.8.5 Marcatori: apre una finestra con una lista come la plancia ma piatta, senza rami. Ogni voce riporta percorso\file\nome del marker e tempo. Le voci sono raggruppate per provenienza, per contiguita': quelle che vengono dallo stesso file, dalla stessa playlist o dalla stessa cartella stanno vicine. Si cercano con \. Canc le elimina, Invio ne modifica il nome, c'e' la selezione multipla, e i pulsanti sono Cancella tutto, Esporta selezionati e Chiudi. Esporta selezionati scrive un file JSON in un formato proprio di MeTeOra, che altre copie di MeTeOra possono importare: contiene i nomi dei file, le loro durate e i loro marcatori, ma non i percorsi, perche' su un'altra macchina gli stessi file possono stare altrove.
+5.8.7 Importa marcatori: legge un file esportato da un'altra copia di MeTeOra. I file si ritrovano dal nome e dalla durata; due file identici in posti diversi hanno gli stessi marcatori, quindi li ricevono tutti e due.
 5.8.6 Salva console: scrive il contenuto della console in un file di testo che si chiama MeTeOra-Vx_x_x-aaaa_mm_gg-hh_mm.txt, per esempio MeTeOra-V1_34_6-2026_10_01-15_42.txt, cosi' i file si ordinano da soli per data. Va nella cartella dell'eseguibile: MeTeOra si distribuisce compilato onedir, quasi tutti i suoi file stanno in _internal, e accanto all'eseguibile restano licenza, manuale e poche altre cose, fra cui le console salvate.
 6. ARCHITETTURA
 6.1 Motore: libmpv tramite python-mpv. Verificato nella tappa 0: formati, seek, velocita, equalizzatore al volo, eventi di fine brano, dispositivi.
@@ -92,6 +93,4 @@ Tappa 9: rifiniture di accessibilita.
 8.5 Licenze: LGPL o GPL della build di mpv e delle librerie dei chip; libsidplayfp e GPL.
 8.6 Dimensione del pacchetto con la DLL di mpv.
 9. DOMANDE APERTE
-Da decidere alla tappa 3, per le impostazioni di 5.8:
-9.1 Marcatori: come si sente il raggruppamento per provenienza in una lista senza rami.
-9.2 Marcatori: da dove si importa un file esportato, e come si ritrovano i file senza percorso, per esempio dal nome e dalla durata, anche quando due file con lo stesso nome stanno in cartelle diverse.
+Nessuna al momento.
