@@ -58,7 +58,9 @@ EVENTI = {
     "brano_spostato": "scudisciata",
     "saltato_acceso": "salto_del_gioco_1",
     "saltato_spento": "salto_del_gioco_10",
-    "cartella_aperta": "carta_pescata",
+    # I rami della plancia aperti e chiusi con le frecce.
+    "ramo_aperto": "carta_pescata",
+    "ramo_chiuso": "meteora_ramo_chiuso",
     "file_aperto": "carta_girata",
     "vai_al_brano": "grosse_biglie",
     "playlist_precedente": "menu_triplicato_su_6",

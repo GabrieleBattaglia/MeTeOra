@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.41.0] - 2026-10-01
+
+- Nella plancia, ogni ramo che apri con freccia destra ha il suo suono, carta_pescata, e ogni ramo che chiudi con freccia sinistra ne ha uno nuovo, meteora_ramo_chiuso: lo stesso fruscio, ma di rumore marrone, più scuro, che scende. Prima suonava solo la prima volta che si apriva una cartella. I rami che aprono e chiudono i comandi, come F9, F10, J, K e Backspace, restano con i loro suoni. Chiesto da Gabriele al collaudo; il suono nuovo è nella collezione di GBUtils V177.
+
 ## [1.40.2] - 2026-10-01
 
 - Maiuscolo con R e Maiuscolo con Y tolgono i marker prima e dopo il punto in cui sei, ma non quello su cui sei: prima toglievano anche lui. Maiuscolo con T continua a toglierli tutti. Dal collaudo di Gabriele.

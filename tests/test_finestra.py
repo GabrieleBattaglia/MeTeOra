@@ -1592,3 +1592,22 @@ def test_maiuscolo_con_le_cifre_resta_sulla_copia_della_plancia(finestra, tmp_pa
     _tasto(finestra, "1", maiuscolo=True)
     assert _ultima(finestra) == "Dal marker M1, 0:01."
     finestra.motore.pausa(True)
+
+
+def test_frecce_aprono_e_chiudono_i_rami_con_un_suono(finestra, suoni_annotati):
+    finestra._aggiungi(None, [os.path.join(r"C:\m", "a.mp3")])
+    finestra.albero.Expand(finestra.nodo_playlist)
+    nodo = next(finestra._figli(finestra.nodo_playlist))
+    suoni_annotati.clear()
+    # La freccia vale finche' dura la sua pressione; i comandi non suonano.
+    _nell_albero(finestra, wx.WXK_RIGHT)
+    assert finestra._freccia_nell_albero
+    finestra.albero.Expand(nodo)
+    assert suoni_annotati == ["ramo_aperto"]
+    finestra.albero.Collapse(nodo)
+    assert suoni_annotati == ["ramo_aperto", "ramo_chiuso"]
+    wx.Yield()
+    assert not finestra._freccia_nell_albero
+    finestra.albero.Expand(nodo)
+    finestra.albero.Collapse(nodo)
+    assert suoni_annotati == ["ramo_aperto", "ramo_chiuso"]

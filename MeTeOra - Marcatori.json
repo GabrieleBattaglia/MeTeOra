@@ -112,6 +112,20 @@
      "nome": "M4"
     }
    ]
+  },
+  "alice nel paese delle meraviglie.mp3|4332.774": {
+   "file": "Alice nel paese delle meraviglie.mp3",
+   "durata": 4332.773875,
+   "sottobrano": null,
+   "percorsi": [
+    "E:\\Audio\\AudioDescritti\\Alice nel paese delle meraviglie.mp3"
+   ],
+   "marker": [
+    {
+     "tempo": 263.568301268531,
+     "nome": "M4"
+    }
+   ]
   }
  }
 }

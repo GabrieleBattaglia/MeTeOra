@@ -13,7 +13,8 @@
 # nascoste, i problemi interni nella console e le righe della console impostabili; nella 1.34.6 le correzioni della revisione:
 # cartelle aperte che non spariscono, playlist che si ricaricano, Risultati cestinati, emoji e jolly nella console;
 # nella 1.36.1 Backspace e Maiuscolo con Backspace, e Maiuscolo e Ctrl con le frecce senza il nome della plancia ripetuto da NVDA;
-# nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e'.
+# nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
+# nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce.
 
 """La finestra di MeTeOra.
 
@@ -467,6 +468,8 @@ class Finestra(wx.Frame):
         self._da_tenere = 0
         # Quante volte di seguito e' arrivato l'ultimo problema interno.
         self._ripetizioni = 0
+        # Vero mentre una freccia, destra o sinistra, apre o chiude un ramo.
+        self._freccia_nell_albero = False
         # Maiuscolo con le frecce allarga la selezione dall'ancora; l'ancora
         # vale finche' il fuoco resta dove l'hanno lasciato Maiuscolo o Ctrl
         # con le frecce, o Ctrl+Spazio.
@@ -518,6 +521,7 @@ class Finestra(wx.Frame):
         pannello.SetSizer(tutto)
         self.albero.Bind(wx.EVT_TREE_ITEM_EXPANDING, self._in_espansione)
         self.albero.Bind(wx.EVT_TREE_ITEM_COLLAPSED, self._chiusa_una_voce)
+        self.albero.Bind(wx.EVT_TREE_ITEM_EXPANDED, self._aperta_una_voce)
         self.albero.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self._invio)
         self.albero.Bind(wx.EVT_TREE_ITEM_MENU, self._menu_da_evento)
         self.albero.Bind(wx.EVT_KEY_DOWN, self._tasto_nell_albero)
@@ -758,6 +762,12 @@ class Finestra(wx.Frame):
         modificatori = evento.GetModifiers()
         spostamento = codice in (wx.WXK_UP, wx.WXK_DOWN, wx.WXK_HOME, wx.WXK_END, wx.WXK_PAGEUP, wx.WXK_PAGEDOWN)
         con_ancora = spostamento and modificatori in (wx.MOD_SHIFT, wx.MOD_CONTROL)
+        if codice in (wx.WXK_LEFT, wx.WXK_RIGHT) and modificatori == wx.MOD_NONE:
+            # Le frecce aprono e chiudono i rami dopo questo gestore, nel
+            # controllo: i suoni li danno gli eventi dell'albero, finche'
+            # dura questa pressione.
+            self._freccia_nell_albero = True
+            wx.CallAfter(self._fine_della_freccia)
         if codice == wx.WXK_SPACE and modificatori == wx.MOD_CONTROL:
             # Ctrl+Spazio, che seleziona e deseleziona da se', fissa l'ancora
             # sulla voce col fuoco, come in Esplora risorse.
@@ -1315,11 +1325,25 @@ class Finestra(wx.Frame):
     def _chiusa_una_voce(self, evento):
         """Una playlist chiusa si ricarica alla prossima apertura: cosi' le
         schede arrivate nel frattempo cambiano anche l'elenco dei brani che
-        passano il filtro, non solo i conti dell'etichetta."""
+        passano il filtro, non solo i conti dell'etichetta. Chiusa con la
+        freccia sinistra, ha il suo suono."""
         evento.Skip()
         dati = self._dati(evento.GetItem()) or {}
         if dati.get("tipo") == "playlist":
             dati["caricato"] = False
+        if self._freccia_nell_albero:
+            self._suono("ramo_chiuso")
+
+    def _aperta_una_voce(self, evento):
+        """Un ramo aperto con la freccia destra ha il suo suono, ogni volta e
+        per ogni ramo. I rami che aprono i comandi, come F10, J e K, no:
+        quei comandi hanno gia' il loro."""
+        evento.Skip()
+        if self._freccia_nell_albero:
+            self._suono("ramo_aperto")
+
+    def _fine_della_freccia(self):
+        self._freccia_nell_albero = False
 
     def _carica(self, voce, dati):
         """Riempie un ramo quando si apre: le unita' di Questo PC, il contenuto
@@ -1382,9 +1406,7 @@ class Finestra(wx.Frame):
             self._aggiungi_voce(voce, "file", pl, brano)
         if not cartelle and not files:
             self.albero.SetItemHasChildren(voce, False)
-            self._riscontro("cartella_aperta", "Niente da suonare qui dentro.")
-        else:
-            self._suono("cartella_aperta")
+            self._riscontro("niente_da_suonare", "Niente da suonare qui dentro.")
 
     def _aggiorna_cartella(self, cartella):
         """Aggiorna dal menu: la voce si cerca quando la si sceglie, perche'
