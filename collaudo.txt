@@ -1,12 +1,12 @@
-Collaudo di MeTeOra 1.42.2, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.42.2. Scrivi le note sulla riga della voce; le voci superate si cancellano.
-Con il fuoco su una playlist aperta premi Backspace: si chiude il ramo Playlist. Poi Maiuscolo con Backspace: il ramo si riapre e torna su quella playlist, con il suo suono. Se non succede niente, scrivi qui cosa dice la console subito dopo, anche se niente, e su quale voce eri.
-Ero sul brano 023... della pl s
-dice: Qui dentro non c'è nessun ramo aperto. 13:53
-Ho fatto prima backspace poi shift+backspace.
-Forse non ci siamo capiti su shift+backspace. Se io sono al livello 8, in hard disk, ad esempio, e voglio uscire dal ramo per procedere in un altro, fratello di quello su cui sono, vorrei una scorciatoia per arrivare velocemente al ramo antenato, per poi scendere, cioè hard disk in questo caso. Bacspace mi riporta al genitore, e va benissimo, ma per risalire tutti i livelli devo premerlo molte volte.
-
-Su un brano con dei marker, Maiuscolo con 2 lo suona dal secondo marker e il fuoco resta sul brano; X poi lo fa ripartire da capo.
-No. x riparte ancora dal marker.
-
-Nella plancia, scendendo dentro un ramo, risalendo o cambiando livello con le frecce, Backspace, Maiuscolo con Backspace, F9, J o K, il beep sale e scende con il livello; scorrendo voci dello stesso livello tace, e tace anche se premi F9 mentre sei nella console.
-Confermo, tranne. Il suono livello si sovrappone a quello di backspace creando un effetto sgradevole.
+Collaudo di MeTeOra 1.43.2, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.43.2. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+In Questo PC scendi di qualche livello dentro un'unità, aprendo cartelle una dentro l'altra, e premi Maiuscolo con Backspace: il fuoco torna sull'unità, che resta aperta, con chiuse le cartelle dentro di lei.
+Il suono di Maiuscolo con Backspace è nuovo, un salto d'ottava verso l'alto: dimmi se ti piace e se si distingue da quello di Backspace.
+Dentro una playlist aperta, su un brano o su un suo marker, Maiuscolo con Backspace porta il fuoco sulla playlist.
+Su un brano dei Preferiti, o su un suo marker, Maiuscolo con Backspace porta il fuoco sui Preferiti.
+Su una playlist o su un'unità, Maiuscolo con Backspace non si muove e la console dice che sei già lì; se dentro c'erano rami aperti, li chiude.
+Su una voce del primo livello, per esempio Questo PC, Maiuscolo con Backspace non si muove e la console dice che sei già al primo livello.
+Su un brano con dei marker che suona, premi R o Y: il fuoco va sul marker; poi X fa ripartire il brano da capo, non dal marker.
+Con il brano in pausa e il fuoco su uno dei suoi marker, X lo riprende da dove era.
+Dopo Backspace e dopo Maiuscolo con Backspace il beep del livello arriva quando il loro suono è finito, senza sovrapporsi.
+Premendo Backspace più volte di fila, svelto, senti solo il beep dell'ultimo livello raggiunto.
+In Acu_Maker, cercando meteora con la barra, trovi tutti i suoni di MeTeOra: quelli col nome che comincia per meteora e quelli con Usato da: meteora in fondo alla descrizione.

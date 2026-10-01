@@ -4,6 +4,7 @@
 import ctypes
 import json
 import os
+import re
 
 import pytest
 
@@ -15,6 +16,8 @@ from finestra import durata_lunga, leggi_tempo, secondi_da_leggere, tempo
 from impostazioni import PREDEFINITE, Impostazioni
 
 HVSC = r"E:\C64Music"
+# Il suona vero, preso all'import: nelle prove una fixture lo sostituisce.
+_SUONA_VERO = suoni.suona
 
 
 def test_formati():
@@ -55,6 +58,32 @@ def test_ogni_evento_ha_un_preset_suo_che_esiste():
     esistenti = set(Acusticator.list())
     mancanti = [p for p in preset if p not in esistenti]
     assert not mancanti, f"preset che non esistono nella collezione: {mancanti}"
+
+
+def test_suona_fissa_l_attesa_sulla_durata_del_preset(monkeypatch):
+    from GBUtils import Acusticator
+
+    # Il beep dei livelli aspetta il suono del comando: attesa() deve dire
+    # quanto manca alla fine dell'ultimo preset suonato, letto dallo score.
+    monkeypatch.setattr(Acusticator, "play", lambda *_a, **_k: True)
+    monkeypatch.setattr(suoni, "_FINE_DELL_ULTIMO", [0.0])
+    score, _kind, _adsr = Acusticator.preset(suoni.EVENTI["risali"])
+    durata = sum(score[1::4])
+    assert durata > 0
+    _SUONA_VERO("risali")
+    assert abs(suoni.attesa() - durata) < 0.05
+    assert not _SUONA_VERO("risali", volume=0)
+    assert abs(suoni.attesa() - durata) < 0.1
+
+
+def test_ogni_preset_porta_la_firma_di_meteora():
+    from GBUtils import Acusticator
+
+    # Chi crea un suono lo firma nel nome, chi lo usa e basta nella descrizione:
+    # cosi' Gabriele lo ritrova in Acu_Maker cercando meteora.
+    firma = re.compile(r"Usato da: [^.]*\bmeteora\b")
+    senza = [p for p in suoni.EVENTI.values() if not p.startswith("meteora_") and not firma.search(Acusticator.descrizione(p))]
+    assert not senza, f"preset senza la firma di MeTeOra: {senza}"
 
 
 def test_impostazioni_scartano_i_valori_sbagliati(tmp_path):

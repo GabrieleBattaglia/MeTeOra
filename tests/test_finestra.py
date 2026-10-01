@@ -1297,7 +1297,7 @@ def test_dopo_ctrl_i_comandi_agiscono_sulla_voce_selezionata(finestra, monkeypat
     assert [b.nome_del_file for b in pl.brani] == ["b.mp3", "c.mp3"]
 
 
-def test_backspace_risale_chiudendo_e_maiuscolo_backspace_scende(finestra, suoni_annotati):
+def test_backspace_risale_chiudendo(finestra, suoni_annotati):
     rock, _jazz = _playlist_di_prova(finestra, ("a.mp3", "b.mp3"), ("x.mp3",))
     finestra._seleziona(_voce_di(finestra, rock, "b.mp3"))
     _nell_albero(finestra, wx.WXK_BACK)
@@ -1309,14 +1309,49 @@ def test_backspace_risale_chiudendo_e_maiuscolo_backspace_scende(finestra, suoni
     assert sum(r.startswith("Chiuso ") for r in finestra._righe) == 1
     _nell_albero(finestra, wx.WXK_BACK)
     assert _ultima(finestra) == "Sei già al primo livello della plancia."
-    # Il ramo Playlist, chiuso, ricorda cosa c'era di aperto dentro: jazz e'
-    # ancora aperta, e Maiuscolo con Backspace riapre il ramo e ci arriva.
+
+
+def test_maiuscolo_backspace_risale_all_antenato(finestra, tmp_path, suoni_annotati):
+    # In Questo PC: dal fondo di una cartella annidata all'unita', che resta
+    # aperta con i rami dentro di lei chiusi.
+    base = tmp_path / "Disco"
+    (base / "Musica" / "Album").mkdir(parents=True)
+    (base / "Libri").mkdir()
+    (base / "Musica" / "Album" / "x.mp3").write_bytes(b"")
+    (base / "Libri" / "y.mp3").write_bytes(b"")
+    finestra.albero.Expand(finestra.nodo_pc)
+    unita = finestra.albero.AppendItem(finestra.nodo_pc, "Disco", data={"tipo": "unita", "percorso": str(base), "caricato": False})
+    finestra.albero.SetItemHasChildren(unita, True)
+    finestra.albero.Expand(unita)
+    musica = _voce(finestra, unita, lambda d: d.get("percorso") == str(base / "Musica"))
+    finestra.albero.Expand(musica)
+    album = next(finestra._figli(musica))
+    finestra.albero.Expand(album)
+    finestra._seleziona(next(finestra._figli(album)))
     _nell_albero(finestra, wx.WXK_BACK, maiuscolo=True)
-    assert finestra.albero.IsExpanded(finestra.nodo_playlist)
-    assert finestra._voce_corrente() == finestra._nodo_della_playlist(finestra.archivio.playlist[1])
-    assert suoni_annotati[-1] == "scendi"
+    assert finestra._voce_corrente() == unita and finestra.albero.IsExpanded(unita)
+    assert not finestra.albero.IsExpanded(musica) and not finestra.albero.IsExpanded(album)
+    assert suoni_annotati[-1] == "risali_all_antenato" and _ultima(finestra) == "Risalito a Disco."
+    # Nel ramo Playlist l'antenato e' la playlist.
+    rock, = _playlist_di_prova(finestra, ("a.mp3",))
+    finestra._seleziona(next(finestra._figli(rock)))
     _nell_albero(finestra, wx.WXK_BACK, maiuscolo=True)
-    assert _ultima(finestra) == "Qui dentro non c'è nessun ramo aperto."
+    assert finestra._voce_corrente() == rock and finestra.albero.IsExpanded(rock)
+    # Gia' sull'antenato non si sale: si dice, con il suono del limite.
+    _nell_albero(finestra, wx.WXK_BACK, maiuscolo=True)
+    assert finestra._voce_corrente() == rock
+    assert suoni_annotati[-1] == "nessun_altro_brano" and _ultima(finestra) == f"Sei già su {finestra._dati(rock)['playlist'].nome}, non si risale oltre."
+    # I Preferiti sono una playlist al primo livello: da un loro brano si va a loro.
+    finestra._seleziona(next(finestra._figli(rock)))
+    _tasto(finestra, codice=wx.WXK_F4)
+    finestra.albero.Expand(finestra.nodo_preferiti)
+    finestra._seleziona(next(finestra._figli(finestra.nodo_preferiti)))
+    _nell_albero(finestra, wx.WXK_BACK, maiuscolo=True)
+    assert finestra._voce_corrente() == finestra.nodo_preferiti and finestra.albero.IsExpanded(finestra.nodo_preferiti)
+    assert suoni_annotati[-1] == "risali_all_antenato"
+    finestra._seleziona(finestra.nodo_pc)
+    _nell_albero(finestra, wx.WXK_BACK, maiuscolo=True)
+    assert _ultima(finestra) == "Sei già al primo livello della plancia."
 
 
 def _in_pausa_a(finestra, secondi):
@@ -1453,10 +1488,14 @@ def test_marker_correzioni_della_revisione(finestra, tmp_path, suoni_annotati):
     assert _premi(finestra, "r") == "Prima di qui non ci sono marker."
     _in_pausa_a(finestra, 4.0)
     assert _premi(finestra, "y") == "Dopo di qui non ci sono marker."
-    # X su un marker del brano in pausa: ci salta, indietro, e riparte.
+    # X su un marker fa come sul suo brano: in pausa lo riprende dal punto.
     finestra._seleziona(marker[2])
     _tasto(finestra, "x")
-    assert not finestra.motore.in_pausa and suoni_annotati[-1] == "marker_indietro"
+    assert not finestra.motore.in_pausa and suoni_annotati[-1] == "ripresa"
+    # E mentre suona lo fa ripartire da capo.
+    _tasto(finestra, "x")
+    assert suoni_annotati[-1] == "da_capo"
+    assert _aspetta(lambda: (finestra.motore.posizione or 9) < 1.0)
     finestra.motore.pausa(True)
     # Ctrl porta il fuoco su M2, Canc elimina M1 selezionato: il fuoco resta su M2.
     finestra._seleziona(marker[0])
@@ -1682,3 +1721,49 @@ def test_maiuscolo_con_le_cifre_dal_marker_col_fuoco(finestra, tmp_path):
     assert _premi(finestra, "3", maiuscolo=True) == "M3, 0:03."
     assert finestra._voce_corrente() == marker[0]
     finestra.motore.pausa(True)
+
+
+def _beep_rimandato(finestra, monkeypatch, ritardi):
+    """Il suono del comando dura ancora per i ritardi dati, e il fuoco e'
+    dove dice la lista fuoco: sul desktop nascosto la finestra non e'
+    attiva, e FindFocus non troverebbe la plancia."""
+    import suoni
+
+    monkeypatch.setattr(suoni, "attesa", lambda: ritardi.pop(0) if ritardi else 0.0)
+    fuoco = [finestra.albero]
+    monkeypatch.setattr(wx.Window, "FindFocus", staticmethod(lambda: fuoco[0]))
+    return fuoco
+
+
+def test_beep_del_livello_aspetta_il_suono_del_comando(finestra, monkeypatch, livelli_annotati):
+    rock, = _playlist_di_prova(finestra, ("a.mp3",))
+    finestra._seleziona(next(finestra._figli(rock)))
+    # Il suono di Backspace dura ancora: il beep arriva dopo, non sopra.
+    _beep_rimandato(finestra, monkeypatch, [0.1])
+    _nell_albero(finestra, wx.WXK_BACK)
+    assert livelli_annotati == []
+    assert _aspetta(lambda: livelli_annotati == [2])
+
+
+def test_beep_rimandato_superato_dal_tasto_dopo_tace(finestra, monkeypatch, livelli_annotati):
+    rock, = _playlist_di_prova(finestra, ("a.mp3",))
+    finestra._seleziona(next(finestra._figli(rock)))
+    # Due Backspace di fila, mentre suona ancora il primo: il beep del
+    # livello intermedio non arriva sopra il secondo suono, tace.
+    _beep_rimandato(finestra, monkeypatch, [0.1, 0.1, 0.1])
+    _nell_albero(finestra, wx.WXK_BACK)
+    _nell_albero(finestra, wx.WXK_BACK)
+    assert _aspetta(lambda: livelli_annotati == [1])
+    _aspetta(lambda: False, secondi=0.4)
+    assert livelli_annotati == [1]
+
+
+def test_beep_rimandato_tace_se_il_fuoco_lascia_la_plancia(finestra, monkeypatch, livelli_annotati):
+    rock, = _playlist_di_prova(finestra, ("a.mp3",))
+    finestra._seleziona(next(finestra._figli(rock)))
+    fuoco = _beep_rimandato(finestra, monkeypatch, [0.1])
+    _nell_albero(finestra, wx.WXK_BACK)
+    # Mentre il beep aspetta si apre un dialogo, che prende il fuoco.
+    fuoco[0] = None
+    _aspetta(lambda: False, secondi=0.4)
+    assert livelli_annotati == []

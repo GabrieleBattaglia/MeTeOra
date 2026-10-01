@@ -14,7 +14,7 @@
 # cartelle aperte che non spariscono, playlist che si ricaricano, Risultati cestinati, emoji e jolly nella console;
 # nella 1.36.1 Backspace e Maiuscolo con Backspace, e Maiuscolo e Ctrl con le frecce senza il nome della plancia ripetuto da NVDA;
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
-# nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli.
+# nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato.
 
 """La finestra di MeTeOra.
 
@@ -132,7 +132,7 @@ TASTI_COMUNI = [
     "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, + e - volume, Maiuscolo+M il passo del volume, M muto.",
     "Maiuscolo+X mette e toglie i punti A e B del loop sul brano selezionato, Maiuscolo+C toglie il loop.",
     "J e K aprono e suonano la playlist precedente e successiva, le cifre da 1 a 0 le prime dieci playlist.",
-    "Nella plancia Backspace chiude il ramo in cui sei e risale, Maiuscolo con Backspace scende fino all'ultimo ramo aperto.",
+    "Nella plancia Backspace chiude il ramo in cui sei e risale di un livello, Maiuscolo con Backspace risale di colpo all'unità o alla playlist, Preferiti compresi, e chiude i rami al suo interno.",
     "T mette un marker dove sei, o rinomina quello su cui sei; R e Y vanno al marker precedente e successivo; Maiuscolo con R, Y e T tolgono i marker prima, dopo e tutti; Maiuscolo con le cifre da 1 a 0 va ai primi dieci marker del brano della plancia.",
     "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione sul brano in riproduzione e Maiuscolo+F8 ce la tiene agganciata, F9 chiude e F10 apre tutto il ramo selezionato.",
     "Barra rovesciata: nella console cerca nella console, altrove in tutte le playlist e in tutte le unità. Barra verticale: il filtro della playlist in cui sta la plancia, anche dalla console.",
@@ -152,7 +152,7 @@ TASTI_DEL_CONTESTO = {
     "cartella": ("una cartella", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Riproduci e Crea playlist da qui."),
     "file": ("un file", "Invio, Applicazioni o Spazio: menu con Riproduci e Aggiungi alla playlist. Maiuscolo+Canc manda il file nel cestino. Un SID con più sottobrani, o un file con dei marker, si apre con freccia destra."),
     "sottobrano": ("un sottobrano di un SID", "Invio, Applicazioni o Spazio: menu con Riproduci e Aggiungi alla playlist. Se ha dei marker, freccia destra li mostra."),
-    "marker": ("un marker", "Invio rinomina il marker, X suona il brano da lì, Canc lo elimina. Applicazioni o Spazio: menu con Vai al marker, Rinomina ed Elimina."),
+    "marker": ("un marker", "Invio rinomina il marker, Canc lo elimina, X fa come sul suo brano. Applicazioni o Spazio: menu con Vai al marker, che suona il brano da lì, Rinomina ed Elimina."),
     "comando": ("un comando", "Invio esegue il comando."),
 }
 
@@ -477,6 +477,9 @@ class Finestra(wx.Frame):
         self._fuoco_atteso = None
         self._righe = []
         self._chiusa = False
+        # Il turno dell'ultimo beep dei livelli: un beep rimandato che nel
+        # frattempo e' stato superato da un altro non suona piu'.
+        self._turno_del_beep = 0
         self._costruisci()
         self._popola_albero()
         self.Bind(wx.EVT_CHAR_HOOK, self._tasto)
@@ -805,7 +808,7 @@ class Finestra(wx.Frame):
         elif codice == wx.WXK_BACK and modificatori == wx.MOD_NONE:
             self._risali()
         elif codice == wx.WXK_BACK and modificatori == wx.MOD_SHIFT:
-            self._scendi()
+            self._risali_all_antenato()
         elif codice == wx.WXK_SPACE and evento.GetModifiers() == wx.MOD_NONE:
             # Il livello lo guarda chi ha chiamato, quando il menu ha finito.
             self._menu(self._voce_di_lavoro())
@@ -847,8 +850,31 @@ class Finestra(wx.Frame):
         if not self or self._chiusa or wx.Window.FindFocus() in (self.console, self.cruscotto):
             return
         dopo = self._profondita(self._voce_corrente())
-        if dopo and dopo != prima:
-            suoni.livello(dopo, self.impostazioni["volume_effetti"])
+        if not dopo or dopo == prima:
+            return
+        self._turno_del_beep += 1
+        self._beep_del_livello(self._turno_del_beep, dopo)
+
+    def _beep_del_livello(self, turno, profondita, rimandato=False):
+        """Il beep aspetta che finisca il suono del comando, come quello di
+        Backspace: sovrapposti stridono (Gabriele, collaudo della 1.42.2). Se
+        intanto un altro tasto ha cambiato di nuovo livello, tace: suona solo
+        il beep dell'ultimo. Tace anche se, mentre aspettava, il fuoco ha
+        lasciato la plancia, per esempio per un dialogo."""
+        if not self or self._chiusa or turno != self._turno_del_beep:
+            return
+        fuoco = wx.Window.FindFocus()
+        if fuoco in (self.console, self.cruscotto) or (rimandato and fuoco is not self.albero):
+            return
+        attesa = suoni.attesa()
+        if attesa > 0:
+            # Un timer di Python che poi torna nel filo della finestra; se nel
+            # frattempo il programma si chiude, non trattiene l'uscita.
+            timer = threading.Timer(attesa + 0.02, lambda: wx.GetApp() and wx.CallAfter(self._beep_del_livello, turno, profondita, True))
+            timer.daemon = True
+            timer.start()
+        else:
+            suoni.livello(profondita, self.impostazioni["volume_effetti"])
 
     def _voce_di_lavoro(self):
         """La voce su cui agiscono i comandi per una voce sola, come Canc, X,
@@ -945,30 +971,40 @@ class Finestra(wx.Frame):
         self._seleziona(ramo)
         self._riscontro("risali", f"Chiuso {self.albero.GetItemText(ramo)}.", "risali")
 
-    def _scendi(self):
-        """Maiuscolo con Backspace: scende dentro la voce col fuoco, lungo i
-        rami aperti, fino all'ultimo ramo aperto che si incontra leggendo, e
-        ci porta il fuoco, aprendo la voce se e' chiusa. Una voce chiusa
-        ricorda i rami aperti che ha dentro, per esempio dopo Backspace da
-        un ramo aperto; una playlist chiusa no, perche' riaprendosi si
-        ricarica."""
+    def _risali_all_antenato(self):
+        """Maiuscolo con Backspace: risale di colpo al ramo antenato, quello
+        di secondo livello che contiene la voce col fuoco, come l'unita' in
+        Questo PC o la playlist nel ramo Playlist; nei Preferiti, che sono
+        una playlist al primo livello, i Preferiti stessi. L'antenato resta
+        aperto e i rami dentro di lui si chiudono, cosi' le sue voci si
+        scorrono subito per scendere in un ramo fratello (Gabriele, collaudo
+        della 1.42.2)."""
         voce = self._voce_corrente()
-        ultimo = None
-        dati = self._dati(voce) or {}
-        if voce.IsOk() and (self.albero.IsExpanded(voce) or dati.get("tipo") != "playlist"):
-            # Nell'ordine di lettura, entrando solo nei rami aperti.
-            pila = list(reversed(list(self._figli(voce))))
-            while pila:
-                figlio = pila.pop()
-                if self.albero.IsExpanded(figlio) and self.albero.GetChildrenCount(figlio, False):
-                    ultimo = figlio
-                    pila.extend(reversed(list(self._figli(figlio))))
-        if ultimo is None:
-            self._riscontro("nessun_altro_brano", "Qui dentro non c'è nessun ramo aperto.")
+        if not voce.IsOk() or self._profondita(voce) < 2:
+            self._riscontro("nessun_altro_brano", "Sei già al primo livello della plancia.")
             return
-        self.albero.EnsureVisible(ultimo)
-        self._seleziona(ultimo)
-        self._riscontro("scendi", f"Ultimo ramo aperto: {self.albero.GetItemText(ultimo)}.", "scendi")
+        antenato = voce
+        while self._profondita(antenato) > 2:
+            antenato = self.albero.GetItemParent(antenato)
+        if self.albero.GetItemParent(antenato) == self.nodo_preferiti:
+            antenato = self.nodo_preferiti
+        # Il fuoco va sull'antenato prima di chiudere i rami in cui stava.
+        self._seleziona(antenato)
+        chiusi = False
+        for figlio in list(self._figli(antenato)):
+            if self.albero.ItemHasChildren(figlio):
+                chiusi = chiusi or self.albero.IsExpanded(figlio)
+                self.albero.CollapseAllChildren(figlio)
+        self.albero.EnsureVisible(antenato)
+        # Della playlist il nome soltanto, senza i conti dell'etichetta.
+        pl = (self._dati(antenato) or {}).get("playlist")
+        nome = pl.nome if pl is not None else self.albero.GetItemText(antenato)
+        if antenato == voce:
+            # Gia' sull'antenato: non si sale, si chiudono solo i rami dentro.
+            dentro = " Chiusi i rami aperti al suo interno." if chiusi else ""
+            self._riscontro("nessun_altro_brano", f"Sei già su {nome}, non si risale oltre.{dentro}")
+            return
+        self._riscontro("risali_all_antenato", f"Risalito a {nome}.", "risali")
 
     def _seleziona(self, voce):
         """Seleziona soltanto questa voce e le da' il fuoco, come una freccia."""
@@ -2424,8 +2460,10 @@ class Finestra(wx.Frame):
         tipo = dati.get("tipo")
         corrente = self.coda.corrente
         if tipo == "marker":
-            self._vai_al_marker(dati)
-            return
+            # X su un marker vale come X sul suo brano: lo suona dall'inizio, o
+            # lo fa ripartire da capo se suona gia'. Da un marker suonano R, Y,
+            # le cifre e Vai al marker (Gabriele, collaudo della 1.42.2).
+            tipo = "sottobrano" if self._ha_sottobrani(dati["brano"]) else "brano"
         if tipo in ("brano", "file", "sottobrano"):
             numero = dati.get("numero")
             gia_suona = self.motore.in_corso and dati["brano"] is corrente and (numero is None or self.motore.sottobrano == numero)
@@ -2827,7 +2865,7 @@ class Finestra(wx.Frame):
     def _marker_numero(self, numero):
         """Maiuscolo con le cifre da 1 a 0: il marker numero, nell'ordine del
         tempo, del brano su cui sta il fuoco della plancia, o del brano di cui
-        e' il marker o il sottobrano. Lo suona da li', come X sul marker. Il
+        e' il marker o il sottobrano. Lo suona da li', come Vai al marker. Il
         fuoco della plancia resta dov'e': X sul brano continua a farlo
         ripartire da capo (Gabriele, collaudo della 1.41.0)."""
         voce = self._voce_di_lavoro()
@@ -2912,7 +2950,7 @@ class Finestra(wx.Frame):
         self._riscontro("marker_eliminato", f"Eliminato il marker {marker['nome']}, a {durata_lunga(marker['tempo'])}.")
 
     def _vai_al_marker(self, dati):
-        """X o Vai al marker: suona il brano dal marker, rispettando il loop
+        """Vai al marker, e Maiuscolo con le cifre: suona il brano dal marker, rispettando il loop
         A-B. Se il brano e' quello caricato ci salta, e riparte se era in
         pausa; il suono dice se il salto va avanti o indietro. Vero se ha
         suonato."""

@@ -10,6 +10,8 @@ prefisso meteora_ e stanno anche loro nella collezione, dove ogni suono
 originale va appena nasce.
 """
 
+import time
+
 EVENTI = {
     "avvio": "partenza",
     "uscita": "terminata",
@@ -86,7 +88,7 @@ EVENTI = {
     "marker_eliminato": "meteora_marker_eliminato",
     # Backspace e Maiuscolo con Backspace nella plancia.
     "risali": "menu_triplicato_su_4",
-    "scendi": "meteora_scendi",
+    "risali_all_antenato": "meteora_risali_all_antenato",
     "apri_tutto": "meteora_apri_tutto",
     "domanda": "campanellino",
     "non_disponibile": "rifiuto",
@@ -134,6 +136,26 @@ def livello(profondita, volume=0.5):
     return True
 
 
+# Quando finisce l'ultimo effetto partito, e quanto dura ogni preset.
+_FINE_DELL_ULTIMO = [0.0]
+_DURATE = {}
+
+
+def _durata(preset):
+    if preset not in _DURATE:
+        from GBUtils import Acusticator
+
+        score, _kind, _adsr = Acusticator.preset(preset)
+        _DURATE[preset] = sum(score[1::4]) if score else 0.0
+    return _DURATE[preset]
+
+
+def attesa():
+    """Quanti secondi mancano alla fine dell'ultimo effetto partito: il beep
+    dei livelli aspetta, per non sovrapporsi."""
+    return max(0.0, _FINE_DELL_ULTIMO[0] - time.monotonic())
+
+
 def suona(evento, volume=0.5, sync=False):
     """Suona il preset dell'evento. Il volume va da 0 a 1; a zero tace.
     Con sync aspetta la fine del suono."""
@@ -141,4 +163,5 @@ def suona(evento, volume=0.5, sync=False):
         return False
     from GBUtils import Acusticator
 
+    _FINE_DELL_ULTIMO[0] = time.monotonic() + _durata(EVENTI[evento])
     return Acusticator.play(EVENTI[evento], sync=sync, volume=volume)

@@ -2,6 +2,16 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.43.2] - 2026-10-01
+
+- X su un marker fa come sul suo brano: lo suona dall'inizio, o se è il brano in corso lo riprende dalla pausa o lo fa ripartire da capo. Prima ripartiva dal marker, e dopo R o Y, che portano il fuoco sul marker, X non tornava più all'inizio del brano. Per suonare da un marker restano R, Y, Maiuscolo con le cifre e Vai al marker nel menu. Dal collaudo di Gabriele.
+- Il beep dei livelli aspetta che finisca il suono del comando, invece di sovrapporsi, come accadeva con Backspace; se intanto un altro tasto cambia di nuovo livello, suona solo il beep dell'ultimo, e se il fuoco lascia la plancia, per esempio per un dialogo, tace. Dal collaudo di Gabriele.
+- Ogni suono che MeTeOra prende dalla collezione di GBUtils porta la sua firma: se non ha meteora nel nome, la descrizione finisce con Usato da e il nome di MeTeOra, così Gabriele lo ritrova in Acu_Maker. Una prova automatica lo controlla. Le firme, per tutte le app, sono nella collezione di GBUtils V179.
+
+## [1.43.0] - 2026-10-01
+
+- Maiuscolo con Backspace risale di colpo al ramo antenato della plancia, cioè all'unità in Questo PC o alla playlist nel ramo Playlist, o ai Preferiti per i loro brani, e chiude i rami aperti dentro di lui: l'antenato resta aperto, così si scende subito in un ramo fratello. Ha un suono nuovo, meteora_risali_all_antenato, un salto d'ottava di onda triangolare, nella collezione di GBUtils V179. Prima scendeva fino all'ultimo ramo aperto, ma a Gabriele serviva la risalita: Backspace sale di un livello alla volta, e da otto livelli sotto servivano otto pressioni. Già sull'antenato, o al primo livello, il fuoco resta dov'è e la console lo dice.
+
 ## [1.42.2] - 2026-10-01
 
 - Maiuscolo con le cifre suona il brano dal marker ma lascia il fuoco della plancia dov'è: prima lo portava sul marker, e X dopo ripartiva dal marker invece che dall'inizio del brano. Dal collaudo di Gabriele.
