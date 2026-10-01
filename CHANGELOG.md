@@ -2,6 +2,23 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.55.2] - 2026-10-02
+
+- Un brano finito proprio nell'istante in cui ne partiva un altro poteva far saltare il brano appena partito: la fine del vecchio veniva presa per quella del nuovo, e MeTeOra passava al seguente. Era una coincidenza rara, vista nel codice e mai sentita.
+
+## [1.55.1] - 2026-10-02
+
+- A ogni passaggio automatico da un brano all'altro la finestra si fermava per circa mezzo secondo, il tempo in cui il brano vecchio finiva di uscire dalla scheda audio, e i tasti premuti in quel momento aspettavano. Ora i comandi al motore partono senza aspettare, e la finestra resta pronta.
+
+## [1.55.0] - 2026-10-02
+
+- Velocità: A rallenta e D accelera la riproduzione a passi di 0,05, da 0,5 a 2; S torna alla velocità normale. Il tono non cambia, anche sui SID.
+- Tono: F lo alza e H lo abbassa di un semitono, fino a dodici sopra o sotto; G lo riporta al normale. La velocità non cambia.
+- Equalizzatore a sette bande, da 60 a 12000 Hz: U e I scelgono la banda, O e P la alzano e la abbassano di un dB, da -12 a +12, È la azzera e Maiuscolo con È le azzera tutte. Le bande seguono il tono, e contro la saturazione il volume scende da solo quanto la banda più alzata: con una sola banda alzata il suono non satura, mentre con più bande vicine alzate, o tutte, la risposta sale fino a circa 5,6 dB oltre, e dal volume 80 o 90 in su conviene abbassare il volume. I guadagni restano dopo i salti nel brano, da un brano all'altro e quando Windows cambia la scheda audio predefinita.
+- Dissolvenza incrociata: L la accende e la spegne, Maiuscolo con L ne chiede la durata, da mezzo secondo a 15 secondi, 4 se non la cambi. Il brano che finisce sfuma mentre il seguente entra, a potenza costante, a ogni cambio di brano, da solo o con i tasti, compreso il ritorno al punto A del loop; con un brano corto la dissolvenza si accorcia. Il seguente si prepara poco prima, e se intanto la plancia cambia, quando la dissolvenza comincia MeTeOra ricontrolla e suona quello giusto; se davanti non c'è più niente, il brano in corso arriva in fondo. In pausa la dissolvenza aspetta la ripresa.
+- Velocità, tono, equalizzatore e dissolvenza si ricordano fra un avvio e l'altro e valgono per tutti i brani; all'avvio la console dice velocità e tono se non sono quelli normali. Le impostazioni hanno quattro voci nuove, dopo Salto avanti di E: Velocità, Tono, Equalizzatore e Dissolvenza. Le righe della console di questi tasti sono brevi e si riscrivono a ogni pressione, come quella del volume.
+- Ogni tasto nuovo ha il suo suono, anche ai limiti: diciannove suoni nuovi, nella collezione di GBUtils V183. Issue 15, tappa 4.
+
 ## [1.51.3] - 2026-10-01
 
 - X ha il suo suono: era muto, perché il volume del suo preset, Rapida_salita-sin_des, era scritto come testo, che Acusticator legge come volume assoluto zero mentre Acu_Maker lo legge come scarto dalla base, e così lo sentivi solo lì. Corretto nella collezione di GBUtils V182; la differenza fra le due letture resta da decidere nella issue 47 di GBUtils.

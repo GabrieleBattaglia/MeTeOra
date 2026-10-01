@@ -11,7 +11,7 @@ Risultati:
 2. SID: sidplayfp.exe li renderizza in WAV a circa 25 volte il tempo reale (120 s di Commando.sid in 4,7 s) e libmpv apre il WAV senza problemi (120,0 s, PCM 16 bit). Percorso SID -> WAV -> libmpv dimostrato.
 3. HVSC: la collezione in E:\C64Music era all'aggiornamento 83. Su una COPIA in hvsc\copia\C64Music ho applicato 84 e 85 con update.exe: riuscito, 61.157 SID, come annunciato per l'aggiornamento 85. L'originale non e stato toccato.
 4. VLC 3.0.24 installato ha plugin per SID, chip e tracker (libsid_plugin, libgme_plugin, libmod_plugin): confronto ancora da fare.
-5. Motore (prova_motore.py, uscita null): seek assoluto a 60 s preciso (60,49), velocita 1,5 accettata, equalizzatore a bande parametriche via filtro lavfi equalizer cambiato a riproduzione in corso senza fermare il brano, evento end-file ricevuto a fine brano, elenco dispositivi (auto, quattro wasapi, openal). Manca ancora l'ascolto reale: lo devi fare tu.
+5. Motore (prova_motore.py, uscita null): seek assoluto a 60 s preciso (60,49), velocita 1,5 accettata, equalizzatore a bande parametriche via filtro lavfi equalizer cambiato a riproduzione in corso senza fermare il brano (correzione della tappa 4, 1 ottobre 2026: il guadagno dato al volo si perde a ogni seek e a ogni brano nuovo, e questa prova non lo vedeva; dalla 1.55.0 il motore riscrive la catena prima), evento end-file ricevuto a fine brano, elenco dispositivi (auto, quattro wasapi, openal). Manca ancora l'ascolto reale: lo devi fare tu.
 Da fare:
 a. (fatto, vedi 5) Equalizzatore, eventi, dispositivi.
 c. Confronto SID: sidplayfp contro plugin di VLC.

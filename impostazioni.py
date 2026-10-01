@@ -1,12 +1,13 @@
 # MeTeOra, le impostazioni: i valori che il programma ricorda fra un avvio e l'altro.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 le righe della console. Nella 1.51.0 caratteri, colori e scheda audio, e i limiti controllati alla lettura del file. Nella 1.51.2 un file con un JSON che non e' un dizionario non ferma l'avvio.
+# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 le righe della console. Nella 1.51.0 caratteri, colori e scheda audio, e i limiti controllati alla lettura del file. Nella 1.51.2 un file con un JSON che non e' un dizionario non ferma l'avvio. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza (tappa 4, issue 15).
 
 """Le impostazioni, in un file JSON accanto al programma.
 
 Dalla 1.51.0 si cambiano dalla finestra delle impostazioni, la voce
 Impostazioni della plancia, che le applica e le salva subito; alcune anche
-con i tasti (il volume, il suo passo, i salti di Q ed E, l'inseguimento).
+con i tasti (il volume, il suo passo, i salti di Q ed E, l'inseguimento,
+e dalla 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza).
 Il testo scritto nei campi lo legge valori.py, che tiene anche i limiti.
 Un valore mancante o sbagliato nel file prende il predefinito: sbagliato vuol
 dire di un altro tipo, o fuori dai limiti che controlla CONTROLLI. Le chiavi
@@ -23,11 +24,18 @@ from valori import (
     CARATTERI_MASSIMI,
     CARATTERI_MINIMI,
     COMPONENTI,
+    DISSOLVENZA_MASSIMA,
+    DISSOLVENZA_MINIMA,
+    FREQUENZE_DELLE_BANDE,
+    GUADAGNO_MASSIMO,
     PASSO_VOLUME_MASSIMO,
     PASSO_VOLUME_MINIMO,
     PERCENTUALE_MASSIMA,
     RIGHE_MINIME,
     SECONDI_MINIMI,
+    TONO_MASSIMO,
+    VELOCITA_MASSIMA,
+    VELOCITA_MINIMA,
     VOLUME_MASSIMO,
 )
 
@@ -55,6 +63,16 @@ PREDEFINITE = {
     # nomi e non l'indice, che cambia fra un avvio e l'altro; il dizionario
     # vuoto e' la scelta automatica.
     "scheda_audio": {},
+    # La velocita' di riproduzione, 1 la normale, e il tono in semitoni
+    # interi, 0 il normale: valgono per tutti i brani (tappa 4).
+    "velocita": 1.0,
+    "tono": 0,
+    # I guadagni dell'equalizzatore in dB interi, uno per banda, nell'ordine
+    # di valori.FREQUENZE_DELLE_BANDE.
+    "bande": [0] * len(FREQUENZE_DELLE_BANDE),
+    # La dissolvenza incrociata fra un brano e l'altro: spenta, la durata in
+    # secondi resta per quando si riaccende.
+    "dissolvenza": {"accesa": False, "secondi": 4.0},
 }
 
 
@@ -93,6 +111,19 @@ def _scheda_valida(valore):
     return not valore or (set(valore) == {"dispositivo", "interfaccia"} and all(isinstance(nome, str) and nome for nome in valore.values()))
 
 
+def _bande_valide(valore):
+    """Una lista di sette guadagni interi in dB, da -12 a +12, uno per banda."""
+    guadagno_valido = _intero_fra(-GUADAGNO_MASSIMO, GUADAGNO_MASSIMO)
+    return isinstance(valore, list) and len(valore) == len(FREQUENZE_DELLE_BANDE) and all(map(guadagno_valido, valore))
+
+
+def _dissolvenza_valida(valore):
+    """Il dizionario con accesa, vero o falso, e i secondi, da 0,5 a 15,
+    senza altre chiavi."""
+    return (isinstance(valore, dict) and set(valore) == {"accesa", "secondi"} and isinstance(valore["accesa"], bool)
+        and _numero_fra(DISSOLVENZA_MINIMA, DISSOLVENZA_MASSIMA)(valore["secondi"]))
+
+
 # Per ogni chiave, la funzione che dice se un valore letto dal file, gia' del
 # tipo giusto, e' accettabile; un valore che non passa prende il predefinito.
 # I limiti sono quelli di valori.py, gli stessi dei campi della finestra.
@@ -107,6 +138,10 @@ CONTROLLI = {
     "colori_testo": _colori_validi,
     "colori_sfondo": _colori_validi,
     "scheda_audio": _scheda_valida,
+    "velocita": _numero_fra(VELOCITA_MINIMA, VELOCITA_MASSIMA),
+    "tono": _intero_fra(-TONO_MASSIMO, TONO_MASSIMO),
+    "bande": _bande_valide,
+    "dissolvenza": _dissolvenza_valida,
 }
 
 

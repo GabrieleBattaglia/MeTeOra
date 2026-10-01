@@ -1,5 +1,6 @@
 # MeTeOra, le prove della finestra principale, sul desktop nascosto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
+# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15).
 
 import datetime
 import os
@@ -84,8 +85,9 @@ def test_nuova_playlist_aggiungi_sposta_togli(finestra, suoni_annotati):
 
 
 def test_tasti_futuri_e_numpad(finestra, suoni_annotati):
-    _tasto(finestra, "a")
-    assert "velocità" in _ultima(finestra)
+    # Dalla 1.55.0 restano futuri solo l'apostrofo e la ì.
+    _tasto(finestra, "'")
+    assert "scelta della traccia audio" in _ultima(finestra)
     assert suoni_annotati[-1] == "non_disponibile"
     righe = len(finestra._righe)
     _tasto(finestra, codice=wx.WXK_NUMPAD_ADD)
@@ -1871,6 +1873,10 @@ def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_an
         ("scheda_audio", "Scheda audio: Automatica (Altoparlanti (Realtek(R) Audio), WASAPI)"),
         ("passo_indietro", "Salto indietro di Q: 10 secondi"),
         ("passo_avanti", "Salto avanti di E: 10 secondi"),
+        ("velocita", "Velocità: 1"),
+        ("tono", "Tono: 0 semitoni"),
+        ("bande", "Equalizzatore: piatto, tutte le bande a 0 dB"),
+        ("dissolvenza", "Dissolvenza: spenta, 4 secondi"),
         ("insegui", "Inseguimento della plancia (Maiuscolo+F8): no"),
         ("caratteri", "Dimensioni dei caratteri: quelle di Windows"),
         ("colori_testo", "Colori dei caratteri: quelli di Windows"),
@@ -2179,7 +2185,7 @@ def test_finestra_dei_marcatori(finestra, monkeypatch, tmp_path, suoni_annotati)
     monkeypatch.setattr(dialoghi.FinestraMarcatori, "ShowModal", copione)
     try:
         finestra._cambia_impostazione("marcatori", lista)
-        assert lista.lista.GetString(12) == "Marcatori: nessuno"
+        assert lista.lista.GetString(list(modulo.VOCI_DELLE_IMPOSTAZIONI).index("marcatori")) == "Marcatori: nessuno"
     finally:
         lista.Destroy()
     brano = str(tmp_path / "canzone.wav")
@@ -2227,7 +2233,7 @@ def test_marcatori_cancella_tutto(finestra, monkeypatch, tmp_path, suoni_annotat
     assert finestra._riga_dell_impostazione("marcatori") == "Marcatori: 3 in 2 file"
     try:
         finestra._cambia_impostazione("marcatori", lista)
-        assert lista.lista.GetString(12) == "Marcatori: nessuno"
+        assert lista.lista.GetString(list(modulo.VOCI_DELLE_IMPOSTAZIONI).index("marcatori")) == "Marcatori: nessuno"
     finally:
         lista.Destroy()
     righe = [_senza_ora(r) for r in finestra._righe[-3:]]
@@ -2514,3 +2520,428 @@ def test_scheda_audio_all_avvio_che_non_si_apre(app, tmp_path, monkeypatch, suon
         f.Close(force=True)
     finally:
         f.Destroy()
+
+
+# Velocita', tono, equalizzatore e dissolvenza, 1.55.0 (tappa 4, issue 15).
+
+
+def test_velocita_e_tono_coi_tasti(finestra, suoni_annotati):
+    righe = len(finestra._righe)
+    assert _premi(finestra, "d") == "Velocità 1,05."
+    assert _premi(finestra, "d") == "Velocità 1,1."
+    assert finestra.motore.velocita == 1.1 and finestra.impostazioni["velocita"] == 1.1
+    # La riga della velocita' si riscrive: una sola, per il display braille.
+    assert len(finestra._righe) == righe + 1
+    assert _premi(finestra, "a") == "Velocità 1,05."
+    assert _premi(finestra, "s") == "Velocità 1, la normale."
+    assert suoni_annotati[-4:] == ["velocita_su", "velocita_su", "velocita_giu", "velocita_normale"]
+    assert finestra.motore.velocita == 1.0
+    for _ in range(11):
+        _tasto(finestra, "a")
+    assert _ultima(finestra) == "Velocità già al minimo, 0,5." and suoni_annotati[-1] == "velocita_al_limite"
+    assert finestra.motore.velocita == 0.5 and _salvate(finestra)["velocita"] == 0.5
+    # Una velocita' fuori passo, scritta a mano nel file, arriva al limite.
+    finestra.impostazioni["velocita"] = 1.98
+    assert _premi(finestra, "d") == "Velocità 2."
+    assert _premi(finestra, "d") == "Velocità già al massimo, 2."
+    assert len(finestra._righe) == righe + 1
+    assert _premi(finestra, "f") == "Tono +1 semitono."
+    assert _premi(finestra, "f") == "Tono +2 semitoni."
+    assert finestra.motore.tono == 2 and len(finestra._righe) == righe + 2
+    assert _premi(finestra, "h") == "Tono +1 semitono."
+    assert _premi(finestra, "g") == "Tono 0 semitoni, il normale."
+    assert suoni_annotati[-4:] == ["tono_su", "tono_su", "tono_giu", "tono_normale"]
+    for _ in range(13):
+        _tasto(finestra, "h")
+    assert _ultima(finestra) == "Tono già al minimo, -12 semitoni." and suoni_annotati[-1] == "tono_al_limite"
+    assert finestra.motore.tono == -12 and _salvate(finestra)["tono"] == -12
+    for _ in range(25):
+        _tasto(finestra, "f")
+    assert _ultima(finestra) == "Tono già al massimo, +12 semitoni." and finestra.motore.tono == 12
+    # Le righe di stato stanno nei quaranta caratteri del display braille.
+    assert all(len(_senza_ora(r)) <= 40 for r in finestra._righe[righe:])
+
+
+def test_equalizzatore_coi_tasti(finestra, suoni_annotati):
+    righe = len(finestra._righe)
+    # Si parte dalla prima banda, e U li' si ferma.
+    assert _premi(finestra, "u") == "Banda 1, 60 Hz: 0 dB. È la prima."
+    assert suoni_annotati[-1] == "banda_al_limite"
+    assert _premi(finestra, "i") == "Banda 2, 150 Hz: 0 dB."
+    assert _premi(finestra, "i") == "Banda 3, 400 Hz: 0 dB."
+    assert _premi(finestra, "o") == "Banda 3, 400 Hz: +1 dB."
+    assert suoni_annotati[-3:] == ["banda_successiva", "banda_successiva", "banda_su"]
+    assert finestra.motore.bande == [0, 0, 1, 0, 0, 0, 0]
+    for _ in range(12):
+        _tasto(finestra, "o")
+    assert _ultima(finestra) == "Banda 3, 400 Hz: +12 dB, il massimo." and suoni_annotati[-1] == "guadagno_al_limite"
+    assert _premi(finestra, "p") == "Banda 3, 400 Hz: +11 dB." and suoni_annotati[-1] == "banda_giu"
+    for _ in range(4):
+        _tasto(finestra, "i")
+    assert _premi(finestra, "i") == "Banda 7, 12000 Hz: 0 dB. È l'ultima."
+    for _ in range(13):
+        _tasto(finestra, "p")
+    assert _ultima(finestra) == "Banda 7, 12000 Hz: -12 dB, il minimo."
+    assert finestra.motore.bande == [0, 0, 11, 0, 0, 0, -12] and _salvate(finestra)["bande"] == [0, 0, 11, 0, 0, 0, -12]
+    assert _premi(finestra, "u") == "Banda 6, 6000 Hz: 0 dB." and suoni_annotati[-1] == "banda_precedente"
+    _tasto(finestra, "i")
+    assert _premi(finestra, "è") == "Banda 7, 12000 Hz: 0 dB, azzerata." and suoni_annotati[-1] == "banda_azzerata"
+    assert finestra.motore.bande == [0, 0, 11, 0, 0, 0, 0]
+    assert _premi(finestra, "è", maiuscolo=True) == "Equalizzatore azzerato, tutte a 0 dB." and suoni_annotati[-1] == "bande_azzerate"
+    assert finestra.motore.bande == [0] * 7 and _salvate(finestra)["bande"] == [0] * 7
+    # Una riga sola, riscritta, e nei quaranta caratteri.
+    assert len(finestra._righe) == righe + 1 and len(_ultima(finestra)) <= 40
+
+
+def test_dissolvenza_coi_tasti(finestra, monkeypatch, suoni_annotati):
+    assert finestra.motore.dissolvenza == 0
+    assert _premi(finestra, "l") == "Dissolvenza accesa, 4 secondi."
+    assert suoni_annotati[-1] == "dissolvenza_accesa" and finestra.motore.dissolvenza == 4.0
+    assert _salvate(finestra)["dissolvenza"] == {"accesa": True, "secondi": 4.0}
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("2,5"))
+    assert _premi(finestra, "l", maiuscolo=True) == "Dissolvenza accesa, 2,5 secondi."
+    assert suoni_annotati[-2:] == ["domanda", "dissolvenza_durata"] and finestra.motore.dissolvenza == 2.5
+    # Oltre i limiti si corregge, e la console lo dice.
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("20"))
+    assert _premi(finestra, "l", maiuscolo=True) == "Dissolvenza accesa, 15 secondi. Dissolvenza: 20 è oltre il massimo, ho messo 15."
+    assert finestra.motore.dissolvenza == 15
+    # Un testo che non e' un numero di secondi lascia la durata com'era.
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("presto"))
+    _tasto(finestra, "l", maiuscolo=True)
+    assert suoni_annotati[-1] == "errore" and _ultima(finestra).startswith("Dissolvenza: presto non è un numero di secondi;")
+    assert _ultima(finestra).endswith("La durata resta di 15 secondi.") and finestra.motore.dissolvenza == 15
+    # Spenta, la durata resta per quando si riaccende; Maiuscolo con L la
+    # cambia senza accenderla.
+    assert _premi(finestra, "l") == "Dissolvenza spenta, 15 secondi."
+    assert suoni_annotati[-1] == "dissolvenza_spenta" and finestra.motore.dissolvenza == 0
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("3"))
+    assert _premi(finestra, "l", maiuscolo=True) == "Dissolvenza spenta, 3 secondi."
+    assert finestra.motore.dissolvenza == 0
+    assert _salvate(finestra)["dissolvenza"] == {"accesa": False, "secondi": 3.0}
+    assert _premi(finestra, "l") == "Dissolvenza accesa, 3 secondi." and finestra.motore.dissolvenza == 3
+
+
+def test_impostazioni_di_velocita_tono_equalizzatore_e_dissolvenza(finestra, monkeypatch, suoni_annotati):
+    campo, lista = _cambia(finestra, monkeypatch, "velocita", "1.07")
+    assert campo.aperture[0]["testo"] == "1" and "Adesso è 1." in campo.aperture[0]["istruzioni"]
+    assert campo.aperture[0]["istruzioni"][-1] == modulo.REGOLA_DEL_DOLLARO
+    assert finestra.motore.velocita == 1.05 and _salvate(finestra)["velocita"] == 1.05
+    assert lista.righe["velocita"] == "Velocità: 1,05"
+    assert _ultima(finestra) == "La velocità ora è 1,05. Velocità: 1,07 va a passi di 0,05, ho messo 1,05."
+    campo, lista = _cambia(finestra, monkeypatch, "tono", "su", "+15")
+    assert [a["testo"] for a in campo.aperture] == ["0", "su"]
+    assert campo.aperture[1]["titolo"] == "Tono: su non è un numero; scrivi un numero intero da -12 a +12. Tono"
+    assert finestra.motore.tono == 12 and _salvate(finestra)["tono"] == 12 and lista.righe["tono"] == "Tono: +12 semitoni"
+    assert _ultima(finestra) == "Il tono ora è di +12 semitoni. Tono: +15 è oltre il massimo, ho messo +12."
+    campo, _lista = _cambia(finestra, monkeypatch, "tono", "0")
+    assert campo.aperture[0]["testo"] == "+12" and _ultima(finestra) == "Il tono ora è di 0 semitoni, il normale."
+    campo, lista = _cambia(finestra, monkeypatch, "bande", "1 2 3", "0 0 +2 0 0 0 -3")
+    assert campo.aperture[0]["testo"] == "0 0 0 0 0 0 0"
+    assert campo.aperture[1]["titolo"].startswith("Equalizzatore: 1 2 3 sono 3 valori;")
+    assert finestra.motore.bande == [0, 0, 2, 0, 0, 0, -3] and _salvate(finestra)["bande"] == [0, 0, 2, 0, 0, 0, -3]
+    assert lista.righe["bande"] == "Equalizzatore: 0 0 +2 0 0 0 -3 dB"
+    assert _ultima(finestra) == "L'equalizzatore ora è 0 0 +2 0 0 0 -3 dB."
+    campo, _lista = _cambia(finestra, monkeypatch, "bande", "")
+    assert campo.aperture[0]["testo"] == "0 0 +2 0 0 0 -3"
+    assert finestra.motore.bande == [0] * 7 and _ultima(finestra) == "L'equalizzatore ora è piatto, tutte le bande a 0 dB."
+    campo, lista = _cambia(finestra, monkeypatch, "dissolvenza", "2,5")
+    assert campo.aperture[0]["testo"] == "spenta, 4 secondi"
+    assert finestra.motore.dissolvenza == 2.5 and _salvate(finestra)["dissolvenza"] == {"accesa": True, "secondi": 2.5}
+    assert lista.righe["dissolvenza"] == "Dissolvenza: accesa, 2,5 secondi"
+    assert _ultima(finestra) == "La dissolvenza ora è accesa, 2,5 secondi."
+    # No la spegne, e la durata resta per quando si riaccende.
+    _cambia(finestra, monkeypatch, "dissolvenza", "no")
+    assert finestra.motore.dissolvenza == 0 and finestra.impostazioni["dissolvenza"] == {"accesa": False, "secondi": 2.5}
+    assert _ultima(finestra) == "La dissolvenza ora è spenta, 2,5 secondi."
+    assert suoni_annotati.count("impostazione_cambiata") == 7
+
+
+def test_avvio_con_velocita_tono_equalizzatore_e_dissolvenza_salvati(app, tmp_path):
+    import json
+
+    from finestra import Finestra
+
+    percorso = tmp_path / modulo.FILE_IMPOSTAZIONI
+    percorso.write_text(json.dumps({"velocita": 1.25, "tono": -2, "bande": [3, 0, 0, 0, 0, 0, -4], "dissolvenza": {"accesa": True, "secondi": 2.5}}),
+        encoding="utf-8")
+    f = Finestra(ao="null", cartella_dati=str(tmp_path))
+    try:
+        assert (f.motore.velocita, f.motore.tono, f.motore.bande, f.motore.dissolvenza) == (1.25, -2, [3, 0, 0, 0, 0, 0, -4], 2.5)
+        assert [_senza_ora(r) for r in f._righe][1] == "Velocità 1,25 e tono -2 semitoni: S e G li riportano al normale."
+        assert f._riga_dell_impostazione("bande") == "Equalizzatore: +3 0 0 0 0 0 -4 dB"
+        assert f._riga_dell_impostazione("dissolvenza") == "Dissolvenza: accesa, 2,5 secondi"
+        f.Close(force=True)
+    finally:
+        f.Destroy()
+    # Solo il tono fuori dal normale, e la dissolvenza spenta: il motore non la fa.
+    percorso.write_text(json.dumps({"tono": 3, "dissolvenza": {"accesa": False, "secondi": 2.5}}), encoding="utf-8")
+    f = Finestra(ao="null", cartella_dati=str(tmp_path))
+    try:
+        assert f.motore.velocita == 1.0 and f.motore.dissolvenza == 0
+        assert [_senza_ora(r) for r in f._righe][1] == "Tono +3 semitoni: G lo riporta al normale."
+        f.Close(force=True)
+    finally:
+        f.Destroy()
+
+
+def test_avvio_normale_non_dice_niente_di_velocita_e_tono(finestra):
+    assert not any(r.startswith(("Velocità", "Tono")) for r in finestra._righe)
+    assert (finestra.motore.velocita, finestra.motore.tono, finestra.motore.bande, finestra.motore.dissolvenza) == (1.0, 0, [0] * 7, 0)
+
+
+def _motore_che_prepara(finestra, monkeypatch):
+    """Il motore finto, che sa anche preparare il seguente."""
+    suonati = _finto_motore(finestra, monkeypatch)
+    preparati = []
+
+    def prepara(percorso, sottobrano=None):
+        preparati.append((os.path.basename(percorso), sottobrano))
+        return True
+
+    monkeypatch.setattr(finestra.motore, "prepara", prepara)
+    return suonati, preparati
+
+
+def _entra(finestra, percorso, sottobrano=None, sottobrani=None):
+    """Il preparato entra, come lo fa entrare il motore: il motore passa a lui
+    e poi avvisa la finestra."""
+    finestra.motore._in_corso = percorso
+    finestra.motore.sottobrano = sottobrano
+    finestra.motore.sottobrani = sottobrani
+    finestra._passaggio(percorso, sottobrano)
+
+
+def test_passaggio_con_la_dissolvenza(finestra, monkeypatch, suoni_annotati):
+    suonati, preparati = _motore_che_prepara(finestra, monkeypatch)
+    rock, jazz = _playlist_di_prova(finestra, ("a.mp3", "b.mp3"), ("x.mp3", "y.mp3"))
+    prima, seconda = finestra.archivio.playlist
+    finestra._suona(prima, prima.brani[0])
+    finestra._prepara_il_seguente()
+    assert preparati == [("b.mp3", None)]
+    # Il preparato entra: la coda passa a lui, senza suonarlo di nuovo, e la
+    # plancia lo dice.
+    _entra(finestra, prima.brani[1].percorso)
+    assert finestra.coda.corrente is prima.brani[1] and suonati == [("a.mp3", None)]
+    assert suoni_annotati[-1] == "brano_seguente_da_solo"
+    assert _ultima(finestra) == f"In riproduzione: {prima.brani[1].percorso}, 2 di 2, playlist {prima.nome}."
+    assert finestra.albero.GetItemText(_voce_di(finestra, rock, "b.mp3")) == "b.mp3, in riproduzione"
+    # La plancia cambia dopo la preparazione: x diventa saltato, e al passaggio
+    # si suona il giusto, y, che entra sfumando dal punto in cui si e'.
+    finestra._prepara_il_seguente()
+    assert preparati[-1] == ("x.mp3", None)
+    seconda.brani[0].saltato = True
+    _entra(finestra, seconda.brani[0].percorso)
+    assert suonati[-1] == ("y.mp3", None) and finestra.coda.corrente is seconda.brani[1]
+    assert suoni_annotati[-1] == "brano_seguente_da_solo"
+    # Un avviso superato non conta: dopo la preparazione, B ha suonato altro.
+    seconda.brani[0].saltato = False
+    finestra._suona(prima, prima.brani[1])
+    finestra._prepara_il_seguente()
+    assert preparati[-1] == ("x.mp3", None)
+    _tasto(finestra, "b")
+    righe = list(finestra._righe)
+    _entra(finestra, seconda.brani[0].percorso)
+    assert finestra._righe == righe and finestra.coda.corrente is seconda.brani[0]
+    # Senza piu' niente da suonare nella plancia, al passaggio il brano che
+    # entra si scarta: il motore rimette quello che esce, che finisce da solo,
+    # e solo alla sua fine vera la console dice Fine.
+    annullati = []
+
+    def annulla_il_passaggio():
+        annullati.append(os.path.basename(finestra.motore.in_corso))
+        finestra.motore._in_corso = prima.brani[1].percorso
+        return True
+
+    finestra._suona(prima, prima.brani[1])
+    finestra._prepara_il_seguente()
+    finestra.albero.Collapse(jazz)
+    righe = list(finestra._righe)
+    with monkeypatch.context() as patch:
+        patch.setattr(finestra.motore, "annulla_il_passaggio", annulla_il_passaggio)
+        _entra(finestra, seconda.brani[0].percorso)
+    assert annullati == ["x.mp3"] and finestra._righe == righe
+    assert finestra.motore.in_corso == prima.brani[1].percorso and finestra.coda.corrente is prima.brani[1]
+    finestra.motore._in_corso = None
+    finestra._brano_finito()
+    assert suoni_annotati[-1] == "fine_playlist" and _ultima(finestra) == "Fine: davanti non c'è altro da suonare."
+    # Se chi esce non c'e' piu', il motore ferma tutto e il Fine arriva subito.
+    finestra.albero.Expand(jazz)
+    finestra._suona(prima, prima.brani[1])
+    finestra._prepara_il_seguente()
+    finestra.albero.Collapse(jazz)
+    _entra(finestra, seconda.brani[0].percorso)
+    assert finestra.motore.in_corso is None and finestra.coda.corrente is prima.brani[1]
+    assert suoni_annotati[-1] == "fine_playlist" and _ultima(finestra) == "Fine: davanti non c'è altro da suonare."
+    # Alla fine della lista non c'e' niente da preparare.
+    preparati.clear()
+    finestra._suona(seconda, seconda.brani[1])
+    finestra._prepara_il_seguente()
+    assert not preparati
+
+
+def test_passaggio_con_la_dissolvenza_nel_loop(finestra, monkeypatch, suoni_annotati):
+    _suonati, preparati = _motore_che_prepara(finestra, monkeypatch)
+    _playlist_di_prova(finestra, ("a.mp3", "b.mp3", "c.mp3"))
+    pl = finestra.archivio.playlist[0]
+    finestra.coda.loop_playlist, finestra.coda.punto_a, finestra.coda.punto_b = pl, pl.brani[0], pl.brani[1]
+    finestra._suona(pl, pl.brani[1])
+    finestra._prepara_il_seguente()
+    assert preparati == [("a.mp3", None)]
+    _entra(finestra, pl.brani[0].percorso)
+    assert finestra.coda.corrente is pl.brani[0] and suoni_annotati[-1] == "ritorno_al_punto_a"
+
+
+def test_passaggio_al_giusto_che_e_lo_stesso_file(finestra, monkeypatch, suoni_annotati):
+    """Al ricontrollo il seguente giusto e' lo stesso file del preparato, in
+    un'altra playlist: suona gia' dall'inizio, e si sposta solo la coda,
+    senza farlo ripartire."""
+    suonati, preparati = _motore_che_prepara(finestra, monkeypatch)
+    _playlist_di_prova(finestra, ("a.mp3", "b.mp3"), ("b.mp3", "y.mp3"))
+    prima, seconda = finestra.archivio.playlist
+    finestra._suona(prima, prima.brani[0])
+    finestra._prepara_il_seguente()
+    assert preparati == [("b.mp3", None)]
+    prima.brani[1].saltato = True
+    _entra(finestra, prima.brani[1].percorso)
+    assert suonati == [("a.mp3", None)]
+    assert finestra.coda.playlist is seconda and finestra.coda.corrente is seconda.brani[0]
+    assert suoni_annotati[-1] == "brano_seguente_da_solo"
+    assert _ultima(finestra) == f"In riproduzione: {seconda.brani[0].percorso}, 1 di 2, playlist {seconda.nome}."
+
+
+def _sid_finto(percorso, sottobrani, iniziale):
+    """Un SID con la sola intestazione PSID, che basta per i sottobrani: il
+    motore finto non lo suona."""
+    intestazione = bytearray(0x7C)
+    intestazione[0:4] = b"PSID"
+    intestazione[0x04:0x06] = (2).to_bytes(2, "big")
+    intestazione[0x06:0x08] = (0x7C).to_bytes(2, "big")
+    intestazione[0x0E:0x10] = sottobrani.to_bytes(2, "big")
+    intestazione[0x10:0x12] = iniziale.to_bytes(2, "big")
+    percorso.write_bytes(bytes(intestazione) + b"\x00\x10\x60")
+    return str(percorso)
+
+
+def test_passaggio_al_sid_come_brano_in_un_altra_playlist(finestra, monkeypatch, tmp_path, suoni_annotati):
+    """Il preparato e' un SID suonato come brano, che il motore fa entrare con
+    il suo sottobrano iniziale; al ricontrollo il seguente giusto e' lo
+    stesso SID, come brano, in un'altra playlist: e' gia' entrato, e si
+    sposta solo la coda, senza suonarlo di nuovo. Prima la guardia vedeva
+    un sottobrano diverso (nessuno contro l'iniziale) e lo richiedeva al
+    motore, che lo fa ripartire da capo."""
+    suonati, preparati = _motore_che_prepara(finestra, monkeypatch)
+    sid = _sid_finto(tmp_path / "s.sid", sottobrani=3, iniziale=2)
+    _playlist_di_prova(finestra, ("a.mp3", sid), (sid, "y.mp3"))
+    prima, seconda = finestra.archivio.playlist
+    finestra._suona(prima, prima.brani[0])
+    finestra._prepara_il_seguente()
+    assert preparati == [("s.sid", None)]
+    prima.brani[1].saltato = True
+    _entra(finestra, sid, 2, 3)
+    assert suonati == [("a.mp3", None)]
+    assert finestra.coda.playlist is seconda and finestra.coda.corrente is seconda.brani[0]
+    assert suoni_annotati[-1] == "brano_seguente_da_solo"
+    assert _ultima(finestra) == f"In riproduzione: {sid}, 1 di 2, playlist {seconda.nome}. Sottobrano 2 di 3."
+
+
+@pytest.mark.skipif(not os.path.isfile(TURBO_OUTRUN), reason="serve la collezione HVSC")
+def test_passaggio_con_la_dissolvenza_fra_i_sottobrani(finestra, monkeypatch, tmp_path, suoni_annotati):
+    """Al passaggio il motore ha gia' il sottobrano che entra: il ricontrollo
+    parte da quello che esce, o troverebbe il seguente del seguente."""
+    import shutil
+
+    suonati, preparati = _motore_che_prepara(finestra, monkeypatch)
+    cartella = tmp_path / "sid"
+    cartella.mkdir()
+    shutil.copy(TURBO_OUTRUN, cartella)
+    finestra.albero.Expand(finestra.nodo_pc)
+    nodo = finestra.albero.AppendItem(finestra.nodo_pc, "sid", data={"tipo": "cartella", "percorso": str(cartella), "caricato": False})
+    finestra.albero.SetItemHasChildren(nodo, True)
+    finestra.albero.Expand(nodo)
+    voce_sid = next(finestra._figli(nodo))
+    dati = finestra._dati(voce_sid)
+    finestra.albero.Expand(voce_sid)
+    finestra._suona(dati["playlist"], dati["brano"], sottobrano=3)
+    finestra._prepara_il_seguente()
+    assert preparati == [("Turbo_Outrun.sid", 4)]
+    _entra(finestra, dati["brano"].percorso, 4, 12)
+    assert suonati == [("Turbo_Outrun.sid", 3)]
+    assert suoni_annotati[-1] == "brano_seguente_da_solo" and _ultima(finestra).endswith("Sottobrano 4 di 12.")
+
+
+def test_passaggio_vero_con_la_dissolvenza(finestra, tmp_path, suoni_annotati):
+    """Il motore vero, sull'uscita nulla: il seguente si prepara, entra
+    sfumando e la coda lo segue; alla fine dell'ultimo la lista finisce."""
+    a, b = tmp_path / "a.wav", tmp_path / "b.wav"
+    _wav(a, secondi=2)
+    _wav(b, secondi=2)
+    finestra._aggiungi(None, [str(a), str(b)])
+    pl = finestra.archivio.playlist[0]
+    finestra.impostazioni["dissolvenza"] = {"accesa": True, "secondi": 0.5}
+    finestra._applica_la_dissolvenza()
+    finestra._suona(pl, pl.brani[0])
+    assert _aspetta(lambda: finestra.coda.corrente is pl.brani[1], secondi=10)
+    assert finestra.motore.in_corso == str(b)
+    assert suoni_annotati[-1] == "brano_seguente_da_solo"
+    assert _ultima(finestra) == f"In riproduzione: {b}, 2 di 2, playlist {pl.nome}."
+    assert _aspetta(lambda: _ultima(finestra) == "Fine: davanti non c'è altro da suonare.", secondi=10)
+    assert suoni_annotati[-1] == "fine_playlist"
+
+
+def test_passaggio_vero_ricontrolla_la_plancia(finestra, tmp_path, suoni_annotati):
+    """Il motore vero: preparato b, b diventa saltato prima del passaggio, e
+    al passaggio si suona c, che entra sfumando al posto di b."""
+    wav = [tmp_path / f"{nome}.wav" for nome in "abc"]
+    for percorso in wav:
+        _wav(percorso, secondi=2)
+    nodo, = _playlist_di_prova(finestra, [str(p) for p in wav])
+    pl = finestra.archivio.playlist[0]
+    finestra.impostazioni["dissolvenza"] = {"accesa": True, "secondi": 0.5}
+    finestra._applica_la_dissolvenza()
+    finestra._suona(pl, pl.brani[0])
+    assert _aspetta(lambda: finestra._preparato is not None, secondi=10)
+    assert finestra._preparato[1] is pl.brani[1]
+    pl.brani[1].saltato = True
+    assert _aspetta(lambda: finestra.coda.corrente is pl.brani[2], secondi=10)
+    assert _aspetta(lambda: finestra.motore.in_corso == str(wav[2]) and (finestra.motore.posizione or 0) > 0.2, secondi=10)
+    assert suoni_annotati[-1] == "brano_seguente_da_solo"
+    assert finestra.albero.GetItemText(_voce_di(finestra, nodo, "c.wav")).endswith("in riproduzione")
+
+
+def test_passaggio_vero_senza_piu_un_seguente(finestra, monkeypatch, tmp_path, suoni_annotati):
+    """Il motore vero: preparato b, b diventa saltato prima del passaggio, e
+    davanti non c'e' altro. b si scarta, a arriva in fondo, e solo dopo la
+    console dice Fine, come senza la dissolvenza."""
+    wav = [tmp_path / f"{nome}.wav" for nome in "ab"]
+    for percorso in wav:
+        _wav(percorso, secondi=3)
+    _playlist_di_prova(finestra, [str(p) for p in wav])
+    pl = finestra.archivio.playlist[0]
+    finestra.impostazioni["dissolvenza"] = {"accesa": True, "secondi": 1.0}
+    finestra._applica_la_dissolvenza()
+    passaggi = []
+    passaggio = finestra._passaggio
+
+    def spia(percorso, sottobrano):
+        passaggi.append(os.path.basename(percorso))
+        passaggio(percorso, sottobrano)
+
+    monkeypatch.setattr(finestra, "_passaggio", spia)
+    inizio = time.time()
+    finestra._suona(pl, pl.brani[0])
+    assert _aspetta(lambda: finestra._preparato is not None, secondi=10)
+    pl.brani[1].saltato = True
+    posizioni = []
+
+    def finito():
+        if finestra.motore.in_corso == str(wav[0]):
+            posizioni.append(finestra.motore.posizione or 0)
+        return _ultima(finestra) == "Fine: davanti non c'è altro da suonare."
+
+    assert _aspetta(finito, secondi=10)
+    # Il passaggio e' cominciato a 1,5 secondi dalla fine di a; prima Fine
+    # arrivava li', e a si interrompeva di colpo.
+    assert passaggi == ["b.wav"]
+    assert time.time() - inizio > 2.3 and max(posizioni) > 2.3
+    assert suoni_annotati[-1] == "fine_playlist" and finestra.coda.corrente is pl.brani[0]
+    assert finestra.motore.in_corso is None and all(lettore.percorso is None for lettore in finestra.motore._lettori)

@@ -15,7 +15,8 @@
 # nella 1.36.1 Backspace e Maiuscolo con Backspace, e Maiuscolo e Ctrl con le frecce senza il nome della plancia ripetuto da NVDA;
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
-# nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori.
+# nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15).
 
 """La finestra di MeTeOra.
 
@@ -57,7 +58,7 @@ from dialoghi import DialogoTesto, FinestraImpostazioni, FinestraMarcatori, Fine
 from filtro import COMMENTO, ErroreFiltro, Filtro, modello_della_console
 from impostazioni import Impostazioni
 from marcatori import Marcatori
-from motore import VOLUME_MASSIMO, durata_del_sottobrano
+from motore import VOLUME_MASSIMO, durata_del_sottobrano, sottobrano_risolto
 from playlist import Archivio, Brano, Coda, Playlist
 from ricerca import AlberoDeiRisultati, Ricerca
 from schedario import Schedario
@@ -125,23 +126,38 @@ TASTI = {
     ("t", True): "togli_i_marker",
     ("r", True): "togli_i_marker_prima",
     ("y", True): "togli_i_marker_dopo",
+    # Velocita', tono, equalizzatore e dissolvenza, tappa 4 (issue 15). La E
+    # accentata arriva come e' anche con il Maiuscolo: Windows da' il tasto,
+    # non la e acuta che il Maiuscolo scriverebbe.
+    ("a", False): "velocita_giu",
+    ("s", False): "velocita_normale",
+    ("d", False): "velocita_su",
+    ("f", False): "tono_su",
+    ("g", False): "tono_normale",
+    ("h", False): "tono_giu",
+    ("u", False): "banda_precedente",
+    ("i", False): "banda_successiva",
+    ("o", False): "banda_su",
+    ("p", False): "banda_giu",
+    ("è", False): "azzera_la_banda",
+    ("è", True): "azzera_le_bande",
+    ("l", False): "dissolvenza",
+    ("l", True): "durata_della_dissolvenza",
 }
 # I segni sopra le cifre nella tastiera italiana: Maiuscolo con 1 e' il punto
 # esclamativo, e cosi' via fino a Maiuscolo con 0, l'uguale.
 CIFRE_COL_MAIUSCOLO = {"!": 1, '"': 2, "£": 3, "$": 4, "%": 5, "&": 6, "/": 7, "(": 8, ")": 9, "=": 10}
 # I tasti gia' assegnati nel piano a funzioni delle tappe successive: per ora
 # dicono di non essere ancora disponibili.
-FUTURI = {
-    "a": "velocità", "s": "velocità", "d": "velocità", "f": "tono", "g": "tono", "h": "tono",
-    "l": "dissolvenza",
-    "u": "equalizzatore", "i": "equalizzatore", "o": "equalizzatore", "p": "equalizzatore", "è": "equalizzatore",
-    "'": "scelta della traccia audio", "ì": "scelta della traccia audio",
-}
-FUTURI_MAIUSCOLI = {"l": "durata della dissolvenza"}
+FUTURI = {"'": "scelta della traccia audio", "ì": "scelta della traccia audio"}
+FUTURI_MAIUSCOLI = {}
 
 TASTI_COMUNI = [
     "X riproduce la voce selezionata o riprende, C pausa, V stop, Z e B brano precedente e successivo, N brano a caso.",
     "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, + e - volume, Maiuscolo+M il passo del volume, M muto.",
+    "A e D rallentano e accelerano, S torna alla velocità normale; F e H alzano e abbassano il tono di un semitono, G lo riporta al normale.",
+    "U e I scelgono la banda dell'equalizzatore, O e P la alzano e la abbassano di un dB, È la azzera, Maiuscolo con È le azzera tutte.",
+    "L accende e spegne la dissolvenza incrociata fra un brano e l'altro, Maiuscolo con L ne chiede la durata in secondi.",
     "Maiuscolo+X mette e toglie i punti A e B del loop sul brano selezionato, Maiuscolo+C toglie il loop.",
     "J e K aprono e suonano la playlist precedente e successiva, le cifre da 1 a 0 le prime dieci playlist.",
     "Nella plancia Backspace chiude il ramo in cui sei e risale di un livello, Maiuscolo con Backspace risale di colpo all'unità o alla playlist, Preferiti compresi, e chiude i rami al suo interno.",
@@ -177,6 +193,10 @@ VOCI_DELLE_IMPOSTAZIONI = {
     "scheda_audio": ("Scheda audio", "cambiata"),
     "passo_indietro": ("Salto indietro di Q", "cambiato"),
     "passo_avanti": ("Salto avanti di E", "cambiato"),
+    "velocita": ("Velocità", "cambiata"),
+    "tono": ("Tono", "cambiato"),
+    "bande": ("Equalizzatore", "cambiato"),
+    "dissolvenza": ("Dissolvenza", "cambiata"),
     "insegui": ("Inseguimento della plancia (Maiuscolo+F8)", "cambiato"),
     "caratteri": ("Dimensioni dei caratteri", "cambiate"),
     "colori_testo": ("Colori dei caratteri", "cambiati"),
@@ -437,8 +457,24 @@ class Finestra(wx.Frame):
             errore_archivio = e
         from motore import Motore
 
+        # Gli avvisi del motore arrivano dai suoi fili: wx.CallAfter li porta
+        # nel filo della finestra.
         self.motore = Motore(alla_fine=lambda: wx.CallAfter(self._brano_finito),
-            all_errore=lambda p: wx.CallAfter(self._brano_in_errore, p), ao=ao, volume=self.impostazioni["volume"])
+            all_errore=lambda p: wx.CallAfter(self._brano_in_errore, p), ao=ao, volume=self.impostazioni["volume"],
+            chiedi_il_seguente=lambda: wx.CallAfter(self._prepara_il_seguente),
+            al_passaggio=lambda percorso, sottobrano: wx.CallAfter(self._passaggio, percorso, sottobrano))
+        # Velocita', tono, equalizzatore e dissolvenza salvati valgono per tutti
+        # i brani, dal primo.
+        self._applica_la_riproduzione()
+        # Il brano che esce quando il motore ha chiesto il seguente, come
+        # (playlist, brano, sottobrano), e il seguente preparato, come
+        # (playlist, brano, sottobrano chiesto): servono al passaggio, per
+        # ricontrollare. None fuori da un passaggio preparato.
+        self._uscente = None
+        self._preparato = None
+        # La banda dell'equalizzatore scelta con U e I, contata da zero: si
+        # parte dalla prima, quella dei 60 Hz.
+        self._banda = 0
         # La scheda audio scelta, appena c'e' il motore; con la scelta
         # automatica non si tocca niente. La console, che ancora non c'e',
         # dira' com'e' andata.
@@ -500,6 +536,9 @@ class Finestra(wx.Frame):
         self.Bind(wx.EVT_CHAR_HOOK, self._tasto)
         self.Bind(wx.EVT_CLOSE, self._alla_chiusura)
         self.scrivi(f"MeTeOra {version.VERSION} del {version.DATE}. Pronto: F1 apre il manuale, F7 apre il cruscotto con i tasti del punto in cui ti trovi.")
+        fuori_dal_normale = self._riproduzione_fuori_dal_normale()
+        if fuori_dal_normale:
+            self.scrivi(fuori_dal_normale)
         if errore_archivio:
             self.scrivi(f"Il file delle playlist non si legge, e parto senza playlist: {errore_archivio}")
             # Il file illeggibile non va sovrascritto alla prima modifica.
@@ -2324,8 +2363,17 @@ class Finestra(wx.Frame):
         return pl
 
     def _suona(self, pl, brano, evento="play", sottobrano=None, inizio=None):
+        """Suona il brano e lo dice. Con la dissolvenza accesa il motore lo fa
+        entrare sfumando, se qualcosa si sente; un seguente preparato non
+        conta piu'."""
+        self._uscente = self._preparato = None
         self.coda.imposta(pl, brano)
         self.motore.suona(brano.percorso, sottobrano or brano.sottobrano, inizio=inizio)
+        self._annuncia(pl, brano, evento)
+
+    def _annuncia(self, pl, brano, evento):
+        """Il riscontro del brano appena partito, con la sua posizione nella
+        lista e il sottobrano, le etichette della plancia e l'inseguimento."""
         numero, totale = self.coda.posizione()
         if getattr(pl, "selezione", False):
             dove = f"{numero} di {totale} della selezione"
@@ -2473,28 +2521,31 @@ class Finestra(wx.Frame):
             return not dati["brano"].saltato and not (self.albero.IsExpanded(voce) and self._ha_sottobrani(dati["brano"]))
         return False
 
-    def _voce_che_suona(self):
+    def _voce_che_suona(self, sottobrano=None):
         """La voce visibile della plancia che corrisponde a cio' che suona, o
         None se non si vede: il sottobrano, se il SID e' aperto, altrimenti il
-        brano o il file."""
+        brano o il file. Il sottobrano e' quello del motore, se non lo si da':
+        al passaggio della dissolvenza il motore ha gia' quello che entra,
+        mentre la coda e' ancora sul brano che esce."""
         corrente = self.coda.corrente
         if corrente is None:
             return None
+        numero = self.motore.sottobrano if sottobrano is None else sottobrano
         for voce in self._tutte_le_voci():
             dati = self._dati(voce) or {}
             if dati.get("tipo") in ("brano", "file") and dati["brano"] is corrente and self._visibile(voce):
                 if self.albero.IsExpanded(voce):
-                    return next((v for v in self._figli(voce) if self._dati(v).get("tipo") == "sottobrano" and self._dati(v).get("numero") == self.motore.sottobrano), voce)
+                    return next((v for v in self._figli(voce) if self._dati(v).get("tipo") == "sottobrano" and self._dati(v).get("numero") == numero), voce)
                 return voce
         return None
 
-    def _voce_da_seguire(self):
+    def _voce_da_seguire(self, sottobrano=None):
         """La voce visibile di cio' che suona, se a decidere il brano dopo e'
         la plancia; None se decide la lista, perche' non si vede, perche'
         c'e' il loop A-B o perche' suona una selezione."""
         if self.coda.intervallo() is not None or getattr(self.coda.playlist, "selezione", False):
             return None
-        return self._voce_che_suona()
+        return self._voce_che_suona(sottobrano)
 
     def _passo_in_plancia(self, voce, verso):
         """La voce suonabile prima (verso -1) o dopo (verso 1), come dati
@@ -2508,38 +2559,116 @@ class Finestra(wx.Frame):
         dati = self._dati(voce)
         return dati["playlist"], dati["brano"], dati.get("numero")
 
-    def _seguente_automatico(self):
+    def _seguente_automatico(self, sottobrano=None):
         """Cosa suonare quando un brano finisce da solo: (playlist, brano,
         sottobrano) o None. Se cio' che suona si vede nella plancia, decide la
         plancia: la voce suonabile che viene dopo, dentro i rami aperti,
         sottobrani compresi, anche in un'altra cartella o playlist. Se non si
         vede, per esempio una cartella suonata chiusa o un file aperto con
-        Apri file, decide la lista. Con il loop A-B decide il loop."""
-        voce = self._voce_da_seguire()
+        Apri file, decide la lista. Con il loop A-B decide il loop.
+        sottobrano e' quello del brano che finisce, se non e' quello del
+        motore, come al passaggio della dissolvenza."""
+        voce = self._voce_da_seguire(sottobrano)
         if voce is not None:
             return self._passo_in_plancia(voce, 1)
         seguente = self.coda.successivo()
         return (self.coda.playlist, seguente, None) if seguente else None
 
-    def _brano_finito(self):
-        if self._chiusa:
-            return
+    def _evento_del_seguente(self, nuova, brano):
+        """Il suono del passaggio automatico al brano della playlist nuova:
+        nel loop, dopo il punto B si torna al punto A, e ha un suono suo. Da
+        chiedere prima di spostare la coda."""
         pl = self.coda.playlist
         prima = pl.indice(self.coda.corrente) if pl else None
+        dopo = nuova.indice(brano)
+        ritorno = self.coda.intervallo() and nuova is pl and prima is not None and dopo is not None and dopo <= prima
+        return "ritorno_al_punto_a" if ritorno else "brano_seguente_da_solo"
+
+    def _brano_finito(self):
+        """Il brano e' finito da solo, senza un seguente preparato che
+        entrasse con la dissolvenza: si suona il seguente, se c'e'."""
+        if self._chiusa:
+            return
+        self._uscente = self._preparato = None
         seguente = self._seguente_automatico()
         if seguente:
             nuova, brano, sottobrano = seguente
-            # Nel loop, dopo il punto B si torna al punto A: ha un suono suo.
-            dopo = nuova.indice(brano)
-            ritorno = self.coda.intervallo() and nuova is pl and prima is not None and dopo is not None and dopo <= prima
-            self._suona(nuova, brano, "ritorno_al_punto_a" if ritorno else "brano_seguente_da_solo", sottobrano)
+            self._suona(nuova, brano, self._evento_del_seguente(nuova, brano), sottobrano)
         else:
-            self._aggiorna_etichette()
-            self._riscontro("fine_playlist", "Fine: davanti non c'è altro da suonare.")
+            self._fine_della_lista()
+
+    def _fine_della_lista(self):
+        self._aggiorna_etichette()
+        self._riscontro("fine_playlist", "Fine: davanti non c'è altro da suonare.")
+
+    # Il passaggio con la dissolvenza incrociata.
+
+    def _prepara_il_seguente(self):
+        """chiedi_il_seguente del motore: con la dissolvenza accesa, poco
+        prima della fine del brano, il motore vuole il seguente da caricare in
+        anticipo, che entrera' sfumando. Si sceglie come a fine brano; se non
+        c'e', non si prepara niente e alla fine arriva _brano_finito."""
+        if self._chiusa or not self.motore.in_corso:
+            return
+        seguente = self._seguente_automatico()
+        if seguente is None:
+            return
+        _playlist, brano, sottobrano = seguente
+        if self.motore.prepara(brano.percorso, sottobrano or brano.sottobrano):
+            self._uscente = (self.coda.playlist, self.coda.corrente, self.motore.sottobrano)
+            self._preparato = seguente
+
+    def _passaggio(self, percorso, sottobrano):
+        """al_passaggio del motore: il brano preparato e' entrato, sfumando o,
+        se e' stato pronto tardi, alla fine di quello di prima. Il motore ha
+        gia' il brano nuovo, la coda e' ancora su quello che esce. Si
+        ricontrolla il seguente, perche' nel frattempo la plancia puo' essere
+        cambiata: se e' lo stesso, o lo stesso file con lo stesso sottobrano
+        in un altro posto della plancia, la coda passa a lui e lo si dice, e
+        il motore non lo richiede, perche' lo farebbe ripartire da capo; se
+        e' un altro si suona quello giusto, che entra sfumando dal punto in
+        cui si e'; se non c'e' piu' niente da suonare, il brano che entra si
+        scarta e quello che
+        esce finisce da solo, e il Fine lo dice _brano_finito alla sua fine
+        vera. Un avviso superato, perche' nel frattempo e' partito altro, non
+        conta."""
+        uscente, preparato = self._uscente, self._preparato
+        self._uscente = self._preparato = None
+        if self._chiusa or uscente is None or preparato is None or preparato[1].percorso != percorso:
+            return
+        # Un brano nuovo molto breve puo' essere gia' finito: in_corso e' None,
+        # e il passaggio vale lo stesso.
+        attivo = self.motore.in_corso
+        if attivo is not None and (attivo != percorso or self.motore.sottobrano != sottobrano):
+            return
+        pl, corrente, sottobrano_uscente = uscente
+        if self.coda.playlist is not pl or self.coda.corrente is not corrente:
+            return
+        seguente = self._seguente_automatico(sottobrano_uscente)
+        if seguente is None:
+            # La plancia non ha piu' niente dopo: come a fine lista, il brano
+            # che esce arriva in fondo, e solo dopo si dice Fine. Se era gia'
+            # finito, il motore ferma tutto e la lista finisce qui.
+            if not self.motore.annulla_il_passaggio():
+                self._fine_della_lista()
+            return
+        nuova, brano, numero = seguente
+        evento = self._evento_del_seguente(nuova, brano)
+        # Lo stesso file del preparato, per esempio in un'altra playlist, suona
+        # gia' dall'inizio: si sposta solo la coda, senza farlo ripartire. Il
+        # sottobrano si confronta come lo sceglie il motore: un SID suonato
+        # come brano entra con il suo sottobrano iniziale.
+        gia_entrato = brano.percorso == percorso and sottobrano_risolto(brano.percorso, numero or brano.sottobrano) == sottobrano
+        if not gia_entrato and (nuova is not preparato[0] or brano is not preparato[1] or numero != preparato[2]):
+            self._suona(nuova, brano, evento, numero)
+            return
+        self.coda.imposta(nuova, brano)
+        self._annuncia(nuova, brano, evento)
 
     def _brano_in_errore(self, percorso):
         if self._chiusa:
             return
+        self._uscente = self._preparato = None
         self._riscontro("errore", f"Non riesco a suonare {os.path.basename(percorso or '')}.")
         seguente = self._seguente_automatico()
         if seguente:
@@ -2690,6 +2819,7 @@ class Finestra(wx.Frame):
         if self._niente_in_corso():
             return
         self.motore.stop()
+        self._uscente = self._preparato = None
         if getattr(self.coda.playlist, "selezione", False):
             # La playlist invisibile della selezione vive fino allo stop.
             self.coda.imposta(None, None)
@@ -2836,6 +2966,177 @@ class Finestra(wx.Frame):
         else:
             self._riscontro("muto_spento", f"Audio di nuovo acceso, volume {self.motore.volume}.", "volume")
 
+    # Velocita', tono, equalizzatore e dissolvenza, tappa 4 (issue 15): valgono
+    # per tutti i brani, e ogni cambio si salva subito. Le righe della console
+    # si riscrivono, una categoria per famiglia, e stanno nei quaranta
+    # caratteri del display braille.
+
+    def _applica_la_riproduzione(self):
+        """Da' al motore velocita', tono, bande e dissolvenza delle impostazioni."""
+        imp = self.impostazioni
+        self.motore.velocita = imp["velocita"]
+        self.motore.tono = imp["tono"]
+        self.motore.bande = imp["bande"]
+        self._applica_la_dissolvenza()
+
+    def _applica_la_dissolvenza(self):
+        dissolvenza = self.impostazioni["dissolvenza"]
+        self.motore.dissolvenza = dissolvenza["secondi"] if dissolvenza["accesa"] else 0
+
+    def _riproduzione_fuori_dal_normale(self):
+        """La riga dell'avvio su velocita' e tono, se non sono quelli normali;
+        vuota se lo sono."""
+        velocita, tono = self.impostazioni["velocita"], self.impostazioni["tono"]
+        if velocita != 1 and tono:
+            return f"Velocità {valori.scrivi_velocita(velocita)} e tono {valori.scrivi_tono(tono)}: S e G li riportano al normale."
+        if velocita != 1:
+            return f"Velocità {valori.scrivi_velocita(velocita)}: S la riporta al normale."
+        if tono:
+            return f"Tono {valori.scrivi_tono(tono)}: G lo riporta al normale."
+        return ""
+
+    @staticmethod
+    def _riga_della_velocita(velocita):
+        return f"Velocità {valori.scrivi_velocita(velocita)}{', la normale' if velocita == 1 else ''}."
+
+    @staticmethod
+    def _riga_del_tono(tono):
+        return f"Tono {valori.scrivi_tono(tono)}{', il normale' if tono == 0 else ''}."
+
+    def _velocita(self, nuova, evento):
+        """Porta la velocita' a nuova, nei limiti; ai limiti lo dice con il
+        suono suo."""
+        attuale = self.impostazioni["velocita"]
+        nuova = max(valori.VELOCITA_MINIMA, min(valori.VELOCITA_MASSIMA, round(nuova, 2)))
+        if nuova == attuale and evento != "velocita_normale":
+            limite = "massimo" if nuova >= valori.VELOCITA_MASSIMA else "minimo"
+            self._riscontro("velocita_al_limite", f"Velocità già al {limite}, {valori.scrivi_velocita(attuale)}.", "velocita")
+            return
+        self.motore.velocita = nuova
+        self.impostazioni["velocita"] = nuova
+        self._salva_impostazioni()
+        self._riscontro(evento, self._riga_della_velocita(nuova), "velocita")
+
+    def _comando_velocita_su(self):
+        self._velocita(self.impostazioni["velocita"] + valori.PASSO_VELOCITA, "velocita_su")
+
+    def _comando_velocita_giu(self):
+        self._velocita(self.impostazioni["velocita"] - valori.PASSO_VELOCITA, "velocita_giu")
+
+    def _comando_velocita_normale(self):
+        self._velocita(1.0, "velocita_normale")
+
+    def _tono(self, nuovo, evento):
+        """Porta il tono a nuovo semitoni, nei limiti; ai limiti lo dice con il
+        suono suo."""
+        attuale = self.impostazioni["tono"]
+        nuovo = max(-valori.TONO_MASSIMO, min(valori.TONO_MASSIMO, nuovo))
+        if nuovo == attuale and evento != "tono_normale":
+            limite = "massimo" if nuovo > 0 else "minimo"
+            self._riscontro("tono_al_limite", f"Tono già al {limite}, {valori.scrivi_tono(attuale)}.", "tono")
+            return
+        self.motore.tono = nuovo
+        self.impostazioni["tono"] = nuovo
+        self._salva_impostazioni()
+        self._riscontro(evento, self._riga_del_tono(nuovo), "tono")
+
+    def _comando_tono_su(self):
+        self._tono(self.impostazioni["tono"] + 1, "tono_su")
+
+    def _comando_tono_giu(self):
+        self._tono(self.impostazioni["tono"] - 1, "tono_giu")
+
+    def _comando_tono_normale(self):
+        self._tono(0, "tono_normale")
+
+    def _riga_della_banda(self, aggiunta=""):
+        """La riga della banda scelta: Banda 3, 400 Hz: +2 dB. La maiuscola
+        non viene da capitalize, che scriverebbe hz."""
+        nome = valori.nome_della_banda(self._banda)
+        guadagno = valori.scrivi_guadagno(self.impostazioni["bande"][self._banda])
+        return f"{nome[0].upper()}{nome[1:]}: {guadagno}{aggiunta}."
+
+    def _scegli_la_banda(self, passo, evento):
+        """U e I: la banda prima o dopo; si fermano alla prima e all'ultima."""
+        nuova = self._banda + passo
+        if not 0 <= nuova < len(valori.FREQUENZE_DELLE_BANDE):
+            self._riscontro("banda_al_limite", self._riga_della_banda(". È la prima" if passo < 0 else ". È l'ultima"), "banda")
+            return
+        self._banda = nuova
+        self._riscontro(evento, self._riga_della_banda(), "banda")
+
+    def _comando_banda_precedente(self):
+        self._scegli_la_banda(-1, "banda_precedente")
+
+    def _comando_banda_successiva(self):
+        self._scegli_la_banda(1, "banda_successiva")
+
+    def _metti_le_bande(self, bande):
+        """Scrive i guadagni nel motore e nelle impostazioni, e li salva."""
+        self.motore.bande = bande
+        self.impostazioni["bande"] = list(bande)
+        self._salva_impostazioni()
+
+    def _guadagno(self, passo, evento):
+        """O e P: la banda scelta su o giu' di un dB; ai limiti lo dicono."""
+        bande = list(self.impostazioni["bande"])
+        nuovo = max(-valori.GUADAGNO_MASSIMO, min(valori.GUADAGNO_MASSIMO, bande[self._banda] + passo))
+        if nuovo == bande[self._banda]:
+            self._riscontro("guadagno_al_limite", self._riga_della_banda(", il massimo" if passo > 0 else ", il minimo"), "banda")
+            return
+        bande[self._banda] = nuovo
+        self._metti_le_bande(bande)
+        self._riscontro(evento, self._riga_della_banda(), "banda")
+
+    def _comando_banda_su(self):
+        self._guadagno(1, "banda_su")
+
+    def _comando_banda_giu(self):
+        self._guadagno(-1, "banda_giu")
+
+    def _comando_azzera_la_banda(self):
+        bande = list(self.impostazioni["bande"])
+        bande[self._banda] = 0
+        self._metti_le_bande(bande)
+        self._riscontro("banda_azzerata", self._riga_della_banda(", azzerata"), "banda")
+
+    def _comando_azzera_le_bande(self):
+        self._metti_le_bande([0] * len(valori.FREQUENZE_DELLE_BANDE))
+        self._riscontro("bande_azzerate", "Equalizzatore azzerato, tutte a 0 dB.", "banda")
+
+    def _comando_dissolvenza(self):
+        """L: accende e spegne la dissolvenza; la durata resta."""
+        dissolvenza = self.impostazioni["dissolvenza"]
+        dissolvenza["accesa"] = not dissolvenza["accesa"]
+        self._applica_la_dissolvenza()
+        self._salva_impostazioni()
+        evento = "dissolvenza_accesa" if dissolvenza["accesa"] else "dissolvenza_spenta"
+        self._riscontro(evento, f"Dissolvenza {valori.scrivi_dissolvenza(dissolvenza)}.", "dissolvenza")
+
+    def _comando_durata_della_dissolvenza(self):
+        """Maiuscolo con L: chiede la durata della dissolvenza in secondi. La
+        dissolvenza resta accesa o spenta com'era."""
+        self._suono("domanda")
+        dissolvenza = self.impostazioni["dissolvenza"]
+        attuale = dissolvenza["secondi"]
+        da_leggere = valori.scrivi_durata(attuale)
+        # Nel campo e nella domanda i numeri soli, senza la parola secondi.
+        minimo, massimo, numero = (valori.scrivi_durata(s).split()[0] for s in (valori.DISSOLVENZA_MINIMA, valori.DISSOLVENZA_MASSIMA, attuale))
+        with DialogoTesto(self, f"Quanti secondi dura la dissolvenza? Da {minimo} a {massimo}, anche con i decimali, per esempio 2,5.",
+                "Durata della dissolvenza", numero) as dialogo:
+            if dialogo.ShowModal() != wx.ID_OK:
+                return
+            testo = dialogo.GetValue()
+        try:
+            secondi, correzioni = valori.leggi_durata_della_dissolvenza(testo)
+        except ErroreValore as e:
+            self._riscontro("errore", f"{e} La durata resta di {da_leggere}.")
+            return
+        dissolvenza["secondi"] = secondi
+        self._applica_la_dissolvenza()
+        self._salva_impostazioni()
+        self._riscontro("dissolvenza_durata", " ".join([f"Dissolvenza {valori.scrivi_dissolvenza(dissolvenza)}.", *correzioni]), "dissolvenza")
+
     def _comando_apri_file(self):
         with DialogoDiFile(self, "Apri file", wildcard=formati.filtro_dialogo(), style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
@@ -2868,6 +3169,10 @@ class Finestra(wx.Frame):
             "scheda_audio": self._scheda_da_leggere,
             "passo_indietro": lambda: f"{secondi_da_leggere(imp['passo_indietro'])} secondi",
             "passo_avanti": lambda: f"{secondi_da_leggere(imp['passo_avanti'])} secondi",
+            "velocita": lambda: valori.scrivi_velocita(imp["velocita"]),
+            "tono": lambda: valori.scrivi_tono(imp["tono"]),
+            "bande": self._bande_da_leggere,
+            "dissolvenza": lambda: valori.scrivi_dissolvenza(imp["dissolvenza"]),
             "insegui": lambda: "sì" if imp["insegui"] else "no",
             "caratteri": self._caratteri_da_leggere,
             "colori_testo": lambda: self._colori_da_leggere("colori_testo"),
@@ -2878,6 +3183,12 @@ class Finestra(wx.Frame):
             "importa_marcatori": lambda: "da un file esportato da MeTeOra",
         }[chiave]()
         return f"{VOCI_DELLE_IMPOSTAZIONI[chiave][0]}: {valore}"
+
+    def _bande_da_leggere(self):
+        """I guadagni dell'equalizzatore come li scrive il campo, in dB, o
+        piatto se sono tutti a zero."""
+        bande = self.impostazioni["bande"]
+        return f"{valori.scrivi_bande(bande)} dB" if any(bande) else "piatto, tutte le bande a 0 dB"
 
     def _caratteri_da_leggere(self):
         caratteri = self.impostazioni["caratteri"]
@@ -2970,6 +3281,37 @@ class Finestra(wx.Frame):
                 f"Di quanti secondi salta {verso} il tasto {tasto}: almeno 0.1, anche con i decimali.",
                 f"Per esempio 10, 2.5 o 2,5, oppure minuti e secondi come 1:30. Anche Maiuscolo+{tasto} lo cambia, dalla finestra principale.",
                 f"Adesso è di {attuale} secondi.", REGOLA_DEL_DOLLARO], attuale
+        if chiave == "velocita":
+            minima, massima, passo = (valori.scrivi_velocita(v) for v in (valori.VELOCITA_MINIMA, valori.VELOCITA_MASSIMA, valori.PASSO_VELOCITA))
+            return valori.leggi_velocita, [
+                f"La velocità di riproduzione, da {minima} a {massima}: 1 è la normale, meno di 1 rallenta, più di 1 accelera. Il tono non cambia.",
+                f"Va a passi di {passo}: un valore fra due passi va al più vicino. Per esempio 1,05 o 0,9, con la virgola o con il punto.",
+                "Anche A e D la cambiano, e S la riporta a 1, dalla finestra principale.",
+                f"Adesso è {valori.scrivi_velocita(imp['velocita'])}.", REGOLA_DEL_DOLLARO], valori.scrivi_velocita(imp["velocita"])
+        if chiave == "tono":
+            return valori.leggi_tono, [
+                f"Il tono in semitoni, da -{valori.TONO_MASSIMO} a +{valori.TONO_MASSIMO}: 0 è il normale. La velocità non cambia, e l'equalizzatore segue il tono.",
+                "Per esempio +2 per alzarlo di due semitoni, -3 per abbassarlo di tre.",
+                "Anche F e H lo cambiano, e G lo riporta a 0, dalla finestra principale.",
+                f"Adesso è di {valori.scrivi_tono(imp['tono'])}.", REGOLA_DEL_DOLLARO], valori.scrivi_tono(imp["tono"]).split()[0]
+        if chiave == "bande":
+            frequenze = ", ".join(str(f) for f in valori.FREQUENZE_DELLE_BANDE[:-1])
+            return valori.leggi_bande, [
+                f"I guadagni delle {len(valori.FREQUENZE_DELLE_BANDE)} bande dell'equalizzatore, in dB interi da -{valori.GUADAGNO_MASSIMO} a +{valori.GUADAGNO_MASSIMO}, "
+                f"separati da spazi, dalla banda più bassa alla più alta: {frequenze} e {valori.FREQUENZE_DELLE_BANDE[-1]} Hz.",
+                "Un numero solo vale per tutte le bande, e il campo vuoto le riporta tutte a 0. Per esempio 0 0 +2 0 0 0 -3, oppure 3.",
+                "Contro la saturazione il volume scende da solo quanto la banda più alzata: con una banda sola il suono non satura, "
+                "con più bande vicine alzate, o tutte, sale fino a circa 5,6 dB oltre, e dal volume 80 o 90 in su conviene abbassare il volume.",
+                "Anche U e I scelgono la banda, O e P la alzano e la abbassano, È la azzera e Maiuscolo con È le azzera tutte, dalla finestra principale.",
+                f"Adesso: {self._bande_da_leggere()}.", REGOLA_DEL_DOLLARO], valori.scrivi_bande(imp["bande"])
+        if chiave == "dissolvenza":
+            secondi = imp["dissolvenza"]["secondi"]
+            minima, massima = (valori.scrivi_durata(s).split()[0] for s in (valori.DISSOLVENZA_MINIMA, valori.DISSOLVENZA_MASSIMA))
+            return (lambda testo: valori.leggi_dissolvenza(testo, secondi)), [
+                "La dissolvenza incrociata: il brano che finisce sfuma mentre il seguente entra. Vale a ogni cambio di brano, da solo o con i tasti.",
+                f"Scrivi no per spegnerla, sì per accenderla, oppure i secondi, da {minima} a {massima}, anche con i decimali, per accenderla con quella durata. Per esempio 4 o 2,5.",
+                "Anche L la accende e la spegne, e Maiuscolo con L ne cambia la durata, dalla finestra principale.",
+                f"Adesso è {valori.scrivi_dissolvenza(imp['dissolvenza'])}.", REGOLA_DEL_DOLLARO], valori.scrivi_dissolvenza(imp["dissolvenza"])
         if chiave == "insegui":
             return valori.leggi_si_no, [
                 "Con l'inseguimento agganciato, a ogni cambio di brano la selezione della plancia va da sola su ciò che suona, senza spostare il fuoco.",
@@ -3014,6 +3356,18 @@ class Finestra(wx.Frame):
             return f"Gli effetti sonori ora suonano al {round(valore * 100)}%." if valore else "Gli effetti sonori ora tacciono."
         if chiave in ("passo_indietro", "passo_avanti"):
             return f"Il salto {'indietro' if chiave == 'passo_indietro' else 'avanti'} ora è di {secondi_da_leggere(valore)} secondi."
+        if chiave == "velocita":
+            self.motore.velocita = valore
+            return f"La velocità ora è {valori.scrivi_velocita(valore)}{', la normale' if valore == 1 else ''}."
+        if chiave == "tono":
+            self.motore.tono = valore
+            return f"Il tono ora è di {valori.scrivi_tono(valore)}{', il normale' if valore == 0 else ''}."
+        if chiave == "bande":
+            self.motore.bande = valore
+            return f"L'equalizzatore ora è {self._bande_da_leggere()}."
+        if chiave == "dissolvenza":
+            self._applica_la_dissolvenza()
+            return f"La dissolvenza ora è {valori.scrivi_dissolvenza(valore)}."
         if chiave == "insegui":
             if not valore:
                 return "Inseguimento sganciato: la selezione resta dove la lasci."

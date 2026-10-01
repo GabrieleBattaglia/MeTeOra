@@ -1,6 +1,6 @@
 # MeTeOra, gli effetti sonori: un suono per ogni azione, con Acusticator.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.51.0 i suoni delle impostazioni, della console salvata, della finestra dei marcatori, della sua ricerca e della scheda audio.
+# 30/09/2026: nasce con la tappa 1. Nella 1.51.0 i suoni delle impostazioni, della console salvata, della finestra dei marcatori, della sua ricerca e della scheda audio. Nella 1.55.0 quelli di velocita', tono, equalizzatore e dissolvenza.
 
 """La mappa degli eventi di MeTeOra sui preset della collezione di GBUtils.
 
@@ -123,6 +123,33 @@ EVENTI = {
     "fuori_dal_loop": "avviso_di_sistema",
     "ritorno_al_punto_a": "scintillio_di_ghiaccio",
     "nessun_altro_brano": "il_gioco_spunta_a_met",
+    # Velocita', tono, equalizzatore e dissolvenza (1.55.0), con i suoni nati
+    # per loro nella collezione. Ogni famiglia ha la sua onda: tic di onda
+    # triangolare per la velocita', note di seno per il tono, soffi di rumore
+    # rosa per l'equalizzatore, dente di sega sfumato per la dissolvenza. Su e
+    # giu' sono specchiati, il ritorno al normale fa incontrare le loro note in
+    # mezzo, e ai limiti si bussa due volte, col secondo colpo piu' piano.
+    "velocita_su": "meteora_velocita_su",
+    "velocita_giu": "meteora_velocita_giu",
+    "velocita_normale": "meteora_velocita_normale",
+    "velocita_al_limite": "meteora_velocita_al_limite",
+    "tono_su": "meteora_tono_su",
+    "tono_giu": "meteora_tono_giu",
+    "tono_normale": "meteora_tono_normale",
+    "tono_al_limite": "meteora_tono_al_limite",
+    # U e I scelgono la banda, O e P ne cambiano il guadagno, la E accentata
+    # la azzera e Maiuscolo con la E accentata le azzera tutte.
+    "banda_precedente": "meteora_banda_precedente",
+    "banda_successiva": "meteora_banda_successiva",
+    "banda_al_limite": "meteora_banda_al_limite",
+    "banda_su": "meteora_banda_su",
+    "banda_giu": "meteora_banda_giu",
+    "guadagno_al_limite": "meteora_guadagno_al_limite",
+    "banda_azzerata": "meteora_banda_azzerata",
+    "bande_azzerate": "meteora_bande_azzerate",
+    "dissolvenza_accesa": "meteora_dissolvenza_accesa",
+    "dissolvenza_spenta": "meteora_dissolvenza_spenta",
+    "dissolvenza_durata": "meteora_dissolvenza_durata",
 }
 
 

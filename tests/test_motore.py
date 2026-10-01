@@ -1,0 +1,845 @@
+# MeTeOra, le prove del motore: due lettori, velocita', tono, equalizzatore, dissolvenza e fine brano senza attese.
+# Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
+# 01/10/2026: nasce con la 1.55.0 (tappa 4, issue 15).
+
+"""Le prove del motore vero, senza suoni.
+
+Il motore suona sull'uscita nulla (ao=null), che va in tempo reale come una
+scheda vera, oppure su un file (ao=pcm), che rende il brano tutto d'un
+fiato: li' si misura il suono uscito con numpy. I brani sono WAV brevi
+generati in tmp_path: rumore bianco per l'equalizzatore, seni per tono e
+volume, silenzio per la dissolvenza, dove contano i volumi dei due lettori
+nel tempo. Le dissolvenze durano da 300 a 500 ms.
+"""
+
+import threading
+import time
+import wave
+
+import numpy as np
+import pytest
+
+import motore as modulo
+from motore import Motore
+
+FREQUENZA = 44100
+
+
+def _scrivi_wav(percorso, campioni, frequenza=FREQUENZA):
+    with wave.open(str(percorso), "wb") as f:
+        f.setnchannels(1)
+        f.setsampwidth(2)
+        f.setframerate(frequenza)
+        f.writeframes(np.clip(np.round(campioni * 32767), -32768, 32767).astype("<i2").tobytes())
+    return str(percorso)
+
+
+def _seno(percorso, secondi, hz=440, ampiezza=0.25, frequenza=FREQUENZA):
+    t = np.arange(int(frequenza * secondi)) / frequenza
+    return _scrivi_wav(percorso, ampiezza * np.sin(2 * np.pi * hz * t), frequenza)
+
+
+def _rumore(percorso, secondi, seme=7):
+    return _scrivi_wav(percorso, np.random.default_rng(seme).normal(0, 0.03, int(FREQUENZA * secondi)))
+
+
+def _silenzio(percorso, secondi):
+    return _scrivi_wav(percorso, np.zeros(int(FREQUENZA * secondi)))
+
+
+def _aspetta(condizione, secondi=5):
+    fine = time.perf_counter() + secondi
+    while time.perf_counter() < fine:
+        if condizione():
+            return True
+        time.sleep(0.005)
+    return condizione()
+
+
+class _Avvisi:
+    """Gli avvisi del motore, con l'istante in cui arrivano, nel filo che li
+    manda: come li vedrebbe la finestra, ma senza wx.CallAfter."""
+
+    def __init__(self):
+        self.righe = []
+        self.fine = threading.Event()
+        self.seguente = None
+
+    def __call__(self, nome):
+        def annota(*argomenti):
+            self.righe.append((time.perf_counter(), nome, argomenti))
+            if nome == "alla_fine":
+                self.fine.set()
+        return annota
+
+    def nomi(self):
+        return [nome for _, nome, _ in self.righe]
+
+    def quando(self, nome):
+        return next(t for t, n, _ in self.righe if n == nome)
+
+
+@pytest.fixture
+def avvisi():
+    return _Avvisi()
+
+
+@pytest.fixture
+def crea(avvisi):
+    """Crea motori che si chiudono da soli a fine prova. Con seguente, la
+    risposta a chiedi_il_seguente e' prepara(seguente), data subito."""
+    creati = []
+
+    def nuovo(ao="null", seguente=None, **altri):
+        m = None
+
+        def chiedi():
+            avvisi("chiedi_il_seguente")()
+            if seguente:
+                m.prepara(seguente)
+
+        m = Motore(alla_fine=avvisi("alla_fine"), all_errore=avvisi("all_errore"), ao=ao, chiedi_il_seguente=chiedi,
+            al_passaggio=avvisi("al_passaggio"), **altri)
+        creati.append(m)
+        return m
+
+    yield nuovo
+    for m in creati:
+        m.chiudi()
+
+
+def _su_file(tmp_path, nome="uscita.raw"):
+    """Le opzioni per far rendere il motore su un file: float, mono, 44,1 kHz."""
+    uscita = tmp_path / nome
+    return uscita, {"ao_pcm_file": str(uscita), "ao_pcm_waveheader": False, "audio_format": "float", "audio_samplerate": FREQUENZA,
+                    "audio_channels": "mono"}
+
+
+def _uscito_alla_fine(m, uscita):
+    """Il suono uscito sul file, a brano finito: il motore si chiude prima,
+    perche' il file sia scritto tutto."""
+    assert _aspetta(lambda: m.in_corso is None)
+    m.chiudi()
+    return np.fromfile(str(uscita), "<f4").astype(float)
+
+
+def _livello(x, centro, ottave=1 / 3):
+    """Il livello in dB di una fascia di frequenze attorno al centro."""
+    potenza = np.abs(np.fft.rfft(x * np.hanning(len(x)))) ** 2
+    frequenze = np.fft.rfftfreq(len(x), 1 / FREQUENZA)
+    fascia = (frequenze >= centro * 2 ** (-ottave / 2)) & (frequenze <= centro * 2 ** (ottave / 2))
+    return 10 * np.log10(potenza[fascia].mean())
+
+
+def _rilievo(x):
+    """Quanto la banda dei 1000 Hz sta sopra quella dei 150, in dB: zero sul
+    rumore bianco con l'equalizzatore piatto."""
+    return _livello(x, 1000) - _livello(x, 150)
+
+
+def _frequenza_dominante(x):
+    potenza = np.abs(np.fft.rfft(x * np.hanning(len(x))))
+    return np.fft.rfftfreq(len(x), 1 / FREQUENZA)[np.argmax(potenza)]
+
+
+def _lettore_di(m, percorso):
+    return next(lettore for lettore in m._lettori if lettore.percorso == percorso)
+
+
+def _volumi(m):
+    """I volumi che mpv ha davvero, letti dai due lettori."""
+    return tuple(lettore.mpv.volume for lettore in m._lettori)
+
+
+def _campiona(m, secondi):
+    """Ogni 10 ms, per i secondi dati: l'istante, i volumi dei due lettori e
+    se ciascuno ha un brano."""
+    righe = []
+    fine = time.perf_counter() + secondi
+    while time.perf_counter() < fine:
+        righe.append((time.perf_counter(), *_volumi(m), *(lettore.percorso is not None for lettore in m._lettori)))
+        time.sleep(0.01)
+    return righe
+
+
+# La catena dei filtri e i limiti.
+
+def test_catena_dei_filtri():
+    catena = modulo.catena_dei_filtri([0, 1, -2, 3, 0, 12, -12])
+    assert catena.startswith("@eq:lavfi=[") and catena.endswith("],scaletempo2")
+    bande = catena[len("@eq:lavfi=["):-len("],scaletempo2")].split(",")
+    assert [b.split("=")[0] for b in bande] == [f"equalizer@b{i}" for i in range(7)]
+    assert bande[0] == f"equalizer@b0=f=60:t=q:w={modulo.Q_DELLE_BANDE}:g=0:precision=f64"
+    assert bande[6] == f"equalizer@b6=f=12000:t=q:w={modulo.Q_DELLE_BANDE}:g=-12:precision=f64"
+    assert "g=-2:" in bande[2] and "t=o" not in catena
+    with pytest.raises(ValueError):
+        modulo.catena_dei_filtri([0] * 6)
+
+
+def test_valori_nei_limiti_e_su_tutti_e_due_i_lettori(crea):
+    m = crea()
+    assert (m.velocita, m.tono, m.bande, m.dissolvenza) == (1.0, 0, [0] * 7, 0.0)
+    m.velocita = 3
+    assert m.velocita == 2.0
+    m.velocita = 0.1
+    assert m.velocita == 0.5
+    m.velocita = 1.25
+    m.tono = 20
+    assert m.tono == 12
+    m.tono = -20
+    assert m.tono == -12
+    m.tono = 2
+    m.imposta_banda(0, 50)
+    m.imposta_banda(6, -50)
+    m.imposta_banda(3, 4)
+    assert m.bande == [12, 0, 0, 4, 0, 0, -12]
+    with pytest.raises(IndexError):
+        m.imposta_banda(7, 1)
+    with pytest.raises(ValueError):
+        m.bande = [1, 2]
+    m.dissolvenza = 100
+    assert m.dissolvenza == 15.0
+    m.dissolvenza = 0.1
+    assert m.dissolvenza == 0.5
+    m.dissolvenza = 0
+    assert m.dissolvenza == 0.0
+    # Le proprieta' arrivano a mpv in modo asincrono, su tutti e due i lettori.
+    attese = {"speed": 1.25, "pitch": 2 ** (2 / 12), "volume_gain": -12.0}
+    for lettore in m._lettori:
+        assert _aspetta(lambda lettore=lettore: all(abs(getattr(lettore.mpv, nome) - valore) < 1e-6 for nome, valore in attese.items()))
+    m.bande = [0, 0, 0, -3, 0, 0, 0]
+    assert m.bande == [0, 0, 0, -3, 0, 0, 0]
+    assert _aspetta(lambda: all(lettore.mpv.volume_gain == 0 for lettore in m._lettori))
+
+
+def test_volume_muto_e_scheda_li_ricorda_il_motore(crea):
+    m = crea(volume=500)
+    assert m.volume == 300
+    m.volume = -4
+    assert m.volume == 0
+    m.volume = 95
+    assert m.volume == 95
+    assert not m.muto and not m.in_pausa
+    m.muto = True
+    assert m.muto
+    assert _aspetta(lambda: all(lettore.mpv.mute for lettore in m._lettori))
+    assert m.dispositivo == "auto"
+    m.dispositivo = "wasapi/{prova}"
+    assert m.dispositivo == "wasapi/{prova}"
+    assert _aspetta(lambda: all(lettore.mpv.audio_device == "wasapi/{prova}" for lettore in m._lettori))
+    assert any(voce["name"] == "auto" for voce in m.dispositivi())
+
+
+# Velocita', tono, equalizzatore: il suono uscito, misurato.
+
+def test_velocita_cambia_la_durata_e_non_il_tono(crea, tmp_path):
+    seno = _seno(tmp_path / "seno.wav", 3)
+    uscita, opzioni = _su_file(tmp_path)
+    m = crea(ao="pcm", opzioni_mpv=opzioni)
+    m.velocita = 1.5
+    m.suona(seno)
+    x = _uscito_alla_fine(m, uscita)
+    assert abs(len(x) / FREQUENZA - 2.0) < 0.05
+    assert abs(_frequenza_dominante(x) - 440) < 3
+
+
+def test_tono_cambia_la_frequenza_e_non_la_durata(crea, tmp_path):
+    seno = _seno(tmp_path / "seno.wav", 3)
+    uscita, opzioni = _su_file(tmp_path)
+    m = crea(ao="pcm", opzioni_mpv=opzioni)
+    m.tono = 12
+    m.suona(seno)
+    x = _uscito_alla_fine(m, uscita)
+    assert abs(len(x) / FREQUENZA - 3.0) < 0.05
+    assert abs(_frequenza_dominante(x) - 880) < 5
+
+
+def test_equalizzatore_piatto_non_cambia_il_rumore(crea, tmp_path):
+    rumore = _rumore(tmp_path / "rumore.wav", 3)
+    uscita, opzioni = _su_file(tmp_path)
+    m = crea(ao="pcm", opzioni_mpv=opzioni)
+    m.suona(rumore)
+    x = _uscito_alla_fine(m, uscita)
+    assert abs(_rilievo(x)) < 1.5
+    assert not np.isnan(x).any()
+
+
+def test_la_banda_alzata_resta_dopo_un_seek(crea, tmp_path):
+    rumore = _rumore(tmp_path / "rumore.wav", 3)
+    uscita, opzioni = _su_file(tmp_path)
+    m = crea(ao="pcm", opzioni_mpv=opzioni)
+    m.suona(rumore, in_pausa=True)
+    assert _aspetta(lambda: m.durata is not None)
+    # La banda alzata al volo, con af-command: il seek la perderebbe, se il
+    # motore non riscrivesse la catena prima.
+    m.imposta_banda(3, 12)
+    m.vai_a(0.5)
+    m.pausa(False)
+    x = _uscito_alla_fine(m, uscita)
+    # Si misurano gli ultimi due secondi, tutti dopo il seek: su ao=pcm a
+    # volte esce anche il suono preparato prima del seek, che qui non conta.
+    # Senza la catena riscritta prima del seek il rilievo sarebbe zero
+    # (provato togliendo la riscrittura).
+    assert len(x) >= 2.5 * FREQUENZA - 100
+    assert _rilievo(x[-2 * FREQUENZA:]) > 8
+
+
+def test_la_banda_alzata_resta_nel_brano_nuovo(crea, tmp_path):
+    primo = _rumore(tmp_path / "primo.wav", 3, seme=1)
+    secondo = _rumore(tmp_path / "secondo.wav", 3, seme=2)
+    uscita, opzioni = _su_file(tmp_path)
+    m = crea(ao="pcm", opzioni_mpv=opzioni)
+    m.suona(primo, in_pausa=True)
+    assert _aspetta(lambda: m.durata is not None)
+    m.imposta_banda(3, 12)
+    m.suona(secondo)
+    x = _uscito_alla_fine(m, uscita)
+    assert _rilievo(x[-2 * FREQUENZA:]) > 8
+
+
+def test_la_banda_alzata_resta_quando_mpv_riapre_l_uscita(crea, tmp_path):
+    # Cinque secondi: su ao=pcm la ricarica dell'uscita in pausa butta da se'
+    # circa un secondo e mezzo dall'inizio del brano, con o senza il motore.
+    rumore = _rumore(tmp_path / "rumore.wav", 5)
+    uscita, opzioni = _su_file(tmp_path)
+    m = crea(ao="pcm", opzioni_mpv=opzioni)
+    m.suona(rumore, in_pausa=True)
+    assert _aspetta(lambda: m.durata is not None)
+    lettore = m._attivo
+    # La banda alzata al volo, con af-command: la catena scritta non la ha.
+    m.imposta_banda(3, 12)
+    assert "g=12" not in lettore.af_scritto
+    # mpv riapre l'uscita da se', come quando Windows cambia la scheda
+    # predefinita: i filtri ripartono dalla catena scritta, e senza la
+    # riscrittura all'evento AUDIO_RECONFIG il rilievo sarebbe zero (provato
+    # togliendola), con il volume ancora abbassato di 12 dB.
+    lettore.comando("ao-reload")
+    # Su ao=pcm il brano esce tutto d'un fiato: prima di farlo suonare si
+    # aspetta che mpv abbia la catena riscritta.
+    _aspetta(lambda: "g=12" in str(lettore.mpv.af), 2)
+    m.pausa(False)
+    x = _uscito_alla_fine(m, uscita)
+    assert m.bande[3] == 12
+    assert len(x) >= 3 * FREQUENZA
+    assert _rilievo(x[-2 * FREQUENZA:]) > 8
+
+
+def test_il_volume_scende_quanto_la_banda_piu_alzata(crea, tmp_path):
+    seno = _seno(tmp_path / "mille.wav", 2, hz=1000, ampiezza=0.5)
+    uscita, opzioni = _su_file(tmp_path)
+    m = crea(ao="pcm", volume=100, opzioni_mpv=opzioni)
+    m.imposta_banda(3, 12)
+    m.imposta_banda(0, -6)
+    m.suona(seno)
+    x = _uscito_alla_fine(m, uscita)
+    # Senza volume-gain il picco sarebbe 2: 0,5 alzato di 12 dB.
+    assert abs(np.abs(x[FREQUENZA // 2:]).max() - 0.5) < 0.05
+
+
+# La fine del brano: niente attese.
+
+def test_suona_dopo_la_fine_non_aspetta(crea, avvisi, tmp_path):
+    primo = _silenzio(tmp_path / "primo.wav", 1)
+    secondo = _silenzio(tmp_path / "secondo.wav", 1)
+    m = crea()
+    m.suona(primo)
+    assert avvisi.fine.wait(5)
+    inizio = time.perf_counter()
+    # Quello che la finestra fa a fine brano: il seguente, e le domande.
+    m.suona(secondo)
+    _ = (m.in_corso, m.in_pausa, m.posizione, m.durata, m.sottobrano)
+    m.volume = 70
+    assert time.perf_counter() - inizio < 0.03
+    assert m.in_corso == secondo and not m.in_pausa
+    assert _aspetta(lambda: (m.posizione or 0) > 0.1)
+    assert avvisi.nomi() == ["alla_fine"]
+
+
+def test_errore_e_fine_del_brano(crea, avvisi, tmp_path):
+    m = crea()
+    mancante = str(tmp_path / "non_ce.wav")
+    m.suona(mancante)
+    assert _aspetta(lambda: avvisi.nomi() == ["all_errore"])
+    assert avvisi.righe[0][2] == (mancante,)
+    assert m.in_corso is None
+    breve = _silenzio(tmp_path / "breve.wav", 0.5)
+    m.suona(breve)
+    assert m.in_corso == breve and m.sottobrano is None and m.sottobrani is None
+    assert _aspetta(lambda: m.durata is not None)
+    assert abs(m.durata - 0.5) < 0.01
+    assert avvisi.fine.wait(5)
+    assert m.in_corso is None and m.posizione is None
+
+
+def test_pausa_stop_e_seek(crea, tmp_path):
+    brano = _silenzio(tmp_path / "brano.wav", 6)
+    m = crea()
+    m.suona(brano, inizio=2.0, in_pausa=True)
+    assert m.in_pausa
+    assert _aspetta(lambda: m.posizione is not None)
+    assert abs(m.posizione - 2.0) < 0.01
+    assert m.pausa() is False
+    assert _aspetta(lambda: m.posizione > 2.2)
+    m.vai_a(4.0)
+    assert _aspetta(lambda: abs(m.posizione - 4.0) < 0.1)
+    m.salta(-2)
+    assert _aspetta(lambda: m.posizione < 3)
+    assert m.pausa(True) is True
+    m.stop()
+    assert m.in_corso is None and m.posizione is None
+
+
+# La dissolvenza.
+
+def test_passaggio_automatico_con_la_sfumatura(crea, avvisi, tmp_path):
+    primo = _silenzio(tmp_path / "primo.wav", 2)
+    secondo = _silenzio(tmp_path / "secondo.wav", 4)
+    m = crea(seguente=secondo)
+    m.dissolvenza = 0.4
+    inizio = time.perf_counter()
+    m.suona(primo)
+    # Il seguente si chiede quando mancano 0,4 + 1,5 secondi: subito.
+    assert _aspetta(lambda: "chiedi_il_seguente" in avvisi.nomi(), 1)
+    assert _aspetta(lambda: "al_passaggio" in avvisi.nomi(), 3)
+    righe = _campiona(m, 1.0)
+    # Il passaggio comincia quando mancano 0,4 + 0,5 secondi alla fine.
+    assert abs(avvisi.quando("al_passaggio") - inizio - 1.1) < 0.2
+    assert next(argomenti for _, nome, argomenti in avvisi.righe if nome == "al_passaggio") == (secondo, None)
+    assert m.in_corso == secondo
+    primo_lettore = next(lettore for lettore in m._lettori if lettore.percorso != secondo)
+    primo_lettore_indice = m._lettori.index(primo_lettore)
+    # Durante la sfumatura chi esce ha ancora il suo brano.
+    sfumatura = [r for r in righe if r[3 + primo_lettore_indice] and (1 < r[1] < 79 or 1 < r[2] < 79)]
+    assert sfumatura, "nessun volume intermedio"
+    durata = sfumatura[-1][0] - sfumatura[0][0]
+    assert 0.25 < durata < 0.55
+    for _, *volumi, _, _ in sfumatura:
+        uscente = volumi[primo_lettore_indice] / 80
+        entrante = volumi[1 - primo_lettore_indice] / 80
+        # A potenza costante: le ampiezze (il cubo del volume) vanno come
+        # coseno e seno. Le due letture non sono simultanee: margine largo.
+        assert 0.75 < (uscente ** 3) ** 2 + (entrante ** 3) ** 2 < 1.25
+    # Chi esce scende, chi entra sale.
+    uscenti = [r[1 + primo_lettore_indice] for r in sfumatura]
+    assert uscenti == sorted(uscenti, reverse=True)
+    # Alla fine chi e' uscito e' fermo, prima del suo evento di fine.
+    assert _volumi(m)[1 - primo_lettore_indice] == 80 and primo_lettore.percorso is None
+    assert "alla_fine" not in avvisi.nomi() and "all_errore" not in avvisi.nomi()
+    assert _aspetta(lambda: primo_lettore.mpv.idle_active)
+
+
+def test_la_velocita_anticipa_il_passaggio(crea, avvisi, tmp_path):
+    primo = _silenzio(tmp_path / "primo.wav", 4)
+    secondo = _silenzio(tmp_path / "secondo.wav", 4)
+    m = crea(seguente=secondo)
+    m.dissolvenza = 0.4
+    m.velocita = 2
+    inizio = time.perf_counter()
+    m.suona(primo)
+    assert _aspetta(lambda: "al_passaggio" in avvisi.nomi(), 4)
+    # Quattro secondi a velocita' 2 sono due veri: il passaggio a 0,9 dalla fine.
+    assert abs(avvisi.quando("al_passaggio") - inizio - 1.1) < 0.2
+
+
+def test_cambio_coi_tasti_con_la_sfumatura_e_pausa(crea, avvisi, tmp_path):
+    primo = _silenzio(tmp_path / "primo.wav", 6)
+    secondo = _silenzio(tmp_path / "secondo.wav", 6)
+    m = crea()
+    m.dissolvenza = 0.5
+    m.suona(primo)
+    assert _aspetta(lambda: (m.posizione or 0) > 0.3)
+    m.suona(secondo)
+    assert m.in_corso == secondo
+    vecchio, nuovo = _lettore_di(m, primo), _lettore_di(m, secondo)
+    assert _aspetta(lambda: 20 < nuovo.mpv.volume < 70)
+    m.pausa(True)
+    assert _aspetta(lambda: vecchio.mpv.pause and nuovo.mpv.pause)
+    time.sleep(0.1)
+    fermi = _volumi(m)
+    time.sleep(0.3)
+    # In pausa la sfumatura non avanza.
+    assert _volumi(m) == fermi
+    m.pausa(False)
+    assert _aspetta(lambda: vecchio.percorso is None, 2)
+    assert _aspetta(lambda: nuovo.mpv.volume == 80)
+    assert not nuovo.mpv.pause
+    assert avvisi.nomi() == []
+
+
+def test_stop_durante_la_sfumatura_ferma_tutto(crea, avvisi, tmp_path):
+    primo = _silenzio(tmp_path / "primo.wav", 6)
+    secondo = _silenzio(tmp_path / "secondo.wav", 6)
+    m = crea()
+    m.dissolvenza = 0.5
+    m.suona(primo)
+    assert _aspetta(lambda: (m.posizione or 0) > 0.3)
+    m.suona(secondo)
+    assert _aspetta(lambda: m._sfumatura is not None and m._sfumatura.durata is not None)
+    m.stop()
+    assert m.in_corso is None and m._sfumatura is None
+    assert all(lettore.percorso is None for lettore in m._lettori)
+    assert _aspetta(lambda: all(lettore.mpv.idle_active for lettore in m._lettori))
+    time.sleep(0.2)
+    assert avvisi.nomi() == []
+
+
+def test_un_altro_cambio_ferma_il_piu_debole(crea, tmp_path):
+    primo = _silenzio(tmp_path / "primo.wav", 8)
+    secondo = _silenzio(tmp_path / "secondo.wav", 8)
+    terzo = _silenzio(tmp_path / "terzo.wav", 8)
+    quarto = _silenzio(tmp_path / "quarto.wav", 8)
+    m = crea()
+    m.dissolvenza = 0.5
+    m.suona(primo)
+    assert _aspetta(lambda: (m.posizione or 0) > 0.3)
+    # Subito dopo l'inizio della sfumatura chi entra si sente appena: si
+    # ferma lui, e il primo continua a scendere verso il terzo.
+    m.suona(secondo)
+    lettore_primo = _lettore_di(m, primo)
+    assert _aspetta(lambda: m._sfumatura.durata is not None)
+    m.suona(terzo)
+    assert m.in_corso == terzo
+    assert lettore_primo.percorso == primo and _lettore_di(m, terzo) is not lettore_primo
+    assert _aspetta(lambda: lettore_primo.percorso is None, 2)
+    # Oltre la meta' si sente di piu' chi entra: si ferma chi esce.
+    lettore_terzo = _lettore_di(m, terzo)
+    m.suona(quarto)
+    assert _aspetta(lambda: m._sfumatura is not None and m._sfumatura.avanzamento() > 0.6)
+    lettore_quarto = _lettore_di(m, quarto)
+    m.suona(primo)
+    assert _lettore_di(m, primo) is lettore_terzo and lettore_quarto.percorso == quarto
+    assert m._sfumatura.ampiezza > 0.7
+    assert _aspetta(lambda: lettore_quarto.percorso is None, 2)
+    assert m.in_corso == primo
+
+
+def test_brano_corto_dimezza_la_sfumatura(crea, avvisi, tmp_path):
+    lungo = _silenzio(tmp_path / "lungo.wav", 6)
+    corto = _silenzio(tmp_path / "corto.wav", 1.2)
+    cortissimo = _silenzio(tmp_path / "cortissimo.wav", 0.7)
+    m = crea()
+    m.dissolvenza = 0.8
+    m.suona(lungo)
+    assert _aspetta(lambda: (m.posizione or 0) > 0.3)
+    m.suona(corto)
+    sfumatura = m._sfumatura
+    assert _aspetta(lambda: sfumatura.durata is not None)
+    # Meta' del brano che entra: 0,6 secondi invece di 0,8.
+    assert abs(sfumatura.durata - 0.6) < 0.01
+    assert avvisi.fine.wait(3)
+    # Finita la sfumatura il corto e' gia' vicino alla fine: il seguente si
+    # chiede, ma qui nessuno risponde.
+    assert avvisi.nomi() == ["chiedi_il_seguente", "alla_fine"]
+    # Sotto il secondo conta anche la fine di chi entra, che mpv annuncia
+    # mezzo secondo prima: 0,7 - 0,5 = 0,2 secondi, e la sfumatura finisce
+    # prima di quell'annuncio.
+    m.suona(lungo)
+    assert _aspetta(lambda: (m.posizione or 0) > 0.3)
+    m.suona(cortissimo)
+    sfumatura, lettore = m._sfumatura, _lettore_di(m, cortissimo)
+    assert _aspetta(lambda: sfumatura.durata is not None)
+    assert abs(sfumatura.durata - 0.2) < 0.03
+    assert _aspetta(lambda: m._sfumatura is None)
+    assert lettore.mpv.volume == 80
+
+
+def test_ripartire_da_capo_non_sfuma(crea, tmp_path):
+    brano = _silenzio(tmp_path / "brano.wav", 6)
+    m = crea()
+    m.dissolvenza = 0.5
+    m.suona(brano)
+    assert _aspetta(lambda: (m.posizione or 0) > 0.5)
+    m.suona(brano)
+    assert m._sfumatura is None and m._lettori[1].percorso is None
+    assert _aspetta(lambda: m.posizione is not None and m.posizione < 0.3)
+
+
+def test_da_capo_sul_brano_che_entra_non_lo_raddoppia(crea, avvisi, tmp_path):
+    """X da capo sul brano che entra durante una sfumatura e' sempre un salto
+    dentro il brano: chi esce si ferma e il brano riparte da capo a piena
+    voce, su un lettore solo. Prima ripartiva sull'altro lettore e si
+    sentiva due volte, sfasato; poi, finche' chi entra si sentiva meno di
+    chi esce, continuava a sfumare."""
+    primo = _silenzio(tmp_path / "primo.wav", 8)
+    secondo = _silenzio(tmp_path / "secondo.wav", 8)
+    m = crea()
+    m.dissolvenza = 0.5
+
+    def ripartito_da_solo(brano, lettore, fermo):
+        assert m._sfumatura is None and m._uscente is None and m.in_corso == brano
+        assert m._attivo is lettore and fermo.percorso is None
+        assert [uno.percorso for uno in m._lettori].count(brano) == 1
+        assert _aspetta(lambda: lettore.mpv.volume == 80)
+        assert _aspetta(lambda: m.posizione is not None and m.posizione < 0.3)
+
+    m.suona(primo)
+    assert _aspetta(lambda: (m.posizione or 0) > 0.3)
+    # Oltre la meta', quando chi entra si sente gia' di piu'.
+    m.suona(secondo)
+    lettore_primo, lettore_secondo = _lettore_di(m, primo), _lettore_di(m, secondo)
+    assert _aspetta(lambda: m._sfumatura is not None and m._sfumatura.avanzamento() > 0.6)
+    m.suona(secondo)
+    ripartito_da_solo(secondo, lettore_secondo, lettore_primo)
+    # Appena entrato, quando chi entra si sente appena: e' un salto lo stesso.
+    assert _aspetta(lambda: (m.posizione or 0) > 0.3)
+    m.suona(primo)
+    lettore_primo = _lettore_di(m, primo)
+    assert m._sfumatura is not None and m._sfumatura.avanzamento() < 0.5
+    m.suona(primo)
+    ripartito_da_solo(primo, lettore_primo, lettore_secondo)
+    time.sleep(0.3)
+    assert m._sfumatura is None and lettore_secondo.percorso is None
+    assert avvisi.nomi() == []
+
+
+def test_in_pausa_il_passaggio_aspetta_la_ripresa(crea, avvisi, tmp_path):
+    primo = _silenzio(tmp_path / "primo.wav", 4)
+    secondo = _silenzio(tmp_path / "secondo.wav", 4)
+    m = crea(seguente=secondo)
+    m.dissolvenza = 1.0
+    # Come la ripresa all'avvio: in pausa a 1,2 secondi dalla fine, gia'
+    # dentro la soglia del passaggio (1 + 0,5). Il seguente si prepara, ma
+    # finche' niente suona il brano non cambia.
+    m.suona(primo, inizio=2.8, in_pausa=True)
+    assert _aspetta(lambda: m._preparato is not None and m._preparato.pronto, 3)
+    time.sleep(0.3)
+    assert avvisi.nomi() == ["chiedi_il_seguente"]
+    assert m.in_corso == primo and m._sfumatura is None and m.in_pausa
+    # Alla ripresa il passaggio parte, con la sfumatura limitata a quanto
+    # resta a chi esce: 1,2 - 0,5 secondi invece di uno.
+    m.pausa(False)
+    assert _aspetta(lambda: "al_passaggio" in avvisi.nomi(), 1)
+    sfumatura = m._sfumatura
+    assert sfumatura is not None and m.in_corso == secondo
+    assert _aspetta(lambda: sfumatura.durata is not None, 1)
+    assert 0.4 < sfumatura.durata < 0.75
+    assert _aspetta(lambda: m._sfumatura is None, 2)
+    assert _aspetta(lambda: _lettore_di(m, secondo).mpv.volume == 80 and not _lettore_di(m, secondo).mpv.pause)
+    assert avvisi.nomi() == ["chiedi_il_seguente", "al_passaggio"]
+
+
+def test_i_salti_in_pausa_vicino_alla_fine_restano_nel_brano(crea, avvisi, tmp_path):
+    primo = _silenzio(tmp_path / "primo.wav", 6)
+    secondo = _silenzio(tmp_path / "secondo.wav", 6)
+    m = crea(seguente=secondo)
+    m.dissolvenza = 1.0
+    m.suona(primo)
+    assert _aspetta(lambda: (m.posizione or 0) > 0.2)
+    m.pausa(True)
+    # In pausa, a 2 secondi dalla fine: il seguente si prepara.
+    m.vai_a(4.0)
+    assert _aspetta(lambda: m._preparato is not None and m._preparato.pronto, 3)
+    # A 1 secondo dalla fine, dentro la soglia del passaggio: niente cambia.
+    # (Su ao=null, in pausa, la posizione dopo un salto si legge prima
+    # esatta e poi circa due decimi indietro: basta che stia oltre i 4,5.)
+    m.vai_a(5.0)
+    assert _aspetta(lambda: m.posizione is not None and m.posizione > 4.6)
+    time.sleep(0.3)
+    assert avvisi.nomi() == ["chiedi_il_seguente"]
+    assert m.in_corso == primo and m._sfumatura is None
+    # Il salto indietro resta nel brano su cui ci si muoveva, lontano dalla
+    # fine, e il preparato resta pronto per quando ci si arrivera'.
+    m.salta(-3)
+    assert _aspetta(lambda: m.posizione is not None and m.posizione < 3.0)
+    assert m.in_corso == primo and m._preparato is not None and m._preparato.percorso == secondo
+    assert avvisi.nomi() == ["chiedi_il_seguente"]
+
+
+def test_salto_oltre_la_fine_in_pausa_scarta_il_preparato(crea, avvisi, tmp_path):
+    """Un salto oltre la fine fatto in pausa finisce il brano come senza la
+    dissolvenza: arriva alla_fine, e la finestra sceglie il seguente da se'.
+    Prima entrava il preparato, fermo in pausa, con al_passaggio."""
+    primo = _silenzio(tmp_path / "primo.wav", 6)
+    secondo = _silenzio(tmp_path / "secondo.wav", 6)
+    m = crea(seguente=secondo)
+    m.dissolvenza = 1.0
+    m.suona(primo)
+    assert _aspetta(lambda: (m.posizione or 0) > 0.2)
+    m.pausa(True)
+    # In pausa, a 2 secondi dalla fine: il seguente si prepara.
+    m.vai_a(4.0)
+    assert _aspetta(lambda: m._preparato is not None and m._preparato.pronto, 3)
+    preparato = m._preparato
+    m.salta(10)
+    assert avvisi.fine.wait(3)
+    time.sleep(0.2)
+    assert avvisi.nomi() == ["chiedi_il_seguente", "alla_fine"]
+    assert m._preparato is None and preparato.percorso is None and m.in_corso is None
+    assert all(lettore.percorso is None for lettore in m._lettori)
+    assert _aspetta(lambda: preparato.mpv.idle_active)
+
+
+def test_preparato_in_errore_passa_senza_sfumatura(crea, avvisi, tmp_path):
+    primo = _silenzio(tmp_path / "primo.wav", 2)
+    mancante = str(tmp_path / "non_ce.wav")
+    m = crea(seguente=mancante)
+    m.dissolvenza = 0.4
+    m.suona(primo)
+    # L'errore del preparato non si dice: il brano finisce come senza la
+    # dissolvenza, e l'errore arriva quando la finestra lo chiede di nuovo.
+    assert avvisi.fine.wait(4)
+    assert avvisi.nomi() == ["chiedi_il_seguente", "alla_fine"]
+    m.suona(mancante)
+    assert _aspetta(lambda: avvisi.nomi()[-1] == "all_errore")
+
+
+def test_preparato_pronto_tardi_entra_alla_fine(crea, avvisi, tmp_path, monkeypatch):
+    primo = _silenzio(tmp_path / "primo.wav", 1)
+    secondo = _silenzio(tmp_path / "secondo.wav", 3)
+    m = crea()
+    m.dissolvenza = 0.4
+    # Un preparato che il sorvegliante non vede mai pronto, come un SID che
+    # tarda: alla fine del primo entra a piena voce, senza sfumatura.
+    monkeypatch.setattr(m, "_da_leggere", lambda: [])
+    m.suona(primo)
+    assert _aspetta(lambda: m.posizione is not None)
+    assert m.prepara(secondo) is True
+    assert _aspetta(lambda: "al_passaggio" in avvisi.nomi(), 3)
+    assert avvisi.nomi() == ["al_passaggio"]
+    assert m.in_corso == secondo and m._sfumatura is None
+    assert _aspetta(lambda: _lettore_di(m, secondo).mpv.volume == 80 and not _lettore_di(m, secondo).mpv.pause)
+    assert _aspetta(lambda: (m.posizione or 0) > 0.2)
+
+
+def test_prepara_solo_quando_serve(crea, tmp_path):
+    primo = _silenzio(tmp_path / "primo.wav", 4)
+    secondo = _silenzio(tmp_path / "secondo.wav", 4)
+    m = crea()
+    assert m.prepara(secondo) is False
+    m.suona(primo)
+    assert _aspetta(lambda: m.posizione is not None)
+    # Senza dissolvenza non si prepara niente.
+    assert m.prepara(secondo) is False
+    m.dissolvenza = 0.5
+    assert m.prepara(secondo) is True
+    altro = m._preparato
+    assert altro is not m._lettori[0] and altro.percorso == secondo
+    assert _aspetta(lambda: altro.pronto)
+    assert altro.mpv.pause and altro.mpv.volume == 0
+    # Lo stesso brano non si ricarica.
+    assert m.prepara(secondo) is True and m._preparato is altro and altro.pronto
+
+
+def test_spegnere_la_dissolvenza_scarta_il_preparato(crea, avvisi, tmp_path):
+    primo = _silenzio(tmp_path / "primo.wav", 3)
+    secondo = _silenzio(tmp_path / "secondo.wav", 3)
+    m = crea(seguente=secondo)
+    m.dissolvenza = 0.5
+    m.suona(primo)
+    assert _aspetta(lambda: m._preparato is not None)
+    m.dissolvenza = 0
+    assert m._preparato is None and all(lettore.percorso != secondo for lettore in m._lettori)
+    assert avvisi.fine.wait(4)
+    assert "al_passaggio" not in avvisi.nomi()
+
+
+def test_ricontrollo_al_passaggio_passa_al_giusto(avvisi, tmp_path):
+    primo = _silenzio(tmp_path / "primo.wav", 2)
+    preparato = _silenzio(tmp_path / "preparato.wav", 4)
+    giusto = _silenzio(tmp_path / "giusto.wav", 4)
+    m = None
+
+    def al_passaggio(percorso, sottobrano):
+        # Come la finestra quando la plancia e' cambiata dopo la preparazione:
+        # il seguente ora e' un altro, e lo chiede subito.
+        avvisi("al_passaggio")(percorso, sottobrano)
+        m.suona(giusto)
+
+    m = Motore(alla_fine=avvisi("alla_fine"), ao="null", chiedi_il_seguente=lambda: m.prepara(preparato), al_passaggio=al_passaggio)
+    try:
+        m.dissolvenza = 0.4
+        m.suona(primo)
+        assert _aspetta(lambda: m.in_corso == giusto, 3)
+        lettore_primo = _lettore_di(m, primo)
+        # Il preparato, appena entrato e quasi muto, si ferma; il primo continua
+        # a scendere, ora verso il giusto, e si ferma prima della sua fine.
+        assert all(lettore.percorso != preparato for lettore in m._lettori)
+        assert m._sfumatura.uscente is lettore_primo and m._sfumatura.ampiezza > 0.9
+        assert _aspetta(lambda: lettore_primo.percorso is None, 2)
+        assert _aspetta(lambda: _lettore_di(m, giusto).mpv.volume == 80)
+        assert avvisi.nomi() == ["al_passaggio"]
+    finally:
+        m.chiudi()
+
+
+def test_annullare_il_passaggio_lascia_finire_chi_esce(avvisi, tmp_path):
+    primo = _silenzio(tmp_path / "primo.wav", 3)
+    preparato = _silenzio(tmp_path / "preparato.wav", 4)
+    m = None
+    esiti = []
+
+    def al_passaggio(percorso, sottobrano):
+        # Come la finestra quando, al ricontrollo, davanti non c'e' piu' niente.
+        avvisi("al_passaggio")(percorso, sottobrano)
+        esiti.append(m.annulla_il_passaggio())
+
+    m = Motore(alla_fine=avvisi("alla_fine"), ao="null", chiedi_il_seguente=lambda: m.prepara(preparato), al_passaggio=al_passaggio)
+    try:
+        m.dissolvenza = 1.0
+        inizio = time.perf_counter()
+        m.suona(primo)
+        # Il passaggio comincia a 1,5 secondi dalla fine; annullato, il primo
+        # torna il brano in corso e arriva in fondo, e la fine si dice.
+        posizioni = []
+        while not avvisi.fine.is_set() and time.perf_counter() - inizio < 6:
+            if m.in_corso == primo:
+                posizioni.append(m.posizione or 0)
+            time.sleep(0.01)
+        assert avvisi.nomi() == ["al_passaggio", "alla_fine"] and esiti == [True]
+        assert avvisi.quando("alla_fine") - avvisi.quando("al_passaggio") > 0.7
+        assert max(posizioni) > 2.4
+        assert m.in_corso is None and all(lettore.percorso is None for lettore in m._lettori)
+        # Il seguente non si e' chiesto di nuovo (gli avvisi qui sopra), e il
+        # preparato non c'e' piu'.
+        assert m._sfumatura is None and m._preparato is None
+        # Senza una sfumatura in corso si ferma tutto, e il motore lo dice.
+        m.suona(primo)
+        assert m.annulla_il_passaggio() is False
+        assert m.in_corso is None and all(lettore.percorso is None for lettore in m._lettori)
+    finally:
+        m.chiudi()
+
+
+class _Evento:
+    """Un evento di fine brano finto, come lo manda python-mpv."""
+
+    def __init__(self, voce, motivo=0):
+        self.event_id = type("Id", (), {"value": modulo.mpv.MpvEventID.END_FILE})()
+        self.data = type("Fine", (), {"reason": motivo, "playlist_entry_id": voce})()
+
+
+def test_conta_solo_la_fine_del_brano_attivo(crea, avvisi, tmp_path):
+    primo = _silenzio(tmp_path / "primo.wav", 6)
+    secondo = _silenzio(tmp_path / "secondo.wav", 6)
+    m = crea()
+    m.dissolvenza = 0.5
+    m.suona(primo)
+    assert _aspetta(lambda: (m.posizione or 0) > 0.3)
+    vecchio = m._attivo
+    voce_vecchia = vecchio.voce
+    m.suona(secondo)
+    nuovo = m._attivo
+    assert _aspetta(lambda: nuovo.voce is not None and m._sfumatura.durata is not None)
+    # La fine di un brano gia' sostituito: non conta.
+    m._evento(nuovo, _Evento(nuovo.voce - 1))
+    # La fine di chi esce, arrivata prima del previsto: la sfumatura continua.
+    m._evento(vecchio, _Evento(voce_vecchia))
+    assert vecchio.finito and vecchio.percorso is None
+    assert m._sfumatura is not None and m.in_corso == secondo
+    assert _aspetta(lambda: m._sfumatura is None, 2)
+    assert avvisi.nomi() == []
+    # La fine del brano attivo, invece, si dice.
+    m._evento(nuovo, _Evento(nuovo.voce))
+    assert avvisi.nomi() == ["alla_fine"] and m.in_corso is None
+
+
+def test_chiudi_chiude_tutti_e_due_i_lettori(avvisi, tmp_path):
+    m = Motore(ao="null")
+    brano = _silenzio(tmp_path / "brano.wav", 3)
+    m.dissolvenza = 0.5
+    m.suona(brano)
+    assert _aspetta(lambda: m.posizione is not None)
+    m.chiudi()
+    assert all(lettore.mpv.handle is None for lettore in m._lettori)
+    assert not m._sorvegliante.is_alive()
+    m.chiudi()

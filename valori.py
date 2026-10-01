@@ -1,6 +1,6 @@
 # MeTeOra, i valori scritti nei campi delle impostazioni: dal testo al valore, con le correzioni dette a chi scrive.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); leggi_tempo e secondi_da_leggere arrivano da finestra.py. Nella 1.51.2 leggi_tempo accetta solo le cifre: prima passavano inf e 1e5.
+# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); leggi_tempo e secondi_da_leggere arrivano da finestra.py. Nella 1.51.2 leggi_tempo accetta solo le cifre: prima passavano inf e 1e5. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza, con i loro limiti e le loro forme da leggere (tappa 4, issue 15).
 
 """I valori delle impostazioni, letti dal testo scritto nei campi.
 
@@ -10,10 +10,16 @@ e si scrive nell'ultima. Le funzioni leggi_* ricevono il testo gia' senza
 quelle righe, con le righe rimaste unite da spazi, e restituiscono
 (valore, correzioni): correzioni e' la lista delle frasi per chi scrive,
 vuota se niente e' stato corretto. Correggere vuol dire portare al limite un
-numero che lo supera, e dirlo; gli spazi in piu' e la virgola dei decimali
-si normalizzano senza dirlo. Tutto il resto si rifiuta con ErroreValore, la
-cui frase dice cosa non va e cosa ci si aspetta. Ogni frase comincia con il
-nome dell'impostazione, perche' finisce nella console.
+numero che lo supera, o al passo una velocita' che non ci cade, e dirlo; gli
+spazi in piu' e la virgola dei decimali si normalizzano senza dirlo. Tutto
+il resto si rifiuta con ErroreValore, la cui frase dice cosa non va e cosa
+ci si aspetta. Ogni frase comincia con il nome dell'impostazione, perche'
+finisce nella console.
+
+Le funzioni scrivi_* danno la forma da leggere di un valore, per le righe
+della console e delle impostazioni; quella di scrivi_colori, scrivi_velocita,
+scrivi_tono, scrivi_bande e scrivi_dissolvenza si rilegge con la sua leggi_*
+e da' lo stesso valore, senza correzioni.
 
 Qui stanno anche i limiti dei valori, che impostazioni.py usa per
 controllare il file, e la lettura dei tempi che serve anche ai tasti della
@@ -22,6 +28,7 @@ finestra principale. Niente wx: sono funzioni pure.
 
 import math
 import re
+from decimal import ROUND_HALF_UP, Decimal
 
 # Il volume della musica arriva fino a 300, come motore.VOLUME_MASSIMO: motore
 # non si importa, perche' caricherebbe mpv e le sue librerie.
@@ -40,12 +47,36 @@ AREE = {"p": "plancia", "c": "console", "t": "cruscotto"}
 # Le risposte a una domanda si' o no, gia' in minuscolo.
 SI = frozenset({"sì", "si", "sí", "si'", "s", "1", "acceso", "vero"})
 NO = frozenset({"no", "n", "0", "spento", "falso"})
+# La velocita' di riproduzione (tappa 4): 1 e' la normale, i tasti A e D la
+# cambiano di un passo.
+VELOCITA_MINIMA, VELOCITA_MASSIMA = 0.5, 2.0
+PASSO_VELOCITA = 0.05
+# Il tono in semitoni e il guadagno di ogni banda dell'equalizzatore in dB
+# vanno da meno a piu' il loro massimo, interi.
+TONO_MASSIMO = 12
+GUADAGNO_MASSIMO = 12
+# Le frequenze centrali delle sette bande dell'equalizzatore, in Hz, dalla
+# piu' bassa alla piu' alta: la banda 1 e' quella dei 60.
+FREQUENZE_DELLE_BANDE = (60, 150, 400, 1000, 2400, 6000, 12000)
+# La durata della dissolvenza incrociata, in secondi.
+DISSOLVENZA_MINIMA, DISSOLVENZA_MASSIMA = 0.5, 15
+# Le parole che accendono e spengono la dissolvenza: quelle del si' e del no,
+# senza le cifre, che li' sono secondi, e anche al femminile.
+_ACCESA = frozenset(parola for parola in SI if not parola.isdigit()) | {"accesa"}
+_SPENTA = frozenset(parola for parola in NO if not parola.isdigit()) | {"spenta"}
 
 _CIFRE = re.compile(r"[0-9]+")
 _INTERO = re.compile(r"[+-]?[0-9]+")
 _DECIMALE = re.compile(r"[+-]?(?:[0-9]+[.,][0-9]*|[.,][0-9]+)")
+# Un numero, intero o con i decimali dopo il punto o la virgola.
+_NUMERO = re.compile(r"[+-]?(?:[0-9]+(?:[.,][0-9]*)?|[.,][0-9]+)")
 # L'ultima parte di un tempo: i secondi, con i decimali dopo il punto.
 _SECONDI = re.compile(r"[0-9]+(?:\.[0-9]*)?|\.[0-9]+")
+# Il tono, con la parola semitoni (o semitono) dopo il numero.
+_SEMITONI = re.compile(r"(.*?) ?semiton[oi]", re.IGNORECASE)
+# La durata della dissolvenza: il numero, con o senza la parola secondi
+# (secondo, sec, s) e il punto finale.
+_DURATA = re.compile(rf"(?P<numero>{_NUMERO.pattern}) ?(?:secondi|secondo|sec|s)?\.?", re.IGNORECASE)
 
 
 class ErroreValore(ValueError):
@@ -96,12 +127,13 @@ def _nei_limiti(numero, minimo, massimo, nome, scritto=str):
     return numero, []
 
 
-def leggi_intero(testo, minimo, massimo, nome):
+def leggi_intero(testo, minimo, massimo, nome, scritto=str):
     """Un numero intero da minimo a massimo; massimo None vuol dire senza
     limite in alto. Fuori dai limiti si porta al limite, e lo si dice; i
-    decimali, con la virgola o con il punto, si rifiutano."""
+    decimali, con la virgola o con il punto, si rifiutano. scritto da' la
+    forma da leggere dei numeri nelle frasi, per esempio con il segno."""
     testo = _pulito(testo)
-    attesa = f"un numero intero da {minimo} in su" if massimo is None else f"un numero intero da {minimo} a {massimo}"
+    attesa = f"un numero intero da {scritto(minimo)} in su" if massimo is None else f"un numero intero da {scritto(minimo)} a {scritto(massimo)}"
     if not testo:
         raise ErroreValore(f"{nome}: manca il numero; scrivi {attesa}.")
     if " " in testo:
@@ -116,7 +148,7 @@ def leggi_intero(testo, minimo, massimo, nome):
     except ValueError:
         # Oltre le 4300 cifre int() non converte.
         raise ErroreValore(non_numero) from None
-    return _nei_limiti(numero, minimo, massimo, nome)
+    return _nei_limiti(numero, minimo, massimo, nome, scritto)
 
 
 def leggi_volume_musica(testo):
@@ -277,3 +309,201 @@ def colore_da_percentuali(percentuali):
     con percentuali_da_colore l'andata e ritorno e' esatta per ogni
     percentuale intera."""
     return tuple(round(p * 255 / 100) for p in percentuali)
+
+
+# Velocita', tono, equalizzatore e dissolvenza, tappa 4 (issue 15).
+
+def _con_la_virgola(numero, decimali):
+    """Un numero da leggere, float o Decimal, con al piu' decimali cifre dopo
+    la virgola e senza gli zeri che non servono: 1,05, 0,5, 2."""
+    return f"{numero:.{decimali}f}".rstrip("0").rstrip(".").replace(".", ",")
+
+
+def _con_segno(numero):
+    """Un intero da leggere con il segno davanti, se non e' zero: +2, -3, 0."""
+    return f"{numero:+d}" if numero else "0"
+
+
+def _decimale(testo):
+    """Il numero scritto, con i decimali dopo il punto o la virgola, come
+    Decimal esatto; None se non e' un numero. Valgono solo le cifre, con il
+    segno davanti: niente esponenti, inf o nan, che Decimal accetterebbe.
+    Un Decimal regge anche migliaia di cifre, senza i limiti di int e float."""
+    return Decimal(testo.replace(",", ".")) if _NUMERO.fullmatch(testo) else None
+
+
+def _decimale_nei_limiti(numero, scritto, minimo, massimo, nome, da_leggere):
+    """Come _nei_limiti, per un numero letto con _decimale: numero e' il
+    Decimal, scritto la forma in cui l'ha scritto chi scrive, e il limite
+    torna come Decimal; da_leggere da' la forma da leggere dei limiti."""
+    minimo, massimo = Decimal(str(minimo)), Decimal(str(massimo))
+    if numero < minimo:
+        return minimo, [f"{nome}: {scritto} è sotto il minimo, ho messo {da_leggere(minimo)}."]
+    if numero > massimo:
+        return massimo, [f"{nome}: {scritto} è oltre il massimo, ho messo {da_leggere(massimo)}."]
+    return numero, []
+
+
+def scrivi_velocita(velocita):
+    """La velocita' da leggere, con la virgola e al centesimo: 1,05, 0,5, 1."""
+    return _con_la_virgola(velocita, 2)
+
+
+def leggi_velocita(testo):
+    """La velocita' di riproduzione, da 0,5 a 2, 1 la normale, con i decimali
+    dopo la virgola o il punto: 1,05 o 1.05. Fuori dai limiti si porta al
+    limite; dentro si arrotonda al passo di 0,05, la meta' in su, cosi' i
+    tasti A e D ripartono da un valore del passo. L'una e l'altra correzione
+    si dicono. Restituisce un float."""
+    nome = "Velocità"
+    testo = _pulito(testo)
+    attesa = f"scrivi un numero da {scrivi_velocita(VELOCITA_MINIMA)} a {scrivi_velocita(VELOCITA_MASSIMA)}, per esempio 1,05 o 0,9; 1 è la velocità normale"
+    if not testo:
+        raise ErroreValore(f"{nome}: manca il numero; {attesa}.")
+    numero = _decimale(testo)
+    if numero is None:
+        raise ErroreValore(f"{nome}: {testo} non è un numero; {attesa}.")
+    scritto = testo.replace(".", ",")
+    numero, correzioni = _decimale_nei_limiti(numero, scritto, VELOCITA_MINIMA, VELOCITA_MASSIMA, nome, scrivi_velocita)
+    # Il calcolo in Decimal e' esatto: in float 1.025 / 0.05 fa 20.4999...
+    # e la meta' andrebbe in giu'.
+    passo = Decimal(str(PASSO_VELOCITA))
+    al_passo = (numero / passo).to_integral_value(rounding=ROUND_HALF_UP) * passo
+    velocita = float(al_passo)
+    if al_passo != numero:
+        correzioni.append(f"{nome}: {scritto} va a passi di {scrivi_velocita(PASSO_VELOCITA)}, ho messo {scrivi_velocita(velocita)}.")
+    return velocita, correzioni
+
+
+def scrivi_tono(semitoni):
+    """Il tono da leggere: +2 semitoni, -1 semitono, 0 semitoni."""
+    return f"{_con_segno(semitoni)} {'semitono' if abs(semitoni) == 1 else 'semitoni'}"
+
+
+def leggi_tono(testo):
+    """Il tono in semitoni, un intero da -12 a +12, 0 il normale: +2, 2, -3.
+    La parola semitoni (o semitono) dopo il numero si accetta, cosi' si
+    rilegge anche la forma di scrivi_tono. Fuori dai limiti si porta al
+    limite, e lo si dice."""
+    testo = _pulito(testo)
+    con_la_parola = _SEMITONI.fullmatch(testo)
+    if con_la_parola:
+        testo = con_la_parola.group(1)
+    return leggi_intero(testo, -TONO_MASSIMO, TONO_MASSIMO, "Tono", _con_segno)
+
+
+def nome_della_banda(indice):
+    """Il nome di una banda dell'equalizzatore, con l'indice contato da zero:
+    "banda 3, 400 Hz" per l'indice 2."""
+    return f"banda {indice + 1}, {FREQUENZE_DELLE_BANDE[indice]} Hz"
+
+
+def scrivi_guadagno(guadagno):
+    """Il guadagno di una banda da leggere: +2 dB, 0 dB, -3 dB."""
+    return f"{_con_segno(guadagno)} dB"
+
+
+def scrivi_bande(bande):
+    """I guadagni delle bande separati da spazi, nella forma che rilegge
+    leggi_bande: "0 0 +2 0 0 0 -3"."""
+    return " ".join(map(_con_segno, bande))
+
+
+def leggi_bande(testo):
+    """I guadagni delle sette bande dell'equalizzatore, in dB interi da -12 a
+    +12: sette numeri separati da spazi, dalla banda piu' bassa alla piu'
+    alta, oppure uno solo, che vale per tutte; il testo vuoto le azzera
+    tutte. Fuori dai limiti si porta al limite, banda per banda, e lo si
+    dice. Restituisce una lista nuova di sette interi."""
+    nome = "Equalizzatore"
+    quante = len(FREQUENZE_DELLE_BANDE)
+    parole = _pulito(testo).split()
+    if not parole:
+        return [0] * quante, []
+    if len(parole) == 1:
+        guadagno, correzioni = leggi_intero(parole[0], -GUADAGNO_MASSIMO, GUADAGNO_MASSIMO, nome, _con_segno)
+        return [guadagno] * quante, correzioni
+    if len(parole) != quante:
+        raise ErroreValore(f"{nome}: {' '.join(parole)} sono {len(parole)} valori; scrivi un numero solo, che vale per tutte le bande, oppure sette numeri, uno per banda dalla più bassa alla più alta, ciascuno da {_con_segno(-GUADAGNO_MASSIMO)} a {_con_segno(GUADAGNO_MASSIMO)}; il campo vuoto le azzera tutte.")
+    guadagni, correzioni = [], []
+    for indice, parola in enumerate(parole):
+        guadagno, corrette = leggi_intero(parola, -GUADAGNO_MASSIMO, GUADAGNO_MASSIMO, f"{nome}, {nome_della_banda(indice)}", _con_segno)
+        guadagni.append(guadagno)
+        correzioni += corrette
+    return guadagni, correzioni
+
+
+def scrivi_durata(secondi):
+    """La durata della dissolvenza da leggere, con la virgola e al
+    millesimo: 4 secondi, 2,5 secondi, 1 secondo."""
+    scritto = _con_la_virgola(secondi, 3)
+    return f"{scritto} {'secondo' if scritto == '1' else 'secondi'}"
+
+
+def scrivi_dissolvenza(dissolvenza):
+    """La dissolvenza da leggere, come la dice la riga delle impostazioni:
+    "accesa, 4 secondi" o "spenta, 4 secondi"; leggi_dissolvenza la rilegge."""
+    return f"{'accesa' if dissolvenza['accesa'] else 'spenta'}, {scrivi_durata(dissolvenza['secondi'])}"
+
+
+def _attesa_della_durata():
+    """Cosa si aspetta il campo della durata, per le frasi d'errore."""
+    return f"scrivi i secondi, da {_con_la_virgola(DISSOLVENZA_MINIMA, 3)} a {_con_la_virgola(DISSOLVENZA_MASSIMA, 3)}, anche con i decimali, per esempio 4 o 2,5"
+
+
+def _durata(scritto, nome):
+    """I secondi della dissolvenza dal numero scritto, gia' riconosciuto da
+    _DURATA: portati fra 0,5 e 15, e lo si dice, poi arrotondati al
+    millesimo senza dirlo, come i salti di Q ed E."""
+    numero, correzioni = _decimale_nei_limiti(_decimale(scritto), scritto.replace(".", ","), DISSOLVENZA_MINIMA, DISSOLVENZA_MASSIMA, nome,
+        lambda limite: _con_la_virgola(limite, 3))
+    return float(numero.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)), correzioni
+
+
+def leggi_durata_della_dissolvenza(testo, nome="Dissolvenza"):
+    """La durata della dissolvenza in secondi, da 0,5 a 15, con i decimali
+    dopo la virgola o il punto, arrotondata al millesimo; dopo il numero si
+    accetta la parola secondi (o secondo, sec, s). Fuori dai limiti si porta
+    al limite, e lo si dice. Restituisce un float. E' la lettura del campo
+    di Maiuscolo+L, che chiede solo la durata; nome comincia le frasi."""
+    testo = _pulito(testo)
+    if not testo:
+        raise ErroreValore(f"{nome}: mancano i secondi; {_attesa_della_durata()}.")
+    trovato = _DURATA.fullmatch(testo)
+    if not trovato:
+        raise ErroreValore(f"{nome}: {testo} non è un numero di secondi; {_attesa_della_durata()}.")
+    return _durata(trovato["numero"], nome)
+
+
+def leggi_dissolvenza(testo, secondi_attuali=None):
+    """La dissolvenza incrociata, come {"accesa": vero o falso, "secondi":
+    durata}. No (o spenta, spento, n, falso) la spegne, e cosi' lo zero; un
+    numero di secondi, letto come in leggi_durata_della_dissolvenza, la
+    accende con quella durata; si' (o accesa, acceso, s, vero) la accende
+    senza cambiare durata. La parola e il numero possono stare insieme, come
+    li scrive scrivi_dissolvenza: "accesa, 4 secondi" o "spenta, 2,5
+    secondi", e spenta la durata resta per quando si riaccende.
+    Senza numero i secondi sono secondi_attuali, quelli di adesso, che la
+    finestra conserva: None se non li passa, e allora li mette lei."""
+    nome = "Dissolvenza"
+    testo = _pulito(testo)
+    attesa = (f"scrivi no per spegnerla, sì per accenderla, oppure i secondi, da {_con_la_virgola(DISSOLVENZA_MINIMA, 3)} a "
+        f"{_con_la_virgola(DISSOLVENZA_MASSIMA, 3)}, per accenderla con quella durata, per esempio 4 o 2,5")
+    if not testo:
+        raise ErroreValore(f"{nome}: manca il valore; {attesa}.")
+    prima, _, resto = testo.partition(" ")
+    parola = prima.rstrip(",:;.").casefold()
+    if parola in _ACCESA or parola in _SPENTA:
+        accesa = parola in _ACCESA
+    else:
+        accesa, resto = None, testo
+    if not resto:
+        return {"accesa": accesa, "secondi": secondi_attuali}, []
+    trovato = _DURATA.fullmatch(resto)
+    if not trovato:
+        raise ErroreValore(f"{nome}: {testo} non è né no né un numero di secondi; {attesa}.")
+    if accesa is not True and _decimale(trovato["numero"]) == 0:
+        # Zero secondi spengono, come la dissolvenza 0 del motore.
+        return {"accesa": False, "secondi": secondi_attuali}, []
+    secondi, correzioni = _durata(trovato["numero"], nome)
+    return {"accesa": accesa is not False, "secondi": secondi}, correzioni
