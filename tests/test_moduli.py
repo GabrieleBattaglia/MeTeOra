@@ -156,3 +156,65 @@ def test_contatore_rinfresca_le_letture_vecchie(tmp_path):
     assert contatore.files(str(tmp_path)) == [nuovo]
     contatore.dimentica_tutto()
     assert contatore.files(str(tmp_path)) is None
+
+
+def test_marcatori_nomi_tolleranza_e_salvataggio(tmp_path):
+    import marcatori
+    from marcatori import Marcatori
+
+    archivio = Marcatori(str(tmp_path / "marcatori.json"))
+    k = marcatori.chiave(r"C:\musica\Canzone.MP3", 200.1234)
+    # Due copie identiche hanno la stessa chiave; senza durata conta il percorso.
+    assert k == marcatori.chiave(r"D:\altrove\canzone.mp3", 200.1234) == "canzone.mp3|200.123"
+    assert marcatori.chiave(r"C:\a\x.mod", None).startswith("percorso|")
+    assert marcatori.chiave(r"C:\sid\Commando.sid", 250.0, 3).endswith("|3")
+    primo = archivio.aggiungi(k, 10.0, r"C:\musica\Canzone.MP3", 200.1234)
+    secondo = archivio.aggiungi(k, 5.0, r"C:\musica\Canzone.MP3", 200.1234)
+    assert (primo["nome"], secondo["nome"]) == ("M1", "M2")
+    assert [m["nome"] for m in archivio.elenco(k)] == ["M2", "M1"]
+    assert archivio.trova(k, 10.004) is primo and archivio.trova(k, 10.006) is None
+    assert archivio.precedente(k, 10.0)["nome"] == "M2" and archivio.precedente(k, 5.0) is None
+    assert archivio.successivo(k, 5.0)["nome"] == "M1" and archivio.successivo(k, 10.0) is None
+    archivio.rinomina(k, primo, "Ritornello")
+    archivio.aggiungi(k, 20.0, r"D:\altrove\canzone.mp3", 200.1234)
+    # Il nome automatico segue il numero piu' alto.
+    assert archivio.elenco(k)[-1]["nome"] == "M3"
+    archivio.salva()
+    di_nuovo = Marcatori(archivio.percorso)
+    di_nuovo.carica()
+    assert [m["nome"] for m in di_nuovo.elenco(k)] == ["M2", "Ritornello", "M3"]
+    assert di_nuovo.forse(r"E:\ovunque\CANZONE.mp3")
+    assert di_nuovo.voci[k]["percorsi"] == [r"C:\musica\Canzone.MP3", r"D:\altrove\canzone.mp3"]
+    assert di_nuovo.togli_prima(k, 10.0) == 2 and [m["nome"] for m in di_nuovo.elenco(k)] == ["M3"]
+    assert di_nuovo.togli_dopo(k, 20.0) == 1 and k not in di_nuovo.voci
+    assert di_nuovo.togli_tutti(k) == 0
+
+
+def test_marcatori_file_illeggibile_e_tempi_vicini(tmp_path):
+    from marcatori import Marcatori
+
+    percorso = tmp_path / "marcatori.json"
+    # Forme sbagliate: nessuna fa cadere il programma.
+    for contenuto in ("[]", '{"marcatori": {"a|1.000": {"marker": [{"tempo": "1:30", "nome": "M1"}]}}}', "{troncato"):
+        percorso.write_text(contenuto, encoding="utf-8")
+        archivio = Marcatori(str(percorso))
+        archivio.carica()
+        assert archivio.errore and archivio.percorso.endswith(".nuovo") and not archivio.voci
+    # I marker nuovi vanno nel .nuovo, e la volta dopo si ritrovano.
+    archivio.aggiungi("a|1.000", 1.0, r"C:\a.mp3", 1.0)
+    assert archivio.modificato
+    archivio.salva()
+    assert not archivio.modificato
+    di_nuovo = Marcatori(str(percorso))
+    di_nuovo.carica()
+    assert di_nuovo.errore and [m["nome"] for m in di_nuovo.elenco("a|1.000")] == ["M1"]
+    # Una voce senza percorsi, scritta a mano, si completa da sola.
+    percorso.write_text('{"marcatori": {"b|2.000": {"marker": [{"tempo": 1, "nome": "X"}]}}}', encoding="utf-8")
+    sano = Marcatori(str(percorso))
+    sano.carica()
+    assert not sano.errore
+    sano.aggiungi("b|2.000", 1.5, r"C:\b.mp3", 2.0)
+    # Due marker a 5,4 millesimi l'uno dall'altro restano due, e si raggiungono.
+    sano.aggiungi("c|9.000", 1.0, r"C:\c.mp3", 9.0)
+    secondo = sano.aggiungi("c|9.000", 1.0054, r"C:\c.mp3", 9.0)
+    assert sano.successivo("c|9.000", 1.0) is secondo and sano.trova("c|9.000", 1.0054) is secondo

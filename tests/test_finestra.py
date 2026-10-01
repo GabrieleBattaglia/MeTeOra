@@ -344,7 +344,7 @@ def test_cartella_suona_con_le_sottocartelle_e_f8_la_ritrova(finestra, monkeypat
 
     suonati = []
 
-    def suona(percorso, sottobrano=None):
+    def suona(percorso, sottobrano=None, inizio=None):
         suonati.append(percorso)
         finestra.motore._in_corso = percorso
 
@@ -510,7 +510,7 @@ def test_durate_nella_plancia(finestra):
 def _finto_motore(finestra, monkeypatch):
     suonati = []
 
-    def suona(percorso, sottobrano=None):
+    def suona(percorso, sottobrano=None, inizio=None):
         suonati.append((os.path.basename(percorso), sottobrano))
         finestra.motore._in_corso = percorso
         finestra.motore.sottobrano = sottobrano
@@ -988,7 +988,7 @@ def test_canc_maiuscolo_canc_f4_e_crea_sulla_selezione(finestra, monkeypatch):
     finestra.albero.SelectItem(_voce_di(finestra, rock, "b.mp3"))
     finestra.albero.SelectItem(finestra._nodo_della_playlist(finestra.archivio.playlist[2]))
     finestra._cancella_selezione()
-    assert _ultima(finestra) == "Tolti 2 brani, eliminate 1 playlist."
+    assert _ultima(finestra) == "Tolti 2 brani, eliminata 1 playlist."
     assert [b.nome_del_file for b in pl_rock.brani] == ["c.mp3"]
     # Il fuoco resta nella playlist su cui si lavorava, sulla voce che resta.
     voce = finestra._voce_corrente()
@@ -1317,3 +1317,232 @@ def test_backspace_risale_chiudendo_e_maiuscolo_backspace_scende(finestra, suoni
     assert suoni_annotati[-1] == "scendi"
     _nell_albero(finestra, wx.WXK_BACK, maiuscolo=True)
     assert _ultima(finestra) == "Qui dentro non c'è nessun ramo aperto."
+
+
+def _in_pausa_a(finestra, secondi):
+    finestra.motore.vai_a(secondi)
+    assert _aspetta(lambda: abs((finestra.motore.posizione or -1) - secondi) < 0.002)
+
+
+def test_marker_t_r_y_e_le_varianti_con_maiuscolo(finestra, monkeypatch, suoni_annotati, tmp_path):
+    brano = tmp_path / "canzone.wav"
+    _wav(brano, secondi=5)
+    finestra._aggiungi(None, [str(brano)])
+    pl = finestra.archivio.playlist[0]
+    finestra._suona(pl, pl.brani[0])
+    finestra.motore.pausa(True)
+    assert _aspetta(lambda: finestra.motore.posizione is not None)
+    _in_pausa_a(finestra, 1.0)
+    assert _premi(finestra, "t") == "Marker M1 a 0:01."
+    assert suoni_annotati[-1] == "marker_messo"
+    _in_pausa_a(finestra, 3.25)
+    assert _premi(finestra, "t") == "Marker M2 a 0:03.250."
+    # Il brano nella plancia dice quanti marker ha, e li mostra aperto.
+    nodo = finestra._nodo_della_playlist(pl)
+    finestra.albero.Expand(finestra.nodo_playlist)
+    finestra.albero.Expand(nodo)
+    voce = next(finestra._figli(nodo))
+    assert finestra.albero.GetItemText(voce).startswith("canzone.wav, 0:05, 2 marker")
+    finestra.albero.Expand(voce)
+    assert _etichette(finestra, voce) == ["M1, 0:01", "M2, 0:03.250"]
+    # R va al marker prima e porta li' il fuoco della plancia; Y a quello dopo.
+    assert _premi(finestra, "r") == "M1, 0:01."
+    assert suoni_annotati[-1] == "marker_indietro"
+    assert _aspetta(lambda: abs((finestra.motore.posizione or -1) - 1.0) < 0.002)
+    assert finestra.albero.GetItemText(finestra._voce_corrente()) == "M1, 0:01"
+    assert _premi(finestra, "r") == "È il primo marker."
+    # T sul marker lo rinomina.
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("Intro"))
+    assert _premi(finestra, "t") == "Il marker M1, a 0:01, ora si chiama Intro."
+    assert suoni_annotati[-1] == "marker_rinominato"
+    assert finestra.albero.GetItemText(finestra._voce_corrente()) == "Intro, 0:01"
+    assert _premi(finestra, "y") == "M2, 0:03.250."
+    assert _premi(finestra, "y") == "È l'ultimo marker."
+    # Invio sul marker lo rinomina, Canc lo elimina.
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("Ritornello"))
+    evento = wx.TreeEvent(wx.wxEVT_TREE_ITEM_ACTIVATED, finestra.albero, finestra._voce_corrente())
+    finestra._invio(evento)
+    assert finestra.albero.GetItemText(finestra._voce_corrente()) == "Ritornello, 0:03.250"
+    _nell_albero(finestra, wx.WXK_DELETE)
+    assert _ultima(finestra) == "Eliminato il marker Ritornello, a 0:03.250."
+    assert finestra.albero.GetItemText(finestra._voce_corrente()) == "Intro, 0:01"
+    # Le varianti con Maiuscolo. Restano Intro a 1 secondo e due marker
+    # nuovi; il nome automatico riparte dal numero piu' alto rimasto.
+    for t in (2.5, 4.0):
+        _in_pausa_a(finestra, t)
+        _premi(finestra, "t")
+    assert [m["nome"] for m in finestra.marcatori.elenco(finestra._contesto_dei_marker("")[0])] == ["Intro", "M1", "M2"]
+    _in_pausa_a(finestra, 2.5)
+    assert _premi(finestra, "r", maiuscolo=True) == "Tolti 2 marker dall'inizio fino a 0:02.500."
+    assert suoni_annotati[-1] == "marker_tolti_prima"
+    assert _premi(finestra, "y", maiuscolo=True) == "Tolto 1 marker da 0:02.500 alla fine."
+    assert suoni_annotati[-1] == "marker_tolti_dopo"
+    assert _premi(finestra, "t", maiuscolo=True) == "Non ci sono marker da togliere in tutto il brano."
+    _premi(finestra, "t")
+    assert _premi(finestra, "t", maiuscolo=True) == "Tolto 1 marker in tutto il brano."
+    assert suoni_annotati[-1] == "marker_tolti_tutti"
+    etichetta = finestra.albero.GetItemText(next(finestra._figli(finestra._nodo_della_playlist(pl))))
+    assert etichetta.startswith("canzone.wav, 0:05") and "marker" not in etichetta
+    # Il file dei marker si salva.
+    from marcatori import Marcatori
+
+    salvati = Marcatori(finestra.marcatori.percorso)
+    salvati.carica()
+    assert not salvati.voci
+
+
+def test_marker_condivisi_dalle_copie_identiche(finestra, tmp_path):
+    import shutil
+
+    prima = tmp_path / "uno" / "canzone.wav"
+    seconda = tmp_path / "due" / "canzone.wav"
+    prima.parent.mkdir()
+    seconda.parent.mkdir()
+    _wav(prima, secondi=3)
+    shutil.copy(prima, seconda)
+    finestra._aggiungi(None, [str(prima)])
+    finestra._aggiungi(None, [str(seconda)])
+    uno, due = finestra.archivio.playlist
+    finestra._suona(uno, uno.brani[0])
+    finestra.motore.pausa(True)
+    assert _aspetta(lambda: finestra.motore.posizione is not None)
+    _in_pausa_a(finestra, 1.5)
+    _premi(finestra, "t")
+    # La seconda copia, in un'altra playlist e in un'altra cartella, ha lo stesso marker.
+    finestra.schedario.leggi_subito(str(seconda))
+    finestra.albero.Expand(finestra.nodo_playlist)
+    nodo = finestra._nodo_della_playlist(due)
+    finestra.albero.Expand(nodo)
+    voce = next(finestra._figli(nodo))
+    assert finestra.albero.GetItemText(voce).endswith("1 marker")
+    finestra.albero.Expand(voce)
+    assert _etichette(finestra, voce) == ["M1, 0:01.500"]
+
+
+def _brano_con_marker(finestra, tmp_path, tempi, secondi=6, nome="canzone.wav"):
+    """Una playlist con un WAV e i suoi marker, il brano in pausa e aperto nella plancia."""
+    brano = tmp_path / nome
+    _wav(brano, secondi=secondi)
+    finestra._aggiungi(None, [str(brano)])
+    pl = finestra.archivio.playlist[-1]
+    finestra._suona(pl, pl.brani[0])
+    finestra.motore.pausa(True)
+    assert _aspetta(lambda: finestra.motore.posizione is not None)
+    for t in tempi:
+        _in_pausa_a(finestra, t)
+        _premi(finestra, "t")
+    finestra.albero.Expand(finestra.nodo_playlist)
+    nodo = finestra._nodo_della_playlist(pl)
+    finestra.albero.Expand(nodo)
+    voce = next(finestra._figli(nodo))
+    finestra.albero.Expand(voce)
+    return pl, voce
+
+
+def test_marker_correzioni_della_revisione(finestra, tmp_path, suoni_annotati):
+    # Un'altra playlist aperta, che Canc sui marker non deve chiudere.
+    finestra._aggiungi(None, [os.path.join(r"C:\m", "altro.mp3")])
+    _pl, voce = _brano_con_marker(finestra, tmp_path, (1.0, 2.0, 3.0))
+    altro = finestra._nodo_della_playlist(finestra.archivio.playlist[0])
+    finestra.albero.Expand(altro)
+    marker = list(finestra._figli(voce))
+    # Ai capi, fuori da un marker, il messaggio dice com'e'.
+    _in_pausa_a(finestra, 0.5)
+    assert _premi(finestra, "r") == "Prima di qui non ci sono marker."
+    _in_pausa_a(finestra, 4.0)
+    assert _premi(finestra, "y") == "Dopo di qui non ci sono marker."
+    # X su un marker del brano in pausa: ci salta, indietro, e riparte.
+    finestra._seleziona(marker[2])
+    _tasto(finestra, "x")
+    assert not finestra.motore.in_pausa and suoni_annotati[-1] == "marker_indietro"
+    finestra.motore.pausa(True)
+    # Ctrl porta il fuoco su M2, Canc elimina M1 selezionato: il fuoco resta su M2.
+    finestra._seleziona(marker[0])
+    _nell_albero(finestra, wx.WXK_DOWN, ctrl=True)
+    _nell_albero(finestra, wx.WXK_DELETE)
+    assert finestra.albero.GetItemText(finestra._voce_corrente()) == "M2, 0:02"
+    # Canc sui due marker rimasti: l'altra playlist resta aperta, il fuoco va sul brano.
+    rimasti = list(finestra._figli(voce))
+    finestra._seleziona(rimasti[0])
+    finestra.albero.SelectItem(rimasti[1])
+    finestra._cancella_selezione()
+    assert _ultima(finestra) == "Eliminati 2 marker."
+    assert finestra.albero.IsExpanded(altro)
+    assert finestra._voce_corrente() == voce
+    # Senza brano in corso, i messaggi dicono cosa fare.
+    finestra.motore.stop()
+    assert _premi(finestra, "r").startswith("Non sta suonando niente: R e Y saltano")
+    assert _premi(finestra, "t", maiuscolo=True).endswith("si tolgono con Canc sulla loro voce nella plancia.")
+
+
+def test_r_mentre_suona_va_oltre_il_marker_appena_raggiunto(finestra, tmp_path):
+    _brano_con_marker(finestra, tmp_path, (2.0, 5.0), secondi=12)
+    _in_pausa_a(finestra, 8.0)
+    finestra.motore.pausa(False)
+    assert _premi(finestra, "r") == "M2, 0:05."
+    assert _aspetta(lambda: (finestra.motore.posizione or 0) > 5.2)
+    assert _premi(finestra, "r") == "M1, 0:02."
+    finestra.motore.pausa(True)
+
+
+def test_copia_aperta_prima_della_scheda_diventa_un_ramo(finestra, monkeypatch, tmp_path):
+    import shutil
+
+    (tmp_path / "due").mkdir()
+    _brano_con_marker(finestra, tmp_path, (1.0,), secondi=3)
+    copia = tmp_path / "due" / "canzone.wav"
+    shutil.copy(tmp_path / "canzone.wav", copia)
+    # Lo schedario non ha ancora letto la copia quando la plancia la mostra.
+    monkeypatch.setattr(finestra.schedario, "chiedi", lambda _percorsi: None)
+    finestra._aggiungi(None, [str(copia)])
+    nodo = finestra._nodo_della_playlist(finestra.archivio.playlist[-1])
+    finestra.albero.Expand(nodo)
+    voce = next(finestra._figli(nodo))
+    assert not finestra.albero.ItemHasChildren(voce)
+    finestra.schedario.leggi_subito(str(copia))
+    finestra._schede_arrivate()
+    assert finestra.albero.ItemHasChildren(voce) and finestra.albero.GetItemText(voce).endswith("1 marker")
+    finestra.albero.Expand(voce)
+    assert _etichette(finestra, voce) == ["M1, 0:01"]
+
+
+def test_le_cifre_e_j_k_non_aprono_i_marker(finestra, monkeypatch, tmp_path):
+    pl, voce = _brano_con_marker(finestra, tmp_path, (1.0,), secondi=3)
+    finestra.motore.stop()
+    finestra.albero.Collapse(voce)
+    finestra.albero.Collapse(finestra._nodo_della_playlist(pl))
+    _finto_motore(finestra, monkeypatch)
+    finestra._seleziona(finestra.nodo_pc)
+    _tasto(finestra, "1")
+    nodo = finestra._nodo_della_playlist(pl)
+    assert finestra.albero.IsExpanded(nodo)
+    assert not finestra.albero.IsExpanded(next(finestra._figli(nodo)))
+
+
+@pytest.mark.skipif(not os.path.isfile(TURBO_OUTRUN), reason="serve la collezione HVSC")
+def test_sid_fuori_dalla_collezione_usa_il_percorso(finestra, tmp_path):
+    import shutil
+
+    durata, numero = finestra._durata_dei_marker(TURBO_OUTRUN, 1)
+    assert durata == 475.0 and numero == 1
+    copia = tmp_path / "Turbo_Outrun.sid"
+    shutil.copy(TURBO_OUTRUN, copia)
+    # Fuori dal database la durata non si sa: i tre minuti predefiniti non valgono.
+    assert finestra._durata_dei_marker(str(copia), 1) == (None, 1)
+    assert finestra._chiave_dei_marker(str(copia), 1).startswith("percorso|")
+
+
+def test_marker_non_salvati_si_salvano_all_uscita(app, tmp_path):
+    from finestra import Finestra
+    from marcatori import Marcatori
+
+    f = Finestra(ao="null", cartella_dati=str(tmp_path))
+    try:
+        f.marcatori.aggiungi("a.mp3|1.000", 0.5, r"C:\a.mp3", 1.0)
+        assert f.marcatori.modificato
+        f.Close(force=True)
+    finally:
+        f.Destroy()
+    salvati = Marcatori(str(tmp_path / modulo.FILE_MARCATORI))
+    salvati.carica()
+    assert [m["nome"] for m in salvati.elenco("a.mp3|1.000")] == ["M1"]

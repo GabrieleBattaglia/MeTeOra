@@ -133,6 +133,18 @@ class Schedario:
         stata ricontrollata; None se non c'e'."""
         return self.schede.get(percorso)
 
+    def leggi_subito(self, percorso):
+        """Legge adesso la scheda di un file, per chi ne ha bisogno subito,
+        come i marker, e la tiene come le altre. None se il file non si legge."""
+        try:
+            scheda = leggi_scheda(percorso)
+        except OSError:
+            return None
+        with self._lucchetto:
+            self.schede[percorso] = scheda
+            self._modificato = True
+        return scheda
+
     def in_attesa(self):
         """Quanti file aspettano di essere letti o ricontrollati."""
         return len(self._in_coda)

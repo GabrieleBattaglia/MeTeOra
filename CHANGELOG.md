@@ -2,6 +2,17 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.39.1] - 2026-10-01
+
+- Le righe della console accordano il singolare: tolto 1 brano, eliminata 1 playlist, tolto ed eliminato 1 marker, invece di tolti ed eliminate.
+
+## [1.39.0] - 2026-10-01
+
+- I marker, issue 12: T mette un marker nel punto del brano in cui sei, con un nome automatico, M1, M2 e così via; fermo su un marker, a meno di cinque millesimi di secondo, ne chiede invece il nuovo nome.
+- R e Y vanno al marker precedente e al successivo, anche in pausa, e portano il fuoco della plancia sul marker; R si ferma al primo, Y all'ultimo. Maiuscolo con R toglie i marker dall'inizio fino a dove sei, Maiuscolo con Y da dove sei alla fine, Maiuscolo con T tutti.
+- Nella plancia un brano con dei marker dice quanti sono e si apre con freccia destra: dentro ci sono i marker, con nome e tempo. Invio ne cambia il nome, X suona il brano da lì, Canc lo elimina, e il menu ha Vai al marker, Rinomina ed Elimina. Un marker sta con il file: le copie identiche dello stesso file, in altre playlist o cartelle, hanno gli stessi marker. I marker si salvano in MeTeOra - Marcatori.json, e ogni azione ha il suo suono nuovo, breve, nella collezione di GBUtils.
+- Mentre il brano suona, R salta il marker superato da meno di un secondo e mezzo, così premuto subito dopo un salto va a quello prima. X su un marker riparte anche dalla pausa e rispetta il loop A-B. J, K e le cifre aprono le playlist senza aprire gli elenchi dei marker. Una copia aperta prima che MeTeOra ne leggesse la durata si apre sui suoi marker appena la durata arriva. I SID fuori da una collezione HVSC usano il percorso, perché la loro durata non si sa. Un file dei marker che non si legge resta com'è, la console lo dice e i marker nuovi vanno accanto, nel file .nuovo, che si rilegge le volte dopo; un salvataggio fallito si ritenta all'uscita.
+
 ## [1.36.2] - 2026-10-01
 
 - Dopo Ctrl con le frecce, che muove il fuoco senza selezionare, Canc, Maiuscolo con Canc, X, Maiuscolo con X, F4 e il menu agiscono sulla voce selezionata, se è una sola, e non su quella che ha solo il fuoco, come in Esplora risorse. Prima Canc toglieva dalla playlist, senza conferma, la voce col fuoco.

@@ -13,7 +13,7 @@
 # nascoste, i problemi interni nella console e le righe della console impostabili; nella 1.34.6 le correzioni della revisione:
 # cartelle aperte che non spariscono, playlist che si ricaricano, Risultati cestinati, emoji e jolly nella console;
 # nella 1.36.1 Backspace e Maiuscolo con Backspace, e Maiuscolo e Ctrl con le frecce senza il nome della plancia ripetuto da NVDA;
-# nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata.
+# nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console.
 
 """La finestra di MeTeOra.
 
@@ -41,6 +41,7 @@ from ctypes import wintypes
 import wx
 
 import formati
+import marcatori
 import percorsi
 import questo_pc
 import songlengths
@@ -49,6 +50,7 @@ import version
 from contatore import Contatore
 from filtro import COMMENTO, ErroreFiltro, Filtro, modello_della_console
 from impostazioni import Impostazioni
+from marcatori import Marcatori
 from motore import VOLUME_MASSIMO, durata_del_sottobrano
 from playlist import Archivio, Brano, Coda, Playlist
 from ricerca import AlberoDeiRisultati, Ricerca
@@ -57,6 +59,7 @@ from schedario import Schedario
 FILE_PLAYLIST = "MeTeOra - Playlist.json"
 FILE_IMPOSTAZIONI = "MeTeOra - Impostazioni.json"
 FILE_SCHEDARIO = "MeTeOra - Schedario.json"
+FILE_MARCATORI = "MeTeOra - Marcatori.json"
 # I messaggi dell'albero di Windows che wx non espone come servono: spostare
 # il cursore senza toccare le altre selezioni, e quante voci stanno in una pagina.
 _manda_messaggio = ctypes.WinDLL("user32").SendMessageW
@@ -102,13 +105,19 @@ TASTI = {
     ("|", False): "filtro",
     ("|", True): "filtro",
     ("m", True): "passo_volume",
+    # I marker, issue 12.
+    ("t", False): "marker",
+    ("r", False): "marker_precedente",
+    ("y", False): "marker_successivo",
+    ("t", True): "togli_i_marker",
+    ("r", True): "togli_i_marker_prima",
+    ("y", True): "togli_i_marker_dopo",
 }
 # I tasti gia' assegnati nel piano a funzioni delle tappe successive: per ora
 # dicono di non essere ancora disponibili.
 FUTURI = {
     "a": "velocità", "s": "velocità", "d": "velocità", "f": "tono", "g": "tono", "h": "tono",
     "l": "dissolvenza",
-    "r": "segnalibri", "t": "segnalibri", "y": "segnalibri",
     "u": "equalizzatore", "i": "equalizzatore", "o": "equalizzatore", "p": "equalizzatore", "è": "equalizzatore",
     "'": "scelta della traccia audio", "ì": "scelta della traccia audio",
 }
@@ -120,6 +129,7 @@ TASTI_COMUNI = [
     "Maiuscolo+X mette e toglie i punti A e B del loop sul brano selezionato, Maiuscolo+C toglie il loop.",
     "J e K aprono e suonano la playlist precedente e successiva, le cifre da 1 a 0 le prime dieci playlist.",
     "Nella plancia Backspace chiude il ramo in cui sei e risale, Maiuscolo con Backspace scende fino all'ultimo ramo aperto.",
+    "T mette un marker dove sei, o rinomina quello su cui sei; R e Y vanno al marker precedente e successivo; Maiuscolo con R, Y e T tolgono i marker prima, dopo e tutti.",
     "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione sul brano in riproduzione e Maiuscolo+F8 ce la tiene agganciata, F9 chiude e F10 apre tutto il ramo selezionato.",
     "Barra rovesciata: nella console cerca nella console, altrove in tutte le playlist e in tutte le unità. Barra verticale: il filtro della playlist in cui sta la plancia, anche dalla console.",
     "F1 manuale, F2 novità, F3 crediti e F12 elenco dei tasti, tutti nella console. Esc esce salvando tutto.",
@@ -132,12 +142,13 @@ TASTI_DEL_CONTESTO = {
     "preferiti": ("i Preferiti", "Invio, Applicazioni o Spazio: menu con Riproduci e Filtro. Barra verticale: il filtro. Canc su un loro brano lo toglie dai Preferiti."),
     "radice_playlist": ("il ramo Playlist", "Invio, Applicazioni o Spazio: menu con Nuova playlist."),
     "playlist": ("una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Filtro, Rinomina ed Elimina. Barra verticale: il filtro. Canc elimina la playlist, dopo una conferma."),
-    "brano": ("un brano di una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Sposta e Saltato. Canc toglie il brano dalla playlist, Maiuscolo+Canc manda il file nel cestino. Un SID con più sottobrani si apre con freccia destra."),
+    "brano": ("un brano di una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Sposta e Saltato. Canc toglie il brano dalla playlist, Maiuscolo+Canc manda il file nel cestino. Un SID con più sottobrani, o un brano con dei marker, si apre con freccia destra."),
     "pc": ("Questo PC", "Freccia destra mostra le unità. Invio, Applicazioni o Spazio: menu con Aggiorna."),
     "unita": ("un'unità", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Crea playlist da qui."),
     "cartella": ("una cartella", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Riproduci e Crea playlist da qui."),
-    "file": ("un file", "Invio, Applicazioni o Spazio: menu con Riproduci e Aggiungi alla playlist. Maiuscolo+Canc manda il file nel cestino. Un SID con più sottobrani si apre con freccia destra."),
-    "sottobrano": ("un sottobrano di un SID", "Invio, Applicazioni o Spazio: menu con Riproduci e Aggiungi alla playlist."),
+    "file": ("un file", "Invio, Applicazioni o Spazio: menu con Riproduci e Aggiungi alla playlist. Maiuscolo+Canc manda il file nel cestino. Un SID con più sottobrani, o un file con dei marker, si apre con freccia destra."),
+    "sottobrano": ("un sottobrano di un SID", "Invio, Applicazioni o Spazio: menu con Riproduci e Aggiungi alla playlist. Se ha dei marker, freccia destra li mostra."),
+    "marker": ("un marker", "Invio rinomina il marker, X suona il brano da lì, Canc lo elimina. Applicazioni o Spazio: menu con Vai al marker, Rinomina ed Elimina."),
     "comando": ("un comando", "Invio esegue il comando."),
 }
 
@@ -432,6 +443,8 @@ class Finestra(wx.Frame):
         self.schedario = Schedario(os.path.join(cartella_dati, FILE_SCHEDARIO), avvisa=lambda: wx.CallAfter(self._schede_arrivate))
         self.schedario.carica()
         self.contatore = Contatore(self.schedario, avvisa=lambda: wx.CallAfter(self._conti_arrivati))
+        self.marcatori = Marcatori(os.path.join(cartella_dati, FILE_MARCATORI))
+        self.marcatori.carica()
         # Le playlist temporanee nate dalle cartelle di Questo PC, per cartella:
         # rigiocando un file della stessa cartella si riusa la stessa.
         self._temporanee = {}
@@ -467,6 +480,8 @@ class Finestra(wx.Frame):
             self.scrivi(f"Il file delle playlist non si legge, e parto senza playlist: {errore_archivio}")
             # Il file illeggibile non va sovrascritto alla prima modifica.
             self.archivio.percorso += ".nuovo"
+        if self.marcatori.errore:
+            self.scrivi(f"Il file dei marker non si legge, e resta com'è: {self.marcatori.errore}. I marker nuovi vanno in {os.path.basename(self.marcatori.percorso)}.")
         self._chiedi_schede(*self.archivio.playlist, self.archivio.preferiti)
 
     # La costruzione.
@@ -675,7 +690,7 @@ class Finestra(wx.Frame):
         elif len(self._voci_selezionate()) > 1:
             righe = [f"Tasti per {len(self._voci_selezionate())} voci selezionate: un ramo selezionato vale per tutto ciò che contiene.",
                 "X suona la selezione come una playlist invisibile, che resta finché non premi V. Invio, Applicazioni o Spazio: menu della selezione. "
-                "Canc toglie i brani dalle playlist ed elimina le playlist, Maiuscolo+Canc manda i file nel cestino, F4 li mette nei Preferiti.",
+                "Canc toglie i brani dalle playlist ed elimina le playlist e i marker, Maiuscolo+Canc manda i file nel cestino, F4 li mette nei Preferiti.",
                 "Maiuscolo con le frecce allarga la selezione, Ctrl con le frecce muove il fuoco senza selezionare, Ctrl+Spazio accende e spegne la voce col fuoco."]
         else:
             dati = self._dati(self._voce_corrente()) or {}
@@ -921,10 +936,15 @@ class Finestra(wx.Frame):
     def _etichetta(self, dati):
         """L'etichetta di un brano, di un file o di un sottobrano, con le sue indicazioni."""
         brano = dati["brano"]
+        if dati["tipo"] == "marker":
+            return f"{dati['marker']['nome']}, {durata_lunga(dati['marker']['tempo'])}"
         suona = bool(self.motore.in_corso) and brano is self.coda.corrente
+        quanti = len(self._marker_della_voce(dati))
         if dati["tipo"] == "sottobrano":
             n = dati["numero"]
             parti = [f"Sottobrano {n} di {dati['totale']}, {tempo(durata_del_sottobrano(brano.percorso, n))}"]
+            if quanti:
+                parti.append(f"{quanti} marker")
             if suona and self.motore.sottobrano == n:
                 parti.append("in riproduzione")
             return ", ".join(parti)
@@ -933,6 +953,8 @@ class Finestra(wx.Frame):
             info = songlengths.info_del_sid(brano.percorso)
             parti[0] += f", sottobrano {brano.sottobrano} di {info['sottobrani'] if info else '?'}"
         parti.extend(self._durata_nella_plancia(brano))
+        if quanti:
+            parti.append(f"{quanti} marker")
         if brano.saltato:
             parti.append("saltato")
         if self.coda.loop_playlist is dati["playlist"]:
@@ -962,13 +984,13 @@ class Finestra(wx.Frame):
         if completo:
             dati["completo"] = True
         voce = self.albero.AppendItem(genitore, self._etichetta(dati), data=dati)
-        if self._ha_sottobrani(brano):
+        if self._ha_sottobrani(brano) or self._marker_della_voce(dati):
             dati["caricato"] = False
             self.albero.SetItemHasChildren(voce, True)
         return voce
 
     def _aggiorna_etichette(self):
-        """Rinfresca le etichette di brani, file e sottobrani: saltato, loop, in riproduzione."""
+        """Rinfresca le etichette di brani, file e sottobrani: saltato, loop, marker, in riproduzione."""
         for voce in self._tutte_le_voci():
             dati = self._dati(voce)
             if not dati or dati["tipo"] not in ("brano", "file", "sottobrano"):
@@ -976,6 +998,9 @@ class Finestra(wx.Frame):
             nuova = self._etichetta(dati)
             if self.albero.GetItemText(voce) != nuova:
                 self.albero.SetItemText(voce, nuova)
+                if dati["tipo"] != "marker" and not self.albero.ItemHasChildren(voce) and self._marker_della_voce(dati):
+                    dati["caricato"] = False
+                    self.albero.SetItemHasChildren(voce, True)
 
     def _filtro_di(self, pl):
         """Il filtro compilato della playlist, o None se non ne ha. Un testo
@@ -1308,12 +1333,23 @@ class Finestra(wx.Frame):
                 if self._ammesso(pl, brano):
                     self._aggiungi_voce(voce, "brano", pl, brano)
             return
-        if tipo in ("brano", "file"):
+        if tipo in ("brano", "file") and self._ha_sottobrani(dati["brano"]):
             brano = dati["brano"]
             totale = songlengths.info_del_sid(brano.percorso)["sottobrani"]
             for n in range(1, totale + 1):
                 figlio = {"tipo": "sottobrano", "playlist": dati["playlist"], "brano": brano, "numero": n, "totale": totale}
+                sotto = self.albero.AppendItem(voce, self._etichetta(figlio), data=figlio)
+                if self._marker_della_voce(figlio):
+                    figlio["caricato"] = False
+                    self.albero.SetItemHasChildren(sotto, True)
+            return
+        if tipo in ("brano", "file", "sottobrano"):
+            for marker in self._marker_della_voce(dati):
+                figlio = {"tipo": "marker", "playlist": dati["playlist"], "brano": dati["brano"], "numero": dati.get("numero") or dati["brano"].sottobrano,
+                    "chiave": self._chiave_della_voce(dati), "marker": marker}
                 self.albero.AppendItem(voce, self._etichetta(figlio), data=figlio)
+            if not self.albero.GetChildrenCount(voce, False):
+                self.albero.SetItemHasChildren(voce, False)
             return
         try:
             cartelle, files = questo_pc.contenuto(dati["percorso"])
@@ -1377,6 +1413,8 @@ class Finestra(wx.Frame):
             getattr(self, f"_comando_{dati['comando']}")()
         elif dati and dati["tipo"] == "altri":
             self._altri_risultati()
+        elif dati and dati["tipo"] == "marker":
+            self._rinomina_il_marker(dati["chiave"], dati["marker"])
         else:
             self._menu(voce)
 
@@ -1463,6 +1501,9 @@ class Finestra(wx.Frame):
             pl, brano = dati["playlist"], dati["brano"]
             return [("Riproduci", lambda: self._riproduci(pl, brano)), ("Aggiungi alla playlist", self._menu_aggiungi(lambda: [Brano(brano.percorso)])),
                 ("Aggiungi ai preferiti", lambda: self._ai_preferiti(brano)), ("Manda nel cestino", lambda: self._al_cestino(self._voce_di_lavoro()))]
+        if tipo == "marker":
+            return [("Vai al marker", lambda: self._vai_al_marker(dati)), ("Rinomina", lambda: self._rinomina_il_marker(dati["chiave"], dati["marker"])),
+                ("Elimina", lambda: self._elimina_il_marker(dati["chiave"], dati["marker"], self._voce_di_lavoro()))]
         if tipo == "sottobrano":
             pl, brano, n = dati["playlist"], dati["brano"], dati["numero"]
             return [("Riproduci", lambda: self._riproduci(pl, brano, n)),
@@ -1521,6 +1562,8 @@ class Finestra(wx.Frame):
             self._elimina_playlist(dati["playlist"])
         elif dati.get("tipo") == "brano":
             self._togli(dati["playlist"], dati["brano"])
+        elif dati.get("tipo") == "marker":
+            self._elimina_il_marker(dati["chiave"], dati["marker"], voce)
         else:
             self._riscontro("non_disponibile", "Qui Canc non cancella niente.")
 
@@ -1591,7 +1634,7 @@ class Finestra(wx.Frame):
         n = len(self._voci_selezionate())
         return [(f"Riproduci le {n} voci selezionate", self._suona_selezione), ("Crea playlist dalla selezione", self._crea_dalla_selezione),
             ("Aggiungi alla playlist", self._menu_aggiungi(self._copie_della_selezione)), ("Aggiungi ai preferiti", self._selezione_ai_preferiti),
-            ("Togli dalle playlist, ed elimina le playlist selezionate", self._cancella_selezione), ("Manda nel cestino", self._cestina_selezione)]
+            ("Togli dalle playlist, ed elimina le playlist e i marker selezionati", self._cancella_selezione), ("Manda nel cestino", self._cestina_selezione)]
 
     def _crea_dalla_selezione(self):
         brani = self._copie_della_selezione()
@@ -1630,27 +1673,41 @@ class Finestra(wx.Frame):
         voci = [(v, self._dati(v) or {}) for v in self._voci_selezionate()]
         da_eliminare = [d["playlist"] for _v, d in voci if d.get("tipo") == "playlist" and d["playlist"] in self.archivio.playlist]
         da_togliere = [(v, d["playlist"], d["brano"]) for v, d in voci if d.get("tipo") == "brano" and d["playlist"] not in da_eliminare]
-        if not (da_eliminare or da_togliere):
-            self._riscontro("non_disponibile", "Nella selezione non c'è niente che Canc possa togliere: brani di playlist o playlist.")
+        marker = [(v, d["chiave"], d["marker"]) for v, d in voci if d.get("tipo") == "marker"]
+        if not (da_eliminare or da_togliere or marker):
+            self._riscontro("non_disponibile", "Nella selezione non c'è niente che Canc possa togliere: brani di playlist, playlist o marker.")
             return
         if da_eliminare and not self._conferma(f"Eliminare {len(da_eliminare)} playlist? I file restano sul disco.", "Elimina playlist"):
             self.scrivi("Eliminazione annullata.")
             return
-        approdo = self._approdo([v for v, d in voci if d.get("tipo") == "playlist" and d["playlist"] in da_eliminare] + [v for v, _pl, _b in da_togliere])
+        approdo = self._approdo([v for v, d in voci if d.get("tipo") == "playlist" and d["playlist"] in da_eliminare] + [v for v, _pl, _b in da_togliere]
+            + [v for v, _k, _m in marker])
         for pl in da_eliminare:
             self.archivio.elimina(pl)
         for _voce, pl, brano in da_togliere:
             pl.togli(brano)
             if self.coda.loop_playlist is pl and brano in (self.coda.punto_a, self.coda.punto_b):
                 self.coda.togli_loop()
-        self._salva_archivio()
-        self._ricostruisci_dopo_la_cancellazione(approdo)
+        # Lo stesso marker puo' comparire sotto piu' copie dello stesso file.
+        tolti_marker = sum(self.marcatori.togli(k, m) for k, m in {(k, m["tempo"]): (k, m) for _v, k, m in marker}.values())
+        if da_eliminare or da_togliere:
+            self._salva_archivio()
+            self._ricostruisci_dopo_la_cancellazione(approdo)
+        elif approdo is not None:
+            # Solo marker: le playlist restano come sono, il fuoco va sulla
+            # voce vicina, e se e' un marker lo ritrova il rinfresco.
+            self.albero.UnselectAll()
+            self._seleziona(approdo)
+        for k in {k for _v, k, _m in marker}:
+            self._salva_i_marker(k)
         parti = []
         if da_togliere:
-            parti.append(f"tolti {brani_al_plurale(len(da_togliere))}")
+            parti.append(f"{'tolto' if len(da_togliere) == 1 else 'tolti'} {brani_al_plurale(len(da_togliere))}")
         if da_eliminare:
-            parti.append(f"eliminate {len(da_eliminare)} playlist")
-        self._riscontro("brano_tolto", ", ".join(parti).capitalize() + ".")
+            parti.append(f"{'eliminata' if len(da_eliminare) == 1 else 'eliminate'} {len(da_eliminare)} playlist")
+        if tolti_marker:
+            parti.append(f"{'eliminato' if tolti_marker == 1 else 'eliminati'} {tolti_marker} marker")
+        self._riscontro("brano_tolto" if da_togliere or da_eliminare else "marker_eliminato", ", ".join(parti).capitalize() + ".")
 
     def _ricostruisci_dopo_la_cancellazione(self, approdo, voci_da_togliere=()):
         """Dopo una cancellazione: toglie dalla plancia le voci delle cartelle
@@ -1683,7 +1740,7 @@ class Finestra(wx.Frame):
         if not numero or dati.get("tipo") != "brano" or not self.albero.ItemHasChildren(voce):
             return
         self.albero.Expand(voce)
-        figlio = next((v for v in self._figli(voce) if (self._dati(v) or {}).get("numero") == numero), None)
+        figlio = next((v for v in self._figli(voce) if (self._dati(v) or {}).get("tipo") == "sottobrano" and self._dati(v).get("numero") == numero), None)
         if figlio is not None:
             self._seleziona(figlio)
 
@@ -2045,9 +2102,9 @@ class Finestra(wx.Frame):
             pl = self._temporanee[cartella] = Playlist.da_percorsi(nome, files, cartella)
         return pl
 
-    def _suona(self, pl, brano, evento="play", sottobrano=None):
+    def _suona(self, pl, brano, evento="play", sottobrano=None, inizio=None):
         self.coda.imposta(pl, brano)
-        self.motore.suona(brano.percorso, sottobrano or brano.sottobrano)
+        self.motore.suona(brano.percorso, sottobrano or brano.sottobrano, inizio=inizio)
         numero, totale = self.coda.posizione()
         if getattr(pl, "selezione", False):
             dove = f"{numero} di {totale} della selezione"
@@ -2191,7 +2248,8 @@ class Finestra(wx.Frame):
         if tipo == "sottobrano":
             return not dati["brano"].saltato
         if tipo in ("brano", "file"):
-            return not dati["brano"].saltato and not (self.albero.IsExpanded(voce) and self.albero.GetChildrenCount(voce, False))
+            # Un SID con i sottobrani aperti lascia il posto a loro; i marker no.
+            return not dati["brano"].saltato and not (self.albero.IsExpanded(voce) and self._ha_sottobrani(dati["brano"]))
         return False
 
     def _voce_che_suona(self):
@@ -2205,7 +2263,7 @@ class Finestra(wx.Frame):
             dati = self._dati(voce) or {}
             if dati.get("tipo") in ("brano", "file") and dati["brano"] is corrente and self._visibile(voce):
                 if self.albero.IsExpanded(voce):
-                    return next((v for v in self._figli(voce) if self._dati(v).get("numero") == self.motore.sottobrano), voce)
+                    return next((v for v in self._figli(voce) if self._dati(v).get("tipo") == "sottobrano" and self._dati(v).get("numero") == self.motore.sottobrano), voce)
                 return voce
         return None
 
@@ -2282,6 +2340,9 @@ class Finestra(wx.Frame):
         dati = self._dati(self._voce_di_lavoro()) or {}
         tipo = dati.get("tipo")
         corrente = self.coda.corrente
+        if tipo == "marker":
+            self._vai_al_marker(dati)
+            return
         if tipo in ("brano", "file", "sottobrano"):
             numero = dati.get("numero")
             gia_suona = self.motore.in_corso and dati["brano"] is corrente and (numero is None or self.motore.sottobrano == numero)
@@ -2323,7 +2384,7 @@ class Finestra(wx.Frame):
         elemento che si puo' suonare, sottobrani compresi."""
         self.albero.Expand(self.nodo_playlist)
         nodo = self._nodo_della_playlist(pl)
-        self._apri_ramo(nodo)
+        self._apri_ramo(nodo, con_i_marker=False)
         self._seleziona(nodo)
         self.albero.EnsureVisible(nodo)
         self.albero.SetFocus()
@@ -2565,6 +2626,259 @@ class Finestra(wx.Frame):
     def _comando_impostazioni(self):
         self._riscontro("non_disponibile", "La finestra delle impostazioni arriva con la tappa 3.")
 
+    # I marker, issue 12.
+
+    # Mentre il brano suona, R considera gia' passato un marker superato da
+    # meno di questo: appena saltati su un marker si e' gia' oltre, e R deve
+    # andare a quello prima.
+    MARGINE_DI_R = 1.5
+
+    def _durata_dei_marker(self, percorso, sottobrano=None, leggi=False):
+        """(durata, sottobrano) con cui un file si riconosce per i suoi marker:
+        per un SID la durata del sottobrano dal database della collezione,
+        per gli altri quella dello schedario. Una durata che non si conosce
+        e' None, e allora vale il percorso: per un SID fuori dal database la
+        durata predefinita di tre minuti non e' una durata vera. Con leggi,
+        se lo schedario non ha ancora letto il file, lo legge subito."""
+        if formati.e_sid(percorso):
+            info = songlengths.info_del_sid(percorso)
+            numero = sottobrano or (info or {}).get("iniziale") or 1
+            durate = songlengths.durate_del_file(percorso)
+            return (durate[numero - 1] if durate and numero <= len(durate) else None), numero
+        scheda = self.schedario.scheda(percorso)
+        if scheda is None and leggi:
+            scheda = self.schedario.leggi_subito(percorso)
+        return (scheda or {}).get("durata"), None
+
+    def _chiave_dei_marker(self, percorso, sottobrano=None, leggi=False):
+        durata, numero = self._durata_dei_marker(percorso, sottobrano, leggi)
+        return marcatori.chiave(percorso, durata, numero)
+
+    def _chiave_della_voce(self, dati):
+        """La chiave dei marker di una voce della plancia, o None: un SID con
+        piu' sottobrani ha i marker sui sottobrani, non sul file."""
+        tipo = dati.get("tipo")
+        if tipo == "marker":
+            return dati["chiave"]
+        if tipo == "sottobrano":
+            return self._chiave_dei_marker(dati["brano"].percorso, dati["numero"])
+        if tipo in ("brano", "file") and not self._ha_sottobrani(dati["brano"]):
+            return self._chiave_dei_marker(dati["brano"].percorso, dati["brano"].sottobrano)
+        return None
+
+    def _marker_della_voce(self, dati):
+        """I marker di un brano, di un file o di un sottobrano della plancia.
+        Prima un controllo sul solo nome del file, che costa poco."""
+        if dati.get("tipo") not in ("brano", "file", "sottobrano") or not self.marcatori.forse(dati["brano"].percorso):
+            return []
+        k = self._chiave_della_voce(dati)
+        return self.marcatori.elenco(k) if k else []
+
+    def _contesto_dei_marker(self, senza_brano):
+        """(chiave, percorso, durata, sottobrano) di cio' che suona, o None
+        con il riscontro senza_brano se non suona niente."""
+        percorso = self.motore.in_corso
+        if not percorso:
+            self._riscontro("niente_da_suonare", f"Non sta suonando niente: {senza_brano}")
+            return None
+        sottobrano = self.motore.sottobrano if self.motore.sottobrani else None
+        durata, numero = self._durata_dei_marker(percorso, sottobrano, leggi=True)
+        return marcatori.chiave(percorso, durata, numero), percorso, durata, numero
+
+    def _salva_i_marker(self, k):
+        """Salva i marker; se non si riesce lo dice, e ci si riprova al
+        prossimo cambiamento o all'uscita."""
+        try:
+            self.marcatori.salva()
+        except OSError as e:
+            self._riscontro("errore", f"Non riesco a salvare i marker, riprovo all'uscita: {e}")
+        self._rinfresca_i_marker(k)
+
+    def _comando_marker(self):
+        """T: un marker nuovo dove si e'; se li' c'e' gia' un marker, lo rinomina."""
+        contesto = self._contesto_dei_marker("i marker si mettono nel brano che suona.")
+        if contesto is None:
+            return
+        k, percorso, durata, numero = contesto
+        posizione = self.motore.posizione or 0.0
+        esistente = self.marcatori.trova(k, posizione)
+        if esistente is not None:
+            self._rinomina_il_marker(k, esistente)
+            return
+        marker = self.marcatori.aggiungi(k, posizione, percorso, durata, numero)
+        self._salva_i_marker(k)
+        self._riscontro("marker_messo", f"Marker {marker['nome']} a {durata_lunga(marker['tempo'])}.")
+
+    def _salta_al_marker(self, verso):
+        contesto = self._contesto_dei_marker("R e Y saltano fra i marker del brano che suona.")
+        if contesto is None:
+            return
+        k = contesto[0]
+        if not self.marcatori.elenco(k):
+            self._riscontro("non_disponibile", "Questo brano non ha marker: T ne mette uno dove sei.")
+            return
+        posizione = self.motore.posizione or 0.0
+        if verso > 0:
+            marker = self.marcatori.successivo(k, posizione)
+        else:
+            margine = marcatori.TOLLERANZA if self.motore.in_pausa else self.MARGINE_DI_R
+            marker = self.marcatori.precedente(k, posizione, margine)
+        if marker is None:
+            sopra = self.marcatori.trova(k, posizione) is not None
+            if verso > 0:
+                testo = "È l'ultimo marker." if sopra else "Dopo di qui non ci sono marker."
+            else:
+                testo = "È il primo marker." if sopra else "Prima di qui non ci sono marker."
+            self._riscontro("nessun_altro_brano", testo)
+            return
+        self.motore.vai_a(marker["tempo"])
+        self._riscontro("marker_avanti" if verso > 0 else "marker_indietro", f"{marker['nome']}, {durata_lunga(marker['tempo'])}.")
+        self._fuoco_sul_marker(k, marker)
+
+    def _comando_marker_precedente(self):
+        self._salta_al_marker(-1)
+
+    def _comando_marker_successivo(self):
+        self._salta_al_marker(1)
+
+    def _togli_i_marker(self, quali):
+        contesto = self._contesto_dei_marker("Maiuscolo con R, Y e T tolgono i marker del brano che suona; quelli di un altro brano si tolgono con Canc sulla loro voce nella plancia.")
+        if contesto is None:
+            return
+        k = contesto[0]
+        posizione = self.motore.posizione or 0.0
+        if quali == "prima":
+            tolti, evento, dove = self.marcatori.togli_prima(k, posizione), "marker_tolti_prima", f"dall'inizio fino a {durata_lunga(posizione)}"
+        elif quali == "dopo":
+            tolti, evento, dove = self.marcatori.togli_dopo(k, posizione), "marker_tolti_dopo", f"da {durata_lunga(posizione)} alla fine"
+        else:
+            tolti, evento, dove = self.marcatori.togli_tutti(k), "marker_tolti_tutti", "in tutto il brano"
+        if not tolti:
+            self._riscontro("non_disponibile", f"Non ci sono marker da togliere {dove}.")
+            return
+        self._salva_i_marker(k)
+        self._riscontro(evento, f"{'Tolto' if tolti == 1 else 'Tolti'} {tolti} marker {dove}.")
+
+    def _comando_togli_i_marker_prima(self):
+        self._togli_i_marker("prima")
+
+    def _comando_togli_i_marker_dopo(self):
+        self._togli_i_marker("dopo")
+
+    def _comando_togli_i_marker(self):
+        self._togli_i_marker("tutti")
+
+    def _rinomina_il_marker(self, k, marker):
+        with DialogoTesto(self, f"Nome del marker a {durata_lunga(marker['tempo'])}:", "Rinomina il marker", marker["nome"]) as dialogo:
+            self._suono("domanda")
+            if dialogo.ShowModal() != wx.ID_OK:
+                self.scrivi("Nome del marker non cambiato.")
+                return
+            nome = " ".join(dialogo.GetValue().split())
+        if not nome or nome == marker["nome"]:
+            self.scrivi("Nome del marker non cambiato.")
+            return
+        vecchio = marker["nome"]
+        self.marcatori.rinomina(k, marker, nome)
+        self._salva_i_marker(k)
+        self._riscontro("marker_rinominato", f"Il marker {vecchio}, a {durata_lunga(marker['tempo'])}, ora si chiama {nome}.")
+
+    def _elimina_il_marker(self, k, marker, voce=None):
+        """Canc su un marker della plancia, la sua voce: lo toglie. Se il
+        fuoco stava proprio su di lui, passa al marker vicino, o al brano se
+        era l'ultimo; altrimenti resta dov'e'."""
+        if voce is not None and voce == self._voce_corrente():
+            vicina = self.albero.GetNextSibling(voce)
+            if not vicina.IsOk():
+                vicina = self.albero.GetPrevSibling(voce)
+            self._seleziona(vicina if vicina.IsOk() else self.albero.GetItemParent(voce))
+        self.marcatori.togli(k, marker)
+        self._salva_i_marker(k)
+        self._riscontro("marker_eliminato", f"Eliminato il marker {marker['nome']}, a {durata_lunga(marker['tempo'])}.")
+
+    def _vai_al_marker(self, dati):
+        """X o Vai al marker: suona il brano dal marker, rispettando il loop
+        A-B. Se il brano e' quello caricato ci salta, e riparte se era in
+        pausa; il suono dice se il salto va avanti o indietro."""
+        brano, numero, marker = dati["brano"], dati.get("numero"), dati["marker"]
+        stesso = self.motore.in_corso == brano.percorso and (numero is None or self.motore.sottobrano == numero)
+        if stesso:
+            avanti = marker["tempo"] >= (self.motore.posizione or 0.0)
+            self.motore.vai_a(marker["tempo"])
+            if self.motore.in_pausa:
+                self.motore.pausa(False)
+            self._riscontro("marker_avanti" if avanti else "marker_indietro", f"{marker['nome']}, {durata_lunga(marker['tempo'])}.")
+            return
+        if not self.coda.nel_loop(dati["playlist"], brano):
+            self._riscontro("fuori_dal_loop", f"{brano.nome_del_file} è fuori dal loop: si suona solo fra il punto A e il punto B.")
+            return
+        self._suona(dati["playlist"], brano, sottobrano=numero, inizio=marker["tempo"])
+
+    def _rinfresca_i_marker(self, k):
+        """Dopo un cambio ai marker di una chiave, rinfresca nella plancia
+        tutte le voci di quel file, in ogni playlist e cartella: etichetta,
+        ramo e marker che mostra. Il fuoco su un marker rinato si ritrova
+        dal suo tempo. Prima si raccolgono le voci, poi si rifanno: rifacendo
+        una voce i suoi marker spariscono, e non vanno piu' toccati."""
+        corrente = self._voce_corrente()
+        dati_correnti = self._dati(corrente) or {}
+        tempo_corrente = dati_correnti["marker"]["tempo"] if dati_correnti.get("tipo") == "marker" else None
+        genitore_del_fuoco = self.albero.GetItemParent(corrente) if tempo_corrente is not None else None
+        # Prima il nome del file, che costa poco; la chiave solo per quelli.
+        nome = os.path.basename(k.split("|")[1]).casefold() if k.startswith("percorso|") else k.split("|")[0]
+        da_rifare = []
+        for voce in self._tutte_le_voci():
+            dati = self._dati(voce) or {}
+            if dati.get("tipo") in ("brano", "file", "sottobrano") and os.path.basename(dati["brano"].percorso).casefold() == nome \
+                    and self._chiave_della_voce(dati) == k:
+                da_rifare.append((voce, dati))
+        ha_marker = bool(self.marcatori.elenco(k))
+        for voce, dati in da_rifare:
+            self.albero.SetItemText(voce, self._etichetta(dati))
+            fuoco_dentro = genitore_del_fuoco is not None and genitore_del_fuoco == voce
+            if fuoco_dentro:
+                # Il marker col fuoco sta per rinascere: il fuoco passa un
+                # attimo sul brano, e poi ritrova il marker dal suo tempo.
+                self._seleziona(voce)
+            aperta = self.albero.IsExpanded(voce)
+            self.albero.DeleteChildren(voce)
+            dati["caricato"] = False
+            self.albero.SetItemHasChildren(voce, ha_marker)
+            if not (aperta and ha_marker):
+                continue
+            self._carica(voce, dati)
+            self.albero.Expand(voce)
+            if fuoco_dentro:
+                figlio = next((v for v in self._figli(voce) if abs((self._dati(v) or {})["marker"]["tempo"] - tempo_corrente) < 1e-6), None)
+                if figlio is not None:
+                    self._seleziona(figlio)
+
+    def _fuoco_sul_marker(self, k, marker):
+        """R e Y: il fuoco della plancia va sul marker raggiunto, aprendo i
+        rami che servono, se cio' che suona sta nella plancia."""
+        voce = self._trova_voce_che_suona()
+        if voce is None:
+            return
+        dati = self._dati(voce) or {}
+        if dati.get("tipo") in ("brano", "file") and self._ha_sottobrani(dati["brano"]):
+            # Di un SID con piu' sottobrani i marker stanno sul sottobrano.
+            self.albero.Expand(voce)
+            voce = next((v for v in self._figli(voce) if (self._dati(v) or {}).get("numero") == self.motore.sottobrano), None)
+            if voce is None:
+                return
+            dati = self._dati(voce)
+        if self._chiave_della_voce(dati) != k:
+            return
+        if not self.albero.ItemHasChildren(voce):
+            # La voce e' nata prima che si sapesse dei suoi marker.
+            dati["caricato"] = False
+            self.albero.SetItemHasChildren(voce, True)
+        self.albero.Expand(voce)
+        figlio = next((v for v in self._figli(voce) if (self._dati(v) or {}).get("marker", {}).get("tempo") == marker["tempo"]), None)
+        if figlio is not None:
+            self.albero.EnsureVisible(figlio)
+            self._seleziona(figlio)
+
     # F8.
 
     def _trova_voce_che_suona(self):
@@ -2589,7 +2903,7 @@ class Finestra(wx.Frame):
                 voce = next((v for v in self._figli(cartella) if (self._dati(v) or {}).get("brano") is corrente), None)
         # Se i sottobrani del SID sono aperti, la voce e' quella del sottobrano che suona.
         if voce is not None and self.albero.IsExpanded(voce):
-            voce = next((v for v in self._figli(voce) if self._dati(v).get("numero") == self.motore.sottobrano), voce)
+            voce = next((v for v in self._figli(voce) if self._dati(v).get("tipo") == "sottobrano" and self._dati(v).get("numero") == self.motore.sottobrano), voce)
         return voce
 
     def _vai_al_brano(self):
@@ -2645,15 +2959,21 @@ class Finestra(wx.Frame):
         self._seleziona(voce)
         self._riscontro("chiudi_tutto", f"Chiuso tutto dentro {self.albero.GetItemText(voce)}.")
 
-    def _apri_ramo(self, voce):
+    def _apri_ramo(self, voce, con_i_marker=True):
         """Apre la voce e tutti i rami che ha dentro, caricandoli, fino a
-        MASSIMO_DI_RAMI. Torna (rami aperti, vero se si e' fermato prima)."""
+        MASSIMO_DI_RAMI. Torna (rami aperti, vero se si e' fermato prima).
+        Senza con_i_marker restano chiusi i brani che dentro hanno solo
+        marker: J e K aprono la playlist per suonarla, non per leggerli."""
         aperti = 0
         da_aprire = [voce]
         with wx.BusyCursor():
             while da_aprire and aperti < MASSIMO_DI_RAMI:
                 ramo = da_aprire.pop(0)
                 if not self.albero.ItemHasChildren(ramo):
+                    continue
+                dati = self._dati(ramo) or {}
+                if not con_i_marker and dati.get("tipo") in ("brano", "file", "sottobrano") and not (
+                        dati["tipo"] != "sottobrano" and self._ha_sottobrani(dati["brano"])):
                     continue
                 self.albero.Expand(ramo)
                 aperti += 1
@@ -2895,6 +3215,9 @@ class Finestra(wx.Frame):
             self._ricerca.ferma()
         self.impostazioni["ripresa"] = self._stato_da_riprendere()
         self._salva_archivio()
+        if self.marcatori.modificato:
+            with contextlib.suppress(OSError):
+                self.marcatori.salva()
         self.contatore.ferma()
         self.schedario.ferma()
         with contextlib.suppress(OSError):

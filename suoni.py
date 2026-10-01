@@ -73,6 +73,15 @@ EVENTI = {
     "ripartito_in_console": "tripletta_su_giu_rapidissima",
     "non_trovato_in_console": "rifiutato",
     "chiudi_tutto": "menu_tripletta_gi_7",
+    # I marker, con i suoni nati per loro nella collezione (GBUtils V175).
+    "marker_messo": "meteora_marker_messo",
+    "marker_rinominato": "meteora_marker_rinominato",
+    "marker_indietro": "meteora_marker_indietro",
+    "marker_avanti": "meteora_marker_avanti",
+    "marker_tolti_prima": "meteora_marker_tolti_prima",
+    "marker_tolti_dopo": "meteora_marker_tolti_dopo",
+    "marker_tolti_tutti": "meteora_marker_tolti_tutti",
+    "marker_eliminato": "meteora_marker_eliminato",
     # Backspace e Maiuscolo con Backspace nella plancia.
     "risali": "menu_triplicato_su_4",
     "scendi": "menu_tripletta_in_basso_5",

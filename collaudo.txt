@@ -1,0 +1,11 @@
+Collaudo di MeTeOra 1.39.1, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Suona un brano e premi T in due punti: la console dice Marker M1 e Marker M2 con il tempo.
+In pausa e mentre suona, R e Y saltano ai marker, e la plancia va sul marker raggiunto; ai capi la console dice che è il primo o l'ultimo.
+Fermo su un marker, T chiede il nuovo nome; nella plancia, Invio su un marker fa lo stesso.
+Nella plancia il brano dice quanti marker ha, e freccia destra li mostra; X su un marker suona il brano da lì, Canc lo elimina.
+Maiuscolo con R, con Y e con T: tolgono i marker prima, dopo e tutti, e la console dice quanti.
+Una copia dello stesso file in un'altra cartella, o lo stesso file in un'altra playlist, mostra gli stessi marker.
+Un SID con più sottobrani: i marker messi su un sottobrano stanno sotto quel sottobrano.
+I suoni nuovi, uno per azione: brevi, e diversi l'uno dall'altro e da quelli che c'erano.
+Mentre il brano suona, R due volte di seguito: la seconda va al marker prima, non di nuovo allo stesso.
+Con i tasti da 1 a 0, o con J e K, la playlist si apre ma i brani con dei marker restano chiusi.
