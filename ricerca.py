@@ -1,6 +1,6 @@
 # MeTeOra, la ricerca globale: cerca con il filtro in tutte le playlist e in tutte le unita'.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la 1.15.0, issue 10. Nella 1.23.0 l'albero della provenienza dei risultati.
+# 30/09/2026: nasce con la 1.15.0, issue 10. Nella 1.23.0 l'albero della provenienza dei risultati; nella 1.34.6 i risultati cestinati escono dal ramo.
 
 """La ricerca in tutto MeTeOra.
 
@@ -170,6 +170,23 @@ class AlberoDeiRisultati:
         gruppo.brani.append(brano)
         self.gruppo_del_brano[id(brano)] = gruppo
         return gruppo
+
+    def togli(self, brano):
+        """Toglie il brano dal suo ramo, per esempio perche' il suo file e'
+        andato nel cestino, e lo sconta dai totali. Torna (ramo, posizione
+        che aveva), o None se non c'era."""
+        gruppo = self.gruppo_del_brano.pop(id(brano), None)
+        if gruppo is None:
+            return None
+        indice = next((i for i, b in enumerate(gruppo.brani) if b is brano), None)
+        if indice is None:
+            return None
+        del gruppo.brani[indice]
+        ramo = gruppo
+        while ramo is not None:
+            ramo.totale -= 1
+            ramo = ramo.genitore
+        return gruppo, indice
 
     def catena(self, gruppo):
         """I rami dalla radice esclusa fino al gruppo compreso."""

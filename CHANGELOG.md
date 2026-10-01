@@ -2,6 +2,27 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.34.6] - 2026-10-01
+
+Correzioni trovate da una revisione a più agenti della 1.34.1, prima del collaudo.
+
+- Una cartella vista vuota quando la si contava, e riempita dopo, non sparisce più mentre la tieni aperta: una cartella aperta che mostra dei file resta sempre, la sua lettura fresca corregge i conti, e Aggiorna su Questo PC rifà tutti i conti, come già Aggiorna su una cartella.
+- Una playlist si ricarica ogni volta che la richiudi e la riapri, come il manuale prometteva: l'elenco dei brani che passano il filtro segue le durate e i tag arrivati nel frattempo, e una playlist che il filtro svuotava non resta più chiusa per sempre.
+- Mandando nel cestino dei Risultati, la ricerca non riaggiunge più gli ultimi risultati doppi: i file cestinati escono anche dal loro ramo e dai conti.
+- Nella console le posizioni contano le emoji come le conta Windows: con un'emoji in una riga, la ricerca, le righe che si riscrivono e il taglio delle righe vecchie non cadono più un carattere prima.
+- Nella ricerca nella console Invio passa all'occorrenza seguente anche con un jolly in testa, invece di ritrovare un pezzo della stessa; l'asterisco in testa si ignora e quello da solo si spiega; la riga che dice che il testo non c'è non viene più ritrovata dalla ricerca dopo.
+
+## [1.34.1] - 2026-10-01
+
+- Il filtro esce dalla plancia: non è più la prima voce della playlist, così NVDA conta solo i brani, e il primo è 1 di quanti sono. Il suo testo sta nell'etichetta della playlist, dopo i conti; si apre dal menu della playlist, e dei Preferiti, con le voci Filtro e Togli il filtro, oppure con la barra verticale, da qualsiasi area, sulla playlist in cui sta la plancia. Una playlist che il filtro svuota non si apre.
+- I campi del filtro e delle ricerche hanno in cima le istruzioni, tutti i comandi con un esempio, come righe che cominciano con il dollaro e non contano; si scrive nell'ultima riga, dove il testo di prima arriva selezionato. Il campo della ricerca e quello del filtro dicono cose loro.
+- La ricerca nella console usa lo stesso campo, con istruzioni sue: il testo si cerca così com'è, senza badare alle maiuscole; l'asterisco vale qualsiasi testo nella stessa riga, il cancelletto una o più cifre, e fra virgolette la sequenza è esatta, maiuscole comprese. Si trovano anche gli orari in fondo alle righe.
+- In Questo PC le cartelle senza niente da suonare, nemmeno nelle sottocartelle, spariscono appena il contatore le ha contate; se il fuoco era su di loro passa alla cartella vicina. Riaprendo, quelle già contate non compaiono nemmeno.
+- I problemi interni, gli errori che MeTeOra non si aspettava, arrivano nella console con una riga breve che dice cosa e dove, e un suono loro; lo stesso problema ripetuto di seguito riscrive la sua riga con il conto delle volte.
+- Le righe della console sono un'impostazione, righe_della_console, 2000 se non la si cambia: per ora si cambia nel file delle impostazioni, poi nella finestra della tappa 3.
+- Dopo Canc su più voci il fuoco resta nella playlist in cui si lavorava, sulla voce vicina che rimane, invece di tornare sul ramo Playlist; lo stesso dopo Maiuscolo con Canc. Anche Canc su un brano solo, con un filtro, sceglie il brano vicino fra quelli che si vedono. Il fuoco su un sottobrano resta sul sottobrano.
+- Nei campi dei filtri le istruzioni restano righe intere, senza a capo automatici, e un Backspace di troppo che attacca la riga in cui si scrive all'ultima istruzione non fa più perdere il testo. I problemi interni del motore, che python-mpv trasformava in semplici avvisi, arrivano anche loro nella console, e nel pacchetto compilato la riga dice il punto giusto del codice.
+
 ## [1.28.1] - 2026-10-01
 
 - Una barra rovesciata sola per le due ricerche: con il fuoco nella console cerca nella console, da ogni altro punto cerca in tutte le playlist e le unità. La barra verticale torna libera.

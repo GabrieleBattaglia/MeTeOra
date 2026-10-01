@@ -1,6 +1,6 @@
 # MeTeOra, il contatore delle cartelle: quanti file suonabili ha una cartella, sottocartelle comprese.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la 1.22.0, dal collaudo della 1.20.0.
+# 30/09/2026: nasce con la 1.22.0, dal collaudo della 1.20.0. Nella 1.34.6 le letture rinfrescate e Aggiorna su Questo PC.
 
 """Il conto dei file di una cartella, con tutto cio' che ha sotto.
 
@@ -62,6 +62,27 @@ class Contatore:
             for mappa in (self.conti, self._letture):
                 for c in [c for c in mappa if legate(c)]:
                     del mappa[c]
+
+    def dimentica_tutto(self):
+        """Dimentica tutti i conti e tutte le letture: Aggiorna su Questo PC."""
+        with self._lucchetto:
+            self.conti.clear()
+            self._letture.clear()
+
+    def rinfresca(self, cartella, lettura):
+        """La cartella e' stata appena letta da chi la mostra: se la lettura
+        tenuta qui per la sessione e' diversa, la sostituisce e dimentica i
+        conti della cartella e di chi la contiene, che vanno rifatti. Torna
+        le cartelle da ricontare."""
+        with self._lucchetto:
+            if cartella not in self._letture or self._letture[cartella] == lettura:
+                return []
+            self._letture[cartella] = lettura
+            chiave = cartella.rstrip("\\").lower()
+            vecchi = [c for c in self.conti if c.rstrip("\\").lower() == chiave or chiave.startswith(c.rstrip("\\").lower() + "\\")]
+            for c in vecchi:
+                del self.conti[c]
+        return vecchi
 
     def _lettura(self, cartella):
         if cartella not in self._letture:

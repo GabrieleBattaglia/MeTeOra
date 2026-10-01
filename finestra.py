@@ -8,7 +8,10 @@
 # nella 1.20.0 F1, F2 e F3 nella console, l'ora in fondo alle scritte e la ricerca nella console;
 # nella 1.21.0 il volume fino a 300, nella 1.22.0 i conti delle cartelle, nella 1.23.0 i Risultati ad albero;
 # nella 1.26.0 la ripresa all'avvio, J e K e i tasti da 1 a 0; nella 1.28.0 la selezione multipla e X da capo;
-# nella 1.28.1 una barra rovesciata sola per le due ricerche.
+# nella 1.28.1 una barra rovesciata sola per le due ricerche; nella 1.34.0 il filtro nel menu della playlist e con la barra
+# verticale, le istruzioni come commenti nei campi, la ricerca nella console con i jolly, le cartelle senza niente da suonare
+# nascoste, i problemi interni nella console e le righe della console impostabili; nella 1.34.6 le correzioni della revisione:
+# cartelle aperte che non spariscono, playlist che si ricaricano, Risultati cestinati, emoji e jolly nella console.
 
 """La finestra di MeTeOra.
 
@@ -26,6 +29,10 @@ import datetime
 import os
 import random
 import re
+import sys
+import threading
+import traceback
+import warnings
 
 import wx
 
@@ -36,7 +43,7 @@ import songlengths
 import suoni
 import version
 from contatore import Contatore
-from filtro import ErroreFiltro, Filtro
+from filtro import COMMENTO, ErroreFiltro, Filtro, modello_della_console
 from impostazioni import Impostazioni
 from motore import VOLUME_MASSIMO, durata_del_sottobrano
 from playlist import Archivio, Brano, Coda, Playlist
@@ -46,7 +53,9 @@ from schedario import Schedario
 FILE_PLAYLIST = "MeTeOra - Playlist.json"
 FILE_IMPOSTAZIONI = "MeTeOra - Impostazioni.json"
 FILE_SCHEDARIO = "MeTeOra - Schedario.json"
-RIGHE_DELLA_CONSOLE = 2000
+# Quanti caratteri al massimo del messaggio di un problema interno: la
+# console riceve una riga breve, non un registro.
+MESSAGGIO_DEL_PROBLEMA = 200
 # Quanti rami al massimo apre F10 in una volta.
 MASSIMO_DI_RAMI = 2000
 # Quanti risultati della ricerca si mostrano alla volta.
@@ -73,6 +82,11 @@ TASTI = {
     ("+", False): "volume_su",
     ("-", False): "volume_giu",
     ("\\", False): "ricerca",
+    # La barra verticale: Maiuscolo con la barra rovesciata nella tastiera
+    # italiana, che a seconda di Windows arriva in un modo o nell'altro.
+    ("\\", True): "filtro",
+    ("|", False): "filtro",
+    ("|", True): "filtro",
     ("m", True): "passo_volume",
 }
 # I tasti gia' assegnati nel piano a funzioni delle tappe successive: per ora
@@ -92,17 +106,17 @@ TASTI_COMUNI = [
     "Maiuscolo+X mette e toglie i punti A e B del loop sul brano selezionato, Maiuscolo+C toglie il loop.",
     "J e K aprono e suonano la playlist precedente e successiva, le cifre da 1 a 0 le prime dieci playlist.",
     "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione sul brano in riproduzione e Maiuscolo+F8 ce la tiene agganciata, F9 chiude e F10 apre tutto il ramo selezionato.",
-    "Barra rovesciata: nella console cerca nella console, altrove in tutte le playlist e in tutte le unità. F1 manuale, F2 novità, F3 crediti e F12 elenco dei tasti, tutti nella console. Esc esce salvando tutto.",
+    "Barra rovesciata: nella console cerca nella console, altrove in tutte le playlist e in tutte le unità. Barra verticale: il filtro della playlist in cui sta la plancia, anche dalla console.",
+    "F1 manuale, F2 novità, F3 crediti e F12 elenco dei tasti, tutti nella console. Esc esce salvando tutto.",
 ]
 # Le righe del cruscotto proprie di ogni tipo di voce della plancia.
 TASTI_DEL_CONTESTO = {
-    "filtro": ("il filtro di una playlist", "Invio o freccia destra modificano il filtro: nel campo Invio conferma, Ctrl+Invio va a capo, Esc annulla. Canc svuota il filtro."),
     "risultati": ("i Risultati della ricerca", "Invio, Applicazioni o Spazio: menu con Riproduci, Salva come playlist, Nuova ricerca e Ferma la ricerca."),
     "altri": ("la voce che mostra altri risultati", "Invio mostra i risultati seguenti."),
     "gruppo_risultati": ("un ramo dei Risultati", "Freccia destra lo apre: i risultati stanno come stavano, sotto la loro playlist o lungo il percorso della loro cartella."),
-    "preferiti": ("i Preferiti", "Invio, Applicazioni o Spazio: menu con Riproduci. Canc su un loro brano lo toglie dai Preferiti."),
+    "preferiti": ("i Preferiti", "Invio, Applicazioni o Spazio: menu con Riproduci e Filtro. Barra verticale: il filtro. Canc su un loro brano lo toglie dai Preferiti."),
     "radice_playlist": ("il ramo Playlist", "Invio, Applicazioni o Spazio: menu con Nuova playlist."),
-    "playlist": ("una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci e Rinomina. Canc elimina la playlist, dopo una conferma."),
+    "playlist": ("una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Filtro, Rinomina ed Elimina. Barra verticale: il filtro. Canc elimina la playlist, dopo una conferma."),
     "brano": ("un brano di una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Sposta e Saltato. Canc toglie il brano dalla playlist, Maiuscolo+Canc manda il file nel cestino. Un SID con più sottobrani si apre con freccia destra."),
     "pc": ("Questo PC", "Freccia destra mostra le unità. Invio, Applicazioni o Spazio: menu con Aggiorna."),
     "unita": ("un'unità", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Crea playlist da qui."),
@@ -196,6 +210,60 @@ def brani_al_plurale(n):
     return "1 brano" if n == 1 else f"{n} brani"
 
 
+def _passo_nostro(nome_del_file):
+    """Vero se un passo della traccia sta nel codice di MeTeOra. Dai sorgenti
+    i nomi sono percorsi interi; nel pacchetto di PyInstaller sono solo nomi
+    come finestra.py, e si riconoscono dai moduli caricati dalla cartella del
+    programma."""
+    cartella = os.path.normcase(os.path.dirname(os.path.abspath(__file__)))
+    nome = os.path.normcase(nome_del_file)
+    if os.path.isabs(nome):
+        return nome.startswith(cartella)
+    nostri = {os.path.splitext(os.path.basename(m.__file__))[0].lower() for m in list(sys.modules.values())
+        if isinstance(getattr(m, "__file__", None), str) and os.path.normcase(os.path.dirname(os.path.abspath(m.__file__))) == cartella}
+    return os.path.splitext(os.path.basename(nome))[0] in nostri
+
+
+_PASSO_NEL_TESTO = re.compile(r'File "([^"]+)", line (\d+), in (\S+)')
+
+
+def _breve(messaggio):
+    messaggio = " ".join(messaggio.split())
+    if len(messaggio) > MESSAGGIO_DEL_PROBLEMA:
+        messaggio = messaggio[:MESSAGGIO_DEL_PROBLEMA].rstrip() + "..."
+    return messaggio
+
+
+def riga_dell_avviso(messaggio):
+    """Una riga sola per un'eccezione che python-mpv ha trasformato in un
+    avviso: la prima riga del suo testo e il punto del codice di MeTeOra da
+    cui viene, se la traccia ci passa."""
+    testo = str(messaggio)
+    riga = f"Problema interno nel motore: {_breve(testo.splitlines()[0] if testo else '')}"
+    passi = [p for p in _PASSO_NEL_TESTO.finditer(testo) if _passo_nostro(p.group(1))]
+    if passi:
+        riga += f", in {os.path.basename(passi[-1].group(1))} alla riga {passi[-1].group(2)}, {passi[-1].group(3)}"
+    return riga + "."
+
+
+def riga_del_problema(tipo, valore, traccia):
+    """Una riga sola per un problema interno: che cosa e' successo e dove,
+    nel codice di MeTeOra se ci e' passato, altrimenti nell'ultimo punto."""
+    passi = traceback.extract_tb(traccia) if traccia else []
+    nostri = [p for p in passi if _passo_nostro(p.filename)]
+    passo = (nostri or passi or [None])[-1]
+    testo = f"Problema interno: {tipo.__name__}"
+    # Anche un messaggio che non si lascia scrivere non deve fermare la riga.
+    messaggio = ""
+    with contextlib.suppress(Exception):
+        messaggio = _breve(str(valore))
+    if messaggio:
+        testo += f", {messaggio}"
+    if passo is not None:
+        testo += f", in {os.path.basename(passo.filename)} alla riga {passo.lineno}, {passo.name}"
+    return testo + "."
+
+
 class DialogoTesto(wx.TextEntryDialog):
     """Un campo da una riga con il testo di prima gia' selezionato: scrivendo
     lo si sostituisce, con le frecce lo si corregge."""
@@ -207,43 +275,91 @@ class DialogoTesto(wx.TextEntryDialog):
         return super().ShowModal()
 
 
+# Le istruzioni in cima ai campi dei filtri e delle ricerche, scritte come
+# righe di commento, che cominciano con il dollaro e non contano.
+_GRAMMATICA_DEL_FILTRO = [
+    "Spazio: tutti i termini insieme, come rob hubbard. Andare a capo vale come uno spazio.",
+    "Barra verticale: l'uno o l'altro, come hubbard|galway.",
+    "Meno davanti a un termine: escluso, come -remix.",
+    "Asterisco: qualsiasi testo, come comm*do. Cancelletto: una o più cifre, come vol#.",
+    'Virgolette: la sequenza esatta, spazi compresi, come "last ninja".',
+    "Maiuscole e accenti non contano. Un termine senza comando cerca nel nome del file e nei tag.",
+    "I comandi sono una lettera, un segno fra < > = <= >= e un valore:",
+    "t tempo, come t<=3:00 o t>90.",
+    "d dimensione, come d>5m o d<700k.",
+    "y anno, come y<1990.",
+    "r sottobrani dei SID, come r>1.",
+    "Questi solo con l'uguale:",
+    "k tipo: k=sid, k=audio, k=video, k=tracker, k=midi, o un'estensione come k=flac.",
+    "a autore, come a=hubbard.",
+    "n titolo, come n=commando.",
+    "l album.",
+    "g genere.",
+    "p percorso della cartella, come p=c64music.",
+    "s saltato: s=1 i brani saltati, s=0 gli altri.",
+    "Le righe che cominciano con il dollaro non contano: scrivi nell'ultima riga.",
+]
+ISTRUZIONI_DEL_FILTRO = ["Puoi usare questi comandi per comporre il filtro.", *_GRAMMATICA_DEL_FILTRO]
+ISTRUZIONI_DELLA_RICERCA = ["Puoi usare questi comandi per comporre la ricerca, in tutte le playlist e in tutte le unità.", *_GRAMMATICA_DEL_FILTRO]
+ISTRUZIONI_DELLA_CONSOLE = [
+    "Puoi usare questi segni per comporre la ricerca nella console.",
+    "Il testo si cerca così com'è, spazi compresi; maiuscole e minuscole non contano. Andare a capo vale come uno spazio.",
+    "Asterisco: qualsiasi testo nella stessa riga, come non*suonare.",
+    "Cancelletto: una o più cifre, come volume #.",
+    'Virgolette: la sequenza esatta, maiuscole comprese, come "SID".',
+    "I messaggi finiscono con l'ora: 07:13 trova ciò che è accaduto alle 7 e 13, e 07:# tutta l'ora delle 7; trovano anche i tempi dei brani che contengono quelle cifre, come 1:07:13.",
+    "Invio, dalla console, passa all'occorrenza seguente.",
+    "Le righe che cominciano con il dollaro non contano: scrivi nell'ultima riga.",
+]
+
+
 class FinestraFiltro(wx.Dialog):
-    """Il campo del filtro: Invio conferma, Ctrl+Invio va a capo, Esc annulla."""
+    """Il campo multiriga dei filtri e delle ricerche. In cima le istruzioni,
+    come righe di commento che cominciano con il dollaro; in fondo la riga in
+    cui si scrive, con il testo di prima selezionato: scrivendo lo si
+    sostituisce, con le frecce lo si corregge. Invio conferma, Ctrl+Invio va
+    a capo, Esc annulla."""
 
-    SPIEGAZIONE = (
-        "Spazio: tutti i termini insieme. Barra verticale: l'uno o l'altro, come hubbard|galway. Meno davanti: escluso. "
-        "Asterisco: qualsiasi testo; cancelletto: numeri. Virgolette: sequenza esatta. "
-        "Comandi con < > = <= >=: t tempo (t<=3:00), d dimensione (d>5m), k tipo (k=sid, k=audio, k=video, k=tracker, k=midi), "
-        "a autore, n titolo, l album, g genere, y anno (y<1990), p percorso, s saltato (s=1), r sottobrani (r>1)."
-    )
-
-    def __init__(self, genitore, nome_playlist, testo, titolo=None):
+    def __init__(self, genitore, titolo, testo, istruzioni):
         from GBwx import STILE_ADATTABILE, adatta_finestra, pannello_scorrevole
 
-        titolo = titolo or f"Filtro di {nome_playlist}"
         super().__init__(genitore, title=titolo, style=STILE_ADATTABILE)
         pannello = pannello_scorrevole(self)
         sizer = wx.BoxSizer(wx.VERTICAL)
         etichetta = wx.StaticText(pannello, label=f"{titolo}. Invio conferma, Ctrl+Invio va a capo, Esc annulla.")
-        self.campo = wx.TextCtrl(pannello, value=testo, style=wx.TE_MULTILINE)
+        self._commenti = sorted((f"{COMMENTO} {riga}" for riga in istruzioni), key=len, reverse=True)
+        # Senza a capo automatici: ogni istruzione resta una riga intera, con
+        # il suo dollaro, quando NVDA e il display braille la leggono.
+        self.campo = wx.TextCtrl(pannello, value="".join(f"{COMMENTO} {riga}\n" for riga in istruzioni), style=wx.TE_MULTILINE | wx.HSCROLL)
         self.campo.SetName(titolo)
-        self.campo.SetMinSize(wx.Size(-1, self.campo.GetCharHeight() * 5))
-        spiegazione = wx.TextCtrl(pannello, value=self.SPIEGAZIONE, style=wx.TE_MULTILINE | wx.TE_READONLY)
-        spiegazione.SetName("Come si scrive il filtro")
-        spiegazione.SetMinSize(wx.Size(-1, spiegazione.GetCharHeight() * 5))
+        self.campo.SetMinSize(wx.Size(-1, self.campo.GetCharHeight() * 12))
+        # L'inizio della riga in cui si scrive, misurato dal controllo: le
+        # posizioni di Windows contano i ritorni a capo a modo loro.
+        self._inizio = self.campo.GetLastPosition()
+        self.campo.AppendText(testo)
         pulsanti = wx.StdDialogButtonSizer()
         pulsanti.AddButton(wx.Button(pannello, wx.ID_OK, "Conferma"))
         pulsanti.AddButton(wx.Button(pannello, wx.ID_CANCEL, "Annulla"))
         pulsanti.Realize()
         sizer.Add(etichetta, 0, wx.ALL, 5)
         sizer.Add(self.campo, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
-        sizer.Add(spiegazione, 0, wx.EXPAND | wx.ALL, 5)
         sizer.Add(pulsanti, 0, wx.ALL | wx.ALIGN_RIGHT, 5)
         pannello.SetSizer(sizer)
-        adatta_finestra(self, pannello, (600, 320))
+        adatta_finestra(self, pannello, (600, 400))
         self.campo.Bind(wx.EVT_KEY_DOWN, self._tasto)
-        self.campo.SelectAll()
+        self._sulla_riga_da_scrivere()
         self.campo.SetFocus()
+
+    def _sulla_riga_da_scrivere(self):
+        if self and self.campo:
+            self.campo.SetSelection(self._inizio, self.campo.GetLastPosition())
+            self.campo.ShowPosition(self.campo.GetLastPosition())
+
+    def ShowModal(self):
+        # Mostrandosi il campo potrebbe spostare la selezione: la si rimette
+        # sulla riga in cui si scrive.
+        wx.CallAfter(self._sulla_riga_da_scrivere)
+        return super().ShowModal()
 
     def _tasto(self, evento):
         if evento.GetKeyCode() in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER):
@@ -256,7 +372,17 @@ class FinestraFiltro(wx.Dialog):
 
     @property
     def testo(self):
-        return self.campo.GetValue()
+        """Cio' che e' stato scritto, senza le righe di commento. Un
+        Backspace di troppo in testa all'ultima riga la attacca all'ultima
+        istruzione: cio' che segue un'istruzione si riprende."""
+        righe = []
+        for riga in self.campo.GetValue().splitlines():
+            istruzione = next((c for c in self._commenti if riga.startswith(c)), None)
+            if istruzione is not None and len(riga) > len(istruzione):
+                righe.append(riga[len(istruzione):])
+            elif not riga.lstrip().startswith(COMMENTO):
+                righe.append(riga)
+        return "\n".join(righe)
 
 
 class Finestra(wx.Frame):
@@ -284,6 +410,8 @@ class Finestra(wx.Frame):
         self._ricerca = None
         self._testo_della_ricerca = ""
         self.risultati = None
+        # Quanti risultati della ricerca sono gia' passati nella plancia.
+        self._risultati_letti = 0
         self.nodo_risultati = None
         self._albero_dei_risultati = None
         self.schedario = Schedario(os.path.join(cartella_dati, FILE_SCHEDARIO), avvisa=lambda: wx.CallAfter(self._schede_arrivate))
@@ -298,8 +426,16 @@ class Finestra(wx.Frame):
         # La categoria dell'ultima riga della console: una riga nuova della
         # stessa categoria la sostituisce invece di aggiungersi.
         self._categoria = None
-        # Il testo dell'ultima ricerca nella console, per Invio.
+        # Il testo dell'ultima ricerca nella console e la sua espressione
+        # regolare, per Invio.
         self._cercato_in_console = ""
+        self._modello_della_console = None
+        # Inizio e fine dell'ultima occorrenza trovata, nel testo delle righe.
+        self._occorrenza = None
+        # Quante righe in fondo non si tagliano mentre F1, F2, F3 o F12 scrivono.
+        self._da_tenere = 0
+        # Quante volte di seguito e' arrivato l'ultimo problema interno.
+        self._ripetizioni = 0
         self._righe = []
         self._chiusa = False
         self._costruisci()
@@ -343,6 +479,7 @@ class Finestra(wx.Frame):
         tutto.Add(self.cruscotto, 0, wx.EXPAND | wx.ALL, 4)
         pannello.SetSizer(tutto)
         self.albero.Bind(wx.EVT_TREE_ITEM_EXPANDING, self._in_espansione)
+        self.albero.Bind(wx.EVT_TREE_ITEM_COLLAPSED, self._chiusa_una_voce)
         self.albero.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self._invio)
         self.albero.Bind(wx.EVT_TREE_ITEM_MENU, self._menu_da_evento)
         self.albero.Bind(wx.EVT_KEY_DOWN, self._tasto_nell_albero)
@@ -368,7 +505,7 @@ class Finestra(wx.Frame):
 
     def scrivi(self, testo, categoria=None, ora=True):
         """Aggiunge una riga in fondo alla console senza spostarne il
-        cursore, e tiene le ultime RIGHE_DELLA_CONSOLE righe. Con una
+        cursore, e tiene le ultime righe, quante ne dicono le impostazioni. Con una
         categoria, per esempio il volume, se anche l'ultima riga era di quella
         categoria la riga si riscrive invece di aggiungersene un'altra.
         In fondo alla riga va l'ora, ore e minuti; chi scrive piu' righe di
@@ -377,7 +514,8 @@ class Finestra(wx.Frame):
             testo = f"{testo} {datetime.datetime.now():%H:%M}"
         posizione = self.console.GetInsertionPoint()
         if categoria is not None and categoria == self._categoria and self._righe:
-            inizio = sum(len(r) for r in self._righe[:-1]) + len(self._righe) - 1
+            # Le posizioni del controllo: le emoji valgono due.
+            inizio = self._unita("".join(r + "\n" for r in self._righe[:-1]))
             self.console.Remove(inizio, self.console.GetLastPosition())
             self.console.AppendText(testo)
             self._righe[-1] = testo
@@ -386,9 +524,10 @@ class Finestra(wx.Frame):
         self._categoria = categoria
         self.console.AppendText(("\n" if self._righe else "") + testo)
         self._righe.append(testo)
-        if len(self._righe) > RIGHE_DELLA_CONSOLE + 100:
-            togliere = len(self._righe) - RIGHE_DELLA_CONSOLE
-            caratteri = sum(len(r) for r in self._righe[:togliere]) + togliere
+        limite = max(self.impostazioni["righe_della_console"], self._da_tenere)
+        if len(self._righe) > limite + 100:
+            togliere = len(self._righe) - limite
+            caratteri = self._unita("".join(r + "\n" for r in self._righe[:togliere]))
             self.console.Remove(0, caratteri)
             del self._righe[:togliere]
             posizione = max(0, posizione - caratteri)
@@ -402,6 +541,68 @@ class Finestra(wx.Frame):
     def _riscontro(self, evento, testo, categoria=None):
         self._suono(evento)
         self.scrivi(testo, categoria)
+
+    # I problemi interni.
+
+    def ascolta_i_problemi(self):
+        """Le eccezioni che nessuno gestisce, nel filo della finestra e negli
+        altri fili, arrivano nella console con una riga breve e un suono loro;
+        e continuano ad andare dove andavano prima, cioe' sul terminale se
+        c'e'."""
+        precedente, precedente_dei_fili = sys.excepthook, threading.excepthook
+
+        def manda(tipo, valore, traccia):
+            if issubclass(tipo, (KeyboardInterrupt, SystemExit)):
+                return
+            # Senza wx.App, per esempio durante l'uscita, la console non c'e'
+            # piu': il problema resta solo dove andava prima.
+            with contextlib.suppress(Exception):
+                wx.CallAfter(self._problema, tipo, valore, traccia)
+
+        def nel_filo_della_finestra(tipo, valore, traccia):
+            with contextlib.suppress(Exception):
+                precedente(tipo, valore, traccia)
+            manda(tipo, valore, traccia)
+
+        def negli_altri_fili(argomenti):
+            with contextlib.suppress(Exception):
+                precedente_dei_fili(argomenti)
+            manda(argomenti.exc_type, argomenti.exc_value, argomenti.exc_traceback)
+
+        precedente_degli_avvisi = warnings.showwarning
+
+        def negli_avvisi(messaggio, categoria, nome_del_file, riga, file=None, line=None):
+            with contextlib.suppress(Exception):
+                precedente_degli_avvisi(messaggio, categoria, nome_del_file, riga, file, line)
+            # python-mpv trasforma in avvisi le eccezioni dei callback che
+            # chiama, compresi quelli del motore di MeTeOra.
+            if os.path.basename(nome_del_file).lower().startswith("mpv") and str(messaggio).startswith("Unhandled"):
+                with contextlib.suppress(Exception):
+                    wx.CallAfter(self._scrivi_il_problema, riga_dell_avviso(messaggio))
+
+        sys.excepthook = nel_filo_della_finestra
+        threading.excepthook = negli_altri_fili
+        warnings.showwarning = negli_avvisi
+
+    def _problema(self, tipo, valore, traccia):
+        self._scrivi_il_problema(riga_del_problema(tipo, valore, traccia))
+
+    def _scrivi_il_problema(self, riga):
+        """Scrive il problema nella console. Lo stesso problema ripetuto di
+        seguito riscrive la sua riga con il conto delle volte, senza suono:
+        un errore che torna a ogni istante non deve riempire la console."""
+        if not self or self._chiusa:
+            return
+        categoria = ("problema", riga)
+        if self._categoria == categoria:
+            self._ripetizioni += 1
+            self.scrivi(f"{riga[:-1]}, {self._ripetizioni} volte.", categoria)
+            return
+        self._ripetizioni = 1
+        # Se il problema sta nei suoni, la riga arriva lo stesso.
+        with contextlib.suppress(Exception):
+            self._suono("problema")
+        self.scrivi(riga, categoria)
 
     # Il fuoco e il cruscotto.
 
@@ -449,7 +650,8 @@ class Finestra(wx.Frame):
     def righe_del_cruscotto(self):
         """Le righe del cruscotto per l'area da cui si arriva."""
         if self._area_precedente == "console":
-            righe = ["Tasti per la console.", "Frecce, Pagina su e giù, Home e Fine per leggere; i messaggi nuovi arrivano in fondo, con l'ora. La barra rovesciata cerca nella console, e Invio passa all'occorrenza seguente."]
+            righe = ["Tasti per la console.", "Frecce, Pagina su e giù, Home e Fine per leggere; i messaggi nuovi arrivano in fondo, con l'ora. "
+                "La barra rovesciata cerca nella console, anche con i jolly e le virgolette, e Invio passa all'occorrenza seguente."]
         elif len(self._voci_selezionate()) > 1:
             righe = [f"Tasti per {len(self._voci_selezionate())} voci selezionate: un ramo selezionato vale per tutto ciò che contiene.",
                 "X suona la selezione come una playlist invisibile, che resta finché non premi V. Invio, Applicazioni o Spazio: menu della selezione. "
@@ -518,8 +720,6 @@ class Finestra(wx.Frame):
             self._cestina_selezione()
         elif codice == wx.WXK_DELETE and evento.GetModifiers() == wx.MOD_NONE:
             self._cancella(self._voce_corrente())
-        elif codice == wx.WXK_RIGHT and evento.GetModifiers() == wx.MOD_NONE and (self._dati(self._voce_corrente()) or {}).get("tipo") == "filtro":
-            self._modifica_filtro(self._dati(self._voce_corrente())["playlist"])
         elif codice == wx.WXK_DELETE and evento.GetModifiers() == wx.MOD_SHIFT:
             self._al_cestino(self._voce_corrente())
         else:
@@ -639,15 +839,25 @@ class Finestra(wx.Frame):
         filtro = self._filtro_di(pl)
         return filtro is None or filtro.ammette(brano, self.schedario.scheda(brano.percorso))
 
-    def _etichetta_del_filtro(self, pl):
-        return f"Filtro: {pl.filtro}" if pl.filtro else "Filtro (Tutto)"
+    def _comando_filtro(self):
+        """La barra verticale: il filtro della playlist, o dei Preferiti, in
+        cui sta il fuoco della plancia, anche se il fuoco della tastiera e'
+        in un'altra area."""
+        voce = self._voce_corrente()
+        while voce.IsOk() and voce != self.albero.GetRootItem():
+            dati = self._dati(voce) or {}
+            if dati.get("tipo") == "playlist":
+                self._modifica_filtro(dati["playlist"])
+                return
+            voce = self.albero.GetItemParent(voce)
+        self._riscontro("non_disponibile", "Il filtro c'è nelle playlist e nei Preferiti: porta la plancia su una playlist o su un suo brano.")
 
     def _modifica_filtro(self, pl):
         """Il campo del filtro; se il testo non si capisce lo spiega e lo ripropone."""
         testo = pl.filtro
         while True:
             self._suono("domanda")
-            with FinestraFiltro(self, pl.nome, testo) as dialogo:
+            with FinestraFiltro(self, f"Filtro di {pl.nome}", testo, ISTRUZIONI_DEL_FILTRO) as dialogo:
                 if dialogo.ShowModal() != wx.ID_OK:
                     self.scrivi("Filtro non cambiato.")
                     return
@@ -661,16 +871,19 @@ class Finestra(wx.Frame):
         self._imposta_filtro(pl, testo)
 
     def _imposta_filtro(self, pl, testo):
+        # Il fuoco della plancia resta sulla sua voce; un brano che il filtro
+        # nuovo nasconde lascia il posto alla sua playlist.
+        dati = self._dati(self._voce_corrente()) or {}
+        dentro = dati.get("playlist") is pl
+        brano = dati.get("brano") if dentro else None
         pl.filtro = testo
         self._salva_archivio()
         self._chiedi_schede(pl)
-        self._popola_playlist(seleziona=pl)
-        # La selezione torna sulla voce Filtro, da cui si era partiti.
-        nodo = self._voce_corrente()
-        self.albero.Expand(nodo)
-        primo = next(self._figli(nodo), None)
-        if primo is not None:
-            self._seleziona(primo)
+        if brano is not None and self._ammesso(pl, brano):
+            self._popola_playlist(seleziona=brano)
+            self._al_sottobrano(dati.get("numero"))
+        else:
+            self._popola_playlist(seleziona=pl if dentro else None)
         passano = sum(1 for b in pl.brani if self._ammesso(pl, b))
         if testo:
             self._riscontro("filtro_messo", f"Filtro di {pl.nome}: {testo}. Passano {brani_al_plurale(passano)} su {len(pl.brani)}.")
@@ -695,10 +908,8 @@ class Finestra(wx.Frame):
         lo sanno."""
         nome = os.path.basename(cartella.rstrip("\\")) or cartella
         files = self.contatore.files(cartella)
-        if files is None:
-            return nome
         if not files:
-            return f"{nome}, nessun file da suonare"
+            return nome
         durate = [(self.schedario.scheda(f) or {}).get("durata") for f in files]
         note = [d for d in durate if d is not None]
         testo = f"{nome}, {len(files)} file"
@@ -709,21 +920,86 @@ class Finestra(wx.Frame):
         return testo
 
     def _aggiorna_cartelle(self):
-        """Rinfresca le etichette delle cartelle caricate nella plancia."""
+        """Rinfresca le etichette delle cartelle caricate nella plancia, e
+        toglie quelle che il contatore ha trovato senza niente da suonare,
+        sottocartelle comprese, anche se il fuoco ci sta sopra o dentro."""
+        vuote = set()
         for voce in self._tutte_le_voci(self.nodo_pc):
             dati = self._dati(voce) or {}
-            if dati.get("tipo") == "cartella":
-                nuova = self._etichetta_della_cartella(dati["percorso"])
-                if self.albero.GetItemText(voce) != nuova:
-                    self.albero.SetItemText(voce, nuova)
+            if dati.get("tipo") != "cartella":
+                continue
+            # Una cartella aperta che mostra dei file non e' vuota, qualunque
+            # cosa dica un conto fatto su una lettura vecchia.
+            mostra_file = dati.get("caricato") and any((self._dati(f) or {}).get("tipo") == "file" for f in self._figli(voce))
+            if self.contatore.files(dati["percorso"]) == [] and not mostra_file:
+                # Le voci arrivano prima dei loro figli: basta togliere il
+                # ramo piu' in alto.
+                if not self._dentro_una_di(voce, vuote):
+                    vuote.add(voce)
+                continue
+            nuova = self._etichetta_della_cartella(dati["percorso"])
+            if self.albero.GetItemText(voce) != nuova:
+                self.albero.SetItemText(voce, nuova)
+        if vuote:
+            self._togli_dalla_plancia(vuote)
+
+    def _togli_dalla_plancia(self, voci):
+        """Toglie dalla plancia dei rami interi. Se il fuoco stava su uno di
+        loro o dentro, passa prima alla voce vicina che resta."""
+        corrente = self._voce_corrente()
+        if corrente.IsOk() and self._dentro_una_di(corrente, voci):
+            approdo = self._approdo(voci)
+            if approdo is not None:
+                self._seleziona(approdo)
+        for voce in voci:
+            self.albero.Delete(voce)
+
+    def _dentro_una_di(self, voce, rami):
+        """Vero se la voce e' uno dei rami, un insieme di voci, o sta dentro
+        uno di loro: si risale una volta sola, anche con migliaia di rami."""
+        radice = self.albero.GetRootItem()
+        while voce.IsOk() and voce != radice:
+            if voce in rami:
+                return True
+            voce = self.albero.GetItemParent(voce)
+        return False
+
+    def _approdo(self, togliere):
+        """Dove resta il fuoco quando le voci togliere spariscono dalla
+        plancia, con tutto cio' che contengono: sulla voce che ce l'ha, se
+        resta; altrimenti sulla prima voce sorella che resta, prima in avanti
+        e poi all'indietro, oppure sul ramo che la contiene, salendo finche'
+        serve. None se non resta niente."""
+        togliere = set(togliere)
+
+        def sparisce(voce):
+            return self._dentro_una_di(voce, togliere)
+
+        radice = self.albero.GetRootItem()
+        voce = self._voce_corrente()
+        while voce.IsOk() and voce != radice:
+            if not sparisce(voce):
+                return voce
+            for passo in (self.albero.GetNextSibling, self.albero.GetPrevSibling):
+                vicina = passo(voce)
+                while vicina.IsOk() and sparisce(vicina):
+                    vicina = passo(vicina)
+                if vicina.IsOk():
+                    return vicina
+            voce = self.albero.GetItemParent(voce)
+        return None
 
     def _conti_arrivati(self):
         if not self._chiusa:
             self._aggiorna_cartelle()
 
     def _etichetta_della_playlist(self, pl):
+        """Nome, brani che passano il filtro, brani totali e il filtro, se
+        c'e': il filtro non e' una voce della playlist, cosi' NVDA conta solo
+        i brani."""
         filtrati = [b for b in pl.brani if self._ammesso(pl, b)]
-        return f"{pl.nome}, brani: {self._conto(filtrati)}, totali: {self._conto(pl.brani)}"
+        etichetta = f"{pl.nome}, brani: {self._conto(filtrati)}, totali: {self._conto(pl.brani)}"
+        return f"{etichetta}, filtro: {pl.filtro}" if pl.filtro else etichetta
 
     def _chiedi_schede(self, *playlist):
         """Chiede allo schedario le schede dei brani delle playlist date."""
@@ -839,8 +1115,20 @@ class Finestra(wx.Frame):
     def _in_espansione(self, evento):
         voce = evento.GetItem()
         dati = self._dati(voce)
-        if dati and dati.get("caricato") is False:
+        # Una playlist aperta senza brani da mostrare non resta aperta, e
+        # quindi non si chiude: si ricarica ogni volta che la si riapre.
+        vuota = dati and dati.get("tipo") == "playlist" and not self.albero.GetChildrenCount(voce, False)
+        if dati and (dati.get("caricato") is False or vuota):
             self._carica(voce, dati)
+
+    def _chiusa_una_voce(self, evento):
+        """Una playlist chiusa si ricarica alla prossima apertura: cosi' le
+        schede arrivate nel frattempo cambiano anche l'elenco dei brani che
+        passano il filtro, non solo i conti dell'etichetta."""
+        evento.Skip()
+        dati = self._dati(evento.GetItem()) or {}
+        if dati.get("tipo") == "playlist":
+            dati["caricato"] = False
 
     def _carica(self, voce, dati):
         """Riempie un ramo quando si apre: le unita' di Questo PC, il contenuto
@@ -858,7 +1146,6 @@ class Finestra(wx.Frame):
             return
         if tipo == "playlist":
             pl = dati["playlist"]
-            self.albero.AppendItem(voce, self._etichetta_del_filtro(pl), data={"tipo": "filtro", "playlist": pl})
             for brano in pl.brani:
                 if self._ammesso(pl, brano):
                     self._aggiungi_voce(voce, "brano", pl, brano)
@@ -876,6 +1163,13 @@ class Finestra(wx.Frame):
             self._riscontro("errore", f"Non riesco a leggere {dati['percorso']}: {e.strerror or e}")
             self.albero.SetItemHasChildren(voce, False)
             return
+        # La lettura appena fatta vale piu' di quella che il contatore tiene
+        # per la sessione: se sono diverse, i conti di questa cartella e di
+        # chi la contiene si rifanno.
+        self.contatore.chiedi(self.contatore.rinfresca(dati["percorso"], (cartelle, files)))
+        # Le cartelle che il contatore sa gia' senza niente da suonare, nemmeno
+        # sotto, non si mostrano; le altre spariscono quando arriva il conto.
+        cartelle = [c for c in cartelle if self.contatore.files(c) != []]
         for cartella in cartelle:
             figlio = self.albero.AppendItem(voce, self._etichetta_della_cartella(cartella), data={"tipo": "cartella", "percorso": cartella, "caricato": False})
             self.albero.SetItemHasChildren(figlio, True)
@@ -890,9 +1184,20 @@ class Finestra(wx.Frame):
         else:
             self._suono("cartella_aperta")
 
+    def _aggiorna_cartella(self, cartella):
+        """Aggiorna dal menu: la voce si cerca quando la si sceglie, perche'
+        mentre il menu e' aperto una cartella vuota puo' sparire."""
+        voce = next((v for v in self._tutte_le_voci(self.nodo_pc) if (self._dati(v) or {}).get("percorso") == cartella), None)
+        if voce is None:
+            self._riscontro("non_disponibile", f"{cartella} non è più nella plancia: dentro non c'è niente da suonare.")
+            return
+        self._aggiorna_ramo(voce)
+
     def _aggiorna_ramo(self, voce):
         dati = self._dati(voce)
-        if dati.get("percorso"):
+        if dati.get("tipo") == "pc":
+            self.contatore.dimentica_tutto()
+        elif dati.get("percorso"):
             self.contatore.dimentica(dati["percorso"])
         aperto = self.albero.IsExpanded(voce)
         self.albero.Collapse(voce)
@@ -912,8 +1217,6 @@ class Finestra(wx.Frame):
             self._menu(voce)
         elif dati and dati["tipo"] == "comando":
             getattr(self, f"_comando_{dati['comando']}")()
-        elif dati and dati["tipo"] == "filtro":
-            self._modifica_filtro(dati["playlist"])
         elif dati and dati["tipo"] == "altri":
             self._altri_risultati()
         else:
@@ -973,15 +1276,14 @@ class Finestra(wx.Frame):
         if tipo == "gruppo_risultati":
             gruppo = dati["gruppo"]
             return [("Salva come playlist", lambda: self._salva_risultati(gruppo))]
-        if tipo == "filtro":
-            pl = dati["playlist"]
-            return [("Modifica il filtro", lambda: self._modifica_filtro(pl)), ("Svuota il filtro", lambda: self._imposta_filtro(pl, ""))]
-        if tipo == "playlist" and dati["playlist"] is self.archivio.preferiti:
-            return [("Riproduci", lambda: self._riproduci_playlist(self.archivio.preferiti))]
         if tipo == "playlist":
             pl = dati["playlist"]
-            return [("Riproduci", lambda: self._riproduci_playlist(pl)), ("Rinomina", lambda: self._rinomina(pl)),
-                ("Elimina", lambda: self._elimina_playlist(pl))]
+            voci = [("Riproduci", lambda: self._riproduci_playlist(pl)), ("Filtro", lambda: self._modifica_filtro(pl))]
+            if pl.filtro:
+                voci.append(("Togli il filtro", lambda: self._imposta_filtro(pl, "")))
+            if pl is not self.archivio.preferiti:
+                voci += [("Rinomina", lambda: self._rinomina(pl)), ("Elimina", lambda: self._elimina_playlist(pl))]
+            return voci
         if tipo == "brano":
             pl, brano = dati["playlist"], dati["brano"]
             return [("Riproduci", lambda: self._riproduci(pl, brano)),
@@ -992,11 +1294,11 @@ class Finestra(wx.Frame):
         if tipo == "pc":
             return [("Aggiorna", lambda: self._aggiorna_ramo(self.nodo_pc))]
         if tipo in ("unita", "cartella"):
-            voce = self._voce_corrente()
             cartella = dati["percorso"]
             nome = dati.get("etichetta", "").split("\\", 1)[-1] if tipo == "unita" else os.path.basename(cartella)
             return [("Riproduci", lambda: self._riproduci_cartella(cartella)), ("Crea playlist da qui", lambda: self._crea_da_qui(cartella, nome)),
-                ("Aggiungi alla playlist", self._menu_aggiungi(lambda: [Brano(p) for p in questo_pc.file_ricorsivi(cartella)])), ("Aggiorna", lambda: self._aggiorna_ramo(voce))]
+                ("Aggiungi alla playlist", self._menu_aggiungi(lambda: [Brano(p) for p in questo_pc.file_ricorsivi(cartella)])),
+                ("Aggiorna", lambda: self._aggiorna_cartella(cartella))]
         if tipo == "file":
             pl, brano = dati["playlist"], dati["brano"]
             return [("Riproduci", lambda: self._riproduci(pl, brano)), ("Aggiungi alla playlist", self._menu_aggiungi(lambda: [Brano(brano.percorso)])),
@@ -1041,8 +1343,12 @@ class Finestra(wx.Frame):
             if not vicina.IsOk():
                 vicina = self.albero.GetPrevSibling(voce)
             pl.togli(brano)
+            if pl is self.risultati:
+                self._togli_dai_risultati(voce, brano)
             self._seleziona(vicina if vicina.IsOk() else genitore)
             self.albero.Delete(voce)
+            if pl is self.risultati:
+                self._aggiorna_risultati()
         else:
             self._togli(pl, brano, annuncia=False)
         self._riscontro("cestino", f"{brano.nome_del_file} è nel cestino di Windows.")
@@ -1055,8 +1361,6 @@ class Finestra(wx.Frame):
             self._elimina_playlist(dati["playlist"])
         elif dati.get("tipo") == "brano":
             self._togli(dati["playlist"], dati["brano"])
-        elif dati.get("tipo") == "filtro":
-            self._imposta_filtro(dati["playlist"], "")
         else:
             self._riscontro("non_disponibile", "Qui Canc non cancella niente.")
 
@@ -1160,36 +1464,68 @@ class Finestra(wx.Frame):
         self._riscontro("preferito_aggiunto", f"Aggiunti ai Preferiti {brani_al_plurale(len(nuovi))}{altri}.")
 
     def _cancella_selezione(self):
-        """Canc su piu' voci: toglie i brani dalle loro playlist, elimina le
-        playlist selezionate dopo una conferma e svuota i filtri selezionati."""
-        voci = [self._dati(v) or {} for v in self._voci_selezionate()]
-        da_eliminare = [d["playlist"] for d in voci if d.get("tipo") == "playlist" and d["playlist"] in self.archivio.playlist]
-        da_togliere = [(d["playlist"], d["brano"]) for d in voci if d.get("tipo") == "brano" and d["playlist"] not in da_eliminare]
-        filtri = [d["playlist"] for d in voci if d.get("tipo") == "filtro"]
-        if not (da_eliminare or da_togliere or filtri):
-            self._riscontro("non_disponibile", "Nella selezione non c'è niente che Canc possa togliere: brani di playlist, playlist o filtri.")
+        """Canc su piu' voci: toglie i brani dalle loro playlist ed elimina le
+        playlist selezionate, dopo una conferma. Il fuoco resta li' dove si
+        lavorava, sulla prima voce vicina che resta."""
+        voci = [(v, self._dati(v) or {}) for v in self._voci_selezionate()]
+        da_eliminare = [d["playlist"] for _v, d in voci if d.get("tipo") == "playlist" and d["playlist"] in self.archivio.playlist]
+        da_togliere = [(v, d["playlist"], d["brano"]) for v, d in voci if d.get("tipo") == "brano" and d["playlist"] not in da_eliminare]
+        if not (da_eliminare or da_togliere):
+            self._riscontro("non_disponibile", "Nella selezione non c'è niente che Canc possa togliere: brani di playlist o playlist.")
             return
         if da_eliminare and not self._conferma(f"Eliminare {len(da_eliminare)} playlist? I file restano sul disco.", "Elimina playlist"):
             self.scrivi("Eliminazione annullata.")
             return
+        approdo = self._approdo([v for v, d in voci if d.get("tipo") == "playlist" and d["playlist"] in da_eliminare] + [v for v, _pl, _b in da_togliere])
         for pl in da_eliminare:
             self.archivio.elimina(pl)
-        for pl, brano in da_togliere:
+        for _voce, pl, brano in da_togliere:
             pl.togli(brano)
             if self.coda.loop_playlist is pl and brano in (self.coda.punto_a, self.coda.punto_b):
                 self.coda.togli_loop()
-        for pl in filtri:
-            pl.filtro = ""
         self._salva_archivio()
-        self._popola_playlist()
+        self._ricostruisci_dopo_la_cancellazione(approdo)
         parti = []
         if da_togliere:
             parti.append(f"tolti {brani_al_plurale(len(da_togliere))}")
         if da_eliminare:
             parti.append(f"eliminate {len(da_eliminare)} playlist")
-        if filtri:
-            parti.append(f"svuotati {len(filtri)} filtri")
         self._riscontro("brano_tolto", ", ".join(parti).capitalize() + ".")
+
+    def _ricostruisci_dopo_la_cancellazione(self, approdo, voci_da_togliere=()):
+        """Dopo una cancellazione: toglie dalla plancia le voci delle cartelle
+        e dei Risultati, ricostruisce il ramo Playlist e rimette il fuoco
+        sull'approdo, da solo nella selezione. Le voci delle playlist e dei
+        Preferiti rinascono, e si ritrovano dal brano o dalla playlist che
+        mostrano; le altre restano le stesse."""
+        rinasce = approdo is not None and approdo not in (self.nodo_preferiti, self.nodo_playlist) and (
+            self._sotto(approdo, self.nodo_preferiti) or self._sotto(approdo, self.nodo_playlist))
+        oggetto = numero = None
+        if rinasce:
+            dati = self._dati(approdo) or {}
+            oggetto = "nuova_playlist" if dati.get("comando") == "nuova_playlist" else (dati.get("brano") or dati.get("playlist"))
+            numero = dati.get("numero")
+        self.albero.UnselectAll()
+        if approdo is not None and not rinasce:
+            self._seleziona(approdo)
+        for voce in voci_da_togliere:
+            self.albero.Delete(voce)
+        self._popola_playlist(seleziona=oggetto)
+        self._al_sottobrano(numero)
+        if approdo is not None and not rinasce:
+            self._seleziona(approdo)
+
+    def _al_sottobrano(self, numero):
+        """Dopo una ricostruzione che ha ritrovato il SID, riapre il SID e
+        porta il fuoco sul sottobrano numero, se c'era."""
+        voce = self._voce_corrente()
+        dati = self._dati(voce) or {}
+        if not numero or dati.get("tipo") != "brano" or not self.albero.ItemHasChildren(voce):
+            return
+        self.albero.Expand(voce)
+        figlio = next((v for v in self._figli(voce) if (self._dati(v) or {}).get("numero") == numero), None)
+        if figlio is not None:
+            self._seleziona(figlio)
 
     def _cestina_selezione(self):
         """Maiuscolo+Canc su piu' voci: i file dei brani e dei file selezionati
@@ -1203,7 +1539,7 @@ class Finestra(wx.Frame):
             self.scrivi("I file restano dove sono.")
             return
         riusciti, falliti = 0, 0
-        cancellate = []
+        cestinate, cancellate = [], []
         for voce, pl, brano in bersagli:
             if self.motore.in_corso == brano.percorso:
                 self.motore.stop()
@@ -1212,13 +1548,16 @@ class Finestra(wx.Frame):
                 continue
             riusciti += 1
             pl.togli(brano)
+            if pl is self.risultati:
+                self._togli_dai_risultati(voce, brano)
+            cestinate.append(voce)
             if pl.temporanea:
                 cancellate.append(voce)
-        self.albero.UnselectAll()
-        for voce in cancellate:
-            self.albero.Delete(voce)
+        approdo = self._approdo(cestinate)
         self._salva_archivio()
-        self._popola_playlist()
+        self._ricostruisci_dopo_la_cancellazione(approdo, cancellate)
+        if any(pl is self.risultati for _v, pl, _b in bersagli):
+            self._aggiorna_risultati()
         testo = f"Nel cestino di Windows {riusciti} file."
         if falliti:
             testo += f" {falliti} non ci sono andati."
@@ -1297,7 +1636,7 @@ class Finestra(wx.Frame):
         testo = self._testo_della_ricerca
         while True:
             self._suono("domanda")
-            with FinestraFiltro(self, "", testo, titolo="Ricerca in tutto MeTeOra") as dialogo:
+            with FinestraFiltro(self, "Ricerca in tutto MeTeOra", testo, ISTRUZIONI_DELLA_RICERCA) as dialogo:
                 if dialogo.ShowModal() != wx.ID_OK:
                     self.scrivi("Ricerca annullata.")
                     return
@@ -1318,6 +1657,7 @@ class Finestra(wx.Frame):
             self._ricerca.ferma()
         self._testo_della_ricerca = testo
         self.risultati = Playlist("Risultati", cartella="")
+        self._risultati_letti = 0
         brani = [(b, "Preferiti") for b in self.archivio.preferiti.brani]
         brani += [(b, f"Playlist {pl.nome}") for pl in self.archivio.playlist for b in pl.brani]
         self._ricerca = Ricerca(filtro, brani, self.schedario, avvisa=lambda: wx.CallAfter(self._risultati_arrivati), unita=unita)
@@ -1352,9 +1692,13 @@ class Finestra(wx.Frame):
         loro ramo dell'albero e, per i rami gia' aperti, nella plancia."""
         if self._ricerca is None:
             return
-        for brano, origine in self._ricerca.pezzo(len(self.risultati.brani), self._ricerca.quanti()):
+        # Si riparte da quanti risultati sono gia' arrivati, non da quanti
+        # ne restano: quelli andati nel cestino non tornano.
+        quanti = self._ricerca.quanti()
+        for brano, origine in self._ricerca.pezzo(self._risultati_letti, quanti):
             self.risultati.brani.append(brano)
             self._albero_dei_risultati.aggiungi(brano, origine)
+        self._risultati_letti = max(self._risultati_letti, quanti)
         self.albero.SetItemText(self.nodo_risultati, self._etichetta_dei_risultati())
         for voce in [self.nodo_risultati, *self._tutte_le_voci(self.nodo_risultati)]:
             dati = self._dati(voce) or {}
@@ -1362,6 +1706,14 @@ class Finestra(wx.Frame):
                 self.albero.SetItemText(voce, self._etichetta_del_gruppo(dati["gruppo"]))
             if dati.get("tipo") in ("risultati", "gruppo_risultati") and dati.get("caricato"):
                 self._riempi_gruppo(voce)
+
+    def _togli_dai_risultati(self, voce, brano):
+        """Un risultato andato nel cestino esce anche dal suo ramo, e il ramo
+        della plancia che lo mostrava ne mostra uno di meno."""
+        tolto = self._albero_dei_risultati.togli(brano) if self._albero_dei_risultati is not None else None
+        ramo = self._dati(self.albero.GetItemParent(voce)) or {}
+        if tolto is not None and ramo.get("tipo") in ("risultati", "gruppo_risultati") and tolto[1] < ramo["brani"]:
+            ramo["brani"] -= 1
 
     def _riempi_gruppo(self, voce):
         """Porta nella plancia cio' che manca di un ramo dei Risultati: prima
@@ -1504,7 +1856,11 @@ class Finestra(wx.Frame):
         elif self.coda.loop_playlist is pl and brano is self.coda.punto_b:
             self.coda.punto_b = None
         self._salva_archivio()
-        vicino = pl.brani[min(i, len(pl.brani) - 1)] if pl.brani else pl
+        # Il fuoco va sul brano che seguiva, o se non c'e' su quello prima,
+        # fra quelli che il filtro lascia vedere; senza brani, sulla playlist.
+        dopo = [b for b in pl.brani[i:] if self._ammesso(pl, b)]
+        prima = [b for b in pl.brani[:i] if self._ammesso(pl, b)]
+        vicino = dopo[0] if dopo else prima[-1] if prima else pl
         self._popola_playlist(seleziona=vicino)
         if annuncia:
             self._riscontro("brano_tolto", f"Tolto {brano.nome_del_file}; nella playlist {pl.nome} restano {brani_al_plurale(len(pl.brani))}.")
@@ -2167,15 +2523,37 @@ class Finestra(wx.Frame):
         if not righe:
             return
         self._suono(evento)
-        for i, riga in enumerate(righe):
-            self.scrivi(riga, ora=i == len(righe) - 1)
-        inizio = sum(len(r) for r in self._righe[:-len(righe)]) + len(self._righe) - len(righe)
-        self._porta_il_cursore(inizio)
+        # Il testo resta intero anche se e' piu' lungo delle righe che la
+        # console tiene: si taglia prima di lui, mai dentro.
+        self._da_tenere = len(righe)
+        try:
+            for i, riga in enumerate(righe):
+                self.scrivi(riga, ora=i == len(righe) - 1)
+        finally:
+            self._da_tenere = 0
+        self._porta_il_cursore(len("".join(r + "\n" for r in self._righe[:-len(righe)])))
+
+    @staticmethod
+    def _unita(testo):
+        """Quante posizioni occupa il testo nel controllo della console, che
+        conta come Windows: i caratteri fuori dal piano base, come le emoji,
+        valgono due."""
+        return len(testo.encode("utf-16-le")) // 2
+
+    def _nella_console(self, posizione):
+        """Dalla posizione nel testo delle righe a quella del controllo."""
+        return self._unita("\n".join(self._righe)[:posizione])
+
+    def _dalla_console(self, nativa):
+        """Dalla posizione del controllo a quella nel testo delle righe."""
+        return len("\n".join(self._righe).encode("utf-16-le")[:2 * nativa].decode("utf-16-le", errors="ignore"))
 
     def _porta_il_cursore(self, posizione):
-        """Porta il fuoco nella console con il cursore sulla posizione data.
-        Arrivando nella console il cursore torna dove era rimasto: per questo
-        la posizione si mette anche in quella da ricordare."""
+        """Porta il fuoco nella console con il cursore sulla posizione data,
+        contata nel testo delle righe. Arrivando nella console il cursore
+        torna dove era rimasto: per questo la posizione si mette anche in
+        quella da ricordare."""
+        posizione = self._nella_console(posizione)
         self._posizione_della_console = posizione
         if self.console.HasFocus():
             self.console.SetInsertionPoint(posizione)
@@ -2191,35 +2569,58 @@ class Finestra(wx.Frame):
             return f"Non riesco a leggere {nome}: {e}"
 
     def _comando_cerca_in_console(self):
-        self._suono("domanda")
-        with DialogoTesto(self, "Cosa cercare nella console? Invio, dalla console, passa all'occorrenza seguente.", "Cerca nella console",
-                self._cercato_in_console) as dialogo:
-            if dialogo.ShowModal() != wx.ID_OK:
+        """Il campo della ricerca nella console, con le sue istruzioni come
+        commenti; se il testo non si capisce lo spiega e lo ripropone."""
+        testo = self._cercato_in_console
+        while True:
+            self._suono("domanda")
+            with FinestraFiltro(self, "Cerca nella console", testo, ISTRUZIONI_DELLA_CONSOLE) as dialogo:
+                if dialogo.ShowModal() != wx.ID_OK:
+                    return
+                # Andare a capo vale come uno spazio; gli spazi dentro il
+                # testo contano, perche' si cerca cosi' com'e'.
+                testo = " ".join(dialogo.testo.splitlines()).strip()
+            if not testo:
                 return
-            testo = dialogo.GetValue().strip()
-        if not testo:
-            return
+            try:
+                modello = modello_della_console(testo)
+            except ErroreFiltro as e:
+                self._riscontro("errore", f"Nella ricerca non capisco: {e}")
+                continue
+            break
         self._cercato_in_console = testo
+        self._modello_della_console = modello
         self._cerca_in_console(0)
 
     def _cerca_in_console(self, da):
         """Porta il cursore sulla prima occorrenza del testo cercato dalla
-        posizione da in poi; arrivata in fondo riparte dall'inizio."""
-        testo = "\n".join(self._righe).lower()
-        cercato = self._cercato_in_console.lower()
-        trovato = testo.find(cercato, da)
-        ripartito = trovato < 0 and da > 0
+        posizione da in poi; arrivata in fondo riparte dall'inizio. Le righe
+        dei messaggi hanno l'ora in fondo, quindi si cercano anche gli orari.
+        La riga che dice che il testo non c'e' lo ripete, e non conta."""
+        righe = self._righe[:-1] if self._categoria == "non_trovato_in_console" else self._righe
+        testo = "\n".join(righe)
+        trovato = self._modello_della_console.search(testo, da)
+        ripartito = trovato is None and da > 0
         if ripartito:
-            trovato = testo.find(cercato)
-        if trovato < 0:
-            self._riscontro("non_trovato_in_console", f"Nella console non c'è {self._cercato_in_console}.")
+            trovato = self._modello_della_console.search(testo)
+        if trovato is None:
+            self._occorrenza = None
+            self._riscontro("non_trovato_in_console", f"Nella console non c'è {self._cercato_in_console}.", "non_trovato_in_console")
             return
+        self._occorrenza = trovato.span()
         self._suono("ripartito_in_console" if ripartito else "trovato_in_console")
-        self._porta_il_cursore(trovato)
+        self._porta_il_cursore(trovato.start())
 
     def _tasto_nella_console(self, evento):
-        if evento.GetKeyCode() in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER) and evento.GetModifiers() == wx.MOD_NONE and self._cercato_in_console:
-            self._cerca_in_console(self.console.GetInsertionPoint() + 1)
+        if evento.GetKeyCode() in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER) and evento.GetModifiers() == wx.MOD_NONE and self._modello_della_console:
+            # Dall'occorrenza su cui sta il cursore si riparte dalla sua fine:
+            # con un jolly in testa, ripartendo dal carattere dopo, si
+            # ritroverebbe un pezzo della stessa.
+            posizione = self._dalla_console(self.console.GetInsertionPoint())
+            if self._occorrenza is not None and posizione == self._occorrenza[0]:
+                self._cerca_in_console(max(self._occorrenza[1], posizione + 1))
+            else:
+                self._cerca_in_console(posizione + 1)
         else:
             evento.Skip()
 

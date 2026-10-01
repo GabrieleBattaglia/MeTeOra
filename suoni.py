@@ -77,6 +77,8 @@ EVENTI = {
     "domanda": "campanellino",
     "non_disponibile": "rifiuto",
     "errore": "errore_secco",
+    # Un problema interno di MeTeOra, non un errore di chi lo usa.
+    "problema": "notifica",
     "niente_da_suonare": "arpeggio_pensoso",
     "loop_a_messo": "notifica_tramite_interfaccia_utente_2",
     "loop_b_messo": "notifica_tramite_interfaccia_utente_3",

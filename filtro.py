@@ -1,6 +1,6 @@
 # MeTeOra, il filtro delle playlist: dal testo scritto da chi ascolta a una funzione che dice si' o no a ogni brano.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la 1.8.0, issue 2.
+# 30/09/2026: nasce con la 1.8.0, issue 2. Nella 1.34.0 i commenti col dollaro e la grammatica della ricerca nella console.
 
 """Il filtro delle playlist.
 
@@ -19,6 +19,15 @@ La grammatica, decisa con Gabriele nella issue 2:
   p percorso, s saltato, r sottobrani dei SID.
 Un termine senza comando cerca nel nome del file e nei tag. Maiuscole e
 accenti non contano. L'ordine dei termini non conta.
+
+Nei campi in cui si scrivono filtri e ricerche le righe che cominciano con il
+dollaro sono commenti: MeTeOra ci mette le istruzioni, e non contano. Il
+cancelletto no, perche' e' gia' il jolly delle cifre (dalla 1.34.0).
+
+La ricerca nella console ha una grammatica sua, piu' semplice: il testo si
+cerca cosi' com'e', spazi compresi e senza badare alle maiuscole; l'asterisco
+vale qualsiasi testo nella stessa riga, il cancelletto una o piu' cifre, e
+fra virgolette la sequenza e' esatta, maiuscole comprese.
 """
 
 import os
@@ -43,8 +52,44 @@ NOMI_DEI_COMANDI = {"t": "tempo", "d": "dimensione", "k": "tipo", "a": "autore",
     "y": "anno", "p": "percorso", "s": "saltato", "r": "sottobrani"}
 
 
+COMMENTO = "$"
+
+
 class ErroreFiltro(ValueError):
     """Il testo del filtro non si capisce; il messaggio dice dove."""
+
+
+def senza_commenti(testo):
+    """Il testo scritto nel campo senza le righe di commento, quelle che
+    cominciano con il dollaro, anche dopo qualche spazio."""
+    return "\n".join(r for r in testo.splitlines() if not r.lstrip().startswith(COMMENTO))
+
+
+def modello_della_console(testo):
+    """L'espressione regolare che cerca il testo nella console: fuori dalle
+    virgolette maiuscole e minuscole non contano, l'asterisco vale qualsiasi
+    testo nella stessa riga e il cancelletto una o piu' cifre; fra le
+    virgolette la sequenza e' esatta, maiuscole comprese, senza jolly."""
+    if testo.count('"') % 2:
+        raise ErroreFiltro("Le virgolette non sono chiuse.")
+    # La ricerca non e' ancorata: un asterisco in testa non aggiunge niente,
+    # e toglierlo fa cominciare l'occorrenza dove comincia cio' che si cerca,
+    # senza rallentare la ricerca con tutte le righe lunghe.
+    testo = testo.lstrip("*")
+    if not testo.strip("* "):
+        raise ErroreFiltro("Scrivi cosa cercare: l'asterisco da solo trova qualsiasi cosa.")
+    parti = []
+    for pezzo in re.split(r'("[^"]*")', testo):
+        if pezzo.startswith('"'):
+            if len(pezzo) == 2:
+                raise ErroreFiltro("Fra le virgolette non c'è niente.")
+            parti.append(re.escape(pezzo[1:-1]))
+        elif pezzo:
+            libero = "".join(r"[^\n]*" if c == "*" else r"\d+" if c == "#" else re.escape(c) for c in pezzo)
+            parti.append(f"(?i:{libero})")
+    if not parti:
+        raise ErroreFiltro("Scrivi cosa cercare.")
+    return re.compile("".join(parti))
 
 
 def normale(testo):

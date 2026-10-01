@@ -1,3 +1,12 @@
-Collaudo di MeTeOra 1.28.0, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra. Scrivi le note sulla riga della voce; le voci superate si cancellano.
-Nella plancia, Maiuscolo con le frecce, Ctrl con le frecce e Ctrl+Spazio si comportano come nella finestra di prova.
-Funziona, ma dopo una cancellazione, rimozione dalla pl, il focus va sul ramo radice "playlist" e non rimane nel sottoramo da cui si è svolta l'operazione
+Collaudo di MeTeOra 1.34.6, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Seleziona due o tre brani di una playlist e premi Canc: il fuoco resta in quella playlist, sul brano che seguiva.
+Dentro una playlist il primo brano è 1 di quanti sono: la voce Filtro non c'è più.
+L'etichetta di una playlist con un filtro finisce con filtro: e il suo testo.
+Il menu della playlist ha Filtro, e Togli il filtro quando un filtro c'è; il menu dei Preferiti anche.
+Con la plancia su un brano di una playlist, passa alla console con F6 e premi la barra verticale: si apre il filtro di quella playlist.
+Nel campo del filtro le istruzioni stanno in cima, con il dollaro davanti, e il cursore è sull'ultima riga, con il filtro di prima selezionato.
+Il campo della ricerca globale dice di comporre la ricerca, quello del filtro di comporre il filtro.
+Nella console cerca un orario, per esempio quello della prima riga, e poi una parola fra virgolette con le maiuscole giuste e sbagliate.
+Apri un'unità con cartelle vuote o con soli file che MeTeOra non suona: spariscono appena contate, anche con il fuoco sopra.
+Nella console cerca volume # e premi Invio più volte: passa da un volume all'altro, senza fermarsi due volte sullo stesso numero.
+Metti a una playlist un filtro che non lascia passare niente, chiudila e riaprila dopo averlo cambiato: l'elenco segue il filtro.

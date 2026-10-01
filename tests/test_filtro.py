@@ -3,7 +3,7 @@
 
 import pytest
 
-from filtro import ErroreFiltro, Filtro
+from filtro import ErroreFiltro, Filtro, modello_della_console, senza_commenti
 from playlist import Brano
 
 SCHEDE = {
@@ -92,3 +92,28 @@ def test_senza_scheda_i_comandi_non_passano():
 def test_errori_spiegati(testo):
     with pytest.raises(ErroreFiltro):
         Filtro(testo)
+
+
+def test_righe_di_commento_col_dollaro():
+    assert senza_commenti("$ istruzioni\nrock\n   $ altro commento\n-live") == "rock\n-live"
+    # Il cancelletto resta il jolly delle cifre, anche in testa alla riga.
+    assert senza_commenti("#1 traccia") == "#1 traccia"
+    assert senza_commenti("$ solo commenti\n$ e basta") == ""
+
+
+def test_modello_della_console():
+    testo = "Volume 60. 07:13\nStop. 07:14\nIn riproduzione: SID di Rob Hubbard, 3:00. 08:02"
+    assert modello_della_console("volume").search(testo).start() == 0
+    # Fra virgolette le maiuscole contano, fuori no.
+    assert modello_della_console('"SID"').search(testo) is not None
+    assert modello_della_console('"sid"').search(testo) is None
+    assert modello_della_console('rob "Hubbard"').search(testo) is not None
+    # L'asterisco resta nella stessa riga, il cancelletto vale le cifre.
+    assert modello_della_console("volume*stop").search(testo) is None
+    assert modello_della_console("in*hubbard").search(testo) is not None
+    assert modello_della_console("07:#").search(testo).group() == "07:13"
+    # Gli spazi si cercano cosi' come sono.
+    assert modello_della_console("volume  60").search(testo) is None
+    for sbagliato in ('"aperte', '""', ""):
+        with pytest.raises(ErroreFiltro):
+            modello_della_console(sbagliato)

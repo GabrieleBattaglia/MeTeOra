@@ -1,6 +1,6 @@
 # MeTeOra, il lettore multimediale accessibile: il programma da avviare.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1.
+# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 i problemi interni arrivano nella console.
 
 """Avvia MeTeOra: controlla le librerie native e apre la finestra massimizzata."""
 
@@ -18,6 +18,7 @@ def main():
     from finestra import Finestra
 
     finestra = Finestra()
+    finestra.ascolta_i_problemi()
     finestra.Maximize()
     finestra.Show()
     finestra.albero.SetFocus()

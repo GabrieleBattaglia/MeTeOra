@@ -19,21 +19,22 @@ Il programma e fortemente orientato alle playlist. La riproduzione di singoli br
 3. INTERFACCIA
 3.1 La finestra parte sempre massimizzata. Barra dei menu solo se serve a far funzionare gli acceleratori.
 3.2 Plancia dei comandi (F5): un grande albero dal bordo sinistro al centro, con rami espandibili, tutti collassati alla partenza. Ogni voce ha un menu contestuale che si apre con Invio, tasto Applicazioni o barra spaziatrice. Le lettere sono comandi (vedi 4), quindi l'albero non ha la ricerca per iniziale: la plancia ha la selezione multipla come Esplora risorse (1.28.0): Maiuscolo con le frecce, Ctrl con le frecce, Ctrl+Spazio; con piu' voci selezionate X, Canc, Maiuscolo+Canc, F4 e il menu lavorano su tutte, e un ramo vale per il suo contenuto; al posto della ricerca per iniziale il tasto \ apre la ricerca globale (issue 10): cerca con la grammatica del filtro in tutte le playlist e in tutte le unita', e raccoglie i risultati nel ramo temporaneo Risultati, fra Preferiti e Playlist.
-3.3 Console (F6), che nella prima bozza era l'area dei messaggi: testo dal centro al bordo destro, che scorre. In fondo si aggiungono i riscontri di tutte le operazioni del programma. Buffer di circa 2000 righe.
+3.3 Console (F6), che nella prima bozza era l'area dei messaggi: testo dal centro al bordo destro, che scorre. In fondo si aggiungono i riscontri di tutte le operazioni del programma. Buffer di 2000 righe, cambiabile nelle impostazioni (1.34.0, per ora nel file). I problemi interni, cioe' le eccezioni non gestite, arrivano qui con una riga breve e un suono loro (1.34.0).
 3.4 Cruscotto (F7), che nella prima bozza era la barra di stato: su tutta la larghezza, in basso, alta almeno cinque righe. Mostra i tasti rapidi validi nel contesto in cui si trovava il fuoco prima di arrivarci.
 3.5 Memoria del fuoco: ogni area ricorda la posizione del fuoco quando lo perde e ce lo riporta quando si torna su di essa.
 3.6 F1 manuale, F2 changelog, F3 crediti, F12 elenco dei tasti: scritti nella console, con il fuoco portato sulla loro prima riga (dalla 1.20.0; prima F1, F2 e F3 aprivano una finestra a parte).
 3.7 Esc chiude il programma salvando tutto, senza conferma: confermato da Gabriele il 30 settembre 2026.
-3.8 Console: ogni scritta ha in fondo l'ora, ore e minuti; la barra rovesciata, con il fuoco nella console, cerca nella console e Invio passa all'occorrenza seguente, a ciclo continuo.
+3.8 Console: ogni scritta ha in fondo l'ora, ore e minuti; la barra rovesciata, con il fuoco nella console, cerca nella console e Invio passa all'occorrenza seguente, a ciclo continuo. Dalla 1.34.0 la ricerca ha il campo multiriga dei filtri, con le sue istruzioni: testo com'e', maiuscole indifferenti, asterisco e cancelletto, virgolette esatte e sensibili alle maiuscole; si trovano anche gli orari. Nella 1.34.6, dopo una revisione a piu' agenti: Invio riparte dalla fine dell'occorrenza, le posizioni tengono conto delle emoji, F1 F2 F3 e F12 non vengono mai tagliati a meta'.
+3.8.1 Nei campi dei filtri e delle ricerche le istruzioni stanno in cima, come righe di commento che cominciano con il dollaro (il cancelletto e' gia' il jolly delle cifre); si scrive nell'ultima riga.
 3.9 Alla riapertura si ritrovano la playlist, il brano e la posizione dell'ultima volta, in pausa: si riparte con X.
 3.10 Struttura della plancia dei comandi:
 Playlist (ramo)
-  Playlist 1, 2, ... (rami). Canc elimina la playlist, con conferma. Menu contestuale: Rinomina, Ordina (sottomenu), Mescola.
+  Playlist 1, 2, ... (rami). Canc elimina la playlist, con conferma. Menu contestuale: Filtro, Togli il filtro, Rinomina, Ordina (sottomenu), Mescola. Il filtro non e' una voce della playlist (1.34.0): NVDA conta i fratelli dell'albero, e cosi' conta solo i brani; il suo testo sta nell'etichetta e la barra verticale lo apre da ogni area.
     Brano (ramo). Canc lo toglie dalla playlist. Menu contestuale: Sposta su, Sposta giu, Sposta in cima, Sposta in fondo, Saltato (attivo o disattivo: il brano resta in lista ma non viene riprodotto).
       Marcatori del brano (segnalibri). Canc elimina il marcatore.
   Nuova playlist (comando)
 Questo PC (ramo). Espandendolo si interroga il sistema e compaiono tutte le unita logiche e virtuali collegate, con lettera e nome del volume (per esempio C:\HardDisk, E:\Dati).
-  Unita (ramo). Espandendola compare il suo file system: sottocartelle e file supportati.
+  Unita (ramo). Espandendola compare il suo file system: sottocartelle e file supportati. Le cartelle senza niente da suonare, sottocartelle comprese, spariscono quando il contatore le ha contate (1.34.0); una cartella aperta che mostra file non sparisce, la lettura fresca di una cartella corregge i conti, Aggiorna su Questo PC li rifa' tutti (1.34.6).
     Cartella (ramo): sottocartelle e file supportati. Una cartella funziona da playlist temporanea, creata al volo: resta nell'albero finche il programma e aperto e si perde alla chiusura. Dove possibile, il menu contestuale ha la voce "Crea playlist da qui", che la trasforma in una playlist vera.
 Apri file (comando). Il file scelto va solo in riproduzione, senza entrare in nessuna playlist; il lettore lo tiene finche non si suona altro, poi lo dimentica.
 Impostazioni (comando)
@@ -48,7 +49,7 @@ Tutti i tasti valgono in tutto il programma, qualunque area abbia il fuoco, ma s
 4.7 Dissolvenza incrociata: L attiva o disattiva, Maiuscolo+L imposta i millisecondi.
 4.8 Marker (issue 12): T ne mette uno (M1, M2...), R e Y saltano al precedente e al successivo, Invio in pausa su un marker lo rinomina; Maiuscolo+R, +Y e +T eliminano quelli prima, dopo e tutti.
 4.9 Equalizzatore: U e I scelgono la banda, O e P aumentano e diminuiscono il valore, E accentata riporta la banda al valore predefinito. E ed E accentata, I e I accentata sono tasti fisici diversi: confermato da Gabriele, nessun conflitto.
-4.10 Nell'albero: Invio, Applicazioni e Spazio aprono il menu contestuale; Canc elimina la voce; \ cerca in tutta la plancia.
+4.10 Nell'albero: Invio, Applicazioni e Spazio aprono il menu contestuale; Canc elimina la voce, e il fuoco resta sulla voce vicina; \ cerca in tutta la plancia; | apre il filtro della playlist in cui sta la plancia, da ogni area.
 5. FUNZIONI
 5.1 Riproduzione: play, pausa, stop, precedente, successivo, casuale, salto avanti e indietro a passi configurabili, salto a un tempo digitato, velocita e tono indipendenti, dissolvenza incrociata, loop A-B, ripetizione (brano, lista), volume, muto, scelta del dispositivo di uscita.
 5.2 Playlist multiple (almeno dieci con tasto diretto): aggiunta di file e cartelle, salvataggio e caricamento in un formato JSON proprio (niente M3U8), ricerca, ordinamento, mescola, brani saltati, statistiche.
@@ -69,7 +70,7 @@ Tutti i tasti valgono in tutto il programma, qualunque area abbia il fuoco, ma s
 Tappa 0 (conclusa): prove di fattibilita del motore e del SID in tempo reale. Dettagli in tappa0-risultati.txt.
 Tappa 1 (fatta nella 1.0.0, issue 1, collaudata da Gabriele il 30 settembre 2026, correzioni nella 1.0.5 e 1.1.0): scheletro con le tre aree, memoria del fuoco, albero con playlist e Questo PC, Apri file, riproduzione, area dei messaggi, tasti di trasporto, primi effetti sonori. Prova con NVDA.
 Tappa 2 (conclusa nella 1.26.0, issue 13): gestione playlist completa dall'albero, ricerca con \, statistiche, salvataggio e caricamento, stato di riapertura, J, K e cifre.
-Tappa 3: segnalibri nell'albero, tabella tasti modificabile, impostazioni, F1 F2 F3.
+Tappa 3: segnalibri nell'albero, tabella tasti modificabile, impostazioni, F1 F2 F3. Nelle impostazioni, chieste da Gabriele il 1 ottobre 2026: una voce per salvare in un file il contenuto della console, e il numero di righe della console, 2000 se non lo si cambia.
 Tappa 4: equalizzatore, velocita, tono, dissolvenza, loop A-B.
 Tappa 5: SID dal prototipo al programma (libsidplayfp 3.x, partenza piu rapida, seek in avanti).
 Tappa 6: formati audio comuni (MP3 e compagnia): collaudo sistematico di quello che libmpv legge.

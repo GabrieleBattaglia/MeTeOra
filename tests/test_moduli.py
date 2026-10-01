@@ -68,6 +68,16 @@ def test_impostazioni_scartano_i_valori_sbagliati(tmp_path):
     assert imp["passo_volume"] == PREDEFINITE["passo_volume"]
 
 
+def test_righe_della_console_dal_file(tmp_path):
+    percorso = tmp_path / "imp.json"
+    assert PREDEFINITE["righe_della_console"] == 2000
+    for scritto, letto in ((5000, 5000), (50, 2000), ("tante", 2000), (True, 2000)):
+        percorso.write_text(json.dumps({"righe_della_console": scritto}), encoding="utf-8")
+        imp = Impostazioni(str(percorso))
+        imp.carica()
+        assert imp["righe_della_console"] == letto, scritto
+
+
 def test_tempi():
     assert tempo(75) == "1:15"
     assert tempo(3725) == "1:02:05"
@@ -127,3 +137,22 @@ def test_schedario_ricorda_e_rilegge(tmp_path):
     di_nuovo = Schedario(archivio)
     di_nuovo.carica()
     assert di_nuovo.scheda(str(sid))["sottobrani"] == 12
+
+
+def test_contatore_rinfresca_le_letture_vecchie(tmp_path):
+    from contatore import Contatore
+
+    (tmp_path / "Dentro").mkdir()
+    contatore = Contatore()
+    contatore.chiedi([str(tmp_path)])
+    contatore.aspetta()
+    assert contatore.files(str(tmp_path)) == []
+    nuovo = str(tmp_path / "Dentro" / "nuovo.mp3")
+    open(nuovo, "wb").close()
+    # La lettura fresca di Dentro cambia: il conto di chi la contiene si rifa'.
+    assert contatore.rinfresca(str(tmp_path / "Dentro"), questo_pc.contenuto(str(tmp_path / "Dentro"))) == [str(tmp_path)]
+    contatore.chiedi([str(tmp_path)])
+    contatore.aspetta()
+    assert contatore.files(str(tmp_path)) == [nuovo]
+    contatore.dimentica_tutto()
+    assert contatore.files(str(tmp_path)) is None
