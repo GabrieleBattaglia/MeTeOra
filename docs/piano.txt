@@ -11,7 +11,7 @@ Il programma e fortemente orientato alle playlist. La riproduzione di singoli br
 2.4 Ogni azione produce un riscontro scritto nella console e un effetto sonoro proprio (vedi 5.7). Esempi di messaggi: "Aggiunti 12 brani, ora 340", "Volume 60", "Segnalibro salvato a 12:31".
 2.5 Statistiche della playlist a richiesta e sempre a portata: numero brani, durata totale, durata residua, brano corrente su totale, tempo trascorso e mancante.
 2.6 Modifica della playlist dall'albero con Canc e con il menu contestuale della voce, al massimo un sottomenu (Ordina). Nessun percorso annidato per le operazioni comuni.
-2.7 Impostazioni in una sola finestra piatta, a schede al massimo di primo livello, ogni opzione con etichetta e valore leggibili.
+2.7 Impostazioni in una sola finestra piatta, a schede al massimo di primo livello, ogni opzione con etichetta e valore leggibili. Come si cambiano: vedi 5.8.
 2.8 Tasti rapidi: tabella unica visibile, modificabile, con avviso di conflitto. Ogni comando ha un nome parlante.
 2.9 Niente tastierino numerico come tasto di comando (NVDA se lo tiene a blocco spento).
 2.10 Finestre e caratteri grandi: nessuna misura fissa in pixel (modello adatta_finestra di Dadillo).
@@ -53,11 +53,18 @@ Tutti i tasti valgono in tutto il programma, qualunque area abbia il fuoco, ma s
 5. FUNZIONI
 5.1 Riproduzione: play, pausa, stop, precedente, successivo, casuale, salto avanti e indietro a passi configurabili, salto a un tempo digitato, velocita e tono indipendenti, dissolvenza incrociata, loop A-B, ripetizione (brano, lista), volume, muto, scelta del dispositivo di uscita.
 5.2 Playlist multiple (almeno dieci con tasto diretto): aggiunta di file e cartelle, salvataggio e caricamento in un formato JSON proprio (niente M3U8), ricerca, ordinamento, mescola, brani saltati, statistiche.
-5.3 Segnalibri (marcatori) in JSON: file, posizione, nota, data. Visibili nell'albero sotto il brano. Recupero dell'ultima posizione per libri e brani lunghi.
+5.3 Segnalibri (marcatori) in JSON: file, posizione, nota, data. Visibili nell'albero sotto il brano. Recupero dell'ultima posizione per libri e brani lunghi. Tutti i marcatori si gestiscono insieme dalle impostazioni (5.8.5).
 5.4 Equalizzatore semplice: poche bande, scelta e regolazione da tasto.
 5.5 Video: finestra separata, controllata dagli stessi tasti. Richiede un discorso a parte sulla GUI prima della sua tappa.
 5.6 Formati speciali: SID (con sottobrani e durate HVSC), tracker, chip music, MIDI, Amiga. Si metteranno tutti.
 5.7 Effetti sonori: ogni singola azione ha il suo effetto sonoro, prodotto con Acusticator di GBUtils. Scelta voluta di Gabriele, anche se non e prassi nei lettori. Volume degli effetti regolabile nelle impostazioni, separato da quello della musica.
+5.8 Impostazioni, idee di Gabriele del 1 ottobre 2026 per la tappa 3. Ogni voce apre un campo in cui si scrive a mano, sul modello dei campi dei filtri: in cima le spiegazioni, come righe che cominciano con il dollaro, e sotto le righe da scrivere. Dove si chiedono piu' valori, lo spazio li separa. Con Invio un validatore legge i valori e li corregge, poi applica l'impostazione o la rifiuta.
+5.8.1 Dimensioni dei caratteri: il campo chiede tre valori, per plancia, console e cruscotto.
+5.8.2 Colori dei caratteri: tre percentuali RGB per area, con la lettera dell'area davanti: p plancia, c console, t cruscotto. Per esempio p31.31.31 e' un bel grigio scuro.
+5.8.3 Colori dello sfondo: come i colori dei caratteri.
+5.8.4 Righe della console: quante ne tiene, 2000 se non lo si cambia, minimo 100. Il valore c'e' dalla 1.34.0, per ora solo nel file delle impostazioni.
+5.8.5 Marcatori: apre una finestra con una lista come la plancia ma piatta, senza rami. Ogni voce riporta percorso\file\nome del marker e tempo. Le voci sono raggruppate per provenienza e si cercano con \. Canc le elimina, Invio ne modifica il nome, c'e' la selezione multipla, e i pulsanti sono Cancella tutto, Esporta selezionati e Chiudi.
+5.8.6 Salva console: scrive il contenuto della console in un file di testo console_timestamp.txt.
 6. ARCHITETTURA
 6.1 Motore: libmpv tramite python-mpv. Verificato nella tappa 0: formati, seek, velocita, equalizzatore al volo, eventi di fine brano, dispositivi.
 6.2 SID: DLL propria su libsidplayfp, emulazione in tempo reale in un filo che rende in anticipo in RAM, passata a libmpv come WAV virtuale. Niente disco. Approvato all'ascolto il 29 settembre 2026.
@@ -70,7 +77,7 @@ Tutti i tasti valgono in tutto il programma, qualunque area abbia il fuoco, ma s
 Tappa 0 (conclusa): prove di fattibilita del motore e del SID in tempo reale. Dettagli in tappa0-risultati.txt.
 Tappa 1 (fatta nella 1.0.0, issue 1, collaudata da Gabriele il 30 settembre 2026, correzioni nella 1.0.5 e 1.1.0): scheletro con le tre aree, memoria del fuoco, albero con playlist e Questo PC, Apri file, riproduzione, area dei messaggi, tasti di trasporto, primi effetti sonori. Prova con NVDA.
 Tappa 2 (conclusa nella 1.26.0, issue 13): gestione playlist completa dall'albero, ricerca con \, statistiche, salvataggio e caricamento, stato di riapertura, J, K e cifre.
-Tappa 3: segnalibri nell'albero, tabella tasti modificabile, impostazioni, F1 F2 F3. Nelle impostazioni, chieste da Gabriele il 1 ottobre 2026: una voce per salvare in un file il contenuto della console, e il numero di righe della console, 2000 se non lo si cambia.
+Tappa 3: segnalibri nell'albero, tabella tasti modificabile, impostazioni come in 5.8, F1 F2 F3.
 Tappa 4: equalizzatore, velocita, tono, dissolvenza, loop A-B.
 Tappa 5: SID dal prototipo al programma (libsidplayfp 3.x, partenza piu rapida, seek in avanti).
 Tappa 6: formati audio comuni (MP3 e compagnia): collaudo sistematico di quello che libmpv legge.
@@ -85,4 +92,6 @@ Tappa 9: rifiniture di accessibilita.
 8.5 Licenze: LGPL o GPL della build di mpv e delle librerie dei chip; libsidplayfp e GPL.
 8.6 Dimensione del pacchetto con la DLL di mpv.
 9. DOMANDE APERTE
-Nessuna al momento.
+Da decidere alla tappa 3, per le impostazioni di 5.8:
+9.1 Salva console: in quale cartella va il file, e come si scrive il timestamp nel nome.
+9.2 Marcatori: in che formato e dove si esportano i selezionati, e come si sente il raggruppamento per provenienza in una lista senza rami.
