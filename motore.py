@@ -1,6 +1,6 @@
 # MeTeOra, il motore di riproduzione: libmpv, e i SID in tempo reale.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0.
+# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta.
 
 """Un solo lettore per tutti i formati.
 
@@ -10,6 +10,8 @@ anticipo e libmpv lo legge come un WAV. Cosi' volume, seek e fine del brano
 funzionano allo stesso modo per tutti.
 Gli eventi di libmpv arrivano in un filo suo: chi li riceve (fine e errore)
 deve riportarli nel filo della finestra, per esempio con wx.CallAfter.
+La scheda audio su cui suona la musica e' quella di dispositivo, da
+scegliere fra quelle di dispositivi(); la sceglie schede_audio.applica.
 """
 
 import librerie  # noqa: F401
@@ -141,6 +143,32 @@ class Motore:
     @muto.setter
     def muto(self, valore):
         self._lettore.mute = valore
+
+    @property
+    def dispositivo(self):
+        """L'uscita audio della musica, col nome che le da' mpv: "auto",
+        il valore di partenza, segue la scheda predefinita di Windows;
+        "wasapi/{...}" e' una scheda precisa, presa da dispositivi().
+        mpv accetta in scrittura anche un nome che non esiste, e se ne
+        accorge solo quando apre il suono: chi scrive lo prende dall'elenco.
+        Scritta durante la riproduzione, mpv riapre l'uscita sulla scheda
+        nuova. Dice la scheda chiesta, non quella che suona davvero."""
+        return self._lettore.audio_device or "auto"
+
+    @dispositivo.setter
+    def dispositivo(self, nome):
+        self._lettore.audio_device = nome
+
+    def dispositivi(self):
+        """Le uscite audio che mpv conosce: una lista di dizionari con name,
+        il nome da scrivere in dispositivo, e description, quello leggibile.
+        Ci sono anche le uscite degli altri driver di mpv, per esempio
+        openal, e la voce "auto".
+        Attenzione, fatto verificato: se la si legge prima che sounddevice
+        sia importato per la prima volta, PortAudio perde le uscite ASIO.
+        Chi la legge chiede prima l'elenco di GBUtils, come fa
+        schede_audio.applica."""
+        return [dict(voce) for voce in self._lettore.audio_device_list or []]
 
     def chiudi(self):
         self._lettore.terminate()

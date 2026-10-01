@@ -2,6 +2,26 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.51.3] - 2026-10-01
+
+- X ha il suo suono: era muto, perché il volume del suo preset, Rapida_salita-sin_des, era scritto come testo, che Acusticator legge come volume assoluto zero mentre Acu_Maker lo legge come scarto dalla base, e così lo sentivi solo lì. Corretto nella collezione di GBUtils V182; la differenza fra le due letture resta da decidere nella issue 47 di GBUtils.
+
+## [1.51.2] - 2026-10-01
+
+- Maiuscolo con Q ed E, e W, accettano solo cifre, punto, virgola e due punti: prima passavano anche scritture come inf o 1e5, e con inf il salto diventava infinito.
+- Un file delle impostazioni che contiene un JSON ma non delle impostazioni, per esempio una lista, non ferma più l'avvio.
+
+## [1.51.0] - 2026-10-01
+
+- La finestra delle impostazioni, dalla voce Impostazioni della plancia: una lista con una riga per voce, il nome e il valore di adesso. Invio su una voce apre un campo come quello del filtro, con le spiegazioni, i limiti e qualche esempio nelle righe col dollaro e il valore di adesso già selezionato nell'ultima riga. Un numero oltre i limiti si porta al limite, e la console lo dice; un testo che non si capisce riapre il campo con la spiegazione in testa. Ogni valore vale subito e si salva subito. Ci sono il volume della musica, il passo del volume, il volume degli effetti in percentuale, i salti di Q ed E, l'inseguimento della plancia e le righe della console, che si tolgono subito se il numero scende. Anche nel file delle impostazioni i valori fuori dai limiti, come un passo del volume a zero o un salto negativo scritti a mano, prendono il valore di partenza invece di arrivare al programma. La finestra, i suoi campi e le sue azioni hanno undici suoni nuovi, nella collezione di GBUtils. Issue 14, tappa 3.
+- Dimensioni dei caratteri: plancia, console e cruscotto hanno ciascuna il suo carattere, da 6 a 72 punti, o tutte e tre lo stesso con un numero solo; il cruscotto cambia altezza con il suo carattere, per tenere cinque righe, ma di solito non occupa più di un terzo della finestra, così con caratteri molto grandi plancia e console restano visibili e il cruscotto scorre; due righe le tiene sempre, anche oltre il terzo in una finestra bassa. Il campo vuoto torna al carattere di Windows.
+- Colori dei caratteri: per ogni area la sua lettera e tre percentuali di rosso, verde e blu, come p31.31.31, un bel grigio scuro; la lettera da sola torna ai colori di Windows.
+- Colori dello sfondo, scritti come quelli dei caratteri.
+- La finestra dei marcatori, dalla voce Marcatori: tutti i marker in una lista, uno per riga, con cartella, file, nome e tempo, raggruppati per cartella e per file, con la selezione multipla di Esplora risorse. La barra rovesciata cerca, con tre suoni suoi per il testo trovato, trovato ripartendo dalla cima e non trovato; Invio rinomina, Canc elimina, Cancella tutto li toglie tutti dopo una conferma. Esporta selezionati scrive i marker scelti in un file, con i nomi e le durate dei file ma senza i percorsi, perché altrove gli stessi file stanno in altre cartelle.
+- Importa marcatori: i marker esportati da un'altra copia di MeTeOra arrivano su ogni copia degli stessi file, riconosciuti dal nome e dalla durata; quelli che ci sono già restano come sono, e la console dice quanti ne sono arrivati. Un file rovinato, per esempio con un tempo impossibile, di oltre trecento anni, non si importa, e la console dice perché.
+- Salva console: tutta la console in un file di testo nella cartella del programma, con la versione, la data e l'ora nel nome, per esempio MeTeOra-V1_51_3-2026_10_01-15_42.txt.
+- Scheda audio: una sola per la musica e per gli effetti, scelta da una lista in ordine di latenza, con in cima la scelta automatica, la più pronta fra quelle che portano alla scheda che Windows usa già. ASIO c'è, con l'avviso che può zittire NVDA. Se gli effetti non aprono la scheda scelta si torna all'automatica, e se la musica non la ritrova, per esempio con ASIO, suona sulla scheda di Windows: la console dice l'una e l'altra cosa. La prova dell'apertura vale anche con gli effetti a volume zero. Se all'avvio la scheda scelta non c'è, o c'è ma gli effetti non la aprono, per esempio perché un altro programma la tiene tutta per sé, suona l'automatica, e la scelta resta per quando la scheda torna; se non si apre, suona anche l'errore.
+
 ## [1.43.2] - 2026-10-01
 
 - X su un marker fa come sul suo brano: lo suona dall'inizio, o se è il brano in corso lo riprende dalla pausa o lo fa ripartire da capo. Prima ripartiva dal marker, e dopo R o Y, che portano il fuoco sul marker, X non tornava più all'inizio del brano. Per suonare da un marker restano R, Y, Maiuscolo con le cifre e Vai al marker nel menu. Dal collaudo di Gabriele.

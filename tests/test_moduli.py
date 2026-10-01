@@ -60,6 +60,21 @@ def test_ogni_evento_ha_un_preset_suo_che_esiste():
     assert not mancanti, f"preset che non esistono nella collezione: {mancanti}"
 
 
+def test_ogni_evento_suona_diverso():
+    from GBUtils import Acusticator
+
+    # Due nomi diversi non bastano: anche onda, note e inviluppo devono
+    # cambiare. I suoni nati per MeTeOra non sono mai a onda quadra.
+    contenuti = {}
+    for preset in suoni.EVENTI.values():
+        score, kind, adsr = Acusticator.preset(preset)
+        contenuti.setdefault(repr((kind, score, adsr)), []).append(preset)
+        if preset.startswith("meteora_"):
+            assert kind != 2, f"{preset} e' a onda quadra"
+    uguali = [nomi for nomi in contenuti.values() if len(nomi) > 1]
+    assert not uguali, f"preset che suonano uguali: {uguali}"
+
+
 def test_suona_fissa_l_attesa_sulla_durata_del_preset(monkeypatch):
     from GBUtils import Acusticator
 

@@ -1,0 +1,22 @@
+Collaudo di MeTeOra 1.51.3, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.51.3. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+X fa partire il brano con il suo suono, che prima era muto.
+Invio sulla voce Impostazioni della plancia apre la finestra delle impostazioni, con il suo suono, e NVDA legge il titolo e la prima riga, nome e valore.
+Le frecce scorrono le quattordici voci; ognuna dice il suo valore di adesso.
+Invio su Volume della musica apre il campo con le righe col dollaro in cima; scrivi 60 e Invio: il volume cambia subito, c'è il suono dell'impostazione cambiata, e tornando sulla lista NVDA legge già Volume della musica: 60.
+Su Righe della console scrivi 50: diventa 100, e la console lo dice.
+Su Passo del volume scrivi abc: suona l'errore e il campo si riapre, con l'errore letto da NVDA all'inizio dell'etichetta.
+Esc in un campo lo chiude senza cambiare niente.
+Volume degli effetti a 20: gli effetti suonano più piano; poi rimettilo com'era.
+Inseguimento della plancia: scrivi sì o no, e Maiuscolo+F8 dopo lo trova cambiato.
+Salto indietro di Q e Salto avanti di E: scrivi 5, poi Q ed E saltano di cinque secondi.
+Caratteri e colori, se hai vicino qualcuno che vede: Dimensioni dei caratteri 20, poi Colori dello sfondo t100.100.80, e chiedigli se plancia, console e cruscotto si leggono bene; il campo vuoto e la lettera t da sola tornano a Windows.
+Scheda audio: Invio apre la lista in ordine di latenza, con in cima Automatica e il nome della scheda; le voci ASIO hanno l'avviso che possono zittire NVDA.
+In questo collaudo non scegliere una voce ASIO: se NVDA tacesse, lo libereresti solo chiudendo MeTeOra.
+Scegli un'altra uscita non ASIO, per esempio WASAPI di un'altra scheda o la stessa in DirectSound: il suono della scheda esce già da lì, e la console dice dove va la musica; poi torna ad Automatica.
+Salva console: la console finisce in un file MeTeOra-V1_51_3-, con data e ora, nella cartella del programma, e la console dice il nome.
+Marcatori: la riga dice quanti marker hai e in quanti file; Invio apre la finestra dei marcatori, con il suo suono.
+Nella lista ogni riga dice cartella, file, nome del marker e tempo; Maiuscolo con le frecce seleziona più righe, Ctrl con le frecce sposta il fuoco, Ctrl+Spazio accende e spegne una riga.
+La barra rovesciata cerca nella lista: ascolta i tre suoni nuovi, trovato, ricominciato da capo e non trovato.
+Invio su una riga rinomina il marker, Canc lo elimina; con più righe selezionate Canc chiede conferma, e il fuoco va sulla prima riga rimasta.
+Prova sicura per Cancella tutto: Home, Maiuscolo+Fine per selezionarle tutte, Esporta selezionati in un file tuo, poi Cancella tutto, che chiede conferma, poi Chiudi.
+Subito dopo, Importa marcatori con quel file: tornano tutti i marker, e la console dice quanti.

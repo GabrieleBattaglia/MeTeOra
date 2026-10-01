@@ -1,6 +1,6 @@
 # MeTeOra, gli effetti sonori: un suono per ogni azione, con Acusticator.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1.
+# 30/09/2026: nasce con la tappa 1. Nella 1.51.0 i suoni delle impostazioni, della console salvata, della finestra dei marcatori, della sua ricerca e della scheda audio.
 
 """La mappa degli eventi di MeTeOra sui preset della collezione di GBUtils.
 
@@ -90,6 +90,25 @@ EVENTI = {
     "risali": "menu_triplicato_su_4",
     "risali_all_antenato": "meteora_risali_all_antenato",
     "apri_tutto": "meteora_apri_tutto",
+    # La finestra delle impostazioni e quella dei marcatori (1.51.0), con i
+    # suoni nati per loro nella collezione. Cancella tutto della finestra dei
+    # marcatori svuota l'archivio intero: non e' marker_tolti_tutti, che
+    # toglie i marker di un brano solo.
+    "impostazioni": "meteora_impostazioni",
+    "impostazione_cambiata": "meteora_impostazione_cambiata",
+    "console_salvata": "meteora_console_salvata",
+    "scheda_audio": "meteora_scheda_audio",
+    "marcatori": "meteora_marcatori",
+    "marcatori_esportati": "meteora_marcatori_esportati",
+    "marcatori_importati": "meteora_marcatori_importati",
+    "marcatori_cancellati": "meteora_marcatori_cancellati",
+    # La barra rovesciata nella finestra dei marcatori: una famiglia di tre
+    # esiti, diversa da quella della ricerca nella console. Trovato e non
+    # trovato cominciano con la stessa scorsa di tre note; ripartito ha la
+    # stessa chiusa di trovato, preceduta da una scivolata che torna in cima.
+    "trovato_nei_marcatori": "meteora_marcatori_trovato",
+    "ripartito_nei_marcatori": "meteora_marcatori_ripartito",
+    "non_trovato_nei_marcatori": "meteora_marcatori_non_trovato",
     "domanda": "campanellino",
     "non_disponibile": "rifiuto",
     "errore": "errore_secco",

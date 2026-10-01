@@ -14,7 +14,8 @@
 # cartelle aperte che non spariscono, playlist che si ricaricano, Risultati cestinati, emoji e jolly nella console;
 # nella 1.36.1 Backspace e Maiuscolo con Backspace, e Maiuscolo e Ctrl con le frecce senza il nome della plancia ripetuto da NVDA;
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
-# nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato.
+# nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
+# nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori.
 
 """La finestra di MeTeOra.
 
@@ -28,6 +29,7 @@ riproduzione non sposta mai la selezione; lo fa F8, su richiesta.
 """
 
 import contextlib
+import copy
 import ctypes
 import datetime
 import os
@@ -45,10 +47,13 @@ import formati
 import marcatori
 import percorsi
 import questo_pc
+import schede_audio
 import songlengths
 import suoni
+import valori
 import version
 from contatore import Contatore
+from dialoghi import DialogoTesto, FinestraImpostazioni, FinestraMarcatori, FinestraScelta
 from filtro import COMMENTO, ErroreFiltro, Filtro, modello_della_console
 from impostazioni import Impostazioni
 from marcatori import Marcatori
@@ -56,11 +61,18 @@ from motore import VOLUME_MASSIMO, durata_del_sottobrano
 from playlist import Archivio, Brano, Coda, Playlist
 from ricerca import AlberoDeiRisultati, Ricerca
 from schedario import Schedario
+from valori import AREE, ErroreValore, leggi_tempo, secondi_da_leggere
 
 FILE_PLAYLIST = "MeTeOra - Playlist.json"
 FILE_IMPOSTAZIONI = "MeTeOra - Impostazioni.json"
 FILE_SCHEDARIO = "MeTeOra - Schedario.json"
 FILE_MARCATORI = "MeTeOra - Marcatori.json"
+# Il nome proposto per l'esportazione dei marcatori, e il filtro dei dialoghi
+# che la scrivono e la leggono.
+FILE_DELL_ESPORTAZIONE = "MeTeOra - Marcatori esportati.json"
+FILTRO_DEI_MARCATORI = "Marcatori di MeTeOra (*.json)|*.json"
+# I dialoghi dei file passano da questo nome, che le prove sostituiscono.
+DialogoDiFile = wx.FileDialog
 # I messaggi dell'albero di Windows che wx non espone come servono: spostare
 # il cursore senza toccare le altre selezioni, e quante voci stanno in una pagina.
 _manda_messaggio = ctypes.WinDLL("user32").SendMessageW
@@ -155,6 +167,35 @@ TASTI_DEL_CONTESTO = {
     "marker": ("un marker", "Invio rinomina il marker, Canc lo elimina, X fa come sul suo brano. Applicazioni o Spazio: menu con Vai al marker, che suona il brano da lì, Rinomina ed Elimina."),
     "comando": ("un comando", "Invio esegue il comando."),
 }
+# Le voci della finestra delle impostazioni, in ordine: chiave -> (etichetta,
+# participio per dire che non e' cambiata; None per le voci che fanno
+# un'azione invece di cambiare un valore).
+VOCI_DELLE_IMPOSTAZIONI = {
+    "volume": ("Volume della musica", "cambiato"),
+    "passo_volume": ("Passo del volume", "cambiato"),
+    "volume_effetti": ("Volume degli effetti", "cambiato"),
+    "scheda_audio": ("Scheda audio", "cambiata"),
+    "passo_indietro": ("Salto indietro di Q", "cambiato"),
+    "passo_avanti": ("Salto avanti di E", "cambiato"),
+    "insegui": ("Inseguimento della plancia (Maiuscolo+F8)", "cambiato"),
+    "caratteri": ("Dimensioni dei caratteri", "cambiate"),
+    "colori_testo": ("Colori dei caratteri", "cambiati"),
+    "colori_sfondo": ("Colori dello sfondo", "cambiati"),
+    "righe_della_console": ("Righe della console", "cambiate"),
+    "salva_console": ("Salva console", None),
+    "marcatori": ("Marcatori", None),
+    "importa_marcatori": ("Importa marcatori", None),
+}
+# L'ultima riga delle istruzioni di ogni campo.
+REGOLA_DEL_DOLLARO = "Le righe che cominciano con il dollaro non contano: scrivi nell'ultima riga."
+# La prova della scheda audio degli effetti: un centesimo di secondo di
+# silenzio alla frequenza del mixer, 44100, che la apre senza suonare niente,
+# anche con il volume degli effetti a zero.
+SILENZIO_DI_PROVA = 441
+# Perche' la scheda audio scelta non e' quella in uso, come lo dice la riga
+# della finestra delle impostazioni: si usa l'automatica, e la scelta resta.
+SCHEDA_MANCANTE = "non c'è"
+SCHEDA_CHE_NON_SI_APRE = "non si apre"
 
 
 def tempo(secondi):
@@ -165,28 +206,6 @@ def tempo(secondi):
     ore, resto = divmod(secondi, 3600)
     minuti, secondi = divmod(resto, 60)
     return f"{ore}:{minuti:02d}:{secondi:02d}" if ore else f"{minuti}:{secondi:02d}"
-
-
-def leggi_tempo(testo):
-    """Da '90', '1.5', '1:30', '1:30,25' o '1:02:03' a secondi; None se non si
-    capisce. I due punti separano ore, minuti e secondi; il punto o la
-    virgola separano i decimali, solo nell'ultima parte."""
-    parti = testo.strip().replace(",", ".").split(":")
-    try:
-        numeri = [int(p) for p in parti[:-1]] + [float(parti[-1])]
-    except ValueError:
-        return None
-    if not 1 <= len(numeri) <= 3 or any(n < 0 for n in numeri) or any(n >= 60 for n in numeri[1:]):
-        return None
-    totale = 0.0
-    for n in numeri:
-        totale = totale * 60 + n
-    return totale
-
-
-def secondi_da_leggere(secondi):
-    """Un numero di secondi da leggere: 10, oppure 1.5."""
-    return f"{secondi:.3f}".rstrip("0").rstrip(".")
 
 
 def durata_lunga(secondi):
@@ -294,17 +313,6 @@ def riga_del_problema(tipo, valore, traccia):
     return testo + "."
 
 
-class DialogoTesto(wx.TextEntryDialog):
-    """Un campo da una riga con il testo di prima gia' selezionato: scrivendo
-    lo si sostituisce, con le frecce lo si corregge."""
-
-    def ShowModal(self):
-        campo = next((c for c in self.GetChildren() if isinstance(c, wx.TextCtrl)), None)
-        if campo is not None:
-            wx.CallAfter(campo.SelectAll)
-        return super().ShowModal()
-
-
 # Le istruzioni in cima ai campi dei filtri e delle ricerche, scritte come
 # righe di commento, che cominciano con il dollaro e non contano.
 _GRAMMATICA_DEL_FILTRO = [
@@ -327,7 +335,7 @@ _GRAMMATICA_DEL_FILTRO = [
     "g genere.",
     "p percorso della cartella, come p=c64music.",
     "s saltato: s=1 i brani saltati, s=0 gli altri.",
-    "Le righe che cominciano con il dollaro non contano: scrivi nell'ultima riga.",
+    REGOLA_DEL_DOLLARO,
 ]
 ISTRUZIONI_DEL_FILTRO = ["Puoi usare questi comandi per comporre il filtro.", *_GRAMMATICA_DEL_FILTRO]
 ISTRUZIONI_DELLA_RICERCA = ["Puoi usare questi comandi per comporre la ricerca, in tutte le playlist e in tutte le unità.", *_GRAMMATICA_DEL_FILTRO]
@@ -339,7 +347,7 @@ ISTRUZIONI_DELLA_CONSOLE = [
     'Virgolette: la sequenza esatta, maiuscole comprese, come "SID".',
     "I messaggi finiscono con l'ora: 07:13 trova ciò che è accaduto alle 7 e 13, e 07:# tutta l'ora delle 7; trovano anche i tempi dei brani che contengono quelle cifre, come 1:07:13.",
     "Invio, dalla console, passa all'occorrenza seguente.",
-    "Le righe che cominciano con il dollaro non contano: scrivi nell'ultima riga.",
+    REGOLA_DEL_DOLLARO,
 ]
 
 
@@ -431,6 +439,10 @@ class Finestra(wx.Frame):
 
         self.motore = Motore(alla_fine=lambda: wx.CallAfter(self._brano_finito),
             all_errore=lambda p: wx.CallAfter(self._brano_in_errore, p), ao=ao, volume=self.impostazioni["volume"])
+        # La scheda audio scelta, appena c'e' il motore; con la scelta
+        # automatica non si tocca niente. La console, che ancora non c'e',
+        # dira' com'e' andata.
+        esito_della_scheda, errore_della_scheda = self._applica_la_scheda_all_avvio()
         self.coda = Coda()
         self.coda.ammesso = self._ammesso
         # I filtri compilati, per playlist: (testo, Filtro).
@@ -480,6 +492,9 @@ class Finestra(wx.Frame):
         # Il turno dell'ultimo beep dei livelli: un beep rimandato che nel
         # frattempo e' stato superato da un altro non suona piu'.
         self._turno_del_beep = 0
+        # Caratteri e colori gia' dati alle tre aree: _applica_aspetto tocca
+        # solo cio' che cambia, e un'area mai toccata resta di Windows.
+        self._aspetto = {"caratteri": {}, "colori_testo": {}, "colori_sfondo": {}}
         self._costruisci()
         self._popola_albero()
         self.Bind(wx.EVT_CHAR_HOOK, self._tasto)
@@ -491,6 +506,7 @@ class Finestra(wx.Frame):
             self.archivio.percorso += ".nuovo"
         if self.marcatori.errore:
             self.scrivi(f"Il file dei marker non si legge, e resta com'è: {self.marcatori.errore}. I marker nuovi vanno in {os.path.basename(self.marcatori.percorso)}.")
+        self._scrivi_la_scheda_all_avvio(esito_della_scheda, errore_della_scheda)
         self._chiedi_schede(*self.archivio.playlist, self.archivio.preferiti)
 
     # La costruzione.
@@ -518,10 +534,12 @@ class Finestra(wx.Frame):
         tutto.Add(wx.StaticText(pannello, label="Cruscotto"), 0, wx.LEFT | wx.RIGHT, 6)
         self.cruscotto = wx.TextCtrl(pannello, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2)
         self.cruscotto.SetName("Cruscotto")
-        # Almeno cinque righe, misurate sul carattere e non in pixel.
-        self.cruscotto.SetMinSize(wx.Size(-1, self.cruscotto.GetCharHeight() * 6 + 8))
+        # Caratteri e colori delle impostazioni, prima di misurare il
+        # cruscotto: la sua misura la calcola _applica_aspetto.
+        self._applica_aspetto()
         tutto.Add(self.cruscotto, 0, wx.EXPAND | wx.ALL, 4)
         pannello.SetSizer(tutto)
+        pannello.Bind(wx.EVT_SIZE, self._pannello_ridimensionato)
         self.albero.Bind(wx.EVT_TREE_ITEM_EXPANDING, self._in_espansione)
         self.albero.Bind(wx.EVT_TREE_ITEM_COLLAPSED, self._chiusa_una_voce)
         self.albero.Bind(wx.EVT_TREE_ITEM_EXPANDED, self._aperta_una_voce)
@@ -534,6 +552,76 @@ class Finestra(wx.Frame):
         self.console.Bind(wx.EVT_KEY_DOWN, self._tasto_nella_console)
         self.cruscotto.Bind(wx.EVT_SET_FOCUS, self._fuoco_al_cruscotto)
         self.cruscotto.Bind(wx.EVT_KILL_FOCUS, self._cruscotto_lasciato)
+
+    def _aree(self):
+        """Le tre aree, con la lettera che le indica nelle impostazioni."""
+        return {"p": self.albero, "c": self.console, "t": self.cruscotto}
+
+    def _applica_aspetto(self):
+        """Da' a plancia, console e cruscotto le dimensioni dei caratteri e i
+        colori delle impostazioni, toccando solo cio' che cambia: un'area che
+        non ne ha mai avuti resta di Windows. Il carattere e' quello di
+        sistema alla dimensione scelta; un'area che torna a Windows riprende
+        il carattere di sistema e i colori di sistema del testo e dello
+        sfondo delle finestre. Le etichette delle aree non cambiano. Alla
+        fine il cruscotto si rimisura sul suo carattere."""
+        aree = self._aree()
+        sistema = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
+        for area, controllo in aree.items():
+            punti = self.impostazioni["caratteri"].get(area)
+            if punti != self._aspetto["caratteri"].get(area):
+                carattere = wx.Font(sistema)
+                if punti:
+                    carattere.SetPointSize(punti)
+                controllo.SetFont(carattere)
+        # I colori vengono dopo i caratteri: nei controlli RichEdit, console e
+        # cruscotto, un carattere nuovo riporta il testo al colore di Windows
+        # (verificato sul desktop nascosto).
+        for chiave, imposta, di_sistema in (("colori_testo", "SetForegroundColour", wx.SYS_COLOUR_WINDOWTEXT),
+                ("colori_sfondo", "SetBackgroundColour", wx.SYS_COLOUR_WINDOW)):
+            for area, controllo in aree.items():
+                percentuali = self.impostazioni[chiave].get(area)
+                if percentuali != self._aspetto[chiave].get(area):
+                    colore = wx.Colour(*valori.colore_da_percentuali(percentuali)) if percentuali else wx.SystemSettings.GetColour(di_sistema)
+                    getattr(controllo, imposta)(colore)
+        self._aspetto = copy.deepcopy({chiave: self.impostazioni[chiave] for chiave in self._aspetto})
+        for controllo in (self.console, self.cruscotto):
+            self._ricolora(controllo)
+        self._misura_il_cruscotto()
+        self.albero.GetParent().Layout()
+        for controllo in aree.values():
+            controllo.Refresh()
+
+    def _misura_il_cruscotto(self):
+        """L'altezza minima del cruscotto, misurata sul suo carattere e non in
+        pixel: cinque righe, ma non oltre un terzo della finestra; due righe
+        pero' sempre, anche oltre il terzo in una finestra bassa. Con caratteri molto grandi le cinque righe si
+        mangiavano plancia e console (Gabriele, 1 ottobre 2026): il cruscotto
+        allora ne mostra meno e scorre. Vero se la misura e' cambiata."""
+        riga = self.cruscotto.GetCharHeight()
+        terzo = self.albero.GetParent().GetClientSize().height // 3
+        altezza = max(riga * 2 + 8, min(riga * 6 + 8, terzo)) if terzo > 0 else riga * 6 + 8
+        if self.cruscotto.GetMinSize().height == altezza:
+            return False
+        self.cruscotto.SetMinSize(wx.Size(-1, altezza))
+        return True
+
+    def _pannello_ridimensionato(self, evento):
+        # Il terzo della finestra cambia con la finestra: alla partenza, che e'
+        # massimizzata, e a ogni cambio di misura. Il gestore di wx che segue
+        # rifa' la disposizione con il minimo nuovo.
+        self._misura_il_cruscotto()
+        evento.Skip()
+
+    @staticmethod
+    def _ricolora(controllo):
+        """Rida' a tutto il testo di una console il colore dei caratteri, se
+        ne ha uno suo: un carattere nuovo, o un testo riscritto, lo possono
+        riportare a quello di Windows. SetForegroundColour con il colore di
+        prima non fa niente, per questo il colore va per un'altra strada,
+        quella di SetFont, che non tocca la selezione."""
+        if controllo.UseForegroundColour():
+            controllo.SetStyle(-1, -1, wx.TextAttr(controllo.GetForegroundColour()))
 
     def _popola_albero(self):
         radice = self.albero.AddRoot("MeTeOra")
@@ -571,17 +659,27 @@ class Finestra(wx.Frame):
         self._righe.append(testo)
         limite = max(self.impostazioni["righe_della_console"], self._da_tenere)
         if len(self._righe) > limite + 100:
-            togliere = len(self._righe) - limite
-            caratteri = self._unita("".join(r + "\n" for r in self._righe[:togliere]))
-            self.console.Remove(0, caratteri)
-            del self._righe[:togliere]
-            posizione = max(0, posizione - caratteri)
-            if self._posizione_della_console is not None:
-                self._posizione_della_console = max(0, self._posizione_della_console - caratteri)
+            posizione = max(0, posizione - self._taglia_la_console(limite))
         self.console.SetInsertionPoint(posizione)
 
+    def _taglia_la_console(self, limite):
+        """Toglie dalla cima della console le righe oltre il limite e
+        restituisce quante posizioni del controllo ha tolto, per chi deve
+        rimettere il cursore."""
+        togliere = len(self._righe) - limite
+        if togliere <= 0:
+            return 0
+        caratteri = self._unita("".join(r + "\n" for r in self._righe[:togliere]))
+        self.console.Remove(0, caratteri)
+        del self._righe[:togliere]
+        if self._posizione_della_console is not None:
+            self._posizione_della_console = max(0, self._posizione_della_console - caratteri)
+        return caratteri
+
     def _suono(self, evento):
-        suoni.suona(evento, self.impostazioni["volume_effetti"])
+        """Suona l'effetto dell'evento; vero se e' partito, falso se il
+        volume degli effetti e' a zero."""
+        return suoni.suona(evento, self.impostazioni["volume_effetti"])
 
     def _riscontro(self, evento, testo, categoria=None):
         self._suono(evento)
@@ -688,6 +786,8 @@ class Finestra(wx.Frame):
         if attuale == testo:
             return False
         self.cruscotto.SetValue(testo)
+        # Un controllo RichEdit riscritto puo' perdere il colore dei caratteri.
+        self._ricolora(self.cruscotto)
         self.cruscotto.SetInsertionPoint(0)
         self._posizione_del_cruscotto = None
         return True
@@ -1630,10 +1730,12 @@ class Finestra(wx.Frame):
                 ("Aggiungi ai preferiti", lambda: self._ai_preferiti(Brano(brano.percorso, sottobrano=n)))]
         return []
 
-    def _conferma(self, domanda, titolo):
-        """Una domanda con Si' e No, e No come risposta predefinita."""
+    def _conferma(self, domanda, titolo, genitore=None):
+        """Una domanda con Si' e No, e No come risposta predefinita. Da un
+        dialogo, il genitore e' lui: chiudendosi, la domanda gli rende il
+        fuoco."""
         self._suono("domanda")
-        with wx.MessageDialog(self, domanda, titolo, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION) as dialogo:
+        with wx.MessageDialog(genitore or self, domanda, titolo, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION) as dialogo:
             return dialogo.ShowModal() == wx.ID_YES
 
     def _al_cestino(self, voce):
@@ -1817,8 +1919,8 @@ class Finestra(wx.Frame):
             # voce vicina, e se e' un marker lo ritrova il rinfresco.
             self.albero.UnselectAll()
             self._seleziona(approdo)
-        for k in {k for _v, k, _m in marker}:
-            self._salva_i_marker(k)
+        if marker:
+            self._salva_i_marker(*{k for _v, k, _m in marker})
         parti = []
         if da_togliere:
             parti.append(f"{'tolto' if len(da_togliere) == 1 else 'tolti'} {brani_al_plurale(len(da_togliere))}")
@@ -2735,7 +2837,7 @@ class Finestra(wx.Frame):
             self._riscontro("muto_spento", f"Audio di nuovo acceso, volume {self.motore.volume}.", "volume")
 
     def _comando_apri_file(self):
-        with wx.FileDialog(self, "Apri file", wildcard=formati.filtro_dialogo(), style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST) as dialogo:
+        with DialogoDiFile(self, "Apri file", wildcard=formati.filtro_dialogo(), style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
                 return
             percorso = dialogo.GetPath()
@@ -2744,8 +2846,453 @@ class Finestra(wx.Frame):
         pl = Playlist("file aperto", [Brano(percorso)], cartella="")
         self._suona(pl, pl.brani[0], "file_aperto")
 
+    # Le impostazioni, piano 5.8.
+
     def _comando_impostazioni(self):
-        self._riscontro("non_disponibile", "La finestra delle impostazioni arriva con la tappa 3.")
+        """La finestra delle impostazioni: una lista piatta, una riga per voce;
+        Invio su una voce la cambia, o fa la sua azione."""
+        self._suono("impostazioni")
+        with FinestraImpostazioni(self, self._voci_delle_impostazioni(), self._cambia_impostazione) as dialogo:
+            dialogo.ShowModal()
+
+    def _voci_delle_impostazioni(self):
+        """Le righe della finestra delle impostazioni, come (chiave, "Etichetta: valore")."""
+        return [(chiave, self._riga_dell_impostazione(chiave)) for chiave in VOCI_DELLE_IMPOSTAZIONI]
+
+    def _riga_dell_impostazione(self, chiave):
+        imp = self.impostazioni
+        valore = {
+            "volume": lambda: str(imp["volume"]),
+            "passo_volume": lambda: str(imp["passo_volume"]),
+            "volume_effetti": lambda: f"{round(imp['volume_effetti'] * 100)}%",
+            "scheda_audio": self._scheda_da_leggere,
+            "passo_indietro": lambda: f"{secondi_da_leggere(imp['passo_indietro'])} secondi",
+            "passo_avanti": lambda: f"{secondi_da_leggere(imp['passo_avanti'])} secondi",
+            "insegui": lambda: "sì" if imp["insegui"] else "no",
+            "caratteri": self._caratteri_da_leggere,
+            "colori_testo": lambda: self._colori_da_leggere("colori_testo"),
+            "colori_sfondo": lambda: self._colori_da_leggere("colori_sfondo"),
+            "righe_della_console": lambda: str(imp["righe_della_console"]),
+            "salva_console": lambda: "scrive la console in un file di testo",
+            "marcatori": self._marcatori_da_leggere,
+            "importa_marcatori": lambda: "da un file esportato da MeTeOra",
+        }[chiave]()
+        return f"{VOCI_DELLE_IMPOSTAZIONI[chiave][0]}: {valore}"
+
+    def _caratteri_da_leggere(self):
+        caratteri = self.impostazioni["caratteri"]
+        if not caratteri:
+            return "quelle di Windows"
+        return ", ".join(f"{nome} {caratteri[area]}" if area in caratteri else f"{nome} di Windows" for area, nome in AREE.items())
+
+    def _colori_da_leggere(self, chiave):
+        colori = self.impostazioni[chiave]
+        if not colori:
+            return "quelli di Windows"
+        testo = ", ".join(f"{nome} {'.'.join(str(p) for p in colori[area])}" for area, nome in AREE.items() if area in colori)
+        return testo + ("; le altre aree di Windows" if len(colori) < len(AREE) else "")
+
+    def _marcatori_da_leggere(self):
+        voci = self.marcatori.voci
+        quanti = sum(len(voce["marker"]) for voce in voci.values())
+        return f"{quanti} in {len(voci)} file" if quanti else "nessuno"
+
+    def _cambia_impostazione(self, chiave, genitore):
+        """Invio su una voce della finestra delle impostazioni, genitore: le
+        voci di valore aprono il loro campo, le altre fanno la loro azione."""
+        azioni = {
+            "scheda_audio": self._scegli_la_scheda_audio,
+            "salva_console": lambda _genitore: self._salva_console(),
+            "marcatori": self._finestra_dei_marcatori,
+            "importa_marcatori": self._importa_i_marcatori,
+        }
+        if chiave in azioni:
+            azioni[chiave](genitore)
+        else:
+            self._campo_dell_impostazione(chiave, genitore)
+
+    def _campo_dell_impostazione(self, chiave, genitore):
+        """Il campo di una voce di valore, come quello dei filtri: in cima le
+        righe col dollaro, che spiegano la voce, i limiti e il valore di
+        adesso; nell'ultima riga il valore, gia' selezionato. Il testo lo
+        legge valori.py: se non va la console dice perche' e il campo si
+        riapre, con l'errore in testa al titolo, che NVDA legge, e con il
+        testo scritto. Un valore buono si applica e si salva subito."""
+        etichetta, participio = VOCI_DELLE_IMPOSTAZIONI[chiave]
+        leggi, istruzioni, testo = self._campo(chiave)
+        errore = ""
+        while True:
+            self._suono("domanda")
+            with FinestraFiltro(genitore, f"{errore} {etichetta}" if errore else etichetta, testo, istruzioni) as dialogo:
+                if dialogo.ShowModal() != wx.ID_OK:
+                    self.scrivi(f"{etichetta} non {participio}.")
+                    return
+                # Piu' righe valgono come una, unite da spazi.
+                testo = " ".join(dialogo.testo.splitlines()).strip()
+                try:
+                    valore, correzioni = leggi(testo)
+                except ErroreValore as e:
+                    errore = str(e)
+                    self._riscontro("errore", errore)
+                    continue
+                frase = self._applica_l_impostazione(chiave, valore)
+                self._salva_impostazioni()
+                # La riga si riscrive prima che il campo se ne vada: tornando
+                # sulla lista, NVDA legge gia' il valore nuovo.
+                genitore.aggiorna(chiave, self._riga_dell_impostazione(chiave))
+            self._riscontro("impostazione_cambiata", " ".join([frase, *correzioni]))
+            return
+
+    def _campo(self, chiave):
+        """(lettura, istruzioni, testo di adesso) del campo di una voce di
+        valore: la lettura e' la funzione di valori.py che legge il testo."""
+        imp = self.impostazioni
+        if chiave == "volume":
+            return valori.leggi_volume_musica, [
+                "Il volume della musica, da 0 a 300: oltre il 100 amplifica, per gli audio registrati troppo bassi.",
+                "Per esempio 80 o 150. Anche più e meno lo cambiano, dalla finestra principale.",
+                f"Adesso è {imp['volume']}.", REGOLA_DEL_DOLLARO], str(imp["volume"])
+        if chiave == "passo_volume":
+            return valori.leggi_passo_volume, [
+                "Di quanto cambiano il volume più e meno: un numero intero da 1 a 50.",
+                "Per esempio 5. Anche Maiuscolo+M lo cambia, dalla finestra principale.",
+                f"Adesso è {imp['passo_volume']}.", REGOLA_DEL_DOLLARO], str(imp["passo_volume"])
+        if chiave == "volume_effetti":
+            percentuale = round(imp["volume_effetti"] * 100)
+            return valori.leggi_volume_effetti, [
+                "Quanto forte suonano gli effetti sonori, in percentuale, da 0 a 100: 0 li zittisce. Il volume della musica non cambia.",
+                "Per esempio 50, oppure 35%.",
+                f"Adesso è {percentuale}%.", REGOLA_DEL_DOLLARO], str(percentuale)
+        if chiave in ("passo_indietro", "passo_avanti"):
+            nome, verso, tasto = VOCI_DELLE_IMPOSTAZIONI[chiave][0], *(("indietro", "Q") if chiave == "passo_indietro" else ("avanti", "E"))
+            attuale = secondi_da_leggere(imp[chiave])
+            return (lambda testo: valori.leggi_secondi(testo, nome)), [
+                f"Di quanti secondi salta {verso} il tasto {tasto}: almeno 0.1, anche con i decimali.",
+                f"Per esempio 10, 2.5 o 2,5, oppure minuti e secondi come 1:30. Anche Maiuscolo+{tasto} lo cambia, dalla finestra principale.",
+                f"Adesso è di {attuale} secondi.", REGOLA_DEL_DOLLARO], attuale
+        if chiave == "insegui":
+            return valori.leggi_si_no, [
+                "Con l'inseguimento agganciato, a ogni cambio di brano la selezione della plancia va da sola su ciò che suona, senza spostare il fuoco.",
+                "Scrivi sì per agganciarlo, no per sganciarlo; valgono anche s, n, 1, 0, acceso e spento. Anche Maiuscolo+F8 lo aggancia e lo sgancia.",
+                f"Adesso è {'agganciato' if imp['insegui'] else 'sganciato'}.", REGOLA_DEL_DOLLARO], "sì" if imp["insegui"] else "no"
+        if chiave == "caratteri":
+            caratteri = imp["caratteri"]
+            di_sistema = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT).GetPointSize()
+            attuale = " ".join(str(caratteri.get(area, di_sistema)) for area in AREE) if caratteri else ""
+            return valori.leggi_caratteri, [
+                f"La dimensione dei caratteri in punti, da {valori.CARATTERI_MINIMI} a {valori.CARATTERI_MASSIMI}: tre numeri separati da spazi, per plancia, console e cruscotto.",
+                f"Un numero solo vale per tutte e tre le aree. Per esempio 12, oppure 12 14 12. Il carattere di Windows è di {di_sistema} punti.",
+                "Il campo vuoto torna al carattere di Windows in tutte e tre le aree.",
+                f"Adesso: {self._caratteri_da_leggere()}.", REGOLA_DEL_DOLLARO], attuale
+        if chiave in ("colori_testo", "colori_sfondo"):
+            nome = VOCI_DELLE_IMPOSTAZIONI[chiave][0]
+            cosa, esempi = ("dei caratteri", "p31.31.31 è un grigio scuro, c100.100.100 il bianco") if chiave == "colori_testo" else (
+                "dello sfondo", "t0.0.0 è il nero, c100.100.80 un giallo chiaro")
+            return (lambda testo: valori.leggi_colori(testo, nome)), [
+                f"Il colore {cosa} di ogni area: la lettera dell'area, p plancia, c console, t cruscotto, e tre percentuali da 0 a 100 di rosso, verde e blu, separate dal punto.",
+                f"Più aree si separano con lo spazio. Per esempio {esempi}.",
+                "La lettera da sola torna ai colori di Windows; le aree che non scrivi restano come sono.",
+                f"Adesso: {self._colori_da_leggere(chiave)}.", REGOLA_DEL_DOLLARO], valori.scrivi_colori(imp[chiave])
+        return valori.leggi_righe_della_console, [
+            f"Quante righe tiene la console: da {valori.RIGHE_MINIME} in su. Le più vecchie si tolgono dalla cima.",
+            "Per esempio 2000, il valore di partenza. Un testo lungo, come il manuale, resta comunque intero.",
+            f"Adesso ne tiene {imp['righe_della_console']}.", REGOLA_DEL_DOLLARO], str(imp["righe_della_console"])
+
+    def _applica_l_impostazione(self, chiave, valore):
+        """Applica il valore letto dal campo e restituisce la frase che lo dice."""
+        imp = self.impostazioni
+        if chiave in ("colori_testo", "colori_sfondo"):
+            # Dal campo dei colori arrivano i cambi, da unire a quelli di adesso.
+            valore = valori.unisci_colori(imp[chiave], valore)
+        imp[chiave] = valore
+        if chiave == "volume":
+            self.motore.volume = valore
+            return f"Il volume della musica ora è {valore}{', amplificato oltre il 100' if valore > 100 else ''}."
+        if chiave == "passo_volume":
+            return f"Più e meno ora cambiano il volume di {valore}."
+        if chiave == "volume_effetti":
+            return f"Gli effetti sonori ora suonano al {round(valore * 100)}%." if valore else "Gli effetti sonori ora tacciono."
+        if chiave in ("passo_indietro", "passo_avanti"):
+            return f"Il salto {'indietro' if chiave == 'passo_indietro' else 'avanti'} ora è di {secondi_da_leggere(valore)} secondi."
+        if chiave == "insegui":
+            if not valore:
+                return "Inseguimento sganciato: la selezione resta dove la lasci."
+            if self.motore.in_corso:
+                self._insegui()
+            return "Inseguimento agganciato: la selezione della plancia segue il brano che suona."
+        if chiave == "righe_della_console":
+            # Il taglio e' subito, senza il margine che scrivi lascia.
+            posizione = self.console.GetInsertionPoint()
+            self.console.SetInsertionPoint(max(0, posizione - self._taglia_la_console(valore)))
+            return f"La console ora tiene {valore} righe."
+        self._applica_aspetto()
+        if chiave == "caratteri":
+            return f"Dimensioni dei caratteri: {self._caratteri_da_leggere()}."
+        return f"{VOCI_DELLE_IMPOSTAZIONI[chiave][0]}: {self._colori_da_leggere(chiave)}."
+
+    # La scheda audio, piano 5.8.9.
+
+    def _applica_la_scheda(self, scelta, avvio=False):
+        """schede_audio.applica, senza mai fermare il programma: PortAudio e
+        mpv sollevano eccezioni loro, e una scheda che non va non deve
+        impedire l'avvio ne' chiudere la finestra. Restituisce (esito,
+        None), o (None, l'eccezione)."""
+        try:
+            return schede_audio.applica(scelta, self.motore, avvio=avvio), None
+        except Exception as e:  # noqa: BLE001 - la scheda audio fallisce in molti modi, e lo dice la console
+            return None, e
+
+    def _applica_la_scheda_all_avvio(self):
+        """La scheda scelta, appena c'e' il motore. Con la scelta automatica
+        non si tocca e non si prova niente: il mixer sceglie da se' alla
+        prima apertura. Una scheda scelta che c'e' si prova come quando la si
+        sceglie, con _effetti_si_aprono: se gli effetti non la aprono, per
+        esempio perche' un altro programma la tiene tutta per se', si usa
+        l'automatica, e la scelta salvata resta, per quando la scheda torna
+        libera. Restituisce (esito, errore) come _applica_la_scheda, e
+        _scheda_in_disparte dice se la scheda scelta manca o non si apre; la
+        console, che ancora non c'e', lo dira' con
+        _scrivi_la_scheda_all_avvio."""
+        scelta = self.impostazioni["scheda_audio"]
+        esito, errore = self._applica_la_scheda(scelta, avvio=True)
+        # Perche' la scheda scelta non e' quella in uso, o None.
+        self._scheda_in_disparte = None
+        if errore is not None:
+            return esito, errore
+        if esito["mancante"]:
+            self._scheda_in_disparte = SCHEDA_MANCANTE
+        elif scelta and not self._effetti_si_aprono():
+            self._scheda_in_disparte = SCHEDA_CHE_NON_SI_APRE
+            esito, errore = self._applica_la_scheda({})
+        return esito, errore
+
+    def _effetti_si_aprono(self):
+        """Vero se il mixer degli effetti apre la sua scheda. La prova manda
+        un attimo di silenzio con Acusticator.riproduci, che apre la scheda
+        prima di tornare e dice se c'e' riuscito: cosi' non dipende dal
+        volume degli effetti, che a zero non fa partire nessun suono, e non
+        si fida di Acusticator.play, che dice di aver suonato anche quando
+        la scheda non si apre."""
+        import numpy
+        from GBUtils import Acusticator
+
+        try:
+            return bool(Acusticator.riproduci(numpy.zeros((SILENZIO_DI_PROVA, 2), dtype=numpy.float32)))
+        except Exception:  # noqa: BLE001 - la scheda audio fallisce in molti modi: per la prova vuol dire che non si apre
+            return False
+
+    @staticmethod
+    def _nome_della_scheda(dispositivo, interfaccia):
+        """Il nome di una scheda da leggere, come "Altoparlanti (Realtek(R)
+        Audio), WASAPI": l'interfaccia ha il nome breve, senza Windows davanti."""
+        return f"{dispositivo}, {(interfaccia or '').removeprefix('Windows ')}"
+
+    def _scheda_dell_esito(self, esito):
+        """La scheda su cui suonano gli effetti dopo applica, da leggere."""
+        nome = self._nome_della_scheda(esito["dispositivo"], esito["interfaccia"]) if esito["dispositivo"] else ""
+        if not esito["automatica"]:
+            return nome
+        return f"Automatica ({nome})" if nome else "Automatica"
+
+    def _scheda_da_leggere(self):
+        scelta = self.impostazioni["scheda_audio"]
+        if scelta:
+            nome = self._nome_della_scheda(scelta["dispositivo"], scelta["interfaccia"])
+            return f"{nome}, {self._scheda_in_disparte}: uso quella automatica" if self._scheda_in_disparte else nome
+        # Con la scelta automatica, la scheda che il mixer usa gia', senza
+        # aprire niente per provarla.
+        uscita = None
+        with contextlib.suppress(Exception):
+            uscita = schede_audio.in_uso()
+        return f"Automatica ({self._nome_della_scheda(uscita['dispositivo'], uscita['interfaccia'])})" if uscita else "Automatica"
+
+    def _scrivi_la_scheda_all_avvio(self, esito, errore):
+        scelta = self.impostazioni["scheda_audio"]
+        if self._scheda_in_disparte == SCHEDA_CHE_NON_SI_APRE:
+            # Con il suono dell'errore: senza, gli effetti tacerebbero per
+            # tutta la sessione senza dire perche'.
+            if errore is not None:
+                self._riscontro("errore", f"La scheda audio scelta, {scelta['dispositivo']}, non si apre, e non riesco a usare quella automatica: {errore}.")
+            else:
+                self._riscontro("errore", f"La scheda audio scelta, {scelta['dispositivo']}, non si apre: uso quella automatica.")
+        elif errore is not None:
+            self.scrivi(f"Non riesco a usare la scheda audio scelta, {scelta.get('dispositivo', 'automatica')}: {errore}.")
+        elif esito["mancante"]:
+            dove = f", {self._nome_della_scheda(esito['dispositivo'], esito['interfaccia'])}" if esito["dispositivo"] else ""
+            self.scrivi(f"La scheda audio scelta, {scelta['dispositivo']}, non c'è: uso quella automatica{dove}.")
+        elif not esito["musica"]:
+            self.scrivi(f"La musica non ritrova la scheda audio {esito['dispositivo']} e suona sulla scheda di Windows.")
+
+    def _scegli_la_scheda_audio(self, genitore):
+        """La scelta della scheda audio, una per musica ed effetti: in cima la
+        scelta automatica, poi le uscite in ordine di latenza."""
+        scelta = self.impostazioni["scheda_audio"]
+        try:
+            elenco = schede_audio.uscite()
+            # La scelta automatica: con l'automatica in uso e' la scheda del
+            # mixer, senza aprire niente; altrimenti la si rifa' per provarla.
+            automatica = (None if scelta else schede_audio.in_uso(elenco)) or schede_audio.automatica()
+        except Exception as e:  # noqa: BLE001 - PortAudio fallisce in molti modi, e lo dice la console
+            self._riscontro("errore", f"Non riesco a leggere le schede audio: {e}.")
+            return
+        righe = [f"Automatica: {schede_audio.etichetta(automatica)}" if automatica else "Automatica", *(schede_audio.etichetta(u) for u in elenco)]
+        attuale = schede_audio.ritrova(scelta, elenco)
+        self._suono("domanda")
+        with FinestraScelta(genitore, "Scheda audio", righe, elenco.index(attuale) + 1 if attuale is not None else 0) as dialogo:
+            if dialogo.ShowModal() != wx.ID_OK:
+                self.scrivi("Scheda audio non cambiata.")
+                return
+            indice = dialogo.GetSelection()
+        self._usa_la_scheda(schede_audio.da_salvare(elenco[indice - 1]) if indice > 0 else {}, genitore)
+
+    def _usa_la_scheda(self, nuova, genitore):
+        """Applica la scheda scelta e la salva; il suono della scheda arriva
+        gia' da quella nuova. Se gli effetti non riescono ad aprirla si torna
+        all'automatica, e la console lo dice. La prova d'apertura vale anche
+        con il volume degli effetti a zero."""
+        esito, errore = self._applica_la_scheda(nuova)
+        aperta = errore is None and self._effetti_si_aprono()
+        evento = None
+        if aperta:
+            self._suono("scheda_audio")
+            testo = f"Scheda audio: {self._scheda_dell_esito(esito)}."
+            if not esito["musica"]:
+                testo += " La musica non la ritrova, e suona sulla scheda di Windows."
+        else:
+            perche = f": {errore}" if errore is not None else ""
+            nome = self._nome_della_scheda(nuova["dispositivo"], nuova["interfaccia"]) if nuova else "automatica"
+            evento = "errore"
+            if nuova:
+                nuova = {}
+                esito, errore = self._applica_la_scheda(nuova)
+                if errore is not None:
+                    torno = f", ma neanche lei va: {errore}"
+                else:
+                    torno = f", {self._nome_della_scheda(esito['dispositivo'], esito['interfaccia'])}" if esito["dispositivo"] else ""
+                testo = f"La scheda audio {nome} non si apre{perche}. Torno alla scelta automatica{torno}."
+            else:
+                testo = f"La scheda audio automatica non si apre{perche}."
+        self.impostazioni["scheda_audio"] = nuova
+        self._scheda_in_disparte = None
+        self._salva_impostazioni()
+        genitore.aggiorna("scheda_audio", self._riga_dell_impostazione("scheda_audio"))
+        if evento:
+            self._riscontro(evento, testo)
+        else:
+            self.scrivi(testo)
+
+    # Salva console, piano 5.8.6.
+
+    def _salva_console(self):
+        """Scrive la console in un file di testo nella cartella dei dati,
+        che nel programma compilato e' quella dell'eseguibile, con un nome
+        che porta versione, data e ora, cosi' i file si ordinano da soli. Due
+        nello stesso minuto: il secondo ha -2 in fondo, il terzo -3."""
+        cartella = os.path.dirname(self.impostazioni.percorso)
+        base = f"MeTeOra-V{version.VERSION.replace('.', '_')}-{datetime.datetime.now():%Y_%m_%d-%H_%M}"
+        nome, numero = f"{base}.txt", 1
+        while os.path.exists(os.path.join(cartella, nome)):
+            numero += 1
+            nome = f"{base}-{numero}.txt"
+        try:
+            with open(os.path.join(cartella, nome), "x", encoding="utf-8") as f:
+                f.write("\n".join(self._righe))
+        except OSError as e:
+            self._riscontro("errore", f"Non riesco a salvare la console: {e.strerror or e}.")
+            return
+        quante = len(self._righe)
+        self._riscontro("console_salvata", f"Console salvata in {nome}, nella cartella del programma: {'1 riga' if quante == 1 else f'{quante} righe'}.")
+
+    # La finestra dei marcatori e l'importazione, piano 5.8.5 e 5.8.7.
+
+    def _finestra_dei_marcatori(self, genitore):
+        self._suono("marcatori")
+        azioni = {"rinomina": self._rinomina_il_marker, "elimina": self._elimina_i_marcatori, "cancella_tutto": self._cancella_tutti_i_marcatori,
+            "esporta": self._esporta_i_marcatori, "suono": self._suono, "riscontro": self._riscontro}
+        with FinestraMarcatori(genitore, self.marcatori, azioni) as dialogo:
+            dialogo.ShowModal()
+        genitore.aggiorna("marcatori", self._riga_dell_impostazione("marcatori"))
+
+    def _elimina_i_marcatori(self, scelti, genitore):
+        """Canc nella finestra dei marcatori: uno solo si elimina subito, come
+        nella plancia; piu' d'uno dopo una conferma."""
+        # Lo stesso marker scelto due volte conta una volta.
+        unici = list({(k, m["tempo"], m["nome"]): (k, m) for k, m in scelti}.values())
+        if len(unici) == 1:
+            self._elimina_il_marker(*unici[0])
+            return
+        if not self._conferma(f"Eliminare {len(unici)} marker?", "Elimina marcatori", genitore):
+            self.scrivi("Eliminazione annullata.")
+            return
+        tolti = sum(self.marcatori.togli(k, m) for k, m in unici)
+        self._salva_i_marker(*dict.fromkeys(k for k, _m in unici))
+        self._riscontro("marker_eliminato", f"Eliminati {tolti} marker.")
+
+    def _cancella_tutti_i_marcatori(self, genitore):
+        """Cancella tutto nella finestra dei marcatori, dopo una conferma con
+        No come risposta predefinita."""
+        voci = self.marcatori.voci
+        quanti, file = sum(len(voce["marker"]) for voce in voci.values()), len(voci)
+        if not quanti:
+            self._riscontro("non_disponibile", "Non ci sono marcatori da cancellare.")
+            return
+        if not self._conferma(f"Cancellare tutti i marcatori, {quanti} marker in {file} file? Non si possono recuperare.", "Cancella tutto", genitore):
+            self.scrivi("I marcatori restano dove sono.")
+            return
+        # Le chiavi da rinfrescare nella plancia si prendono prima di cancellare.
+        chiavi = list(voci)
+        tolti = self.marcatori.cancella_tutto()
+        self._salva_i_marker(*chiavi)
+        self._riscontro("marcatori_cancellati", f"Cancellati tutti i marcatori: {tolti} marker in {file} file.")
+
+    def _esporta_i_marcatori(self, scelti, genitore):
+        """Esporta selezionati: i marker scelti in un file JSON senza
+        percorsi, che un'altra copia di MeTeOra puo' importare."""
+        dati, saltati = self.marcatori.esporta(scelti)
+        esportati = sum(len(voce["marker"]) for voce in dati["marcatori"])
+        if not esportati:
+            self._riscontro("non_disponibile", "I marker scelti non si esportano: MeTeOra non conosce una durata valida dei loro file, e senza la durata un altro computer non li ritroverebbe.")
+            return
+        with DialogoDiFile(genitore, "Esporta marcatori", defaultDir=os.path.dirname(self.impostazioni.percorso), defaultFile=FILE_DELL_ESPORTAZIONE,
+                wildcard=FILTRO_DEI_MARCATORI, style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT) as dialogo:
+            if dialogo.ShowModal() != wx.ID_OK:
+                self.scrivi("Esportazione annullata.")
+                return
+            percorso = dialogo.GetPath()
+        if not os.path.splitext(percorso)[1]:
+            percorso += ".json"
+        try:
+            Marcatori.scrivi_esportazione(dati, percorso)
+        except OSError as e:
+            self._riscontro("errore", f"Non riesco a esportare i marcatori: {e.strerror or e}.")
+            return
+        file = len(dati["marcatori"])
+        testo = f"{'Esportato' if esportati == 1 else 'Esportati'} {esportati} marker di {file} file in {os.path.basename(percorso)}."
+        if saltati:
+            testo += f" {saltati} non {'esportato' if saltati == 1 else 'esportati'}: MeTeOra non conosce una durata valida dei loro file."
+        self._riscontro("marcatori_esportati", testo)
+
+    def _importa_i_marcatori(self, genitore):
+        """Importa marcatori: i marker di un file esportato vanno sui file con
+        lo stesso nome e la stessa durata, copie comprese; quelli che ci
+        sono gia' restano come sono."""
+        with DialogoDiFile(genitore, "Importa marcatori", defaultDir=os.path.dirname(self.impostazioni.percorso), wildcard=FILTRO_DEI_MARCATORI,
+                style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST) as dialogo:
+            if dialogo.ShowModal() != wx.ID_OK:
+                self.scrivi("Importazione annullata.")
+                return
+            percorso = dialogo.GetPath()
+        try:
+            voci = Marcatori.leggi_esportazione(percorso)
+        except ValueError as e:
+            self._riscontro("errore", str(e))
+            return
+        aggiunti, gia_presenti, chiavi = self.marcatori.importa(voci)
+        if chiavi:
+            self._salva_i_marker(*chiavi)
+        presenti = {0: "nessuno c'era già", 1: "1 c'era già"}.get(gia_presenti, f"{gia_presenti} c'erano già")
+        self._riscontro("marcatori_importati", f"{'Importato 1 marcatore' if aggiunti == 1 else f'Importati {aggiunti} marcatori'}, {presenti}.")
+        genitore.aggiorna("marcatori", self._riga_dell_impostazione("marcatori"))
 
     # I marker, issue 12.
 
@@ -2806,14 +3353,16 @@ class Finestra(wx.Frame):
         durata, numero = self._durata_dei_marker(percorso, sottobrano, leggi=True)
         return marcatori.chiave(percorso, durata, numero), percorso, durata, numero
 
-    def _salva_i_marker(self, k):
-        """Salva i marker; se non si riesce lo dice, e ci si riprova al
-        prossimo cambiamento o all'uscita."""
+    def _salva_i_marker(self, *chiavi):
+        """Salva i marker, una volta sola, e rinfresca nella plancia le voci
+        delle chiavi; se il salvataggio non riesce lo dice, e ci si riprova
+        al prossimo cambiamento o all'uscita."""
         try:
             self.marcatori.salva()
         except OSError as e:
             self._riscontro("errore", f"Non riesco a salvare i marker, riprovo all'uscita: {e}")
-        self._rinfresca_i_marker(k)
+        for k in chiavi:
+            self._rinfresca_i_marker(k)
 
     def _comando_marker(self):
         """T: un marker nuovo dove si e'; se li' c'e' gia' un marker, lo rinomina."""
@@ -2921,8 +3470,8 @@ class Finestra(wx.Frame):
     def _comando_togli_i_marker(self):
         self._togli_i_marker("tutti")
 
-    def _rinomina_il_marker(self, k, marker):
-        with DialogoTesto(self, f"Nome del marker a {durata_lunga(marker['tempo'])}:", "Rinomina il marker", marker["nome"]) as dialogo:
+    def _rinomina_il_marker(self, k, marker, genitore=None):
+        with DialogoTesto(genitore or self, f"Nome del marker a {durata_lunga(marker['tempo'])}:", "Rinomina il marker", marker["nome"]) as dialogo:
             self._suono("domanda")
             if dialogo.ShowModal() != wx.ID_OK:
                 self.scrivi("Nome del marker non cambiato.")

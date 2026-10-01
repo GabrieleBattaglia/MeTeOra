@@ -1,9 +1,11 @@
 # MeTeOra, le prove della finestra principale, sul desktop nascosto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 
+import datetime
 import os
 import re
 import time
+import types
 
 import pytest
 import wx
@@ -1767,3 +1769,748 @@ def test_beep_rimandato_tace_se_il_fuoco_lascia_la_plancia(finestra, monkeypatch
     fuoco[0] = None
     _aspetta(lambda: False, secondi=0.4)
     assert livelli_annotati == []
+
+
+# La finestra delle impostazioni, 1.51.0.
+
+AUTOMATICA = {"indice": 18, "dispositivo": "Altoparlanti (Realtek(R) Audio)", "interfaccia": "Windows WASAPI", "breve": "WASAPI", "latenza": 3.0,
+    "esclusiva": False}
+ASIO = {"indice": 16, "dispositivo": "Realtek ASIO", "interfaccia": "ASIO", "breve": "ASIO", "latenza": 23.219954648526077, "esclusiva": True}
+
+
+class _CampoFinto:
+    """Il campo di una voce delle impostazioni, che risponde da solo: una
+    risposta per ogni apertura, None per Annulla. Annota titolo, testo di
+    partenza e istruzioni di ogni apertura, e sa se e' aperto."""
+
+    def __init__(self, *risposte):
+        self.risposte = list(risposte)
+        self.aperture = []
+        self.aperto = False
+
+    def __call__(self, genitore, titolo, testo, istruzioni):
+        self.aperture.append({"titolo": titolo, "testo": testo, "istruzioni": list(istruzioni)})
+        self.risposta = self.risposte.pop(0)
+        return self
+
+    def __enter__(self):
+        self.aperto = True
+        return self
+
+    def __exit__(self, *_a):
+        self.aperto = False
+        return False
+
+    def ShowModal(self):
+        return wx.ID_CANCEL if self.risposta is None else wx.ID_OK
+
+    @property
+    def testo(self):
+        return self.risposta
+
+
+class _ListaFinta:
+    """La finestra delle impostazioni, che annota le righe riscritte e se il
+    campo era ancora aperto quando e' successo."""
+
+    def __init__(self, campo=None):
+        self.campo = campo
+        self.righe = {}
+        self.a_campo_aperto = []
+
+    def aggiorna(self, chiave, testo):
+        self.righe[chiave] = testo
+        self.a_campo_aperto.append(bool(self.campo and self.campo.aperto))
+
+
+def _cambia(finestra, monkeypatch, chiave, *risposte):
+    """Cambia una voce delle impostazioni scrivendo le risposte nel campo."""
+    campo = _CampoFinto(*risposte)
+    monkeypatch.setattr(modulo, "FinestraFiltro", campo)
+    lista = _ListaFinta(campo)
+    finestra._cambia_impostazione(chiave, lista)
+    return campo, lista
+
+
+def _salvate(finestra):
+    from impostazioni import Impostazioni
+
+    salvate = Impostazioni(finestra.impostazioni.percorso)
+    salvate.carica()
+    return salvate
+
+
+def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_annotati):
+    monkeypatch.setattr(modulo.schede_audio, "in_uso", lambda elenco=None: AUTOMATICA)
+    aperte = []
+
+    class Finta:
+        def __init__(self, genitore, voci, al_cambio):
+            aperte.append((genitore, voci, al_cambio))
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_a):
+            return False
+
+        def ShowModal(self):
+            return wx.ID_CANCEL
+
+    monkeypatch.setattr(modulo, "FinestraImpostazioni", Finta)
+    voce = _voce(finestra, finestra.albero.GetRootItem(), lambda d: d.get("comando") == "impostazioni")
+    finestra._seleziona(voce)
+    finestra._invio(wx.TreeEvent(wx.wxEVT_TREE_ITEM_ACTIVATED, finestra.albero, voce))
+    assert suoni_annotati[-1] == "impostazioni"
+    genitore, voci, al_cambio = aperte[0]
+    assert genitore is finestra and al_cambio == finestra._cambia_impostazione
+    assert voci == [
+        ("volume", "Volume della musica: 80"),
+        ("passo_volume", "Passo del volume: 5"),
+        ("volume_effetti", "Volume degli effetti: 50%"),
+        ("scheda_audio", "Scheda audio: Automatica (Altoparlanti (Realtek(R) Audio), WASAPI)"),
+        ("passo_indietro", "Salto indietro di Q: 10 secondi"),
+        ("passo_avanti", "Salto avanti di E: 10 secondi"),
+        ("insegui", "Inseguimento della plancia (Maiuscolo+F8): no"),
+        ("caratteri", "Dimensioni dei caratteri: quelle di Windows"),
+        ("colori_testo", "Colori dei caratteri: quelli di Windows"),
+        ("colori_sfondo", "Colori dello sfondo: quelli di Windows"),
+        ("righe_della_console", "Righe della console: 2000"),
+        ("salva_console", "Salva console: scrive la console in un file di testo"),
+        ("marcatori", "Marcatori: nessuno"),
+        ("importa_marcatori", "Importa marcatori: da un file esportato da MeTeOra"),
+    ]
+
+
+def test_impostazioni_nella_finestra_vera(finestra, monkeypatch):
+    """Invio sulla lista vera apre il campo, e la riga cambia prima che il campo si chiuda."""
+    monkeypatch.setattr(modulo.schede_audio, "in_uso", lambda elenco=None: None)
+    dialogo = modulo.FinestraImpostazioni(finestra, finestra._voci_delle_impostazioni(), finestra._cambia_impostazione)
+    try:
+        assert dialogo.lista.GetString(3) == "Scheda audio: Automatica"
+        campo = _CampoFinto("7")
+        monkeypatch.setattr(modulo, "FinestraFiltro", campo)
+        dialogo.lista.SetSelection(1)
+        evento = wx.KeyEvent(wx.wxEVT_CHAR_HOOK)
+        evento.SetKeyCode(wx.WXK_RETURN)
+        evento.SetEventObject(dialogo.lista)
+        dialogo._tasto(evento)
+        assert dialogo.lista.GetString(1) == "Passo del volume: 7"
+        assert dialogo.lista.GetSelection() == 1
+        assert campo.aperture[0]["titolo"] == "Passo del volume"
+    finally:
+        dialogo.Destroy()
+
+
+def test_impostazioni_valori_buoni_corretti_e_sbagliati(finestra, monkeypatch, suoni_annotati):
+    # Un valore sbagliato riapre il campo con l'errore in testa al titolo e il
+    # testo scritto; uno oltre il limite si corregge, e la console lo dice.
+    campo, lista = _cambia(finestra, monkeypatch, "passo_volume", " x ", "70")
+    errore = "Passo del volume: x non è un numero; scrivi un numero intero da 1 a 50."
+    assert [a["titolo"] for a in campo.aperture] == ["Passo del volume", f"{errore} Passo del volume"]
+    assert [a["testo"] for a in campo.aperture] == ["5", "x"]
+    istruzioni = campo.aperture[0]["istruzioni"]
+    assert "Adesso è 5." in istruzioni and istruzioni[-1] == modulo.REGOLA_DEL_DOLLARO
+    assert finestra.impostazioni["passo_volume"] == 50 and _salvate(finestra)["passo_volume"] == 50
+    assert suoni_annotati[-4:] == ["domanda", "errore", "domanda", "impostazione_cambiata"]
+    assert _senza_ora(finestra._righe[-2]) == errore
+    assert _ultima(finestra) == "Più e meno ora cambiano il volume di 50. Passo del volume: 70 è oltre il massimo, ho messo 50."
+    # La riga della lista si riscrive mentre il campo e' ancora li'.
+    assert lista.righe == {"passo_volume": "Passo del volume: 50"} and lista.a_campo_aperto == [True]
+    # Annulla non cambia niente.
+    _campo, lista = _cambia(finestra, monkeypatch, "passo_volume", None)
+    assert _ultima(finestra) == "Passo del volume non cambiato." and finestra.impostazioni["passo_volume"] == 50 and not lista.righe
+    # Il volume della musica vale subito, e si salva subito.
+    _cambia(finestra, monkeypatch, "volume", "150")
+    assert finestra.motore.volume == 150 and _salvate(finestra)["volume"] == 150
+    assert _ultima(finestra) == "Il volume della musica ora è 150, amplificato oltre il 100."
+    campo, lista = _cambia(finestra, monkeypatch, "volume_effetti", "35%")
+    assert campo.aperture[0]["testo"] == "50"
+    assert finestra.impostazioni["volume_effetti"] == 0.35 and lista.righe["volume_effetti"] == "Volume degli effetti: 35%"
+    assert _ultima(finestra) == "Gli effetti sonori ora suonano al 35%."
+    # I salti di Q ed E, anche con la virgola, almeno di un decimo.
+    _campo, lista = _cambia(finestra, monkeypatch, "passo_indietro", "2,5")
+    assert finestra.impostazioni["passo_indietro"] == 2.5 and lista.righe["passo_indietro"] == "Salto indietro di Q: 2.5 secondi"
+    _cambia(finestra, monkeypatch, "passo_avanti", "0.05")
+    assert finestra.impostazioni["passo_avanti"] == 0.1
+    assert _ultima(finestra) == "Il salto avanti ora è di 0.1 secondi. Salto avanti di E: 0.05 è sotto il minimo, ho messo 0.1."
+    campo, _lista = _cambia(finestra, monkeypatch, "passo_indietro", "1:30")
+    assert campo.aperture[0]["testo"] == "2.5" and finestra.impostazioni["passo_indietro"] == 90
+    salvate = _salvate(finestra)
+    assert (salvate["volume_effetti"], salvate["passo_indietro"], salvate["passo_avanti"]) == (0.35, 90, 0.1)
+
+
+def test_impostazioni_inseguimento(finestra, monkeypatch, suoni_annotati):
+    inseguiti = []
+    monkeypatch.setattr(finestra, "_insegui", lambda: inseguiti.append(True))
+    monkeypatch.setattr(type(finestra.motore), "in_corso", property(lambda _self: r"C:\m\a.mp3"))
+    campo, lista = _cambia(finestra, monkeypatch, "insegui", "forse", "Sì")
+    assert [a["testo"] for a in campo.aperture] == ["no", "forse"]
+    assert campo.aperture[1]["titolo"].startswith("Inseguimento della plancia: forse non è né sì né no; scrivi sì o no.")
+    assert finestra.impostazioni["insegui"] is True and _salvate(finestra)["insegui"] is True and inseguiti == [True]
+    assert lista.righe["insegui"] == "Inseguimento della plancia (Maiuscolo+F8): sì"
+    assert _ultima(finestra) == "Inseguimento agganciato: la selezione della plancia segue il brano che suona."
+    _cambia(finestra, monkeypatch, "insegui", "spento")
+    assert finestra.impostazioni["insegui"] is False and inseguiti == [True]
+    assert _ultima(finestra) == "Inseguimento sganciato: la selezione resta dove la lasci."
+
+
+def test_impostazioni_righe_della_console_tagliano_subito(finestra, monkeypatch):
+    for i in range(400):
+        finestra.scrivi(f"riga {i}")
+    finestra.console.SetInsertionPoint(finestra.console.GetLastPosition())
+    _campo, lista = _cambia(finestra, monkeypatch, "righe_della_console", "150")
+    # Le 150 righe piu' recenti, senza il margine di 100, piu' quella che lo dice.
+    assert len(finestra._righe) == 151 and finestra._righe[0].startswith("riga 250")
+    testo = finestra.console.GetValue().replace("\r\n", "\n").replace("\r", "\n")
+    assert testo.split("\n") == finestra._righe
+    assert _ultima(finestra) == "La console ora tiene 150 righe." and lista.righe["righe_della_console"] == "Righe della console: 150"
+    _cambia(finestra, monkeypatch, "righe_della_console", "50")
+    assert len(finestra._righe) == 101 and finestra.impostazioni["righe_della_console"] == 100
+    assert _ultima(finestra) == "La console ora tiene 100 righe. Righe della console: 50 è sotto il minimo, ho messo 100."
+
+
+def _colore_del_testo(controllo, posizione=0):
+    attributi = wx.TextAttr()
+    controllo.GetStyle(posizione, attributi)
+    return tuple(attributi.GetTextColour())[:3]
+
+
+def _minimo_del_cruscotto(f):
+    """Cinque righe del suo carattere, ma non oltre un terzo della finestra,
+    e non meno di due righe."""
+    riga = f.cruscotto.GetCharHeight()
+    terzo = f.albero.GetParent().GetClientSize().height // 3
+    return max(riga * 2 + 8, min(riga * 6 + 8, terzo)) if terzo > 0 else riga * 6 + 8
+
+
+def test_cruscotto_al_massimo_un_terzo_della_finestra(finestra, monkeypatch):
+    # Con caratteri a 72 punti in una finestra bassa, come un portatile, il
+    # cruscotto non si mangia plancia e console (Gabriele, 1 ottobre 2026).
+    finestra.SetSize(wx.Size(1200, 700))
+    wx.Yield()
+    _cambia(finestra, monkeypatch, "caratteri", "72")
+    wx.Yield()
+    pannello = finestra.albero.GetParent()
+    riga = finestra.cruscotto.GetCharHeight()
+    assert finestra.cruscotto.GetMinSize().GetHeight() == max(riga * 2 + 8, pannello.GetClientSize().height // 3)
+    assert finestra.albero.GetSize().GetHeight() > riga and finestra.console.GetSize().GetHeight() > riga
+    # Con un carattere che ci sta, le cinque righe tornano.
+    _cambia(finestra, monkeypatch, "caratteri", "12")
+    riga = finestra.cruscotto.GetCharHeight()
+    assert riga * 6 + 8 <= pannello.GetClientSize().height // 3
+    assert finestra.cruscotto.GetMinSize().GetHeight() == riga * 6 + 8
+
+
+def test_impostazioni_caratteri_e_colori(finestra, monkeypatch):
+    di_sistema = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT).GetPointSize()
+    campo, lista = _cambia(finestra, monkeypatch, "caratteri", "12 14 16")
+    assert campo.aperture[0]["testo"] == ""
+    assert [c.GetFont().GetPointSize() for c in (finestra.albero, finestra.console, finestra.cruscotto)] == [12, 14, 16]
+    # Il cruscotto si rimisura sul carattere nuovo.
+    assert finestra.cruscotto.GetMinSize().GetHeight() == _minimo_del_cruscotto(finestra)
+    assert lista.righe["caratteri"] == "Dimensioni dei caratteri: plancia 12, console 14, cruscotto 16"
+    assert _ultima(finestra) == "Dimensioni dei caratteri: plancia 12, console 14, cruscotto 16."
+    assert _salvate(finestra)["caratteri"] == {"p": 12, "c": 14, "t": 16}
+    campo, lista = _cambia(finestra, monkeypatch, "colori_testo", "p31.31.31 c0.50.0 t100.0.0")
+    assert campo.aperture[0]["testo"] == ""
+    assert [tuple(c.GetForegroundColour())[:3] for c in (finestra.albero, finestra.console, finestra.cruscotto)] == [(79, 79, 79), (0, 128, 0), (255, 0, 0)]
+    assert lista.righe["colori_testo"] == "Colori dei caratteri: plancia 31.31.31, console 0.50.0, cruscotto 100.0.0"
+    # Il testo che arriva nella console, e quello del cruscotto riscritto, hanno il colore.
+    finestra.scrivi("una riga colorata")
+    assert _colore_del_testo(finestra.console, finestra.console.GetLastPosition() - 3) == (0, 128, 0)
+    finestra._area_precedente = "console"
+    assert finestra._rinfresca_cruscotto()
+    assert _colore_del_testo(finestra.cruscotto) == (255, 0, 0)
+    # Un carattere nuovo, dopo i colori, non li porta via.
+    campo, _lista = _cambia(finestra, monkeypatch, "caratteri", "20")
+    assert campo.aperture[0]["testo"] == "12 14 16"
+    assert finestra.console.GetFont().GetPointSize() == 20
+    assert _colore_del_testo(finestra.console) == (0, 128, 0) and _colore_del_testo(finestra.cruscotto) == (255, 0, 0)
+    _cambia(finestra, monkeypatch, "colori_sfondo", "t100.100.80")
+    assert tuple(finestra.cruscotto.GetBackgroundColour())[:3] == (255, 255, 204)
+    # La lettera da sola riporta l'area ai colori di Windows; le altre restano.
+    campo, lista = _cambia(finestra, monkeypatch, "colori_testo", "p")
+    assert campo.aperture[0]["testo"] == "p31.31.31 c0.50.0 t100.0.0"
+    assert finestra.albero.GetForegroundColour() == wx.SystemSettings.GetColour(wx.SYS_COLOUR_WINDOWTEXT)
+    assert tuple(finestra.console.GetForegroundColour())[:3] == (0, 128, 0)
+    assert lista.righe["colori_testo"] == "Colori dei caratteri: console 0.50.0, cruscotto 100.0.0; le altre aree di Windows"
+    assert _salvate(finestra)["colori_testo"] == {"c": [0, 50, 0], "t": [100, 0, 0]}
+    # Il campo vuoto riporta i caratteri a quelli di Windows.
+    _cambia(finestra, monkeypatch, "caratteri", "")
+    assert {c.GetFont().GetPointSize() for c in (finestra.albero, finestra.console, finestra.cruscotto)} == {di_sistema}
+    assert _ultima(finestra) == "Dimensioni dei caratteri: quelle di Windows."
+    # Un valore sbagliato non tocca niente.
+    campo, _lista = _cambia(finestra, monkeypatch, "colori_sfondo", "x50.50.50", None)
+    assert campo.aperture[1]["titolo"].startswith("Colori dello sfondo: in x50.50.50, x non è un'area")
+    assert _ultima(finestra) == "Colori dello sfondo non cambiati."
+
+
+def test_caratteri_e_colori_all_avvio(app, tmp_path):
+    """I caratteri e i colori salvati si danno alle aree gia' nella costruzione,
+    prima di misurare il cruscotto."""
+    import json
+
+    from finestra import Finestra
+
+    (tmp_path / modulo.FILE_IMPOSTAZIONI).write_text(json.dumps({"caratteri": {"t": 18}, "colori_testo": {"c": [100, 0, 0]}}), encoding="utf-8")
+    f = Finestra(ao="null", cartella_dati=str(tmp_path))
+    try:
+        assert f.cruscotto.GetFont().GetPointSize() == 18
+        assert f.cruscotto.GetMinSize().GetHeight() == _minimo_del_cruscotto(f)
+        assert tuple(f.console.GetForegroundColour())[:3] == (255, 0, 0)
+        assert _colore_del_testo(f.console) == (255, 0, 0)
+        # Le aree senza impostazioni restano di Windows, mai toccate.
+        assert not f.albero.UseForegroundColour() and not f.console.UseBackgroundColour()
+        f.Close(force=True)
+    finally:
+        f.Destroy()
+
+
+class _Fermo(datetime.datetime):
+    """Un orologio fermo alle 15:42 del 1 ottobre 2026."""
+
+    @classmethod
+    def now(cls, tz=None):
+        return cls(2026, 10, 1, 15, 42)
+
+
+def test_salva_console(finestra, monkeypatch, tmp_path, suoni_annotati):
+    monkeypatch.setattr(modulo, "datetime", types.SimpleNamespace(datetime=_Fermo))
+    finestra.scrivi("Una riga con un'emoji 🎵")
+    righe = list(finestra._righe)
+    lista = _ListaFinta()
+    finestra._cambia_impostazione("salva_console", lista)
+    nome = f"MeTeOra-V{modulo.version.VERSION.replace('.', '_')}-2026_10_01-15_42.txt"
+    assert (tmp_path / nome).read_text(encoding="utf-8") == "\n".join(righe)
+    assert suoni_annotati[-1] == "console_salvata"
+    assert _ultima(finestra) == f"Console salvata in {nome}, nella cartella del programma: {len(righe)} righe."
+    # Nello stesso minuto il secondo file ha -2 in fondo, il terzo -3.
+    finestra._cambia_impostazione("salva_console", lista)
+    finestra._cambia_impostazione("salva_console", lista)
+    secondo, terzo = tmp_path / nome.replace(".txt", "-2.txt"), tmp_path / nome.replace(".txt", "-3.txt")
+    assert terzo.is_file() and secondo.read_text(encoding="utf-8") == "\n".join([*righe, finestra._righe[-3]])
+    assert not lista.righe
+    # Una cartella che non si scrive: la console lo dice.
+    percorso = finestra.impostazioni.percorso
+    finestra.impostazioni.percorso = str(tmp_path / "manca" / "imp.json")
+    try:
+        finestra._salva_console()
+    finally:
+        finestra.impostazioni.percorso = percorso
+    assert suoni_annotati[-1] == "errore" and _ultima(finestra).startswith("Non riesco a salvare la console: ")
+
+
+class _FileFinto:
+    """Il dialogo di un file, che risponde da solo con un percorso, o con
+    Annulla se il percorso e' None; annota le sue aperture."""
+
+    def __init__(self, percorso):
+        self.percorso = percorso
+        self.aperture = []
+
+    def __call__(self, genitore, messaggio, **opzioni):
+        self.aperture.append((genitore, messaggio, opzioni))
+        return self
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_a):
+        return False
+
+    def ShowModal(self):
+        return wx.ID_CANCEL if self.percorso is None else wx.ID_OK
+
+    def GetPath(self):
+        return str(self.percorso)
+
+
+def _finestra_delle_impostazioni(finestra, monkeypatch):
+    """La finestra delle impostazioni vera, mai mostrata, genitore dei dialoghi veri."""
+    monkeypatch.setattr(modulo.schede_audio, "in_uso", lambda elenco=None: None)
+    return modulo.FinestraImpostazioni(finestra, finestra._voci_delle_impostazioni(), finestra._cambia_impostazione)
+
+
+def test_finestra_dei_marcatori(finestra, monkeypatch, tmp_path, suoni_annotati):
+    import dialoghi
+    from marcatori import Marcatori
+
+    _pl, voce = _brano_con_marker(finestra, tmp_path, (1.0, 2.0, 3.0))
+    lista = _finestra_delle_impostazioni(finestra, monkeypatch)
+    viste = []
+    conferme = []
+    cercati = []
+
+    def righe(dialogo):
+        return [dialogo.lista.GetItemText(i) for i in range(dialogo.lista.GetItemCount())]
+
+    def copione(dialogo):
+        viste.append(righe(dialogo))
+        # La barra rovesciata cerca con i suoi tre suoni, non con quelli della
+        # ricerca nella console: trovato, ripartito dalla cima, non trovato.
+        monkeypatch.setattr(dialoghi, "DialogoTesto", _DialogoFinto("m2", "m2", "assolo"))
+        for _ in range(3):
+            dialogo._cerca()
+            cercati.append((dialogo.lista.GetFocusedItem(), suoni_annotati[-1]))
+        dialogo.lista.Select(1, False)
+        dialogo.lista.Select(0)
+        dialogo.lista.Focus(0)
+        # Invio rinomina la riga col fuoco.
+        monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("Intro"))
+        dialogo._rinomina()
+        viste.append(righe(dialogo))
+        # Canc su una riga sola la elimina senza chiedere.
+        dialogo.lista.Select(0, False)
+        dialogo.lista.Select(1)
+        dialogo.lista.Focus(1)
+        dialogo._elimina()
+        viste.append(righe(dialogo))
+        # Esporta selezionati, nel file scelto, senza percorsi.
+        dialogo.lista.Select(0)
+        monkeypatch.setattr(modulo, "DialogoDiFile", _FileFinto(tmp_path / "esportati"))
+        dialogo._esporta()
+        # Canc su due righe chiede conferma, con la finestra dei marcatori come genitore.
+        monkeypatch.setattr(finestra, "_conferma", lambda domanda, titolo, genitore: conferme.append((domanda, genitore)) or True)
+        dialogo._elimina()
+        viste.append(righe(dialogo))
+        return wx.ID_CANCEL
+
+    monkeypatch.setattr(dialoghi.FinestraMarcatori, "ShowModal", copione)
+    try:
+        finestra._cambia_impostazione("marcatori", lista)
+        assert lista.lista.GetString(12) == "Marcatori: nessuno"
+    finally:
+        lista.Destroy()
+    brano = str(tmp_path / "canzone.wav")
+    assert viste[0] == [f"{brano}\\M1, 0:01", f"{brano}\\M2, 0:02", f"{brano}\\M3, 0:03"]
+    assert cercati == [(1, "trovato_nei_marcatori"), (1, "ripartito_nei_marcatori"), (1, "non_trovato_nei_marcatori")]
+    assert any(_senza_ora(r) == "Nei marcatori non c'è assolo." for r in finestra._righe)
+    assert viste[1][0] == f"{brano}\\Intro, 0:01"
+    assert viste[2] == [f"{brano}\\Intro, 0:01", f"{brano}\\M3, 0:03"]
+    assert viste[3] == ["Nessun marcatore."]
+    assert len(conferme) == 1 and conferme[0][0] == "Eliminare 2 marker?" and isinstance(conferme[0][1], dialoghi.FinestraMarcatori)
+    # L'esportazione: un file .json, con i due marker scelti e senza percorsi.
+    _genitore, messaggio, opzioni = modulo.DialogoDiFile.aperture[0]
+    assert messaggio == "Esporta marcatori" and opzioni["defaultFile"] == modulo.FILE_DELL_ESPORTAZIONE and opzioni["defaultDir"] == str(tmp_path)
+    assert opzioni["style"] == wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
+    esportate = Marcatori.leggi_esportazione(str(tmp_path / "esportati.json"))
+    assert [(v["file"], [m["nome"] for m in v["marker"]]) for v in esportate] == [("canzone.wav", ["Intro", "M3"])]
+    assert "percorsi" not in (tmp_path / "esportati.json").read_text(encoding="utf-8")
+    # I suoni, le righe della console e la plancia rinfrescata.
+    assert [s for s in suoni_annotati if s != "domanda"][-8:] == ["marcatori", "trovato_nei_marcatori", "ripartito_nei_marcatori", "non_trovato_nei_marcatori",
+        "marker_rinominato", "marker_eliminato", "marcatori_esportati", "marker_eliminato"]
+    assert any(_senza_ora(r) == "Esportati 2 marker di 1 file in esportati.json." for r in finestra._righe)
+    assert _ultima(finestra) == "Eliminati 2 marker."
+    etichetta = finestra.albero.GetItemText(voce)
+    assert etichetta.startswith("canzone.wav, 0:06") and "marker" not in etichetta
+    salvati = Marcatori(finestra.marcatori.percorso)
+    salvati.carica()
+    assert not salvati.voci
+
+
+def test_marcatori_cancella_tutto(finestra, monkeypatch, tmp_path, suoni_annotati):
+    import dialoghi
+
+    _pl, voce = _brano_con_marker(finestra, tmp_path, (1.0, 2.0))
+    finestra.marcatori.aggiungi("altro.mp3|9.000", 4.0, r"C:\m\altro.mp3", 9.0)
+    lista = _finestra_delle_impostazioni(finestra, monkeypatch)
+    risposte = [False, True]
+    monkeypatch.setattr(finestra, "_conferma", lambda domanda, titolo, genitore: risposte.pop(0))
+
+    def copione(dialogo):
+        for _ in range(3):
+            dialogo._cancella_tutto()
+        return wx.ID_CANCEL
+
+    monkeypatch.setattr(dialoghi.FinestraMarcatori, "ShowModal", copione)
+    assert finestra._riga_dell_impostazione("marcatori") == "Marcatori: 3 in 2 file"
+    try:
+        finestra._cambia_impostazione("marcatori", lista)
+        assert lista.lista.GetString(12) == "Marcatori: nessuno"
+    finally:
+        lista.Destroy()
+    righe = [_senza_ora(r) for r in finestra._righe[-3:]]
+    # La terza volta la lista dice gia' che non ci sono marcatori.
+    assert righe == ["I marcatori restano dove sono.", "Cancellati tutti i marcatori: 3 marker in 2 file.", "Non ci sono marcatori."]
+    assert suoni_annotati[-1] == "non_disponibile" and "marcatori_cancellati" in suoni_annotati
+    assert not finestra.marcatori.voci and not list(finestra._figli(voce))
+
+
+def test_importa_marcatori(finestra, monkeypatch, tmp_path, suoni_annotati):
+    import json
+
+    from marcatori import Marcatori
+
+    _pl, voce = _brano_con_marker(finestra, tmp_path, (1.0,))
+    k = next(iter(finestra.marcatori.voci))
+    durata = finestra.marcatori.voci[k]["durata"]
+    # Un marker entro la tolleranza di quello che c'e' gia', e uno nuovo.
+    esportazione = tmp_path / "da importare.json"
+    esportazione.write_text(json.dumps({"formato": "MeTeOra - Marcatori", "versione": 1, "marcatori": [{"file": "Canzone.WAV", "durata": durata,
+        "sottobrano": None, "marker": [{"tempo": 1.002, "nome": "Doppione"}, {"tempo": 2.5, "nome": "Strofa"}]}]}), encoding="utf-8")
+    monkeypatch.setattr(modulo, "DialogoDiFile", _FileFinto(esportazione))
+    lista = _ListaFinta()
+    finestra._cambia_impostazione("importa_marcatori", lista)
+    assert modulo.DialogoDiFile.aperture[0][2]["style"] == wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
+    assert suoni_annotati[-1] == "marcatori_importati" and _ultima(finestra) == "Importato 1 marcatore, 1 c'era già."
+    assert _etichette(finestra, voce) == ["M1, 0:01", "Strofa, 0:02.500"]
+    assert lista.righe == {"marcatori": "Marcatori: 2 in 1 file"}
+    salvati = Marcatori(finestra.marcatori.percorso)
+    salvati.carica()
+    assert [m["nome"] for m in salvati.elenco(k)] == ["M1", "Strofa"]
+    # La seconda volta non aggiunge niente.
+    finestra._cambia_impostazione("importa_marcatori", lista)
+    assert _ultima(finestra) == "Importati 0 marcatori, 2 c'erano già."
+    # Un file che non e' un'esportazione, e Annulla.
+    rotto = tmp_path / "rotto.json"
+    rotto.write_text("non è json", encoding="utf-8")
+    monkeypatch.setattr(modulo, "DialogoDiFile", _FileFinto(rotto))
+    finestra._cambia_impostazione("importa_marcatori", lista)
+    assert suoni_annotati[-1] == "errore" and _ultima(finestra) == "rotto.json non è un'esportazione dei marcatori di MeTeOra: non è un file JSON."
+    monkeypatch.setattr(modulo, "DialogoDiFile", _FileFinto(None))
+    finestra._cambia_impostazione("importa_marcatori", lista)
+    assert _ultima(finestra) == "Importazione annullata."
+
+
+class _SceltaFinta:
+    """La scelta da una lista, che risponde da sola con un indice, o con
+    Annulla se l'indice e' None; annota titolo, righe e scelta di partenza."""
+
+    def __init__(self, indice):
+        self.indice = indice
+        self.aperture = []
+
+    def __call__(self, genitore, titolo, voci, scelta):
+        self.aperture.append((titolo, list(voci), scelta))
+        return self
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_a):
+        return False
+
+    def ShowModal(self):
+        return wx.ID_CANCEL if self.indice is None else wx.ID_OK
+
+    def GetSelection(self):
+        return self.indice
+
+
+def _esito(uscita, automatica=False, mancante=False, musica=True):
+    return {"uscita": uscita, "dispositivo": uscita["dispositivo"] if uscita else None, "interfaccia": uscita["interfaccia"] if uscita else None,
+        "automatica": automatica, "mancante": mancante, "musica": musica, "mpv": "auto"}
+
+
+class _ProvaFinta:
+    """Acusticator.riproduci, che non apre niente: annota la forma del
+    buffer di silenzio e dice se la scheda si e' aperta come le si chiede."""
+
+    def __init__(self, aperta=True):
+        self.aperta = aperta
+        self.prove = []
+
+    def __call__(self, buffer, fs=None, sync=False):
+        assert not buffer.any(), "la prova deve essere silenzio"
+        self.prove.append(buffer.shape)
+        return self.aperta
+
+
+def test_scheda_audio(finestra, monkeypatch, suoni_annotati):
+    import GBUtils
+
+    applicate = []
+    esiti = {"Realtek ASIO": _esito(ASIO, musica=False), "": _esito(AUTOMATICA, automatica=True), AUTOMATICA["dispositivo"]: _esito(AUTOMATICA)}
+
+    def applica(scelta, motore, avvio=False):
+        assert motore is finestra.motore and not avvio
+        applicate.append(dict(scelta))
+        return esiti[scelta.get("dispositivo", "")]
+
+    monkeypatch.setattr(modulo.schede_audio, "uscite", lambda: [AUTOMATICA, ASIO])
+    monkeypatch.setattr(modulo.schede_audio, "in_uso", lambda elenco=None: AUTOMATICA)
+    monkeypatch.setattr(modulo.schede_audio, "automatica", lambda: AUTOMATICA)
+    monkeypatch.setattr(modulo.schede_audio, "applica", applica)
+    prova = _ProvaFinta()
+    monkeypatch.setattr(GBUtils.Acusticator, "riproduci", prova)
+    # La scheda ASIO: la musica non la ritrova, e la console lo dice.
+    scelta = _SceltaFinta(2)
+    monkeypatch.setattr(modulo, "FinestraScelta", scelta)
+    lista = _ListaFinta()
+    finestra._cambia_impostazione("scheda_audio", lista)
+    assert scelta.aperture == [("Scheda audio", ["Automatica: Altoparlanti (Realtek(R) Audio), WASAPI, 3 ms", "Altoparlanti (Realtek(R) Audio), WASAPI, 3 ms",
+        "Realtek ASIO, ASIO, 23,2 ms, esclusiva: può zittire NVDA"], 0)]
+    assert applicate == [{"dispositivo": "Realtek ASIO", "interfaccia": "ASIO"}]
+    assert finestra.impostazioni["scheda_audio"] == {"dispositivo": "Realtek ASIO", "interfaccia": "ASIO"}
+    assert _salvate(finestra)["scheda_audio"] == {"dispositivo": "Realtek ASIO", "interfaccia": "ASIO"}
+    assert suoni_annotati[-2:] == ["domanda", "scheda_audio"]
+    assert _ultima(finestra) == "Scheda audio: Realtek ASIO, ASIO. La musica non la ritrova, e suona sulla scheda di Windows."
+    assert lista.righe == {"scheda_audio": "Scheda audio: Realtek ASIO, ASIO"}
+    # La scheda si e' provata con un centesimo di secondo di silenzio stereo.
+    assert prova.prove == [(modulo.SILENZIO_DI_PROVA, 2)]
+    # La scheda che gli effetti non aprono: si torna all'automatica. Il suono
+    # della scheda non parte, tanto non si sentirebbe: suona l'errore.
+    prova.aperta = False
+    scelta = _SceltaFinta(1)
+    monkeypatch.setattr(modulo, "FinestraScelta", scelta)
+    finestra._cambia_impostazione("scheda_audio", lista)
+    assert scelta.aperture[0][2] == 2
+    assert applicate[1:] == [{"dispositivo": AUTOMATICA["dispositivo"], "interfaccia": "Windows WASAPI"}, {}]
+    assert finestra.impostazioni["scheda_audio"] == {} and _salvate(finestra)["scheda_audio"] == {}
+    assert suoni_annotati[-2:] == ["domanda", "errore"]
+    assert _ultima(finestra) == ("La scheda audio Altoparlanti (Realtek(R) Audio), WASAPI non si apre. "
+        "Torno alla scelta automatica, Altoparlanti (Realtek(R) Audio), WASAPI.")
+    assert lista.righe["scheda_audio"] == "Scheda audio: Automatica (Altoparlanti (Realtek(R) Audio), WASAPI)"
+    # L'automatica, scelta di nuovo, e Annulla.
+    prova.aperta = True
+    monkeypatch.setattr(modulo, "FinestraScelta", _SceltaFinta(0))
+    finestra._cambia_impostazione("scheda_audio", lista)
+    assert applicate[-1] == {} and _ultima(finestra) == "Scheda audio: Automatica (Altoparlanti (Realtek(R) Audio), WASAPI)."
+    monkeypatch.setattr(modulo, "FinestraScelta", _SceltaFinta(None))
+    finestra._cambia_impostazione("scheda_audio", lista)
+    assert _ultima(finestra) == "Scheda audio non cambiata." and len(applicate) == 4
+
+    # Un elenco che non si legge: la console lo dice.
+    def guasto():
+        raise OSError("PortAudio non risponde")
+
+    monkeypatch.setattr(modulo.schede_audio, "uscite", guasto)
+    finestra._cambia_impostazione("scheda_audio", lista)
+    assert suoni_annotati[-1] == "errore" and _ultima(finestra) == "Non riesco a leggere le schede audio: PortAudio non risponde."
+
+
+def test_scheda_audio_con_gli_effetti_a_zero(finestra, monkeypatch, suoni_annotati):
+    import GBUtils
+
+    import suoni
+
+    # Con il volume degli effetti a zero nessun suono parte, come in suoni.suona
+    # vero: la prova d'apertura della scheda deve farsi lo stesso.
+    annota = suoni.suona
+    monkeypatch.setattr(suoni, "suona", lambda evento, volume=0.5, sync=False: volume > 0 and annota(evento, volume, sync))
+    finestra.impostazioni["volume_effetti"] = 0.0
+    applicate = []
+
+    def applica(scelta, motore, avvio=False):
+        applicate.append(dict(scelta))
+        return _esito(ASIO, musica=False) if scelta else _esito(AUTOMATICA, automatica=True)
+
+    monkeypatch.setattr(modulo.schede_audio, "uscite", lambda: [AUTOMATICA, ASIO])
+    monkeypatch.setattr(modulo.schede_audio, "in_uso", lambda elenco=None: AUTOMATICA)
+    monkeypatch.setattr(modulo.schede_audio, "applica", applica)
+    prova = _ProvaFinta(aperta=False)
+    monkeypatch.setattr(GBUtils.Acusticator, "riproduci", prova)
+    monkeypatch.setattr(modulo, "FinestraScelta", _SceltaFinta(2))
+    lista = _ListaFinta()
+    finestra._cambia_impostazione("scheda_audio", lista)
+    # La scheda ASIO non si apre: si torna all'automatica, e la console lo dice.
+    assert prova.prove == [(modulo.SILENZIO_DI_PROVA, 2)]
+    assert applicate == [{"dispositivo": "Realtek ASIO", "interfaccia": "ASIO"}, {}]
+    assert finestra.impostazioni["scheda_audio"] == {} and _salvate(finestra)["scheda_audio"] == {}
+    assert _ultima(finestra) == "La scheda audio Realtek ASIO, ASIO non si apre. Torno alla scelta automatica, Altoparlanti (Realtek(R) Audio), WASAPI."
+    assert lista.righe["scheda_audio"] == "Scheda audio: Automatica (Altoparlanti (Realtek(R) Audio), WASAPI)"
+    # Muti anche il suono della scheda e quello dell'errore.
+    assert suoni_annotati == []
+
+
+def test_scheda_audio_all_avvio(app, tmp_path, monkeypatch, suoni_annotati):
+    import json
+
+    import GBUtils
+
+    from finestra import Finestra
+
+    cuffie = {"dispositivo": "Cuffie USB", "interfaccia": "Windows WASAPI"}
+    (tmp_path / modulo.FILE_IMPOSTAZIONI).write_text(json.dumps({"scheda_audio": cuffie}), encoding="utf-8")
+    chiamate = []
+    # Una scheda che manca, o che non si applica, non si prova.
+    prova = _ProvaFinta()
+    monkeypatch.setattr(GBUtils.Acusticator, "riproduci", prova)
+
+    def mancante(scelta, motore, avvio=False):
+        chiamate.append((dict(scelta), avvio))
+        return _esito(AUTOMATICA, automatica=True, mancante=True)
+
+    monkeypatch.setattr(modulo.schede_audio, "applica", mancante)
+    f = Finestra(ao="null", cartella_dati=str(tmp_path))
+    try:
+        assert chiamate == [(cuffie, True)] and prova.prove == []
+        righe = [_senza_ora(r) for r in f._righe]
+        assert "La scheda audio scelta, Cuffie USB, non c'è: uso quella automatica, Altoparlanti (Realtek(R) Audio), WASAPI." in righe
+        # La scelta resta, per quando le cuffie tornano.
+        assert f.impostazioni["scheda_audio"] == cuffie
+        assert f._riga_dell_impostazione("scheda_audio") == "Scheda audio: Cuffie USB, WASAPI, non c'è: uso quella automatica"
+        f.Close(force=True)
+    finally:
+        f.Destroy()
+
+    def guasta(scelta, motore, avvio=False):
+        raise RuntimeError("PortAudio non risponde")
+
+    monkeypatch.setattr(modulo.schede_audio, "applica", guasta)
+    f = Finestra(ao="null", cartella_dati=str(tmp_path))
+    try:
+        assert "Non riesco a usare la scheda audio scelta, Cuffie USB: PortAudio non risponde." in [_senza_ora(r) for r in f._righe]
+        assert prova.prove == []
+        f.Close(force=True)
+    finally:
+        f.Destroy()
+
+
+def test_scheda_audio_all_avvio_che_non_si_apre(app, tmp_path, monkeypatch, suoni_annotati):
+    import json
+
+    import GBUtils
+
+    from finestra import Finestra
+
+    cuffie = {"dispositivo": "Cuffie USB", "interfaccia": "Windows WASAPI"}
+    percorso = tmp_path / modulo.FILE_IMPOSTAZIONI
+    percorso.write_text(json.dumps({"scheda_audio": cuffie}), encoding="utf-8")
+    chiamate = []
+    uscita = {**AUTOMATICA, "indice": 30, "dispositivo": "Cuffie USB"}
+
+    def applica(scelta, motore, avvio=False):
+        chiamate.append((dict(scelta), avvio))
+        return _esito(uscita) if scelta else _esito(AUTOMATICA, automatica=True)
+
+    monkeypatch.setattr(modulo.schede_audio, "applica", applica)
+    monkeypatch.setattr(modulo.schede_audio, "in_uso", lambda elenco=None: AUTOMATICA)
+    # Le cuffie ci sono, ma un altro programma le tiene: gli effetti non le aprono.
+    prova = _ProvaFinta(aperta=False)
+    monkeypatch.setattr(GBUtils.Acusticator, "riproduci", prova)
+    f = Finestra(ao="null", cartella_dati=str(tmp_path))
+    try:
+        assert prova.prove == [(modulo.SILENZIO_DI_PROVA, 2)]
+        assert chiamate == [(cuffie, True), ({}, False)]
+        assert "La scheda audio scelta, Cuffie USB, non si apre: uso quella automatica." in [_senza_ora(r) for r in f._righe]
+        assert "errore" in suoni_annotati
+        # La scelta resta, anche nel file, per quando le cuffie tornano libere.
+        assert f.impostazioni["scheda_audio"] == cuffie
+        assert f._riga_dell_impostazione("scheda_audio") == "Scheda audio: Cuffie USB, WASAPI, non si apre: uso quella automatica"
+        f.Close(force=True)
+    finally:
+        f.Destroy()
+    assert json.loads(percorso.read_text(encoding="utf-8"))["scheda_audio"] == cuffie
+    # Quando si aprono, niente da dire e niente da cambiare.
+    chiamate.clear()
+    suoni_annotati.clear()
+    prova.aperta = True
+    f = Finestra(ao="null", cartella_dati=str(tmp_path))
+    try:
+        assert chiamate == [(cuffie, True)] and len(prova.prove) == 2
+        assert not any("Cuffie USB" in r for r in f._righe) and "errore" not in suoni_annotati
+        assert f._riga_dell_impostazione("scheda_audio") == "Scheda audio: Cuffie USB, WASAPI"
+        f.Close(force=True)
+    finally:
+        f.Destroy()
+    # Con la scelta automatica, all'avvio non si prova niente.
+    percorso.write_text(json.dumps({"scheda_audio": {}}), encoding="utf-8")
+    chiamate.clear()
+    f = Finestra(ao="null", cartella_dati=str(tmp_path))
+    try:
+        assert chiamate == [({}, True)] and len(prova.prove) == 2
+        f.Close(force=True)
+    finally:
+        f.Destroy()
