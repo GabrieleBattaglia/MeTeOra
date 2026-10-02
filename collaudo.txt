@@ -1,5 +1,13 @@
-Collaudo di MeTeOra 1.59.0, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.59.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
-A tutte le domande cancellate, la risposta è sì, funziona e mi va bene.
-
-Domanda: la scelta a caso è libera, quindi un brano può tornare dopo pochi altri; preferisci un mazzo, in cui ogni brano suona una volta prima di ricominciare?
-Sì, sarebbe molto bello. Però mettiamo una nuova impostazione in cui l'utente può scegliere fra diversi modelli di shuffle. casualità totale, 1 per brano, e poi Stop alla fine, o ricomincio? nel caso sia scelta la seconda.
+Collaudo di MeTeOra 1.61.0, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.61.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+I decimali si leggono con il punto: la velocità con A e D, per esempio 1.05, e la dissolvenza, per esempio accesa, 2.5 secondi.
+Gli esempi nei campi di Maiuscolo con Q ed E, di Maiuscolo con L e delle impostazioni di velocità e dissolvenza usano il punto; se scrivi la virgola, si accetta ancora.
+W con il meno conta dalla fine: -12 va a dodici secondi dalla fine, -1:30 a un minuto e mezzo dalla fine.
+O abbassa la banda dell'equalizzatore e P la alza, ciascuno col suo suono.
+Fra le impostazioni, Modello della riproduzione casuale apre una lista con tre modelli, e la riga dice quello scelto.
+Maiuscolo con N, accendendo, dice il modello.
+Con una volta per brano, ogni brano suona una volta prima che ne torni uno; anche quello che scegli tu con X esce dal mazzo.
+Con una volta per brano, poi si ferma: finito il mazzo la riproduzione si ferma, e la console dice Fine: ogni brano del mazzo ha suonato una volta.
+Con una volta per brano, poi ricomincia: finito il mazzo si continua, e l'ultimo brano non torna subito.
+Con casualità totale tutto va come nella 1.59.0.
+Domanda: il modello di partenza è una volta per brano, poi ricomincia; ti va bene, o preferisci casualità totale?
+Domanda: il mazzo non si ricorda alla riapertura di MeTeOra, e riparte intero; ti va bene?
