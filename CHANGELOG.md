@@ -4,7 +4,7 @@ Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
 ## [1.62.4] - 2026-10-02
 
-- I brani Matroska audio (mka), AU e CAF, e quasi certamente i moduli dei tracker, nella plancia non avevano la durata: la libreria che legge le durate non li conosce. Ora la chiede a libmpv, muta, in disparte. Le schede già salvate senza durata si rileggono.
+- I brani Matroska audio (mka), AU e CAF, e i moduli dei tracker, nella plancia non avevano la durata: la libreria che legge le durate non li conosce. Ora la chiede a libmpv, muta, in disparte. Le schede già salvate senza durata si rileggono.
 - Gli AAC grezzi, i file .aac senza contenitore, avevano una durata sbagliata, anche di molto: il formato non la scrive, e la si stimava dal bitrate. Ora la si conta, fotogramma per fotogramma, ed è esatta. Durante l'ascolto però mpv usa ancora la sua stima: la durata detta da W e il momento della dissolvenza su questi file possono sbagliare.
 - Le due correzioni vengono dal collaudo sistematico dei formati della tappa 6: 19 estensioni, con i file di prova fatti al momento, ciascuna aperta, misurata, attraversata con un salto e portata alla fine.
 

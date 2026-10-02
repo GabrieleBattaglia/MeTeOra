@@ -112,3 +112,22 @@ def test_il_formato_si_riconosce_si_apre_si_salta_e_finisce(file_di_prova, esten
         assert not errori
     finally:
         m.chiudi()
+
+
+def test_un_modulo_dei_tracker_ha_la_durata_e_suona(tmp_path):
+    """Un ProTracker minimo, fatto qui: 64 righe vuote a velocita' 6 e 125 BPM,
+    7.68 secondi. mutagen non conosce i tracker: la durata la da' libmpv, con
+    libopenmpt (1.62.4)."""
+    percorso = tmp_path / "prova.mod"
+    percorso.write_bytes(b"prova".ljust(20, b"\0") + bytes(31 * 30) + bytes([1, 127]) + bytes(128) + b"M.K." + bytes(64 * 4 * 4))
+    assert formati.supportato(str(percorso))
+    assert schedario.leggi_scheda(str(percorso))["durata"] == pytest.approx(7.68, abs=0.01)
+    finiti = []
+    m = motore.Motore(ao="null", alla_fine=lambda: finiti.append(True))
+    try:
+        m.suona(str(percorso))
+        assert _aspetta(lambda: (m.posizione or 0) > 0)
+        m.vai_a(7.3)
+        assert _aspetta(lambda: finiti, 3)
+    finally:
+        m.chiudi()
