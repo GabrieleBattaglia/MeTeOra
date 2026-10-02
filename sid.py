@@ -1,6 +1,6 @@
 # MeTeOra, i SID: emulazione in tempo reale su sidshim.dll, resa in RAM, senza disco.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: passa dai prototipi al programma con la tappa 1.
+# 30/09/2026: passa dai prototipi al programma con la tappa 1. Nella 1.61.1 il riscaldamento, per il primo SID.
 
 """Motore SID in tempo reale su sidshim.dll: rendering a blocchi in RAM, senza disco."""
 import ctypes
@@ -24,6 +24,27 @@ _dll.sid_chiudi.argtypes = [ctypes.c_void_p]
 FREQUENZA = 48000
 CANALI = 2
 BLOCCO = FREQUENZA // 50 * CANALI  # 20 ms di campioni interlacciati
+_RISCALDATA = threading.Event()
+_RISCALDAMENTO = threading.Lock()
+
+
+def riscalda():
+    """La prima apertura di un SID nel processo costa circa 150 ms in piu':
+    libsidplayfp prepara le tabelle dei filtri. Qui la si fa una volta sola,
+    in un filo in disparte, cosi' il primo SID suonato parte come gli altri
+    (tappa 5, 1.61.1). Un percorso vuoto basta: i chip si creano prima di
+    leggere il brano."""
+    with _RISCALDAMENTO:
+        if _RISCALDATA.is_set():
+            return
+        _RISCALDATA.set()
+
+    def lavora():
+        h = _dll.sid_apri(b"", FREQUENZA, 1)
+        if h:
+            _dll.sid_chiudi(h)
+
+    threading.Thread(target=lavora, name="MeTeOra, riscaldamento dei SID", daemon=True).start()
 
 
 class BranoSid:
