@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza.
 
 """La finestra di MeTeOra.
 
@@ -139,8 +139,10 @@ TASTI = {
     ("h", False): "tono_su",
     ("u", False): "banda_precedente",
     ("i", False): "banda_successiva",
-    ("o", False): "banda_su",
-    ("p", False): "banda_giu",
+    # Anche qui a sinistra si scende e a destra si sale: O abbassa la banda,
+    # P la alza (Gabriele, collaudo della 1.60.0).
+    ("o", False): "banda_giu",
+    ("p", False): "banda_su",
     ("è", False): "azzera_la_banda",
     ("è", True): "azzera_le_bande",
     ("l", False): "dissolvenza",
@@ -158,7 +160,7 @@ TASTI_COMUNI = [
     "X riproduce la voce selezionata o riprende, C pausa, V stop, Z e B brano precedente e successivo, N brano a caso, Maiuscolo con N la riproduzione casuale.",
     "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, + e - volume, Maiuscolo+M il passo del volume, M muto.",
     "A e D rallentano e accelerano, S torna alla velocità normale; F e H abbassano e alzano il tono di un semitono, G lo riporta al normale.",
-    "U e I scelgono la banda dell'equalizzatore, O e P la alzano e la abbassano di un dB, È la azzera, Maiuscolo con È le azzera tutte.",
+    "U e I scelgono la banda dell'equalizzatore, O e P la abbassano e la alzano di un dB, È la azzera, Maiuscolo con È le azzera tutte.",
     "L accende e spegne la dissolvenza incrociata: con lei sfumano i cambi di brano, lo stop, la pausa, X da capo e i marker; Maiuscolo con L ne chiede la durata.",
     "Maiuscolo+X, a giro: punto A del loop sul brano selezionato, poi punto B, poi toglie il loop.",
     "J e K aprono e suonano la playlist precedente e successiva, le cifre da 1 a 0 le prime dieci playlist.",
@@ -3141,7 +3143,7 @@ class Finestra(wx.Frame):
         self._salva_impostazioni()
 
     def _guadagno(self, passo):
-        """O e P: la banda scelta su o giu' di un dB; ai limiti lo dicono. Il
+        """O e P: la banda scelta giu' o su di un dB; ai limiti lo dicono. Il
         suono, fatto al volo, dice il guadagno con l'altezza della nota."""
         bande = list(self.impostazioni["bande"])
         nuovo = max(-valori.GUADAGNO_MASSIMO, min(valori.GUADAGNO_MASSIMO, bande[self._banda] + passo))
@@ -3378,7 +3380,7 @@ class Finestra(wx.Frame):
                 "Un numero solo vale per tutte le bande, e il campo vuoto le riporta tutte a 0. Per esempio 0 0 +2 0 0 0 -3, oppure 3.",
                 "Contro la saturazione il volume scende da solo quanto la banda più alzata: con una banda sola il suono non satura, "
                 "con più bande vicine alzate, o tutte, sale fino a circa 5.6 dB oltre, e dal volume 80 o 90 in su conviene abbassare il volume.",
-                "Anche U e I scelgono la banda, O e P la alzano e la abbassano, È la azzera e Maiuscolo con È le azzera tutte, dalla finestra principale.",
+                "Anche U e I scelgono la banda, O e P la abbassano e la alzano, È la azzera e Maiuscolo con È le azzera tutte, dalla finestra principale.",
                 f"Adesso: {self._bande_da_leggere()}.", REGOLA_DEL_DOLLARO], valori.scrivi_bande(imp["bande"])
         if chiave == "dissolvenza":
             secondi = imp["dissolvenza"]["secondi"]

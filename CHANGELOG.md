@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.60.1] - 2026-10-02
+
+- O abbassa la banda dell'equalizzatore e P la alza, come A e D per la velocità e F e H per il tono: a sinistra si scende, a destra si sale. Il suono segue, perché dice il guadagno. Dal collaudo di Gabriele.
+
 ## [1.60.0] - 2026-10-02
 
 - W accetta anche un tempo contato dalla fine, con il meno davanti: -12 va a dodici secondi dalla fine, -1:30 a un minuto e mezzo dalla fine. Comodo per sentire la dissolvenza senza fare il conto. Chiesto da Gabriele al collaudo.

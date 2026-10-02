@@ -2687,19 +2687,19 @@ def test_equalizzatore_coi_tasti(finestra, suoni_annotati, equalizzatore_annotat
     assert suoni_annotati[-1] == "banda_al_limite"
     assert _premi(finestra, "i") == "Banda 2, 150 Hz: 0 dB."
     assert _premi(finestra, "i") == "Banda 3, 400 Hz: 0 dB."
-    assert _premi(finestra, "o") == "Banda 3, 400 Hz: +1 dB."
+    assert _premi(finestra, "p") == "Banda 3, 400 Hz: +1 dB."
     # I suoni al volo: la banda scelta e il guadagno dato (1.58.0).
     assert equalizzatore_annotato == [("banda", 1), ("banda", 2), ("guadagno", 1)]
     assert finestra.motore.bande == [0, 0, 1, 0, 0, 0, 0]
     for _ in range(12):
-        _tasto(finestra, "o")
+        _tasto(finestra, "p")
     assert _ultima(finestra) == "Banda 3, 400 Hz: +12 dB, il massimo." and suoni_annotati[-1] == "guadagno_al_limite"
-    assert _premi(finestra, "p") == "Banda 3, 400 Hz: +11 dB." and equalizzatore_annotato[-1] == ("guadagno", 11)
+    assert _premi(finestra, "o") == "Banda 3, 400 Hz: +11 dB." and equalizzatore_annotato[-1] == ("guadagno", 11)
     for _ in range(4):
         _tasto(finestra, "i")
     assert _premi(finestra, "i") == "Banda 7, 12000 Hz: 0 dB. È l'ultima."
     for _ in range(13):
-        _tasto(finestra, "p")
+        _tasto(finestra, "o")
     assert _ultima(finestra) == "Banda 7, 12000 Hz: -12 dB, il minimo."
     assert finestra.motore.bande == [0, 0, 11, 0, 0, 0, -12] and _salvate(finestra)["bande"] == [0, 0, 11, 0, 0, 0, -12]
     assert _premi(finestra, "u") == "Banda 6, 6000 Hz: 0 dB." and equalizzatore_annotato[-1] == ("banda", 5)
