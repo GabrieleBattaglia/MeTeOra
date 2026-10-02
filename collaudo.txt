@@ -24,3 +24,4 @@ Con la riproduzione casuale accesa e la playlist chiusa, un loop o una selezione
 Con la riproduzione casuale e la dissolvenza accese, il brano a caso entra sfumando.
 Con la riproduzione casuale accesa, Z, B e N restano come prima.
 Chiudi e riapri MeTeOra: la riproduzione casuale è come l'avevi lasciata, e la trovi anche fra le impostazioni.
+Domanda: la scelta a caso è libera, quindi un brano può tornare dopo pochi altri; preferisci un mazzo, in cui ogni brano suona una volta prima di ricominciare?
