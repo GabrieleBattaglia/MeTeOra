@@ -2,4 +2,5 @@ python-mpv
 mutagen
 numpy
 wxPython
+accessible-output2
 pytest
