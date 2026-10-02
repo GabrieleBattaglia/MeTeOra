@@ -1,16 +1,17 @@
 {
- "volume": 98,
+ "volume": 80,
  "passo_volume": 1,
  "passo_indietro": 3.0,
  "passo_avanti": 10.0,
  "volume_effetti": 0.35,
  "insegui": true,
  "ripresa": {
-  "percorso": "E:\\Audio\\esperimenti audio\\Turbo_Outrun.wav",
+  "percorso": "E:\\Music\\Ace Of Base\\The Sign\\02 All That She Wants.m4a",
   "sottobrano": null,
   "numero": 1,
-  "posizione": 0,
-  "tipo": "file"
+  "posizione": 31.960022675736973,
+  "tipo": "cartella",
+  "cartella": "E:\\Music\\Ace Of Base\\The Sign"
  },
  "righe_della_console": 2000,
  "caratteri": {},
@@ -61,7 +62,7 @@
   1
  ],
  "dissolvenza": {
-  "accesa": false,
+  "accesa": true,
   "secondi": 4.0
  }
 }

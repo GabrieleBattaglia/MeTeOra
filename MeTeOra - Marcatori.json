@@ -1,4 +1,19 @@
 {
  "versione": 1,
- "marcatori": {}
+ "marcatori": {
+  "02 all that she wants.m4a|211.603": {
+   "file": "02 All That She Wants.m4a",
+   "durata": 211.60344671201815,
+   "sottobrano": null,
+   "percorsi": [
+    "E:\\Music\\Ace Of Base\\The Sign\\02 All That She Wants.m4a"
+   ],
+   "marker": [
+    {
+     "tempo": 10.768043559315192,
+     "nome": "M1"
+    }
+   ]
+  }
+ }
 }
