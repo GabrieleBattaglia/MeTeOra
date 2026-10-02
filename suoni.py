@@ -181,36 +181,42 @@ def livello(profondita, volume=0.5):
 
 
 # I suoni dell'equalizzatore, fatti al volo come il beep dei livelli (Gabriele,
-# 2 ottobre 2026): un fa 3 di riferimento, una pausa, e una seconda nota che
+# 2 ottobre 2026): un fa di riferimento, una pausa, e una seconda nota che
 # dice a orecchio la banda scelta con U e I, dente di sega, sulla scala da do 3
-# a si 3, o il guadagno dato con O e P, onda triangolare, su tre ottave attorno
-# al fa 3: un semitono e mezzo per ogni dB, da -12 a +12.
+# a si 3 dopo il fa 3, o il guadagno dato con O e P, onda triangolare, su tre
+# ottave attorno al fa 4: un semitono e mezzo per ogni dB, da -12 a +12.
+# Nella 1.58.4 O e P salgono di un'ottava, dal fa 3 al fa 4: a -12 dB la nota
+# scendeva sotto i 62 Hz e si sentiva appena. E prendono un attacco e un
+# rilascio del 5 per cento della nota, 2,5 e 4,5 ms: con l'inviluppo quasi
+# nullo di U e I la triangolare di Acusticator comincia sul suo picco, e
+# l'inizio e la fine delle note schioccavano (collaudo di Gabriele).
 NOTE_DELLE_BANDE = ("c3", "d3", "e3", "f3", "g3", "a3", "b3")
-FA_3 = 174.61411571650194
+FA_4 = 349.2282314330039
 ADSR_DELL_EQUALIZZATORE = [0.002, 0.0, 100.0, 0.002]
+ADSR_DEL_GUADAGNO = [5.0, 0.0, 100.0, 5.0]
 
 
 def frequenza_del_guadagno(db):
-    return FA_3 * 2 ** (1.5 * db / 12)
+    return FA_4 * 2 ** (1.5 * db / 12)
 
 
 def banda(indice, volume=0.5):
     """Il suono della banda indice, da 0 (60 Hz) a 6 (12000 Hz)."""
-    return _al_volo(["f3", 0.04, 0.0, volume, "p", 0.04, 0.0, 0.0, NOTE_DELLE_BANDE[indice], 0.08, 0.0, volume], 4, volume)
+    return _al_volo(["f3", 0.04, 0.0, volume, "p", 0.04, 0.0, 0.0, NOTE_DELLE_BANDE[indice], 0.08, 0.0, volume], 4, volume, ADSR_DELL_EQUALIZZATORE)
 
 
 def guadagno(db, volume=0.5):
     """Il suono del guadagno di una banda, in dB."""
-    return _al_volo(["f3", 0.05, 0.0, volume, "p", 0.04, 0.0, 0.0, frequenza_del_guadagno(db), 0.09, 0.0, volume], 3, volume)
+    return _al_volo(["f4", 0.05, 0.0, volume, "p", 0.04, 0.0, 0.0, frequenza_del_guadagno(db), 0.09, 0.0, volume], 3, volume, ADSR_DEL_GUADAGNO)
 
 
-def _al_volo(score, kind, volume):
+def _al_volo(score, kind, volume, adsr):
     if volume <= 0:
         return False
     from GBUtils import Acusticator
 
     _FINE_DELL_ULTIMO[0] = time.monotonic() + sum(score[1::4])
-    Acusticator(score, kind=kind, adsr=ADSR_DELL_EQUALIZZATORE)
+    Acusticator(score, kind=kind, adsr=adsr)
     return True
 
 

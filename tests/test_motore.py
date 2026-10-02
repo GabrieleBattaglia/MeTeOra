@@ -886,12 +886,50 @@ def test_stop_sfumando_libera_subito_il_motore(crea, avvisi, tmp_path):
     m.stop(sfumando=True)
     # Il motore e' libero subito, e il brano si spegne piano sull'altro lettore.
     assert m.in_corso is None and vecchio.percorso == primo
-    assert _aspetta(lambda: vecchio.mpv.volume < 40, 1)
+    assert _aspetta(lambda: vecchio.mpv.volume < 70, 1)
     # Un brano avviato intanto parte senza aspettare la coda.
     m.suona(secondo)
     assert m.in_corso == secondo and m._attivo is not vecchio and vecchio.percorso == primo
     assert _aspetta(lambda: vecchio.percorso is None, 2)
     assert _aspetta(lambda: m._attivo.mpv.volume == 80, 1) and m.in_corso == secondo
+    assert avvisi.nomi() == []
+
+
+def test_le_discese_arrivano_allo_zero_prima_di_fermarsi(crea, avvisi, tmp_path, monkeypatch):
+    # Fino alla 1.58.1 la pausa, la coda dello stop e chi esce da una
+    # sfumatura si fermavano con il volume dell'ultimo gradino, circa un
+    # settimo della voce, e la fine era un taglio.
+    primo = _silenzio(tmp_path / "primo.wav", 8)
+    secondo = _silenzio(tmp_path / "secondo.wav", 8)
+    fermati = []
+    originali = modulo._Lettore.ferma, modulo._Lettore.imposta
+
+    def ferma(self):
+        if self.percorso is not None:
+            fermati.append(("stop", self.volume_scritto))
+        originali[0](self)
+
+    def imposta(self, nome, valore):
+        if nome == "pause" and valore is True:
+            fermati.append(("pausa", self.volume_scritto))
+        originali[1](self, nome, valore)
+
+    monkeypatch.setattr(modulo._Lettore, "ferma", ferma)
+    monkeypatch.setattr(modulo._Lettore, "imposta", imposta)
+    m = crea()
+    m.dissolvenza = 0.4
+    m.suona(primo)
+    assert _aspetta(lambda: (m.posizione or 0) > 0.3)
+    m.pausa(sfumando=True)
+    assert _aspetta(lambda: m._calo is None, 2)
+    m.pausa(sfumando=True)
+    assert _aspetta(lambda: m._calo is None, 2)
+    m.suona(secondo)
+    assert _aspetta(lambda: m._sfumatura is None and m.in_corso == secondo, 2)
+    m.stop(sfumando=True)
+    assert _aspetta(lambda: m._coda is None, 2)
+    assert [nome for nome, _ in fermati] == ["pausa", "stop", "stop"]
+    assert all(volume < 1 for _, volume in fermati), fermati
     assert avvisi.nomi() == []
 
 

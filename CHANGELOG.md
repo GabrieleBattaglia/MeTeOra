@@ -2,6 +2,12 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.58.4] - 2026-10-02
+
+- Con la dissolvenza accesa, la pausa, lo stop e il brano che esce da una dissolvenza fra due brani finivano con un piccolo taglio: la voce non arrivava a zero, ma si fermava a circa un settimo, l'ultimo gradino della discesa. Adesso scende fino al silenzio, e il brano si ferma un istante dopo. Trovato da una prova che falliva ogni tanto.
+- O e P suonano un'ottava più su: il fa di riferimento è il fa 4, e la nota del guadagno sta fra un'ottava e mezza sotto e un'ottava e mezza sopra. A -12 dB scendeva sotto i 62 Hz e si sentiva appena. Dal collaudo di Gabriele.
+- Le note di O e P cominciano e finiscono senza schiocchi: hanno un attacco e un rilascio di pochi millesimi di secondo, dove prima l'onda triangolare partiva di colpo dal suo picco. Dal collaudo di Gabriele.
+
 ## [1.58.1] - 2026-10-02
 
 - F abbassa il tono e H lo alza, come A e D per la velocità: a sinistra si scende, a destra si sale. Anche i suoni seguono. Dal collaudo di Gabriele.

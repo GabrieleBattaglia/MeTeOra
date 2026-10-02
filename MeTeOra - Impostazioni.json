@@ -1,15 +1,15 @@
 {
- "volume": 80,
+ "volume": 97,
  "passo_volume": 1,
  "passo_indietro": 3.0,
  "passo_avanti": 10.0,
  "volume_effetti": 0.35,
  "insegui": true,
  "ripresa": {
-  "percorso": "E:\\Music\\Ace Of Base\\The Sign\\02 All That She Wants.m4a",
+  "percorso": "E:\\Music\\Ace Of Base\\The Sign\\04 Happy Nation.m4a",
   "sottobrano": null,
-  "numero": 1,
-  "posizione": 31.960022675736973,
+  "numero": 3,
+  "posizione": 0,
   "tipo": "cartella",
   "cartella": "E:\\Music\\Ace Of Base\\The Sign"
  },
@@ -53,16 +53,16 @@
  "velocita": 1.0,
  "tono": 0,
  "bande": [
+  1,
   0,
   0,
   0,
   0,
   0,
-  0,
-  1
+  10
  ],
  "dissolvenza": {
   "accesa": true,
-  "secondi": 4.0
+  "secondi": 7.0
  }
 }

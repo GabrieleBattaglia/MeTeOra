@@ -56,7 +56,7 @@ M: muto, e di nuovo M riaccende l'audio.
 A e D: rallentano e accelerano la riproduzione, a passi di 0,05, da 0,5 a 2 volte la velocità normale; il tono non cambia. S: torna alla velocità normale.
 F e H: abbassano e alzano il tono di un semitono, fino a dodici sotto o sopra, come A e D per la velocità; la velocità non cambia. G: torna al tono normale.
 U e I: scelgono la banda dell'equalizzatore, la precedente e la seguente, fra le sette da 60 a 12000 Hz, e si fermano alla prima e all'ultima. All'avvio la banda scelta è la prima, quella dei 60 Hz. Il suono dice la banda a orecchio: un fa di riferimento, poi una nota della scala, da do per la prima a si per la settima.
-O e P: alzano e abbassano di un dB la banda scelta, da -12 a +12. Il suono dice il guadagno a orecchio: lo stesso fa di riferimento, poi una nota che sta tanto più su o più giù quanto più la banda è alzata o abbassata, fino a un'ottava e mezza.
+O e P: alzano e abbassano di un dB la banda scelta, da -12 a +12. Il suono dice il guadagno a orecchio: un fa di riferimento, un'ottava sopra quello di U e I, poi una nota che sta tanto più su o più giù quanto più la banda è alzata o abbassata, fino a un'ottava e mezza.
 È: riporta a 0 dB la banda scelta. Maiuscolo con È: riporta a 0 dB tutte le bande.
 L: accende e spegne la dissolvenza incrociata fra un brano e l'altro.
 Maiuscolo con L: chiede la durata della dissolvenza in secondi, da 0,5 a 15, anche con i decimali; la dissolvenza resta accesa o spenta com'era.

@@ -1,6 +1,6 @@
 # MeTeOra, il motore di riproduzione: libmpv, e i SID in tempo reale.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa.
+# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi.
 
 """Due lettori libmpv per tutti i formati.
 
@@ -244,6 +244,9 @@ class _Sfumatura:
         self.durata = None
         self.trascorso = 0.0
         self.ultima = None
+        # Vero quando un passo ha gia' scritto la voce a zero per chi esce:
+        # vedi _passo.
+        self.zittita = False
 
     def avanzamento(self):
         if self.durata is None:
@@ -272,6 +275,9 @@ class _Calo:
         self.durata = None
         self.trascorso = 0.0
         self.ultima = None
+        # Vero quando un passo ha gia' scritto la voce a zero: vedi
+        # _passo_dei_cali.
+        self.zittito = False
 
     def avanzamento(self):
         if self.durata is None:
@@ -1032,12 +1038,20 @@ class Motore:
             cambiati = True
             if c.avanzamento() < 1:
                 continue
+            # Chi scende si ferma al passo dopo quello che ha scritto lo zero.
+            # Fino alla 1.58.1 si fermava subito, e l'ultimo volume scritto
+            # era quello del gradino di prima: con passi di una trentina di
+            # millesimi, a una dissolvenza di mezzo secondo, circa un
+            # settimo della voce, che la pausa o lo stop troncavano di
+            # colpo. Il passo in piu' da' al dispositivo il tempo di
+            # suonare il silenzio.
+            if not c.sale and not c.zittito:
+                c.zittito = True
+                continue
             if c is self._coda:
                 self._chiudi_la_coda()
             else:
-                self._calo = None
-                if not c.sale:
-                    c.lettore.imposta("pause", True)
+                self._chiudi_il_calo()
         if cambiati:
             self._applica_i_volumi()
 
@@ -1075,9 +1089,12 @@ class Motore:
             else:
                 s.trascorso += max(0.0, posizione - s.ultima) / velocita
             s.ultima = posizione
-            if s.avanzamento() >= 1:
+            if s.avanzamento() >= 1 and s.zittita:
                 self._chiudi_la_sfumatura()
             else:
+                # All'ultimo gradino chi esce va a zero, e si ferma al passo
+                # dopo, come i cali.
+                s.zittita = s.avanzamento() >= 1
                 self._applica_i_volumi()
             return []
         if not self._dissolvenza or self._attivo not in letture:
