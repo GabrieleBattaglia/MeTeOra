@@ -2,6 +2,16 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.58.1] - 2026-10-02
+
+- F abbassa il tono e H lo alza, come A e D per la velocità: a sinistra si scende, a destra si sale. Anche i suoni seguono. Dal collaudo di Gabriele.
+
+## [1.58.0] - 2026-10-02
+
+- Con la dissolvenza accesa sfumano anche lo stop, la pausa e la ripresa, X da capo e i salti ai marker con R, Y e Maiuscolo con le cifre. Lo stop fa spegnere il brano piano mentre MeTeOra è già pronta a suonarne un altro; la pausa arriva quando la voce è scesa, e la ripresa riparte dal silenzio e risale; X da capo e i marker fanno incrociare il punto di partenza e quello d'arrivo dello stesso brano. Chiesto da Gabriele al collaudo.
+- I suoni di U, I, O e P si fanno al volo e dicono a orecchio quello che stai facendo: U e I suonano un fa di riferimento e poi una nota della scala, da do a si, una per banda; O e P lo stesso fa e poi una nota tanto più su o più giù quanto più la banda è alzata o abbassata, su tre ottave. Chiesto da Gabriele.
+- Il loop si fa tutto con Maiuscolo con X, a giro: senza loop mette il punto A, con il punto A mette il punto B, anche sullo stesso brano, che allora si ripete da solo, e con A e B toglie il loop. Maiuscolo con C resta libero. I suoni del loop sono i soffi che prima avevano U, I, O e P, nella collezione di GBUtils V184. Chiesto da Gabriele.
+
 ## [1.55.2] - 2026-10-02
 
 - Un brano finito proprio nell'istante in cui ne partiva un altro poteva far saltare il brano appena partito: la fine del vecchio veniva presa per quella del nuovo, e MeTeOra passava al seguente. Era una coincidenza rara, vista nel codice e mai sentita.

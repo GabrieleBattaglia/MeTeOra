@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15).
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati.
 
 """La finestra di MeTeOra.
 
@@ -100,7 +100,6 @@ TASTI = {
     ("k", False): "playlist_successiva",
     ("x", True): "loop",
     ("c", False): "pausa",
-    ("c", True): "togli_loop",
     ("v", False): "stop",
     ("b", False): "successivo",
     ("n", False): "casuale",
@@ -132,9 +131,11 @@ TASTI = {
     ("a", False): "velocita_giu",
     ("s", False): "velocita_normale",
     ("d", False): "velocita_su",
-    ("f", False): "tono_su",
+    # Come A e D per la velocita': a sinistra si scende, a destra si sale
+    # (Gabriele, collaudo della 1.55.2).
+    ("f", False): "tono_giu",
     ("g", False): "tono_normale",
-    ("h", False): "tono_giu",
+    ("h", False): "tono_su",
     ("u", False): "banda_precedente",
     ("i", False): "banda_successiva",
     ("o", False): "banda_su",
@@ -155,10 +156,10 @@ FUTURI_MAIUSCOLI = {}
 TASTI_COMUNI = [
     "X riproduce la voce selezionata o riprende, C pausa, V stop, Z e B brano precedente e successivo, N brano a caso.",
     "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, + e - volume, Maiuscolo+M il passo del volume, M muto.",
-    "A e D rallentano e accelerano, S torna alla velocità normale; F e H alzano e abbassano il tono di un semitono, G lo riporta al normale.",
+    "A e D rallentano e accelerano, S torna alla velocità normale; F e H abbassano e alzano il tono di un semitono, G lo riporta al normale.",
     "U e I scelgono la banda dell'equalizzatore, O e P la alzano e la abbassano di un dB, È la azzera, Maiuscolo con È le azzera tutte.",
-    "L accende e spegne la dissolvenza incrociata fra un brano e l'altro, Maiuscolo con L ne chiede la durata in secondi.",
-    "Maiuscolo+X mette e toglie i punti A e B del loop sul brano selezionato, Maiuscolo+C toglie il loop.",
+    "L accende e spegne la dissolvenza incrociata: con lei sfumano i cambi di brano, lo stop, la pausa, X da capo e i marker; Maiuscolo con L ne chiede la durata.",
+    "Maiuscolo+X, a giro: punto A del loop sul brano selezionato, poi punto B, poi toglie il loop.",
     "J e K aprono e suonano la playlist precedente e successiva, le cifre da 1 a 0 le prime dieci playlist.",
     "Nella plancia Backspace chiude il ramo in cui sei e risale di un livello, Maiuscolo con Backspace risale di colpo all'unità o alla playlist, Preferiti compresi, e chiude i rami al suo interno.",
     "T mette un marker dove sei, o rinomina quello su cui sei; R e Y vanno al marker precedente e successivo; Maiuscolo con R, Y e T tolgono i marker prima, dopo e tutti; Maiuscolo con le cifre da 1 a 0 va ai primi dieci marker del brano della plancia.",
@@ -2362,13 +2363,14 @@ class Finestra(wx.Frame):
             pl = self._temporanee[cartella] = Playlist.da_percorsi(nome, files, cartella)
         return pl
 
-    def _suona(self, pl, brano, evento="play", sottobrano=None, inizio=None):
+    def _suona(self, pl, brano, evento="play", sottobrano=None, inizio=None, sfuma_lo_stesso=False):
         """Suona il brano e lo dice. Con la dissolvenza accesa il motore lo fa
         entrare sfumando, se qualcosa si sente; un seguente preparato non
-        conta piu'."""
+        conta piu'. Con sfuma_lo_stesso sfuma anche ripartendo con il brano
+        in corso, come X da capo."""
         self._uscente = self._preparato = None
         self.coda.imposta(pl, brano)
-        self.motore.suona(brano.percorso, sottobrano or brano.sottobrano, inizio=inizio)
+        self.motore.suona(brano.percorso, sottobrano or brano.sottobrano, inizio=inizio, sfuma_lo_stesso=sfuma_lo_stesso)
         self._annuncia(pl, brano, evento)
 
     def _annuncia(self, pl, brano, evento):
@@ -2708,11 +2710,12 @@ class Finestra(wx.Frame):
             self._riproduci_cartella(dati["percorso"])
             return
         if self.motore.in_corso and self.motore.in_pausa:
-            self.motore.pausa(False)
+            self.motore.pausa(False, sfumando=True)
             self._riscontro("ripresa", f"Riprende da {tempo(self.motore.posizione)}.")
         elif self.motore.in_corso:
-            # Come in Winamp: X su cio' che sta suonando lo fa ripartire da capo.
-            self._suona(self.coda.playlist, corrente, "da_capo", self.motore.sottobrano if self.motore.sottobrani else None)
+            # Come in Winamp: X su cio' che sta suonando lo fa ripartire da capo;
+            # con la dissolvenza accesa, sfumando (Gabriele, 2 ottobre 2026).
+            self._suona(self.coda.playlist, corrente, "da_capo", self.motore.sottobrano if self.motore.sottobrani else None, sfuma_lo_stesso=True)
         elif corrente:
             self._suona(self.coda.playlist, corrente)
         else:
@@ -2775,42 +2778,38 @@ class Finestra(wx.Frame):
             return
         self._apri_e_suona(self.archivio.playlist[numero - 1], "playlist_numero")
 
-    def _comando_togli_loop(self):
-        if self.coda.loop_playlist is None:
-            self._riscontro("loop_non_qui", "Non c'è un loop da togliere.")
-            return
-        self.coda.togli_loop()
-        self._aggiorna_etichette()
-        self._riscontro("loop_tolto", "Loop tolto: si suona di nuovo tutta la lista.")
-
     def _comando_loop(self):
+        """Maiuscolo con X, a giro (Gabriele, 2 ottobre 2026): senza loop mette
+        il punto A sul brano selezionato; con il solo punto A mette il punto B,
+        anche sullo stesso brano, che allora si ripete da solo; con A e B li
+        toglie tutti e due, da qualsiasi punto."""
+        coda = self.coda
+        if coda.loop_playlist is not None and coda.punto_b is not None:
+            coda.togli_loop()
+            self._aggiorna_etichette()
+            self._riscontro("loop_tolto", "Loop tolto: si suona di nuovo tutta la lista.")
+            return
         dati = self._dati(self._voce_di_lavoro()) or {}
         if dati.get("tipo") not in ("brano", "file", "sottobrano"):
             self._riscontro("loop_non_qui", "Il loop si mette su un brano: scegline uno in una playlist o in una cartella.")
             return
         pl, brano = dati["playlist"], dati["brano"]
-        coda = self.coda
-        if coda.loop_playlist is pl and brano is coda.punto_a:
-            coda.togli_loop()
-            self._riscontro("loop_tolto", "Loop tolto: si suona di nuovo tutta la lista.")
-        elif coda.loop_playlist is pl and brano is coda.punto_b:
-            coda.punto_b = None
-            self._riscontro("loop_b_tolto", f"Punto B tolto; resta il punto A su {coda.punto_a.nome_del_file}.")
-        elif coda.loop_playlist is pl:
+        if coda.loop_playlist is None:
+            coda.loop_playlist, coda.punto_a, coda.punto_b = pl, brano, None
+            self._riscontro("loop_a_messo", f"Punto A del loop su {brano.nome_del_file}. Maiuscolo+X su un altro brano mette il punto B.")
+        elif coda.loop_playlist is not pl:
+            self._riscontro("loop_non_qui", f"Il punto A sta in {coda.loop_playlist.nome}: il punto B va su un brano della stessa lista.")
+            return
+        else:
             coda.punto_b = brano
             primo, ultimo = coda.intervallo(pl)
-            self._riscontro("loop_b_messo", f"Loop fra {coda.punto_a.nome_del_file} e {brano.nome_del_file}: {brani_al_plurale(ultimo - primo + 1)}.")
-        else:
-            prima = coda.loop_playlist is not None
-            coda.loop_playlist, coda.punto_a, coda.punto_b = pl, brano, None
-            tolto = " Il loop di prima è tolto." if prima else ""
-            self._riscontro("loop_a_messo", f"Punto A del loop su {brano.nome_del_file}.{tolto} Maiuscolo+X su un altro brano mette il punto B.")
+            self._riscontro("loop_b_messo", f"Loop fra {coda.punto_a.nome_del_file} e {brano.nome_del_file}: {brani_al_plurale(ultimo - primo + 1)}. Maiuscolo+X lo toglie.")
         self._aggiorna_etichette()
 
     def _comando_pausa(self):
         if self._niente_in_corso():
             return
-        if self.motore.pausa():
+        if self.motore.pausa(sfumando=True):
             self._riscontro("pausa", f"Pausa a {tempo(self.motore.posizione)}.")
         else:
             self._riscontro("ripresa", f"Riprende da {tempo(self.motore.posizione)}.")
@@ -2818,7 +2817,9 @@ class Finestra(wx.Frame):
     def _comando_stop(self):
         if self._niente_in_corso():
             return
-        self.motore.stop()
+        # Con la dissolvenza accesa il brano si spegne piano, e il motore e'
+        # subito libero (Gabriele, 2 ottobre 2026).
+        self.motore.stop(sfumando=True)
         self._uscente = self._preparato = None
         if getattr(self.coda.playlist, "selezione", False):
             # La playlist invisibile della selezione vive fino allo stop.
@@ -3056,20 +3057,22 @@ class Finestra(wx.Frame):
         guadagno = valori.scrivi_guadagno(self.impostazioni["bande"][self._banda])
         return f"{nome[0].upper()}{nome[1:]}: {guadagno}{aggiunta}."
 
-    def _scegli_la_banda(self, passo, evento):
-        """U e I: la banda prima o dopo; si fermano alla prima e all'ultima."""
+    def _scegli_la_banda(self, passo):
+        """U e I: la banda prima o dopo; si fermano alla prima e all'ultima. Il
+        suono, fatto al volo, dice la banda con una nota della scala."""
         nuova = self._banda + passo
         if not 0 <= nuova < len(valori.FREQUENZE_DELLE_BANDE):
             self._riscontro("banda_al_limite", self._riga_della_banda(". È la prima" if passo < 0 else ". È l'ultima"), "banda")
             return
         self._banda = nuova
-        self._riscontro(evento, self._riga_della_banda(), "banda")
+        suoni.banda(nuova, self.impostazioni["volume_effetti"])
+        self.scrivi(self._riga_della_banda(), "banda")
 
     def _comando_banda_precedente(self):
-        self._scegli_la_banda(-1, "banda_precedente")
+        self._scegli_la_banda(-1)
 
     def _comando_banda_successiva(self):
-        self._scegli_la_banda(1, "banda_successiva")
+        self._scegli_la_banda(1)
 
     def _metti_le_bande(self, bande):
         """Scrive i guadagni nel motore e nelle impostazioni, e li salva."""
@@ -3077,8 +3080,9 @@ class Finestra(wx.Frame):
         self.impostazioni["bande"] = list(bande)
         self._salva_impostazioni()
 
-    def _guadagno(self, passo, evento):
-        """O e P: la banda scelta su o giu' di un dB; ai limiti lo dicono."""
+    def _guadagno(self, passo):
+        """O e P: la banda scelta su o giu' di un dB; ai limiti lo dicono. Il
+        suono, fatto al volo, dice il guadagno con l'altezza della nota."""
         bande = list(self.impostazioni["bande"])
         nuovo = max(-valori.GUADAGNO_MASSIMO, min(valori.GUADAGNO_MASSIMO, bande[self._banda] + passo))
         if nuovo == bande[self._banda]:
@@ -3086,13 +3090,14 @@ class Finestra(wx.Frame):
             return
         bande[self._banda] = nuovo
         self._metti_le_bande(bande)
-        self._riscontro(evento, self._riga_della_banda(), "banda")
+        suoni.guadagno(nuovo, self.impostazioni["volume_effetti"])
+        self.scrivi(self._riga_della_banda(), "banda")
 
     def _comando_banda_su(self):
-        self._guadagno(1, "banda_su")
+        self._guadagno(1)
 
     def _comando_banda_giu(self):
-        self._guadagno(-1, "banda_giu")
+        self._guadagno(-1)
 
     def _comando_azzera_la_banda(self):
         bande = list(self.impostazioni["bande"])
@@ -3755,9 +3760,19 @@ class Finestra(wx.Frame):
                 testo = "È il primo marker." if sopra else "Prima di qui non ci sono marker."
             self._riscontro("nessun_altro_brano", testo)
             return
-        self.motore.vai_a(marker["tempo"])
+        self._vai_nel_brano(marker["tempo"])
         self._riscontro("marker_avanti" if verso > 0 else "marker_indietro", f"{marker['nome']}, {durata_lunga(marker['tempo'])}.")
         self._fuoco_sul_marker(k, marker)
+
+    def _vai_nel_brano(self, secondi):
+        """Un salto a un marker del brano in corso: con la dissolvenza accesa e
+        il brano che suona, il punto di partenza e il marker si incrociano
+        sui due lettori (Gabriele, 2 ottobre 2026); altrimenti un salto netto."""
+        if self.impostazioni["dissolvenza"]["accesa"] and self.motore.in_corso and not self.motore.in_pausa:
+            sottobrano = self.motore.sottobrano if self.motore.sottobrani else None
+            self.motore.suona(self.motore.in_corso, sottobrano, inizio=secondi, sfuma_lo_stesso=True)
+        else:
+            self.motore.vai_a(secondi)
 
     def _comando_marker_precedente(self):
         self._salta_al_marker(-1)
@@ -3861,9 +3876,11 @@ class Finestra(wx.Frame):
         stesso = self.motore.in_corso == brano.percorso and (numero is None or self.motore.sottobrano == numero)
         if stesso:
             avanti = marker["tempo"] >= (self.motore.posizione or 0.0)
-            self.motore.vai_a(marker["tempo"])
             if self.motore.in_pausa:
-                self.motore.pausa(False)
+                self.motore.vai_a(marker["tempo"])
+                self.motore.pausa(False, sfumando=True)
+            else:
+                self._vai_nel_brano(marker["tempo"])
             self._riscontro("marker_avanti" if avanti else "marker_indietro", f"{marker['nome']}, {durata_lunga(marker['tempo'])}.")
             return True
         if not self.coda.nel_loop(dati["playlist"], brano):

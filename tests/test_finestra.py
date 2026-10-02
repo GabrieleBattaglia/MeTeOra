@@ -232,12 +232,12 @@ def test_f9_e_f10(finestra, suoni_annotati):
     assert suoni_annotati[-1] == "chiudi_tutto"
 
 
-def test_maiuscolo_c_toglie_il_loop(finestra):
-    _tasto(finestra, "c", maiuscolo=True)
-    assert _ultima(finestra) == "Non c'è un loop da togliere."
+def test_maiuscolo_c_non_tocca_il_loop(finestra):
+    # Dalla 1.58.0 il loop si toglie con Maiuscolo con X, a giro: Maiuscolo
+    # con C e' libero.
     finestra.coda.loop_playlist = finestra.archivio.preferiti
     _tasto(finestra, "c", maiuscolo=True)
-    assert finestra.coda.loop_playlist is None
+    assert finestra.coda.loop_playlist is finestra.archivio.preferiti
 
 
 def _voce(f, radice, condizione):
@@ -294,22 +294,33 @@ def test_loop_a_b_con_maiuscolo_x(finestra, suoni_annotati):
     def scegli(n):
         finestra._seleziona(_voce(finestra, nodo, lambda d: d.get("brano") is pl.brani[n - 1]))
 
+    finestra._seleziona(finestra.nodo_pc)
+    assert _premi(finestra, "x", maiuscolo=True).startswith("Il loop si mette su un brano")
+    assert suoni_annotati[-1] == "loop_non_qui"
+    # Maiuscolo con X, a giro (1.58.0): punto A, punto B, loop tolto.
     scegli(2)
     assert _premi(finestra, "x", maiuscolo=True).startswith("Punto A del loop su 2.mp3.")
+    assert suoni_annotati[-1] == "loop_a_messo"
     scegli(4)
-    assert _premi(finestra, "x", maiuscolo=True) == "Loop fra 2.mp3 e 4.mp3: 3 brani."
+    assert _premi(finestra, "x", maiuscolo=True) == "Loop fra 2.mp3 e 4.mp3: 3 brani. Maiuscolo+X lo toglie."
+    assert suoni_annotati[-1] == "loop_b_messo"
     assert _etichette(finestra, nodo)[1] == "2.mp3, punto A del loop"
     assert _etichette(finestra, nodo)[3] == "4.mp3, punto B del loop"
     scegli(5)
     assert "fuori dal loop" in _premi(finestra, "x")
     assert suoni_annotati[-1] == "fuori_dal_loop"
-    scegli(4)
-    assert _premi(finestra, "x", maiuscolo=True) == "Punto B tolto; resta il punto A su 2.mp3."
-    scegli(2)
-    assert _premi(finestra, "x", maiuscolo=True).startswith("Loop tolto")
-    assert _etichette(finestra, nodo)[1] == "2.mp3"
+    # Con A e B, Maiuscolo con X toglie tutti e due, da qualsiasi punto.
     finestra._seleziona(finestra.nodo_pc)
-    assert _premi(finestra, "x", maiuscolo=True).startswith("Il loop si mette su un brano")
+    assert _premi(finestra, "x", maiuscolo=True).startswith("Loop tolto")
+    assert suoni_annotati[-1] == "loop_tolto" and finestra.coda.loop_playlist is None
+    assert _etichette(finestra, nodo)[1] == "2.mp3" and _etichette(finestra, nodo)[3] == "4.mp3"
+    # Il punto B sullo stesso brano del punto A: quel brano si ripete da solo.
+    scegli(3)
+    _tasto(finestra, "x", maiuscolo=True)
+    assert _premi(finestra, "x", maiuscolo=True) == "Loop fra 3.mp3 e 3.mp3: 1 brano. Maiuscolo+X lo toglie."
+    _tasto(finestra, "x", maiuscolo=True)
+    # Maiuscolo con C e' libero.
+    assert finestra.coda.loop_playlist is None and ("c", True) not in modulo.TASTI
 
 
 def test_maiuscolo_canc_manda_nel_cestino(finestra, suoni_annotati, tmp_path, monkeypatch):
@@ -348,7 +359,7 @@ def test_cartella_suona_con_le_sottocartelle_e_f8_la_ritrova(finestra, monkeypat
 
     suonati = []
 
-    def suona(percorso, sottobrano=None, inizio=None):
+    def suona(percorso, sottobrano=None, inizio=None, sfuma_lo_stesso=False):
         suonati.append(percorso)
         finestra.motore._in_corso = percorso
 
@@ -514,7 +525,7 @@ def test_durate_nella_plancia(finestra):
 def _finto_motore(finestra, monkeypatch):
     suonati = []
 
-    def suona(percorso, sottobrano=None, inizio=None):
+    def suona(percorso, sottobrano=None, inizio=None, sfuma_lo_stesso=False):
         suonati.append((os.path.basename(percorso), sottobrano))
         finestra.motore._in_corso = percorso
         finestra.motore.sottobrano = sottobrano
@@ -966,7 +977,7 @@ def test_x_su_cio_che_suona_riparte_da_capo(finestra, monkeypatch, suoni_annotat
     assert suoni_annotati[-1] == "da_capo"
     # In pausa, X riprende dal punto: e' cio' che usa la ripresa all'avvio.
     monkeypatch.setattr(type(finestra.motore), "in_pausa", property(lambda _self: True))
-    monkeypatch.setattr(finestra.motore, "pausa", lambda valore=None: False)
+    monkeypatch.setattr(finestra.motore, "pausa", lambda valore=None, sfumando=False: False)
     _tasto(finestra, "x")
     assert _ultima(finestra).startswith("Riprende da")
 
@@ -2545,24 +2556,25 @@ def test_velocita_e_tono_coi_tasti(finestra, suoni_annotati):
     assert _premi(finestra, "d") == "Velocità 2."
     assert _premi(finestra, "d") == "Velocità già al massimo, 2."
     assert len(finestra._righe) == righe + 1
-    assert _premi(finestra, "f") == "Tono +1 semitono."
-    assert _premi(finestra, "f") == "Tono +2 semitoni."
-    assert finestra.motore.tono == 2 and len(finestra._righe) == righe + 2
+    # H alza e F abbassa, come D e A per la velocita' (1.58.1).
     assert _premi(finestra, "h") == "Tono +1 semitono."
+    assert _premi(finestra, "h") == "Tono +2 semitoni."
+    assert finestra.motore.tono == 2 and len(finestra._righe) == righe + 2
+    assert _premi(finestra, "f") == "Tono +1 semitono."
     assert _premi(finestra, "g") == "Tono 0 semitoni, il normale."
     assert suoni_annotati[-4:] == ["tono_su", "tono_su", "tono_giu", "tono_normale"]
     for _ in range(13):
-        _tasto(finestra, "h")
+        _tasto(finestra, "f")
     assert _ultima(finestra) == "Tono già al minimo, -12 semitoni." and suoni_annotati[-1] == "tono_al_limite"
     assert finestra.motore.tono == -12 and _salvate(finestra)["tono"] == -12
     for _ in range(25):
-        _tasto(finestra, "f")
+        _tasto(finestra, "h")
     assert _ultima(finestra) == "Tono già al massimo, +12 semitoni." and finestra.motore.tono == 12
     # Le righe di stato stanno nei quaranta caratteri del display braille.
     assert all(len(_senza_ora(r)) <= 40 for r in finestra._righe[righe:])
 
 
-def test_equalizzatore_coi_tasti(finestra, suoni_annotati):
+def test_equalizzatore_coi_tasti(finestra, suoni_annotati, equalizzatore_annotato):
     righe = len(finestra._righe)
     # Si parte dalla prima banda, e U li' si ferma.
     assert _premi(finestra, "u") == "Banda 1, 60 Hz: 0 dB. È la prima."
@@ -2570,12 +2582,13 @@ def test_equalizzatore_coi_tasti(finestra, suoni_annotati):
     assert _premi(finestra, "i") == "Banda 2, 150 Hz: 0 dB."
     assert _premi(finestra, "i") == "Banda 3, 400 Hz: 0 dB."
     assert _premi(finestra, "o") == "Banda 3, 400 Hz: +1 dB."
-    assert suoni_annotati[-3:] == ["banda_successiva", "banda_successiva", "banda_su"]
+    # I suoni al volo: la banda scelta e il guadagno dato (1.58.0).
+    assert equalizzatore_annotato == [("banda", 1), ("banda", 2), ("guadagno", 1)]
     assert finestra.motore.bande == [0, 0, 1, 0, 0, 0, 0]
     for _ in range(12):
         _tasto(finestra, "o")
     assert _ultima(finestra) == "Banda 3, 400 Hz: +12 dB, il massimo." and suoni_annotati[-1] == "guadagno_al_limite"
-    assert _premi(finestra, "p") == "Banda 3, 400 Hz: +11 dB." and suoni_annotati[-1] == "banda_giu"
+    assert _premi(finestra, "p") == "Banda 3, 400 Hz: +11 dB." and equalizzatore_annotato[-1] == ("guadagno", 11)
     for _ in range(4):
         _tasto(finestra, "i")
     assert _premi(finestra, "i") == "Banda 7, 12000 Hz: 0 dB. È l'ultima."
@@ -2583,7 +2596,7 @@ def test_equalizzatore_coi_tasti(finestra, suoni_annotati):
         _tasto(finestra, "p")
     assert _ultima(finestra) == "Banda 7, 12000 Hz: -12 dB, il minimo."
     assert finestra.motore.bande == [0, 0, 11, 0, 0, 0, -12] and _salvate(finestra)["bande"] == [0, 0, 11, 0, 0, 0, -12]
-    assert _premi(finestra, "u") == "Banda 6, 6000 Hz: 0 dB." and suoni_annotati[-1] == "banda_precedente"
+    assert _premi(finestra, "u") == "Banda 6, 6000 Hz: 0 dB." and equalizzatore_annotato[-1] == ("banda", 5)
     _tasto(finestra, "i")
     assert _premi(finestra, "è") == "Banda 7, 12000 Hz: 0 dB, azzerata." and suoni_annotati[-1] == "banda_azzerata"
     assert finestra.motore.bande == [0, 0, 11, 0, 0, 0, 0]
@@ -2945,3 +2958,35 @@ def test_passaggio_vero_senza_piu_un_seguente(finestra, monkeypatch, tmp_path, s
     assert time.time() - inizio > 2.3 and max(posizioni) > 2.3
     assert suoni_annotati[-1] == "fine_playlist" and finestra.coda.corrente is pl.brani[0]
     assert finestra.motore.in_corso is None and all(lettore.percorso is None for lettore in finestra.motore._lettori)
+
+
+def test_con_la_dissolvenza_sfumano_stop_pausa_da_capo_e_marker(finestra, monkeypatch, tmp_path):
+    """Con la dissolvenza accesa (1.58.0) V, C, X da capo e i salti ai marker
+    del brano in corso chiedono la sfumatura al motore; spenta, restano
+    netti. Il motore e' quello vero, su ao=null; qui si guarda cosa chiede
+    la finestra."""
+    pl, _voce = _brano_con_marker(finestra, tmp_path, [1.0, 3.0])
+    finestra.motore.vai_a(0.5)
+    finestra.motore.pausa(False)
+    assert _aspetta(lambda: not finestra.motore.in_pausa and 0.4 < (finestra.motore.posizione or 0) < 0.9)
+    chiamate = []
+    vero_suona, vera_pausa, vero_stop = finestra.motore.suona, finestra.motore.pausa, finestra.motore.stop
+    monkeypatch.setattr(finestra.motore, "suona", lambda *a, **k: chiamate.append(("suona", k.get("inizio"), k.get("sfuma_lo_stesso"))) or vero_suona(*a, **k))
+    monkeypatch.setattr(finestra.motore, "vai_a", lambda s: chiamate.append(("vai_a", s)))
+    monkeypatch.setattr(finestra.motore, "pausa", lambda valore=None, sfumando=False: chiamate.append(("pausa", sfumando)) or vera_pausa(valore, sfumando))
+    monkeypatch.setattr(finestra.motore, "stop", lambda sfumando=False: chiamate.append(("stop", sfumando)) or vero_stop(sfumando))
+    # Spenta: il marker e' un salto netto.
+    _tasto(finestra, "y")
+    assert chiamate[-1][0] == "vai_a"
+    _premi(finestra, "l")
+    assert finestra.motore.dissolvenza > 0
+    _tasto(finestra, "y")
+    assert chiamate[-1] == ("suona", 1.0, True)
+    # X sul brano che suona lo fa ripartire da capo, sfumando.
+    finestra._seleziona(next(finestra._figli(finestra._nodo_della_playlist(pl))))
+    _tasto(finestra, "x")
+    assert chiamate[-1] == ("suona", None, True)
+    _tasto(finestra, "c")
+    assert chiamate[-1] == ("pausa", True)
+    _tasto(finestra, "v")
+    assert chiamate[-1] == ("stop", True)

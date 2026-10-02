@@ -1,6 +1,6 @@
 # MeTeOra, gli effetti sonori: un suono per ogni azione, con Acusticator.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.51.0 i suoni delle impostazioni, della console salvata, della finestra dei marcatori, della sua ricerca e della scheda audio. Nella 1.55.0 quelli di velocita', tono, equalizzatore e dissolvenza.
+# 30/09/2026: nasce con la tappa 1. Nella 1.51.0 i suoni delle impostazioni, della console salvata, della finestra dei marcatori, della sua ricerca e della scheda audio. Nella 1.55.0 quelli di velocita', tono, equalizzatore e dissolvenza. Nella 1.58.0 i suoni al volo dell'equalizzatore, e il loop con i soffi rimasti liberi.
 
 """La mappa degli eventi di MeTeOra sui preset della collezione di GBUtils.
 
@@ -115,10 +115,11 @@ EVENTI = {
     # Un problema interno di MeTeOra, non un errore di chi lo usa.
     "problema": "notifica",
     "niente_da_suonare": "arpeggio_pensoso",
-    "loop_a_messo": "notifica_tramite_interfaccia_utente_2",
-    "loop_b_messo": "notifica_tramite_interfaccia_utente_3",
-    "loop_b_tolto": "colpo_d_impatto_1",
-    "loop_tolto": "colpo_d_impatto_2",
+    # Maiuscolo con X, a giro (1.58.0): punto A, punto B, loop tolto. I suoni
+    # sono i soffi che fino alla 1.55.2 servivano a U, I e O, P.
+    "loop_a_messo": "meteora_loop_a_messo",
+    "loop_b_messo": "meteora_loop_b_messo",
+    "loop_tolto": "meteora_loop_tolto",
     "loop_non_qui": "colpo_d_impatto_5",
     "fuori_dal_loop": "avviso_di_sistema",
     "ritorno_al_punto_a": "scintillio_di_ghiaccio",
@@ -137,13 +138,10 @@ EVENTI = {
     "tono_giu": "meteora_tono_giu",
     "tono_normale": "meteora_tono_normale",
     "tono_al_limite": "meteora_tono_al_limite",
-    # U e I scelgono la banda, O e P ne cambiano il guadagno, la E accentata
-    # la azzera e Maiuscolo con la E accentata le azzera tutte.
-    "banda_precedente": "meteora_banda_precedente",
-    "banda_successiva": "meteora_banda_successiva",
+    # U e I scelgono la banda e O e P ne cambiano il guadagno con i suoni fatti
+    # al volo (banda e guadagno, qui sotto); ai limiti, la E accentata che la
+    # azzera e Maiuscolo con la E accentata che le azzera tutte hanno i preset.
     "banda_al_limite": "meteora_banda_al_limite",
-    "banda_su": "meteora_banda_su",
-    "banda_giu": "meteora_banda_giu",
     "guadagno_al_limite": "meteora_guadagno_al_limite",
     "banda_azzerata": "meteora_banda_azzerata",
     "bande_azzerate": "meteora_bande_azzerate",
@@ -179,6 +177,40 @@ def livello(profondita, volume=0.5):
 
     morbido = MORBIDEZZA_DEL_LIVELLO / DURATA_DEL_LIVELLO * 100
     Acusticator([frequenza_del_livello(profondita), DURATA_DEL_LIVELLO, 0.0, volume], kind=1, adsr=[morbido, 0.0, 100.0, morbido])
+    return True
+
+
+# I suoni dell'equalizzatore, fatti al volo come il beep dei livelli (Gabriele,
+# 2 ottobre 2026): un fa 3 di riferimento, una pausa, e una seconda nota che
+# dice a orecchio la banda scelta con U e I, dente di sega, sulla scala da do 3
+# a si 3, o il guadagno dato con O e P, onda triangolare, su tre ottave attorno
+# al fa 3: un semitono e mezzo per ogni dB, da -12 a +12.
+NOTE_DELLE_BANDE = ("c3", "d3", "e3", "f3", "g3", "a3", "b3")
+FA_3 = 174.61411571650194
+ADSR_DELL_EQUALIZZATORE = [0.002, 0.0, 100.0, 0.002]
+
+
+def frequenza_del_guadagno(db):
+    return FA_3 * 2 ** (1.5 * db / 12)
+
+
+def banda(indice, volume=0.5):
+    """Il suono della banda indice, da 0 (60 Hz) a 6 (12000 Hz)."""
+    return _al_volo(["f3", 0.04, 0.0, volume, "p", 0.04, 0.0, 0.0, NOTE_DELLE_BANDE[indice], 0.08, 0.0, volume], 4, volume)
+
+
+def guadagno(db, volume=0.5):
+    """Il suono del guadagno di una banda, in dB."""
+    return _al_volo(["f3", 0.05, 0.0, volume, "p", 0.04, 0.0, 0.0, frequenza_del_guadagno(db), 0.09, 0.0, volume], 3, volume)
+
+
+def _al_volo(score, kind, volume):
+    if volume <= 0:
+        return False
+    from GBUtils import Acusticator
+
+    _FINE_DELL_ULTIMO[0] = time.monotonic() + sum(score[1::4])
+    Acusticator(score, kind=kind, adsr=ADSR_DELL_EQUALIZZATORE)
     return True
 
 

@@ -1,6 +1,6 @@
 # MeTeOra, il motore di riproduzione: libmpv, e i SID in tempo reale.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita.
+# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa.
 
 """Due lettori libmpv per tutti i formati.
 
@@ -256,6 +256,35 @@ class _Sfumatura:
         return self.ampiezza * math.cos(angolo), math.sin(angolo)
 
 
+class _Calo:
+    """La voce di un lettore solo che scende fino al silenzio, o sale dal
+    silenzio, con la dissolvenza accesa: per lo stop, la pausa e la ripresa
+    (Gabriele, 2 ottobre 2026). Come la sfumatura, l'avanzamento si misura
+    sulla posizione del brano divisa per la velocita', e la durata si decide
+    alla prima lettura: la dissolvenza, ma non oltre cio' che resta al brano."""
+
+    def __init__(self, lettore, sale, ampiezza):
+        self.lettore = lettore
+        self.sale = sale
+        # L'ampiezza da cui parte: 1 a piena voce, 0 dalla pausa, o quella a
+        # cui era arrivato un altro calo interrotto.
+        self.ampiezza = ampiezza
+        self.durata = None
+        self.trascorso = 0.0
+        self.ultima = None
+
+    def avanzamento(self):
+        if self.durata is None:
+            return 0.0
+        return 1.0 if self.durata <= 0 else min(1.0, self.trascorso / self.durata)
+
+    def ampiezza_ora(self):
+        angolo = self.avanzamento() * math.pi / 2
+        if self.sale:
+            return self.ampiezza + (1.0 - self.ampiezza) * math.sin(angolo)
+        return self.ampiezza * math.cos(angolo)
+
+
 class Motore:
     def __init__(self, alla_fine=None, all_errore=None, ao="wasapi", volume=80, chiedi_il_seguente=None, al_passaggio=None, opzioni_mpv=None):
         """alla_fine() quando un brano finisce da solo e non c'e' un seguente
@@ -289,6 +318,11 @@ class Motore:
         self._uscente = None
         self._preparato = None
         self._sfumatura = None
+        # Il calo dell'attivo verso la pausa, o la sua salita dopo la ripresa;
+        # e la coda di un brano fermato con lo stop, che si spegne sull'altro
+        # lettore mentre l'attivo e' gia' libero.
+        self._calo = None
+        self._coda = None
         self._chiesto = False
         # Cresce a ogni cambio di stato: il sorvegliante, che legge mpv senza
         # il lucchetto, scarta le letture fatte nel frattempo.
@@ -367,6 +401,12 @@ class Motore:
         lettore.pronto = False
         lettore.finito = True
         self._cambiato()
+        if self._coda is not None and lettore is self._coda.lettore:
+            # La coda di uno stop, arrivata in fondo prima di spegnersi.
+            self._coda = None
+            return None
+        if self._calo is not None and lettore is self._calo.lettore:
+            self._calo = None
         if lettore is self._preparato:
             # Il preparato in errore si scarta: il passaggio avverra' senza
             # dissolvenza, e il brano dara' l'errore quando la finestra lo
@@ -426,7 +466,7 @@ class Motore:
     def sottobrani(self, valore):
         self._attivo.sottobrani = valore
 
-    def suona(self, percorso, sottobrano=None, inizio=None, in_pausa=False):
+    def suona(self, percorso, sottobrano=None, inizio=None, in_pausa=False, sfuma_lo_stesso=False):
         """Avvia un file, dall'inizio o dai secondi inizio, e in pausa se
         chiesto. Per i SID suona il sottobrano chiesto, o quello iniziale,
         con la durata dal database della collezione.
@@ -435,27 +475,32 @@ class Motore:
         due brani si sentono gia', perche' una sfumatura e' in corso, il piu'
         debole si ferma subito e il piu' forte esce dal punto in cui e'.
         Ripartire con il brano in corso, stesso file e stesso sottobrano, non
-        sfuma mai: e' un salto dentro il brano, come X da capo. Vale anche
-        durante una sfumatura, per il brano che entra, appena entrato o quasi
-        alla fine: chi esce si ferma, come a un salto, e il brano riparte da
-        capo a piena voce, su un lettore solo."""
+        sfuma, a meno di sfuma_lo_stesso: senza, e' un salto dentro il
+        brano. Vale anche durante una sfumatura, per il brano che entra,
+        appena entrato o quasi alla fine: chi esce si ferma, come a un salto,
+        e il brano riparte a piena voce, su un lettore solo. Con
+        sfuma_lo_stesso, per X da capo e per i marker con la dissolvenza
+        accesa (Gabriele, 2 ottobre 2026), lo stesso brano riparte dal punto
+        chiesto sull'altro lettore e i due punti si incrociano."""
         brano = _Brano(percorso, sottobrano, inizio)
         with self._blocco:
             if self._chiuso:
                 return
             attivo = self._attivo
-            stesso = attivo.percorso == percorso and attivo.sottobrano == brano.sottobrano
+            stesso = attivo.percorso == percorso and attivo.sottobrano == brano.sottobrano and not sfuma_lo_stesso
             si_sente = self._sfumatura is not None or (attivo.percorso is not None and attivo.pronto and not attivo.finito)
             sfuma = self._dissolvenza > 0 and not in_pausa and not self._pausa and si_sente and not stesso
             self._pausa = bool(in_pausa)
             self._chiesto = False
             self._scarta_il_preparato()
             if not sfuma:
+                self._calo = None
                 self._chiudi_la_sfumatura()
                 attivo.carica(brano, self._pausa, self._volume, self._catena())
             else:
                 uscente, ampiezza = self._chi_esce()
                 entrante = self._altro(uscente)
+                self._lascia_la_coda(entrante)
                 if entrante.percorso is not None:
                     entrante.ferma()
                 entrante.carica(brano, False, 0, self._catena())
@@ -470,7 +515,11 @@ class Motore:
         si sente di piu', dal punto in cui e'."""
         s = self._sfumatura
         if s is None:
-            return self._attivo, 1.0
+            # Un calo in corso, verso la pausa o in salita dalla ripresa: chi
+            # esce parte dal punto in cui era arrivato.
+            ampiezza = self._calo.ampiezza_ora() if self._calo is not None else 1.0
+            self._calo = None
+            return self._attivo, ampiezza
         self._sfumatura = None
         self._uscente = None
         ampiezza_uscente, ampiezza_entrante = s.ampiezze()
@@ -496,6 +545,7 @@ class Motore:
                     return True
                 self._scarta_il_preparato()
             self._preparato = self._altro(attivo)
+            self._lascia_la_coda(self._preparato)
             self._preparato.carica(brano, True, 0, self._catena())
             self._chiesto = True
             self._cambiato()
@@ -505,23 +555,71 @@ class Motore:
     def in_pausa(self):
         return self._pausa
 
-    def pausa(self, valore=None):
+    def pausa(self, valore=None, sfumando=False):
         """Mette o toglie la pausa; senza valore la inverte. Torna il nuovo
-        stato. Durante una sfumatura vale per tutti e due i brani."""
+        stato. Durante una sfumatura vale per tutti e due i brani.
+        Con sfumando e la dissolvenza accesa, fuori da una sfumatura e con un
+        brano che si sente, la pausa arriva dopo che la voce e' scesa fino al
+        silenzio, e la ripresa riparte dal silenzio e risale; in_pausa dice
+        subito il nuovo stato. Una ripresa durante la discesa risale dal
+        punto in cui era arrivata."""
         with self._blocco:
-            self._pausa = (not self._pausa) if valore is None else bool(valore)
+            nuova = (not self._pausa) if valore is None else bool(valore)
+            attivo = self._attivo
+            si_sente = attivo.percorso is not None and attivo.pronto and not attivo.finito
+            if sfumando and self._dissolvenza > 0 and self._sfumatura is None and si_sente and nuova != self._pausa:
+                self._pausa = nuova
+                if nuova:
+                    self._calo = _Calo(attivo, False, self._calo.ampiezza_ora() if self._calo is not None else 1.0)
+                else:
+                    if self._calo is not None:
+                        partenza = self._calo.ampiezza_ora()
+                    else:
+                        # Dalla pausa vera: si riparte muti.
+                        partenza = 0.0
+                        self._scrivi_il_volume(attivo, 0)
+                        attivo.imposta("pause", False)
+                    self._calo = _Calo(attivo, True, partenza)
+                self._applica_i_volumi()
+                self._cambiato()
+                return self._pausa
+            self._pausa = nuova
+            self._calo = None
+            self._applica_i_volumi()
             for lettore in self._suonanti():
                 lettore.imposta("pause", self._pausa)
             self._cambiato()
             return self._pausa
 
-    def stop(self):
-        """Ferma tutto: il brano, chi esce e il preparato."""
+    def stop(self, sfumando=False):
+        """Ferma tutto: il brano, chi esce e il preparato.
+        Con sfumando e la dissolvenza accesa, fuori da una sfumatura e con un
+        brano che si sente, il brano si spegne piano sull'altro lettore,
+        come coda, e il motore e' subito libero: in_corso vale None, e un
+        brano avviato intanto parte senza aspettare la coda."""
         with self._blocco:
+            attivo = self._attivo
+            si_sente = attivo.percorso is not None and attivo.pronto and not attivo.finito and not self._pausa
+            if sfumando and self._dissolvenza > 0 and self._sfumatura is None and si_sente:
+                ampiezza = self._calo.ampiezza_ora() if self._calo is not None else 1.0
+                self._calo = None
+                self._scarta_il_preparato()
+                altro = self._altro(attivo)
+                self._lascia_la_coda(altro)
+                if altro.percorso is not None:
+                    altro.ferma()
+                self._coda = _Calo(attivo, False, ampiezza)
+                self._attivo = altro
+                self._chiesto = False
+                self._cambiato()
+                return
+            self._calo = None
+            self._chiudi_la_coda()
             self._chiudi_la_sfumatura()
             self._scarta_il_preparato()
             self._attivo.ferma()
             self._chiesto = False
+            self._applica_i_volumi()
             self._cambiato()
 
     def annulla_il_passaggio(self):
@@ -560,6 +658,7 @@ class Motore:
         # dati al volo.
         with self._blocco:
             self._chiudi_la_sfumatura()
+            self._chiudi_il_calo()
             if self._preparato is None:
                 self._chiesto = False
             self._attivo.imposta("af", self._catena())
@@ -744,6 +843,8 @@ class Motore:
             self._dissolvenza = float(_fra(secondi, valori.DISSOLVENZA_MINIMA, valori.DISSOLVENZA_MASSIMA)) if secondi and secondi > 0 else 0.0
             if not self._dissolvenza:
                 self._scarta_il_preparato()
+                self._chiudi_il_calo()
+                self._chiudi_la_coda()
             if not prima:
                 self._chiesto = False
             self._cambiato()
@@ -794,20 +895,48 @@ class Motore:
         self._sfumatura = None
         self._applica_i_volumi()
 
+    def _chiudi_il_calo(self):
+        """Il calo dell'attivo finisce subito: se scendeva verso la pausa, la
+        pausa arriva adesso; in ogni caso la voce torna piena."""
+        c = self._calo
+        if c is None:
+            return
+        self._calo = None
+        if not c.sale:
+            c.lettore.imposta("pause", True)
+        self._applica_i_volumi()
+
+    def _chiudi_la_coda(self):
+        """La coda di uno stop si ferma subito."""
+        if self._coda is None:
+            return
+        lettore = self._coda.lettore
+        self._coda = None
+        lettore.ferma()
+
+    def _lascia_la_coda(self, lettore):
+        """Il lettore serve a un altro brano: se teneva la coda di uno stop,
+        la coda si lascia, e chi lo usa lo ferma o lo ricarica."""
+        if self._coda is not None and self._coda.lettore is lettore:
+            self._coda = None
+
     def _scrivi_il_volume(self, lettore, volume):
         if volume != lettore.volume_scritto:
             lettore.imposta("volume", volume)
 
     def _applica_i_volumi(self):
-        s = self._sfumatura
-        if s is None:
-            self._scrivi_il_volume(self._attivo, self._volume)
-            return
         # La legge del volume di mpv e' cubica: l'ampiezza e' (volume/100)
         # al cubo, quindi al volume va la radice cubica dell'ampiezza.
-        uscente, entrante = s.ampiezze()
-        self._scrivi_il_volume(s.uscente, self._volume * max(0.0, uscente) ** (1 / 3))
-        self._scrivi_il_volume(s.entrante, self._volume * max(0.0, entrante) ** (1 / 3))
+        s = self._sfumatura
+        if s is None:
+            ampiezza = self._calo.ampiezza_ora() if self._calo is not None else 1.0
+            self._scrivi_il_volume(self._attivo, self._volume * max(0.0, ampiezza) ** (1 / 3))
+        else:
+            uscente, entrante = s.ampiezze()
+            self._scrivi_il_volume(s.uscente, self._volume * max(0.0, uscente) ** (1 / 3))
+            self._scrivi_il_volume(s.entrante, self._volume * max(0.0, entrante) ** (1 / 3))
+        if self._coda is not None:
+            self._scrivi_il_volume(self._coda.lettore, self._volume * max(0.0, self._coda.ampiezza_ora()) ** (1 / 3))
 
     def _passa_al_preparato(self, sfumando):
         """Il preparato diventa l'attivo: con la sfumatura, o a piena voce se
@@ -815,9 +944,13 @@ class Motore:
         entrante = self._preparato
         self._preparato = None
         self._chiesto = False
+        # Un calo in corso, per esempio la salita dopo una ripresa: chi esce
+        # parte dal punto in cui era arrivato.
+        ampiezza = self._calo.ampiezza_ora() if self._calo is not None else 1.0
+        self._calo = None
         if sfumando:
             self._uscente = self._attivo
-            self._sfumatura = _Sfumatura(self._uscente, entrante)
+            self._sfumatura = _Sfumatura(self._uscente, entrante, ampiezza)
         else:
             self._scrivi_il_volume(entrante, self._volume)
         self._attivo = entrante
@@ -831,7 +964,9 @@ class Motore:
 
     def _da_sorvegliare(self):
         attivo = self._attivo
-        return self._sfumatura is not None or (self._dissolvenza > 0 and attivo.percorso is not None and not attivo.finito)
+        if self._sfumatura is not None or self._calo is not None or self._coda is not None:
+            return True
+        return self._dissolvenza > 0 and attivo.percorso is not None and not attivo.finito
 
     def _da_leggere(self):
         """I lettori da interrogare in questo passo."""
@@ -840,10 +975,13 @@ class Motore:
             lettori = [s.entrante] if s.entrante.pronto and not s.entrante.finito else []
             if s.durata is None and s.uscente.pronto and not s.uscente.finito:
                 lettori.append(s.uscente)
-            return lettori
-        lettori = [self._attivo] if self._attivo.pronto and not self._attivo.finito else []
-        if self._preparato is not None and self._preparato.pronto:
-            lettori.append(self._preparato)
+        else:
+            lettori = [self._attivo] if self._attivo.pronto and not self._attivo.finito else []
+            if self._preparato is not None and self._preparato.pronto:
+                lettori.append(self._preparato)
+        coda = self._coda.lettore if self._coda is not None else None
+        if coda is not None and coda.pronto and not coda.finito and coda not in lettori:
+            lettori.append(coda)
         return lettori
 
     def _sorveglia(self):
@@ -873,6 +1011,36 @@ class Motore:
                 avviso()
             self._riposo.wait(PASSO_DEL_SORVEGLIANTE)
 
+    def _passo_dei_cali(self, letture):
+        """Fa avanzare il calo dell'attivo e la coda dello stop. Alla fine il
+        calo verso la pausa mette la pausa e riporta la voce piena (la
+        ripresa ripartira' dal silenzio), quello in salita si toglie, e la
+        coda si ferma."""
+        cambiati = False
+        for c in (self._calo, self._coda):
+            if c is None or c.lettore not in letture:
+                continue
+            posizione, durata = letture[c.lettore]
+            if posizione is None:
+                continue
+            if c.durata is None:
+                resto = (durata - posizione) / self._velocita - MARGINE_DI_FINE if durata else self._dissolvenza
+                c.durata = max(0.0, min(self._dissolvenza, resto))
+            else:
+                c.trascorso += max(0.0, posizione - c.ultima) / self._velocita
+            c.ultima = posizione
+            cambiati = True
+            if c.avanzamento() < 1:
+                continue
+            if c is self._coda:
+                self._chiudi_la_coda()
+            else:
+                self._calo = None
+                if not c.sale:
+                    c.lettore.imposta("pause", True)
+        if cambiati:
+            self._applica_i_volumi()
+
     def _lunghezza(self, posizione, durata):
         """I secondi veri della sfumatura per chi entra, alla sua posizione: la
         dissolvenza, ma non oltre meta' del brano, e non oltre il punto in cui
@@ -886,6 +1054,7 @@ class Motore:
         """Un passo del sorvegliante, con il lucchetto: restituisce gli avvisi
         da dare fuori."""
         velocita = self._velocita
+        self._passo_dei_cali(letture)
         s = self._sfumatura
         if s is not None:
             posizione, durata = letture.get(s.entrante, (None, None))

@@ -1,28 +1,17 @@
-Collaudo di MeTeOra 1.55.2, tappa 4, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.55.2. Scrivi le note sulla riga della voce; le voci superate si cancellano.
-F alza il tono di un semitono e H lo abbassa, G lo riporta al normale; a 12 semitoni sopra o sotto suona il limite.
-Qui serve una inversione: per coerenza: f abbassa e h alza. Anche i suoni vanno invertiti in accordo.
-
-U e I scelgono la banda dell'equalizzatore, e la riga dice il numero, la frequenza e i decibel; alla prima e all'ultima banda suona il limite.
-O alza di un decibel la banda scelta e P la abbassa; a +12 o -12 suona il limite.
-Qui funziona tutto e ti ringrazio per i suoni nuovi ma ho bisogno di un sistema a scala musicale. Così da capire ad orecchio quale banda sto scegliendo.
-Funzionerà così: segnali creati al volo con acusticator. 2 note suddivise da una pausa. Onda dente di sega.
-nota 1 = f3 durata 0.04, pausa da 0.04, nota 2 da c3 a b3, durata 0.08
-adsr uguale per entrambe: 0.002, 0, 100%, 0.002
-Per la coppia o p, anche qui stessa cosa, il suono mi deve dire il valore che sto impostando.
-Stessa struttura ma le durate sono 0.05 per nota 1 e 0.09 per nota 2, l'onda è triangolare e l'adsr è lo stesso.
-Qui però lo span è più alto. Teniamo sempre un f3 come riferimento centrale ma la seconda nota la aggiusti in base alla quantità di passi delle bande e copri 3 ottave, quindi f3 +- un'ottava e mezzo.
-
-Con la dissolvenza accesa, B passa al brano seguente sfumando: il vecchio scende mentre il nuovo sale, e li senti tutti e due insieme.
-Sì, però la dissolvenza va anche su shift+v stop con dissolvenza, shift+x riprendi da capo con dissolvenza, shift+c pausa e ripresa con dissolvenza. (verifica che siano disponibili)
-Lo stesso con Z, N, J, K e le cifre.
-Se attiva, la dissolvenza deve funzionare anche su r y e shift + numeri per saltare ai markers.
-
-Domanda: cambiando brano durante una sfumatura, si ferma quello che si sente meno e il più forte continua a scendere da dove era; ti va bene così?
-Non ho capito bene la domanda. Il comportamento voluto è:
-brano 1 in play, cambio brano con sfumatura attiva: mentre il primo si abbassa, quello nuovo si alza, si incrociano di volume a metà sfumata e mentre il primo arriva a 0, il nuovo arriva al massimo.
-
-Domanda: Maiuscolo con L cambia solo la durata, e la dissolvenza resta accesa o spenta com'era; ti va bene così?
-Sì
-
-Domanda: dopo il riavvio U e I ripartono dalla banda 1, perché la banda scelta non si ricorda; ti va bene così?
-Sì
+Collaudo di MeTeOra 1.58.1, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.58.1. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+F abbassa il tono e H lo alza, ciascuno col suo suono, e G lo riporta al normale.
+U e I: ogni banda ha il suo suono, un fa di riferimento e poi una nota della scala, da do per la prima banda a si per la settima; si riconoscono a orecchio?
+O e P: il suono fa sentire il guadagno, lo stesso fa e poi una nota più alta o più bassa quanto più la banda è alzata o abbassata; si capisce a orecchio?
+Alla prima e all'ultima banda, e a +12 o -12, suona ancora il limite.
+Maiuscolo con X su un brano mette il punto A, su un altro brano della stessa lista il punto B, e di nuovo Maiuscolo con X, da qualsiasi punto, toglie il loop.
+Il punto B sullo stesso brano del punto A fa ripetere quel brano da solo.
+I tre suoni del loop sono i soffi che prima avevano U, I e O, P; ti vanno bene?
+Maiuscolo con C non fa più niente.
+Con la dissolvenza accesa, V spegne il brano piano; se subito dopo premi X su un altro brano, parte mentre il vecchio si sta ancora spegnendo.
+Con la dissolvenza accesa, C mette in pausa quando la voce è scesa; C di nuovo riparte dal silenzio e risale.
+Premendo C durante la discesa, la voce risale dal punto in cui era arrivata.
+Con la dissolvenza accesa, X sul brano che suona lo fa ripartire da capo: il punto di adesso e l'inizio si incrociano.
+Con la dissolvenza accesa, R, Y e Maiuscolo con le cifre portano al marker sfumando: il punto di adesso e il marker si incrociano.
+Con la dissolvenza spenta, stop, pausa, X da capo e marker tornano netti come prima.
+Domanda: i salti con Q, E e W restano netti anche con la dissolvenza accesa; ti va bene così?
+Domanda: durante una dissolvenza fra due brani, C e V valgono subito per tutti e due, senza sfumare; ti va bene così?

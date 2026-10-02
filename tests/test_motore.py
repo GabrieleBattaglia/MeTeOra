@@ -843,3 +843,100 @@ def test_chiudi_chiude_tutti_e_due_i_lettori(avvisi, tmp_path):
     assert all(lettore.mpv.handle is None for lettore in m._lettori)
     assert not m._sorvegliante.is_alive()
     m.chiudi()
+
+
+# Stop, pausa, ripresa, X da capo e marker con la dissolvenza (1.58.0).
+
+
+def test_pausa_e_ripresa_sfumando(crea, avvisi, tmp_path):
+    brano = _silenzio(tmp_path / "brano.wav", 8)
+    m = crea()
+    m.dissolvenza = 0.4
+    m.suona(brano)
+    assert _aspetta(lambda: (m.posizione or 0) > 0.3)
+    lettore = m._attivo
+    # La pausa arriva dopo che la voce e' scesa; in_pausa lo dice subito.
+    assert m.pausa(sfumando=True) is True and m.in_pausa
+    assert not lettore.mpv.pause
+    assert _aspetta(lambda: lettore.mpv.volume < 40, 1)
+    assert _aspetta(lambda: lettore.mpv.pause, 2)
+    # Fermo in pausa, la voce torna piena: la ripresa la fara' risalire.
+    assert _aspetta(lambda: lettore.mpv.volume == 80, 1) and m._calo is None
+    assert m.pausa(sfumando=True) is False and not m.in_pausa
+    assert _aspetta(lambda: not lettore.mpv.pause, 1)
+    assert lettore.mpv.volume < 40
+    assert _aspetta(lambda: lettore.mpv.volume == 80, 2) and m._calo is None
+    # Una ripresa durante la discesa risale dal punto in cui era arrivata.
+    m.pausa(sfumando=True)
+    assert _aspetta(lambda: 20 < lettore.mpv.volume < 70, 1)
+    m.pausa(sfumando=True)
+    assert _aspetta(lambda: lettore.mpv.volume == 80, 2)
+    assert not lettore.mpv.pause and m.in_corso == brano
+    assert avvisi.nomi() == []
+
+
+def test_stop_sfumando_libera_subito_il_motore(crea, avvisi, tmp_path):
+    primo = _silenzio(tmp_path / "primo.wav", 8)
+    secondo = _silenzio(tmp_path / "secondo.wav", 8)
+    m = crea()
+    m.dissolvenza = 0.5
+    m.suona(primo)
+    assert _aspetta(lambda: (m.posizione or 0) > 0.3)
+    vecchio = m._attivo
+    m.stop(sfumando=True)
+    # Il motore e' libero subito, e il brano si spegne piano sull'altro lettore.
+    assert m.in_corso is None and vecchio.percorso == primo
+    assert _aspetta(lambda: vecchio.mpv.volume < 40, 1)
+    # Un brano avviato intanto parte senza aspettare la coda.
+    m.suona(secondo)
+    assert m.in_corso == secondo and m._attivo is not vecchio and vecchio.percorso == primo
+    assert _aspetta(lambda: vecchio.percorso is None, 2)
+    assert _aspetta(lambda: m._attivo.mpv.volume == 80, 1) and m.in_corso == secondo
+    assert avvisi.nomi() == []
+
+
+def test_da_capo_e_marker_sfumano_con_lo_stesso_brano(crea, avvisi, tmp_path):
+    brano = _silenzio(tmp_path / "brano.wav", 8)
+    m = crea()
+    m.dissolvenza = 0.4
+    m.suona(brano)
+    assert _aspetta(lambda: (m.posizione or 0) > 1.0)
+    # X da capo, o un marker, con la dissolvenza: lo stesso brano su tutti e
+    # due i lettori, dal punto di prima e dal punto chiesto, che si incrociano.
+    m.suona(brano, inizio=3.0, sfuma_lo_stesso=True)
+    assert m._sfumatura is not None
+    assert [lettore.percorso for lettore in m._lettori] == [brano, brano]
+    assert _aspetta(lambda: m._sfumatura is None, 2)
+    assert [lettore.percorso for lettore in m._lettori].count(brano) == 1
+    assert 3.0 <= m.posizione < 4.5 and m._attivo.mpv.volume == 80
+    # Senza sfuma_lo_stesso resta un salto netto, su un lettore solo.
+    m.suona(brano, sfuma_lo_stesso=False)
+    assert m._sfumatura is None
+    assert avvisi.nomi() == []
+
+
+def test_senza_dissolvenza_stop_e_pausa_sono_netti(crea, tmp_path):
+    brano = _silenzio(tmp_path / "brano.wav", 6)
+    m = crea()
+    m.suona(brano)
+    assert _aspetta(lambda: (m.posizione or 0) > 0.3)
+    lettore = m._attivo
+    assert m.pausa(sfumando=True) and _aspetta(lambda: lettore.mpv.pause, 1)
+    assert m._calo is None and lettore.mpv.volume == 80
+    m.pausa(sfumando=True)
+    m.stop(sfumando=True)
+    assert m.in_corso is None and m._coda is None and lettore.percorso is None
+
+
+def test_un_salto_durante_la_discesa_mette_subito_la_pausa(crea, tmp_path):
+    brano = _silenzio(tmp_path / "brano.wav", 8)
+    m = crea()
+    m.dissolvenza = 0.5
+    m.suona(brano)
+    assert _aspetta(lambda: (m.posizione or 0) > 0.3)
+    lettore = m._attivo
+    m.pausa(sfumando=True)
+    assert _aspetta(lambda: lettore.mpv.volume < 70, 1)
+    m.vai_a(2.0)
+    assert m._calo is None and m.in_pausa
+    assert _aspetta(lambda: lettore.mpv.pause and lettore.mpv.volume == 80, 1)
