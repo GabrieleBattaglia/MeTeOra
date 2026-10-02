@@ -3198,3 +3198,21 @@ def test_con_la_dissolvenza_sfumano_stop_pausa_da_capo_e_marker(finestra, monkey
     assert chiamate[-1] == ("pausa", True)
     _tasto(finestra, "v")
     assert chiamate[-1] == ("stop", True)
+
+
+def test_dopo_un_salto_lontano_la_console_dice_l_attesa_del_sid(finestra, monkeypatch, suoni_annotati):
+    salti = []
+    attese = {"secondi": 9.2}
+    monkeypatch.setattr(type(finestra.motore), "in_corso", property(lambda _self: r"C:\m\a.sid"))
+    monkeypatch.setattr(type(finestra.motore), "posizione", property(lambda _self: 0.5))
+    monkeypatch.setattr(type(finestra.motore), "durata", property(lambda _self: 180.0))
+    monkeypatch.setattr(finestra.motore, "salta", salti.append)
+    monkeypatch.setattr(finestra.motore, "vai_a", salti.append)
+    monkeypatch.setattr(finestra.motore, "attesa_del_sid", lambda secondi: attese["secondi"])
+    _tasto(finestra, "e")
+    assert [_senza_ora(r) for r in finestra._righe[-2:]] == ["Avanti a 0:10 di 3:00.", "Il SID si prepara fino a 0:10: circa 9 secondi."]
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("2:48"))
+    assert _premi(finestra, "w") == "Il SID si prepara fino a 2:48: circa 9 secondi."
+    # Sotto il secondo e mezzo non si dice niente.
+    attese["secondi"] = 1.4
+    assert _premi(finestra, "w") == "Vado a 2:48 di 3:00." and suoni_annotati[-1] == "vai_a_tempo"

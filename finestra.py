@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto.
 
 """La finestra di MeTeOra.
 
@@ -211,6 +211,10 @@ SPIEGAZIONI_DEI_MODELLI = {
 # Il segno che il mazzo della riproduzione casuale e' finito, e che la
 # riproduzione si ferma.
 FINE_DEL_MAZZO = object()
+
+
+# Da quanti secondi d'attesa in su la console dice che il SID si prepara.
+ATTESA_DA_DIRE = 1.5
 
 
 VOCI_DELLE_IMPOSTAZIONI = {
@@ -3011,6 +3015,15 @@ class Finestra(wx.Frame):
             arrivo = min(arrivo, durata)
         self.motore.salta(secondi)
         self._riscontro(evento, f"{'Avanti' if secondi > 0 else 'Indietro'} a {tempo(arrivo)} di {tempo(durata)}.", "salto")
+        self._avvisa_l_attesa_del_sid(arrivo)
+
+    def _avvisa_l_attesa_del_sid(self, arrivo):
+        """Dopo un salto: se il brano e' un SID e il punto d'arrivo non e'
+        ancora reso, la console dice quanto c'e' da aspettare, che altrimenti
+        sarebbe silenzio senza spiegazioni (tappa 5, 1.62.0)."""
+        attesa = self.motore.attesa_del_sid(arrivo)
+        if attesa >= ATTESA_DA_DIRE:
+            self.scrivi(f"Il SID si prepara fino a {tempo(arrivo)}: circa {max(2, round(attesa))} secondi.")
 
     def _comando_avanti(self):
         self._salto(self.impostazioni["passo_avanti"], "avanti")
@@ -3055,6 +3068,7 @@ class Finestra(wx.Frame):
             return
         self.motore.vai_a(secondi)
         self._riscontro("vai_a_tempo", f"Vado a {tempo(secondi)} di {tempo(durata)}.")
+        self._avvisa_l_attesa_del_sid(secondi)
 
     def _volume(self, passo):
         attuale = self.motore.volume
@@ -3928,6 +3942,7 @@ class Finestra(wx.Frame):
             return
         self._vai_nel_brano(marker["tempo"])
         self._riscontro("marker_avanti" if verso > 0 else "marker_indietro", f"{marker['nome']}, {durata_lunga(marker['tempo'])}.")
+        self._avvisa_l_attesa_del_sid(marker["tempo"])
         self._fuoco_sul_marker(k, marker)
 
     def _vai_nel_brano(self, secondi):
@@ -4048,6 +4063,7 @@ class Finestra(wx.Frame):
             else:
                 self._vai_nel_brano(marker["tempo"])
             self._riscontro("marker_avanti" if avanti else "marker_indietro", f"{marker['nome']}, {durata_lunga(marker['tempo'])}.")
+            self._avvisa_l_attesa_del_sid(marker["tempo"])
             return True
         if not self.coda.nel_loop(dati["playlist"], brano):
             self._riscontro("fuori_dal_loop", f"{brano.nome_del_file} è fuori dal loop: si suona solo fra il punto A e il punto B.")

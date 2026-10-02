@@ -12,6 +12,7 @@ volume, silenzio per la dissolvenza, dove contano i volumi dei due lettori
 nel tempo. Le dissolvenze durano da 300 a 500 ms.
 """
 
+import os
 import threading
 import time
 import wave
@@ -978,3 +979,26 @@ def test_un_salto_durante_la_discesa_mette_subito_la_pausa(crea, tmp_path):
     m.vai_a(2.0)
     assert m._calo is None and m.in_pausa
     assert _aspetta(lambda: lettore.mpv.pause and lettore.mpv.volume == 80, 1)
+
+
+TURBO_OUTRUN = r"E:\C64Music\MUSICIANS\T\Tel_Jeroen\Turbo_Outrun.sid"
+
+
+@pytest.mark.skipif(not os.path.isfile(TURBO_OUTRUN), reason="serve la collezione HVSC")
+def test_attesa_del_sid(crea, tmp_path):
+    import shutil
+
+    copia = tmp_path / "Turbo_Outrun.sid"
+    shutil.copy(TURBO_OUTRUN, copia)
+    m = crea()
+    # Appena caricato, prima che mpv apra il flusso, l'attesa si stima.
+    m.suona(str(copia), 1)
+    assert m.attesa_del_sid(150) > 2
+    assert _aspetta(lambda: (m.posizione or 0) > 0, 10)
+    # Appena partito, la fine del brano non e' ancora resa; l'inizio si'.
+    assert m.attesa_del_sid(170) > 2
+    assert m.attesa_del_sid(0.5) == 0
+    # Gli altri brani non aspettano mai.
+    m.suona(_silenzio(tmp_path / "brano.wav", 8))
+    assert _aspetta(lambda: (m.posizione or 0) > 0)
+    assert m.attesa_del_sid(7) == 0

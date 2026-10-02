@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.62.0] - 2026-10-02
+
+- Dopo un salto in avanti in un SID appena partito, con E, W o i marker, la console dice quanto c'è da aspettare, per esempio Il SID si prepara fino a 2:48: circa 9 secondi. Un SID si genera dall'inizio, più in fretta del tempo reale ma non subito, e fino al punto d'arrivo prima c'era solo silenzio. La riga compare da un secondo e mezzo d'attesa in su; dopo una decina di secondi d'ascolto, di solito, tutto il brano è già pronto e i salti sono immediati.
+
 ## [1.61.1] - 2026-10-02
 
 - I SID partono prima: dal tasto alla musica passavano circa 230 millesimi di secondo, quasi 400 per il primo SID dopo l'avvio; ora circa 80. MeTeOra non fa più analizzare a mpv i primi secondi del brano, che andavano generati prima di partire, e prepara il motore dei SID appena si apre. È il primo passo della tappa 5.

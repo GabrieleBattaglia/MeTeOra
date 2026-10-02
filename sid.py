@@ -1,12 +1,13 @@
 # MeTeOra, i SID: emulazione in tempo reale su sidshim.dll, resa in RAM, senza disco.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: passa dai prototipi al programma con la tappa 1. Nella 1.61.1 il riscaldamento, per il primo SID.
+# 30/09/2026: passa dai prototipi al programma con la tappa 1. Nella 1.61.1 il riscaldamento, per il primo SID. Nella 1.62.0 l'attesa di un punto non ancora reso.
 
 """Motore SID in tempo reale su sidshim.dll: rendering a blocchi in RAM, senza disco."""
 import ctypes
 import os
 import struct
 import threading
+import time
 
 import numpy as np
 
@@ -24,6 +25,16 @@ _dll.sid_chiudi.argtypes = [ctypes.c_void_p]
 FREQUENZA = 48000
 CANALI = 2
 BLOCCO = FREQUENZA // 50 * CANALI  # 20 ms di campioni interlacciati
+# Quante volte il tempo reale corre la resa, finche' non la si misura: le
+# misure del 2 ottobre 2026 stanno fra 16 e 25 volte.
+VELOCITA_STIMATA = 15.0
+# Quanto deve aver lavorato la resa perche' la sua velocita' si misuri.
+MISURA_MINIMA = 0.3
+# La stima dell'attesa resta prudente: l'inizio di un brano si rende spesso
+# piu' in fretta del resto, e la velocita' misurata si prende al massimo
+# cosi'; al salto stesso, a mpv, servono ancora circa mezzo secondo.
+VELOCITA_MASSIMA_STIMATA = 20.0
+RITARDO_DEL_SALTO = 0.5
 _RISCALDATA = threading.Event()
 _RISCALDAMENTO = threading.Lock()
 
@@ -63,8 +74,22 @@ class BranoSid:
         self.pronti = 0
         self._fermo = False
         self._condizione = threading.Condition()
+        self._partenza = time.perf_counter()
         self._filo = threading.Thread(target=self._lavora, daemon=True)
         self._filo.start()
+
+    def secondi_pronti(self):
+        return self.pronti / (FREQUENZA * CANALI)
+
+    def attesa(self, secondi):
+        """Quanti secondi mancano, circa, perche' il punto dato sia reso: zero
+        se lo e' gia', o se la resa e' finita (tappa 5, 1.62.0)."""
+        pronti = self.secondi_pronti()
+        if secondi <= pronti or self.pronti >= self.totale:
+            return 0.0
+        trascorso = time.perf_counter() - self._partenza
+        velocita = min(pronti / trascorso, VELOCITA_MASSIMA_STIMATA) if trascorso >= MISURA_MINIMA and pronti > 0 else VELOCITA_STIMATA
+        return (min(secondi, self.totale / (FREQUENZA * CANALI)) - pronti) / velocita + RITARDO_DEL_SALTO
 
     def _lavora(self):
         while self.pronti < self.totale and not self._fermo:
