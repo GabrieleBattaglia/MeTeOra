@@ -6,7 +6,8 @@
 il file di prova si fa al momento con la codifica di libmpv, da un la di sei
 secondi, in una cartella temporanea; poi il motore, muto, lo apre, ne legge la
 durata, ci salta dentro e arriva alla fine. APE, TAK, Musepack e DSD, che
-FFmpeg legge ma non scrive, restano fuori; MIDI, tracker e video hanno le
+FFmpeg legge ma non scrive, restano fuori, e Speex, che libmpv non riesce a
+scrivere; DTS c'e'; MIDI, tracker e video hanno le
 loro tappe."""
 
 import threading
@@ -24,6 +25,8 @@ SECONDI = 6.0
 # Le codifiche allungano un poco il file: i PCM di libmpv arrivano a un
 # multiplo di 1024 campioni, 6.144 secondi, e TTA ai suoi blocchi.
 DURATA_MASSIMA = 6.3
+# Qualche codifica invece taglia qualche millesimo in coda.
+DURATA_MINIMA = 5.95
 # L'AAC grezzo, senza contenitore (ADTS), non scrive la durata: FFmpeg la
 # stima dal bitrate, e sui sei secondi di prova dice quasi sedici. Nel motore
 # si controlla solo che si apra, che ci si salti dentro e che finisca; lo
@@ -50,7 +53,11 @@ FORMATI = {
     "mka": ("libopus", "matroska"),
     "au": ("pcm_s16be", "au"),
     "caf": ("pcm_s16le", "caf"),
+    "dts": ("dca", "dts"),
 }
+# Le opzioni in piu' per qualche codificatore: quello del DTS e' sperimentale.
+# Speex manca: la codifica di libmpv scrive un file senza audio, anche a 16 kHz.
+OPZIONI_DI_CODIFICA = {"dca": {"oacopts": "strict=-2"}}
 
 
 def _aspetta(condizione, secondi=5):
@@ -64,7 +71,7 @@ def _aspetta(condizione, secondi=5):
 
 def _codifica(sorgente, uscita, codificatore, contenitore):
     finito = threading.Event()
-    m = motore.mpv.MPV(o=str(uscita), oac=codificatore, of=contenitore, ao="null", vo="null", video="no", config=False)
+    m = motore.mpv.MPV(o=str(uscita), oac=codificatore, of=contenitore, ao="null", vo="null", video="no", config=False, **OPZIONI_DI_CODIFICA.get(codificatore, {}))
     try:
         m.register_event_callback(lambda evento: finito.set() if evento.event_id.value == motore.mpv.MpvEventID.END_FILE else None)
         m.play(str(sorgente))
@@ -97,14 +104,14 @@ def test_il_formato_si_riconosce_si_apre_si_salta_e_finisce(file_di_prova, esten
     assert formati.supportato(percorso)
     # La durata della plancia: mutagen, libmpv per i formati che mutagen non
     # conosce, e per l'AAC grezzo il conto dei fotogrammi (1.62.4).
-    assert SECONDI <= schedario.leggi_scheda(percorso)["durata"] <= DURATA_MASSIMA, estensione
+    assert DURATA_MINIMA <= schedario.leggi_scheda(percorso)["durata"] <= DURATA_MASSIMA, estensione
     finiti, errori = [], []
     m = motore.Motore(ao="null", alla_fine=lambda: finiti.append(True), all_errore=errori.append)
     try:
         m.suona(percorso)
         assert _aspetta(lambda: (m.posizione or 0) > 0), estensione
         if estensione not in DURATA_STIMATA:
-            assert SECONDI <= m.durata <= DURATA_MASSIMA, (estensione, m.durata)
+            assert DURATA_MINIMA <= m.durata <= DURATA_MASSIMA, (estensione, m.durata)
         m.vai_a(3.0)
         assert _aspetta(lambda: 3.0 <= (m.posizione or 0) < 3.5, 2), (estensione, m.posizione)
         m.vai_a(SECONDI - 0.4)

@@ -7,8 +7,8 @@
 I SID li suona la DLL di libsidplayfp; tutto il resto libmpv, che dietro ha
 FFmpeg e libopenmpt. L'elenco e' quello dei formati che la tappa 0 ha visto
 fra i demuxer di libmpv. Dalla tappa 6 tests/test_formati.py collauda uno per
-uno quelli che FFmpeg sa anche scrivere; APE, TAK, Musepack, DSD, DTS e Speex
-restano da provare con file veri.
+uno quelli che FFmpeg sa anche scrivere, DTS compreso; APE, TAK, Musepack, DSD
+e Speex restano da provare con file veri.
 """
 
 import os
