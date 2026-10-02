@@ -1,6 +1,6 @@
 # MeTeOra, i valori scritti nei campi delle impostazioni: dal testo al valore, con le correzioni dette a chi scrive.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); leggi_tempo e secondi_da_leggere arrivano da finestra.py. Nella 1.51.2 leggi_tempo accetta solo le cifre: prima passavano inf e 1e5. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza, con i loro limiti e le loro forme da leggere (tappa 4, issue 15). Nella 1.59.2 velocita' e dissolvenza si scrivono con il punto, come il resto di MeTeOra. Nella 1.60.0 leggi_tempo_nel_brano, per W, anche dalla fine.
+# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); leggi_tempo e secondi_da_leggere arrivano da finestra.py. Nella 1.51.2 leggi_tempo accetta solo le cifre: prima passavano inf e 1e5. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza, con i loro limiti e le loro forme da leggere (tappa 4, issue 15). Nella 1.59.2 velocita' e dissolvenza si scrivono con il punto, come il resto di MeTeOra. Nella 1.60.0 leggi_tempo_nel_brano, per W, anche dalla fine. Nella 1.61.0 i modelli della riproduzione casuale.
 
 """I valori delle impostazioni, letti dal testo scritto nei campi.
 
@@ -60,6 +60,15 @@ GUADAGNO_MASSIMO = 12
 FREQUENZE_DELLE_BANDE = (60, 150, 400, 1000, 2400, 6000, 12000)
 # La durata della dissolvenza incrociata, in secondi.
 DISSOLVENZA_MINIMA, DISSOLVENZA_MASSIMA = 0.5, 15
+# I modelli della riproduzione casuale (Gabriele, collaudo della 1.60.1): il
+# nome salvato nelle impostazioni e la forma da leggere. Con i due modelli a
+# mazzo ogni brano suona una volta; finito il mazzo, ci si ferma o si
+# ricomincia.
+MODELLI_CASUALI = {
+    "totale": "casualità totale",
+    "una_volta": "una volta per brano, poi si ferma",
+    "a_giro": "una volta per brano, poi ricomincia",
+}
 # Le parole che accendono e spengono la dissolvenza: quelle del si' e del no,
 # senza le cifre, che li' sono secondi, e anche al femminile.
 _ACCESA = frozenset(parola for parola in SI if not parola.isdigit()) | {"accesa"}

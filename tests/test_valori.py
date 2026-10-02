@@ -643,7 +643,7 @@ def test_predefinite_della_tappa_4():
 
 
 def test_carica_i_valori_buoni(tmp_path):
-    buoni = {"volume": 300, "passo_volume": 50, "passo_indietro": 0.1, "passo_avanti": 0.23, "volume_effetti": 1, "insegui": True, "casuale": True,
+    buoni = {"volume": 300, "passo_volume": 50, "passo_indietro": 0.1, "passo_avanti": 0.23, "volume_effetti": 1, "insegui": True, "casuale": True, "modello_casuale": "totale",
         "ripresa": {"percorso": "x"}, "righe_della_console": 100, "caratteri": {"p": 6, "t": 72}, "colori_testo": {"c": [0, 100, 50]},
         "colori_sfondo": {"p": [31, 31, 31], "c": [100, 100, 100], "t": [0, 0, 0]},
         "scheda_audio": {"dispositivo": "Altoparlanti (Realtek(R) Audio)", "interfaccia": "Windows WASAPI"},
@@ -690,6 +690,7 @@ def test_carica_i_limiti_della_tappa_4(tmp_path):
     ("dissolvenza", {"accesa": True, "secondi": None}), ("dissolvenza", {"accesa": True, "secondi": 4.0, "altro": 1}), ("dissolvenza", True),
     ("dissolvenza", 4), ("dissolvenza", [True, 4.0]),
     ("casuale", 1), ("casuale", "sì"), ("casuale", None),
+    ("modello_casuale", "mazzo"), ("modello_casuale", 1), ("modello_casuale", None), ("modello_casuale", ""),
 ])
 def test_carica_scarta_i_valori_fuori_intervallo(tmp_path, chiave, valore):
     imp = _caricate(tmp_path, {chiave: valore, "insegui": True})

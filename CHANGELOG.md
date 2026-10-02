@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.61.0] - 2026-10-02
+
+- La riproduzione casuale ha tre modelli, da scegliere fra le impostazioni con la voce Modello della riproduzione casuale: casualità totale, come finora, con un brano qualsiasi ogni volta; una volta per brano, poi si ferma; una volta per brano, poi ricomincia, che è il modello di partenza. Con il mazzo ogni brano suona una volta prima che si ricominci, anche quello scelto da te; finito il mazzo, la riproduzione si ferma e la console lo dice, oppure si rimescola e si continua senza ripetere subito l'ultimo brano. Maiuscolo con N, accendendo, dice il modello. Chiesto da Gabriele al collaudo.
+
 ## [1.60.1] - 2026-10-02
 
 - O abbassa la banda dell'equalizzatore e P la alza, come A e D per la velocità e F e H per il tono: a sinistra si scende, a destra si sale. Il suono segue, perché dice il guadagno. Dal collaudo di Gabriele.

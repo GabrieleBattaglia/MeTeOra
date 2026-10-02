@@ -640,7 +640,7 @@ def test_maiuscolo_n_accende_e_spegne_la_riproduzione_casuale(finestra, suoni_an
     _tasto(finestra, "n", maiuscolo=True)
     assert finestra.impostazioni["casuale"] is True and _salvate(finestra)["casuale"] is True
     assert suoni_annotati[-1] == "casuale_acceso"
-    assert _ultima(finestra) == "Riproduzione casuale accesa: a fine brano il seguente si sceglie a caso."
+    assert _ultima(finestra) == "Riproduzione casuale accesa: una volta per brano, poi ricomincia."
     _tasto(finestra, "n", maiuscolo=True)
     assert finestra.impostazioni["casuale"] is False and _salvate(finestra)["casuale"] is False
     assert suoni_annotati[-1] == "casuale_spento"
@@ -652,6 +652,7 @@ def test_riproduzione_casuale_nella_plancia(finestra, monkeypatch, suoni_annotat
     rock, _jazz = _playlist_di_prova(finestra, ("a.mp3", "b.mp3", "c.mp3"), ("x.mp3", "y.mp3"))
     prima, seconda = finestra.archivio.playlist
     finestra.impostazioni["casuale"] = True
+    finestra.impostazioni["modello_casuale"] = "totale"
     scelte = []
 
     def a_caso(candidati):
@@ -679,6 +680,7 @@ def test_riproduzione_casuale_nella_lista_e_nel_loop(finestra, monkeypatch, suon
     finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n in ("a.mp3", "b.mp3", "c.mp3", "d.mp3")])
     pl = finestra.archivio.playlist[0]
     finestra.impostazioni["casuale"] = True
+    finestra.impostazioni["modello_casuale"] = "totale"
     scelte = []
 
     def a_caso(candidati):
@@ -709,6 +711,81 @@ def test_riproduzione_casuale_nella_lista_e_nel_loop(finestra, monkeypatch, suon
         brano.saltato = True
     finestra._brano_finito()
     assert _ultima(finestra).startswith("Fine")
+
+
+def _mazzo_di_quattro(finestra, monkeypatch, modello):
+    """Una playlist chiusa di quattro brani, la riproduzione casuale accesa
+    con il modello dato, e la scelta che prende sempre il primo candidato."""
+    suonati = _finto_motore(finestra, monkeypatch)
+    finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n in ("a.mp3", "b.mp3", "c.mp3", "d.mp3")])
+    finestra.impostazioni["casuale"] = True
+    finestra.impostazioni["modello_casuale"] = modello
+    scelte = []
+
+    def a_caso(candidati):
+        scelte.append(_nomi(candidati))
+        return candidati[0]
+
+    finestra._a_caso = a_caso
+    return finestra.archivio.playlist[0], suonati, scelte
+
+
+def test_riproduzione_casuale_una_volta_per_brano_poi_si_ferma(finestra, monkeypatch, suoni_annotati):
+    pl, suonati, scelte = _mazzo_di_quattro(finestra, monkeypatch, "una_volta")
+    finestra._suona(pl, pl.brani[0])
+    for _ in range(3):
+        finestra._brano_finito()
+    # Ogni brano esce dal mazzo appena suona.
+    assert scelte == [["b.mp3", "c.mp3", "d.mp3"], ["c.mp3", "d.mp3"], ["d.mp3"]]
+    assert [s[0] for s in suonati] == ["a.mp3", "b.mp3", "c.mp3", "d.mp3"]
+    # L'ultimo brano e' finito davvero: il motore non ha piu' niente.
+    finestra.motore._in_corso = None
+    finestra._brano_finito()
+    assert _ultima(finestra) == "Fine: ogni brano del mazzo ha suonato una volta." and suoni_annotati[-1] == "fine_playlist"
+    assert len(suonati) == 4
+    # Il mazzo si e' rifatto: il brano scelto da chi ascolta esce, gli altri ci sono tutti.
+    finestra._suona(pl, pl.brani[2])
+    finestra._brano_finito()
+    assert scelte[-1] == ["a.mp3", "b.mp3", "d.mp3"] and suonati[-1] == ("a.mp3", None)
+
+
+def test_riproduzione_casuale_una_volta_per_brano_poi_ricomincia(finestra, monkeypatch, suoni_annotati):
+    pl, suonati, scelte = _mazzo_di_quattro(finestra, monkeypatch, "a_giro")
+    finestra._suona(pl, pl.brani[3])
+    for _ in range(4):
+        finestra._brano_finito()
+    # Finito il mazzo si rimescola, e l'ultimo brano non torna subito.
+    assert scelte == [["a.mp3", "b.mp3", "c.mp3"], ["b.mp3", "c.mp3"], ["c.mp3"], ["a.mp3", "b.mp3", "d.mp3"]]
+    assert [s[0] for s in suonati] == ["d.mp3", "a.mp3", "b.mp3", "c.mp3", "a.mp3"]
+    # Riaccendere la riproduzione casuale rifa' il mazzo: esce solo cio' che suona.
+    _tasto(finestra, "n", maiuscolo=True)
+    _tasto(finestra, "n", maiuscolo=True)
+    finestra.motore._in_corso = pl.brani[0].percorso
+    finestra._ricomincia_il_mazzo()
+    finestra._brano_finito()
+    assert scelte[-1] == ["b.mp3", "c.mp3", "d.mp3"]
+
+
+def test_impostazioni_modello_della_riproduzione_casuale(finestra, monkeypatch, suoni_annotati):
+    scelta = _SceltaFinta(0)
+    monkeypatch.setattr(modulo, "FinestraScelta", scelta)
+    lista = _ListaFinta()
+    finestra._cambia_impostazione("modello_casuale", lista)
+    titolo, righe, partenza = scelta.aperture[0]
+    assert titolo == "Modello della riproduzione casuale" and partenza == 2
+    assert righe == [
+        "Casualità totale: ogni volta un brano qualsiasi, mai lo stesso due volte di fila",
+        "Una volta per brano, poi si ferma: ogni brano suona una volta, poi la riproduzione finisce",
+        "Una volta per brano, poi ricomincia: ogni brano suona una volta, poi si rimescola e si ricomincia",
+    ]
+    assert finestra.impostazioni["modello_casuale"] == "totale" and _salvate(finestra)["modello_casuale"] == "totale"
+    assert lista.righe["modello_casuale"] == "Modello della riproduzione casuale: casualità totale"
+    assert _ultima(finestra) == "La riproduzione casuale ora va con il modello casualità totale." and suoni_annotati[-1] == "impostazione_cambiata"
+    _tasto(finestra, "n", maiuscolo=True)
+    assert _ultima(finestra) == "Riproduzione casuale accesa: casualità totale."
+    monkeypatch.setattr(modulo, "FinestraScelta", _SceltaFinta(None))
+    finestra._cambia_impostazione("modello_casuale", lista)
+    assert _ultima(finestra) == "Modello della riproduzione casuale non cambiato." and finestra.impostazioni["modello_casuale"] == "totale"
 
 
 def test_ricerca_globale(finestra, monkeypatch, suoni_annotati, tmp_path):
@@ -1981,6 +2058,7 @@ def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_an
         ("bande", "Equalizzatore: piatto, tutte le bande a 0 dB"),
         ("dissolvenza", "Dissolvenza: spenta, 4 secondi"),
         ("casuale", "Riproduzione casuale (Maiuscolo+N): no"),
+        ("modello_casuale", "Modello della riproduzione casuale: una volta per brano, poi ricomincia"),
         ("insegui", "Inseguimento della plancia (Maiuscolo+F8): no"),
         ("caratteri", "Dimensioni dei caratteri: quelle di Windows"),
         ("colori_testo", "Colori dei caratteri: quelli di Windows"),
@@ -2072,7 +2150,7 @@ def test_impostazioni_riproduzione_casuale(finestra, monkeypatch, suoni_annotati
     assert "Adesso è spenta." in campo.aperture[0]["istruzioni"]
     assert finestra.impostazioni["casuale"] is True and _salvate(finestra)["casuale"] is True
     assert lista.righe["casuale"] == "Riproduzione casuale (Maiuscolo+N): sì"
-    assert _ultima(finestra) == "Riproduzione casuale accesa: a fine brano il seguente si sceglie a caso."
+    assert _ultima(finestra) == "Riproduzione casuale accesa: una volta per brano, poi ricomincia."
     _cambia(finestra, monkeypatch, "casuale", "no")
     assert finestra.impostazioni["casuale"] is False
     assert _ultima(finestra) == "Riproduzione casuale spenta: a fine brano si va avanti in ordine."
@@ -2915,6 +2993,7 @@ def test_riproduzione_casuale_con_la_dissolvenza_tiene_la_scelta(finestra, monke
     _playlist_di_prova(finestra, ("a.mp3", "b.mp3", "c.mp3", "d.mp3"))
     pl = finestra.archivio.playlist[0]
     finestra.impostazioni["casuale"] = True
+    finestra.impostazioni["modello_casuale"] = "totale"
     estratti = iter([2, 0, 1])
     finestra._a_caso = lambda candidati: candidati[next(estratti)]
     finestra._suona(pl, pl.brani[0])

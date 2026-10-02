@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo.
 
 """La finestra di MeTeOra.
 
@@ -196,10 +196,21 @@ def _stesso_posto(a, b):
     return a[0] is b[0] and a[1] is b[1] and a[2] == b[2]
 
 
-def _frase_della_casuale(accesa):
+def _frase_della_casuale(accesa, modello):
     if accesa:
-        return "Riproduzione casuale accesa: a fine brano il seguente si sceglie a caso."
+        return f"Riproduzione casuale accesa: {valori.MODELLI_CASUALI[modello]}."
     return "Riproduzione casuale spenta: a fine brano si va avanti in ordine."
+
+
+# Le righe della lista dei modelli della riproduzione casuale.
+SPIEGAZIONI_DEI_MODELLI = {
+    "totale": "ogni volta un brano qualsiasi, mai lo stesso due volte di fila",
+    "una_volta": "ogni brano suona una volta, poi la riproduzione finisce",
+    "a_giro": "ogni brano suona una volta, poi si rimescola e si ricomincia",
+}
+# Il segno che il mazzo della riproduzione casuale e' finito, e che la
+# riproduzione si ferma.
+FINE_DEL_MAZZO = object()
 
 
 VOCI_DELLE_IMPOSTAZIONI = {
@@ -214,6 +225,7 @@ VOCI_DELLE_IMPOSTAZIONI = {
     "bande": ("Equalizzatore", "cambiato"),
     "dissolvenza": ("Dissolvenza", "cambiata"),
     "casuale": ("Riproduzione casuale (Maiuscolo+N)", "cambiata"),
+    "modello_casuale": ("Modello della riproduzione casuale", "cambiato"),
     "insegui": ("Inseguimento della plancia (Maiuscolo+F8)", "cambiato"),
     "caratteri": ("Dimensioni dei caratteri", "cambiate"),
     "colori_testo": ("Colori dei caratteri", "cambiati"),
@@ -492,6 +504,14 @@ class Finestra(wx.Frame):
         # La scelta della riproduzione casuale, come (cio' che suona, il
         # seguente scelto): vedi _seguente_casuale.
         self._casuale_ricordato = None
+        # Il mazzo della riproduzione casuale (1.61.0): i brani gia' usciti,
+        # come (id della playlist, id del brano, sottobrano), con le
+        # playlist e i brani tenuti in vita, perche' un id non torni a un
+        # oggetto nuovo. _mazzo_finito dice a _fine_della_lista perche' ci si
+        # ferma.
+        self._mazzo = set()
+        self._mazzo_tenuti = []
+        self._mazzo_finito = False
         # La banda dell'equalizzatore scelta con U e I, contata da zero: si
         # parte dalla prima, quella dei 60 Hz.
         self._banda = 0
@@ -2389,6 +2409,7 @@ class Finestra(wx.Frame):
         in corso, come X da capo."""
         self._uscente = self._preparato = None
         self.coda.imposta(pl, brano)
+        self._segna_nel_mazzo(pl, brano, sottobrano)
         self.motore.suona(brano.percorso, sottobrano or brano.sottobrano, inizio=inizio, sfuma_lo_stesso=sfuma_lo_stesso)
         self._annuncia(pl, brano, evento)
 
@@ -2590,8 +2611,12 @@ class Finestra(wx.Frame):
         sottobrano e' quello del brano che finisce, se non e' quello del
         motore, come al passaggio della dissolvenza."""
         voce = self._voce_da_seguire(sottobrano)
+        self._mazzo_finito = False
         if self.impostazioni["casuale"]:
             seguente = self._seguente_casuale(voce, sottobrano)
+            if seguente is FINE_DEL_MAZZO:
+                self._mazzo_finito = True
+                return None
             if seguente is not None:
                 return seguente
         if voce is not None:
@@ -2627,12 +2652,45 @@ class Finestra(wx.Frame):
             scelto = next((c for c in candidati if _stesso_posto(c, ricordato[1])), None)
             if scelto is not None:
                 return scelto
+        modello = self.impostazioni["modello_casuale"]
+        if modello != "totale":
+            # Il mazzo: solo i brani non ancora usciti. Finito il mazzo ci si
+            # ferma, o si rimescola, e il brano che suona conta gia' nel giro
+            # nuovo, cosi' non torna subito.
+            nel_mazzo = [c for c in candidati if (id(c[0]), id(c[1]), c[2]) not in self._mazzo]
+            if not nel_mazzo:
+                if modello == "una_volta":
+                    return FINE_DEL_MAZZO
+                self._mazzo.clear()
+                self._mazzo_tenuti.clear()
+                self._segna_nel_mazzo(*suona)
+                nel_mazzo = candidati
+            candidati = nel_mazzo
         scelto = self._a_caso(candidati)
         self._casuale_ricordato = (suona, scelto)
         return scelto
 
     # La scelta a caso, che le prove sostituiscono.
     _a_caso = staticmethod(random.choice)
+
+    def _segna_nel_mazzo(self, pl, brano, numero):
+        """Con la riproduzione casuale accesa, il brano che parte esce dal
+        mazzo, anche se l'ha scelto chi ascolta: fino al giro nuovo non
+        torna. Esce anche come brano intero, senza sottobrano: e' la voce di
+        un SID con i sottobrani chiusi."""
+        if not self.impostazioni["casuale"] or pl is None or brano is None:
+            return
+        self._mazzo.update({(id(pl), id(brano), numero), (id(pl), id(brano), None)})
+        self._mazzo_tenuti.append((pl, brano))
+
+    def _ricomincia_il_mazzo(self):
+        """Il mazzo torna intero, e la scelta ricordata si dimentica; con la
+        riproduzione casuale accesa, cio' che suona ne e' gia' uscito."""
+        self._mazzo.clear()
+        self._mazzo_tenuti.clear()
+        self._casuale_ricordato = None
+        if self.motore.in_corso and self.coda.corrente is not None:
+            self._segna_nel_mazzo(self.coda.playlist, self.coda.corrente, self.motore.sottobrano if self.motore.sottobrani else None)
 
     def _evento_del_seguente(self, nuova, brano):
         """Il suono del passaggio automatico al brano della playlist nuova:
@@ -2662,6 +2720,12 @@ class Finestra(wx.Frame):
 
     def _fine_della_lista(self):
         self._aggiorna_etichette()
+        if self._mazzo_finito:
+            # Il mazzo si rifa': la prossima riproduzione comincia un giro nuovo.
+            self._mazzo_finito = False
+            self._ricomincia_il_mazzo()
+            self._riscontro("fine_playlist", "Fine: ogni brano del mazzo ha suonato una volta.")
+            return
         self._riscontro("fine_playlist", "Fine: davanti non c'è altro da suonare.")
 
     # Il passaggio con la dissolvenza incrociata.
@@ -2726,6 +2790,7 @@ class Finestra(wx.Frame):
             self._suona(nuova, brano, evento, numero)
             return
         self.coda.imposta(nuova, brano)
+        self._segna_nel_mazzo(nuova, brano, numero)
         self._annuncia(nuova, brano, evento)
 
     def _brano_in_errore(self, percorso):
@@ -3186,9 +3251,9 @@ class Finestra(wx.Frame):
         restano come sono."""
         accesa = not self.impostazioni["casuale"]
         self.impostazioni["casuale"] = accesa
-        self._casuale_ricordato = None
+        self._ricomincia_il_mazzo()
         self._salva_impostazioni()
-        self._riscontro("casuale_acceso" if accesa else "casuale_spento", _frase_della_casuale(accesa))
+        self._riscontro("casuale_acceso" if accesa else "casuale_spento", _frase_della_casuale(accesa, self.impostazioni["modello_casuale"]))
 
     def _comando_durata_della_dissolvenza(self):
         """Maiuscolo con L: chiede la durata della dissolvenza in secondi. La
@@ -3251,6 +3316,7 @@ class Finestra(wx.Frame):
             "bande": self._bande_da_leggere,
             "dissolvenza": lambda: valori.scrivi_dissolvenza(imp["dissolvenza"]),
             "casuale": lambda: "sì" if imp["casuale"] else "no",
+            "modello_casuale": lambda: valori.MODELLI_CASUALI[imp["modello_casuale"]],
             "insegui": lambda: "sì" if imp["insegui"] else "no",
             "caratteri": self._caratteri_da_leggere,
             "colori_testo": lambda: self._colori_da_leggere("colori_testo"),
@@ -3291,6 +3357,7 @@ class Finestra(wx.Frame):
         voci di valore aprono il loro campo, le altre fanno la loro azione."""
         azioni = {
             "scheda_audio": self._scegli_la_scheda_audio,
+            "modello_casuale": self._scegli_il_modello_casuale,
             "salva_console": lambda _genitore: self._salva_console(),
             "marcatori": self._finestra_dei_marcatori,
             "importa_marcatori": self._importa_i_marcatori,
@@ -3453,8 +3520,8 @@ class Finestra(wx.Frame):
             self._applica_la_dissolvenza()
             return f"La dissolvenza ora è {valori.scrivi_dissolvenza(valore)}."
         if chiave == "casuale":
-            self._casuale_ricordato = None
-            return _frase_della_casuale(valore)
+            self._ricomincia_il_mazzo()
+            return _frase_della_casuale(valore, imp["modello_casuale"])
         if chiave == "insegui":
             if not valore:
                 return "Inseguimento sganciato: la selezione resta dove la lasci."
@@ -3563,6 +3630,23 @@ class Finestra(wx.Frame):
             self.scrivi(f"La scheda audio scelta, {scelta['dispositivo']}, non c'è: uso quella automatica{dove}.")
         elif not esito["musica"]:
             self.scrivi(f"La musica non ritrova la scheda audio {esito['dispositivo']} e suona sulla scheda di Windows.")
+
+    def _scegli_il_modello_casuale(self, genitore):
+        """Il modello della riproduzione casuale, da una lista (Gabriele,
+        collaudo della 1.60.1). Cambiandolo il mazzo si rifa'."""
+        chiavi = list(valori.MODELLI_CASUALI)
+        righe = [f"{valori.MODELLI_CASUALI[c][0].upper()}{valori.MODELLI_CASUALI[c][1:]}: {SPIEGAZIONI_DEI_MODELLI[c]}" for c in chiavi]
+        self._suono("domanda")
+        with FinestraScelta(genitore, "Modello della riproduzione casuale", righe, chiavi.index(self.impostazioni["modello_casuale"])) as dialogo:
+            if dialogo.ShowModal() != wx.ID_OK:
+                self.scrivi("Modello della riproduzione casuale non cambiato.")
+                return
+            indice = dialogo.GetSelection()
+        self.impostazioni["modello_casuale"] = chiavi[indice]
+        self._ricomincia_il_mazzo()
+        self._salva_impostazioni()
+        genitore.aggiorna("modello_casuale", self._riga_dell_impostazione("modello_casuale"))
+        self._riscontro("impostazione_cambiata", f"La riproduzione casuale ora va con il modello {valori.MODELLI_CASUALI[chiavi[indice]]}.")
 
     def _scegli_la_scheda_audio(self, genitore):
         """La scelta della scheda audio, una per musica ed effetti: in cima la

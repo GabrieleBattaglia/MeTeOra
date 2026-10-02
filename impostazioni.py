@@ -1,6 +1,6 @@
 # MeTeOra, le impostazioni: i valori che il programma ricorda fra un avvio e l'altro.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 le righe della console. Nella 1.51.0 caratteri, colori e scheda audio, e i limiti controllati alla lettura del file. Nella 1.51.2 un file con un JSON che non e' un dizionario non ferma l'avvio. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza (tappa 4, issue 15). Nella 1.59.0 la riproduzione casuale (issue 17).
+# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 le righe della console. Nella 1.51.0 caratteri, colori e scheda audio, e i limiti controllati alla lettura del file. Nella 1.51.2 un file con un JSON che non e' un dizionario non ferma l'avvio. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza (tappa 4, issue 15). Nella 1.59.0 la riproduzione casuale (issue 17). Nella 1.61.0 il modello della riproduzione casuale.
 
 """Le impostazioni, in un file JSON accanto al programma.
 
@@ -29,6 +29,7 @@ from valori import (
     DISSOLVENZA_MINIMA,
     FREQUENZE_DELLE_BANDE,
     GUADAGNO_MASSIMO,
+    MODELLI_CASUALI,
     PASSO_VOLUME_MASSIMO,
     PASSO_VOLUME_MINIMO,
     PERCENTUALE_MASSIMA,
@@ -51,6 +52,10 @@ PREDEFINITE = {
     # Maiuscolo con N: quando un brano finisce da solo, il seguente si sceglie
     # a caso (issue 17).
     "casuale": False,
+    # Il modello della riproduzione casuale, una chiave di
+    # valori.MODELLI_CASUALI: di partenza una volta per brano, poi si
+    # ricomincia (1.61.0).
+    "modello_casuale": "a_giro",
     # Cosa suonava all'uscita, per riprendere da li' in pausa.
     "ripresa": {},
     # Quante righe tiene la console.
@@ -146,6 +151,7 @@ CONTROLLI = {
     "tono": _intero_fra(-TONO_MASSIMO, TONO_MASSIMO),
     "bande": _bande_valide,
     "dissolvenza": _dissolvenza_valida,
+    "modello_casuale": lambda valore: valore in MODELLI_CASUALI,
 }
 
 
