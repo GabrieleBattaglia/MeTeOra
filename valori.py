@@ -1,6 +1,6 @@
 # MeTeOra, i valori scritti nei campi delle impostazioni: dal testo al valore, con le correzioni dette a chi scrive.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); leggi_tempo e secondi_da_leggere arrivano da finestra.py. Nella 1.51.2 leggi_tempo accetta solo le cifre: prima passavano inf e 1e5. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza, con i loro limiti e le loro forme da leggere (tappa 4, issue 15). Nella 1.59.2 velocita' e dissolvenza si scrivono con il punto, come il resto di MeTeOra.
+# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); leggi_tempo e secondi_da_leggere arrivano da finestra.py. Nella 1.51.2 leggi_tempo accetta solo le cifre: prima passavano inf e 1e5. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza, con i loro limiti e le loro forme da leggere (tappa 4, issue 15). Nella 1.59.2 velocita' e dissolvenza si scrivono con il punto, come il resto di MeTeOra. Nella 1.60.0 leggi_tempo_nel_brano, per W, anche dalla fine.
 
 """I valori delle impostazioni, letti dal testo scritto nei campi.
 
@@ -109,6 +109,22 @@ def leggi_tempo(testo):
         # un intero enorme non diventa float.
         return None
     return totale if math.isfinite(totale) else None
+
+
+def leggi_tempo_nel_brano(testo, durata):
+    """Il tempo di W in secondi dall'inizio del brano: come leggi_tempo,
+    oppure, con il meno davanti, contato dalla fine, -12 o -1:30, se la
+    durata si sa (Gabriele, 2 ottobre 2026). None se non si capisce o se
+    cade fuori dal brano."""
+    testo = testo.strip()
+    if testo.startswith("-"):
+        indietro = leggi_tempo(testo[1:])
+        secondi = None if indietro is None or durata is None else durata - indietro
+    else:
+        secondi = leggi_tempo(testo)
+    if secondi is None or secondi < 0 or (durata is not None and secondi > durata):
+        return None
+    return secondi
 
 
 def secondi_da_leggere(secondi):

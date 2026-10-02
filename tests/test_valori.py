@@ -32,6 +32,7 @@ from valori import (
     leggi_secondi,
     leggi_si_no,
     leggi_tempo,
+    leggi_tempo_nel_brano,
     leggi_tono,
     leggi_velocita,
     leggi_volume_effetti,
@@ -63,6 +64,17 @@ def test_leggi_tempo_capisce_le_forme_di_sempre(testo, secondi):
 @pytest.mark.parametrize("testo", ["", " ", "a", "-5", "+5", "1:75", "1:2:3:4", "1:30.5:00", "1 30", "inf", "nan", "1e5", "1_000", "١٢"])
 def test_leggi_tempo_rifiuta_quello_che_non_e_un_tempo(testo):
     assert leggi_tempo(testo) is None
+
+
+@pytest.mark.parametrize(("testo", "durata", "secondi"), [("4:00", 252.4, 240), ("-12", 252.4, 240.4), (" - 1:30 ", 252.4, 162.4),
+    ("-0", 252.4, 252.4), ("4:12", 252.4, 252), ("90", None, 90)])
+def test_leggi_tempo_nel_brano_anche_dalla_fine(testo, durata, secondi):
+    assert leggi_tempo_nel_brano(testo, durata) == pytest.approx(secondi)
+
+
+@pytest.mark.parametrize(("testo", "durata"), [("4:13", 252.4), ("-4:13", 252.4), ("-12", None), ("--12", 252.4), ("-", 252.4), ("-x", 252.4), ("", 252.4)])
+def test_leggi_tempo_nel_brano_rifiuta_fuori_dal_brano(testo, durata):
+    assert leggi_tempo_nel_brano(testo, durata) is None
 
 
 def test_leggi_tempo_rifiuta_i_numeri_di_centinaia_di_cifre():

@@ -46,7 +46,7 @@ J e K: portano il fuoco nella plancia sulla playlist precedente e successiva a q
 Le cifre da 1 a 9, e lo 0 per la decima: come J e K, con le prime dieci playlist salvate.
 Q ed E: indietro e avanti nel brano, di dieci secondi se non lo cambi.
 Maiuscolo con Q e Maiuscolo con E: chiedono di quanti secondi saltare, indietro e avanti, anche con i decimali, come 2.5.
-W: va a un tempo del brano, scritto come minuti e secondi, per esempio 1:30, oppure in secondi, anche con i decimali: 1:30.5 oppure 90.5.
+W: va a un tempo del brano, scritto come minuti e secondi, per esempio 1:30, oppure in secondi, anche con i decimali: 1:30.5 oppure 90.5. Con il meno davanti il tempo si conta dalla fine: -12 va a dodici secondi dalla fine, -1:30 a un minuto e mezzo dalla fine.
 T: mette un marker nel punto del brano in cui sei, con un nome automatico, M1, M2 e così via. Se lì c'è già un marker, a meno di cinque millesimi di secondo, chiede invece il suo nuovo nome.
 R e Y: vanno al marker precedente e al successivo del brano che suona, anche in pausa, e portano il fuoco della plancia sul marker; R si ferma al primo, Y all'ultimo. Mentre il brano suona, R salta il marker superato da meno di un secondo e mezzo: premuto subito dopo un salto, va al marker prima.
 Maiuscolo con R: toglie i marker prima del punto in cui sei. Maiuscolo con Y: quelli dopo. Il marker su cui sei, se ci sei sopra, resta. Maiuscolo con T: tutti i marker del brano, compreso quello.

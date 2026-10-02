@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17).
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno.
 
 """La finestra di MeTeOra.
 
@@ -62,7 +62,7 @@ from motore import VOLUME_MASSIMO, durata_del_sottobrano, sottobrano_risolto
 from playlist import Archivio, Brano, Coda, Playlist
 from ricerca import AlberoDeiRisultati, Ricerca
 from schedario import Schedario
-from valori import AREE, ErroreValore, leggi_tempo, secondi_da_leggere
+from valori import AREE, ErroreValore, leggi_tempo, leggi_tempo_nel_brano, secondi_da_leggere
 
 FILE_PLAYLIST = "MeTeOra - Playlist.json"
 FILE_IMPOSTAZIONI = "MeTeOra - Impostazioni.json"
@@ -2977,12 +2977,13 @@ class Finestra(wx.Frame):
             return
         self._suono("domanda")
         durata = self.motore.durata
-        with DialogoTesto(self, f"A che tempo andare? Minuti e secondi, per esempio 1:30. Il brano dura {tempo(durata)}.", "Vai al tempo") as dialogo:
+        with DialogoTesto(self, f"A che tempo andare? Minuti e secondi, per esempio 1:30, o dalla fine con il meno, per esempio -12. Il brano dura {tempo(durata)}.",
+                "Vai al tempo") as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
                 return
             testo = dialogo.GetValue()
-        secondi = leggi_tempo(testo)
-        if secondi is None or (durata is not None and secondi > durata):
+        secondi = leggi_tempo_nel_brano(testo, durata)
+        if secondi is None:
             self._riscontro("errore", f"{testo} non è un tempo dentro il brano.")
             return
         self.motore.vai_a(secondi)

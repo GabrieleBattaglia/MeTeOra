@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.60.0] - 2026-10-02
+
+- W accetta anche un tempo contato dalla fine, con il meno davanti: -12 va a dodici secondi dalla fine, -1:30 a un minuto e mezzo dalla fine. Comodo per sentire la dissolvenza senza fare il conto. Chiesto da Gabriele al collaudo.
+
 ## [1.59.2] - 2026-10-02
 
 - I decimali si scrivono con il punto in tutta MeTeOra, come avevamo deciso: la velocità, per esempio 1.05, la durata della dissolvenza, per esempio 2.5 secondi, le latenze delle schede audio, gli esempi dei campi e delle frasi d'errore, l'esempio delle dimensioni nel filtro e il manuale. Dalla tappa 4 alcuni usavano la virgola. Scrivendo, la virgola si accetta ancora. Dal collaudo di Gabriele.

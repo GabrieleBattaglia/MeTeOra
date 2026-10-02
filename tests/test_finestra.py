@@ -764,6 +764,19 @@ def test_ricerca_globale(finestra, monkeypatch, suoni_annotati, tmp_path):
     assert finestra.albero.GetItemText(finestra.nodo_risultati) == "Risultati di jazz: 1 trovato"
 
 
+def test_w_va_a_un_tempo_anche_dalla_fine(finestra, monkeypatch, suoni_annotati):
+    salti = []
+    monkeypatch.setattr(type(finestra.motore), "in_corso", property(lambda _self: r"C:\m\a.mp3"))
+    monkeypatch.setattr(type(finestra.motore), "durata", property(lambda _self: 252.0))
+    monkeypatch.setattr(finestra.motore, "vai_a", salti.append)
+    for scritto, atteso, frase in (("4:00", 240.0, "Vado a 4:00 di 4:12."), ("-12", 240.0, "Vado a 4:00 di 4:12."), ("-1:30", 162.0, "Vado a 2:42 di 4:12.")):
+        monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto(scritto))
+        assert _premi(finestra, "w") == frase
+        assert salti[-1] == atteso and suoni_annotati[-1] == "vai_a_tempo"
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("-5:00"))
+    assert _premi(finestra, "w") == "-5:00 non è un tempo dentro il brano." and len(salti) == 3
+
+
 class _DialogoFinto:
     """Un DialogoTesto, o un campo del filtro, che risponde da solo. Con piu'
     risposte le da' una per volta, ripetendo l'ultima."""
