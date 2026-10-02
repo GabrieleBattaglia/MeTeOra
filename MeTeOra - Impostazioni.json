@@ -1,17 +1,16 @@
 {
- "volume": 89,
+ "volume": 98,
  "passo_volume": 1,
  "passo_indietro": 3.0,
  "passo_avanti": 10.0,
  "volume_effetti": 0.35,
  "insegui": true,
  "ripresa": {
-  "percorso": "H:\\backup20251217 - Da PCGigante\\Music\\883\\Hanno Ucciso L'Uomo Ragno\\03 6_1_ Sfigato.m4a",
+  "percorso": "E:\\Audio\\esperimenti audio\\Turbo_Outrun.wav",
   "sottobrano": null,
-  "numero": 3,
-  "posizione": 2.8841723356009106,
-  "tipo": "playlist",
-  "indice": 1
+  "numero": 1,
+  "posizione": 0,
+  "tipo": "file"
  },
  "righe_della_console": 2000,
  "caratteri": {},
@@ -49,5 +48,20 @@
    4
   ]
  },
- "scheda_audio": {}
+ "scheda_audio": {},
+ "velocita": 1.0,
+ "tono": 0,
+ "bande": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  1
+ ],
+ "dissolvenza": {
+  "accesa": false,
+  "secondi": 4.0
+ }
 }
