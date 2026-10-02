@@ -69,9 +69,9 @@ def uscite():
 
 
 def _millisecondi(latenza):
-    """3 ms, 23,2 ms: il decimale solo se serve, con la virgola."""
+    """3 ms, 23.2 ms: il decimale solo se serve, con il punto."""
     decimi = round(latenza, 1)
-    numero = f"{decimi:.0f}" if decimi == int(decimi) else f"{decimi:.1f}".replace(".", ",")
+    numero = f"{decimi:.0f}" if decimi == int(decimi) else f"{decimi:.1f}"
     return f"{numero} ms"
 
 

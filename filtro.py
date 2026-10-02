@@ -126,7 +126,7 @@ def _tempo(testo):
 
 
 def _dimensione(testo):
-    """Byte da un numero con k, m o g facoltativi: 700k, 5m, 1,5g."""
+    """Byte da un numero con k, m o g facoltativi: 700k, 5m, 1.5g."""
     testo = testo.strip().lower().replace(",", ".")
     moltiplicatore = 1
     if testo and testo[-1] in "kmg":
@@ -175,7 +175,7 @@ def _comando(lettera, operatore, valore, testo):
     if lettera == "d":
         soglia = _dimensione(valore)
         if soglia is None:
-            raise ErroreFiltro(f"In {testo}, {valore} non è una dimensione: si scrive come 700k, 5m o 1,5g.")
+            raise ErroreFiltro(f"In {testo}, {valore} non è una dimensione: si scrive come 700k, 5m o 1.5g.")
         return lambda _b, s, _d: _confronta(s.get("dim") if s else None, operatore, soglia)
     if lettera in ("y", "r"):
         if not valore.isdigit():

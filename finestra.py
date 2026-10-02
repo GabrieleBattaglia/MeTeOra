@@ -3196,7 +3196,7 @@ class Finestra(wx.Frame):
         da_leggere = valori.scrivi_durata(attuale)
         # Nel campo e nella domanda i numeri soli, senza la parola secondi.
         minimo, massimo, numero = (valori.scrivi_durata(s).split()[0] for s in (valori.DISSOLVENZA_MINIMA, valori.DISSOLVENZA_MASSIMA, attuale))
-        with DialogoTesto(self, f"Quanti secondi dura la dissolvenza? Da {minimo} a {massimo}, anche con i decimali, per esempio 2,5.",
+        with DialogoTesto(self, f"Quanti secondi dura la dissolvenza? Da {minimo} a {massimo}, anche con i decimali, per esempio 2.5.",
                 "Durata della dissolvenza", numero) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
                 return
@@ -3354,13 +3354,13 @@ class Finestra(wx.Frame):
             attuale = secondi_da_leggere(imp[chiave])
             return (lambda testo: valori.leggi_secondi(testo, nome)), [
                 f"Di quanti secondi salta {verso} il tasto {tasto}: almeno 0.1, anche con i decimali.",
-                f"Per esempio 10, 2.5 o 2,5, oppure minuti e secondi come 1:30. Anche Maiuscolo+{tasto} lo cambia, dalla finestra principale.",
+                f"Per esempio 10 o 2.5, oppure minuti e secondi come 1:30. Anche Maiuscolo+{tasto} lo cambia, dalla finestra principale.",
                 f"Adesso è di {attuale} secondi.", REGOLA_DEL_DOLLARO], attuale
         if chiave == "velocita":
             minima, massima, passo = (valori.scrivi_velocita(v) for v in (valori.VELOCITA_MINIMA, valori.VELOCITA_MASSIMA, valori.PASSO_VELOCITA))
             return valori.leggi_velocita, [
                 f"La velocità di riproduzione, da {minima} a {massima}: 1 è la normale, meno di 1 rallenta, più di 1 accelera. Il tono non cambia.",
-                f"Va a passi di {passo}: un valore fra due passi va al più vicino. Per esempio 1,05 o 0,9, con la virgola o con il punto.",
+                f"Va a passi di {passo}: un valore fra due passi va al più vicino. Per esempio 1.05 o 0.9.",
                 "Anche A e D la cambiano, e S la riporta a 1, dalla finestra principale.",
                 f"Adesso è {valori.scrivi_velocita(imp['velocita'])}.", REGOLA_DEL_DOLLARO], valori.scrivi_velocita(imp["velocita"])
         if chiave == "tono":
@@ -3376,7 +3376,7 @@ class Finestra(wx.Frame):
                 f"separati da spazi, dalla banda più bassa alla più alta: {frequenze} e {valori.FREQUENZE_DELLE_BANDE[-1]} Hz.",
                 "Un numero solo vale per tutte le bande, e il campo vuoto le riporta tutte a 0. Per esempio 0 0 +2 0 0 0 -3, oppure 3.",
                 "Contro la saturazione il volume scende da solo quanto la banda più alzata: con una banda sola il suono non satura, "
-                "con più bande vicine alzate, o tutte, sale fino a circa 5,6 dB oltre, e dal volume 80 o 90 in su conviene abbassare il volume.",
+                "con più bande vicine alzate, o tutte, sale fino a circa 5.6 dB oltre, e dal volume 80 o 90 in su conviene abbassare il volume.",
                 "Anche U e I scelgono la banda, O e P la alzano e la abbassano, È la azzera e Maiuscolo con È le azzera tutte, dalla finestra principale.",
                 f"Adesso: {self._bande_da_leggere()}.", REGOLA_DEL_DOLLARO], valori.scrivi_bande(imp["bande"])
         if chiave == "dissolvenza":
@@ -3384,7 +3384,7 @@ class Finestra(wx.Frame):
             minima, massima = (valori.scrivi_durata(s).split()[0] for s in (valori.DISSOLVENZA_MINIMA, valori.DISSOLVENZA_MASSIMA))
             return (lambda testo: valori.leggi_dissolvenza(testo, secondi)), [
                 "La dissolvenza incrociata: il brano che finisce sfuma mentre il seguente entra. Vale a ogni cambio di brano, da solo o con i tasti.",
-                f"Scrivi no per spegnerla, sì per accenderla, oppure i secondi, da {minima} a {massima}, anche con i decimali, per accenderla con quella durata. Per esempio 4 o 2,5.",
+                f"Scrivi no per spegnerla, sì per accenderla, oppure i secondi, da {minima} a {massima}, anche con i decimali, per accenderla con quella durata. Per esempio 4 o 2.5.",
                 "Anche L la accende e la spegne, e Maiuscolo con L ne cambia la durata, dalla finestra principale.",
                 f"Adesso è {valori.scrivi_dissolvenza(imp['dissolvenza'])}.", REGOLA_DEL_DOLLARO], valori.scrivi_dissolvenza(imp["dissolvenza"])
         if chiave == "casuale":

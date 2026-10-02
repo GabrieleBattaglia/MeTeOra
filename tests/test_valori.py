@@ -359,17 +359,17 @@ def test_leggi_velocita_buona(testo, velocita):
 
 
 @pytest.mark.parametrize(("testo", "velocita", "frase"), [
-    ("1,07", 1.05, "Velocità: 1,07 va a passi di 0,05, ho messo 1,05."),
-    ("1.08", 1.1, "Velocità: 1,08 va a passi di 0,05, ho messo 1,1."),
-    ("1,025", 1.05, "Velocità: 1,025 va a passi di 0,05, ho messo 1,05."),
-    ("1,0249", 1.0, "Velocità: 1,0249 va a passi di 0,05, ho messo 1."),
-    ("0,52", 0.5, "Velocità: 0,52 va a passi di 0,05, ho messo 0,5."),
-    ("1,975", 2.0, "Velocità: 1,975 va a passi di 0,05, ho messo 2."),
-    ("0,3", 0.5, "Velocità: 0,3 è sotto il minimo, ho messo 0,5."),
-    ("0", 0.5, "Velocità: 0 è sotto il minimo, ho messo 0,5."),
-    ("-1", 0.5, "Velocità: -1 è sotto il minimo, ho messo 0,5."),
+    ("1,07", 1.05, "Velocità: 1.07 va a passi di 0.05, ho messo 1.05."),
+    ("1.08", 1.1, "Velocità: 1.08 va a passi di 0.05, ho messo 1.1."),
+    ("1,025", 1.05, "Velocità: 1.025 va a passi di 0.05, ho messo 1.05."),
+    ("1,0249", 1.0, "Velocità: 1.0249 va a passi di 0.05, ho messo 1."),
+    ("0,52", 0.5, "Velocità: 0.52 va a passi di 0.05, ho messo 0.5."),
+    ("1,975", 2.0, "Velocità: 1.975 va a passi di 0.05, ho messo 2."),
+    ("0,3", 0.5, "Velocità: 0.3 è sotto il minimo, ho messo 0.5."),
+    ("0", 0.5, "Velocità: 0 è sotto il minimo, ho messo 0.5."),
+    ("-1", 0.5, "Velocità: -1 è sotto il minimo, ho messo 0.5."),
     ("3", 2.0, "Velocità: 3 è oltre il massimo, ho messo 2."),
-    ("2.03", 2.0, "Velocità: 2,03 è oltre il massimo, ho messo 2."),
+    ("2.03", 2.0, "Velocità: 2.03 è oltre il massimo, ho messo 2."),
 ])
 def test_leggi_velocita_corregge_e_lo_dice(testo, velocita, frase):
     """Prima i limiti, poi il passo, la meta' in su: una correzione sola."""
@@ -378,14 +378,14 @@ def test_leggi_velocita_corregge_e_lo_dice(testo, velocita, frase):
 
 def test_leggi_velocita_le_cifre_infinite():
     assert leggi_velocita("9" * 5000) == (2.0, [f"Velocità: {'9' * 5000} è oltre il massimo, ho messo 2."])
-    assert leggi_velocita("0," + "0" * 5000 + "1") == (0.5, [f"Velocità: 0,{'0' * 5000}1 è sotto il minimo, ho messo 0,5."])
+    assert leggi_velocita("0," + "0" * 5000 + "1") == (0.5, [f"Velocità: 0.{'0' * 5000}1 è sotto il minimo, ho messo 0.5."])
 
 
 @pytest.mark.parametrize(("testo", "frase"), [
-    ("", "Velocità: manca il numero; scrivi un numero da 0,5 a 2, per esempio 1,05 o 0,9; 1 è la velocità normale."),
-    ("  ", "Velocità: manca il numero; scrivi un numero da 0,5 a 2, per esempio 1,05 o 0,9; 1 è la velocità normale."),
-    ("veloce", "Velocità: veloce non è un numero; scrivi un numero da 0,5 a 2, per esempio 1,05 o 0,9; 1 è la velocità normale."),
-    ("1 05", "Velocità: 1 05 non è un numero; scrivi un numero da 0,5 a 2, per esempio 1,05 o 0,9; 1 è la velocità normale."),
+    ("", "Velocità: manca il numero; scrivi un numero da 0.5 a 2, per esempio 1.05 o 0.9; 1 è la velocità normale."),
+    ("  ", "Velocità: manca il numero; scrivi un numero da 0.5 a 2, per esempio 1.05 o 0.9; 1 è la velocità normale."),
+    ("veloce", "Velocità: veloce non è un numero; scrivi un numero da 0.5 a 2, per esempio 1.05 o 0.9; 1 è la velocità normale."),
+    ("1 05", "Velocità: 1 05 non è un numero; scrivi un numero da 0.5 a 2, per esempio 1.05 o 0.9; 1 è la velocità normale."),
 ])
 def test_leggi_velocita_rifiuta_e_dice_cosa_aspetta(testo, frase):
     with pytest.raises(ErroreValore) as errore:
@@ -408,11 +408,11 @@ def test_leggi_velocita_sta_sempre_sul_passo_e_nei_limiti():
 
 def test_scrivi_velocita_e_il_ritorno():
     assert scrivi_velocita(1.0) == "1"
-    assert scrivi_velocita(1.05) == "1,05"
-    assert scrivi_velocita(0.5) == "0,5"
+    assert scrivi_velocita(1.05) == "1.05"
+    assert scrivi_velocita(0.5) == "0.5"
     assert scrivi_velocita(2.0) == "2"
-    # Il float di 1 + 0,05 + 0,05 si legge comunque al centesimo.
-    assert scrivi_velocita(1.0 + 0.05 + 0.05) == "1,1"
+    # Il float di 1 + 0.05 + 0.05 si legge comunque al centesimo.
+    assert scrivi_velocita(1.0 + 0.05 + 0.05) == "1.1"
     for passi in range(10, 41):
         velocita = round(passi * PASSO_VELOCITA, 2)
         assert leggi_velocita(scrivi_velocita(velocita)) == (velocita, []), velocita
@@ -527,13 +527,13 @@ def test_leggi_durata_della_dissolvenza_buona(testo, secondi):
 
 def test_leggi_durata_della_dissolvenza_corregge_e_rifiuta():
     assert leggi_durata_della_dissolvenza("20") == (15.0, ["Dissolvenza: 20 è oltre il massimo, ho messo 15."])
-    assert leggi_durata_della_dissolvenza("0,2 secondi") == (0.5, ["Dissolvenza: 0,2 è sotto il minimo, ho messo 0,5."])
-    assert leggi_durata_della_dissolvenza("0", "Durata della dissolvenza") == (0.5, ["Durata della dissolvenza: 0 è sotto il minimo, ho messo 0,5."])
+    assert leggi_durata_della_dissolvenza("0,2 secondi") == (0.5, ["Dissolvenza: 0.2 è sotto il minimo, ho messo 0.5."])
+    assert leggi_durata_della_dissolvenza("0", "Durata della dissolvenza") == (0.5, ["Durata della dissolvenza: 0 è sotto il minimo, ho messo 0.5."])
     assert leggi_durata_della_dissolvenza("9" * 5000)[0] == 15.0
-    with pytest.raises(ErroreValore, match=r"^Dissolvenza: mancano i secondi; scrivi i secondi, da 0,5 a 15, anche con i decimali, per esempio 4 o 2,5\.$"):
+    with pytest.raises(ErroreValore, match=r"^Dissolvenza: mancano i secondi; scrivi i secondi, da 0.5 a 15, anche con i decimali, per esempio 4 o 2.5\.$"):
         leggi_durata_della_dissolvenza(" ")
     for testo in ("no", "sì", "1:30", "4 minuti", "inf", "1e1", "4 4"):
-        with pytest.raises(ErroreValore, match=f"^Dissolvenza: {re.escape(testo)} non è un numero di secondi; scrivi i secondi, da 0,5 a 15,"):
+        with pytest.raises(ErroreValore, match=f"^Dissolvenza: {re.escape(testo)} non è un numero di secondi; scrivi i secondi, da 0.5 a 15,"):
             leggi_durata_della_dissolvenza(testo)
 
 
@@ -564,16 +564,16 @@ def test_leggi_dissolvenza_con_i_secondi(testo, dissolvenza):
 
 def test_leggi_dissolvenza_corregge_ai_limiti():
     assert leggi_dissolvenza("20") == ({"accesa": True, "secondi": 15.0}, ["Dissolvenza: 20 è oltre il massimo, ho messo 15."])
-    assert leggi_dissolvenza("0,2") == ({"accesa": True, "secondi": 0.5}, ["Dissolvenza: 0,2 è sotto il minimo, ho messo 0,5."])
-    assert leggi_dissolvenza("-3", 4.0) == ({"accesa": True, "secondi": 0.5}, ["Dissolvenza: -3 è sotto il minimo, ho messo 0,5."])
+    assert leggi_dissolvenza("0,2") == ({"accesa": True, "secondi": 0.5}, ["Dissolvenza: 0.2 è sotto il minimo, ho messo 0.5."])
+    assert leggi_dissolvenza("-3", 4.0) == ({"accesa": True, "secondi": 0.5}, ["Dissolvenza: -3 è sotto il minimo, ho messo 0.5."])
     assert leggi_dissolvenza("spenta, 30 secondi") == ({"accesa": False, "secondi": 15.0}, ["Dissolvenza: 30 è oltre il massimo, ho messo 15."])
     # Accesa a zero secondi non e' spenta: zero si porta al minimo.
-    assert leggi_dissolvenza("accesa, 0") == ({"accesa": True, "secondi": 0.5}, ["Dissolvenza: 0 è sotto il minimo, ho messo 0,5."])
+    assert leggi_dissolvenza("accesa, 0") == ({"accesa": True, "secondi": 0.5}, ["Dissolvenza: 0 è sotto il minimo, ho messo 0.5."])
 
 
 @pytest.mark.parametrize(("testo", "frase"), [
-    ("", "Dissolvenza: manca il valore; scrivi no per spegnerla, sì per accenderla, oppure i secondi, da 0,5 a 15, per accenderla con quella durata, per esempio 4 o 2,5."),
-    ("forse", "Dissolvenza: forse non è né no né un numero di secondi; scrivi no per spegnerla, sì per accenderla, oppure i secondi, da 0,5 a 15, per accenderla con quella durata, per esempio 4 o 2,5."),
+    ("", "Dissolvenza: manca il valore; scrivi no per spegnerla, sì per accenderla, oppure i secondi, da 0.5 a 15, per accenderla con quella durata, per esempio 4 o 2.5."),
+    ("forse", "Dissolvenza: forse non è né no né un numero di secondi; scrivi no per spegnerla, sì per accenderla, oppure i secondi, da 0.5 a 15, per accenderla con quella durata, per esempio 4 o 2.5."),
     ("accesa forse", "Dissolvenza: accesa forse non è né no né un numero di secondi;"),
     ("4 minuti", "Dissolvenza: 4 minuti non è né no né un numero di secondi;"),
     ("1:30", "Dissolvenza: 1:30 non è né no né un numero di secondi;"),
@@ -590,9 +590,9 @@ def test_leggi_dissolvenza_rifiuta(testo, frase):
 def test_scrivi_durata_e_dissolvenza_e_il_ritorno():
     assert scrivi_durata(4.0) == "4 secondi"
     assert scrivi_durata(1.0) == "1 secondo"
-    assert scrivi_durata(2.5) == "2,5 secondi"
-    assert scrivi_durata(0.5) == "0,5 secondi"
-    assert scrivi_durata(2.346) == "2,346 secondi"
+    assert scrivi_durata(2.5) == "2.5 secondi"
+    assert scrivi_durata(0.5) == "0.5 secondi"
+    assert scrivi_durata(2.346) == "2.346 secondi"
     assert scrivi_durata(15) == "15 secondi"
     assert scrivi_dissolvenza({"accesa": True, "secondi": 4.0}) == "accesa, 4 secondi"
     assert scrivi_dissolvenza({"accesa": False, "secondi": 1.0}) == "spenta, 1 secondo"

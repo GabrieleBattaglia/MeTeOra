@@ -146,12 +146,12 @@ def test_uscite_senza_wdm_ks_in_ordine_di_latenza(gb):
 
 def test_etichette(gb):
     assert schede_audio.etichetta(_uscita(18)) == "Altoparlanti (Realtek(R) Audio), WASAPI, 3 ms"
-    assert schede_audio.etichetta(_uscita(16)) == "Realtek ASIO, ASIO, 23,2 ms, esclusiva: può zittire NVDA"
+    assert schede_audio.etichetta(_uscita(16)) == "Realtek ASIO, ASIO, 23.2 ms, esclusiva: può zittire NVDA"
     assert schede_audio.etichetta(_uscita(5)) == "Realtek Digital Output (Realtek, MME, 90 ms"
     assert schede_audio.etichetta(_uscita(15)) == "Cuffie (Bluetooth), DirectSound, 120 ms"
     voce = {"indice": 1, "dispositivo": "Scheda", "interfaccia": "Windows WASAPI", "breve": "WASAPI", "latenza": 2.96, "esclusiva": False}
     assert schede_audio.etichetta(voce) == "Scheda, WASAPI, 3 ms"
-    assert schede_audio.etichetta({**voce, "latenza": 0.54}) == "Scheda, WASAPI, 0,5 ms"
+    assert schede_audio.etichetta({**voce, "latenza": 0.54}) == "Scheda, WASAPI, 0.5 ms"
     # Senza latenza e senza nome breve: l'interfaccia senza Windows, e niente millesimi.
     assert schede_audio.etichetta({"indice": 1, "dispositivo": "Scheda", "interfaccia": "Windows WASAPI", "latenza": None}) == "Scheda, WASAPI"
 

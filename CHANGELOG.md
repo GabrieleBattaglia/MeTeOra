@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.59.2] - 2026-10-02
+
+- I decimali si scrivono con il punto in tutta MeTeOra, come avevamo deciso: la velocità, per esempio 1.05, la durata della dissolvenza, per esempio 2.5 secondi, le latenze delle schede audio, gli esempi dei campi e delle frasi d'errore, l'esempio delle dimensioni nel filtro e il manuale. Dalla tappa 4 alcuni usavano la virgola. Scrivendo, la virgola si accetta ancora. Dal collaudo di Gabriele.
+- Il manuale, fra le voci delle impostazioni, ha anche la Riproduzione casuale.
+
 ## [1.59.0] - 2026-10-02
 
 - Maiuscolo con N accende e spegne la riproduzione casuale. Accesa, quando un brano finisce da solo il seguente si sceglie a caso fra quelli che l'avanzamento automatico potrebbe suonare: le voci che si vedono nella plancia, oppure la lista, il loop o la selezione da cui si suona. Con la dissolvenza il brano scelto è quello che entra sfumando. Z, B e gli altri tasti restano come sono, e MeTeOra ricorda la scelta alla riapertura; c'è anche nelle impostazioni. I suoni sono due avvisi del loop di prima, nella collezione di GBUtils V185. Chiesto da Gabriele nella issue 17.

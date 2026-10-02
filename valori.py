@@ -1,6 +1,6 @@
 # MeTeOra, i valori scritti nei campi delle impostazioni: dal testo al valore, con le correzioni dette a chi scrive.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); leggi_tempo e secondi_da_leggere arrivano da finestra.py. Nella 1.51.2 leggi_tempo accetta solo le cifre: prima passavano inf e 1e5. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza, con i loro limiti e le loro forme da leggere (tappa 4, issue 15).
+# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); leggi_tempo e secondi_da_leggere arrivano da finestra.py. Nella 1.51.2 leggi_tempo accetta solo le cifre: prima passavano inf e 1e5. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza, con i loro limiti e le loro forme da leggere (tappa 4, issue 15). Nella 1.59.2 velocita' e dissolvenza si scrivono con il punto, come il resto di MeTeOra.
 
 """I valori delle impostazioni, letti dal testo scritto nei campi.
 
@@ -90,7 +90,7 @@ def _pulito(testo):
 
 
 def leggi_tempo(testo):
-    """Da '90', '1.5', '1:30', '1:30,25' o '1:02:03' a secondi; None se non si
+    """Da '90', '1.5', '1:30', '1:30.25' o '1:02:03' a secondi; None se non si
     capisce. I due punti separano ore, minuti e secondi; il punto o la
     virgola separano i decimali, solo nell'ultima parte. Valgono solo le
     cifre: segni, esponenti, inf e nan, che float() accetterebbe, no."""
@@ -172,7 +172,7 @@ def leggi_volume_effetti(testo):
 
 def leggi_secondi(testo, nome="Salto"):
     """Un salto in secondi, scritto come leggi_tempo lo capisce (90, 1.5,
-    1,5, 1:30, 1:30,25, 1:02:03), arrotondato al millesimo e almeno di 0.1:
+    1.5, 1:30, 1:30.25, 1:02:03), arrotondato al millesimo e almeno di 0.1:
     sotto si porta a 0.1, e lo si dice. nome e' quello dell'impostazione,
     per esempio "Salto indietro di Q"."""
     testo = _pulito(testo)
@@ -313,10 +313,11 @@ def colore_da_percentuali(percentuali):
 
 # Velocita', tono, equalizzatore e dissolvenza, tappa 4 (issue 15).
 
-def _con_la_virgola(numero, decimali):
+def _con_il_punto(numero, decimali):
     """Un numero da leggere, float o Decimal, con al piu' decimali cifre dopo
-    la virgola e senza gli zeri che non servono: 1,05, 0,5, 2."""
-    return f"{numero:.{decimali}f}".rstrip("0").rstrip(".").replace(".", ",")
+    il punto e senza gli zeri che non servono: 1.05, 0.5, 2. Dalla 1.59.2 il
+    punto, come in tutta MeTeOra: prima qui c'era la virgola."""
+    return f"{numero:.{decimali}f}".rstrip("0").rstrip(".")
 
 
 def _con_segno(numero):
@@ -345,25 +346,25 @@ def _decimale_nei_limiti(numero, scritto, minimo, massimo, nome, da_leggere):
 
 
 def scrivi_velocita(velocita):
-    """La velocita' da leggere, con la virgola e al centesimo: 1,05, 0,5, 1."""
-    return _con_la_virgola(velocita, 2)
+    """La velocita' da leggere, con il punto e al centesimo: 1.05, 0.5, 1."""
+    return _con_il_punto(velocita, 2)
 
 
 def leggi_velocita(testo):
-    """La velocita' di riproduzione, da 0,5 a 2, 1 la normale, con i decimali
-    dopo la virgola o il punto: 1,05 o 1.05. Fuori dai limiti si porta al
-    limite; dentro si arrotonda al passo di 0,05, la meta' in su, cosi' i
+    """La velocita' di riproduzione, da 0.5 a 2, 1 la normale, con i decimali
+    dopo il punto o la virgola: 1.05 o 1,05. Fuori dai limiti si porta al
+    limite; dentro si arrotonda al passo di 0.05, la meta' in su, cosi' i
     tasti A e D ripartono da un valore del passo. L'una e l'altra correzione
     si dicono. Restituisce un float."""
     nome = "Velocità"
     testo = _pulito(testo)
-    attesa = f"scrivi un numero da {scrivi_velocita(VELOCITA_MINIMA)} a {scrivi_velocita(VELOCITA_MASSIMA)}, per esempio 1,05 o 0,9; 1 è la velocità normale"
+    attesa = f"scrivi un numero da {scrivi_velocita(VELOCITA_MINIMA)} a {scrivi_velocita(VELOCITA_MASSIMA)}, per esempio 1.05 o 0.9; 1 è la velocità normale"
     if not testo:
         raise ErroreValore(f"{nome}: manca il numero; {attesa}.")
     numero = _decimale(testo)
     if numero is None:
         raise ErroreValore(f"{nome}: {testo} non è un numero; {attesa}.")
-    scritto = testo.replace(".", ",")
+    scritto = testo.replace(",", ".")
     numero, correzioni = _decimale_nei_limiti(numero, scritto, VELOCITA_MINIMA, VELOCITA_MASSIMA, nome, scrivi_velocita)
     # Il calcolo in Decimal e' esatto: in float 1.025 / 0.05 fa 20.4999...
     # e la meta' andrebbe in giu'.
@@ -434,9 +435,9 @@ def leggi_bande(testo):
 
 
 def scrivi_durata(secondi):
-    """La durata della dissolvenza da leggere, con la virgola e al
-    millesimo: 4 secondi, 2,5 secondi, 1 secondo."""
-    scritto = _con_la_virgola(secondi, 3)
+    """La durata della dissolvenza da leggere, con il punto e al
+    millesimo: 4 secondi, 2.5 secondi, 1 secondo."""
+    scritto = _con_il_punto(secondi, 3)
     return f"{scritto} {'secondo' if scritto == '1' else 'secondi'}"
 
 
@@ -448,21 +449,21 @@ def scrivi_dissolvenza(dissolvenza):
 
 def _attesa_della_durata():
     """Cosa si aspetta il campo della durata, per le frasi d'errore."""
-    return f"scrivi i secondi, da {_con_la_virgola(DISSOLVENZA_MINIMA, 3)} a {_con_la_virgola(DISSOLVENZA_MASSIMA, 3)}, anche con i decimali, per esempio 4 o 2,5"
+    return f"scrivi i secondi, da {_con_il_punto(DISSOLVENZA_MINIMA, 3)} a {_con_il_punto(DISSOLVENZA_MASSIMA, 3)}, anche con i decimali, per esempio 4 o 2.5"
 
 
 def _durata(scritto, nome):
     """I secondi della dissolvenza dal numero scritto, gia' riconosciuto da
-    _DURATA: portati fra 0,5 e 15, e lo si dice, poi arrotondati al
+    _DURATA: portati fra 0.5 e 15, e lo si dice, poi arrotondati al
     millesimo senza dirlo, come i salti di Q ed E."""
-    numero, correzioni = _decimale_nei_limiti(_decimale(scritto), scritto.replace(".", ","), DISSOLVENZA_MINIMA, DISSOLVENZA_MASSIMA, nome,
-        lambda limite: _con_la_virgola(limite, 3))
+    numero, correzioni = _decimale_nei_limiti(_decimale(scritto), scritto.replace(",", "."), DISSOLVENZA_MINIMA, DISSOLVENZA_MASSIMA, nome,
+        lambda limite: _con_il_punto(limite, 3))
     return float(numero.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)), correzioni
 
 
 def leggi_durata_della_dissolvenza(testo, nome="Dissolvenza"):
-    """La durata della dissolvenza in secondi, da 0,5 a 15, con i decimali
-    dopo la virgola o il punto, arrotondata al millesimo; dopo il numero si
+    """La durata della dissolvenza in secondi, da 0.5 a 15, con i decimali
+    dopo il punto o la virgola, arrotondata al millesimo; dopo il numero si
     accetta la parola secondi (o secondo, sec, s). Fuori dai limiti si porta
     al limite, e lo si dice. Restituisce un float. E' la lettura del campo
     di Maiuscolo+L, che chiede solo la durata; nome comincia le frasi."""
@@ -481,14 +482,14 @@ def leggi_dissolvenza(testo, secondi_attuali=None):
     numero di secondi, letto come in leggi_durata_della_dissolvenza, la
     accende con quella durata; si' (o accesa, acceso, s, vero) la accende
     senza cambiare durata. La parola e il numero possono stare insieme, come
-    li scrive scrivi_dissolvenza: "accesa, 4 secondi" o "spenta, 2,5
+    li scrive scrivi_dissolvenza: "accesa, 4 secondi" o "spenta, 2.5
     secondi", e spenta la durata resta per quando si riaccende.
     Senza numero i secondi sono secondi_attuali, quelli di adesso, che la
     finestra conserva: None se non li passa, e allora li mette lei."""
     nome = "Dissolvenza"
     testo = _pulito(testo)
-    attesa = (f"scrivi no per spegnerla, sì per accenderla, oppure i secondi, da {_con_la_virgola(DISSOLVENZA_MINIMA, 3)} a "
-        f"{_con_la_virgola(DISSOLVENZA_MASSIMA, 3)}, per accenderla con quella durata, per esempio 4 o 2,5")
+    attesa = (f"scrivi no per spegnerla, sì per accenderla, oppure i secondi, da {_con_il_punto(DISSOLVENZA_MINIMA, 3)} a "
+        f"{_con_il_punto(DISSOLVENZA_MASSIMA, 3)}, per accenderla con quella durata, per esempio 4 o 2.5")
     if not testo:
         raise ErroreValore(f"{nome}: manca il valore; {attesa}.")
     prima, _, resto = testo.partition(" ")

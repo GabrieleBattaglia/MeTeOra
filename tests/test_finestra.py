@@ -2450,7 +2450,7 @@ def test_scheda_audio(finestra, monkeypatch, suoni_annotati):
     lista = _ListaFinta()
     finestra._cambia_impostazione("scheda_audio", lista)
     assert scelta.aperture == [("Scheda audio", ["Automatica: Altoparlanti (Realtek(R) Audio), WASAPI, 3 ms", "Altoparlanti (Realtek(R) Audio), WASAPI, 3 ms",
-        "Realtek ASIO, ASIO, 23,2 ms, esclusiva: può zittire NVDA"], 0)]
+        "Realtek ASIO, ASIO, 23.2 ms, esclusiva: può zittire NVDA"], 0)]
     assert applicate == [{"dispositivo": "Realtek ASIO", "interfaccia": "ASIO"}]
     assert finestra.impostazioni["scheda_audio"] == {"dispositivo": "Realtek ASIO", "interfaccia": "ASIO"}
     assert _salvate(finestra)["scheda_audio"] == {"dispositivo": "Realtek ASIO", "interfaccia": "ASIO"}
@@ -2631,18 +2631,18 @@ def test_scheda_audio_all_avvio_che_non_si_apre(app, tmp_path, monkeypatch, suon
 
 def test_velocita_e_tono_coi_tasti(finestra, suoni_annotati):
     righe = len(finestra._righe)
-    assert _premi(finestra, "d") == "Velocità 1,05."
-    assert _premi(finestra, "d") == "Velocità 1,1."
+    assert _premi(finestra, "d") == "Velocità 1.05."
+    assert _premi(finestra, "d") == "Velocità 1.1."
     assert finestra.motore.velocita == 1.1 and finestra.impostazioni["velocita"] == 1.1
     # La riga della velocita' si riscrive: una sola, per il display braille.
     assert len(finestra._righe) == righe + 1
-    assert _premi(finestra, "a") == "Velocità 1,05."
+    assert _premi(finestra, "a") == "Velocità 1.05."
     assert _premi(finestra, "s") == "Velocità 1, la normale."
     assert suoni_annotati[-4:] == ["velocita_su", "velocita_su", "velocita_giu", "velocita_normale"]
     assert finestra.motore.velocita == 1.0
     for _ in range(11):
         _tasto(finestra, "a")
-    assert _ultima(finestra) == "Velocità già al minimo, 0,5." and suoni_annotati[-1] == "velocita_al_limite"
+    assert _ultima(finestra) == "Velocità già al minimo, 0.5." and suoni_annotati[-1] == "velocita_al_limite"
     assert finestra.motore.velocita == 0.5 and _salvate(finestra)["velocita"] == 0.5
     # Una velocita' fuori passo, scritta a mano nel file, arriva al limite.
     finestra.impostazioni["velocita"] = 1.98
@@ -2705,7 +2705,7 @@ def test_dissolvenza_coi_tasti(finestra, monkeypatch, suoni_annotati):
     assert suoni_annotati[-1] == "dissolvenza_accesa" and finestra.motore.dissolvenza == 4.0
     assert _salvate(finestra)["dissolvenza"] == {"accesa": True, "secondi": 4.0}
     monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("2,5"))
-    assert _premi(finestra, "l", maiuscolo=True) == "Dissolvenza accesa, 2,5 secondi."
+    assert _premi(finestra, "l", maiuscolo=True) == "Dissolvenza accesa, 2.5 secondi."
     assert suoni_annotati[-2:] == ["domanda", "dissolvenza_durata"] and finestra.motore.dissolvenza == 2.5
     # Oltre i limiti si corregge, e la console lo dice.
     monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("20"))
@@ -2732,8 +2732,8 @@ def test_impostazioni_di_velocita_tono_equalizzatore_e_dissolvenza(finestra, mon
     assert campo.aperture[0]["testo"] == "1" and "Adesso è 1." in campo.aperture[0]["istruzioni"]
     assert campo.aperture[0]["istruzioni"][-1] == modulo.REGOLA_DEL_DOLLARO
     assert finestra.motore.velocita == 1.05 and _salvate(finestra)["velocita"] == 1.05
-    assert lista.righe["velocita"] == "Velocità: 1,05"
-    assert _ultima(finestra) == "La velocità ora è 1,05. Velocità: 1,07 va a passi di 0,05, ho messo 1,05."
+    assert lista.righe["velocita"] == "Velocità: 1.05"
+    assert _ultima(finestra) == "La velocità ora è 1.05. Velocità: 1.07 va a passi di 0.05, ho messo 1.05."
     campo, lista = _cambia(finestra, monkeypatch, "tono", "su", "+15")
     assert [a["testo"] for a in campo.aperture] == ["0", "su"]
     assert campo.aperture[1]["titolo"] == "Tono: su non è un numero; scrivi un numero intero da -12 a +12. Tono"
@@ -2753,12 +2753,12 @@ def test_impostazioni_di_velocita_tono_equalizzatore_e_dissolvenza(finestra, mon
     campo, lista = _cambia(finestra, monkeypatch, "dissolvenza", "2,5")
     assert campo.aperture[0]["testo"] == "spenta, 4 secondi"
     assert finestra.motore.dissolvenza == 2.5 and _salvate(finestra)["dissolvenza"] == {"accesa": True, "secondi": 2.5}
-    assert lista.righe["dissolvenza"] == "Dissolvenza: accesa, 2,5 secondi"
-    assert _ultima(finestra) == "La dissolvenza ora è accesa, 2,5 secondi."
+    assert lista.righe["dissolvenza"] == "Dissolvenza: accesa, 2.5 secondi"
+    assert _ultima(finestra) == "La dissolvenza ora è accesa, 2.5 secondi."
     # No la spegne, e la durata resta per quando si riaccende.
     _cambia(finestra, monkeypatch, "dissolvenza", "no")
     assert finestra.motore.dissolvenza == 0 and finestra.impostazioni["dissolvenza"] == {"accesa": False, "secondi": 2.5}
-    assert _ultima(finestra) == "La dissolvenza ora è spenta, 2,5 secondi."
+    assert _ultima(finestra) == "La dissolvenza ora è spenta, 2.5 secondi."
     assert suoni_annotati.count("impostazione_cambiata") == 7
 
 
@@ -2773,9 +2773,9 @@ def test_avvio_con_velocita_tono_equalizzatore_e_dissolvenza_salvati(app, tmp_pa
     f = Finestra(ao="null", cartella_dati=str(tmp_path))
     try:
         assert (f.motore.velocita, f.motore.tono, f.motore.bande, f.motore.dissolvenza) == (1.25, -2, [3, 0, 0, 0, 0, 0, -4], 2.5)
-        assert [_senza_ora(r) for r in f._righe][1] == "Velocità 1,25 e tono -2 semitoni: S e G li riportano al normale."
+        assert [_senza_ora(r) for r in f._righe][1] == "Velocità 1.25 e tono -2 semitoni: S e G li riportano al normale."
         assert f._riga_dell_impostazione("bande") == "Equalizzatore: +3 0 0 0 0 0 -4 dB"
-        assert f._riga_dell_impostazione("dissolvenza") == "Dissolvenza: accesa, 2,5 secondi"
+        assert f._riga_dell_impostazione("dissolvenza") == "Dissolvenza: accesa, 2.5 secondi"
         f.Close(force=True)
     finally:
         f.Destroy()
