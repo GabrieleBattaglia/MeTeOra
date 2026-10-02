@@ -18,14 +18,16 @@ import pytest
 
 import formati
 import motore
+import schedario
 
 SECONDI = 6.0
 # Le codifiche allungano un poco il file: i PCM di libmpv arrivano a un
 # multiplo di 1024 campioni, 6.144 secondi, e TTA ai suoi blocchi.
 DURATA_MASSIMA = 6.3
 # L'AAC grezzo, senza contenitore (ADTS), non scrive la durata: FFmpeg la
-# stima dal bitrate, e sui sei secondi di prova dice quasi sedici. Si
-# controlla solo che si apra, che ci si salti dentro e che finisca.
+# stima dal bitrate, e sui sei secondi di prova dice quasi sedici. Nel motore
+# si controlla solo che si apra, che ci si salti dentro e che finisca; lo
+# schedario, che da' la durata alla plancia, la conta giusta (1.62.4).
 DURATA_STIMATA = {"aac"}
 # Estensione: (codificatore, contenitore) per la codifica di libmpv.
 FORMATI = {
@@ -93,6 +95,9 @@ def file_di_prova(tmp_path_factory):
 def test_il_formato_si_riconosce_si_apre_si_salta_e_finisce(file_di_prova, estensione):
     percorso = str(file_di_prova[estensione])
     assert formati.supportato(percorso)
+    # La durata della plancia: mutagen, libmpv per i formati che mutagen non
+    # conosce, e per l'AAC grezzo il conto dei fotogrammi (1.62.4).
+    assert SECONDI <= schedario.leggi_scheda(percorso)["durata"] <= DURATA_MASSIMA, estensione
     finiti, errori = [], []
     m = motore.Motore(ao="null", alla_fine=lambda: finiti.append(True), all_errore=errori.append)
     try:

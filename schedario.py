@@ -1,6 +1,6 @@
 # MeTeOra, lo schedario: durata, dimensione e tag dei file, ricordati fra un avvio e l'altro.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la 1.7.0, per le durate delle playlist (issue 4) e poi per il filtro (issue 2).
+# 30/09/2026: nasce con la 1.7.0, per le durate delle playlist (issue 4) e poi per il filtro (issue 2). Nella 1.62.4 le durate da libmpv per i formati che mutagen non conosce, e quella esatta dell'AAC grezzo.
 
 """Lo schedario dei file.
 
@@ -13,8 +13,10 @@ c'e', altrimenti la chiede e viene avvisato quando arriva. In ogni sessione
 ogni file si ricontrolla una volta, confrontando dimensione e data.
 """
 
+import atexit
 import contextlib
 import json
+import mmap
 import os
 import queue
 import threading
@@ -39,6 +41,91 @@ def _anno(testo):
     return None
 
 
+# Le frequenze dell'AAC grezzo (ADTS), per indice.
+_FREQUENZE_ADTS = (96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350)
+# Quanto si aspetta libmpv per un file, al massimo.
+ATTESA_DELLA_SONDA = 5.0
+
+
+def durata_adts(percorso):
+    """La durata vera di un AAC grezzo (ADTS), contando i fotogrammi: il
+    formato non la scrive, e mutagen e FFmpeg la stimano dal bitrate,
+    sbagliando di molto (tappa 6, 1.62.4). None se non e' un ADTS."""
+    with open(percorso, "rb") as f:
+        if os.fstat(f.fileno()).st_size < 7:
+            return None
+        with mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as dati:
+            posizione = 0
+            if dati[:3] == b"ID3" and len(dati) >= 10:
+                posizione = 10 + ((dati[6] & 0x7F) << 21 | (dati[7] & 0x7F) << 14 | (dati[8] & 0x7F) << 7 | (dati[9] & 0x7F))
+            campioni, frequenza = 0, None
+            while posizione + 7 <= len(dati):
+                testa = dati[posizione:posizione + 7]
+                indice = (testa[2] >> 2) & 0x0F
+                lunghezza = ((testa[3] & 0x03) << 11) | (testa[4] << 3) | (testa[5] >> 5)
+                if testa[0] != 0xFF or (testa[1] & 0xF6) != 0xF0 or lunghezza < 7 or indice >= len(_FREQUENZE_ADTS):
+                    break
+                frequenza = frequenza or _FREQUENZE_ADTS[indice]
+                campioni += 1024 * ((testa[6] & 0x03) + 1)
+                posizione += lunghezza
+    return campioni / frequenza if frequenza else None
+
+
+class _Sonda:
+    """Un'istanza di libmpv muta e in pausa, che apre un file solo per
+    leggerne la durata: per i formati che mutagen non conosce, come Matroska,
+    AU, CAF e i tracker (tappa 6, 1.62.4)."""
+
+    def __init__(self):
+        import motore
+
+        self._mpv_modulo = motore.mpv
+        # Muta per l'uscita nulla e la pausa: con audio=no mpv chiuderebbe il
+        # file senza dire la durata.
+        self._mpv = motore.mpv.MPV(**{**motore.OPZIONI_DI_BASE, "ao": "null", "pause": True})
+        self._caricato = threading.Event()
+        self._mpv.register_event_callback(self._evento)
+
+    def _evento(self, evento):
+        # Il file e' aperto, o non si apre: la fine per lo stop del file di
+        # prima non conta.
+        identita = evento.event_id.value
+        errore = identita == self._mpv_modulo.MpvEventID.END_FILE and evento.data.reason == self._mpv_modulo.MpvEventEndFile.ERROR
+        if identita == self._mpv_modulo.MpvEventID.FILE_LOADED or errore:
+            self._caricato.set()
+
+    def durata(self, percorso):
+        self._caricato.clear()
+        try:
+            self._mpv.loadfile(percorso)
+            if not self._caricato.wait(ATTESA_DELLA_SONDA):
+                return None
+            durata = self._mpv.duration
+        except Exception:  # noqa: BLE001 - un file rovinato non deve fermare lo schedario
+            return None
+        finally:
+            with contextlib.suppress(Exception):
+                self._mpv.stop()
+        return float(durata) if durata else None
+
+    def chiudi(self):
+        self._mpv.terminate()
+
+
+_SONDA = []
+_SONDA_BLOCCO = threading.Lock()
+
+
+def durata_da_mpv(percorso):
+    """La durata letta da libmpv, con la sonda aperta alla prima richiesta e
+    chiusa all'uscita; None se libmpv non la sa."""
+    with _SONDA_BLOCCO:
+        if not _SONDA:
+            _SONDA.append(_Sonda())
+            atexit.register(_SONDA[0].chiudi)
+        return _SONDA[0].durata(percorso)
+
+
 def leggi_scheda(percorso):
     """La scheda di un file: dimensione, data di modifica, durata in secondi
     (None se non si sa), tag, e per i SID il numero dei sottobrani."""
@@ -61,9 +148,14 @@ def leggi_scheda(percorso):
         audio = mutagen.File(percorso, easy=True)
     except Exception:  # noqa: BLE001 - un file rovinato non deve fermare lo schedario
         audio = None
+    if formati.estensione(percorso) == ".aac":
+        with contextlib.suppress(OSError, ValueError):
+            scheda["durata"] = durata_adts(percorso)
+    if audio is not None and scheda["durata"] is None and getattr(audio, "info", None) is not None and getattr(audio.info, "length", None):
+        scheda["durata"] = float(audio.info.length)
+    if scheda["durata"] is None:
+        scheda["durata"] = durata_da_mpv(percorso)
     if audio is not None:
-        if getattr(audio, "info", None) is not None and getattr(audio.info, "length", None):
-            scheda["durata"] = float(audio.info.length)
         tags = audio.tags or {}
 
         def primo(chiave):
@@ -104,7 +196,11 @@ class Schedario:
         except (OSError, ValueError):
             return
         if dati.get("versione") == VERSIONE_DEL_FILE and isinstance(dati.get("schede"), dict):
-            self.schede = dati["schede"]
+            # Dalla 1.62.4 le durate che mutagen non sapeva le legge libmpv, e
+            # quella dell'AAC grezzo si conta: le schede senza durata, e quelle
+            # degli AAC, si rileggono.
+            self.schede = {chiave: scheda for chiave, scheda in dati["schede"].items()
+                if formati.e_sid(chiave) or (scheda.get("durata") is not None and formati.estensione(chiave) != ".aac")}
 
     def salva(self):
         if not self._modificato:
