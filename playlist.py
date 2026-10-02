@@ -1,6 +1,6 @@
 # MeTeOra, le playlist: brani, playlist, archivio e coda di riproduzione.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 il sottobrano dei SID, nella 1.3.0 il loop A-B, nella 1.6.0 i Preferiti, nella 1.8.0 il filtro.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 il sottobrano dei SID, nella 1.3.0 il loop A-B, nella 1.6.0 i Preferiti, nella 1.8.0 il filtro. Nella 1.59.0 Coda.altri, per la riproduzione casuale.
 
 """Il modello dei dati, senza finestre e senza suono.
 
@@ -250,10 +250,15 @@ class Coda:
     def precedente(self):
         return self._vicino(-1)
 
+    def altri(self):
+        """I brani non saltati della playlist, o del suo loop, tranne il
+        corrente."""
+        return [b for b in self._suonabili() if b is not self.corrente]
+
     def casuale(self, scelta=random.choice):
         """Un brano a caso fra quelli non saltati, diverso dal corrente
         quando ce n'e' piu' di uno."""
-        candidati = [b for b in self._suonabili() if b is not self.corrente] or self._suonabili()
+        candidati = self.altri() or self._suonabili()
         return scelta(candidati) if candidati else None
 
     def posizione(self):

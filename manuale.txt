@@ -28,7 +28,7 @@ Menu di un marker: Vai al marker, Rinomina, Elimina.
 Il brano in riproduzione e la voce selezionata sono due cose diverse: quando un brano finisce e ne parte un altro, la selezione resta dov'è. Nella plancia il brano che suona ha l'indicazione "in riproduzione" dopo il nome.
 Quando un brano finisce da solo
 Il brano che segue lo decide la plancia, come la leggeresti scendendo con la freccia giù. Se ciò che suona si vede nella plancia, cioè sta dentro rami tutti aperti, si passa alla voce suonabile che viene dopo: il file o il brano seguente, e dentro i rami aperti tutto ciò che contengono, sottobrani compresi. Un SID con i sottobrani aperti suona i sottobrani uno dopo l'altro; chiuso, lascia il posto al file che viene dopo. Finita una cartella o una playlist, se più avanti ce n'è un'altra aperta si entra lì; se davanti non c'è più niente di aperto, la riproduzione si ferma.
-Se ciò che suona non si vede, per esempio una cartella suonata con X da chiusa o un file aperto con Apri file, si segue la lista da cui è partito. Con il loop A-B attivo decide il loop. Z, B e N seguono la stessa regola.
+Se ciò che suona non si vede, per esempio una cartella suonata con X da chiusa o un file aperto con Apri file, si segue la lista da cui è partito. Con il loop A-B attivo decide il loop. Z, B e N seguono la stessa regola. Con la riproduzione casuale accesa, Maiuscolo con N, il brano che segue si sceglie a caso nello stesso campo.
 Con la dissolvenza accesa il brano che segue si sceglie con la stessa regola, ma un po' prima della fine, per prepararlo; quando la dissolvenza comincia MeTeOra ricontrolla, e se nel frattempo la plancia è cambiata suona quello giusto. La sezione Velocità, tono, equalizzatore e dissolvenza spiega come.
 I tasti
 Tutti i tasti funzionano in tutta la finestra, qualunque area abbia il fuoco. Quelli a lettera valgono anche nella plancia, dove per questo non si salta alle voci digitandone l'iniziale. F12 scrive questo elenco nella console.
@@ -41,6 +41,7 @@ C: pausa, e di nuovo C riprende.
 V: stop. Poi X riparte dall'inizio del brano.
 Z e B: il brano precedente e il successivo. Seguono la plancia come l'avanzamento automatico: se ciò che suona si vede, vanno alla voce suonabile prima o dopo, sottobrani compresi; se non si vede, seguono la lista da cui è partito.
 N: un brano a caso fra le voci suonabili che si vedono nella plancia; se ciò che suona non si vede, a caso nella sua lista.
+Maiuscolo con N: accende e spegne la riproduzione casuale. Accesa, quando un brano finisce da solo il seguente si sceglie a caso, fra quelli che l'avanzamento automatico potrebbe suonare: le voci suonabili che si vedono nella plancia, oppure la lista, il loop o la selezione da cui si suona, mai lo stesso brano due volte di fila. Z, B e gli altri tasti restano come sono. MeTeOra la ricorda anche alla riapertura.
 J e K: portano il fuoco nella plancia sulla playlist precedente e successiva a quella in cui sei, o a quella che suona; la aprono tutta, sottobrani compresi ma non gli elenchi dei marker, e suonano il suo primo elemento, se ne ha almeno uno. Senza una playlist di partenza, K va alla prima e J all'ultima.
 Le cifre da 1 a 9, e lo 0 per la decima: come J e K, con le prime dieci playlist salvate.
 Q ed E: indietro e avanti nel brano, di dieci secondi se non lo cambi.

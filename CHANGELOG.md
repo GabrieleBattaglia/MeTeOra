@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.59.0] - 2026-10-02
+
+- Maiuscolo con N accende e spegne la riproduzione casuale. Accesa, quando un brano finisce da solo il seguente si sceglie a caso fra quelli che l'avanzamento automatico potrebbe suonare: le voci che si vedono nella plancia, oppure la lista, il loop o la selezione da cui si suona. Con la dissolvenza il brano scelto è quello che entra sfumando. Z, B e gli altri tasti restano come sono, e MeTeOra ricorda la scelta alla riapertura; c'è anche nelle impostazioni. I suoni sono due avvisi del loop di prima, nella collezione di GBUtils V185. Chiesto da Gabriele nella issue 17.
+
 ## [1.58.4] - 2026-10-02
 
 - Con la dissolvenza accesa, la pausa, lo stop e il brano che esce da una dissolvenza fra due brani finivano con un piccolo taglio: la voce non arrivava a zero, ma si fermava a circa un settimo, l'ultimo gradino della discesa. Adesso scende fino al silenzio, e il brano si ferma un istante dopo. Trovato da una prova che falliva ogni tanto.

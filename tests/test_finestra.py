@@ -632,6 +632,85 @@ def test_maiuscolo_f8_aggancia_la_selezione(finestra, monkeypatch, suoni_annotat
     assert salvate["insegui"] is False
 
 
+def _nomi(candidati):
+    return [os.path.basename(c[1].percorso) for c in candidati]
+
+
+def test_maiuscolo_n_accende_e_spegne_la_riproduzione_casuale(finestra, suoni_annotati):
+    _tasto(finestra, "n", maiuscolo=True)
+    assert finestra.impostazioni["casuale"] is True and _salvate(finestra)["casuale"] is True
+    assert suoni_annotati[-1] == "casuale_acceso"
+    assert _ultima(finestra) == "Riproduzione casuale accesa: a fine brano il seguente si sceglie a caso."
+    _tasto(finestra, "n", maiuscolo=True)
+    assert finestra.impostazioni["casuale"] is False and _salvate(finestra)["casuale"] is False
+    assert suoni_annotati[-1] == "casuale_spento"
+    assert _ultima(finestra) == "Riproduzione casuale spenta: a fine brano si va avanti in ordine."
+
+
+def test_riproduzione_casuale_nella_plancia(finestra, monkeypatch, suoni_annotati):
+    suonati = _finto_motore(finestra, monkeypatch)
+    rock, _jazz = _playlist_di_prova(finestra, ("a.mp3", "b.mp3", "c.mp3"), ("x.mp3", "y.mp3"))
+    prima, seconda = finestra.archivio.playlist
+    finestra.impostazioni["casuale"] = True
+    scelte = []
+
+    def a_caso(candidati):
+        scelte.append(_nomi(candidati))
+        return candidati[-1]
+
+    finestra._a_caso = a_caso
+    finestra._suona(prima, prima.brani[0])
+    finestra._brano_finito()
+    # Fra tutte le voci suonabili che si vedono, tranne quella che suona.
+    assert scelte == [["b.mp3", "c.mp3", "x.mp3", "y.mp3"]]
+    assert suonati[-1] == ("y.mp3", None) and finestra.coda.playlist is seconda
+    assert suoni_annotati[-1] == "brano_seguente_da_solo"
+    # Una playlist chiusa esce dal campo.
+    finestra.albero.Collapse(rock)
+    finestra._brano_finito()
+    assert scelte[-1] == ["x.mp3"] and suonati[-1] == ("x.mp3", None)
+    # Z e B restano in ordine.
+    _tasto(finestra, "b")
+    assert suonati[-1] == ("y.mp3", None) and len(scelte) == 2
+
+
+def test_riproduzione_casuale_nella_lista_e_nel_loop(finestra, monkeypatch, suoni_annotati):
+    suonati = _finto_motore(finestra, monkeypatch)
+    finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n in ("a.mp3", "b.mp3", "c.mp3", "d.mp3")])
+    pl = finestra.archivio.playlist[0]
+    finestra.impostazioni["casuale"] = True
+    scelte = []
+
+    def a_caso(candidati):
+        scelte.append(_nomi(candidati))
+        return candidati[0]
+
+    finestra._a_caso = a_caso
+    # La playlist e' chiusa: decide la lista.
+    finestra._suona(pl, pl.brani[2])
+    finestra._brano_finito()
+    assert scelte[-1] == ["a.mp3", "b.mp3", "d.mp3"] and suonati[-1] == ("a.mp3", None)
+    # Nel loop si sceglie fra A e B, e tornare indietro non e' il ritorno al
+    # punto A.
+    finestra.coda.loop_playlist, finestra.coda.punto_a, finestra.coda.punto_b = pl, pl.brani[1], pl.brani[2]
+    finestra._suona(pl, pl.brani[2])
+    finestra._brano_finito()
+    assert scelte[-1] == ["b.mp3"] and suonati[-1] == ("b.mp3", None)
+    assert suoni_annotati[-1] == "brano_seguente_da_solo"
+    # Il loop su un brano solo lo ripete, come in ordine.
+    finestra.coda.punto_a = finestra.coda.punto_b = pl.brani[3]
+    finestra._suona(pl, pl.brani[3])
+    finestra._brano_finito()
+    assert len(scelte) == 2 and suonati[-1] == ("d.mp3", None)
+    assert suoni_annotati[-1] == "ritorno_al_punto_a"
+    # Senza altri brani nella lista, la riproduzione finisce.
+    finestra.coda.togli_loop()
+    for brano in pl.brani[:3]:
+        brano.saltato = True
+    finestra._brano_finito()
+    assert _ultima(finestra).startswith("Fine")
+
+
 def test_ricerca_globale(finestra, monkeypatch, suoni_annotati, tmp_path):
     from filtro import Filtro
 
@@ -1888,6 +1967,7 @@ def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_an
         ("tono", "Tono: 0 semitoni"),
         ("bande", "Equalizzatore: piatto, tutte le bande a 0 dB"),
         ("dissolvenza", "Dissolvenza: spenta, 4 secondi"),
+        ("casuale", "Riproduzione casuale (Maiuscolo+N): no"),
         ("insegui", "Inseguimento della plancia (Maiuscolo+F8): no"),
         ("caratteri", "Dimensioni dei caratteri: quelle di Windows"),
         ("colori_testo", "Colori dei caratteri: quelli di Windows"),
@@ -1970,6 +2050,19 @@ def test_impostazioni_inseguimento(finestra, monkeypatch, suoni_annotati):
     _cambia(finestra, monkeypatch, "insegui", "spento")
     assert finestra.impostazioni["insegui"] is False and inseguiti == [True]
     assert _ultima(finestra) == "Inseguimento sganciato: la selezione resta dove la lasci."
+
+
+def test_impostazioni_riproduzione_casuale(finestra, monkeypatch, suoni_annotati):
+    campo, lista = _cambia(finestra, monkeypatch, "casuale", "forse", "acceso")
+    assert [a["testo"] for a in campo.aperture] == ["no", "forse"]
+    assert campo.aperture[1]["titolo"].startswith("Riproduzione casuale: forse non è né sì né no; scrivi sì o no.")
+    assert "Adesso è spenta." in campo.aperture[0]["istruzioni"]
+    assert finestra.impostazioni["casuale"] is True and _salvate(finestra)["casuale"] is True
+    assert lista.righe["casuale"] == "Riproduzione casuale (Maiuscolo+N): sì"
+    assert _ultima(finestra) == "Riproduzione casuale accesa: a fine brano il seguente si sceglie a caso."
+    _cambia(finestra, monkeypatch, "casuale", "no")
+    assert finestra.impostazioni["casuale"] is False
+    assert _ultima(finestra) == "Riproduzione casuale spenta: a fine brano si va avanti in ordine."
 
 
 def test_impostazioni_righe_della_console_tagliano_subito(finestra, monkeypatch):
@@ -2802,6 +2895,29 @@ def test_passaggio_con_la_dissolvenza_nel_loop(finestra, monkeypatch, suoni_anno
     assert preparati == [("a.mp3", None)]
     _entra(finestra, pl.brani[0].percorso)
     assert finestra.coda.corrente is pl.brani[0] and suoni_annotati[-1] == "ritorno_al_punto_a"
+
+
+def test_riproduzione_casuale_con_la_dissolvenza_tiene_la_scelta(finestra, monkeypatch, suoni_annotati):
+    suonati, preparati = _motore_che_prepara(finestra, monkeypatch)
+    _playlist_di_prova(finestra, ("a.mp3", "b.mp3", "c.mp3", "d.mp3"))
+    pl = finestra.archivio.playlist[0]
+    finestra.impostazioni["casuale"] = True
+    estratti = iter([2, 0, 1])
+    finestra._a_caso = lambda candidati: candidati[next(estratti)]
+    finestra._suona(pl, pl.brani[0])
+    finestra._prepara_il_seguente()
+    assert preparati == [("d.mp3", None)]
+    # Al passaggio il ricontrollo trova la stessa scelta, senza estrarre di
+    # nuovo: entra il preparato, e non si suona altro.
+    _entra(finestra, pl.brani[3].percorso)
+    assert finestra.coda.corrente is pl.brani[3] and suonati == [("a.mp3", None)]
+    assert suoni_annotati[-1] == "brano_seguente_da_solo"
+    # Se il brano scelto non si puo' piu' suonare, si estrae di nuovo.
+    finestra._prepara_il_seguente()
+    assert preparati[-1] == ("a.mp3", None)
+    pl.brani[0].saltato = True
+    _entra(finestra, pl.brani[0].percorso)
+    assert suonati[-1] == ("c.mp3", None) and finestra.coda.corrente is pl.brani[2]
 
 
 def test_passaggio_al_giusto_che_e_lo_stesso_file(finestra, monkeypatch, suoni_annotati):

@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17).
 
 """La finestra di MeTeOra.
 
@@ -103,6 +103,7 @@ TASTI = {
     ("v", False): "stop",
     ("b", False): "successivo",
     ("n", False): "casuale",
+    ("n", True): "riproduzione_casuale",
     ("m", False): "muto",
     ("q", False): "indietro",
     ("e", False): "avanti",
@@ -154,7 +155,7 @@ FUTURI = {"'": "scelta della traccia audio", "ì": "scelta della traccia audio"}
 FUTURI_MAIUSCOLI = {}
 
 TASTI_COMUNI = [
-    "X riproduce la voce selezionata o riprende, C pausa, V stop, Z e B brano precedente e successivo, N brano a caso.",
+    "X riproduce la voce selezionata o riprende, C pausa, V stop, Z e B brano precedente e successivo, N brano a caso, Maiuscolo con N la riproduzione casuale.",
     "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, + e - volume, Maiuscolo+M il passo del volume, M muto.",
     "A e D rallentano e accelerano, S torna alla velocità normale; F e H abbassano e alzano il tono di un semitono, G lo riporta al normale.",
     "U e I scelgono la banda dell'equalizzatore, O e P la alzano e la abbassano di un dB, È la azzera, Maiuscolo con È le azzera tutte.",
@@ -187,6 +188,18 @@ TASTI_DEL_CONTESTO = {
 # Le voci della finestra delle impostazioni, in ordine: chiave -> (etichetta,
 # participio per dire che non e' cambiata; None per le voci che fanno
 # un'azione invece di cambiare un valore).
+def _stesso_posto(a, b):
+    """Vero se due (playlist, brano, sottobrano) sono lo stesso posto: la
+    stessa playlist e lo stesso brano, non due uguali, e lo stesso numero."""
+    return a[0] is b[0] and a[1] is b[1] and a[2] == b[2]
+
+
+def _frase_della_casuale(accesa):
+    if accesa:
+        return "Riproduzione casuale accesa: a fine brano il seguente si sceglie a caso."
+    return "Riproduzione casuale spenta: a fine brano si va avanti in ordine."
+
+
 VOCI_DELLE_IMPOSTAZIONI = {
     "volume": ("Volume della musica", "cambiato"),
     "passo_volume": ("Passo del volume", "cambiato"),
@@ -198,6 +211,7 @@ VOCI_DELLE_IMPOSTAZIONI = {
     "tono": ("Tono", "cambiato"),
     "bande": ("Equalizzatore", "cambiato"),
     "dissolvenza": ("Dissolvenza", "cambiata"),
+    "casuale": ("Riproduzione casuale (Maiuscolo+N)", "cambiata"),
     "insegui": ("Inseguimento della plancia (Maiuscolo+F8)", "cambiato"),
     "caratteri": ("Dimensioni dei caratteri", "cambiate"),
     "colori_testo": ("Colori dei caratteri", "cambiati"),
@@ -473,6 +487,9 @@ class Finestra(wx.Frame):
         # ricontrollare. None fuori da un passaggio preparato.
         self._uscente = None
         self._preparato = None
+        # La scelta della riproduzione casuale, come (cio' che suona, il
+        # seguente scelto): vedi _seguente_casuale.
+        self._casuale_ricordato = None
         # La banda dell'equalizzatore scelta con U e I, contata da zero: si
         # parte dalla prima, quella dei 60 Hz.
         self._banda = 0
@@ -2571,15 +2588,57 @@ class Finestra(wx.Frame):
         sottobrano e' quello del brano che finisce, se non e' quello del
         motore, come al passaggio della dissolvenza."""
         voce = self._voce_da_seguire(sottobrano)
+        if self.impostazioni["casuale"]:
+            seguente = self._seguente_casuale(voce, sottobrano)
+            if seguente is not None:
+                return seguente
         if voce is not None:
             return self._passo_in_plancia(voce, 1)
         seguente = self.coda.successivo()
         return (self.coda.playlist, seguente, None) if seguente else None
 
+    def _candidati_in_plancia(self, voce):
+        """Le voci suonabili che si vedono nella plancia, tranne voce."""
+        return [v for v in self._tutte_le_voci() if v != voce and self._visibile(v) and self._suonabile_in_plancia(v)]
+
+    def _seguente_casuale(self, voce, sottobrano):
+        """Con la riproduzione casuale accesa (issue 17), il seguente a caso
+        nel campo dell'avanzamento automatico, diverso da cio' che suona: fra
+        le voci suonabili che si vedono nella plancia, se a decidere e' la
+        plancia; altrimenti nella lista, nel loop o nella selezione. None se
+        non c'e' altro, e allora decide l'avanzamento in ordine, che nel loop
+        sullo stesso brano lo fa ripetere.
+        La scelta resta la stessa finche' suona lo stesso brano: con la
+        dissolvenza il seguente si chiede due volte, per prepararlo e per
+        ricontrollarlo al passaggio, e una seconda estrazione farebbe
+        suonare un altro brano al posto di quello preparato. Si rifa' se il
+        brano scelto non e' piu' fra quelli possibili."""
+        if voce is not None:
+            candidati = [(d["playlist"], d["brano"], d.get("numero")) for d in map(self._dati, self._candidati_in_plancia(voce))]
+        else:
+            candidati = [(self.coda.playlist, brano, None) for brano in self.coda.altri()]
+        if not candidati:
+            return None
+        suona = (self.coda.playlist, self.coda.corrente, self.motore.sottobrano if sottobrano is None else sottobrano)
+        ricordato = self._casuale_ricordato
+        if ricordato is not None and _stesso_posto(ricordato[0], suona):
+            scelto = next((c for c in candidati if _stesso_posto(c, ricordato[1])), None)
+            if scelto is not None:
+                return scelto
+        scelto = self._a_caso(candidati)
+        self._casuale_ricordato = (suona, scelto)
+        return scelto
+
+    # La scelta a caso, che le prove sostituiscono.
+    _a_caso = staticmethod(random.choice)
+
     def _evento_del_seguente(self, nuova, brano):
         """Il suono del passaggio automatico al brano della playlist nuova:
         nel loop, dopo il punto B si torna al punto A, e ha un suono suo. Da
         chiedere prima di spostare la coda."""
+        if self.impostazioni["casuale"] and brano is not self.coda.corrente:
+            # A caso non si torna al punto A: si va da un'altra parte.
+            return "brano_seguente_da_solo"
         pl = self.coda.playlist
         prima = pl.indice(self.coda.corrente) if pl else None
         dopo = nuova.indice(brano)
@@ -2868,7 +2927,7 @@ class Finestra(wx.Frame):
                 return
             self._suona(self.coda.playlist, brano, "casuale")
             return
-        candidati = [v for v in self._tutte_le_voci() if v != voce and self._visibile(v) and self._suonabile_in_plancia(v)]
+        candidati = self._candidati_in_plancia(voce)
         if not candidati:
             self._riscontro("nessun_altro_brano", "Nella plancia non si vede nient'altro da suonare.")
             return
@@ -3118,6 +3177,16 @@ class Finestra(wx.Frame):
         evento = "dissolvenza_accesa" if dissolvenza["accesa"] else "dissolvenza_spenta"
         self._riscontro(evento, f"Dissolvenza {valori.scrivi_dissolvenza(dissolvenza)}.", "dissolvenza")
 
+    def _comando_riproduzione_casuale(self):
+        """Maiuscolo con N: accende e spegne la riproduzione casuale (issue
+        17). Vale solo quando un brano finisce da solo: Z, B e gli altri tasti
+        restano come sono."""
+        accesa = not self.impostazioni["casuale"]
+        self.impostazioni["casuale"] = accesa
+        self._casuale_ricordato = None
+        self._salva_impostazioni()
+        self._riscontro("casuale_acceso" if accesa else "casuale_spento", _frase_della_casuale(accesa))
+
     def _comando_durata_della_dissolvenza(self):
         """Maiuscolo con L: chiede la durata della dissolvenza in secondi. La
         dissolvenza resta accesa o spenta com'era."""
@@ -3178,6 +3247,7 @@ class Finestra(wx.Frame):
             "tono": lambda: valori.scrivi_tono(imp["tono"]),
             "bande": self._bande_da_leggere,
             "dissolvenza": lambda: valori.scrivi_dissolvenza(imp["dissolvenza"]),
+            "casuale": lambda: "sì" if imp["casuale"] else "no",
             "insegui": lambda: "sì" if imp["insegui"] else "no",
             "caratteri": self._caratteri_da_leggere,
             "colori_testo": lambda: self._colori_da_leggere("colori_testo"),
@@ -3317,6 +3387,12 @@ class Finestra(wx.Frame):
                 f"Scrivi no per spegnerla, sì per accenderla, oppure i secondi, da {minima} a {massima}, anche con i decimali, per accenderla con quella durata. Per esempio 4 o 2,5.",
                 "Anche L la accende e la spegne, e Maiuscolo con L ne cambia la durata, dalla finestra principale.",
                 f"Adesso è {valori.scrivi_dissolvenza(imp['dissolvenza'])}.", REGOLA_DEL_DOLLARO], valori.scrivi_dissolvenza(imp["dissolvenza"])
+        if chiave == "casuale":
+            return (lambda testo: valori.leggi_si_no(testo, "Riproduzione casuale")), [
+                "Con la riproduzione casuale accesa, quando un brano finisce da solo il seguente si sceglie a caso, fra quelli che l'avanzamento automatico "
+                "potrebbe suonare: le voci che si vedono nella plancia, oppure la lista, il loop o la selezione da cui si suona. Z, B e gli altri tasti restano come sono.",
+                "Scrivi sì per accenderla, no per spegnerla; valgono anche s, n, 1, 0, acceso e spento. Anche Maiuscolo con N la accende e la spegne.",
+                f"Adesso è {'accesa' if imp['casuale'] else 'spenta'}.", REGOLA_DEL_DOLLARO], "sì" if imp["casuale"] else "no"
         if chiave == "insegui":
             return valori.leggi_si_no, [
                 "Con l'inseguimento agganciato, a ogni cambio di brano la selezione della plancia va da sola su ciò che suona, senza spostare il fuoco.",
@@ -3373,6 +3449,9 @@ class Finestra(wx.Frame):
         if chiave == "dissolvenza":
             self._applica_la_dissolvenza()
             return f"La dissolvenza ora è {valori.scrivi_dissolvenza(valore)}."
+        if chiave == "casuale":
+            self._casuale_ricordato = None
+            return _frase_della_casuale(valore)
         if chiave == "insegui":
             if not valore:
                 return "Inseguimento sganciato: la selezione resta dove la lasci."

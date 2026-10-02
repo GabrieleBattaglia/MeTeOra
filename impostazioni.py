@@ -1,13 +1,14 @@
 # MeTeOra, le impostazioni: i valori che il programma ricorda fra un avvio e l'altro.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 le righe della console. Nella 1.51.0 caratteri, colori e scheda audio, e i limiti controllati alla lettura del file. Nella 1.51.2 un file con un JSON che non e' un dizionario non ferma l'avvio. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza (tappa 4, issue 15).
+# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 le righe della console. Nella 1.51.0 caratteri, colori e scheda audio, e i limiti controllati alla lettura del file. Nella 1.51.2 un file con un JSON che non e' un dizionario non ferma l'avvio. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza (tappa 4, issue 15). Nella 1.59.0 la riproduzione casuale (issue 17).
 
 """Le impostazioni, in un file JSON accanto al programma.
 
 Dalla 1.51.0 si cambiano dalla finestra delle impostazioni, la voce
 Impostazioni della plancia, che le applica e le salva subito; alcune anche
 con i tasti (il volume, il suo passo, i salti di Q ed E, l'inseguimento,
-e dalla 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza).
+dalla 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza, e
+dalla 1.59.0 la riproduzione casuale).
 Il testo scritto nei campi lo legge valori.py, che tiene anche i limiti.
 Un valore mancante o sbagliato nel file prende il predefinito: sbagliato vuol
 dire di un altro tipo, o fuori dai limiti che controlla CONTROLLI. Le chiavi
@@ -47,6 +48,9 @@ PREDEFINITE = {
     "volume_effetti": 0.5,
     # Maiuscolo+F8: la selezione della plancia segue il brano che suona.
     "insegui": False,
+    # Maiuscolo con N: quando un brano finisce da solo, il seguente si sceglie
+    # a caso (issue 17).
+    "casuale": False,
     # Cosa suonava all'uscita, per riprendere da li' in pausa.
     "ripresa": {},
     # Quante righe tiene la console.
