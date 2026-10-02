@@ -1002,3 +1002,38 @@ def test_attesa_del_sid(crea, tmp_path):
     m.suona(_silenzio(tmp_path / "brano.wav", 8))
     assert _aspetta(lambda: (m.posizione or 0) > 0)
     assert m.attesa_del_sid(7) == 0
+
+@pytest.mark.skipif(not os.path.isfile(TURBO_OUTRUN), reason="serve la collezione HVSC")
+def test_due_flussi_sullo_stesso_sid_condividono_la_resa(tmp_path):
+    import shutil
+
+    copia = tmp_path / "Turbo_Outrun.sid"
+    shutil.copy(TURBO_OUTRUN, copia)
+    primo = modulo.sid.apri_flusso(str(copia), 1, 30.0)
+    secondo = modulo.sid.apri_flusso(str(copia), 1, 30.0)
+    altro = modulo.sid.apri_flusso(str(copia), 2, 30.0)
+    try:
+        assert primo.brano is secondo.brano and altro.brano is not primo.brano
+        # La resa si ferma solo con l'ultimo flusso, e chiudere due volte non conta.
+        primo.close()
+        primo.close()
+        assert not secondo.brano._fermo
+        secondo.close()
+        assert secondo.brano._fermo
+    finally:
+        altro.close()
+
+
+@pytest.mark.skipif(not os.path.isfile(TURBO_OUTRUN), reason="serve la collezione HVSC")
+def test_marker_sfumato_su_un_sid_senza_silenzio(crea, tmp_path):
+    import shutil
+
+    copia = tmp_path / "Turbo_Outrun.sid"
+    shutil.copy(TURBO_OUTRUN, copia)
+    m = crea()
+    m.dissolvenza = 0.5
+    m.suona(str(copia), 1)
+    assert _aspetta(lambda: m._attivo.flusso is not None and m._attivo.flusso.brano.secondi_pronti() > 70, 15)
+    # Lo stesso SID entra sull'altro lettore dal secondo 60: la resa c'e' gia'.
+    m.suona(str(copia), 1, inizio=60, sfuma_lo_stesso=True)
+    assert _aspetta(lambda: (m.posizione or 0) > 60, 1.5)

@@ -1,4 +1,4 @@
-Collaudo di MeTeOra 1.62.1, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.62.1. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Collaudo di MeTeOra 1.62.2, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.62.2. Scrivi le note sulla riga della voce; le voci superate si cancellano.
 I decimali si leggono con il punto: la velocità con A e D, per esempio 1.05, e la dissolvenza, per esempio accesa, 2.5 secondi.
 Gli esempi nei campi di Maiuscolo con Q ed E, di Maiuscolo con L e delle impostazioni di velocità e dissolvenza usano il punto; se scrivi la virgola, si accetta ancora.
 W con il meno conta dalla fine: -12 va a dodici secondi dalla fine, -1:30 a un minuto e mezzo dalla fine.
@@ -14,3 +14,4 @@ Domanda: il mazzo non si ricorda alla riapertura di MeTeOra, e riparte intero; t
 Un SID parte quasi subito dopo X, anche il primo dopo l'avvio di MeTeOra.
 Su un SID appena partito, W con -12 dice Vado a e poi Il SID si prepara fino a, con i secondi da aspettare; la musica riparte più o meno dopo quei secondi.
 Dopo una decina di secondi d'ascolto dello stesso SID, i salti in avanti sono immediati e la riga dell'attesa non compare.
+Con la dissolvenza accesa, su un SID che suona da una decina di secondi, un marker lontano o X da capo sfumano subito, senza silenzio prima del punto d'arrivo.

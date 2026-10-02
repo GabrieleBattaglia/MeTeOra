@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.62.2] - 2026-10-02
+
+- Con la dissolvenza accesa, X da capo e i marker su un SID non lo rigenerano più dall'inizio: il SID che entra usa la musica già generata per quello che esce. Prima, un marker lontano dall'inizio faceva sfumare il brano verso qualche secondo di silenzio.
+
 ## [1.62.1] - 2026-10-02
 
 - Fermato un SID, la musica già generata restava in memoria finché quel lettore non apriva un altro brano: per un SID lungo, decine di megabyte. Ora si libera anche allo stop. Il difetto era nato nella 1.62.0.

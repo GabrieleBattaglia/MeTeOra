@@ -1,6 +1,6 @@
 # MeTeOra, i SID: emulazione in tempo reale su sidshim.dll, resa in RAM, senza disco.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: passa dai prototipi al programma con la tappa 1. Nella 1.61.1 il riscaldamento, per il primo SID. Nella 1.62.0 l'attesa di un punto non ancora reso.
+# 30/09/2026: passa dai prototipi al programma con la tappa 1. Nella 1.61.1 il riscaldamento, per il primo SID. Nella 1.62.0 l'attesa di un punto non ancora reso. Nella 1.62.2 apri_flusso, con la resa condivisa.
 
 """Motore SID in tempo reale su sidshim.dll: rendering a blocchi in RAM, senza disco."""
 import ctypes
@@ -117,11 +117,48 @@ def intestazione_wav(byte_dati):
     return b"RIFF" + struct.pack("<I", 36 + byte_dati) + b"WAVEfmt " + struct.pack("<IHHIIHH", 16, 1, c, f, f * c * 2, c * 2, 16) + b"data" + struct.pack("<I", byte_dati)
 
 
-class FlussoSid:
-    """Flusso WAV virtuale per register_stream_protocol di python-mpv, servito dalla RAM."""
+# I SID aperti, per chiave (percorso, sottobrano, secondi): il brano reso e
+# quanti flussi lo leggono.
+_CONDIVISI = {}
+_CONDIVISI_BLOCCO = threading.Lock()
 
-    def __init__(self, brano):
+
+def apri_flusso(percorso, sottobrano, secondi):
+    """Un flusso sul sottobrano dato. I flussi aperti insieme sullo stesso
+    sottobrano, con la stessa durata, leggono la stessa resa: con la
+    dissolvenza, X da capo e i marker caricano lo stesso SID sull'altro
+    lettore, e senza condividere lo rigenererebbero dall'inizio, con secondi
+    di silenzio prima del punto d'arrivo (tappa 5, 1.62.2). La resa si ferma
+    quando si chiude l'ultimo flusso."""
+    chiave = (os.path.normcase(os.path.abspath(percorso)), sottobrano, secondi)
+    with _CONDIVISI_BLOCCO:
+        voce = _CONDIVISI.get(chiave)
+        if voce is None:
+            voce = [BranoSid(percorso, sottobrano, secondi), 0]
+            _CONDIVISI[chiave] = voce
+        voce[1] += 1
+    return FlussoSid(voce[0], lambda: _lascia(chiave))
+
+
+def _lascia(chiave):
+    with _CONDIVISI_BLOCCO:
+        voce = _CONDIVISI[chiave]
+        voce[1] -= 1
+        if voce[1]:
+            return
+        del _CONDIVISI[chiave]
+    voce[0].ferma()
+
+
+class FlussoSid:
+    """Flusso WAV virtuale per register_stream_protocol di python-mpv, servito
+    dalla RAM. alla_chiusura, se c'e', prende il posto della fermata del
+    brano: e' apri_flusso a decidere quando fermarlo."""
+
+    def __init__(self, brano, alla_chiusura=None):
         self.brano = brano
+        self._alla_chiusura = alla_chiusura
+        self._chiuso = False
         self.testa = intestazione_wav(brano.totale * 2)
         self.size = len(self.testa) + brano.totale * 2
         self.pos = 0
@@ -144,4 +181,10 @@ class FlussoSid:
         return pos
 
     def close(self):
-        self.brano.ferma()
+        if self._chiuso:
+            return
+        self._chiuso = True
+        if self._alla_chiusura is not None:
+            self._alla_chiusura()
+        else:
+            self.brano.ferma()
