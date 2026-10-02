@@ -1,4 +1,4 @@
-Collaudo di MeTeOra 1.62.0, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.62.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Collaudo di MeTeOra 1.62.1, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.62.1. Scrivi le note sulla riga della voce; le voci superate si cancellano.
 I decimali si leggono con il punto: la velocità con A e D, per esempio 1.05, e la dissolvenza, per esempio accesa, 2.5 secondi.
 Gli esempi nei campi di Maiuscolo con Q ed E, di Maiuscolo con L e delle impostazioni di velocità e dissolvenza usano il punto; se scrivi la virgola, si accetta ancora.
 W con il meno conta dalla fine: -12 va a dodici secondi dalla fine, -1:30 a un minuto e mezzo dalla fine.

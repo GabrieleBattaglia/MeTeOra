@@ -231,6 +231,9 @@ class _Lettore:
         self.sottobrano = self.sottobrani = None
         self.voce = None
         self.pronto = False
+        # La musica gia' resa di un SID puo' pesare decine di megabyte: il
+        # riferimento si lascia anche qui, non solo al brano dopo (1.62.1).
+        self.flusso = None
         self._richieste += 1
         self.comando("stop")
 
