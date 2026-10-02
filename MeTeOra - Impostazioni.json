@@ -1,18 +1,19 @@
 {
  "volume": 101,
- "passo_volume": 1,
+ "passo_volume": 3,
  "passo_indietro": 3.0,
  "passo_avanti": 10.0,
- "volume_effetti": 0.35,
+ "volume_effetti": 0.45,
  "insegui": true,
  "casuale": true,
+ "modello_casuale": "una_volta",
  "ripresa": {
-  "percorso": "E:\\Music\\Abba\\Unknown Album\\Dancing Queen.m4a",
+  "percorso": "E:\\Music\\Le Canzoni della Melevisione - Gli scacchi sono un sogno.mp3",
   "sottobrano": null,
   "numero": 0,
-  "posizione": 0,
+  "posizione": 77.99933771021769,
   "tipo": "cartella",
-  "cartella": "E:\\Music\\Abba\\Unknown Album"
+  "cartella": "E:\\Music"
  },
  "righe_della_console": 2000,
  "caratteri": {},
@@ -58,7 +59,7 @@
   0,
   0,
   0,
-  0,
+  8,
   0,
   0
  ],
