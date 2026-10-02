@@ -1,6 +1,6 @@
 # MeTeOra, il motore di riproduzione: libmpv, e i SID in tempo reale.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario.
+# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7).
 
 """Due lettori libmpv per tutti i formati.
 
@@ -84,7 +84,7 @@ _FINE_PER_ERRORE = mpv.MpvEventEndFile.ERROR
 # di Python stampa come errori fatali.
 OPZIONI_DI_BASE = {"vo": "null", "video": "no", "config": False, "ytdl": False, "input_default_bindings": False, "osc": False,
     "load_stats_overlay": False, "load_console": False, "load_auto_profiles": False, "load_select": False, "load_commands": False,
-    "load_positioning": False, "load_context_menu": False}
+    "load_positioning": False, "load_context_menu": False, "input_vo_keyboard": False, "input_cursor": False}
 _EVENTI_UTILI = frozenset({mpv.MpvEventID.START_FILE, mpv.MpvEventID.FILE_LOADED, mpv.MpvEventID.END_FILE, mpv.MpvEventID.AUDIO_RECONFIG})
 
 
@@ -311,7 +311,8 @@ class _Calo:
 
 
 class Motore:
-    def __init__(self, alla_fine=None, all_errore=None, ao="wasapi", volume=80, chiedi_il_seguente=None, al_passaggio=None, opzioni_mpv=None):
+    def __init__(self, alla_fine=None, all_errore=None, ao="wasapi", volume=80, chiedi_il_seguente=None, al_passaggio=None, opzioni_mpv=None,
+            al_caricamento=None, ai_sottotitoli=None):
         """alla_fine() quando un brano finisce da solo e non c'e' un seguente
         preparato, o quando arriva in fondo in pausa, con un salto oltre la
         fine, e allora il preparato si scarta; all_errore(percorso) quando un brano non si puo' aprire o
@@ -323,11 +324,16 @@ class Motore:
         con la sfumatura o, se e' stato pronto troppo tardi, alla fine di
         quello di prima. Gli avvisi arrivano dai fili del motore.
         opzioni_mpv: altre opzioni di mpv, uguali per i due lettori; servono
-        alle prove (ao_pcm_file e simili)."""
+        alle prove (ao_pcm_file e simili).
+        Dalla tappa 7: al_caricamento() quando un lettore ha aperto il suo
+        brano, e se ne possono leggere le tracce; ai_sottotitoli(testo) a
+        ogni sottotitolo nuovo del brano in corso."""
         self._alla_fine = alla_fine
         self._all_errore = all_errore
         self._chiedi_il_seguente = chiedi_il_seguente
         self._al_passaggio = al_passaggio
+        self._al_caricamento = al_caricamento
+        self._ai_sottotitoli = ai_sottotitoli
         self._blocco = threading.RLock()
         self._sveglia = threading.Condition(self._blocco)
         self._riposo = threading.Event()
@@ -364,6 +370,8 @@ class Motore:
             raise
         self._lettori = tuple(lettori)
         self._attivo = self._lettori[0]
+        for lettore in self._lettori:
+            lettore.mpv.observe_property("sub-text", functools.partial(self._sottotitolo, lettore))
         self._sorvegliante = threading.Thread(target=self._sorveglia, name="MeTeOra, dissolvenza", daemon=True)
         self._sorvegliante.start()
         sid.riscalda()
@@ -397,6 +405,7 @@ class Motore:
                 if lettore.voce is not None and lettore._avviata == lettore.voce:
                     lettore.pronto = True
                     self._cambiato()
+                    avviso = self._al_caricamento
             elif identita == mpv.MpvEventID.END_FILE:
                 # Un brano sostituito o fermato finisce con il motivo STOP; e la
                 # fine di un brano gia' sostituito da un altro non conta.
@@ -690,6 +699,71 @@ class Motore:
             self._attivo.imposta("af", self._catena())
             self._attivo.comando("seek", str(secondi), riferimento, "exact")
             self._cambiato()
+
+    # Il video e i sottotitoli, tappa 7.
+
+    def _sottotitolo(self, lettore, _nome, testo):
+        """sub-text di un lettore, nel suo filo: conta solo quello del brano
+        in corso, e non vuoto."""
+        with self._blocco:
+            if self._chiuso or lettore is not self._attivo:
+                return
+        if testo and self._ai_sottotitoli is not None:
+            self._ai_sottotitoli(testo)
+
+    def imposta_il_video(self, finestre):
+        """finestre: le maniglie delle due finestre, una per lettore, in cui
+        libmpv disegna; None spegne il video, e dei brani si sente solo
+        l'audio. Le uscite si scelgono qui, a brano anche gia' partito:
+        finche' il video resta spento libmpv non apre niente."""
+        with self._blocco:
+            for indice, lettore in enumerate(self._lettori):
+                if finestre is None:
+                    lettore.imposta("vid", "no")
+                else:
+                    lettore.imposta("vo", "gpu")
+                    lettore.imposta("wid", str(finestre[indice]))
+                    lettore.imposta("vid", "auto")
+
+    def indice_attivo(self):
+        """0 o 1: il lettore del brano in corso, quello da mostrare."""
+        with self._blocco:
+            return self._lettori.index(self._attivo)
+
+    def tracce(self):
+        """Le tracce del brano in corso: {"video": vero se ne ha una,
+        "audio": [...], "sub": [...]}, ciascuna come la da' track-list di
+        mpv (id, selected, title, lang, codec...). None se non c'e' un brano
+        aperto."""
+        with self._blocco:
+            lettore = self._attivo
+            if lettore.percorso is None or not lettore.pronto:
+                return None
+        try:
+            elenco = lettore.mpv.track_list or []
+        except (mpv.ShutdownError, SystemError, RuntimeError, ValueError, TypeError, AttributeError):
+            return None
+        tracce = {"video": False, "audio": [], "sub": []}
+        for traccia in elenco:
+            tipo = traccia.get("type")
+            if tipo == "video" and not traccia.get("albumart"):
+                tracce["video"] = True
+            elif tipo in ("audio", "sub"):
+                tracce[tipo].append(traccia)
+        return tracce
+
+    def scegli_traccia(self, tipo, numero):
+        """tipo "aid" o "sid": la traccia audio o dei sottotitoli del brano in
+        corso, per numero, o "no" per nessuna."""
+        with self._blocco:
+            self._attivo.imposta(tipo, numero)
+
+    def rapporto(self, valore):
+        """Il rapporto dell'immagine, per i due lettori: "-1" quello del file,
+        altrimenti per esempio "16:9"."""
+        with self._blocco:
+            for lettore in self._lettori:
+                lettore.imposta("video-aspect-override", valore)
 
     def attesa_del_sid(self, secondi):
         """Se il brano in corso e' un SID, quanti secondi mancano, circa,

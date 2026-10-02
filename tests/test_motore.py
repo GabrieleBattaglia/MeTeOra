@@ -1037,3 +1037,45 @@ def test_marker_sfumato_su_un_sid_senza_silenzio(crea, tmp_path):
     # Lo stesso SID entra sull'altro lettore dal secondo 60: la resa c'e' gia'.
     m.suona(str(copia), 1, inizio=60, sfuma_lo_stesso=True)
     assert _aspetta(lambda: (m.posizione or 0) > 60, 1.5)
+
+
+def _video_con_sottotitoli(cartella):
+    """Un video di sei secondi con l'audio, fatto con la codifica di libmpv, e
+    accanto il suo file di sottotitoli con due righe."""
+    video = cartella / "film.mp4"
+    finito = threading.Event()
+    codifica = modulo.mpv.MPV(o=str(video), ovc="mpeg4", oac="aac", ao="null", vo="null", config=False)
+    try:
+        codifica.register_event_callback(lambda evento: finito.set() if evento.event_id.value == modulo.mpv.MpvEventID.END_FILE else None)
+        codifica.play("av://lavfi:testsrc=duration=6:size=160x120:rate=25[out0];sine=frequency=440:duration=6[out1]")
+        assert finito.wait(30)
+    finally:
+        codifica.terminate()
+    (cartella / "film.srt").write_text("1\n00:00:01,000 --> 00:00:02,000\nPrima riga\n\n2\n00:00:02,500 --> 00:00:03,500\nSeconda riga\n\n", encoding="utf-8")
+    return video
+
+
+def test_tracce_e_sottotitoli_con_il_video_spento(avvisi, tmp_path):
+    video = _video_con_sottotitoli(tmp_path)
+    sottotitoli, caricati = [], []
+    m = Motore(ao="null", ai_sottotitoli=sottotitoli.append, al_caricamento=lambda: caricati.append(True))
+    try:
+        assert m.tracce() is None
+        m.suona(str(video))
+        assert _aspetta(lambda: m.tracce() is not None) and caricati
+        tracce = m.tracce()
+        assert tracce["video"] is True and len(tracce["audio"]) == 1 and len(tracce["sub"]) == 1
+        assert tracce["sub"][0].get("external") and m.indice_attivo() == 0
+        # Il video e' spento, e i sottotitoli arrivano lo stesso, puntuali.
+        assert _aspetta(lambda: sottotitoli == ["Prima riga"], 3)
+        m.scegli_traccia("sid", "no")
+        assert _aspetta(lambda: not any(t.get("selected") for t in m.tracce()["sub"]), 2)
+        time.sleep(2)
+        assert sottotitoli == ["Prima riga"]
+        m.rapporto("4:3")
+        # mpv lo rilegge come numero.
+        assert _aspetta(lambda: abs(float(m._attivo.mpv.video_aspect_override) - 4 / 3) < 0.01, 2)
+        m.imposta_il_video(None)
+        assert _aspetta(lambda: m._attivo.mpv.vid is False, 2)
+    finally:
+        m.chiudi()

@@ -1,0 +1,22 @@
+Collaudo di MeTeOra 1.63.0, con NVDA: il video, tappa 7. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.63.0. Un video di prova con i sottotitoli accanto è in E:\git\tmp\player-accessibile\video_prova. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Maiuscolo con F1 accende il video, con il suo suono, e di nuovo lo spegne, con un altro.
+Con il video acceso, X su un video apre la sua finestra sopra MeTeOra, grande come lei, con l'immagine.
+Con la finestra del video davanti funzionano tutti i tasti di MeTeOra, per esempio C, Q, E, più e meno.
+F5, F6 e F7 dalla finestra del video riportano davanti MeTeOra, nell'area del tasto.
+Allo stop la finestra del video sparisce, e il fuoco torna dov'era in MeTeOra.
+Un brano senza video, dopo un video, chiude la finestra.
+Esc nella finestra del video la nasconde per quel brano; il video dopo la riapre.
+Maiuscolo con F5 mette il video a schermo intero e lo riporta in finestra, ciascuno con il suo suono; Esc toglie anche lo schermo intero.
+Maiuscolo con F6 cambia a giro il rapporto dell'immagine: quello del video, 16:9, 4:3, 21:9.
+Per chi vede: la barra del tempo compare con il mouse sul bordo inferiore della finestra del video, si nasconde dopo qualche secondo, e trascinandola si salta.
+Con il video spento, dei video si sente solo l'audio, come prima.
+Maiuscolo con F2 sul video di prova accende i sottotitoli letti: ogni riga la dice NVDA e si scrive nella console.
+I sottotitoli letti funzionano anche con il video spento.
+Maiuscolo con F2 va a giro: spenti, la prima traccia, la seconda, e di nuovo spenti; su un brano senza sottotitoli li accende o li spegne per i brani dopo.
+Maiuscolo con F3, su un video con più tracce audio, passa alla seguente e dice numero e lingua; con una traccia sola lo dice.
+Fra le impostazioni ci sono Video, Sottotitoli letti e Sintesi dei sottotitoli; la Sintesi apre una lista con l'automatica e le sintesi presenti.
+Chiudi e riapri MeTeOra: video e sottotitoli sono come li avevi lasciati.
+Apostrofo e ì non fanno più niente.
+I suoni nuovi: video acceso e spento, sottotitoli accesi e spenti, traccia audio, schermo intero e in finestra, rapporto; ti vanno bene?
+Domanda: Esc nella finestra del video la nasconde solo per il brano in corso; ti va bene, o preferisci che spenga il video come Maiuscolo con F1?
+Domanda: con la dissolvenza fra due video, la finestra mostra subito l'immagine del video che entra, mentre l'audio sfuma; ti va bene?

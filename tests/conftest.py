@@ -90,6 +90,32 @@ def equalizzatore_annotato(monkeypatch):
     return suonati
 
 
+@pytest.fixture(autouse=True)
+def sintesi_finta(monkeypatch):
+    """La sintesi dei sottotitoli non parla mai: le uscite sono finte. Si
+    aprono quelle in presenti, sono attive quelle vere in attive (la voce di
+    Windows, aperta, lo e' sempre), e i testi detti finiscono in detti, come
+    (chiave, testo). Le prove cambiano presenti e attive a piacere."""
+    import types
+
+    import sintesi
+
+    stato = types.SimpleNamespace(detti=[], presenti={"nvda", "jaws", "sapi5"}, attive={"nvda": True, "jaws": False})
+
+    class Finta:
+        def __init__(self, chiave):
+            self.chiave = chiave
+
+        def is_active(self):
+            return stato.attive.get(self.chiave, False)
+
+        def output(self, testo, interrupt=False):
+            stato.detti.append((self.chiave, testo))
+
+    monkeypatch.setattr(sintesi, "_crea", lambda chiave: Finta(chiave) if chiave in stato.presenti else None)
+    return stato
+
+
 @pytest.fixture(scope="session")
 def app():
     import wx

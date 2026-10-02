@@ -1,6 +1,6 @@
 # MeTeOra, gli effetti sonori: un suono per ogni azione, con Acusticator.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.51.0 i suoni delle impostazioni, della console salvata, della finestra dei marcatori, della sua ricerca e della scheda audio. Nella 1.55.0 quelli di velocita', tono, equalizzatore e dissolvenza. Nella 1.58.0 i suoni al volo dell'equalizzatore, e il loop con i soffi rimasti liberi. Nella 1.59.0 l'acceso e lo spento della riproduzione casuale.
+# 30/09/2026: nasce con la tappa 1. Nella 1.51.0 i suoni delle impostazioni, della console salvata, della finestra dei marcatori, della sua ricerca e della scheda audio. Nella 1.55.0 quelli di velocita', tono, equalizzatore e dissolvenza. Nella 1.58.0 i suoni al volo dell'equalizzatore, e il loop con i soffi rimasti liberi. Nella 1.59.0 l'acceso e lo spento della riproduzione casuale. Nella 1.63.0 i suoni del video.
 
 """La mappa degli eventi di MeTeOra sui preset della collezione di GBUtils.
 
@@ -34,6 +34,15 @@ EVENTI = {
     # spegnerla (Gabriele, issue 17).
     "casuale_acceso": "notifica_tramite_interfaccia_utente_3",
     "casuale_spento": "notifica_tramite_interfaccia_utente_2",
+    # Il video, tappa 7 (1.63.0): suoni originali, nella collezione di GBUtils V186.
+    "video_acceso": "meteora_video_acceso",
+    "video_spento": "meteora_video_spento",
+    "sottotitoli_accesi": "meteora_sottotitoli_accesi",
+    "sottotitoli_spenti": "meteora_sottotitoli_spenti",
+    "traccia_audio": "meteora_traccia_audio",
+    "schermo_intero": "meteora_schermo_intero",
+    "schermo_in_finestra": "meteora_schermo_in_finestra",
+    "rapporto": "meteora_rapporto",
     "brano_seguente_da_solo": "carta_giocata",
     "fine_playlist": "carillon_dolce",
     "avanti": "laser_da_gioco_2",

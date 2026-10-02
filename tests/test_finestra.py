@@ -84,14 +84,13 @@ def test_nuova_playlist_aggiungi_sposta_togli(finestra, suoni_annotati):
     assert "brano_tolto" in suoni_annotati
 
 
-def test_tasti_futuri_e_numpad(finestra, suoni_annotati):
-    # Dalla 1.55.0 restano futuri solo l'apostrofo e la ì.
+def test_tasti_liberi_e_numpad(finestra, suoni_annotati):
+    # Dalla 1.63.0 apostrofo e ì sono liberi: la traccia audio e' Maiuscolo con F3.
+    righe, suonati = len(finestra._righe), len(suoni_annotati)
     _tasto(finestra, "'")
-    assert "scelta della traccia audio" in _ultima(finestra)
-    assert suoni_annotati[-1] == "non_disponibile"
-    righe = len(finestra._righe)
+    _tasto(finestra, "ì")
     _tasto(finestra, codice=wx.WXK_NUMPAD_ADD)
-    assert len(finestra._righe) == righe
+    assert len(finestra._righe) == righe and len(suoni_annotati) == suonati
 
 
 def test_senza_niente_in_corso(finestra, suoni_annotati):
@@ -2059,6 +2058,9 @@ def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_an
         ("dissolvenza", "Dissolvenza: spenta, 4 secondi"),
         ("casuale", "Riproduzione casuale (Maiuscolo+N): no"),
         ("modello_casuale", "Modello della riproduzione casuale: una volta per brano, poi ricomincia"),
+        ("video", "Video (Maiuscolo+F1): no"),
+        ("sottotitoli", "Sottotitoli letti (Maiuscolo+F2): no"),
+        ("sintesi", "Sintesi dei sottotitoli: automatica, adesso NVDA"),
         ("insegui", "Inseguimento della plancia (Maiuscolo+F8): no"),
         ("caratteri", "Dimensioni dei caratteri: quelle di Windows"),
         ("colori_testo", "Colori dei caratteri: quelli di Windows"),
@@ -3216,3 +3218,203 @@ def test_dopo_un_salto_lontano_la_console_dice_l_attesa_del_sid(finestra, monkey
     # Sotto il secondo e mezzo non si dice niente.
     attese["secondi"] = 1.4
     assert _premi(finestra, "w") == "Vado a 2:48 di 3:00." and suoni_annotati[-1] == "vai_a_tempo"
+
+
+def _video_finto(finestra, monkeypatch, tracce):
+    """Il motore finto del video: un brano in corso con le tracce date, e le
+    chiamate annotate in una lista."""
+    chiamate = []
+    stato = {"in_corso": r"C:\m\film.mkv", "tracce": tracce, "indice": 0}
+    monkeypatch.setattr(type(finestra.motore), "in_corso", property(lambda _self: stato["in_corso"]))
+    monkeypatch.setattr(finestra.motore, "tracce", lambda: stato["tracce"] if stato["in_corso"] else None)
+    monkeypatch.setattr(finestra.motore, "indice_attivo", lambda: stato["indice"])
+    monkeypatch.setattr(finestra.motore, "imposta_il_video", lambda finestre: chiamate.append(("video", finestre)))
+    monkeypatch.setattr(finestra.motore, "scegli_traccia", lambda tipo, numero: chiamate.append((tipo, numero)))
+    monkeypatch.setattr(finestra.motore, "rapporto", lambda valore: chiamate.append(("rapporto", valore)))
+    return stato, chiamate
+
+
+def _tracce(video=True, audio=1, sottotitoli=0, scelto_audio=0, scelto_sub=None):
+    return {"video": video,
+            "audio": [{"id": i + 1, "lang": "ita" if i == 0 else "eng", "selected": i == scelto_audio, "codec": "aac"} for i in range(audio)],
+            "sub": [{"id": i + 1, "lang": "ita", "title": f"Traccia {i + 1}", "selected": i == scelto_sub, "codec": "subrip"} for i in range(sottotitoli)]}
+
+
+def test_maiuscolo_f1_accende_il_video_e_la_finestra_si_apre_e_si_chiude(finestra, monkeypatch, suoni_annotati):
+    stato, chiamate = _video_finto(finestra, monkeypatch, _tracce())
+    _tasto(finestra, codice=wx.WXK_F1, maiuscolo=True)
+    assert finestra.impostazioni["video"] is True and _salvate(finestra)["video"] is True
+    assert "video_acceso" in suoni_annotati
+    assert any(_senza_ora(r) == "Video acceso: i video si vedono in una finestra sopra MeTeOra." for r in finestra._righe)
+    video = finestra._video
+    assert video is not None and video.IsShown() and video.GetTitle() == "film.mkv, video, MeTeOra"
+    assert chiamate[0] == ("video", video.finestre())
+    # Un brano senza video la chiude; uno con il video la riapre, senza ridare
+    # al motore le finestre.
+    stato["tracce"] = _tracce(video=False)
+    finestra._aggiorna_il_video()
+    assert not video.IsShown()
+    stato["tracce"] = _tracce()
+    finestra._aggiorna_il_video()
+    assert video.IsShown() and chiamate.count(("video", video.finestre())) == 1
+    # Con la dissolvenza il pannello segue il lettore che suona.
+    stato["indice"] = 1
+    finestra._aggiorna_il_video()
+    assert video.pannelli[1].IsShown() and not video.pannelli[0].IsShown()
+    # Allo stop sparisce.
+    stato["in_corso"] = None
+    finestra._aggiorna_il_video()
+    assert not video.IsShown()
+    # Spento, il motore smette di disegnare, e dei video si sente l'audio.
+    stato["in_corso"] = r"C:\m\film.mkv"
+    _tasto(finestra, codice=wx.WXK_F1, maiuscolo=True)
+    assert finestra.impostazioni["video"] is False and chiamate[-1] == ("video", None)
+    assert suoni_annotati[-1] == "video_spento" and not video.IsShown()
+    assert _ultima(finestra) == "Video spento: dei video si sente solo l'audio."
+
+
+def test_esc_nella_finestra_del_video_la_nasconde_per_quel_brano(finestra, monkeypatch, suoni_annotati):
+    stato, _chiamate = _video_finto(finestra, monkeypatch, _tracce())
+    finestra.impostazioni["video"] = True
+    finestra._aggiorna_il_video()
+    video = finestra._video
+    evento = wx.KeyEvent(wx.wxEVT_CHAR_HOOK)
+    evento.SetKeyCode(wx.WXK_ESCAPE)
+    video._tasto(evento)
+    assert not video.IsShown() and not finestra._chiusa
+    # Per lo stesso brano non si riapre; per il brano dopo si'.
+    finestra._aggiorna_il_video()
+    assert not video.IsShown()
+    stato["in_corso"] = r"C:\m\altro.mkv"
+    finestra._aggiorna_il_video()
+    assert video.IsShown()
+    # Gli altri tasti passano alla finestra principale.
+    evento = wx.KeyEvent(wx.wxEVT_CHAR_HOOK)
+    evento.SetUnicodeKey(ord("+"))
+    evento.SetKeyCode(ord("+"))
+    volume = finestra.motore.volume
+    video._tasto(evento)
+    assert finestra.motore.volume > volume
+
+
+def test_maiuscolo_f2_sottotitoli_a_giro(finestra, monkeypatch, suoni_annotati):
+    stato, chiamate = _video_finto(finestra, monkeypatch, _tracce(sottotitoli=2))
+    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    assert chiamate[-1] == ("sid", "1") and finestra.impostazioni["sottotitoli"] is True
+    assert _ultima(finestra) == "Sottotitoli letti, traccia 1 di 2, italiano, Traccia 1, subrip." and suoni_annotati[-1] == "sottotitoli_accesi"
+    stato["tracce"] = _tracce(sottotitoli=2, scelto_sub=0)
+    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    assert chiamate[-1] == ("sid", "2")
+    stato["tracce"] = _tracce(sottotitoli=2, scelto_sub=1)
+    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    assert chiamate[-1] == ("sid", "no") and finestra.impostazioni["sottotitoli"] is False
+    assert _ultima(finestra) == "Sottotitoli letti spenti." and suoni_annotati[-1] == "sottotitoli_spenti"
+    assert _salvate(finestra)["sottotitoli"] is False
+    # Su un brano senza sottotitoli si accendono per i brani dopo.
+    stato["tracce"] = _tracce()
+    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    assert _ultima(finestra) == "Sottotitoli letti accesi; questo brano non ne ha." and finestra.impostazioni["sottotitoli"] is True
+    # Accesi, un brano con i sottotitoli prende la prima traccia da solo.
+    stato["tracce"] = _tracce(video=False, sottotitoli=1)
+    finestra._aggiorna_il_video()
+    assert chiamate[-1] == ("sid", "1")
+
+
+def test_i_sottotitoli_letti_vanno_alla_sintesi_e_nella_console(finestra, sintesi_finta):
+    finestra._sottotitolo("Prima riga\ndi prova")
+    assert not sintesi_finta.detti
+    finestra.impostazioni["sottotitoli"] = True
+    finestra._sottotitolo("Prima riga\ndi prova")
+    assert sintesi_finta.detti == [("nvda", "Prima riga di prova")] and _ultima(finestra) == "Prima riga di prova"
+    # Senza screen reader attivi va alla voce di Windows; scelta a mano, a quella.
+    sintesi_finta.attive["nvda"] = False
+    finestra._sottotitolo("Seconda")
+    assert sintesi_finta.detti[-1] == ("sapi5", "Seconda")
+    finestra.impostazioni["sintesi"] = "jaws"
+    sintesi_finta.attive["jaws"] = True
+    finestra._sottotitolo("Terza")
+    assert sintesi_finta.detti[-1] == ("jaws", "Terza")
+
+
+def test_maiuscolo_f3_traccia_audio_a_giro(finestra, monkeypatch, suoni_annotati):
+    stato, chiamate = _video_finto(finestra, monkeypatch, _tracce(audio=1))
+    _tasto(finestra, codice=wx.WXK_F3, maiuscolo=True)
+    assert _ultima(finestra) == "Questo brano ha una traccia audio sola." and suoni_annotati[-1] == "non_disponibile"
+    stato["tracce"] = _tracce(audio=2, scelto_audio=0)
+    _tasto(finestra, codice=wx.WXK_F3, maiuscolo=True)
+    assert chiamate[-1] == ("aid", "2") and _ultima(finestra) == "Traccia audio 2 di 2, inglese, aac." and suoni_annotati[-1] == "traccia_audio"
+    stato["tracce"] = _tracce(audio=2, scelto_audio=1)
+    _tasto(finestra, codice=wx.WXK_F3, maiuscolo=True)
+    assert chiamate[-1] == ("aid", "1")
+    stato["in_corso"] = None
+    _tasto(finestra, codice=wx.WXK_F3, maiuscolo=True)
+    assert _ultima(finestra) == "Non sta suonando niente."
+
+
+def test_maiuscolo_f5_e_f6_schermo_intero_e_rapporto(finestra, monkeypatch, suoni_annotati):
+    _stato, chiamate = _video_finto(finestra, monkeypatch, _tracce())
+    _tasto(finestra, codice=wx.WXK_F5, maiuscolo=True)
+    assert _ultima(finestra) == "La finestra del video non è aperta." and suoni_annotati[-1] == "non_disponibile"
+    finestra.impostazioni["video"] = True
+    finestra._aggiorna_il_video()
+    _tasto(finestra, codice=wx.WXK_F5, maiuscolo=True)
+    assert finestra._video.IsFullScreen() and suoni_annotati[-1] == "schermo_intero"
+    _tasto(finestra, codice=wx.WXK_F5, maiuscolo=True)
+    assert not finestra._video.IsFullScreen() and suoni_annotati[-1] == "schermo_in_finestra" and _ultima(finestra) == "Video in finestra."
+    for _ in range(4):
+        _tasto(finestra, codice=wx.WXK_F6, maiuscolo=True)
+    assert [c for c in chiamate if c[0] == "rapporto"] == [("rapporto", "16:9"), ("rapporto", "4:3"), ("rapporto", "2.33:1"), ("rapporto", "-1")]
+    assert _ultima(finestra) == "Rapporto dell'immagine: quello del video." and suoni_annotati[-1] == "rapporto"
+
+
+def test_impostazioni_video_sottotitoli_e_sintesi(finestra, monkeypatch, suoni_annotati, sintesi_finta):
+    _stato, chiamate = _video_finto(finestra, monkeypatch, _tracce())
+    _campo, lista = _cambia(finestra, monkeypatch, "video", "sì")
+    assert finestra.impostazioni["video"] is True and finestra._video.IsShown()
+    assert lista.righe["video"] == "Video (Maiuscolo+F1): sì"
+    _cambia(finestra, monkeypatch, "video", "no")
+    assert chiamate[-1] == ("video", None) and not finestra._video.IsShown()
+    _campo, lista = _cambia(finestra, monkeypatch, "sottotitoli", "acceso")
+    assert finestra.impostazioni["sottotitoli"] is True and lista.righe["sottotitoli"] == "Sottotitoli letti (Maiuscolo+F2): sì"
+    # La sintesi: l'automatica e le uscite che rispondono adesso.
+    scelta = _SceltaFinta(2)
+    monkeypatch.setattr(modulo, "FinestraScelta", scelta)
+    lista = _ListaFinta()
+    finestra._cambia_impostazione("sintesi", lista)
+    titolo, righe, partenza = scelta.aperture[0]
+    assert titolo == "Sintesi dei sottotitoli" and partenza == 0
+    assert righe == ["Automatica: lo screen reader attivo, altrimenti la voce di Windows", "NVDA", "La voce di Windows, SAPI5"]
+    assert finestra.impostazioni["sintesi"] == "sapi5" and _salvate(finestra)["sintesi"] == "sapi5"
+    assert lista.righe["sintesi"] == "Sintesi dei sottotitoli: la voce di Windows, SAPI5"
+    # Una scelta che non risponde piu' resta in fondo alla lista, e lo dice.
+    finestra.impostazioni["sintesi"] = "jaws"
+    scelta = _SceltaFinta(None)
+    monkeypatch.setattr(modulo, "FinestraScelta", scelta)
+    finestra._cambia_impostazione("sintesi", _ListaFinta())
+    assert scelta.aperture[0][1][-1] == "JAWS, che adesso non risponde" and scelta.aperture[0][2] == 3
+    assert _ultima(finestra) == "Sintesi dei sottotitoli non cambiata."
+
+def test_la_barra_del_tempo_della_finestra_del_video(finestra, monkeypatch):
+    _video_finto(finestra, monkeypatch, _tracce())
+    salti = []
+    monkeypatch.setattr(type(finestra.motore), "posizione", property(lambda _self: 30.0))
+    monkeypatch.setattr(type(finestra.motore), "durata", property(lambda _self: 120.0))
+    monkeypatch.setattr(finestra.motore, "vai_a", salti.append)
+    finestra.impostazioni["video"] = True
+    finestra._aggiorna_il_video()
+    video = finestra._video
+    # Il mouse lontano dal bordo: la barra resta nascosta; sul bordo compare
+    # e segue il tempo.
+    monkeypatch.setattr(modulo.wx, "GetMousePosition", lambda: wx.Point(-10000, -10000))
+    video._controllo(None)
+    assert not video.barra.IsShown()
+    rettangolo = video.GetScreenRect()
+    import video as modulo_video
+
+    monkeypatch.setattr(modulo_video.wx, "GetMousePosition", lambda: wx.Point(rettangolo.x + 5, rettangolo.GetBottom() - 1))
+    video._controllo(None)
+    assert video.barra.IsShown() and video.barra.GetValue() == 250
+    # Lasciata a meta', salta a meta' del brano.
+    video.barra.SetValue(500)
+    video._lascia(wx.ScrollEvent())
+    assert salti == [60.0]

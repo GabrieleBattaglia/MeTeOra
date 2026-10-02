@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7).
 
 """La finestra di MeTeOra.
 
@@ -49,6 +49,7 @@ import marcatori
 import percorsi
 import questo_pc
 import schede_audio
+import sintesi
 import songlengths
 import suoni
 import valori
@@ -63,6 +64,7 @@ from playlist import Archivio, Brano, Coda, Playlist
 from ricerca import AlberoDeiRisultati, Ricerca
 from schedario import Schedario
 from valori import AREE, ErroreValore, leggi_tempo, leggi_tempo_nel_brano, secondi_da_leggere
+from video import FinestraVideo
 
 FILE_PLAYLIST = "MeTeOra - Playlist.json"
 FILE_IMPOSTAZIONI = "MeTeOra - Impostazioni.json"
@@ -153,7 +155,9 @@ TASTI = {
 CIFRE_COL_MAIUSCOLO = {"!": 1, '"': 2, "£": 3, "$": 4, "%": 5, "&": 6, "/": 7, "(": 8, ")": 9, "=": 10}
 # I tasti gia' assegnati nel piano a funzioni delle tappe successive: per ora
 # dicono di non essere ancora disponibili.
-FUTURI = {"'": "scelta della traccia audio", "ì": "scelta della traccia audio"}
+# Apostrofo e I accentata, tenuti per la traccia audio fino alla 1.62.4,
+# sono liberi: la traccia audio e' Maiuscolo con F3 (Gabriele, tappa 7).
+FUTURI = {}
 FUTURI_MAIUSCOLI = {}
 
 TASTI_COMUNI = [
@@ -163,6 +167,7 @@ TASTI_COMUNI = [
     "U e I scelgono la banda dell'equalizzatore, O e P la abbassano e la alzano di un dB, È la azzera, Maiuscolo con È le azzera tutte.",
     "L accende e spegne la dissolvenza incrociata: con lei sfumano i cambi di brano, lo stop, la pausa, X da capo e i marker; Maiuscolo con L ne chiede la durata.",
     "Maiuscolo+X, a giro: punto A del loop sul brano selezionato, poi punto B, poi toglie il loop.",
+    "Il video, con Maiuscolo e i tasti funzione: F1 lo accende e lo spegne, F2 sceglie i sottotitoli letti a giro, F3 la traccia audio a giro, F5 lo schermo intero, F6 il rapporto dell'immagine a giro.",
     "J e K aprono e suonano la playlist precedente e successiva, le cifre da 1 a 0 le prime dieci playlist.",
     "Nella plancia Backspace chiude il ramo in cui sei e risale di un livello, Maiuscolo con Backspace risale di colpo all'unità o alla playlist, Preferiti compresi, e chiude i rami al suo interno.",
     "T mette un marker dove sei, o rinomina quello su cui sei; R e Y vanno al marker precedente e successivo; Maiuscolo con R, Y e T tolgono i marker prima, dopo e tutti; Maiuscolo con le cifre da 1 a 0 va ai primi dieci marker del brano della plancia.",
@@ -217,6 +222,29 @@ FINE_DEL_MAZZO = object()
 ATTESA_DA_DIRE = 1.5
 
 
+# I rapporti dell'immagine di Maiuscolo con F6, a giro: il valore per mpv e
+# il nome da leggere. -1 e' quello del file.
+RAPPORTI = (("-1", "quello del video"), ("16:9", "16:9"), ("4:3", "4:3"), ("2.33:1", "21:9"))
+# I nomi delle lingue piu' comuni nelle tracce, dai codici di tre lettere.
+LINGUE = {"ita": "italiano", "eng": "inglese", "fre": "francese", "fra": "francese", "ger": "tedesco", "deu": "tedesco", "spa": "spagnolo",
+    "por": "portoghese", "jpn": "giapponese", "chi": "cinese", "zho": "cinese", "rus": "russo", "dut": "olandese", "nld": "olandese",
+    "swe": "svedese", "pol": "polacco", "kor": "coreano", "ara": "arabo", "und": None}
+
+
+def _descrivi_traccia(traccia, indice, totale):
+    """Una traccia audio o di sottotitoli da leggere: "2 di 3, italiano,
+    Commento del regista, ac3"."""
+    lingua = traccia.get("lang")
+    parti = [f"{indice + 1} di {totale}", LINGUE.get(lingua, lingua), traccia.get("title"), traccia.get("codec")]
+    return ", ".join(str(parte) for parte in parti if parte)
+
+
+def _frase_del_video(acceso):
+    if acceso:
+        return "Video acceso: i video si vedono in una finestra sopra MeTeOra."
+    return "Video spento: dei video si sente solo l'audio."
+
+
 VOCI_DELLE_IMPOSTAZIONI = {
     "volume": ("Volume della musica", "cambiato"),
     "passo_volume": ("Passo del volume", "cambiato"),
@@ -230,6 +258,9 @@ VOCI_DELLE_IMPOSTAZIONI = {
     "dissolvenza": ("Dissolvenza", "cambiata"),
     "casuale": ("Riproduzione casuale (Maiuscolo+N)", "cambiata"),
     "modello_casuale": ("Modello della riproduzione casuale", "cambiato"),
+    "video": ("Video (Maiuscolo+F1)", "cambiato"),
+    "sottotitoli": ("Sottotitoli letti (Maiuscolo+F2)", "cambiati"),
+    "sintesi": ("Sintesi dei sottotitoli", "cambiata"),
     "insegui": ("Inseguimento della plancia (Maiuscolo+F8)", "cambiato"),
     "caratteri": ("Dimensioni dei caratteri", "cambiate"),
     "colori_testo": ("Colori dei caratteri", "cambiati"),
@@ -495,7 +526,9 @@ class Finestra(wx.Frame):
         self.motore = Motore(alla_fine=lambda: wx.CallAfter(self._brano_finito),
             all_errore=lambda p: wx.CallAfter(self._brano_in_errore, p), ao=ao, volume=self.impostazioni["volume"],
             chiedi_il_seguente=lambda: wx.CallAfter(self._prepara_il_seguente),
-            al_passaggio=lambda percorso, sottobrano: wx.CallAfter(self._passaggio, percorso, sottobrano))
+            al_passaggio=lambda percorso, sottobrano: wx.CallAfter(self._passaggio, percorso, sottobrano),
+            al_caricamento=lambda: wx.CallAfter(self._aggiorna_il_video),
+            ai_sottotitoli=lambda testo: wx.CallAfter(self._sottotitolo, testo))
         # Velocita', tono, equalizzatore e dissolvenza salvati valgono per tutti
         # i brani, dal primo.
         self._applica_la_riproduzione()
@@ -516,6 +549,19 @@ class Finestra(wx.Frame):
         self._mazzo = set()
         self._mazzo_tenuti = []
         self._mazzo_finito = False
+        # Il video, tappa 7: la sua finestra, nata al primo video; se il
+        # motore disegna gia' nei suoi pannelli; il rapporto dell'immagine
+        # scelto con Maiuscolo+F6, come indice di RAPPORTI; la finestra che
+        # aveva il fuoco prima del video, per riportarcelo; la sintesi dei
+        # sottotitoli letti.
+        self._video = None
+        self._video_nel_motore = False
+        # Il brano su cui la finestra del video e' stata nascosta a mano, con
+        # Esc o chiudendola: per lui non si riapre.
+        self._video_nascosto_per = None
+        self._rapporto = 0
+        self._fuoco_prima_del_video = None
+        self._sintesi = sintesi.Sintesi()
         # La banda dell'equalizzatore scelta con U e I, contata da zero: si
         # parte dalla prima, quella dei 60 Hz.
         self._banda = 0
@@ -894,6 +940,8 @@ class Finestra(wx.Frame):
 
     def _vai(self, controllo, evento):
         self._suono(evento)
+        if not self.IsActive():
+            self.Raise()
         if controllo is self.cruscotto and self.cruscotto.HasFocus():
             self._rinfresca_cruscotto()
         controllo.SetFocus()
@@ -924,6 +972,11 @@ class Finestra(wx.Frame):
             return True
         if modificatori == wx.MOD_SHIFT and codice == wx.WXK_F8:
             self._aggancia()
+            return True
+        tasti_del_video = {wx.WXK_F1: self._comando_video, wx.WXK_F2: self._comando_sottotitoli, wx.WXK_F3: self._comando_traccia_audio,
+            wx.WXK_F5: self._comando_schermo_intero, wx.WXK_F6: self._comando_rapporto}
+        if modificatori == wx.MOD_SHIFT and codice in tasti_del_video:
+            tasti_del_video[codice]()
             return True
         # Il tastierino numerico resta a NVDA, e Ctrl e Alt ai comandi di Windows.
         if modificatori not in (wx.MOD_NONE, wx.MOD_SHIFT) or wx.WXK_NUMPAD0 <= codice <= wx.WXK_NUMPAD_DIVIDE:
@@ -2431,6 +2484,8 @@ class Finestra(wx.Frame):
         self._riscontro(evento, testo)
         self._aggiorna_etichette()
         self._insegui()
+        self._video_nascosto_per = None
+        self._aggiorna_il_video()
 
     def _riproduci(self, pl, brano, sottobrano=None):
         """Suona un brano scelto nella plancia, se il loop lo permette."""
@@ -2724,6 +2779,7 @@ class Finestra(wx.Frame):
 
     def _fine_della_lista(self):
         self._aggiorna_etichette()
+        self._aggiorna_il_video()
         if self._mazzo_finito:
             # Il mazzo si rifa': la prossima riproduzione comincia un giro nuovo.
             self._mazzo_finito = False
@@ -2955,9 +3011,11 @@ class Finestra(wx.Frame):
             # La playlist invisibile della selezione vive fino allo stop.
             self.coda.imposta(None, None)
             self._aggiorna_etichette()
+            self._aggiorna_il_video()
             self._riscontro("stop", "Stop. La selezione suonata è chiusa: X suona di nuovo ciò che selezioni.")
             return
         self._aggiorna_etichette()
+        self._aggiorna_il_video()
         self._riscontro("stop", "Stop. X riparte dall'inizio del brano.")
 
     def _vicino(self, verso, evento, limite):
@@ -3331,6 +3389,9 @@ class Finestra(wx.Frame):
             "dissolvenza": lambda: valori.scrivi_dissolvenza(imp["dissolvenza"]),
             "casuale": lambda: "sì" if imp["casuale"] else "no",
             "modello_casuale": lambda: valori.MODELLI_CASUALI[imp["modello_casuale"]],
+            "video": lambda: "sì" if imp["video"] else "no",
+            "sottotitoli": lambda: "sì" if imp["sottotitoli"] else "no",
+            "sintesi": self._sintesi_da_leggere,
             "insegui": lambda: "sì" if imp["insegui"] else "no",
             "caratteri": self._caratteri_da_leggere,
             "colori_testo": lambda: self._colori_da_leggere("colori_testo"),
@@ -3372,6 +3433,7 @@ class Finestra(wx.Frame):
         azioni = {
             "scheda_audio": self._scegli_la_scheda_audio,
             "modello_casuale": self._scegli_il_modello_casuale,
+            "sintesi": self._scegli_la_sintesi,
             "salva_console": lambda _genitore: self._salva_console(),
             "marcatori": self._finestra_dei_marcatori,
             "importa_marcatori": self._importa_i_marcatori,
@@ -3477,6 +3539,16 @@ class Finestra(wx.Frame):
                 "potrebbe suonare: le voci che si vedono nella plancia, oppure la lista, il loop o la selezione da cui si suona. Z, B e gli altri tasti restano come sono.",
                 "Scrivi sì per accenderla, no per spegnerla; valgono anche s, n, 1, 0, acceso e spento. Anche Maiuscolo con N la accende e la spegne.",
                 f"Adesso è {'accesa' if imp['casuale'] else 'spenta'}.", REGOLA_DEL_DOLLARO], "sì" if imp["casuale"] else "no"
+        if chiave == "video":
+            return (lambda testo: valori.leggi_si_no(testo, "Video")), [
+                "Con il video acceso, quando parte un brano con il video si apre la sua finestra, sopra MeTeOra; allo stop sparisce. Spento, dei video si sente solo l'audio.",
+                "Scrivi sì per accenderlo, no per spegnerlo; valgono anche s, n, 1, 0, acceso e spento. Anche Maiuscolo con F1 lo accende e lo spegne.",
+                f"Adesso è {'acceso' if imp['video'] else 'spento'}.", REGOLA_DEL_DOLLARO], "sì" if imp["video"] else "no"
+        if chiave == "sottotitoli":
+            return (lambda testo: valori.leggi_si_no(testo, "Sottotitoli letti")), [
+                "Con i sottotitoli letti accesi, ogni sottotitolo dei video va alla sintesi scelta qui sotto e si scrive nella console, anche con il video spento.",
+                "Scrivi sì per accenderli, no per spegnerli; valgono anche s, n, 1, 0, acceso e spento. Maiuscolo con F2 li accende e sceglie la traccia, a giro.",
+                f"Adesso sono {'accesi' if imp['sottotitoli'] else 'spenti'}.", REGOLA_DEL_DOLLARO], "sì" if imp["sottotitoli"] else "no"
         if chiave == "insegui":
             return valori.leggi_si_no, [
                 "Con l'inseguimento agganciato, a ogni cambio di brano la selezione della plancia va da sola su ciò che suona, senza spostare il fuoco.",
@@ -3536,6 +3608,16 @@ class Finestra(wx.Frame):
         if chiave == "casuale":
             self._ricomincia_il_mazzo()
             return _frase_della_casuale(valore, imp["modello_casuale"])
+        if chiave == "video":
+            if not valore:
+                self._spegni_il_video()
+            self._aggiorna_il_video()
+            return _frase_del_video(valore)
+        if chiave == "sottotitoli":
+            if not valore and self.motore.in_corso:
+                self.motore.scegli_traccia("sid", "no")
+            self._aggiorna_il_video()
+            return "Sottotitoli letti accesi." if valore else "Sottotitoli letti spenti."
         if chiave == "insegui":
             if not valore:
                 return "Inseguimento sganciato: la selezione resta dove la lasci."
@@ -3644,6 +3726,186 @@ class Finestra(wx.Frame):
             self.scrivi(f"La scheda audio scelta, {scelta['dispositivo']}, non c'è: uso quella automatica{dove}.")
         elif not esito["musica"]:
             self.scrivi(f"La musica non ritrova la scheda audio {esito['dispositivo']} e suona sulla scheda di Windows.")
+
+    # Il video e i sottotitoli, tappa 7.
+
+    def _aggiorna_il_video(self):
+        """Il video del brano in corso: la finestra si apre, se il video e'
+        acceso e il brano ne ha uno, e altrimenti si chiude; i sottotitoli si
+        accendono o si spengono come dicono le impostazioni. Si chiama a ogni
+        brano annunciato, quando il motore ha aperto un brano, allo stop e
+        quando cambia un'impostazione: rifare i conti non costa niente."""
+        if self._chiusa:
+            return
+        if not self.motore.in_corso:
+            self._nascondi_il_video()
+            return
+        tracce = self.motore.tracce()
+        if tracce is None:
+            # Il brano si sta aprendo: decide l'avviso del caricamento, senza
+            # chiudere e riaprire la finestra nel frattempo.
+            return
+        self._sottotitoli_del_brano(tracce)
+        if self.impostazioni["video"] and tracce["video"] and self.motore.in_corso != self._video_nascosto_per:
+            self._mostra_il_video()
+        else:
+            self._nascondi_il_video()
+
+    def _sottotitoli_del_brano(self, tracce):
+        """Accesi, se il brano non ne ha gia' scelti si prende la prima traccia;
+        spenti, nessuna."""
+        scelta = next((t for t in tracce["sub"] if t.get("selected")), None)
+        if self.impostazioni["sottotitoli"] and scelta is None and tracce["sub"]:
+            self.motore.scegli_traccia("sid", str(tracce["sub"][0]["id"]))
+        elif not self.impostazioni["sottotitoli"] and scelta is not None:
+            self.motore.scegli_traccia("sid", "no")
+
+    def _mostra_il_video(self):
+        if self._video is None:
+            self._video = FinestraVideo(self, lambda: self.motore.posizione, lambda: self.motore.durata, self.motore.vai_a, self._nascondi_a_mano)
+        if not self._video_nel_motore:
+            self.motore.imposta_il_video(self._video.finestre())
+            self._video_nel_motore = True
+        self._video.mostra_il_lettore(self.motore.indice_attivo())
+        titolo = f"{os.path.basename(self.motore.in_corso or '')}, video, MeTeOra"
+        if self._video.IsShown():
+            # Gia' aperta: si aggiorna, senza riprendere il fuoco a chi lo ha.
+            self._video.SetTitle(titolo)
+            return
+        self._fuoco_prima_del_video = wx.Window.FindFocus()
+        self._video.apri(titolo, self.GetScreenRect())
+
+    def _nascondi_il_video(self):
+        """La finestra del video sparisce, e MeTeOra torna davanti con il
+        fuoco dove lo aveva lasciato."""
+        if self._video is None or not self._video.IsShown():
+            return
+        self._video.chiudi()
+        self.Raise()
+        fuoco = self._fuoco_prima_del_video
+        self._fuoco_prima_del_video = None
+        if fuoco and fuoco.GetTopLevelParent() is self:
+            fuoco.SetFocus()
+        else:
+            self.albero.SetFocus()
+
+    def _nascondi_a_mano(self):
+        """Esc nella finestra del video, o la sua chiusura: la finestra
+        sparisce per il brano in corso, e il video resta acceso per i brani
+        dopo."""
+        self._video_nascosto_per = self.motore.in_corso
+        self._nascondi_il_video()
+
+    def _spegni_il_video(self):
+        if self._video_nel_motore:
+            self.motore.imposta_il_video(None)
+            self._video_nel_motore = False
+
+    def _sottotitolo(self, testo):
+        """Un sottotitolo del brano in corso: alla sintesi scelta e nella
+        console, se i sottotitoli letti sono accesi."""
+        testo = " ".join(testo.split())
+        if self._chiusa or not testo or not self.impostazioni["sottotitoli"]:
+            return
+        self._sintesi.dici(testo, self.impostazioni["sintesi"])
+        self.scrivi(testo)
+
+    def _comando_video(self):
+        """Maiuscolo con F1: il video acceso o spento."""
+        acceso = not self.impostazioni["video"]
+        self.impostazioni["video"] = acceso
+        self._video_nascosto_per = None
+        self._salva_impostazioni()
+        if not acceso:
+            self._spegni_il_video()
+        self._riscontro("video_acceso" if acceso else "video_spento", _frase_del_video(acceso))
+        self._aggiorna_il_video()
+
+    def _comando_sottotitoli(self):
+        """Maiuscolo con F2: i sottotitoli letti a giro, spenti, la prima
+        traccia, la seconda e cosi' via. Su un brano senza sottotitoli li
+        accende o li spegne per i brani dopo."""
+        tracce = self.motore.tracce() if self.motore.in_corso else None
+        sottotitoli = tracce["sub"] if tracce else []
+        if not sottotitoli:
+            acceso = not self.impostazioni["sottotitoli"]
+            seguente = None
+            frase = ("Sottotitoli letti accesi; questo brano non ne ha." if tracce else "Sottotitoli letti accesi.") if acceso else "Sottotitoli letti spenti."
+        else:
+            scelta = next((i for i, t in enumerate(sottotitoli) if t.get("selected")), None)
+            indice = 0 if scelta is None else scelta + 1
+            seguente = sottotitoli[indice] if indice < len(sottotitoli) else None
+            acceso = seguente is not None
+            self.motore.scegli_traccia("sid", str(seguente["id"]) if acceso else "no")
+            frase = f"Sottotitoli letti, traccia {_descrivi_traccia(seguente, indice, len(sottotitoli))}." if acceso else "Sottotitoli letti spenti."
+        self.impostazioni["sottotitoli"] = acceso
+        self._salva_impostazioni()
+        self._riscontro("sottotitoli_accesi" if acceso else "sottotitoli_spenti", frase)
+
+    def _comando_traccia_audio(self):
+        """Maiuscolo con F3: la traccia audio del brano, a giro."""
+        if self._niente_in_corso():
+            return
+        tracce = self.motore.tracce()
+        audio = tracce["audio"] if tracce else []
+        if len(audio) < 2:
+            self._riscontro("non_disponibile", "Questo brano ha una traccia audio sola." if audio else "Questo brano non ha tracce audio da scegliere.")
+            return
+        scelta = next((i for i, t in enumerate(audio) if t.get("selected")), -1)
+        indice = (scelta + 1) % len(audio)
+        self.motore.scegli_traccia("aid", str(audio[indice]["id"]))
+        self._riscontro("traccia_audio", f"Traccia audio {_descrivi_traccia(audio[indice], indice, len(audio))}.")
+
+    def _comando_schermo_intero(self):
+        """Maiuscolo con F5: la finestra del video a schermo intero, o di nuovo in finestra."""
+        if self._video is None or not self._video.IsShown():
+            self._riscontro("non_disponibile", "La finestra del video non è aperta.")
+            return
+        if self._video.schermo_intero():
+            self._riscontro("schermo_intero", "Video a schermo intero.")
+        else:
+            self._riscontro("schermo_in_finestra", "Video in finestra.")
+
+    def _comando_rapporto(self):
+        """Maiuscolo con F6: il rapporto dell'immagine, a giro."""
+        self._rapporto = (self._rapporto + 1) % len(RAPPORTI)
+        valore, nome = RAPPORTI[self._rapporto]
+        self.motore.rapporto(valore)
+        self._riscontro("rapporto", f"Rapporto dell'immagine: {nome}.")
+
+    def _sintesi_da_leggere(self):
+        scelta = self.impostazioni["sintesi"]
+        if scelta != sintesi.AUTOMATICA:
+            return sintesi.nome(scelta)
+        effettiva = self._sintesi.scelta(sintesi.AUTOMATICA)
+        return f"automatica, adesso {sintesi.nome(effettiva)}" if effettiva else "automatica, adesso nessuna"
+
+    def _scegli_la_sintesi(self, genitore):
+        """La sintesi dei sottotitoli, da una lista: l'automatica e le uscite
+        che si possono usare adesso."""
+        chiavi = [sintesi.AUTOMATICA, *sintesi.disponibili()]
+        attuale = self.impostazioni["sintesi"]
+        if attuale not in chiavi:
+            # Una scelta di prima che ora non risponde resta in fondo, e lo dice.
+            chiavi.append(attuale)
+        righe = [self._riga_della_sintesi(chiave) for chiave in chiavi]
+        self._suono("domanda")
+        with FinestraScelta(genitore, "Sintesi dei sottotitoli", righe, chiavi.index(attuale)) as dialogo:
+            if dialogo.ShowModal() != wx.ID_OK:
+                self.scrivi("Sintesi dei sottotitoli non cambiata.")
+                return
+            indice = dialogo.GetSelection()
+        self.impostazioni["sintesi"] = chiavi[indice]
+        self._salva_impostazioni()
+        genitore.aggiorna("sintesi", self._riga_dell_impostazione("sintesi"))
+        self._riscontro("impostazione_cambiata", f"I sottotitoli ora vanno a {self._sintesi_da_leggere()}.")
+
+    def _riga_della_sintesi(self, chiave):
+        if chiave == sintesi.AUTOMATICA:
+            return "Automatica: lo screen reader attivo, altrimenti la voce di Windows"
+        if chiave in sintesi.USCITE and self._sintesi.scelta(chiave) is None:
+            return f"{sintesi.nome(chiave)}, che adesso non risponde"
+        return sintesi.nome(chiave)[0].upper() + sintesi.nome(chiave)[1:]
 
     def _scegli_il_modello_casuale(self, genitore):
         """Il modello della riproduzione casuale, da una lista (Gabriele,
@@ -4484,6 +4746,9 @@ class Finestra(wx.Frame):
                 self.marcatori.salva()
         self.contatore.ferma()
         self.schedario.ferma()
+        if self._video is not None:
+            self._video.Destroy()
+            self._video = None
         with contextlib.suppress(OSError):
             self.schedario.salva()
         with contextlib.suppress(OSError):

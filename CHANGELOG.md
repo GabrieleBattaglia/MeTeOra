@@ -2,6 +2,14 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.63.0] - 2026-10-03
+
+- Il video, tappa 7. Maiuscolo con F1 accende e spegne il video: acceso, quando parte un brano con il video si apre la sua finestra, sopra MeTeOra e grande come lei, che chi guarda può spostare, ridimensionare e mettere a schermo intero; allo stop sparisce e MeTeOra torna davanti. Spento, dei video si sente solo l'audio, come finora. Nella finestra del video tutti i tasti di MeTeOra funzionano, ed Esc toglie lo schermo intero o nasconde la finestra per il brano in corso; per chi vede c'è una barra del tempo che compare con il mouse sul bordo inferiore.
+- Maiuscolo con F2: i sottotitoli letti, a giro, spenti e poi le tracce. Vanno alla sintesi scelta nelle impostazioni, uno screen reader o la voce di Windows, e nella console, anche con il video spento; MeTeOra prende anche il file dei sottotitoli accanto al video.
+- Maiuscolo con F3 sceglie a giro la traccia audio, Maiuscolo con F5 mette il video a schermo intero, Maiuscolo con F6 cambia a giro il rapporto dell'immagine. Apostrofo e ì, tenuti finora per la traccia audio, sono liberi.
+- Tre voci nuove nelle impostazioni: Video, Sottotitoli letti e Sintesi dei sottotitoli. Video e sottotitoli si ricordano alla riapertura.
+- I suoni del video sono originali, nella collezione di GBUtils V186. Deciso con Gabriele nel discorso sulla GUI del 3 ottobre 2026.
+
 ## [1.62.4] - 2026-10-02
 
 - I brani Matroska audio (mka), AU e CAF, e i moduli dei tracker, nella plancia non avevano la durata: la libreria che legge le durate non li conosce. Ora la chiede a libmpv, muta, in disparte. Le schede già salvate senza durata si rileggono.
