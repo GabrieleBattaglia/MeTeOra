@@ -1,27 +1,5 @@
 Collaudo di MeTeOra 1.59.0, con NVDA. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.59.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
-F abbassa il tono e H lo alza, ciascuno col suo suono, e G lo riporta al normale.
-U e I: ogni banda ha il suo suono, un fa di riferimento e poi una nota della scala, da do per la prima banda a si per la settima; si riconoscono a orecchio?
-U e I: se anche loro schioccano all'inizio o alla fine, scrivilo qui.
-O e P: il suono fa sentire il guadagno, un fa 4, un'ottava sopra quello di U e I, e poi una nota più alta o più bassa quanto più la banda è alzata o abbassata; si capisce a orecchio, anche a -12?
-O e P cominciano e finiscono senza schiocchi.
-Alla prima e all'ultima banda, e a +12 o -12, suona ancora il limite.
-Maiuscolo con X su un brano mette il punto A, su un altro brano della stessa lista il punto B, e di nuovo Maiuscolo con X, da qualsiasi punto, toglie il loop.
-Il punto B sullo stesso brano del punto A fa ripetere quel brano da solo.
-I tre suoni del loop sono i soffi che prima avevano U, I e O, P; ti vanno bene?
-Maiuscolo con C non fa più niente.
-Con la dissolvenza accesa, V spegne il brano piano; se subito dopo premi X su un altro brano, parte mentre il vecchio si sta ancora spegnendo.
-Con la dissolvenza accesa, C mette in pausa quando la voce è scesa; C di nuovo riparte dal silenzio e risale.
-Premendo C durante la discesa, la voce risale dal punto in cui era arrivata.
-Con la dissolvenza accesa, la fine dello stop, della pausa e del brano che esce scende fino al silenzio, senza un piccolo taglio in coda.
-Con la dissolvenza accesa, X sul brano che suona lo fa ripartire da capo: il punto di adesso e l'inizio si incrociano.
-Con la dissolvenza accesa, R, Y e Maiuscolo con le cifre portano al marker sfumando: il punto di adesso e il marker si incrociano.
-Con la dissolvenza spenta, stop, pausa, X da capo e marker tornano netti come prima.
-Domanda: i salti con Q, E e W restano netti anche con la dissolvenza accesa; ti va bene così?
-Domanda: durante una dissolvenza fra due brani, C e V valgono subito per tutti e due, senza sfumare; ti va bene così?
-Maiuscolo con N accende la riproduzione casuale, con la nota che sale, e la spegne, con la nota che scende.
-Con la riproduzione casuale accesa, a fine brano il seguente è uno a caso fra le voci suonabili che si vedono nella plancia, mai lo stesso due volte di fila.
-Con la riproduzione casuale accesa e la playlist chiusa, un loop o una selezione, il brano a caso resta lì dentro.
-Con la riproduzione casuale e la dissolvenza accese, il brano a caso entra sfumando.
-Con la riproduzione casuale accesa, Z, B e N restano come prima.
-Chiudi e riapri MeTeOra: la riproduzione casuale è come l'avevi lasciata, e la trovi anche fra le impostazioni.
+A tutte le domande cancellate, la risposta è sì, funziona e mi va bene.
+
 Domanda: la scelta a caso è libera, quindi un brano può tornare dopo pochi altri; preferisci un mazzo, in cui ogni brano suona una volta prima di ricominciare?
+Sì, sarebbe molto bello. Però mettiamo una nuova impostazione in cui l'utente può scegliere fra diversi modelli di shuffle. casualità totale, 1 per brano, e poi Stop alla fine, o ricomincio? nel caso sia scelta la seconda.

@@ -1,17 +1,18 @@
 {
- "volume": 97,
+ "volume": 101,
  "passo_volume": 1,
  "passo_indietro": 3.0,
  "passo_avanti": 10.0,
  "volume_effetti": 0.35,
  "insegui": true,
+ "casuale": true,
  "ripresa": {
-  "percorso": "E:\\Music\\Ace Of Base\\The Sign\\04 Happy Nation.m4a",
+  "percorso": "E:\\Music\\Abba\\Unknown Album\\Dancing Queen.m4a",
   "sottobrano": null,
-  "numero": 3,
+  "numero": 0,
   "posizione": 0,
   "tipo": "cartella",
-  "cartella": "E:\\Music\\Ace Of Base\\The Sign"
+  "cartella": "E:\\Music\\Abba\\Unknown Album"
  },
  "righe_della_console": 2000,
  "caratteri": {},
@@ -53,13 +54,13 @@
  "velocita": 1.0,
  "tono": 0,
  "bande": [
-  1,
   0,
   0,
   0,
   0,
   0,
-  10
+  0,
+  0
  ],
  "dissolvenza": {
   "accesa": true,
