@@ -1,4 +1,4 @@
-Collaudo di MeTeOra 1.64.0, con NVDA: Questa rete. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.64.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Collaudo di MeTeOra 1.65.0, con NVDA: Questa rete, i MIDI e i tracker. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.65.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
 Nella plancia, dopo Questo PC, c'è Questa rete; freccia destra la apre.
 Dentro c'è iliadbox (iliadbox_Server), il percorso salvato in Windows: si apre, mostra cartelle e brani, e si suona come una cartella di Questo PC.
 Con la iliadbox spenta, o il cavo staccato, aprire il suo ramo non blocca MeTeOra: dopo pochi secondi la console dice che non risponde, e il ramo si può riaprire.
@@ -8,3 +8,14 @@ Aggiungi un percorso di rete, con Invio: chiede un percorso come \\server\cartel
 Un percorso scritto male, o già presente, viene rifiutato con il motivo.
 Canc su un percorso aggiunto da te lo toglie, con il suo suono; su quello salvato in Windows non toglie niente.
 Chiudi e riapri MeTeOra: i percorsi aggiunti da te ci sono ancora.
+Prima l'ascolto alla cieca dei banchi di suoni, quando vuoi: dalla cartella E:\git\tmp\player-accessibile\ascolti_midi, python ascolto_banchi.py.
+Il primo MIDI, con X: MeTeOra chiede se scaricare FluidSynth e cercare i banchi; con No i MIDI restano da preparare e non suonano.
+Con Sì scarica FluidSynth, cerca nei dischi dicendo nella console a che punto è, e propone i banchi trovati, con in fondo Scarica FluidR3 GM.
+Scelto il banco, il MIDI parte da solo, e ogni strumento ha il suo suono.
+Scegliendo Scarica FluidR3 GM, la console dice le percentuali, e alla fine il MIDI parte.
+Fra le impostazioni, Banco dei suoni MIDI: cerca nel PC, scrivi il percorso, scarica FluidR3 GM; la riga dice il banco in uso.
+Chiudi e riapri MeTeOra: il banco resta, e i MIDI partono subito.
+I MIDI nella plancia hanno la durata giusta.
+Con la dissolvenza accesa, un MIDI entra sfumando come gli altri brani.
+Se hai moduli dell'Amiga o dei tracker, per esempio .okt, .med, .sfx o .fc, compaiono nella plancia e suonano.
+Domanda: il banco si cerca al primo MIDI, non al primo avvio di MeTeOra; ti va bene?

@@ -151,6 +151,12 @@ def leggi_scheda(percorso):
     if formati.estensione(percorso) == ".aac":
         with contextlib.suppress(OSError, ValueError):
             scheda["durata"] = durata_adts(percorso)
+    elif formati.estensione(percorso) in formati.MIDI:
+        # mutagen.File non riconosce i MIDI: la durata la da' la sua classe
+        # SMF, dalla mappa dei tempi (1.65.0).
+        import midi
+
+        scheda["durata"] = midi.durata(percorso)
     if audio is not None and scheda["durata"] is None and getattr(audio, "info", None) is not None and getattr(audio.info, "length", None):
         scheda["durata"] = float(audio.info.length)
     if scheda["durata"] is None:

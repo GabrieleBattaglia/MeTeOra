@@ -2061,6 +2061,7 @@ def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_an
         ("video", "Video (Maiuscolo+F1): no"),
         ("sottotitoli", "Sottotitoli letti (Maiuscolo+F2): no"),
         ("sintesi", "Sintesi dei sottotitoli: automatica, adesso NVDA"),
+        ("banco_midi", "Banco dei suoni MIDI: nessuno, si sceglie al primo MIDI"),
         ("insegui", "Inseguimento della plancia (Maiuscolo+F8): no"),
         ("caratteri", "Dimensioni dei caratteri: quelle di Windows"),
         ("colori_testo", "Colori dei caratteri: quelli di Windows"),
@@ -3498,3 +3499,90 @@ def test_aggiungere_e_togliere_un_percorso_di_rete(finestra, monkeypatch, tmp_pa
     # Canc su un percorso salvato in Windows non toglie niente.
     finestra._cancella(next(finestra._figli(finestra.nodo_rete)))
     assert _ultima(finestra) == "Qui Canc non cancella niente."
+
+
+def _banco_finto(cartella, nome="Banco.sf2"):
+    """Un file con l'intestazione di un banco di suoni: basta a e_un_banco."""
+    percorso = cartella / nome
+    percorso.write_bytes(b"RIFF" + b"\0\0\0\0" + b"sfbk" + bytes(20))
+    return str(percorso)
+
+
+def _midi_finti(finestra, monkeypatch, presente=True):
+    """FluidSynth finto e il lavoro in disparte fatto subito, con wx.CallAfter
+    che chiama al momento: la preparazione dei MIDI senza fili ne' rete."""
+    stato = {"presente": presente, "scaricati": []}
+    monkeypatch.setattr(modulo.midi, "fluidsynth_presente", lambda: stato["presente"])
+    monkeypatch.setattr(modulo.midi, "scarica_fluidsynth", lambda avanza=None: stato.update(presente=True) or stato["scaricati"].append("fluidsynth"))
+    monkeypatch.setattr(modulo, "midi_in_disparte", lambda lavoro, al_termine: al_termine(lavoro()))
+    monkeypatch.setattr(modulo.wx, "CallAfter", lambda funzione, *argomenti, **chiavi: funzione(*argomenti, **chiavi))
+    monkeypatch.setattr(type(finestra.motore), "banco_midi", property(lambda self: stato.get("banco"), lambda self, banco: stato.update(banco=banco)))
+    return stato
+
+
+def test_il_primo_midi_scarica_fluidsynth_cerca_i_banchi_e_poi_suona(finestra, monkeypatch, tmp_path, suoni_annotati):
+    suonati = _finto_motore(finestra, monkeypatch)
+    stato = _midi_finti(finestra, monkeypatch, presente=False)
+    banco = _banco_finto(tmp_path)
+    monkeypatch.setattr(modulo.midi, "cerca_banchi", lambda radici=None, avvisa=None, fermo=None: [(banco, 30_000_000)])
+    finestra._aggiungi(None, [str(tmp_path / "canzone.mid")])
+    pl = finestra.archivio.playlist[0]
+    # Chi rifiuta non sente niente, e sa dove prepararli.
+    monkeypatch.setattr(finestra, "_conferma", lambda domanda, titolo, genitore=None: False)
+    finestra._suona(pl, pl.brani[0])
+    assert not suonati and _ultima(finestra).startswith("I MIDI restano da preparare")
+    domande = []
+    monkeypatch.setattr(finestra, "_conferma", lambda domanda, titolo, genitore=None: domande.append(domanda) or True)
+    scelta = _SceltaFinta(0)
+    monkeypatch.setattr(modulo, "FinestraScelta", scelta)
+    finestra._suona(pl, pl.brani[0])
+    assert "Scarico FluidSynth e cerco nei dischi" in domande[0] and stato["scaricati"] == ["fluidsynth"]
+    titolo, righe, _partenza = scelta.aperture[0]
+    assert titolo == "Banco dei suoni MIDI" and righe == [f"Banco, 30 MB, in {tmp_path}", "Scarica FluidR3 GM, circa 148 MB"]
+    for evento in ("scaricamento_avviato", "scaricamento_finito", "ricerca_avviata", "ricerca_finita", "impostazione_cambiata"):
+        assert evento in suoni_annotati
+    assert finestra.impostazioni["banco_midi"] == banco and _salvate(finestra)["banco_midi"] == banco and stato["banco"] == banco
+    assert suonati == [("canzone.mid", None)]
+
+
+def test_senza_banchi_nei_dischi_si_scarica_fluidr3(finestra, monkeypatch, tmp_path, suoni_annotati):
+    suonati = _finto_motore(finestra, monkeypatch)
+    _midi_finti(finestra, monkeypatch)
+    banco = _banco_finto(tmp_path, "FluidR3_GM.sf2")
+    monkeypatch.setattr(modulo.midi, "cerca_banchi", lambda radici=None, avvisa=None, fermo=None: [])
+    monkeypatch.setattr(modulo.midi, "scarica_fluidr3", lambda avanza=None: avanza(50, 100) or banco)
+    domande = []
+    monkeypatch.setattr(finestra, "_conferma", lambda domanda, titolo, genitore=None: domande.append(domanda) or True)
+    finestra._aggiungi(None, [str(tmp_path / "canzone.mid")])
+    pl = finestra.archivio.playlist[0]
+    finestra._suona(pl, pl.brani[0])
+    assert domande[1].startswith("Scarico FluidR3 GM") and finestra.impostazioni["banco_midi"] == banco
+    assert any(_senza_ora(r) == "FluidR3 GM: 50 per cento." for r in finestra._righe)
+    assert suonati == [("canzone.mid", None)] and "scaricamento_finito" in suoni_annotati
+
+
+def test_un_midi_senza_banco_non_si_prepara_per_la_dissolvenza(finestra, monkeypatch, tmp_path):
+    _suonati, preparati = _motore_che_prepara(finestra, monkeypatch)
+    _midi_finti(finestra, monkeypatch)
+    _playlist_di_prova(finestra, ("a.mp3", "b.mid"))
+    pl = finestra.archivio.playlist[0]
+    finestra._suona(pl, pl.brani[0])
+    finestra._prepara_il_seguente()
+    assert preparati == []
+
+
+def test_impostazioni_banco_dei_suoni_midi(finestra, monkeypatch, tmp_path, suoni_annotati):
+    _midi_finti(finestra, monkeypatch)
+    banco = _banco_finto(tmp_path)
+    # Scrivi il percorso: un file che non e' un banco si rifiuta.
+    monkeypatch.setattr(modulo, "FinestraScelta", _SceltaFinta(1))
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto(str(tmp_path / "niente.sf2")))
+    lista = _ListaFinta()
+    finestra._cambia_impostazione("banco_midi", lista)
+    assert _ultima(finestra).endswith("non è un banco di suoni: serve un file sf2 o sf3.") and not finestra.impostazioni["banco_midi"]
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto(f'"{banco}"'))
+    finestra._cambia_impostazione("banco_midi", lista)
+    assert finestra.impostazioni["banco_midi"] == banco and lista.righe["banco_midi"] == "Banco dei suoni MIDI: Banco.sf2"
+    assert _ultima(finestra) == "I MIDI suonano con il banco Banco.sf2." and suoni_annotati[-1] == "impostazione_cambiata"
+    os.remove(banco)
+    assert finestra._riga_dell_impostazione("banco_midi") == f"Banco dei suoni MIDI: {banco}, che non si trova più"

@@ -1,6 +1,6 @@
 # MeTeOra, le impostazioni: i valori che il programma ricorda fra un avvio e l'altro.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 le righe della console. Nella 1.51.0 caratteri, colori e scheda audio, e i limiti controllati alla lettura del file. Nella 1.51.2 un file con un JSON che non e' un dizionario non ferma l'avvio. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza (tappa 4, issue 15). Nella 1.59.0 la riproduzione casuale (issue 17). Nella 1.61.0 il modello della riproduzione casuale. Nella 1.63.0 video, sottotitoli letti e sintesi (tappa 7). Nella 1.64.0 i percorsi di rete scritti a mano.
+# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 le righe della console. Nella 1.51.0 caratteri, colori e scheda audio, e i limiti controllati alla lettura del file. Nella 1.51.2 un file con un JSON che non e' un dizionario non ferma l'avvio. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza (tappa 4, issue 15). Nella 1.59.0 la riproduzione casuale (issue 17). Nella 1.61.0 il modello della riproduzione casuale. Nella 1.63.0 video, sottotitoli letti e sintesi (tappa 7). Nella 1.64.0 i percorsi di rete scritti a mano. Nella 1.65.0 il banco dei suoni MIDI.
 
 """Le impostazioni, in un file JSON accanto al programma.
 
@@ -65,6 +65,9 @@ PREDEFINITE = {
     "sintesi": "automatica",
     # I percorsi di rete scritti a mano in Questa rete, come \\server\cartella.
     "percorsi_di_rete": [],
+    # Il banco di suoni dei MIDI, il percorso di un file sf2 o sf3; vuoto,
+    # al primo MIDI MeTeOra lo cerca (tappa 8).
+    "banco_midi": "",
     # Cosa suonava all'uscita, per riprendere da li' in pausa.
     "ripresa": {},
     # Quante righe tiene la console.

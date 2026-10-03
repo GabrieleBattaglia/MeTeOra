@@ -1,6 +1,6 @@
 # MeTeOra, gli effetti sonori: un suono per ogni azione, con Acusticator.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.51.0 i suoni delle impostazioni, della console salvata, della finestra dei marcatori, della sua ricerca e della scheda audio. Nella 1.55.0 quelli di velocita', tono, equalizzatore e dissolvenza. Nella 1.58.0 i suoni al volo dell'equalizzatore, e il loop con i soffi rimasti liberi. Nella 1.59.0 l'acceso e lo spento della riproduzione casuale. Nella 1.63.0 i suoni del video. Nella 1.64.0 quelli di Questa rete.
+# 30/09/2026: nasce con la tappa 1. Nella 1.51.0 i suoni delle impostazioni, della console salvata, della finestra dei marcatori, della sua ricerca e della scheda audio. Nella 1.55.0 quelli di velocita', tono, equalizzatore e dissolvenza. Nella 1.58.0 i suoni al volo dell'equalizzatore, e il loop con i soffi rimasti liberi. Nella 1.59.0 l'acceso e lo spento della riproduzione casuale. Nella 1.63.0 i suoni del video. Nella 1.64.0 quelli di Questa rete. Nella 1.65.0 quelli dello scaricamento.
 
 """La mappa degli eventi di MeTeOra sui preset della collezione di GBUtils.
 
@@ -46,6 +46,9 @@ EVENTI = {
     # Questa rete (1.64.0): la ricerca dei computer usa i suoni della ricerca.
     "percorso_aggiunto": "meteora_percorso_aggiunto",
     "percorso_tolto": "meteora_percorso_tolto",
+    # I MIDI (1.65.0): la ricerca dei banchi usa i suoni della ricerca.
+    "scaricamento_avviato": "meteora_scaricamento_avviato",
+    "scaricamento_finito": "meteora_scaricamento_finito",
     "brano_seguente_da_solo": "carta_giocata",
     "fine_playlist": "carillon_dolce",
     "avanti": "laser_da_gioco_2",

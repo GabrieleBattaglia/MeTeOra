@@ -10,3 +10,6 @@ dist/
 *.exe
 .pytest_cache/
 .ruff_cache/
+# FluidSynth e i banchi di suoni che MeTeOra scarica al primo MIDI (tappa 8): FluidR3 pesa 148 MB.
+fluidsynth/
+banchi/

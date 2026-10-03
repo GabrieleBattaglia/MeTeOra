@@ -14,14 +14,24 @@ e Speex restano da provare con file veri.
 import os
 
 SID = frozenset({".sid"})
+# I MIDI li rende FluidSynth, dalla 1.65.0 (tappa 8, issue 16).
+MIDI = frozenset({".mid", ".midi", ".kar"})
+# I moduli dei tracker, che libmpv legge con libopenmpt: dalla 1.65.0 tutte
+# le estensioni di libopenmpt, compresi i formati Amiga classici (OKT, MED,
+# SFX, STK, DIGI, Future Composer...), tranne quelle che hanno anche altri
+# usi, come .ppm e .mus (tappa 8, Gabriele). Il filtro le usa per k=tracker.
+TRACKER = frozenset({
+    ".mod", ".xm", ".it", ".s3m", ".mptm", ".669", ".med", ".mtm", ".stm", ".umx",
+    ".amf", ".ams", ".c67", ".dbm", ".digi", ".dmf", ".dsm", ".dsym", ".dtm", ".far", ".fc", ".fc13", ".fc14", ".gdm", ".gmc",
+    ".ice", ".imf", ".j2b", ".m15", ".mdl", ".mms", ".mo3", ".mt2", ".nst", ".okt", ".plm", ".psm", ".pt36", ".ptm", ".puma",
+    ".rtm", ".sfx", ".sfx2", ".smod", ".st26", ".stk", ".stp", ".stx", ".symmod", ".ult", ".wow",
+})
 AUDIO = frozenset({
     ".mp3", ".mp2", ".wav", ".flac", ".ogg", ".oga", ".opus", ".m4a", ".aac", ".wma", ".ape", ".wv", ".tak", ".tta",
     ".mpc", ".dsf", ".dff", ".aiff", ".aif", ".alac", ".ac3", ".dts", ".mka", ".au", ".caf", ".spx",
-    ".mid", ".midi", ".kar",
-    ".mod", ".xm", ".it", ".s3m", ".mptm", ".669", ".med", ".mtm", ".stm", ".umx",
-})
+}) | TRACKER
 VIDEO = frozenset({".mp4", ".mkv", ".avi", ".mov", ".wmv", ".webm", ".flv", ".m4v", ".mpg", ".mpeg", ".ts", ".m2ts", ".3gp", ".vob", ".ogv"})
-TUTTI = SID | AUDIO | VIDEO
+TUTTI = SID | MIDI | AUDIO | VIDEO
 
 
 def estensione(percorso):
@@ -34,6 +44,10 @@ def supportato(percorso):
 
 def e_sid(percorso):
     return estensione(percorso) in SID
+
+
+def e_midi(percorso):
+    return estensione(percorso) in MIDI
 
 
 def filtro_dialogo():

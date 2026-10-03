@@ -2,6 +2,12 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.65.0] - 2026-10-03
+
+- I MIDI suonano con FluidSynth e un banco di suoni General MIDI: ogni strumento ha il suo suono, invece di uno solo per tutti. La prima volta MeTeOra chiede se procedere, scarica FluidSynth, cerca nei dischi i banchi che hai già e te li propone; se non ce ne sono, propone di scaricare FluidR3 GM. Il banco si cambia nelle impostazioni, con la voce nuova Banco dei suoni MIDI. Chiesto da Gabriele (issue 16, tappa 8).
+- I MIDI hanno nella plancia la durata giusta, letta dalla loro mappa dei tempi.
+- MeTeOra riconosce tutti i moduli dei tracker che libopenmpt sa suonare, compresi i formati dell'Amiga come OKT, MED, SFX, STK, DIGI e Future Composer; anche il filtro k=tracker li conta tutti.
+
 ## [1.64.0] - 2026-10-03
 
 - Questa rete, un ramo nuovo della plancia accanto a Questo PC: i percorsi di rete salvati in Windows, come il disco della iliadbox, ciascuno con il suo nome; i percorsi che aggiungi con il comando Aggiungi un percorso di rete, ricordati e da togliere con Canc; e il ramo Computer della rete, che cerca in disparte i computer della rete e le loro cartelle condivise. Le cartelle di rete si aprono e si suonano come quelle di Questo PC, e una cartella che non risponde non blocca più MeTeOra: dopo pochi secondi la console lo dice. Chiesto da Gabriele.

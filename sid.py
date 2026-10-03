@@ -61,6 +61,10 @@ def riscalda():
 class BranoSid:
     """Un sottobrano reso in memoria da un filo di esecuzione che corre in anticipo."""
 
+    # Le velocita' della stima dell'attesa: i MIDI ne hanno di loro.
+    VELOCITA_STIMATA = VELOCITA_STIMATA
+    VELOCITA_MASSIMA_STIMATA = VELOCITA_MASSIMA_STIMATA
+
     def __init__(self, percorso, sottobrano, secondi):
         self._h = _dll.sid_apri(os.fsencode(percorso), FREQUENZA, 1)
         errore = _dll.sid_errore(self._h)
@@ -88,7 +92,7 @@ class BranoSid:
         if secondi <= pronti or self.pronti >= self.totale:
             return 0.0
         trascorso = time.perf_counter() - self._partenza
-        velocita = min(pronti / trascorso, VELOCITA_MASSIMA_STIMATA) if trascorso >= MISURA_MINIMA and pronti > 0 else VELOCITA_STIMATA
+        velocita = min(pronti / trascorso, self.VELOCITA_MASSIMA_STIMATA) if trascorso >= MISURA_MINIMA and pronti > 0 else self.VELOCITA_STIMATA
         return (min(secondi, self.totale / (FREQUENZA * CANALI)) - pronti) / velocita + RITARDO_DEL_SALTO
 
     def _lavora(self):

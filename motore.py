@@ -1,6 +1,6 @@
 # MeTeOra, il motore di riproduzione: libmpv, e i SID in tempo reale.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7).
+# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7). Nella 1.65.0 i MIDI resi da FluidSynth (tappa 8).
 
 """Due lettori libmpv per tutti i formati.
 
@@ -51,6 +51,7 @@ import librerie  # noqa: F401
 import mpv
 
 import formati
+import midi
 import sid
 import songlengths
 import valori
@@ -121,6 +122,17 @@ def _apri_sid(uri):
     return sid.apri_flusso(percorso, int(sottobrano), float(secondi))
 
 
+# Le opzioni di loadfile per i flussi WAV resi in RAM, SID e MIDI. Il formato
+# e' gia' detto, e l'intestazione WAV dice tutto il resto: senza probe-info e
+# con probesize al minimo lavf non legge in anticipo secondi di flusso, che
+# andrebbero prima resi. La partenza scende da circa 230 a circa 80 ms
+# (tappa 5, 1.61.1).
+_OPZIONI_DEL_FLUSSO = {"demuxer-lavf-format": "wav", "demuxer-lavf-probe-info": "no", "demuxer-lavf-probesize": "32",
+    "cache": "no", "demuxer-readahead-secs": "1"}
+# La durata di un MIDI di cui la mappa dei tempi non si legge.
+DURATA_DI_RISERVA_DEL_MIDI = 180.0
+
+
 def _testo(valore):
     """Un valore come lo vuole il comando set di mpv."""
     if isinstance(valore, bool):
@@ -136,7 +148,7 @@ class _Brano:
     """Dove sta un brano per libmpv: l'indirizzo, le opzioni di loadfile e,
     per i SID, il sottobrano scelto e quanti ce ne sono."""
 
-    def __init__(self, percorso, sottobrano=None, inizio=None):
+    def __init__(self, percorso, sottobrano=None, inizio=None, banco_midi=None):
         self.percorso = percorso
         self.indirizzo = percorso
         self.opzioni = {"start": f"{inizio:.3f}"} if inizio else {}
@@ -146,12 +158,13 @@ class _Brano:
             self.sottobrani = max(1, songlengths.info_del_sid(percorso)["sottobrani"])
             secondi = durata_del_sottobrano(percorso, self.sottobrano)
             self.indirizzo = f"sid://{self.sottobrano}/{max(1.0, secondi)}/{percorso}"
-            # Il formato e' gia' detto, e l'intestazione WAV dice tutto il
-            # resto: senza probe-info e con probesize al minimo lavf non legge
-            # in anticipo secondi di flusso, che il SID dovrebbe prima rendere.
-            # La partenza scende da circa 230 a circa 80 ms (tappa 5, 1.61.1).
-            self.opzioni.update({"demuxer-lavf-format": "wav", "demuxer-lavf-probe-info": "no", "demuxer-lavf-probesize": "32",
-                "cache": "no", "demuxer-readahead-secs": "1"})
+            self.opzioni.update(_OPZIONI_DEL_FLUSSO)
+        elif banco_midi and formati.e_midi(percorso):
+            # Un MIDI, con un banco di suoni: lo rende FluidSynth (tappa 8).
+            # Senza banco lo legge libmpv da se', come prima della 1.65.0.
+            secondi = (midi.durata(percorso) or DURATA_DI_RISERVA_DEL_MIDI) + midi.CODA
+            self.indirizzo = f"midi://{secondi}/{percorso}"
+            self.opzioni.update(_OPZIONI_DEL_FLUSSO)
 
 
 class _Lettore:
@@ -188,10 +201,18 @@ class _Lettore:
         # finche' mpv non lo apre, e a ogni brano nuovo.
         self.flusso = None
         self.mpv.register_stream_protocol("sid", self._apri_sid)
+        self.mpv.register_stream_protocol("midi", self._apri_midi)
         self.mpv.register_event_callback(functools.partial(motore._evento, self))
 
     def _apri_sid(self, uri):
         flusso = _apri_sid(uri)
+        self.flusso = flusso
+        return flusso
+
+    def _apri_midi(self, uri):
+        # midi://<secondi>/<percorso>: il banco e' quello del motore.
+        secondi, percorso = uri[len("midi://"):].split("/", 1)
+        flusso = midi.apri_flusso(percorso, self._motore.banco_midi, float(secondi))
         self.flusso = flusso
         return flusso
 
@@ -346,6 +367,8 @@ class Motore:
         self._tono = 0
         self._bande = [0] * len(valori.FREQUENZE_DELLE_BANDE)
         self._dissolvenza = 0.0
+        # Il banco di suoni dei MIDI, None finche' la finestra non lo sceglie.
+        self._banco_midi = None
         self._uscente = None
         self._preparato = None
         self._sfumatura = None
@@ -517,7 +540,7 @@ class Motore:
         sfuma_lo_stesso, per X da capo e per i marker con la dissolvenza
         accesa (Gabriele, 2 ottobre 2026), lo stesso brano riparte dal punto
         chiesto sull'altro lettore e i due punti si incrociano."""
-        brano = _Brano(percorso, sottobrano, inizio)
+        brano = _Brano(percorso, sottobrano, inizio, self._banco_midi)
         with self._blocco:
             if self._chiuso:
                 return
@@ -570,7 +593,7 @@ class Motore:
         quando manca la durata della dissolvenza alla fine di quello in
         corso. Vale solo con la dissolvenza accesa, un brano in corso e
         nessuna sfumatura in corso; torna vero se il brano e' stato preso."""
-        brano = _Brano(percorso, sottobrano)
+        brano = _Brano(percorso, sottobrano, banco_midi=self._banco_midi)
         with self._blocco:
             attivo = self._attivo
             if self._chiuso or not self._dissolvenza or self._sfumatura is not None or attivo.percorso is None or attivo.finito:
@@ -772,12 +795,27 @@ class Motore:
         (tappa 5, 1.62.0)."""
         with self._blocco:
             lettore = self._attivo
-            if lettore.percorso is None or lettore.sottobrano is None:
+            reso = lettore.sottobrano is not None or (self._banco_midi and formati.e_midi(lettore.percorso or ""))
+            if lettore.percorso is None or not reso:
                 return 0.0
             flusso = lettore.flusso
         if flusso is None:
-            return secondi / sid.VELOCITA_STIMATA
+            stimata = sid.VELOCITA_STIMATA if lettore.sottobrano is not None else midi.VELOCITA_STIMATA
+            return secondi / stimata
         return flusso.brano.attesa(secondi)
+
+    @property
+    def banco_midi(self):
+        """Il banco di suoni con cui FluidSynth rende i MIDI; None, e i MIDI
+        li legge libmpv da se'. Vale dal brano dopo."""
+        return self._banco_midi
+
+    @banco_midi.setter
+    def banco_midi(self, banco):
+        with self._blocco:
+            self._banco_midi = banco or None
+        if midi.fluidsynth_presente():
+            midi.svuota_la_scorta(tranne=banco)
 
     @property
     def posizione(self):

@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8).
 
 """La finestra di MeTeOra.
 
@@ -46,6 +46,7 @@ import wx
 
 import formati
 import marcatori
+import midi
 import percorsi
 import questa_rete
 import questo_pc
@@ -244,6 +245,12 @@ def _descrivi_traccia(traccia, indice, totale):
     return ", ".join(str(parte) for parte in parti if parte)
 
 
+def midi_in_disparte(lavoro, al_termine):
+    """Fa lavoro() in un filo a parte e passa il risultato ad al_termine:
+    gli scaricamenti e la ricerca dei banchi non fermano la finestra."""
+    threading.Thread(target=lambda: al_termine(lavoro()), name="MeTeOra, preparazione dei MIDI", daemon=True).start()
+
+
 def _frase_del_video(acceso):
     if acceso:
         return "Video acceso: i video si vedono in una finestra sopra MeTeOra."
@@ -266,6 +273,7 @@ VOCI_DELLE_IMPOSTAZIONI = {
     "video": ("Video (Maiuscolo+F1)", "cambiato"),
     "sottotitoli": ("Sottotitoli letti (Maiuscolo+F2)", "cambiati"),
     "sintesi": ("Sintesi dei sottotitoli", "cambiata"),
+    "banco_midi": ("Banco dei suoni MIDI", "cambiato"),
     "insegui": ("Inseguimento della plancia (Maiuscolo+F8)", "cambiato"),
     "caratteri": ("Dimensioni dei caratteri", "cambiate"),
     "colori_testo": ("Colori dei caratteri", "cambiati"),
@@ -559,6 +567,9 @@ class Finestra(wx.Frame):
         # scelto con Maiuscolo+F6, come indice di RAPPORTI; la finestra che
         # aveva il fuoco prima del video, per riportarcelo; la sintesi dei
         # sottotitoli letti.
+        # I MIDI, tappa 8: vero mentre si scarica FluidSynth, si cercano i
+        # banchi o si scarica FluidR3.
+        self._midi_in_preparazione = False
         self._video = None
         self._video_nel_motore = False
         # Il brano su cui la finestra del video e' stata nascosta a mano, con
@@ -2606,6 +2617,9 @@ class Finestra(wx.Frame):
         entrare sfumando, se qualcosa si sente; un seguente preparato non
         conta piu'. Con sfuma_lo_stesso sfuma anche ripartendo con il brano
         in corso, come X da capo."""
+        if formati.e_midi(brano.percorso) and not self._midi_pronti():
+            self._prepara_i_midi(lambda: self._suona(pl, brano, evento, sottobrano, inizio, sfuma_lo_stesso))
+            return
         self._uscente = self._preparato = None
         self.coda.imposta(pl, brano)
         self._segna_nel_mazzo(pl, brano, sottobrano)
@@ -2943,6 +2957,9 @@ class Finestra(wx.Frame):
         if seguente is None:
             return
         _playlist, brano, sottobrano = seguente
+        if formati.e_midi(brano.percorso) and not self._midi_pronti():
+            # Senza banco il MIDI non si prepara: a fine brano lo chiede _suona.
+            return
         if self.motore.prepara(brano.percorso, sottobrano or brano.sottobrano):
             self._uscente = (self.coda.playlist, self.coda.corrente, self.motore.sottobrano)
             self._preparato = seguente
@@ -3223,7 +3240,8 @@ class Finestra(wx.Frame):
         sarebbe silenzio senza spiegazioni (tappa 5, 1.62.0)."""
         attesa = self.motore.attesa_del_sid(arrivo)
         if attesa >= ATTESA_DA_DIRE:
-            self.scrivi(f"Il SID si prepara fino a {tempo(arrivo)}: circa {max(2, round(attesa))} secondi.")
+            che = "Il MIDI" if formati.e_midi(self.motore.in_corso or "") else "Il SID"
+            self.scrivi(f"{che} si prepara fino a {tempo(arrivo)}: circa {max(2, round(attesa))} secondi.")
 
     def _comando_avanti(self):
         self._salto(self.impostazioni["passo_avanti"], "avanti")
@@ -3320,10 +3338,19 @@ class Finestra(wx.Frame):
         self.motore.tono = imp["tono"]
         self.motore.bande = imp["bande"]
         self._applica_la_dissolvenza()
+        self._applica_il_banco()
 
     def _applica_la_dissolvenza(self):
         dissolvenza = self.impostazioni["dissolvenza"]
         self.motore.dissolvenza = dissolvenza["secondi"] if dissolvenza["accesa"] else 0
+
+    def _applica_il_banco(self):
+        """Il banco dei MIDI al motore, se FluidSynth c'e' e il banco si trova."""
+        self.motore.banco_midi = self.impostazioni["banco_midi"] if self._midi_pronti() else None
+
+    def _midi_pronti(self):
+        banco = self.impostazioni["banco_midi"]
+        return bool(banco) and midi.fluidsynth_presente() and midi.e_un_banco(banco)
 
     def _riproduzione_fuori_dal_normale(self):
         """La riga dell'avvio su velocita' e tono, se non sono quelli normali;
@@ -3534,6 +3561,7 @@ class Finestra(wx.Frame):
             "video": lambda: "sì" if imp["video"] else "no",
             "sottotitoli": lambda: "sì" if imp["sottotitoli"] else "no",
             "sintesi": self._sintesi_da_leggere,
+            "banco_midi": self._banco_da_leggere,
             "insegui": lambda: "sì" if imp["insegui"] else "no",
             "caratteri": self._caratteri_da_leggere,
             "colori_testo": lambda: self._colori_da_leggere("colori_testo"),
@@ -3576,6 +3604,7 @@ class Finestra(wx.Frame):
             "scheda_audio": self._scegli_la_scheda_audio,
             "modello_casuale": self._scegli_il_modello_casuale,
             "sintesi": self._scegli_la_sintesi,
+            "banco_midi": self._scegli_il_banco,
             "salva_console": lambda _genitore: self._salva_console(),
             "marcatori": self._finestra_dei_marcatori,
             "importa_marcatori": self._importa_i_marcatori,
@@ -4048,6 +4077,148 @@ class Finestra(wx.Frame):
         if chiave in sintesi.USCITE and self._sintesi.scelta(chiave) is None:
             return f"{sintesi.nome(chiave)}, che adesso non risponde"
         return sintesi.nome(chiave)[0].upper() + sintesi.nome(chiave)[1:]
+
+    # I MIDI, tappa 8: FluidSynth e il banco dei suoni.
+
+    def _prepara_i_midi(self, dopo=None):
+        """Al primo MIDI: dice cosa serve, scarica FluidSynth se manca, cerca
+        nei dischi i banchi di suoni e li propone; se non ce ne sono propone
+        FluidR3. Tutto in disparte; dopo() arriva quando i MIDI sono pronti."""
+        if self._midi_in_preparazione:
+            self._riscontro("non_disponibile", "Sto preparando i MIDI: un momento.")
+            return
+        serve_fluidsynth = not midi.fluidsynth_presente()
+        if serve_fluidsynth:
+            domanda = ("Per suonare i MIDI MeTeOra usa FluidSynth, un programma libero di circa 3 MB, e un banco di suoni General MIDI. "
+                "Scarico FluidSynth e cerco nei dischi i banchi che hai già? La ricerca può durare qualche minuto.")
+        else:
+            domanda = "Per suonare i MIDI serve un banco di suoni General MIDI. Cerco nei dischi quelli che hai già? La ricerca può durare qualche minuto."
+        if not self._conferma(domanda, "MIDI"):
+            self.scrivi("I MIDI restano da preparare: si può fare anche dalle impostazioni, con Banco dei suoni MIDI.")
+            return
+        self._midi_in_preparazione = True
+
+        def lavoro():
+            if serve_fluidsynth:
+                wx.CallAfter(self._riscontro, "scaricamento_avviato", "Scarico FluidSynth.")
+                try:
+                    midi.scarica_fluidsynth()
+                except (OSError, ValueError) as e:
+                    return ("errore", f"FluidSynth non si scarica: {e}")
+                wx.CallAfter(self._riscontro, "scaricamento_finito", "FluidSynth pronto.")
+            wx.CallAfter(self._riscontro, "ricerca_avviata", "Cerco i banchi di suoni nei dischi.")
+            return ("trovati", midi.cerca_banchi(avvisa=lambda quante: wx.CallAfter(self.scrivi, f"Cerco i banchi: {quante} cartelle viste.", "banchi")))
+
+        midi_in_disparte(lavoro, lambda esito: wx.CallAfter(self._banchi_cercati, esito, dopo))
+
+    def _banchi_cercati(self, esito, dopo):
+        self._midi_in_preparazione = False
+        if self._chiusa:
+            return
+        tipo, valore = esito
+        if tipo == "errore":
+            self._riscontro("errore", valore)
+            return
+        trovati = valore
+        if not trovati:
+            self._riscontro("ricerca_finita", "Nei dischi non ho trovato banchi di suoni.")
+            if self._conferma(f"Scarico FluidR3 GM, il banco storico di FluidSynth, circa {midi.FLUIDR3_DIMENSIONE // 1_000_000} MB?", "MIDI"):
+                self._scarica_fluidr3(dopo)
+            return
+        self._riscontro("ricerca_finita", "Trovato un banco di suoni." if len(trovati) == 1 else f"Trovati {len(trovati)} banchi di suoni.")
+        self._scegli_fra_i_banchi(trovati, self, dopo)
+
+    def _scegli_fra_i_banchi(self, trovati, genitore, dopo=None):
+        """La lista dei banchi trovati, con in fondo lo scaricamento di FluidR3."""
+        righe = [f"{os.path.splitext(os.path.basename(p))[0]}, {round(d / 1_000_000)} MB, in {os.path.dirname(p)}" for p, d in trovati]
+        righe.append(f"Scarica FluidR3 GM, circa {midi.FLUIDR3_DIMENSIONE // 1_000_000} MB")
+        self._suono("domanda")
+        with FinestraScelta(genitore, "Banco dei suoni MIDI", righe, 0) as dialogo:
+            if dialogo.ShowModal() != wx.ID_OK:
+                self.scrivi("Banco dei suoni MIDI non cambiato.")
+                return
+            indice = dialogo.GetSelection()
+        if indice == len(trovati):
+            self._scarica_fluidr3(dopo, genitore)
+        else:
+            self._usa_il_banco(trovati[indice][0], dopo, genitore)
+
+    def _scarica_fluidr3(self, dopo=None, genitore=None):
+        self._midi_in_preparazione = True
+        self._riscontro("scaricamento_avviato", f"Scarico FluidR3 GM, circa {midi.FLUIDR3_DIMENSIONE // 1_000_000} MB.")
+        decimi = [0]
+
+        def avanza(scaricati, totale):
+            if totale and scaricati * 10 // totale > decimi[0]:
+                decimi[0] = scaricati * 10 // totale
+                wx.CallAfter(self.scrivi, f"FluidR3 GM: {decimi[0] * 10} per cento.", "banchi")
+
+        def lavoro():
+            try:
+                return ("banco", midi.scarica_fluidr3(avanza))
+            except (OSError, ValueError) as e:
+                return ("errore", f"FluidR3 GM non si scarica: {e}")
+
+        midi_in_disparte(lavoro, lambda esito: wx.CallAfter(self._fluidr3_scaricato, esito, dopo, genitore))
+
+    def _fluidr3_scaricato(self, esito, dopo, genitore):
+        self._midi_in_preparazione = False
+        if self._chiusa:
+            return
+        tipo, valore = esito
+        if tipo == "errore":
+            self._riscontro("errore", valore)
+            return
+        self._suono("scaricamento_finito")
+        self._usa_il_banco(valore, dopo, genitore if genitore is not None and genitore.IsShown() else None)
+
+    def _usa_il_banco(self, percorso, dopo=None, genitore=None):
+        """Il banco scelto vale da subito, e si ricorda."""
+        self.impostazioni["banco_midi"] = percorso
+        self._salva_impostazioni()
+        self._applica_il_banco()
+        if genitore is not None and hasattr(genitore, "aggiorna"):
+            genitore.aggiorna("banco_midi", self._riga_dell_impostazione("banco_midi"))
+        self._riscontro("impostazione_cambiata", f"I MIDI suonano con il banco {os.path.basename(percorso)}.")
+        if dopo is not None and self._midi_pronti():
+            dopo()
+
+    def _banco_da_leggere(self):
+        banco = self.impostazioni["banco_midi"]
+        if not banco:
+            return "nessuno, si sceglie al primo MIDI"
+        if not midi.e_un_banco(banco):
+            return f"{banco}, che non si trova più"
+        return os.path.basename(banco) + ("" if midi.fluidsynth_presente() else ", FluidSynth da scaricare")
+
+    def _scegli_il_banco(self, genitore):
+        """La voce Banco dei suoni MIDI: cerca nel PC, scrivi il percorso, o
+        scarica FluidR3."""
+        righe = ["Cerca i banchi nel PC", "Scrivi il percorso di un banco", f"Scarica FluidR3 GM, circa {midi.FLUIDR3_DIMENSIONE // 1_000_000} MB"]
+        self._suono("domanda")
+        with FinestraScelta(genitore, "Banco dei suoni MIDI", righe, 0) as dialogo:
+            if dialogo.ShowModal() != wx.ID_OK:
+                self.scrivi("Banco dei suoni MIDI non cambiato.")
+                return
+            indice = dialogo.GetSelection()
+        if indice == 0:
+            self._prepara_i_midi()
+        elif indice == 1:
+            self._scrivi_il_banco(genitore)
+        else:
+            self._scarica_fluidr3(genitore=genitore)
+
+    def _scrivi_il_banco(self, genitore):
+        self._suono("domanda")
+        with DialogoTesto(genitore, "Il percorso del banco di suoni, un file sf2 o sf3.", "Banco dei suoni MIDI", self.impostazioni["banco_midi"]) as dialogo:
+            if dialogo.ShowModal() != wx.ID_OK:
+                self.scrivi("Banco dei suoni MIDI non cambiato.")
+                return
+            percorso = dialogo.GetValue().strip().strip('"')
+        if not midi.e_un_banco(percorso):
+            self._riscontro("errore", f"{percorso} non è un banco di suoni: serve un file sf2 o sf3.")
+            return
+        self._usa_il_banco(percorso, genitore=genitore)
 
     def _scegli_il_modello_casuale(self, genitore):
         """Il modello della riproduzione casuale, da una lista (Gabriele,

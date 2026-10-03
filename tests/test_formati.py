@@ -138,3 +138,10 @@ def test_un_modulo_dei_tracker_ha_la_durata_e_suona(tmp_path):
         assert _aspetta(lambda: finiti, 3)
     finally:
         m.chiudi()
+
+
+@pytest.mark.parametrize("estensione", [".okt", ".med", ".sfx", ".stk", ".digi", ".fc", ".fc14", ".symmod", ".mo3", ".ult", ".far"])
+def test_i_formati_amiga_e_dei_tracker_si_riconoscono(estensione):
+    # Dalla 1.65.0 tutte le estensioni di libopenmpt, tranne quelle con altri usi.
+    assert formati.supportato("modulo" + estensione) and formati.supportato("MODULO" + estensione.upper())
+    assert not formati.supportato("immagine.ppm") and not formati.supportato("doom.mus")
