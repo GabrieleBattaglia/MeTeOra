@@ -13,12 +13,12 @@
  "percorsi_di_rete": [],
  "banco_midi": "E:\\VstPlugins\\SF2 Instruments\\FluidR3 GM.sf2",
  "ripresa": {
-  "percorso": "E:\\Audio\\MIDI\\50 special.mid",
+  "percorso": "E:\\Audio\\MODULE\\ACTIONS.MOD",
   "sottobrano": null,
   "numero": 10,
-  "posizione": 16.123178998392287,
+  "posizione": 0,
   "tipo": "cartella",
-  "cartella": "E:\\Audio\\MIDI"
+  "cartella": "E:\\Audio\\MODULE"
  },
  "righe_della_console": 2000,
  "caratteri": {},
@@ -69,7 +69,7 @@
   0
  ],
  "dissolvenza": {
-  "accesa": false,
+  "accesa": true,
   "secondi": 7.0
  }
 }
