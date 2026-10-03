@@ -1,6 +1,7 @@
 # MeTeOra, le prove: desktop nascosto, suoni muti, cartelle temporanee.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 # 30/09/2026: nasce con la tappa 1, sul modello di tests/conftest.py di Tornello.
+# 03/10/2026, 1.72.0: os.startfile vietato, perche' F1 apre il manuale nel browser.
 
 """Le regole comuni delle prove.
 
@@ -64,6 +65,18 @@ def suoni_annotati(monkeypatch):
 
     monkeypatch.setattr(suoni, "suona", annota)
     return suonati
+
+
+@pytest.fixture(autouse=True)
+def startfile_vietato(monkeypatch):
+    """os.startfile non apre mai niente durante le prove: un browser, come
+    quello del manuale di F1, comparirebbe davanti a chi le lancia e NVDA ne
+    leggerebbe il titolo. Una prova che lo chiama senza sostituirlo fallisce."""
+
+    def vietato(*argomenti, **opzioni):
+        raise AssertionError(f"os.startfile chiamato da una prova senza sostituirlo: {argomenti}")
+
+    monkeypatch.setattr(os, "startfile", vietato, raising=False)
 
 
 @pytest.fixture(autouse=True)

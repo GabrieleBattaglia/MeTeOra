@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida.
 
 """La finestra di MeTeOra.
 
@@ -43,6 +43,7 @@ import time
 import traceback
 import warnings
 from ctypes import wintypes
+from html.parser import HTMLParser
 
 import wx
 
@@ -169,38 +170,42 @@ NOMI_DEI_SEGNI = {
 }
 
 TASTI_COMUNI = [
-    "X riproduce la voce selezionata o riprende, C pausa, V stop, Z e B brano precedente e successivo, N brano a caso, Maiuscolo con N la riproduzione casuale.",
-    "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, più e meno volume, Maiuscolo+M il passo del volume, M muto.",
+    "X suona la voce selezionata, riprende dalla pausa o fa ripartire da capo il brano che suona già; C pausa, V stop, Z e B brano precedente e successivo, N brano a caso, Maiuscolo con N la riproduzione casuale.",
+    "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, più e meno volume, Maiuscolo con M il passo del volume, M muto.",
     "A e D rallentano e accelerano, S torna alla velocità normale; F e H abbassano e alzano il tono di un semitono, G lo riporta al normale.",
     "U e I scelgono la banda dell'equalizzatore, O e P la abbassano e la alzano di un dB, È la azzera, Maiuscolo con È le azzera tutte.",
     "L accende e spegne la dissolvenza incrociata: con lei sfumano i cambi di brano, lo stop, la pausa, X da capo e i marker; Maiuscolo con L ne chiede la durata.",
-    "Maiuscolo+X, a giro: punto A del loop sul brano selezionato, poi punto B, poi toglie il loop.",
+    "Maiuscolo con X, a giro: punto A del loop sul brano selezionato, poi punto B, poi toglie il loop.",
     "Il video, con Maiuscolo e i tasti funzione: F1 lo accende e lo spegne, F2 sceglie i sottotitoli letti a giro, F3 la traccia audio a giro, F5 lo schermo intero, F6 il rapporto dell'immagine a giro.",
     "J e K aprono e suonano la playlist precedente e successiva, le cifre da 1 a 0 le prime dieci playlist.",
     "Nella plancia Backspace chiude il ramo in cui sei e risale di un livello, Maiuscolo con Backspace risale di colpo all'unità o alla playlist, Preferiti compresi, e chiude i rami al suo interno.",
     "T mette un marker dove sei, o rinomina quello su cui sei; R e Y vanno al marker precedente e successivo; Maiuscolo con R, Y e T tolgono i marker prima, dopo e tutti; Maiuscolo con le cifre da 1 a 0 va ai primi dieci marker del brano della plancia.",
-    "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione sul brano in riproduzione e Maiuscolo+F8 ce la tiene agganciata, F9 chiude e F10 apre tutto il ramo selezionato, F11 legge i tag del brano selezionato e Maiuscolo+F11 apre il menu per modificarli.",
-    "Barra rovesciata: nella console cerca nella console, nella plancia nel ramo in cui sei; Ctrl con la barra rovesciata in tutte le playlist e in tutte le unità. Barra verticale: il filtro della playlist in cui sta la plancia, anche dalla console.",
-    "F1 manuale, F2 novità, F3 crediti e F12 elenco dei tasti, tutti nella console. Esc esce salvando tutto.",
+    "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione e il fuoco della plancia sul brano in riproduzione e Maiuscolo con F8 ce la tiene agganciata, "
+    "F9 chiude e F10 apre tutto il ramo col fuoco, F11 legge i tag del brano selezionato e Maiuscolo con F11 apre il menu per modificarli.",
+    "Barra rovesciata: nella console cerca nella console, altrove nel ramo della plancia in cui sei, e da Apri file o Impostazioni in tutto MeTeOra; Ctrl con la barra rovesciata cerca in tutto MeTeOra, anche dalla console. "
+    "Barra verticale: il filtro della playlist o dei Preferiti in cui sta la plancia, anche dalla console.",
+    "F1 apre il manuale nel browser; F12 scrive nella console la guida rapida dei tasti, F2 le novità e F3 i crediti, sempre nella console. Esc esce salvando tutto.",
 ]
 # Le righe del cruscotto proprie di ogni tipo di voce della plancia.
 TASTI_DEL_CONTESTO = {
-    "risultati": ("i Risultati della ricerca", "Invio, Applicazioni o Spazio: menu con Riproduci, Salva come playlist, Nuova ricerca e Ferma la ricerca."),
+    "risultati": ("i Risultati della ricerca", "Invio, Applicazioni o Spazio: menu con Riproduci, Salva come playlist, Nuova ricerca, che cerca in tutto MeTeOra, e Ferma la ricerca."),
     "altri": ("la voce che mostra altri risultati", "Invio mostra i risultati seguenti."),
-    "gruppo_risultati": ("un ramo dei Risultati", "Freccia destra lo apre: i risultati stanno come stavano, sotto la loro playlist o lungo il percorso della loro cartella."),
-    "preferiti": ("i Preferiti", "Invio, Applicazioni o Spazio: menu con Riproduci e Filtro. Barra verticale: il filtro. Canc su un loro brano lo toglie dai Preferiti."),
+    "gruppo_risultati": ("un ramo dei Risultati", "Freccia destra lo apre: i risultati stanno come stavano, sotto la loro playlist o lungo il percorso della loro cartella. Invio, Applicazioni o Spazio: menu con Salva come playlist."),
+    "preferiti": ("i Preferiti", "Invio, Applicazioni o Spazio: menu con Riproduci, Filtro e, se c'è un filtro, Togli il filtro. Barra verticale: il filtro. Canc su un loro brano lo toglie dai Preferiti."),
     "radice_playlist": ("il ramo Playlist", "Invio, Applicazioni o Spazio: menu con Nuova playlist."),
-    "playlist": ("una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Filtro, Rinomina ed Elimina. Barra verticale: il filtro. Canc elimina la playlist, dopo una conferma."),
-    "brano": ("un brano di una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Sposta, Saltato, Rinomina file, Leggi i tag e Tag. Canc toglie il brano dalla playlist, Maiuscolo+Canc manda il file nel cestino. Un SID o un file delle console con più sottobrani, o un brano con dei marker, si apre con freccia destra."),
+    "playlist": ("una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Filtro, Togli il filtro se c'è un filtro, Rinomina ed Elimina. Barra verticale: il filtro. Canc elimina la playlist, dopo una conferma."),
+    "brano": ("un brano di una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Sposta su, giù, in cima e in fondo, Saltato, Togli dalla playlist, Aggiungi ai preferiti, Rinomina file, Leggi i tag e Tag per i formati che li hanno, e Manda nel cestino. "
+        "Canc toglie il brano dalla playlist, Maiuscolo con Canc manda il file nel cestino. Un SID o un file delle console con più sottobrani, o un brano con dei marker, si apre con freccia destra."),
     "pc": ("Questo PC", "Freccia destra mostra le unità. Invio, Applicazioni o Spazio: menu con Aggiorna."),
     "rete": ("Questa rete", "Freccia destra mostra i percorsi di rete, i computer della rete e il comando per aggiungere un percorso. Invio, Applicazioni o Spazio: menu con Aggiungi un percorso di rete e Aggiorna."),
     "computer_della_rete": ("i computer della rete", "Freccia destra li cerca, in disparte: può volerci qualche secondo. Invio, Applicazioni o Spazio: menu con Cerca di nuovo."),
     "computer": ("un computer della rete", "Freccia destra mostra le sue cartelle condivise. Invio, Applicazioni o Spazio: menu con Aggiorna."),
     "attesa": ("una ricerca in corso", "Aspetta: la voce sparisce quando la ricerca finisce."),
-    "unita": ("un'unità", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Crea playlist da qui."),
-    "cartella": ("una cartella", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Riproduci e Crea playlist da qui."),
-    "file": ("un file", "Invio, Applicazioni o Spazio: menu con Riproduci, Aggiungi alla playlist, Rinomina file, Leggi i tag e Tag. Maiuscolo+Canc manda il file nel cestino. Un SID o un file delle console con più sottobrani, o un file con dei marker, si apre con freccia destra."),
-    "sottobrano": ("un sottobrano di un SID o di un file delle console", "Invio, Applicazioni o Spazio: menu con Riproduci e Aggiungi alla playlist. Se ha dei marker, freccia destra li mostra."),
+    "unita": ("un'unità", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Riproduci, Crea playlist da qui, Aggiungi alla playlist e Aggiorna."),
+    "cartella": ("una cartella", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Riproduci, Crea playlist da qui, Aggiungi alla playlist e Aggiorna."),
+    "file": ("un file", "Invio, Applicazioni o Spazio: menu con Riproduci, Aggiungi alla playlist, Aggiungi ai preferiti, Rinomina file, Leggi i tag e Tag per i formati che li hanno, e Manda nel cestino. "
+        "Maiuscolo con Canc manda il file nel cestino. Un SID o un file delle console con più sottobrani, o un file con dei marker, si apre con freccia destra."),
+    "sottobrano": ("un sottobrano di un SID o di un file delle console", "Invio, Applicazioni o Spazio: menu con Riproduci, Aggiungi alla playlist e Aggiungi ai preferiti. Se ha dei marker, freccia destra li mostra."),
     "marker": ("un marker", "Invio rinomina il marker, Canc lo elimina, X fa come sul suo brano. Applicazioni o Spazio: menu con Vai al marker, che suona il brano da lì, Rinomina ed Elimina."),
     "comando": ("un comando", "Invio esegue il comando."),
 }
@@ -327,22 +332,73 @@ def durata_lunga(secondi):
     return testo + (f".{millesimi:03d}" if millesimi else "")
 
 
-def e_un_titolo(riga):
-    """Nel manuale i titoli sono le righe che non finiscono con un segno di
-    punteggiatura: tutte le altre sono frasi."""
-    riga = riga.strip()
-    return bool(riga) and riga[-1] not in ".:;!?)"
+# L'id del primo capitolo di manuale.html, la guida rapida che F12 scrive
+# nella console (1.72.0).
+ID_DELLA_GUIDA = "guida-rapida"
 
 
-def sezione_del_manuale(testo, titolo):
-    """Le righe della sezione del manuale che ha quel titolo, titolo
-    compreso, fino al titolo seguente; lista vuota se non c'e'."""
-    righe = [r.strip() for r in testo.splitlines()]
-    if titolo not in righe:
-        return []
-    inizio = righe.index(titolo)
-    fine = next((i for i in range(inizio + 1, len(righe)) if e_un_titolo(righe[i])), len(righe))
-    return [r for r in righe[inizio:fine] if r]
+class _LettoreDellaGuida(HTMLParser):
+    """Legge la guida rapida di manuale.html: dal titolo h2 con l'id della
+    guida, compreso, fino al titolo h2 seguente. Ogni titolo, voce di elenco
+    e paragrafo diventa una riga, senza i tag, con le entita' decodificate e
+    gli spazi ridotti a uno."""
+
+    BLOCCHI = ("h2", "h3", "h4", "li", "p")
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.righe = []
+        # prima della guida, dentro, o dopo: dopo non si legge piu' niente.
+        self._stato = "prima"
+        self._aperti = []
+        self._pezzi = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "h2" and self._stato == "dentro":
+            self._a_capo()
+            self._aperti = []
+            self._stato = "dopo"
+        elif tag == "h2" and self._stato == "prima" and dict(attrs).get("id") == ID_DELLA_GUIDA:
+            self._stato = "dentro"
+        if self._stato != "dentro":
+            return
+        if tag in self.BLOCCHI:
+            # Un blocco dentro un altro, come un elenco dentro una voce: il
+            # testo fin qui e' una riga, quello dentro un'altra.
+            self._a_capo()
+            self._aperti.append(tag)
+        elif tag == "br":
+            self._pezzi.append(" ")
+
+    def handle_endtag(self, tag):
+        if self._stato != "dentro" or tag not in self._aperti:
+            return
+        self._a_capo()
+        while self._aperti.pop() != tag:
+            pass
+
+    def handle_data(self, data):
+        if self._stato == "dentro" and self._aperti:
+            self._pezzi.append(data)
+
+    def close(self):
+        super().close()
+        self._a_capo()
+
+    def _a_capo(self):
+        riga = " ".join("".join(self._pezzi).split())
+        if riga:
+            self.righe.append(riga)
+        self._pezzi = []
+
+
+def guida_rapida(testo):
+    """Le righe della guida rapida del manuale in HTML, titolo compreso;
+    lista vuota se il manuale non ce l'ha."""
+    lettore = _LettoreDellaGuida()
+    lettore.feed(testo)
+    lettore.close()
+    return lettore.righe
 
 
 def righe_del_changelog(testo):
@@ -644,7 +700,7 @@ class Finestra(wx.Frame):
         self._modello_della_console = None
         # Inizio e fine dell'ultima occorrenza trovata, nel testo delle righe.
         self._occorrenza = None
-        # Quante righe in fondo non si tagliano mentre F1, F2, F3 o F12 scrivono.
+        # Quante righe in fondo non si tagliano mentre F2, F3, F11 o F12 scrivono.
         self._da_tenere = 0
         # Quante volte di seguito e' arrivato l'ultimo problema interno.
         self._ripetizioni = 0
@@ -668,7 +724,7 @@ class Finestra(wx.Frame):
         self.Bind(wx.EVT_CHAR_HOOK, self._tasto)
         self.Bind(wx.EVT_CLOSE, self._alla_chiusura)
         self.Bind(wx.EVT_ACTIVATE, self._all_attivazione)
-        self.scrivi(f"MeTeOra {version.VERSION} del {version.DATE}. Pronto: F1 apre il manuale, F7 apre il cruscotto con i tasti del punto in cui ti trovi.")
+        self.scrivi(f"MeTeOra {version.VERSION} del {version.DATE}. Pronto: F1 apre il manuale nel browser, F12 scrive nella console la guida rapida dei tasti, F7 apre il cruscotto con i tasti del punto in cui ti trovi.")
         fuori_dal_normale = self._riproduzione_fuori_dal_normale()
         if fuori_dal_normale:
             self.scrivi(fuori_dal_normale)
@@ -1023,13 +1079,13 @@ class Finestra(wx.Frame):
     def righe_del_cruscotto(self):
         """Le righe del cruscotto per l'area da cui si arriva."""
         if self._area_precedente == "console":
-            righe = ["Tasti per la console.", "Frecce, Pagina su e giù, Home e Fine per leggere; i messaggi nuovi arrivano in fondo, con l'ora. "
+            righe = ["Tasti per la console.", "Frecce, Pagina su e giù, Inizio e Fine per leggere; i messaggi nuovi arrivano in fondo, con l'ora. "
                 "La barra rovesciata cerca nella console, anche con i jolly e le virgolette, e Invio passa all'occorrenza seguente."]
         elif len(self._voci_selezionate()) > 1:
             righe = [f"Tasti per {len(self._voci_selezionate())} voci selezionate: un ramo selezionato vale per tutto ciò che contiene.",
                 "X suona la selezione come una playlist invisibile, che resta finché non premi V. Invio, Applicazioni o Spazio: menu della selezione, con Leggi i tag e Modifica i tag. "
-                "Canc toglie i brani dalle playlist ed elimina le playlist e i marker, Maiuscolo+Canc manda i file nel cestino, F4 li mette nei Preferiti.",
-                "Maiuscolo con le frecce allarga la selezione, Ctrl con le frecce muove il fuoco senza selezionare, Ctrl+Spazio accende e spegne la voce col fuoco."]
+                "Canc toglie i brani dalle playlist ed elimina le playlist e i marker, Maiuscolo con Canc manda i file nel cestino, F4 li mette nei Preferiti.",
+                "Maiuscolo con le frecce allarga la selezione, Ctrl con le frecce muove il fuoco senza selezionare, Ctrl con Spazio accende e spegne la voce col fuoco."]
         else:
             # La voce su cui agiscono Canc, X, F4 e il menu, che puo' non
             # essere quella col fuoco (tappa 9).
@@ -1041,7 +1097,8 @@ class Finestra(wx.Frame):
             if tipo == "cartella" and dati.get("a_mano"):
                 righe.append("Canc, o Togli il percorso nel menu, lo toglie da Questa rete; i file restano dove sono.")
             if voce != self._voce_corrente():
-                righe.append("Il fuoco è su un'altra voce: le frecce partono da lì, ma Canc, X, F4 e il menu agiscono sulla voce selezionata.")
+                righe.append("Il fuoco è su un'altra voce: le frecce, F9, F10, J, K e la barra verticale partono da lì; Canc, Maiuscolo con Canc, X, Maiuscolo con X, F4, F11, "
+                    "Maiuscolo con F11, Maiuscolo con le cifre, la barra rovesciata e il menu agiscono sulla voce selezionata.")
         return righe + TASTI_COMUNI
 
     def _vai(self, controllo, evento):
@@ -4328,7 +4385,7 @@ class Finestra(wx.Frame):
                 f"Adesso: {self._colori_da_leggere(chiave)}.", REGOLA_DEL_DOLLARO], valori.scrivi_colori(imp[chiave])
         return valori.leggi_righe_della_console, [
             f"Quante righe tiene la console: da {valori.RIGHE_MINIME} in su. Le più vecchie si tolgono dalla cima.",
-            "Per esempio 2000, il valore di partenza. Un testo lungo, come il manuale, resta comunque intero.",
+            "Per esempio 2000, il valore di partenza. Un testo lungo, come le novità di F2, resta comunque intero.",
             f"Adesso ne tiene {imp['righe_della_console']}.", REGOLA_DEL_DOLLARO], str(imp["righe_della_console"])
 
     def _applica_l_impostazione(self, chiave, valore):
@@ -5589,22 +5646,34 @@ class Finestra(wx.Frame):
             evento.Skip()
 
     def _elenco_dei_tasti(self):
-        """F12: scrive nella console la sezione I tasti del manuale, cosi' la
-        documentazione dei tasti e' una sola, e porta il fuoco nella console,
-        con il cursore sulla prima riga dell'elenco."""
-        manuale = self._leggi_risorsa("manuale.txt")
+        """F12: scrive nella console la guida rapida del manuale, cioe' i
+        tasti, i comandi della ricerca e del filtro e i colori, una riga per
+        voce, cosi' la documentazione resta una sola; porta il fuoco nella
+        console, con il cursore sulla prima riga (1.72.0)."""
+        manuale = self._leggi_risorsa("manuale.html")
         if manuale is None:
             return
-        righe = sezione_del_manuale(manuale, "I tasti")
+        righe = guida_rapida(manuale)
         if not righe:
-            self._riscontro("errore", "Nel manuale non trovo la sezione I tasti.")
+            self._riscontro("errore", "Nel manuale non trovo la guida rapida.")
             return
         self._stampa("elenco_dei_tasti", righe)
 
     def _manuale(self):
-        manuale = self._leggi_risorsa("manuale.txt")
-        if manuale is not None:
-            self._stampa("manuale", manuale.splitlines())
+        """F1: apre manuale.html nel browser predefinito, dove si naviga per
+        titoli; la console lo dice (1.72.0, prima lo scriveva nella console).
+        Se il file manca o non si apre, lo dice con il suono dell'errore."""
+        nome = "manuale.html"
+        percorso = percorsi.percorso_risorsa(nome)
+        if not os.path.isfile(percorso):
+            self._riscontro("errore", f"Non riesco ad aprire {nome}: il file non c'è.")
+            return
+        try:
+            os.startfile(percorso)  # noqa: S606 - il manuale del programma, da un percorso fisso, nel browser predefinito
+        except OSError as e:
+            self._riscontro("errore", f"Non riesco ad aprire {nome}: {e.strerror or e}.")
+            return
+        self._riscontro("manuale", "Il manuale si apre nel browser.")
 
     def _changelog(self):
         novita = self._leggi_risorsa("CHANGELOG.md")

@@ -1344,33 +1344,90 @@ def test_z_b_n_seguono_la_plancia(finestra, monkeypatch):
     assert finestra.coda.playlist is seconda
 
 
-def test_f12_scrive_i_tasti_dal_manuale(finestra, suoni_annotati):
+MANUALE_DI_PROVA = """<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><title>Prova</title><style>h2 { color: red; }</style></head>
+<body>
+<h1>Manuale di prova</h1>
+<nav aria-label="Indice"><ul><li><a href="#guida-rapida">Guida rapida</a></li><li><a href="#altro">Altro</a></li></ul></nav>
+<h2 id="guida-rapida">Guida   rapida</h2>
+<h3 id="tasti">I tasti</h3>
+<h4>L'aiuto</h4>
+<ul>
+<li><kbd>F1</kbd>: apre il manuale
+    nel browser.</li>
+<li><kbd>Maiuscolo con F8</kbd>: aggancia &amp; sgancia, e t&lt;=3:00 &egrave; giusto.</li>
+<li>   </li>
+<li>Una voce<ul><li>con un elenco dentro</li></ul>e la sua coda.</li>
+</ul>
+<p>Per esempio: k=sid <em>a=hubbard</em><br>t&gt;2:00.</p>
+<h2 id="altro">Un altro capitolo</h2>
+<p>Questo non c'entra.</p>
+<h3>Neanche questo</h3>
+</body></html>"""
+
+
+def test_guida_rapida_su_un_html_piccolo():
+    assert modulo.guida_rapida(MANUALE_DI_PROVA) == [
+        "Guida rapida", "I tasti", "L'aiuto", "F1: apre il manuale nel browser.",
+        "Maiuscolo con F8: aggancia & sgancia, e t<=3:00 è giusto.",
+        "Una voce", "con un elenco dentro", "e la sua coda.",
+        "Per esempio: k=sid a=hubbard t>2:00."]
+    # Una guida in fondo al file finisce con il file; un file senza guida non ne ha.
+    assert modulo.guida_rapida('<h2 id="guida-rapida">Guida</h2><ul><li>Ultima voce.</li></ul>') == ["Guida", "Ultima voce."]
+    assert modulo.guida_rapida('<h1>Senza guida</h1><h2 id="altro">Altro</h2><p>Testo.</p>') == []
+    assert modulo.guida_rapida("") == []
+
+
+def test_guida_rapida_del_manuale_vero(finestra):
+    righe = modulo.guida_rapida(finestra._leggi_risorsa("manuale.html"))
+    assert len(righe) > 100
+    assert righe[0] == "Guida rapida"
+    for titolo in ("I tasti", "I comandi della ricerca e del filtro", "I colori"):
+        assert titolo in righe, titolo
+    assert righe.index("I tasti") < righe.index("I comandi della ricerca e del filtro") < righe.index("I colori")
+    for riga in righe:
+        assert riga and riga == riga.strip() and "  " not in riga and "\n" not in riga, riga
+        assert not re.search(r"</?[A-Za-z][^>]*>", riga), riga
+        assert not re.search(r"&(#\d+|#x[0-9a-fA-F]+|[A-Za-z]+);", riga), riga
+    assert any(r.startswith("F12:") for r in righe) and any(r.startswith("X:") for r in righe)
+    # La guida finisce dove comincia il secondo capitolo.
+    assert "La finestra" not in righe
+
+
+def test_f12_scrive_la_guida_rapida(finestra, suoni_annotati):
     _tasto(finestra, codice=wx.WXK_F12)
-    righe = modulo.sezione_del_manuale(finestra._leggi_risorsa("manuale.txt"), "I tasti")
+    righe = modulo.guida_rapida(finestra._leggi_risorsa("manuale.html"))
     stampate = finestra._righe[-len(righe):]
     assert stampate[:-1] == righe[:-1] and _senza_ora(stampate[-1]) == righe[-1]
     assert re.search(r" \d\d:\d\d$", stampate[-1]) and not re.search(r" \d\d:\d\d$", stampate[0])
-    assert righe[0] == "I tasti" and any(r.startswith("F12:") for r in righe)
-    assert not any(r == "I SID" for r in righe)
     assert suoni_annotati[-1] == "elenco_dei_tasti"
     inizio = finestra._posizione_della_console
     testo = finestra.console.GetValue().replace("\r\n", "\n").replace("\r", "\n")
-    assert testo[inizio:].startswith("I tasti")
+    assert testo[inizio:].startswith("Guida rapida\n")
 
 
-def test_ogni_tasto_e_nel_manuale(finestra):
-    """Ogni tasto a lettera e ogni tasto funzione ha la sua riga nella sezione I tasti."""
-    righe = modulo.sezione_del_manuale(finestra._leggi_risorsa("manuale.txt"), "I tasti")
-    testo = " ".join(righe)
-    for tasto in ("F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F12", "Esc", "Barra rovesciata", "Barra verticale", "Canc", "Backspace"):
-        assert tasto in testo, tasto
+def test_f12_senza_guida_lo_dice(finestra, suoni_annotati, monkeypatch):
+    monkeypatch.setattr(finestra, "_leggi_risorsa", lambda nome: "<h1>Manuale</h1><p>Niente guida.</p>")
+    _tasto(finestra, codice=wx.WXK_F12)
+    assert _ultima(finestra) == "Nel manuale non trovo la guida rapida."
+    assert suoni_annotati[-1] == "errore"
+
+
+def test_ogni_tasto_e_nella_guida_rapida(finestra):
+    """Ogni tasto a lettera e ogni tasto funzione ha la sua riga nella guida
+    rapida, che comincia con il suo nome."""
+    righe = modulo.guida_rapida(finestra._leggi_risorsa("manuale.html"))
+    tasti = [f"F{n}" for n in range(1, 13)] + [f"Maiuscolo con F{n}" for n in (1, 2, 3, 5, 6, 8, 10, 11)] + [
+        "Esc", "Alt con F4", "Tab", "Maiuscolo con Tab", "Barra rovesciata", "Ctrl con la barra rovesciata", "Barra verticale",
+        "Canc", "Maiuscolo con Canc", "Backspace", "Maiuscolo con Backspace", "Meno", "Più", "Cifre da 1 a 0", "Maiuscolo con le cifre da 1 a 0"]
     for (carattere, maiuscolo), _comando in modulo.TASTI.items():
         if carattere.isalpha():
-            nome = f"Maiuscolo con {carattere.upper()}" if maiuscolo else carattere.upper()
-            assert any(r.startswith(nome) or f" {nome} " in r or f"{nome}:" in r or f" e {carattere.upper()}" in r for r in righe), nome
+            tasti.append(f"Maiuscolo con {carattere.upper()}" if maiuscolo else carattere.upper())
+    for tasto in tasti:
+        assert any(r.startswith(f"{tasto}:") for r in righe), tasto
 
 
-def test_f12_porta_il_cursore_all_inizio_dell_elenco(finestra):
+def test_f12_porta_il_cursore_all_inizio_della_guida(finestra):
     finestra.scrivi("una riga qualsiasi")
     finestra.console.SetInsertionPoint(0)
     _tasto(finestra, codice=wx.WXK_F12)
@@ -1379,11 +1436,45 @@ def test_f12_porta_il_cursore_all_inizio_dell_elenco(finestra):
     inizio = finestra._posizione_della_console
     assert finestra.console.GetInsertionPoint() == inizio
     testo = finestra.console.GetValue().replace("\r\n", "\n").replace("\r", "\n")
-    assert testo[inizio:].startswith("I tasti")
+    assert testo[inizio:].startswith("Guida rapida")
 
 
-def test_f1_f2_f3_scrivono_nella_console(finestra):
-    for codice, prima in ((wx.WXK_F1, "Manuale di MeTeOra"), (wx.WXK_F2, "Novità di MeTeOra"), (wx.WXK_F3, "Crediti di MeTeOra")):
+def test_f1_apre_il_manuale_nel_browser(finestra, suoni_annotati, monkeypatch):
+    # Il browser non si apre mai davvero: os.startfile annota soltanto.
+    aperti = []
+    monkeypatch.setattr(modulo.os, "startfile", aperti.append, raising=False)
+    righe = len(finestra._righe)
+    _tasto(finestra, codice=wx.WXK_F1)
+    assert aperti == [modulo.percorsi.percorso_risorsa("manuale.html")]
+    assert os.path.basename(aperti[0]) == "manuale.html" and os.path.isfile(aperti[0])
+    # Il manuale non si scrive piu' nella console: una riga sola, che lo dice.
+    assert len(finestra._righe) == righe + 1
+    assert _ultima(finestra) == "Il manuale si apre nel browser."
+    assert suoni_annotati[-1] == "manuale"
+
+
+def test_f1_che_non_apre_il_browser_lo_dice(finestra, suoni_annotati, monkeypatch):
+    def fallisce(percorso):
+        raise OSError(1155, "Nessuna applicazione associata al file")
+
+    monkeypatch.setattr(modulo.os, "startfile", fallisce, raising=False)
+    _tasto(finestra, codice=wx.WXK_F1)
+    assert _ultima(finestra) == "Non riesco ad aprire manuale.html: Nessuna applicazione associata al file."
+    assert suoni_annotati[-1] == "errore"
+
+
+def test_f1_senza_il_manuale_lo_dice(finestra, suoni_annotati, monkeypatch, tmp_path):
+    aperti = []
+    monkeypatch.setattr(modulo.os, "startfile", aperti.append, raising=False)
+    monkeypatch.setattr(modulo.percorsi, "percorso_risorsa", lambda nome: str(tmp_path / nome))
+    _tasto(finestra, codice=wx.WXK_F1)
+    assert aperti == []
+    assert _ultima(finestra) == "Non riesco ad aprire manuale.html: il file non c'è."
+    assert suoni_annotati[-1] == "errore"
+
+
+def test_f2_f3_scrivono_nella_console(finestra):
+    for codice, prima in ((wx.WXK_F2, "Novità di MeTeOra"), (wx.WXK_F3, "Crediti di MeTeOra")):
         _tasto(finestra, codice=codice)
         for _ in range(5):
             wx.Yield()

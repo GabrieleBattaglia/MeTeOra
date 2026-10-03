@@ -2,6 +2,16 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.72.0] - 2026-10-04
+
+- Il manuale è in HTML, manuale.html, e si naviga per titoli: un capitolo per argomento, come la finestra, i Preferiti, le playlist, Questo PC, la rete, la ricerca e il filtro, la riproduzione, i marker, i tag, il video, il Commodore 64, l'Amiga, la musica delle console, i MIDI e le impostazioni, ognuno con il concetto, i tasti e degli esempi. Chiesto da Gabriele.
+- Il primo capitolo è la guida rapida: tutti i tasti divisi per aree, una riga per tasto con una spiegazione breve; poi i comandi della ricerca e del filtro, con quelli della ricerca nella console e nei marcatori; poi i codici RGB dei colori delle impostazioni.
+- F1 apre il manuale nel browser predefinito, e la console lo dice; se il file manca o non si apre, lo dice con il suono dell'errore. Prima lo scriveva nella console.
+- F12 scrive nella console la guida rapida, una riga per titolo e per voce, e ci porta il fuoco sulla prima riga: un tasto che non ricordi si trova scorrendo. Prima scriveva solo la sezione I tasti.
+- Il cruscotto segue i menu veri: l'unità e la cartella hanno anche Riproduci, Aggiungi alla playlist e Aggiorna; il brano Togli dalla playlist, Aggiungi ai preferiti e Manda nel cestino; il file Aggiungi ai preferiti e Manda nel cestino; il sottobrano Aggiungi ai preferiti; un ramo dei Risultati Salva come playlist; le playlist e i Preferiti Togli il filtro, quando c'è. Leggi i tag e Tag valgono solo per i formati che li hanno.
+- Il cruscotto chiama i tasti come il manuale, Inizio invece di Home e Maiuscolo con M invece di Maiuscolo+M; dice che F8 porta anche il fuoco, che X fa ripartire da capo il brano che suona già, che la barra rovesciata da Apri file e Impostazioni cerca in tutto MeTeOra e Nuova ricerca dei Risultati pure; con il fuoco spostato da Ctrl elenca tutti i comandi che agiscono sulla voce selezionata e quelli che partono dalla voce col fuoco.
+- Le prove automatiche non aprono mai il browser: il comando che apre i file è sostituito per tutte.
+
 ## [1.71.0] - 2026-10-03
 
 - La barra rovesciata cerca nel ramo della plancia in cui sei, sottocartelle comprese: una cartella, un'unità, una playlist, i Preferiti o i Risultati; su Questo PC tutti i dischi, sul ramo Playlist tutte le playlist, su Questa rete i suoi percorsi. Così cercare in una cartella, per esempio nei giochi Amiga, è molto più veloce. Ctrl con la barra rovesciata cerca in tutto MeTeOra, come prima la barra da sola. Chiesto da Gabriele.

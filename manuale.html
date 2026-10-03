@@ -1,0 +1,1336 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manuale di MeTeOra</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --sfondo: #fcfcfa;
+  --testo: #1b1b1b;
+  --tenue: #4f4f4f;
+  --collegamento: #0a4d96;
+  --kbd-sfondo: #eceff3;
+  --kbd-bordo: #868c96;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --sfondo: #131518;
+    --testo: #e9e9e9;
+    --tenue: #b4b4b4;
+    --collegamento: #8fc6ff;
+    --kbd-sfondo: #2a2f36;
+    --kbd-bordo: #7d838d;
+  }
+}
+html { font-size: 100%; }
+body {
+  margin: 0 auto;
+  padding: 1rem 1.25rem 4rem;
+  max-width: 46em;
+  background: var(--sfondo);
+  color: var(--testo);
+  font-family: system-ui, "Segoe UI", Arial, sans-serif;
+  line-height: 1.6;
+  overflow-wrap: break-word;
+}
+h1 { font-size: 2em; line-height: 1.2; margin: 0.6em 0 0.4em; }
+h2 { font-size: 1.6em; line-height: 1.25; margin: 2.4em 0 0.5em; padding-top: 0.6em; }
+h3 { font-size: 1.3em; line-height: 1.3; margin: 1.8em 0 0.4em; }
+h4 { font-size: 1.1em; line-height: 1.3; margin: 1.4em 0 0.3em; }
+p, li { max-width: 40em; }
+li { margin: 0.25em 0; }
+ol li { margin: 0.4em 0; }
+a { color: var(--collegamento); }
+a:focus, a:hover { outline: 0.15em solid var(--collegamento); outline-offset: 0.1em; }
+nav ul { padding-left: 1.4em; }
+nav li { margin: 0.15em 0; }
+kbd {
+  font-family: inherit;
+  font-size: 0.95em;
+  background: var(--kbd-sfondo);
+  color: var(--testo);
+  border: 0.06em solid var(--kbd-bordo);
+  border-bottom-width: 0.14em;
+  border-radius: 0.3em;
+  padding: 0.02em 0.35em;
+}
+.nota { color: var(--tenue); }
+</style>
+</head>
+<body>
+<h1>Manuale di MeTeOra</h1>
+<p>MeTeOra è un lettore audio e video pensato per chi usa uno screen reader e un display braille. Suona quasi tutti i formati audio e video, compresa la musica del Commodore 64 in formato SID, i moduli dei tracker dell'Amiga, la musica delle console di gioco e i MIDI, e si comanda tutto da tastiera. Ogni azione ha un suono suo e scrive una riga nella console.</p>
+<p>Questo manuale descrive ciò che c'è adesso, e cresce insieme al programma. Il primo capitolo, la guida rapida, elenca tutti i tasti, i comandi della ricerca e del filtro e i codici dei colori, per la consultazione al volo: F12 la scrive nella console. Gli altri capitoli spiegano un argomento alla volta, con i suoi tasti e degli esempi. F1 apre questo manuale nel browser: con NVDA, H e Maiuscolo con H passano da un titolo all'altro, e le cifre da 1 a 4 vanno ai titoli di quel livello.</p>
+<nav aria-label="Indice">
+<ul>
+<li><a href="#guida-rapida">Guida rapida</a>
+<ul>
+<li><a href="#tasti">I tasti</a></li>
+<li><a href="#comandi-ricerca-filtro">I comandi della ricerca e del filtro</a></li>
+<li><a href="#colori">I colori</a></li>
+</ul></li>
+<li><a href="#la-finestra">La finestra</a>
+<ul>
+<li><a href="#tre-aree">Le tre aree</a></li>
+<li><a href="#plancia">La plancia dei comandi</a></li>
+<li><a href="#console">La console</a></li>
+<li><a href="#cruscotto">Il cruscotto</a></li>
+<li><a href="#tasti-ovunque">I tasti in tutta la finestra</a></li>
+<li><a href="#esempi-finestra">Esempi</a></li>
+</ul></li>
+<li><a href="#aiuto-avvio-uscita">L'aiuto, l'avvio e l'uscita</a>
+<ul>
+<li><a href="#manuale-e-guida">Il manuale, la guida rapida, le novità e i crediti</a></li>
+<li><a href="#avvio">L'avvio</a></li>
+<li><a href="#uscita">L'uscita</a></li>
+<li><a href="#esempi-aiuto">Esempi</a></li>
+</ul></li>
+<li><a href="#preferiti">I Preferiti</a>
+<ul>
+<li><a href="#preferiti-concetto">Che cosa sono</a></li>
+<li><a href="#preferiti-tasti">I tasti e il menu</a></li>
+<li><a href="#esempi-preferiti">Esempi</a></li>
+</ul></li>
+<li><a href="#playlist">Le playlist</a>
+<ul>
+<li><a href="#ramo-playlist">Il ramo Playlist</a></li>
+<li><a href="#etichetta-playlist">L'etichetta di una playlist</a></li>
+<li><a href="#menu-playlist">Il menu di una playlist</a></li>
+<li><a href="#brani-playlist">I brani di una playlist</a></li>
+<li><a href="#creare-playlist">Creare e riempire le playlist</a></li>
+<li><a href="#j-k-cifre">J, K e le cifre</a></li>
+<li><a href="#esempi-playlist">Esempi</a></li>
+</ul></li>
+<li><a href="#questo-pc">Questo PC</a>
+<ul>
+<li><a href="#unita-cartelle-file">Unità, cartelle e file</a></li>
+<li><a href="#conti-cartelle">I conti delle cartelle</a></li>
+<li><a href="#menu-pc">I menu di Questo PC</a></li>
+<li><a href="#cartella-temporanea">Una cartella come playlist temporanea</a></li>
+<li><a href="#esempi-pc">Esempi</a></li>
+</ul></li>
+<li><a href="#la-rete">La rete</a>
+<ul>
+<li><a href="#rete-contenuto">Che cosa c'è in Questa rete</a></li>
+<li><a href="#percorsi-a-mano">I percorsi aggiunti a mano</a></li>
+<li><a href="#computer-della-rete">I computer della rete</a></li>
+<li><a href="#rete-che-non-risponde">Le cartelle che non rispondono</a></li>
+<li><a href="#esempi-rete">Esempi</a></li>
+</ul></li>
+<li><a href="#ricerca-e-filtro">La ricerca e il filtro</a>
+<ul>
+<li><a href="#grammatica">Come si scrivono il filtro e la ricerca</a></li>
+<li><a href="#filtro-playlist">Il filtro di una playlist</a></li>
+<li><a href="#ricerca-ramo">La ricerca nel ramo in cui sei</a></li>
+<li><a href="#ricerca-ovunque">La ricerca in tutto MeTeOra</a></li>
+<li><a href="#risultati">I Risultati</a></li>
+<li><a href="#ricerca-console">La ricerca nella console</a></li>
+<li><a href="#esempi-ricerca">Esempi</a></li>
+</ul></li>
+<li><a href="#riproduzione">La riproduzione</a>
+<ul>
+<li><a href="#x-c-v">Suonare, mettere in pausa, fermare</a></li>
+<li><a href="#brano-seguente">Il brano seguente</a></li>
+<li><a href="#casuale">La riproduzione casuale</a></li>
+<li><a href="#loop">Il loop A-B</a></li>
+<li><a href="#selezione">La selezione multipla</a></li>
+<li><a href="#salti">Muoversi nel brano</a></li>
+<li><a href="#volume">Il volume</a></li>
+<li><a href="#f8-inseguimento">F8 e l'inseguimento</a></li>
+<li><a href="#brano-in-errore">Un brano che non si suona</a></li>
+<li><a href="#esempi-riproduzione">Esempi</a></li>
+</ul></li>
+<li><a href="#velocita-tono-equalizzatore-dissolvenza">Velocità, tono, equalizzatore e dissolvenza</a>
+<ul>
+<li><a href="#velocita">La velocità</a></li>
+<li><a href="#tono">Il tono</a></li>
+<li><a href="#equalizzatore">L'equalizzatore</a></li>
+<li><a href="#dissolvenza">La dissolvenza incrociata</a></li>
+<li><a href="#esempi-suono">Esempi</a></li>
+</ul></li>
+<li><a href="#marker">I marker</a>
+<ul>
+<li><a href="#marker-concetto">Che cos'è un marker</a></li>
+<li><a href="#marker-tasti">I tasti dei marker</a></li>
+<li><a href="#marker-plancia">I marker nella plancia</a></li>
+<li><a href="#finestra-marcatori">La finestra dei marcatori</a></li>
+<li><a href="#esporta-importa">Esportare e importare i marker</a></li>
+<li><a href="#esempi-marker">Esempi</a></li>
+</ul></li>
+<li><a href="#tag">I tag</a>
+<ul>
+<li><a href="#tag-leggere">Leggere i tag</a></li>
+<li><a href="#tag-modificare">Modificare i tag</a></li>
+<li><a href="#tag-piu-file">I tag di più file insieme</a></li>
+<li><a href="#tag-wav">Il blocco INFO dei WAV</a></li>
+<li><a href="#tag-formati">I formati con i tag</a></li>
+<li><a href="#esempi-tag">Esempi</a></li>
+</ul></li>
+<li><a href="#video">Il video</a>
+<ul>
+<li><a href="#video-finestra">La finestra del video</a></li>
+<li><a href="#video-tasti">I tasti con la finestra del video</a></li>
+<li><a href="#sottotitoli">I sottotitoli letti</a></li>
+<li><a href="#tracce-rapporto">Le tracce audio e il rapporto dell'immagine</a></li>
+<li><a href="#esempi-video">Esempi</a></li>
+</ul></li>
+<li><a href="#formati">I formati</a>
+<ul>
+<li><a href="#formati-elenco">I file che MeTeOra suona</a></li>
+<li><a href="#formati-durate">Le durate</a></li>
+</ul></li>
+<li><a href="#commodore-64">Il Commodore 64</a>
+<ul>
+<li><a href="#sid-come">Come suonano i SID</a></li>
+<li><a href="#sid-durate">Le durate e la collezione HVSC</a></li>
+<li><a href="#sid-sottobrani">I sottobrani</a></li>
+<li><a href="#sid-salti">I salti in un SID</a></li>
+<li><a href="#esempi-sid">Esempi</a></li>
+</ul></li>
+<li><a href="#amiga">L'Amiga e i moduli dei tracker</a>
+<ul>
+<li><a href="#tracker-formati">I moduli e i loro formati</a></li>
+<li><a href="#tracker-trovare">Trovare i moduli</a></li>
+<li><a href="#esempi-amiga">Esempi</a></li>
+</ul></li>
+<li><a href="#musica-delle-console">La musica delle console</a>
+<ul>
+<li><a href="#console-sistemi">I sistemi e i file</a></li>
+<li><a href="#console-durate">Come finisce un brano</a></li>
+<li><a href="#console-m3u">Il file m3u</a></li>
+<li><a href="#esempi-console">Esempi</a></li>
+</ul></li>
+<li><a href="#midi">I MIDI</a>
+<ul>
+<li><a href="#midi-come">Come suonano i MIDI</a></li>
+<li><a href="#midi-preparazione">La prima volta</a></li>
+<li><a href="#midi-banco">Cambiare il banco</a></li>
+<li><a href="#esempi-midi">Esempi</a></li>
+</ul></li>
+<li><a href="#impostazioni">Le impostazioni</a>
+<ul>
+<li><a href="#impostazioni-finestra">La finestra delle impostazioni</a></li>
+<li><a href="#impostazioni-campi">I campi delle voci di valore</a></li>
+<li><a href="#impostazioni-voci">Le voci, una per una</a></li>
+<li><a href="#esempi-impostazioni">Esempi</a></li>
+</ul></li>
+<li><a href="#campi-domande-liste">I campi, le domande e le liste</a>
+<ul>
+<li><a href="#campi-piu-righe">I campi con le istruzioni</a></li>
+<li><a href="#campi-una-riga">I campi da una riga</a></li>
+<li><a href="#domande">Le domande con Sì e No</a></li>
+<li><a href="#liste">Le liste di scelta</a></li>
+<li><a href="#dialoghi-e-tasti">I tasti dentro i dialoghi</a></li>
+</ul></li>
+<li><a href="#file-di-meteora">I file di MeTeOra</a>
+<ul>
+<li><a href="#file-dati">I file dei dati</a></li>
+<li><a href="#file-illeggibili">Un file che non si legge</a></li>
+<li><a href="#cartelle-programma">Le cartelle accanto al programma</a></li>
+</ul></li>
+<li><a href="#problemi">Quando qualcosa va storto</a>
+<ul>
+<li><a href="#problema-interno">Problema interno</a></li>
+<li><a href="#errori-salvataggio">I salvataggi che non riescono</a></li>
+<li><a href="#errori-avvio">Gli errori all'avvio</a></li>
+<li><a href="#altri-errori">Altri messaggi d'errore</a></li>
+<li><a href="#esempi-problemi">Esempi</a></li>
+</ul></li>
+</ul>
+</nav>
+<h2 id="guida-rapida">Guida rapida</h2>
+<h3 id="tasti">I tasti</h3>
+<p>I tasti valgono in tutta la finestra, qualunque area abbia il fuoco, e anche dalla finestra del video, tranne quelli propri della plancia e della console; dentro i dialoghi, come le impostazioni, valgono solo i tasti del dialogo.</p>
+<h4>L'aiuto e l'uscita</h4>
+<ul>
+<li><kbd>F1</kbd>: apre il manuale nel browser.</li>
+<li><kbd>F12</kbd>: scrive nella console questa guida rapida e ci porta il fuoco, sulla prima riga.</li>
+<li><kbd>F2</kbd>: scrive nella console le novità di ogni versione e ci porta il fuoco.</li>
+<li><kbd>F3</kbd>: scrive nella console i crediti e ci porta il fuoco.</li>
+<li><kbd>Esc</kbd>: esce da MeTeOra salvando tutto, e alla riapertura ritrovi in pausa il brano e il punto a cui eri.</li>
+<li><kbd>Alt con F4</kbd>: esce da MeTeOra come Esc, con lo stesso salvataggio.</li>
+</ul>
+<h4>Le aree della finestra</h4>
+<ul>
+<li><kbd>F5</kbd>: porta il fuoco nella plancia dei comandi, e dalla finestra del video riporta davanti MeTeOra.</li>
+<li><kbd>F6</kbd>: porta il fuoco nella console, con il cursore dove l'avevi lasciato, e come F5 riporta davanti MeTeOra dalla finestra del video.</li>
+<li><kbd>F7</kbd>: porta il fuoco nel cruscotto, con i tasti del punto da cui arrivi, e premuto nel cruscotto lo rinfresca; come F5, riporta davanti MeTeOra dalla finestra del video.</li>
+<li><kbd>Maiuscolo con Tab</kbd>: passa all'area precedente.</li>
+<li><kbd>Tab</kbd>: passa all'area seguente, nell'ordine plancia, console, cruscotto.</li>
+</ul>
+<h4>La riproduzione</h4>
+<ul>
+<li><kbd>X</kbd>: suona la voce selezionata, cioè un brano, un file, un sottobrano, una playlist, i Preferiti, una cartella o un'unità con tutte le sottocartelle.</li>
+<li><kbd>X</kbd>: sul brano che sta già suonando lo fa ripartire da capo, e se è in pausa lo riprende dal punto in cui era.</li>
+<li><kbd>X</kbd>: su un marker fa come sul suo brano.</li>
+<li><kbd>X</kbd>: sulla playlist o sulla cartella da cui stai già suonando, e sulle voci che non si suonano, come Questo PC o i Risultati, riprende dalla pausa o fa ripartire da capo il brano in corso.</li>
+<li><kbd>C</kbd>: mette in pausa, e di nuovo C riprende.</li>
+<li><kbd>V</kbd>: ferma la riproduzione, e poi X riparte dall'inizio del brano.</li>
+<li><kbd>Z</kbd>: suona il brano precedente, nella plancia se ciò che suona si vede, altrimenti nella lista da cui suona.</li>
+<li><kbd>B</kbd>: suona il brano successivo, con la stessa regola di Z.</li>
+<li><kbd>N</kbd>: suona un brano a caso fra quelli che si vedono nella plancia, o nella lista da cui suona.</li>
+<li><kbd>Maiuscolo con N</kbd>: accende e spegne la riproduzione casuale, che sceglie a caso il brano seguente quando uno finisce da solo.</li>
+<li><kbd>Maiuscolo con X</kbd>: a giro, mette il punto A del loop sul brano selezionato, poi il punto B, poi toglie il loop.</li>
+<li><kbd>F4</kbd>: mette nei Preferiti il brano, il file o il sottobrano selezionato.</li>
+<li><kbd>F8</kbd>: porta la selezione e il fuoco della plancia su ciò che suona, aprendo i rami che servono.</li>
+<li><kbd>Maiuscolo con F8</kbd>: aggancia o sgancia l'inseguimento, che porta da solo la selezione su ogni brano che parte.</li>
+</ul>
+<h4>Le playlist</h4>
+<ul>
+<li><kbd>J</kbd>: apre e suona la playlist salvata precedente.</li>
+<li><kbd>K</kbd>: apre e suona la playlist salvata successiva.</li>
+<li><kbd>Cifre da 1 a 0</kbd>: sulla tastiera principale, aprono e suonano la playlist salvata con quel numero, e lo 0 la decima.</li>
+</ul>
+<h4>Muoversi nel brano</h4>
+<ul>
+<li><kbd>Q</kbd>: salta indietro nel brano, di 10 secondi se non lo cambi.</li>
+<li><kbd>E</kbd>: salta avanti nel brano, di 10 secondi se non lo cambi.</li>
+<li><kbd>Maiuscolo con Q</kbd>: chiede di quanti secondi salta Q.</li>
+<li><kbd>Maiuscolo con E</kbd>: chiede di quanti secondi salta E.</li>
+<li><kbd>W</kbd>: chiede un tempo del brano e ci va, anche contato dalla fine con il meno davanti.</li>
+</ul>
+<h4>Il volume</h4>
+<ul>
+<li><kbd>Meno</kbd>: sulla tastiera principale, abbassa il volume, di 5 se non lo cambi, fino a 0.</li>
+<li><kbd>Più</kbd>: sulla tastiera principale, alza il volume fino a 300, e oltre il 100 amplifica.</li>
+<li><kbd>M</kbd>: toglie l'audio, e di nuovo M lo riaccende.</li>
+<li><kbd>Maiuscolo con M</kbd>: chiede di quanto cambiano il volume meno e più, da 1 a 50.</li>
+</ul>
+<h4>Velocità e tono</h4>
+<ul>
+<li><kbd>A</kbd>: rallenta di 0.05, fino a 0.5, senza cambiare il tono.</li>
+<li><kbd>D</kbd>: accelera di 0.05, fino a 2, senza cambiare il tono.</li>
+<li><kbd>S</kbd>: torna alla velocità normale.</li>
+<li><kbd>F</kbd>: abbassa il tono di un semitono, fino a 12 sotto, senza cambiare la velocità.</li>
+<li><kbd>H</kbd>: alza il tono di un semitono, fino a 12 sopra, senza cambiare la velocità.</li>
+<li><kbd>G</kbd>: torna al tono normale.</li>
+</ul>
+<h4>L'equalizzatore e la dissolvenza</h4>
+<ul>
+<li><kbd>U</kbd>: sceglie la banda precedente dell'equalizzatore, fermandosi alla prima.</li>
+<li><kbd>I</kbd>: sceglie la banda seguente, fermandosi all'ultima.</li>
+<li><kbd>O</kbd>: abbassa di un dB la banda scelta, fino a -12.</li>
+<li><kbd>P</kbd>: alza di un dB la banda scelta, fino a +12.</li>
+<li><kbd>È</kbd>: riporta a 0 dB la banda scelta.</li>
+<li><kbd>Maiuscolo con È</kbd>: riporta a 0 dB tutte le bande.</li>
+<li><kbd>L</kbd>: accende e spegne la dissolvenza incrociata fra un brano e l'altro.</li>
+<li><kbd>Maiuscolo con L</kbd>: chiede la durata della dissolvenza, da 0.5 a 15 secondi.</li>
+</ul>
+<h4>I marker</h4>
+<ul>
+<li><kbd>T</kbd>: mette un marker nel punto in cui sei del brano che suona, o rinomina quello su cui sei.</li>
+<li><kbd>R</kbd>: va al marker precedente del brano che suona, anche in pausa.</li>
+<li><kbd>Y</kbd>: va al marker successivo del brano che suona, anche in pausa.</li>
+<li><kbd>Maiuscolo con R</kbd>: toglie i marker prima del punto in cui sei.</li>
+<li><kbd>Maiuscolo con Y</kbd>: toglie i marker dopo il punto in cui sei.</li>
+<li><kbd>Maiuscolo con T</kbd>: toglie tutti i marker del brano che suona.</li>
+<li><kbd>Maiuscolo con le cifre da 1 a 0</kbd>: cioè dal punto esclamativo all'uguale, suona dal marker con quel numero il brano su cui sta la plancia.</li>
+</ul>
+<h4>I tag</h4>
+<ul>
+<li><kbd>F11</kbd>: scrive nella console i tag del brano o del file selezionato, o dei file selezionati, e ci porta il fuoco.</li>
+<li><kbd>Maiuscolo con F11</kbd>: apre subito il menu dei tag, per modificarli.</li>
+</ul>
+<h4>Il video</h4>
+<ul>
+<li><kbd>Maiuscolo con F1</kbd>: accende e spegne il video.</li>
+<li><kbd>Maiuscolo con F2</kbd>: sceglie a giro i sottotitoli letti: spenti, la prima traccia, la seconda e così via.</li>
+<li><kbd>Maiuscolo con F3</kbd>: sceglie a giro la traccia audio del brano.</li>
+<li><kbd>Maiuscolo con F5</kbd>: mette la finestra del video a schermo intero, e di nuovo in finestra.</li>
+<li><kbd>Maiuscolo con F6</kbd>: cambia a giro il rapporto dell'immagine.</li>
+<li><kbd>Esc</kbd>: nella finestra del video toglie lo schermo intero, oppure nasconde il video per il brano in corso.</li>
+<li><kbd>Alt con F4</kbd>: nella finestra del video la nasconde per il brano in corso, come Esc.</li>
+</ul>
+<h4>La ricerca e il filtro</h4>
+<ul>
+<li><kbd>Barra rovesciata</kbd>: nella plancia, nel cruscotto e dalla finestra del video, cerca nel ramo della plancia in cui sei, sottocartelle comprese.</li>
+<li><kbd>Barra rovesciata</kbd>: nella console cerca un testo nella console.</li>
+<li><kbd>Ctrl con la barra rovesciata</kbd>: cerca in tutto MeTeOra, anche dalla console.</li>
+<li><kbd>Barra verticale</kbd>: cioè Maiuscolo con la barra rovesciata, apre il filtro della playlist o dei Preferiti in cui sta la plancia, da qualsiasi area.</li>
+</ul>
+<h4>Nella plancia</h4>
+<ul>
+<li><kbd>Frecce su e giù, Inizio, Fine, Pagina su e Pagina giù</kbd>: muovono il fuoco fra le voci, e un beep dice il livello quando cambia.</li>
+<li><kbd>Freccia sinistra</kbd>: chiude il ramo, e su una voce chiusa va al ramo che la contiene.</li>
+<li><kbd>Freccia destra</kbd>: apre il ramo e lo carica, e su un ramo già aperto va alla prima voce che contiene.</li>
+<li><kbd>Backspace</kbd>: chiude il ramo in cui sei e ci porta il fuoco, un livello alla volta.</li>
+<li><kbd>Maiuscolo con Backspace</kbd>: risale di colpo al ramo di secondo livello in cui sei, come l'unità, la playlist o i Preferiti, e chiude i rami al suo interno.</li>
+<li><kbd>F9</kbd>: chiude la voce col fuoco e tutto ciò che ha dentro, o il ramo che la contiene se non ha niente dentro.</li>
+<li><kbd>F10</kbd>: apre e carica la voce col fuoco e tutti i rami che ha dentro, fino a duemila rami.</li>
+<li><kbd>Invio</kbd>: apre il menu della voce, ma esegue i comandi, mostra gli altri risultati e rinomina i marker.</li>
+<li><kbd>Tasto Applicazioni</kbd>: apre il menu della voce.</li>
+<li><kbd>Barra spaziatrice</kbd>: apre il menu della voce, come il tasto Applicazioni.</li>
+<li><kbd>Maiuscolo con F10</kbd>: apre il menu della voce come il tasto Applicazioni, per le tastiere che non lo hanno.</li>
+<li><kbd>Canc</kbd>: elimina una playlist dopo una conferma, toglie un brano da una playlist o dai Preferiti, elimina un marker o toglie un percorso di rete aggiunto a mano.</li>
+<li><kbd>Maiuscolo con Canc</kbd>: manda nel cestino di Windows il file di un brano o di un file, dopo una conferma con No come risposta predefinita.</li>
+</ul>
+<h4>La selezione multipla</h4>
+<ul>
+<li><kbd>Maiuscolo con freccia su e freccia giù</kbd>: allargano la selezione dalla voce da cui hai cominciato.</li>
+<li><kbd>Maiuscolo con Inizio, Fine, Pagina su e Pagina giù</kbd>: allargano la selezione fino alla prima voce, fino all'ultima o di una pagina.</li>
+<li><kbd>Ctrl con freccia su e freccia giù, Inizio, Fine, Pagina su e Pagina giù</kbd>: muovono il fuoco senza cambiare la selezione.</li>
+<li><kbd>Ctrl con la barra spaziatrice</kbd>: seleziona o deseleziona la voce che ha il fuoco.</li>
+<li><kbd>X</kbd>: con più voci selezionate, suona la selezione come una playlist invisibile, finché V non la chiude.</li>
+<li><kbd>Invio, tasto Applicazioni o barra spaziatrice</kbd>: con più voci selezionate, aprono il menu della selezione.</li>
+<li><kbd>Canc</kbd>: con più voci selezionate, toglie i brani dalle playlist, elimina le playlist dopo una conferma ed elimina i marker.</li>
+<li><kbd>Maiuscolo con Canc</kbd>: con più voci selezionate, manda nel cestino i file dei brani e dei file selezionati, non quelli dentro le cartelle o le playlist selezionate, con una sola conferma.</li>
+<li><kbd>F4</kbd>: con più voci selezionate, mette nei Preferiti tutti i loro brani.</li>
+</ul>
+<h4>Nella console e nel cruscotto</h4>
+<ul>
+<li><kbd>Frecce, Pagina su e giù, Inizio e Fine</kbd>: leggono il testo della console e del cruscotto, che sono in sola lettura.</li>
+<li><kbd>Barra rovesciata</kbd>: nella console apre il campo Cerca nella console.</li>
+<li><kbd>Invio</kbd>: nella console passa all'occorrenza seguente dell'ultima ricerca, e arrivato in fondo riparte dall'inizio.</li>
+<li><kbd>Ctrl con C</kbd>: copia il testo selezionato, per esempio un Problema interno da riferire.</li>
+</ul>
+<h4>Nei campi di testo</h4>
+<ul>
+<li><kbd>Invio</kbd>: in ogni campo conferma.</li>
+<li><kbd>Ctrl con Invio</kbd>: nei campi con le istruzioni in cima, come il filtro, le ricerche e le impostazioni, va a capo, e andare a capo vale come uno spazio.</li>
+<li><kbd>Esc</kbd>: in ogni campo annulla, e la console dice che niente è cambiato.</li>
+</ul>
+<h4>Nelle domande e nelle liste di scelta</h4>
+<ul>
+<li><kbd>S</kbd>: in una domanda con Sì e No risponde subito Sì.</li>
+<li><kbd>N</kbd>: in una domanda con Sì e No risponde subito No.</li>
+<li><kbd>Esc</kbd>: in una domanda vale No.</li>
+<li><kbd>Invio</kbd>: in una domanda preme il pulsante col fuoco, che all'apertura è No.</li>
+<li><kbd>Invio</kbd>: in una lista di scelta, come Scheda audio, conferma la riga selezionata.</li>
+<li><kbd>Esc</kbd>: in una lista di scelta annulla.</li>
+</ul>
+<h4>Nella finestra delle impostazioni</h4>
+<ul>
+<li><kbd>Invio</kbd>: cambia la voce selezionata, o fa la sua azione.</li>
+<li><kbd>Esc</kbd>: chiude la finestra delle impostazioni.</li>
+<li><kbd>Lettere</kbd>: portano alla voce seguente che comincia così, e ripremute passano alla successiva, come nelle liste di Windows.</li>
+</ul>
+<h4>Nella finestra dei marcatori</h4>
+<ul>
+<li><kbd>Barra rovesciata</kbd>: cerca un testo nelle righe, dalla riga dopo quella col fuoco.</li>
+<li><kbd>Invio</kbd>: rinomina il marker della riga col fuoco.</li>
+<li><kbd>Canc</kbd>: elimina i marker delle righe selezionate, dopo una conferma se sono più d'uno.</li>
+<li><kbd>Maiuscolo con le frecce</kbd>: allargano la selezione.</li>
+<li><kbd>Ctrl con le frecce</kbd>: muovono il fuoco senza selezionare.</li>
+<li><kbd>Ctrl con la barra spaziatrice</kbd>: accende e spegne la riga col fuoco.</li>
+<li><kbd>Esc</kbd>: chiude la finestra dei marcatori e torna alle impostazioni.</li>
+</ul>
+<h4>I tasti senza comando</h4>
+<ul>
+<li><kbd>Lettere e segni senza comando</kbd>: come Maiuscolo con A o l'apostrofo, dicono che non hanno un comando, con un suono, e il fuoco resta dov'è.</li>
+<li><kbd>Tastierino numerico</kbd>: resta a NVDA, e i suoi tasti non sono comandi di MeTeOra.</li>
+<li><kbd>Ctrl e Alt con le lettere e le cifre</kbd>: restano ai comandi di Windows, tranne Ctrl con la barra rovesciata.</li>
+</ul>
+<h3 id="comandi-ricerca-filtro">I comandi della ricerca e del filtro</h3>
+<p>Nel filtro di una playlist e nella ricerca della plancia la grammatica è la stessa; maiuscole e accenti non contano, e un termine senza comando cerca nel nome del file e nei tag titolo, artista, album, genere e anno.</p>
+<h4>Gli operatori</h4>
+<ul>
+<li><kbd>Spazio</kbd>: separa i termini, che devono valere tutti, come rob hubbard.</li>
+<li><kbd>Barra verticale</kbd>: unisce alternative, l'una o l'altra, come hubbard|galway, e lega più dello spazio.</li>
+<li><kbd>Meno</kbd>: davanti a un termine lo esclude, come -remix.</li>
+<li><kbd>Asterisco</kbd>: vale qualsiasi testo, come comm*do.</li>
+<li><kbd>Cancelletto</kbd>: vale una o più cifre, come vol#.</li>
+<li><kbd>Virgolette</kbd>: cercano la sequenza esatta, spazi compresi, come "last ninja".</li>
+<li><kbd>Campo vuoto</kbd>: nel filtro toglie il filtro, come Togli il filtro; nella ricerca non vale, e il campo si riapre.</li>
+</ul>
+<h4>I comandi</h4>
+<ul>
+<li><kbd>t</kbd>: il tempo, con minore, maggiore, uguale, minore o uguale, maggiore o uguale, come t&lt;=3:00, t&gt;1:02:03 o t&gt;90.</li>
+<li><kbd>d</kbd>: la dimensione del file, in byte, o con k, m e g in multipli di 1024, come d&gt;5m, d&lt;700k o d&gt;1.5g.</li>
+<li><kbd>y</kbd>: l'anno, un numero intero, come y&lt;1990.</li>
+<li><kbd>r</kbd>: il numero dei sottobrani dei SID e della musica delle console, come r&gt;1.</li>
+<li><kbd>k</kbd>: solo con l'uguale, il tipo: k=sid, k=audio, k=video, k=tracker, k=midi, k=chip o un'estensione come k=flac.</li>
+<li><kbd>a</kbd>: solo con l'uguale, l'autore, cioè il tag Artista, come a=hubbard.</li>
+<li><kbd>n</kbd>: solo con l'uguale, il titolo, come n=commando.</li>
+<li><kbd>l</kbd>: solo con l'uguale, l'album.</li>
+<li><kbd>g</kbd>: solo con l'uguale, il genere.</li>
+<li><kbd>p</kbd>: solo con l'uguale, il percorso della cartella, come p=c64music.</li>
+<li><kbd>s</kbd>: solo con l'uguale, s=1 o s=sì i brani saltati, s=0 o s=no gli altri.</li>
+</ul>
+<p>Per esempio: k=sid a=hubbard|galway t&gt;2:00 -"loader".</p>
+<h4>Nella ricerca della console</h4>
+<ul>
+<li><kbd>Testo</kbd>: si cerca così com'è, spazi compresi, e maiuscole e minuscole non contano.</li>
+<li><kbd>Asterisco</kbd>: vale qualsiasi testo dentro la stessa riga, come non*suonare.</li>
+<li><kbd>Cancelletto</kbd>: vale una o più cifre, come 07:# per tutta l'ora delle 7.</li>
+<li><kbd>Virgolette</kbd>: cercano la sequenza esatta, maiuscole comprese, come "SID".</li>
+</ul>
+<h4>Nella ricerca dei marcatori</h4>
+<ul>
+<li><kbd>Barra rovesciata</kbd>: chiede un testo e va alla riga seguente che lo contiene, senza jolly e senza badare alle maiuscole; ripremuta ripropone lo stesso testo, e Invio passa alla riga dopo.</li>
+</ul>
+<h3 id="colori">I colori</h3>
+<p>Le voci Colori dei caratteri e Colori dello sfondo, nelle impostazioni, vogliono per ogni area una parola: la lettera dell'area seguita da tre numeri divisi dal punto, come p31.31.31.</p>
+<ul>
+<li><kbd>p</kbd>: la plancia dei comandi.</li>
+<li><kbd>c</kbd>: la console.</li>
+<li><kbd>t</kbd>: il cruscotto.</li>
+<li><kbd>I tre numeri</kbd>: sono il rosso, il verde e il blu, ciascuno da 0, spento, a 100, pieno, e mescolati fanno il colore.</li>
+<li><kbd>0.0.0</kbd>: il nero.</li>
+<li><kbd>100.100.100</kbd>: il bianco.</li>
+<li><kbd>50.50.50</kbd>: un grigio medio, e con tre numeri uguali più bassi, come 31.31.31, un grigio più scuro.</li>
+<li><kbd>100.0.0</kbd>: il rosso.</li>
+<li><kbd>0.100.0</kbd>: il verde.</li>
+<li><kbd>0.0.100</kbd>: il blu.</li>
+<li><kbd>100.100.0</kbd>: il giallo, e 100.100.80 un giallo chiaro.</li>
+<li><kbd>0.100.100</kbd>: l'azzurro.</li>
+<li><kbd>100.0.100</kbd>: il viola.</li>
+<li><kbd>100.50.0</kbd>: l'arancione.</li>
+<li><kbd>p31.31.31 c100.100.100</kbd>: più aree si scrivono separate dallo spazio, e quelle che non scrivi restano come sono.</li>
+<li><kbd>p</kbd>: la lettera da sola riporta quell'area ai colori di Windows, e p c t le riporta tutte e tre.</li>
+<li><kbd>Numeri interi</kbd>: un decimale, una virgola o più o meno di tre numeri danno errore, e un numero oltre 100 diventa 100, come dice la console.</li>
+<li><kbd>P 31.31.31</kbd>: la lettera può essere maiuscola o staccata dai numeri, e un'area scritta due volte prende il valore scritto per ultimo.</li>
+<li><kbd>Campo vuoto</kbd>: non cambia niente; per tornare ai colori di Windows si scrivono le lettere da sole.</li>
+</ul>
+<h2 id="la-finestra">La finestra</h2>
+<h3 id="tre-aree">Le tre aree</h3>
+<p>La finestra di MeTeOra ha tre aree, nell'ordine in cui le raggiunge il tasto Tab: la plancia dei comandi, la console e il cruscotto. F5, F6 e F7 portano il fuoco direttamente in ciascuna, con un suono suo; Tab e Maiuscolo con Tab passano dall'una all'altra.</p>
+<ul>
+<li>La plancia dei comandi, F5: un albero con tutti i comandi e tutti i contenuti, le playlist, i dischi, la rete.</li>
+<li>La console, F6: il diario di MeTeOra, una riga per ogni azione.</li>
+<li>Il cruscotto, F7: i tasti del punto da cui arrivi.</li>
+</ul>
+<h3 id="plancia">La plancia dei comandi</h3>
+<p>La plancia è un albero. Al primo livello ci sono, nell'ordine: i Preferiti; i Risultati, che compaiono dopo la prima ricerca; il ramo Playlist; Questo PC; Questa rete; il comando Apri file e il comando Impostazioni. Ogni capitolo di questo manuale ne descrive uno.</p>
+<h4>Muoversi nella plancia</h4>
+<p>Le frecce su e giù, Inizio, Fine, Pagina su e Pagina giù muovono il fuoco come in ogni albero di Windows. I rami si aprono con freccia destra e si chiudono con freccia sinistra, ciascuno con il suo suono: un fruscio che sale quando si apre, uno più scuro che scende quando si chiude. Aprendosi, un ramo si carica: le unità, le cartelle, i brani di una playlist, i sottobrani di un SID, i marker di un brano. Freccia destra su un ramo già aperto porta alla prima voce che contiene; freccia sinistra su una voce chiusa porta il fuoco sul ramo che la contiene, senza chiuderlo.</p>
+<p>Quando un tasto porta il fuoco a un livello diverso dell'albero, un beep breve ne dice la profondità: do al primo livello, e tre semitoni più su per ogni livello in più, fino al do 8 del diciassettesimo, oltre il quale resta lì. Vale per le frecce e per ogni comando, anche quando passa da un dialogo, come F9, J, K o Maiuscolo con Canc; scorrendo voci dello stesso livello, o lavorando nella console o nel cruscotto, il beep tace. Se il comando ha un suono suo, il beep aspetta che finisca.</p>
+<p>Backspace chiude il ramo in cui sei e ci porta il fuoco, con la riga Chiuso e il nome del ramo; premuto ancora risale di un livello, chiudendo anche quello, fino al primo livello della plancia, dove la console dice Sei già al primo livello della plancia.</p>
+<p>Maiuscolo con Backspace risale di colpo al ramo antenato della voce su cui sei, quello al secondo livello della plancia, per esempio l'unità in Questo PC o la playlist nel ramo Playlist, e chiude i rami aperti dentro di lui. Nei Preferiti, che sono una playlist al primo livello, risale ai Preferiti stessi. L'antenato resta aperto, così con le frecce si passa subito a un ramo fratello di quello da cui vieni. Backspace invece sale di un livello alla volta. Se sei già sull'antenato, o al primo livello della plancia, il fuoco non si muove e la console lo dice; sull'antenato si chiudono comunque i rami aperti al suo interno.</p>
+<p>F9 chiude la voce che ha il fuoco e tutto ciò che ha dentro, e ci porta la selezione; se la voce non ha niente dentro, chiude il ramo che la contiene. F10 apre la voce e tutti i rami che ha dentro, caricandoli, marker compresi, e come F9 su una voce senza niente dentro lavora sul ramo che la contiene. F10 si ferma dopo duemila rami, in qualsiasi punto della plancia: sotto Questo PC ci sono dischi interi. La console dice quanti rami ha aperto, e se si è fermato prima.</p>
+<p>Le lettere nella plancia sono comandi, come in tutta la finestra: per questo non si salta a una voce digitandone l'iniziale.</p>
+<h4>Il menu della voce</h4>
+<p>Su ogni voce Invio, il tasto Applicazioni e la barra spaziatrice aprono il menu della voce, con il suono del menu. Maiuscolo con F10 fa come il tasto Applicazioni, come in tutto Windows. Ci sono tre eccezioni per Invio: sui comandi, come Nuova playlist, Apri file, Impostazioni o Aggiungi un percorso di rete, Invio li esegue; sulla voce Mostra altri risultati mostra i risultati seguenti; su un marker chiede il suo nuovo nome.</p>
+<p>Su una voce senza menu, come un comando, il tasto Applicazioni e la barra spaziatrice lo dicono, e su un comando ricordano che Invio lo esegue. Sulla voce d'attesa di una ricerca nella rete dicono Ricerca in corso: la voce sparisce quando la ricerca finisce. I menu di ogni voce sono descritti nei capitoli che seguono.</p>
+<h4>Canc e Maiuscolo con Canc</h4>
+<p>Canc nella plancia elimina una playlist, dopo una domanda con No come risposta predefinita; toglie un brano da una playlist o dai Preferiti; elimina un marker; toglie da Questa rete un percorso di rete aggiunto a mano, e i suoi file restano dove sono. Il fuoco resta lì dove lavoravi: sul brano che seguiva, o su quello prima, o sulla playlist se è rimasta vuota; dopo una playlist eliminata, sulla playlist vicina; dopo un marker, sul marker vicino o sul suo brano. Sui Preferiti Canc dice che non si eliminano, e che Canc su un loro brano lo toglie. Sulle altre voci, come una cartella, un'unità, un file di una cartella o un sottobrano, dice Qui Canc non cancella niente.</p>
+<p>Maiuscolo con Canc manda nel cestino di Windows il file di un brano di una playlist o dei Preferiti, o di un file di una cartella o dei Risultati, dopo una domanda con No come risposta predefinita. Se il file sta suonando, prima si ferma; poi il brano esce dalla playlist, dalla cartella o dai Risultati in cui sta. Le altre playlist che contengono lo stesso file lo tengono nell'elenco, ma il file non c'è più. Maiuscolo con Canc non manda mai nel cestino una cartella, una playlist o un marker: lo dice. Su un sottobrano ricorda che si usa sul file che lo contiene.</p>
+<h4>La voce su cui agiscono i comandi</h4>
+<p>I comandi per una voce sola agiscono sulla voce che ha il fuoco. C'è un caso diverso, come in Esplora risorse: se con Ctrl e le frecce hai portato il fuoco su una voce non selezionata, e di selezionate ce n'è una sola, i comandi agiscono su quella selezionata. Vale per Canc, Maiuscolo con Canc, X, Maiuscolo con X, F4, il menu, la barra rovesciata, Maiuscolo con le cifre, F11 e Maiuscolo con F11; il cruscotto, in quel caso, lo ricorda. F9, F10, J, K, Backspace e la barra verticale lavorano invece sempre dalla voce che ha il fuoco. La selezione multipla è spiegata nel capitolo La riproduzione.</p>
+<h4>La voce selezionata e il brano che suona</h4>
+<p>Il brano in riproduzione e la voce selezionata sono due cose diverse: quando un brano finisce e ne parte un altro, la selezione resta dov'è. Nella plancia il brano che suona ha l'indicazione in riproduzione dopo il nome; F8 porta la selezione su di lui, e l'inseguimento, Maiuscolo con F8, ce la porta da solo a ogni cambio di brano.</p>
+<h3 id="console">La console</h3>
+<p>La console, F6, ha una riga per ogni azione, la più recente in fondo, con l'ora, in ore e minuti, in fondo alla riga; un testo lungo, come la guida rapida o le novità, ha l'ora solo in fondo all'ultima riga. Quando ci torni, il cursore è dove l'avevi lasciato. È in sola lettura: le frecce, Pagina su e giù, Inizio e Fine servono a leggerla, e Ctrl con C copia il testo selezionato.</p>
+<p>La console tiene le ultime duemila righe, se non lo cambi con la voce Righe della console delle impostazioni: quando le supera di cento, toglie dalla cima le più vecchie. Un testo lungo, come la guida rapida, resta comunque intero. Con la voce Salva console delle impostazioni la scrivi tutta in un file.</p>
+<p>Le informazioni che si ripetono di seguito riscrivono la loro riga invece di aggiungerne sempre una nuova: il volume e il muto, i salti nel brano, il passo del volume e quello dei salti, la velocità, il tono, la banda dell'equalizzatore, la dissolvenza, Backspace e Maiuscolo con Backspace, l'avanzamento della ricerca dei banchi dei MIDI e dello scaricamento di FluidR3, il testo non trovato nella console e lo stesso problema interno ripetuto.</p>
+<p>Se dentro MeTeOra qualcosa va storto, la console lo dice con una riga che comincia con Problema interno, o Problema interno nel motore, e un suono suo: è il punto da riferire a chi sviluppa. Il capitolo Quando qualcosa va storto spiega come.</p>
+<p>La barra rovesciata, dalla console, cerca un testo nella console, e Invio passa all'occorrenza seguente: il capitolo La ricerca e il filtro spiega come.</p>
+<h3 id="cruscotto">Il cruscotto</h3>
+<p>Il cruscotto, F7, mostra i tasti del punto da cui sei arrivato. Da una voce della plancia elenca i tasti di quella voce e del suo menu; da più voci selezionate, i tasti della selezione; dalla console, quelli della console. Sotto vengono le righe dei tasti che valgono ovunque. Se torni dallo stesso punto il cursore resta dove l'avevi lasciato; F7 premuto nel cruscotto lo rinfresca.</p>
+<p>Il cruscotto non ha tasti suoi: valgono tutti quelli generali, e la barra rovesciata, da lì, cerca nel ramo della plancia, non nel cruscotto. È alto cinque righe, ma di solito non occupa più di un terzo della finestra: con caratteri molto grandi ne mostra meno e scorre, così plancia e console restano visibili; due righe però le tiene sempre.</p>
+<h3 id="tasti-ovunque">I tasti in tutta la finestra</h3>
+<p>Tutti i tasti funzionano in tutta la finestra, qualunque area abbia il fuoco: dalla console si può mettere in pausa, cambiare il volume o aprire il filtro. Fanno eccezione i tasti propri della plancia, come Invio, Canc, Backspace, le frecce e la barra spaziatrice, e Invio della console. Le lettere valgono anche nella plancia, dove per questo non si salta alle voci digitandone l'iniziale.</p>
+<p>Un tasto a lettera o un segno senza comando, premuto da solo o con Maiuscolo, lo dice con un suono, per esempio Il tasto apostrofo non ha un comando, o Maiuscolo+A non ha un comando, e il fuoco resta dov'è. Altri tasti passano a Windows in silenzio: Ctrl e Alt con le lettere e le cifre, tranne Ctrl con la barra rovesciata; Maiuscolo con F4, F7, F9 e F12; i caratteri scritti con AltGr, che nella plancia si fermano senza nessun riscontro. Il tastierino numerico resta a NVDA: nemmeno il più e il meno del tastierino cambiano il volume.</p>
+<h3 id="esempi-finestra">Esempi</h3>
+<h4>Sapere quali tasti valgono su una voce</h4>
+<ol>
+<li>Nella plancia, porta il fuoco sulla voce, per esempio un brano di una playlist.</li>
+<li>Premi F7: il cruscotto dice Tasti per un brano di una playlist, i tasti del suo menu, e sotto quelli che valgono ovunque.</li>
+<li>Leggi con le frecce, poi premi F5 per tornare nella plancia, sulla stessa voce.</li>
+</ol>
+<h4>Risalire in fretta da una cartella profonda</h4>
+<ol>
+<li>In Questo PC sei sceso con freccia destra in una cartella dentro un'altra, dentro l'unità E.</li>
+<li>Premi Backspace: la cartella che contiene la voce si chiude e il fuoco va su di lei, con la riga Chiuso e il suo nome.</li>
+<li>Premi Maiuscolo con Backspace: il fuoco risale all'unità, che resta aperta, e i rami al suo interno si chiudono.</li>
+<li>Con freccia giù scorri le cartelle dell'unità e scegli un'altra cartella.</li>
+</ol>
+<h2 id="aiuto-avvio-uscita">L'aiuto, l'avvio e l'uscita</h2>
+<h3 id="manuale-e-guida">Il manuale, la guida rapida, le novità e i crediti</h3>
+<p>F1 apre questo manuale nel browser predefinito di Windows. È fatto per la lettura con i titoli: con NVDA, in modalità navigazione, H porta al titolo seguente e Maiuscolo con H al precedente, il 2 ai capitoli, il 3 alle loro sezioni e il 4 alle sottosezioni; in cima c'è l'indice, con un collegamento per ogni capitolo e sezione.</p>
+<p>F12 scrive nella console la guida rapida, il primo capitolo di questo manuale: tutti i tasti, divisi per aree, i comandi della ricerca e del filtro e i codici dei colori, una riga per tasto. Porta il fuoco nella console con il cursore sulla prima riga, così non ti ricordi un tasto, premi F12, scorri e lo trovi. La guida resta intera anche se è più lunga delle righe che la console tiene.</p>
+<p>F2 scrive nella console le novità di ogni versione, dalla più recente, ciascuna introdotta da una riga come Versione 1.71.0 del 2026-10-03. F3 scrive i crediti: la versione, gli autori, le librerie su cui MeTeOra si regge e la licenza. Come F12, ci portano il fuoco con il cursore sulla prima riga. Se il file del manuale o delle novità non si legge, la console lo dice con il suono dell'errore.</p>
+<h3 id="avvio">L'avvio</h3>
+<p>MeTeOra si apre a tutta finestra, con il fuoco nella plancia, sui Preferiti, e un suono. La prima riga della console dice la versione e la data, e ricorda F1, F12 e F7. Se la velocità o il tono non sono quelli normali, la riga dopo lo dice, con il tasto che li riporta al normale. Se il file delle playlist, delle impostazioni o dei marker non si legge, o la scheda audio scelta non c'è, la console lo dice con il suono dell'errore: il capitolo Quando qualcosa va storto spiega cosa succede.</p>
+<p>Alla riapertura ritrovi, in pausa, il brano e il punto a cui eri all'uscita, con la selezione della plancia su di lui, e la console dice Riprendo da dove eri, con il percorso e il tempo. MeTeOra ritrova anche la lista da cui suonava: la playlist, i Preferiti, la cartella, o la cartella suonata con tutte le sottocartelle, così Z, B e l'avanzamento continuano lì; se la lista non c'è più, il brano resta da solo, come un file aperto con Apri file. X riparte dal punto, e se è un video apre anche la sua finestra; fino ad allora il fuoco resta nella plancia. Se il file non c'è più, la console dice Non trovo più, con il suo percorso, che suonava l'ultima volta.</p>
+<h3 id="uscita">L'uscita</h3>
+<p>Esc, da qualsiasi area della finestra principale, esce da MeTeOra salvando tutto: le playlist, i marker, lo schedario delle durate e dei tag, le impostazioni e il punto di ripresa. Alt con F4, o il pulsante di chiusura della finestra, fa lo stesso. Una ricerca in corso si ferma. Se all'uscita qualcosa non si salva, lo dice una finestra prima di chiudere, con il suono dell'errore e l'elenco di ciò che non si è salvato. Poi arriva il suono dell'uscita, che si ascolta intero prima che MeTeOra si chiuda.</p>
+<p>Nella finestra del video, invece, Esc toglie lo schermo intero o nasconde il video, e non esce da MeTeOra.</p>
+<h3 id="esempi-aiuto">Esempi</h3>
+<h4>Ritrovare un tasto che non ricordi</h4>
+<ol>
+<li>Premi F12: la guida rapida arriva nella console, e il fuoco va sulla sua prima riga, Guida rapida; subito sotto c'è I tasti.</li>
+<li>Scendi con freccia giù fino all'area che ti interessa, per esempio Il volume, e leggi i suoi tasti.</li>
+<li>Oppure premi la barra rovesciata, scrivi una parola, per esempio dissolvenza, e premi Invio: il cursore va sulla prima riga che la contiene, e Invio passa alla seguente.</li>
+<li>Premi F5 per tornare nella plancia.</li>
+</ol>
+<h4>Leggere una spiegazione nel manuale</h4>
+<ol>
+<li>Premi F1: il manuale si apre nel browser.</li>
+<li>Premi il 2 di NVDA, in modalità navigazione, fino al capitolo che cerchi, per esempio I marker, oppure scegli il capitolo dall'indice in cima e premi Invio.</li>
+<li>Con il 3 passi da una sezione all'altra del capitolo; in fondo a ogni capitolo ci sono gli esempi.</li>
+<li>Chiudi il browser, o passa a MeTeOra con Alt con Tab.</li>
+</ol>
+<h2 id="preferiti">I Preferiti</h2>
+<h3 id="preferiti-concetto">Che cosa sono</h3>
+<p>I Preferiti sono la prima voce della plancia: una playlist speciale con i brani che ci mandi da qualsiasi playlist o cartella, con F4 o con la voce Aggiungi ai preferiti del menu di un brano, di un file o di un sottobrano. Nei Preferiti va una copia del brano, con lo stesso file e lo stesso sottobrano: il brano resta anche dov'era. Un brano che c'è già non si aggiunge due volte, e la console lo dice.</p>
+<p>Funzionano come le altre playlist: si aprono con freccia destra, si suonano, hanno il loro filtro, e la loro etichetta dice i brani e la durata totale, per esempio Preferiti, brani: 12 (48:05.250), totali: 12 (48:05.250). Sono diversi in tre cose: non si rinominano, non si eliminano, e non contano per J, K e le cifre, che girano solo fra le playlist salvate. Nei Preferiti, Maiuscolo con Backspace risale ai Preferiti stessi.</p>
+<h3 id="preferiti-tasti">I tasti e il menu</h3>
+<ul>
+<li>F4 mette nei Preferiti il brano, il file o il sottobrano selezionato; su un'altra voce ricorda di sceglierne uno. Con più voci selezionate li mette tutti, e la console dice quanti c'erano già.</li>
+<li>X sui Preferiti li suona dal primo brano; se sono vuoti, la console ricorda che F4 ci mette il brano selezionato.</li>
+<li>Canc su un brano dei Preferiti lo toglie; Canc sui Preferiti dice che non si eliminano.</li>
+<li>La barra verticale, sui Preferiti o su un loro brano, apre il loro filtro.</li>
+<li>Il menu dei Preferiti, con Invio, il tasto Applicazioni o la barra spaziatrice, ha Riproduci, Filtro e Togli il filtro, se un filtro c'è.</li>
+<li>Il menu di un brano dei Preferiti è quello dei brani delle playlist, descritto nel capitolo Le playlist.</li>
+</ul>
+<h3 id="esempi-preferiti">Esempi</h3>
+<h4>Mettere un brano nei Preferiti e ascoltarli</h4>
+<ol>
+<li>Nella plancia porta il fuoco su un brano di una playlist, o su un file di una cartella di Questo PC.</li>
+<li>Premi F4: la console dice che il brano è nei Preferiti, e quanti brani hanno adesso.</li>
+<li>Premi Inizio: il fuoco va sui Preferiti, la prima voce della plancia.</li>
+<li>Premi X: i Preferiti suonano dal primo brano.</li>
+</ol>
+<h4>Togliere un brano dai Preferiti</h4>
+<ol>
+<li>Porta il fuoco sui Preferiti e aprili con freccia destra.</li>
+<li>Scendi con freccia giù fino al brano da togliere.</li>
+<li>Premi Canc: il brano esce dai Preferiti, il file resta dov'è, e il fuoco va sul brano che seguiva.</li>
+</ol>
+<h2 id="playlist">Le playlist</h2>
+<h3 id="ramo-playlist">Il ramo Playlist</h3>
+<p>Il ramo Playlist contiene le tue playlist, nell'ordine in cui le hai create, e in fondo il comando Nuova playlist. Ogni playlist ha i suoi brani, e si salva da sola a ogni modifica, insieme ai Preferiti e ai filtri, nel file MeTeOra - Playlist.json. Una playlist contiene solo i riferimenti ai file: eliminarla, o togliere un brano, non tocca i file sul disco.</p>
+<p>Invio sul comando Nuova playlist crea una playlist vuota e ci porta la selezione. Il nome è automatico: Playlist, oppure Playlist 2, Playlist 3 e così via se c'è già; lo cambi con Rinomina nel suo menu. La console dice Creata la playlist, vuota, e ricorda che si riempie da Questo PC, con Aggiungi alla playlist. Il menu del ramo Playlist, con Invio, il tasto Applicazioni o la barra spaziatrice, ha la stessa voce, Nuova playlist.</p>
+<h3 id="etichetta-playlist">L'etichetta di una playlist</h3>
+<p>Dopo il nome, ogni playlist dice i suoi brani e la loro durata totale, per esempio: Rock, brani: 12 (48:05.250), totali: 12 (48:05.250). Il primo conto è quello dei brani che passano il filtro, il secondo quello di tutti; se la playlist ha un filtro, l'etichetta finisce con il suo testo, per esempio: filtro: k=sid. Le durate si leggono in sottofondo, e MeTeOra se le ricorda; i brani di cui la durata non si sa, o non si sa ancora, sono contati a parte, per esempio 12 (40:10, 2 senza durata), e una lista di cui non si sa nessuna durata dice senza durata.</p>
+<p>Una playlist si ricarica ogni volta che la richiudi e la riapri: così l'elenco segue le durate e i tag arrivati nel frattempo, che il filtro può usare. Una playlist in cui il filtro non lascia passare niente non si apre.</p>
+<h3 id="menu-playlist">Il menu di una playlist</h3>
+<p>Invio, il tasto Applicazioni o la barra spaziatrice su una playlist aprono il suo menu:</p>
+<ul>
+<li>Riproduci: suona la playlist dal primo brano che si può suonare.</li>
+<li>Filtro: apre il campo del filtro, come la barra verticale. Il capitolo La ricerca e il filtro lo spiega.</li>
+<li>Togli il filtro, che c'è solo quando un filtro c'è: lo svuota, e tornano tutti i brani.</li>
+<li>Rinomina: chiede il nuovo nome, con quello di adesso già selezionato. Un nome che un'altra playlist ha già, senza badare alle maiuscole, non si accetta, e la console lo dice; un campo vuoto, o lo stesso nome, lasciano tutto com'è.</li>
+<li>Elimina: chiede conferma, con No come risposta predefinita, e ricorda che i file restano sul disco; il fuoco va sulla playlist vicina. Lo stesso fa Canc sulla playlist.</li>
+</ul>
+<h3 id="brani-playlist">I brani di una playlist</h3>
+<p>Aperta con freccia destra, una playlist mostra i suoi brani: il nome del file con l'estensione, poi la durata quando si conosce, e dopo, quando servono, le indicazioni: quanti marker ha, saltato, punto A del loop, punto B del loop, in riproduzione. Un sottobrano messo in una playlist come brano a sé ha il nome del file e il numero del sottobrano, per esempio Commando.sid, sottobrano 3 di 5. Un SID o un file delle console con più sottobrani dice quanti sono e quanto durano in tutto, ed è un ramo, come un brano con dei marker: freccia destra mostra i sottobrani, o i marker.</p>
+<h4>Il menu di un brano</h4>
+<ul>
+<li>Riproduci: suona il brano, come X.</li>
+<li>Sposta su, Sposta giù, Sposta in cima, Sposta in fondo: cambiano il posto del brano nella playlist; la console dice il nuovo posto, per esempio Love Song ora è il 3 di 12, o che il brano è già lì. Spostare non vale per le selezioni.</li>
+<li>Saltato, una voce a spunta: un brano saltato resta nella playlist, ma l'avanzamento automatico, Z, B e N lo saltano; X sulla sua voce lo suona lo stesso. Di nuovo Saltato lo rimette fra quelli da suonare.</li>
+<li>Togli dalla playlist: come Canc, toglie il brano, e il fuoco va al brano che seguiva, o a quello prima, o alla playlist se è rimasta vuota. Se il brano era il punto A del loop, il loop si toglie.</li>
+<li>Aggiungi ai preferiti: come F4.</li>
+<li>Rinomina file: cambia il nome del file sul disco, spiegato qui sotto.</li>
+<li>Leggi i tag e Tag: solo per i formati di cui MeTeOra sa scrivere i tag; il capitolo I tag li spiega.</li>
+<li>Manda nel cestino: come Maiuscolo con Canc.</li>
+</ul>
+<h4>Rinomina file</h4>
+<p>Rinomina file, nel menu di un brano o di un file, cambia il nome del file sul disco. Si scrive solo il nome, e l'estensione resta; se la scrivi lo stesso, per abitudine, non si raddoppia. Spazi e punti in fondo al nome si tolgono, come fa Windows. Un campo vuoto, o lo stesso nome, lasciano tutto com'è.</p>
+<p>Un nome non si accetta, e la console dice perché, se contiene un carattere che Windows non vuole nei nomi dei file: minore, maggiore, due punti, virgolette, barra, barra rovesciata, barra verticale, punto interrogativo o asterisco; se è un nome riservato di Windows, come CON, PRN, AUX, NUL, da COM1 a COM9 e da LPT1 a LPT9; o se nella cartella c'è già un file con il nome nuovo.</p>
+<p>I file accanto con lo stesso nome lo seguono: i sottotitoli e i testi sincronizzati, cioè srt, ass, ssa, vtt, sub, idx, sup e lrc, anche con la lingua in mezzo, come film.srt o film.it.srt, e per la musica delle console il suo file m3u. Gli altri file accanto, come una copertina o un nfo, restano con il nome di prima. Le playlist, i Preferiti, i Risultati, le durate e i marker passano al nome nuovo. Un brano che suona continua a suonare, con il nome nuovo: se serve si ferma un istante e riparte dal suo punto.</p>
+<h3 id="creare-playlist">Creare e riempire le playlist</h3>
+<ul>
+<li>Nuova playlist, in fondo al ramo Playlist: una playlist vuota, con il nome automatico.</li>
+<li>Crea playlist da qui, nel menu di un'unità o di una cartella: una playlist con tutti i file della cartella e delle sue sottocartelle, che prende il nome della cartella o del volume dell'unità.</li>
+<li>Aggiungi alla playlist, nel menu di un file, di un sottobrano, di un'unità, di una cartella o della selezione: un sottomenu con le playlist e, in fondo, Nuova playlist, che ne crea una con il nome automatico. Da una cartella si aggiungono tutti i suoi file, sottocartelle comprese. La console dice quanti brani sono arrivati e quanti ne ha adesso la playlist.</li>
+<li>Crea playlist dalla selezione, nel menu della selezione: chiede il nome, proponendo Selezione, che vale anche per un campo lasciato vuoto.</li>
+<li>Salva come playlist, nel menu dei Risultati o di un loro ramo: chiede il nome, proponendo Ricerca e il testo cercato.</li>
+</ul>
+<p>Se il nome di una playlist nuova c'è già, MeTeOra ci aggiunge un numero: Rock 2, Rock 3 e così via.</p>
+<h3 id="j-k-cifre">J, K e le cifre</h3>
+<p>J e K portano il fuoco nella plancia sulla playlist salvata precedente e successiva a quella in cui sta la plancia, o se la plancia non è in una playlist a quella che suona. La aprono tutta, sottobrani compresi ma non gli elenchi dei marker, e suonano il suo primo elemento, se ne ha almeno uno. Senza una playlist di partenza, K va alla prima e J all'ultima; alla prima e all'ultima la console lo dice. I Preferiti non contano: J e K girano solo fra le playlist salvate.</p>
+<p>Le cifre da 1 a 9 della tastiera principale, e lo 0 per la decima, fanno lo stesso con le prime dieci playlist salvate, nell'ordine del ramo Playlist; se la playlist con quel numero non c'è, la console dice quante ce ne sono.</p>
+<h3 id="esempi-playlist">Esempi</h3>
+<h4>Creare una playlist da una cartella</h4>
+<ol>
+<li>Nella plancia porta il fuoco su Questo PC e aprilo con freccia destra.</li>
+<li>Apri l'unità con freccia destra e scendi fino alla cartella, aprendo le cartelle che la contengono.</li>
+<li>Sulla cartella premi Invio: si apre il suo menu.</li>
+<li>Scegli Crea playlist da qui e premi Invio.</li>
+<li>La console dice Creata la playlist, con il nome della cartella e il numero dei brani; la trovi nel ramo Playlist.</li>
+</ol>
+<h4>Creare una playlist vuota e riempirla</h4>
+<ol>
+<li>Apri il ramo Playlist con freccia destra, scendi fino all'ultima voce, Nuova playlist, e premi Invio: nasce una playlist che si chiama Playlist, e la selezione va su di lei.</li>
+<li>Premi la barra spaziatrice, scegli Rinomina, scrivi il nome che vuoi e premi Invio.</li>
+<li>In Questo PC porta il fuoco su un file, premi la barra spaziatrice, scegli Aggiungi alla playlist e, nel sottomenu, la playlist appena rinominata.</li>
+<li>Fai lo stesso con le cartelle intere: Aggiungi alla playlist le mette con tutte le loro sottocartelle.</li>
+</ol>
+<h4>Mettere un brano in cima a una playlist</h4>
+<ol>
+<li>Apri la playlist con freccia destra e scendi fino al brano.</li>
+<li>Premi Invio, scegli Sposta in cima e premi Invio.</li>
+<li>La console dice che il brano ora è il 1 della playlist, e il fuoco resta su di lui.</li>
+</ol>
+<h4>Suonare la terza playlist</h4>
+<ol>
+<li>Da qualsiasi area premi 3, sulla tastiera principale.</li>
+<li>La terza playlist del ramo Playlist si apre, il fuoco va su di lei e il primo brano suona.</li>
+<li>Premi K per passare alla quarta playlist; J, poi, ti riporta alla terza.</li>
+</ol>
+<h2 id="questo-pc">Questo PC</h2>
+<h3 id="unita-cartelle-file">Unità, cartelle e file</h3>
+<p>Questo PC contiene le unità del computer, con la lettera e il nome del volume, per esempio E:\Dati; un volume senza nome ha il suo tipo: Disco locale, Unità rimovibile, Unità di rete, Unità CD o Disco in memoria. Le unità di rete con una lettera stanno qui, non in Questa rete.</p>
+<p>Dentro le unità ci sono le cartelle e i file che MeTeOra sa suonare, in ordine alfabetico, le cartelle prima dei file; i file e le cartelle nascosti o di sistema non compaiono, e non si suonano né si cercano. Ogni file mostra il nome con l'estensione e la durata quando si conosce. Un SID o un file delle console con più sottobrani dice quanti sono e quanto durano in tutto, ed è un ramo: freccia destra mostra i sottobrani. Un file con dei marker è un ramo anche lui, con i marker dentro.</p>
+<p>Una cartella che non si può leggere lo dice nella console, con il motivo. Una cartella aperta in cui non c'è niente da suonare lo dice: Niente da suonare qui dentro.</p>
+<h3 id="conti-cartelle">I conti delle cartelle</h3>
+<p>Ogni cartella, dopo il nome, dice quanti file suonabili contiene, sottocartelle comprese, e quanto durano in tutto, per esempio Amiga, 240 file, 8:12:30 in tutto, 3 senza durata. MeTeOra li conta in sottofondo quando apri la cartella che le contiene, e le durate arrivano mentre le legge. I conti valgono finché MeTeOra resta aperto; le durate invece MeTeOra se le ricorda.</p>
+<p>Le cartelle in cui non c'è niente da suonare, nemmeno nelle sottocartelle, spariscono appena contate, anche se il fuoco è su di loro: in quel caso passa alla cartella vicina. Una cartella che hai aperto e che mostra dei file non sparisce mai. Se una cartella non compare perché era vuota quando è stata contata, Aggiorna sulla cartella che la contiene, o su Questo PC, rifà i conti.</p>
+<h3 id="menu-pc">I menu di Questo PC</h3>
+<ul>
+<li>Il menu di Questo PC ha una voce, Aggiorna, che dimentica i conti di tutte le cartelle e ricarica le unità, per esempio dopo aver inserito una chiavetta.</li>
+<li>Il menu di un'unità o di una cartella ha Riproduci, Crea playlist da qui, Aggiungi alla playlist, con il sottomenu delle playlist, e Aggiorna, che rilegge la cartella e rifà i suoi conti.</li>
+<li>Il menu di un file ha Riproduci, Aggiungi alla playlist, Aggiungi ai preferiti, Rinomina file, Leggi i tag e Tag per i formati di cui MeTeOra scrive i tag, e Manda nel cestino.</li>
+<li>Il menu di un sottobrano ha Riproduci, Aggiungi alla playlist e Aggiungi ai preferiti.</li>
+</ul>
+<h3 id="cartella-temporanea">Una cartella come playlist temporanea</h3>
+<p>Una cartella funziona come una playlist temporanea. X su un file lo suona, e il brano seguente lo decide la plancia, come spiega il capitolo La riproduzione: il file dopo, e dentro i rami aperti tutto ciò che contengono. X su una cartella, o su un'unità, la suona con tutto ciò che ha sotto: prima i suoi file, poi quelli delle sottocartelle, una dopo l'altra. Dal suo menu si crea invece una playlist vera, con tutti i file della cartella e delle sue sottocartelle.</p>
+<p>Un file sotto Questo PC non ha Togli dalla playlist: Canc lì non cancella niente, e per toglierlo dal disco c'è Maiuscolo con Canc, che lo manda nel cestino.</p>
+<h3 id="esempi-pc">Esempi</h3>
+<h4>Suonare una cartella con tutte le sottocartelle</h4>
+<ol>
+<li>Apri Questo PC e l'unità con freccia destra, e porta il fuoco sulla cartella, per esempio Musica.</li>
+<li>Premi X: suonano i file della cartella, poi quelli delle sottocartelle.</li>
+<li>Premi B per passare al file seguente; F8 porta la selezione e il fuoco sul file che suona, aprendo le sottocartelle che servono.</li>
+</ol>
+<h4>Far ricomparire una cartella sparita</h4>
+<ol>
+<li>Hai copiato dei brani in una cartella che MeTeOra aveva contato vuota, e che quindi non compare.</li>
+<li>Porta il fuoco sulla cartella che la contiene, premi Invio, scegli Aggiorna e premi Invio.</li>
+<li>La console dice Aggiornato, con il nome della cartella: i conti si rifanno, e la cartella ricompare.</li>
+</ol>
+<h2 id="la-rete">La rete</h2>
+<h3 id="rete-contenuto">Che cosa c'è in Questa rete</h3>
+<p>Questa rete sta nella plancia accanto a Questo PC, e contiene le cartelle in rete, in quest'ordine:</p>
+<ul>
+<li>i percorsi di rete salvati in Windows, quelli che Esplora risorse mostra sotto Questo PC, per esempio il disco di un router o di un NAS, ciascuno con il suo nome; restano solo le cartelle di rete, quelle che cominciano con due barre rovesciate, mentre i percorsi FTP o web non compaiono;</li>
+<li>i percorsi che aggiungi tu, ciascuno con il suo percorso come nome;</li>
+<li>il ramo Computer della rete, che cerca i computer della rete e le loro cartelle condivise;</li>
+<li>in fondo, il comando Aggiungi un percorso di rete.</li>
+</ul>
+<p>Le cartelle di rete si aprono, si suonano, si cercano e diventano playlist come quelle di Questo PC, con gli stessi menu. Le cartelle al primo livello di Questa rete, e le cartelle condivise di un computer, non dicono i loro conti e non spariscono anche se sono vuote; le loro sottocartelle li dicono, come in Questo PC. Le unità di rete con una lettera stanno in Questo PC.</p>
+<p>Il menu di Questa rete ha Aggiungi un percorso di rete e Aggiorna, che rilegge i percorsi e ricomincia da capo.</p>
+<h3 id="percorsi-a-mano">I percorsi aggiunti a mano</h3>
+<p>Il comando Aggiungi un percorso di rete, in fondo a Questa rete o nel suo menu, chiede un percorso come \\server\cartella e lo ricorda, nelle impostazioni. Le barre normali diventano rovesciate, e la barra in fondo si toglie. Servono il nome del server e quello della cartella: un percorso che non è di rete non si accetta, e nemmeno uno che c'è già in Questa rete. Un percorso che adesso non risponde si tiene lo stesso, e la console lo dice.</p>
+<p>Un percorso che hai aggiunto si toglie con Canc, subito e senza domanda, o con Togli il percorso nel suo menu; i file restano dove sono. I percorsi salvati in Windows non si tolgono da MeTeOra.</p>
+<h3 id="computer-della-rete">I computer della rete</h3>
+<p>Freccia destra su Computer della rete cerca i computer della rete. La ricerca va in disparte, con una voce d'attesa, Cerco i computer della rete, e può durare qualche secondo; finita, la console dice quanti computer ha trovato, o che non ne ha trovati. Su molti Windows trova poco o niente. Freccia destra su un computer cerca allo stesso modo le sue cartelle condivise, che poi si aprono come le altre cartelle di rete.</p>
+<p>Il menu di Computer della rete ha Cerca di nuovo; quello di un computer ha Aggiorna, che rifà la ricerca delle sue cartelle condivise. Sulla voce d'attesa, Invio, il tasto Applicazioni e la barra spaziatrice dicono Ricerca in corso: la voce sparisce quando la ricerca finisce.</p>
+<h3 id="rete-che-non-risponde">Le cartelle che non rispondono</h3>
+<p>Una cartella di rete spenta farebbe aspettare Windows anche mezzo minuto. Per questo, prima di aprire una cartella al primo livello di Questa rete, o una cartella condivisa di un computer, MeTeOra prova se risponde: se non risponde entro tre secondi, la console lo dice, con il suono dell'errore, e il ramo resta da riaprire, quando il computer o il disco saranno accesi.</p>
+<p>La barra rovesciata su Questa rete cerca in tutti i suoi percorsi, e su un computer nelle sue cartelle condivise già trovate; se non ci sono percorsi, la console dice che lì non c'è niente in cui cercare. Ctrl con la barra rovesciata, la ricerca in tutto MeTeOra, non entra mai nella rete.</p>
+<h3 id="esempi-rete">Esempi</h3>
+<h4>Aggiungere una cartella di un disco di rete</h4>
+<ol>
+<li>Nella plancia porta il fuoco su Questa rete e aprila con freccia destra.</li>
+<li>Scendi fino all'ultima voce, Aggiungi un percorso di rete, e premi Invio.</li>
+<li>Scrivi il percorso, per esempio \\nas\musica, e premi Invio.</li>
+<li>La console dice Aggiunto a Questa rete, con il percorso, e la selezione va sulla sua voce; freccia destra la apre.</li>
+</ol>
+<h4>Togliere un percorso aggiunto</h4>
+<ol>
+<li>In Questa rete porta il fuoco sul percorso che avevi aggiunto.</li>
+<li>Premi Canc: la console dice Tolto da Questa rete, e che i file restano dove sono.</li>
+</ol>
+<h2 id="ricerca-e-filtro">La ricerca e il filtro</h2>
+<p>Il filtro sceglie quali brani di una playlist si vedono e si suonano; la ricerca trova i brani in un ramo della plancia, o in tutto MeTeOra, e li mette nei Risultati. Si scrivono tutti e due allo stesso modo. La console ha una ricerca sua, più semplice, e la finestra dei marcatori un'altra ancora, descritta nel capitolo I marker.</p>
+<h3 id="grammatica">Come si scrivono il filtro e la ricerca</h3>
+<h4>I termini e gli operatori</h4>
+<ul>
+<li>I termini separati da spazi devono valere tutti. Andare a capo vale come uno spazio, gli spazi in più non contano, e l'ordine dei termini nemmeno.</li>
+<li>La barra verticale unisce alternative: hubbard|galway trova l'uno o l'altro. Lega più dello spazio: rob hubbard|galway vuol dire rob, e poi hubbard o galway. Funziona anche staccata, hubbard | galway. Le alternative possono essere parole, frasi fra virgolette o comandi, come k=sid|k=mod; una barra in testa o in fondo a un termine, senza niente dall'altra parte, è un errore.</li>
+<li>Il meno davanti a un termine lo esclude: -live. Vale anche davanti a un comando, -k=mod, a una frase, -"loader", o a un gruppo di alternative. Dentro una parola, come in AC-DC, è un carattere normale, e un meno da solo cerca il trattino.</li>
+<li>L'asterisco vale qualsiasi testo, anche nessuno: w*ball, comm*do. Funziona anche nei valori dei comandi a, n, l, g e p, come a=hub*.</li>
+<li>Il cancelletto vale una o più cifre: vol# trova vol1, vol2 e vol12. Staccato dal resto è un termine a sé, e trova ogni file che ha una cifra nel nome o nei tag: per i dischi numerati si scrive attaccato, come disco#.</li>
+<li>Le virgolette cercano una sequenza esatta, spazi compresi: "last ninja". Anche fra le virgolette maiuscole e accenti non contano; dentro non ci sono jolly, e l'asterisco è un carattere come gli altri. Virgolette vuote, o non chiuse, sono un errore.</li>
+<li>Maiuscole e accenti non contano mai: citta trova Città.</li>
+</ul>
+<h4>Dove cerca un termine senza comando</h4>
+<p>Un termine senza comando cerca nel nome del file, senza la cartella, e in cinque tag: titolo, artista, album, genere e anno. Il compositore, il commento, l'artista dell'album, la traccia e il disco non si cercano. I tag si leggono per i formati di cui MeTeOra sa scrivere i tag, e anche per altri che la libreria mutagen sa aprire, come TAK o MOV; dei SID e della musica delle console si leggono il titolo, l'autore e l'anno scritti nel file. Degli altri file, come i video MKV o AVI, i moduli dei tracker e i MIDI, conta solo il nome.</p>
+<h4>I comandi</h4>
+<p>Un comando è una lettera, seguita da un segno fra minore, maggiore, uguale, minore o uguale, maggiore o uguale, e da un valore, senza spazi: t&lt;=3:00. La lettera può anche essere maiuscola. Una lettera che non è un comando è un errore, e la console elenca i comandi; anche un comando senza valore, come t=, è un errore, e la console dice che manca il valore. Il valore non può contenere spazi né virgolette: per un autore di due parole si scrive a=rob*hubbard.</p>
+<p>Questi accettano tutti e cinque i segni:</p>
+<ul>
+<li>t, il tempo: in secondi, come t&gt;90 o t&gt;90.5, oppure come minuti e secondi, t&lt;=3:00, o ore, minuti e secondi, t&gt;1:02:03; i decimali, con il punto o la virgola, vanno solo nell'ultima parte. Per un sottobrano vale la sua durata. Un file di cui non si sa la durata non passa mai.</li>
+<li>d, la dimensione del file: il numero da solo è in byte, e k, m e g lo moltiplicano per 1024, per 1024 al quadrato e per 1024 al cubo: d&gt;5m, d&lt;700k, d&gt;1.5g. Attenzione: d&gt;5 vuol dire più di cinque byte.</li>
+<li>y, l'anno: un numero intero, come y&lt;1990. Vale il primo anno di quattro cifre del tag anno, o del copyright di un SID o di un file delle console. Un file senza anno non passa mai.</li>
+<li>r, i sottobrani dei SID e della musica delle console: un numero intero, come r&gt;1. I file che non hanno sottobrani non passano mai un comando r, nemmeno r&lt;2.</li>
+</ul>
+<p>Questi accettano solo l'uguale:</p>
+<ul>
+<li>k, il tipo, come estensione o famiglia: k=sid, k=mp3, k=.flac, k=audio, k=video, k=tracker, k=midi, k=chip per la musica delle console. La famiglia audio comprende tutto ciò che non è video: l'audio comune, i tracker, i SID, i MIDI e le console. Un'estensione che nessun file ha non è un errore: non trova niente.</li>
+<li>a, l'autore: il tag artista, e per i SID e le console l'autore scritto nel file, come a=hubbard.</li>
+<li>n, il titolo, come n=commando.</li>
+<li>l, l'album.</li>
+<li>g, il genere.</li>
+<li>p, il percorso della cartella in cui sta il file, lettera dell'unità compresa, e non il nome del file: p=c64music, p=e:\musica*.</li>
+<li>s, saltato: s=1 trova i brani saltati, s=0 gli altri; valgono anche sì e no.</li>
+</ul>
+<p>Per esempio: k=sid a=hubbard|galway t&gt;2:00 -"loader" trova i SID di Hubbard o di Galway più lunghi di due minuti, che non hanno loader nel nome né nei tag.</p>
+<h4>Gli errori</h4>
+<p>Se il testo non si capisce, la console dice Nel filtro non capisco, o Nella ricerca non capisco, e il perché; il campo si riapre con il testo che avevi scritto, da correggere.</p>
+<h4>Le durate e i tag in sottofondo</h4>
+<p>Durate e tag si leggono in sottofondo, e MeTeOra se li ricorda nello schedario. Se un filtro li usa e la lettura non è finita, i conti nell'etichetta della playlist si aggiornano da soli, mentre l'elenco dei brani si aggiorna riaprendo la playlist. Dei file sul disco che MeTeOra non ha mai letto si conoscono solo il nome e il percorso: i comandi su durata e tag trovano soltanto quelli già passati dallo schedario, per esempio perché stanno in una playlist o in una cartella aperta.</p>
+<h3 id="filtro-playlist">Il filtro di una playlist</h3>
+<p>Ogni playlist, e anche i Preferiti, ha il suo filtro, che si salva con lei. Non è una voce della playlist, così NVDA conta solo i brani: si apre dal menu della playlist, con la voce Filtro, oppure con la barra verticale, cioè Maiuscolo con la barra rovesciata, da qualsiasi area, sulla playlist in cui sta la plancia, anche da un suo brano. Fuori da una playlist la barra verticale ricorda dove si usa.</p>
+<p>Il campo del filtro ha in cima le istruzioni, righe che cominciano con il dollaro e non contano; si scrive nell'ultima riga, dove il filtro di prima arriva già selezionato: scrivendo lo si sostituisce, con le frecce lo si corregge. Invio conferma, Ctrl con Invio va a capo, Esc annulla.</p>
+<p>Il filtro decide quali brani si vedono, si contano e si suonano: X, Z, B, N e l'avanzamento automatico saltano quelli che non passano. Confermato, la console dice quanti brani passano su quanti, e l'etichetta della playlist finisce con il testo del filtro. Il fuoco resta sulla sua voce; se era su un brano che il filtro nuovo nasconde, passa alla playlist. La voce Togli il filtro del menu, che c'è quando un filtro c'è, lo svuota, e così un campo confermato vuoto.</p>
+<h3 id="ricerca-ramo">La ricerca nel ramo in cui sei</h3>
+<p>La barra rovesciata apre il campo della ricerca, uguale a quello del filtro, con le istruzioni in cima, la stessa grammatica e il testo dell'ultima ricerca già selezionato. Il campo vuoto non si accetta: la console dice Scrivi cosa cercare, e il campo si riapre. La ricerca guarda nel ramo della plancia in cui sei:</p>
+<ul>
+<li>in una cartella o in un'unità, con tutte le sottocartelle;</li>
+<li>in una playlist, o nei Preferiti;</li>
+<li>nei Risultati, o in un loro ramo, così una ricerca si può restringere;</li>
+<li>da un brano, da un file, da un sottobrano o da un marker, nella playlist in cui sta, o nella cartella in cui sta, con le sue sottocartelle;</li>
+<li>su Questo PC, in tutte le unità, saltando le unità di rete e i CD;</li>
+<li>sul ramo Playlist, in tutte le playlist;</li>
+<li>su Questa rete, nei suoi percorsi, e su un computer della rete nelle sue cartelle condivise già trovate;</li>
+<li>sui comandi Apri file e Impostazioni, in tutto MeTeOra.</li>
+</ul>
+<p>Dove non c'è niente in cui cercare, per esempio su Questa rete senza percorsi, la console lo dice e ricorda Ctrl con la barra rovesciata. La barra rovesciata funziona così anche dal cruscotto e dalla finestra del video; dalla console, invece, cerca nella console. Partita la ricerca, la console dice cosa cerca e dove, e quando ha finito quanti risultati ha trovato.</p>
+<h3 id="ricerca-ovunque">La ricerca in tutto MeTeOra</h3>
+<p>Ctrl con la barra rovesciata, da qualsiasi area, console compresa, e dalla finestra del video, cerca in tutto MeTeOra: prima nei Preferiti e nelle playlist, poi in tutte le unità, dischi fissi, chiavette e dischi in memoria, saltando le unità di rete e i CD, che possono essere lentissimi o vuoti. La voce Nuova ricerca del menu dei Risultati fa lo stesso, anche se l'ultima ricerca era in un ramo solo.</p>
+<h3 id="risultati">I Risultati</h3>
+<p>I Risultati compaiono nella plancia dopo la prima ricerca, fra i Preferiti e il ramo Playlist. Si riempiono mentre la ricerca va avanti, e l'etichetta dice il testo cercato, quanti sono, e se la ricerca è ancora in corso o se l'hai fermata, per esempio Risultati di hubbard: 42 trovati, ricerca in corso.</p>
+<p>Dentro, i risultati stanno come stavano: quelli trovati in una playlist sotto il nome della playlist, come Playlist Rock, o sotto Preferiti; quelli trovati sul disco lungo il percorso della loro cartella, un ramo per l'unità, con il nome che ha in Questo PC, e uno per ogni cartella. Ogni ramo dice quanti risultati contiene. Un risultato è un file come quelli di una cartella, con lo stesso menu; X lo suona, e il brano seguente lo decide la plancia, come per i file di una cartella. Un risultato mandato nel cestino esce dal suo ramo.</p>
+<p>Se un ramo ha più di mille brani se ne vedono mille alla volta: l'ultima voce dice quanti ne mostra e quanti ne restano, per esempio Mostra altri 1000 risultati, ne restano 2400, o Mostra l'ultimo risultato. Invio su di lei, o la voce del suo menu, fa vedere i seguenti e porta la selezione sul primo di loro.</p>
+<p>Il menu dei Risultati ha:</p>
+<ul>
+<li>Riproduci, che li suona tutti, dal primo: X sulla voce Risultati, invece, non li suona.</li>
+<li>Salva come playlist, che li fa diventare una playlist vera con il nome che scegli, proponendo Ricerca e il testo cercato.</li>
+<li>Nuova ricerca, la ricerca in tutto MeTeOra.</li>
+<li>Ferma la ricerca, che ferma la ricerca in corso e dice quanti risultati ci sono; senza una ricerca in corso lo dice.</li>
+</ul>
+<p>Il menu di un ramo dei Risultati ha Salva come playlist, per i soli risultati di quel ramo e dei suoi rami interni, proponendo il nome del ramo e il testo cercato. I Risultati sono temporanei: la ricerca seguente li sostituisce, e alla chiusura si perdono.</p>
+<h3 id="ricerca-console">La ricerca nella console</h3>
+<p>Dalla console, la barra rovesciata apre il campo Cerca nella console, con le sue istruzioni in cima e il testo cercato prima. La grammatica è più semplice di quella del filtro:</p>
+<ul>
+<li>Il testo si cerca così com'è, spazi compresi, e maiuscole e minuscole non contano; gli accenti invece contano. Andare a capo vale come uno spazio.</li>
+<li>L'asterisco vale qualsiasi testo nella stessa riga, come non*suonare; un asterisco da solo è un errore, perché troverebbe tutto.</li>
+<li>Il cancelletto vale una o più cifre, come volume #.</li>
+<li>Fra virgolette la sequenza è esatta, maiuscole comprese: "SID" non trova sid.</li>
+</ul>
+<p>La prima ricerca parte dall'inizio della console e porta il cursore sulla prima occorrenza, con un suono. Le righe dei messaggi finiscono con l'ora, quindi si cercano anche gli orari: 07:13 trova ciò che è accaduto alle 7 e 13, ma anche un tempo di un brano come 1:07:13, e 07:# tutta l'ora delle 7.</p>
+<p>Invio, dalla console, passa all'occorrenza che viene dopo quella su cui sei, anche con i jolly; arrivato in fondo riparte dall'inizio, con un suono diverso. Se il testo non c'è, la console lo dice; finché quella riga resta l'ultima della console, la ricerca seguente non la ritrova. Senza una ricerca, Invio dice che nella console non c'è una ricerca e che la barra rovesciata ne apre una. Un campo confermato vuoto annulla la ricerca.</p>
+<h3 id="esempi-ricerca">Esempi</h3>
+<h4>Cercare un brano su un disco</h4>
+<ol>
+<li>Apri Questo PC con freccia destra e porta il fuoco sull'unità, per esempio E:\Dati, o su una cartella, per esempio Amiga.</li>
+<li>Premi la barra rovesciata: si apre il campo della ricerca, con le istruzioni in cima.</li>
+<li>Scrivi una parola del nome, per esempio commando, e premi Invio: la console dice Cerco commando, e dove.</li>
+<li>Premi Inizio: il fuoco va sui Preferiti, la prima voce della plancia; se sono aperti, chiudili con freccia sinistra.</li>
+<li>Premi freccia giù: il fuoco va sui Risultati, subito dopo i Preferiti.</li>
+<li>Apri i Risultati con freccia destra, o tutti i loro rami insieme con F10, e scendi fino al brano.</li>
+<li>Premi X per suonarlo, o F4 per metterlo nei Preferiti.</li>
+</ol>
+<h4>Ascoltare di una playlist solo i SID di Hubbard</h4>
+<ol>
+<li>Porta la plancia sulla playlist, o su un suo brano.</li>
+<li>Premi la barra verticale, cioè Maiuscolo con la barra rovesciata: si apre il campo del filtro.</li>
+<li>Scrivi k=sid a=hubbard e premi Invio: la console dice quanti brani passano, e l'etichetta della playlist finisce con filtro: k=sid a=hubbard.</li>
+<li>Premi X sulla playlist: suonano solo i SID di Hubbard.</li>
+<li>Per tornare a tutti i brani, premi Invio sulla playlist e scegli Togli il filtro.</li>
+</ol>
+<h4>Fare una playlist con i risultati</h4>
+<ol>
+<li>Dopo una ricerca, porta il fuoco sui Risultati e premi Invio.</li>
+<li>Scegli Salva come playlist e premi Invio: il campo propone Ricerca e il testo cercato.</li>
+<li>Cambia il nome se vuoi e premi Invio: la console dice Creata la playlist, con il numero dei brani, e la trovi nel ramo Playlist.</li>
+</ol>
+<h4>Ritrovare nella console i brani suonati</h4>
+<ol>
+<li>Premi F6 per andare nella console.</li>
+<li>Premi la barra rovesciata, scrivi in riproduzione con i due punti in fondo, cioè in riproduzione:, e premi Invio: il cursore va sulla prima riga che comincia con In riproduzione. Senza i due punti troveresti anche altre righe, come Non c'è una playlist in riproduzione.</li>
+<li>Premi Invio per passare alla seguente; arrivato in fondo, un suono diverso dice che si riparte dall'inizio.</li>
+</ol>
+<h2 id="riproduzione">La riproduzione</h2>
+<h3 id="x-c-v">Suonare, mettere in pausa, fermare</h3>
+<h4>X</h4>
+<p>X riproduce la voce selezionata: un brano, un file, un sottobrano, una playlist, i Preferiti, una cartella o un'unità. Una cartella, o un'unità, si suona con tutto ciò che ha sotto: prima i suoi file, poi quelli delle sottocartelle. Su un marker X fa come sul suo brano. Con più voci selezionate X suona la selezione, descritta più avanti.</p>
+<p>Se la voce è il brano che sta già suonando, X lo fa ripartire da capo, come in Winamp, sfumando se la dissolvenza è accesa; se è in pausa, lo riprende dal punto in cui era. Su una playlist o su una cartella da cui stai già suonando X non riparte dal primo brano: fa come sul brano in corso, cioè lo riprende dalla pausa o lo fa ripartire da capo. Lo stesso fa sulle voci che non si suonano con X, come Questo PC, Questa rete, il ramo Playlist, i Risultati e i loro rami, o un comando; se niente suona ma un brano era stato fermato con V, lo fa ripartire dall'inizio, e se non c'è niente da riprendere la console lo dice. Un brano della stessa lista fuori dal loop A-B non si suona, e la console lo dice.</p>
+<p>A ogni brano che parte la console scrive In riproduzione, con il percorso completo del file, il suo posto nella lista, come 3 di 12, e il nome della playlist o della cartella; per un SID o un file delle console anche il sottobrano, come Sottobrano 2 di 5.</p>
+<h4>C e V</h4>
+<p>C mette in pausa, dicendo il tempo, e di nuovo C riprende; V ferma la riproduzione, e poi X riparte dall'inizio del brano. Con la dissolvenza accesa la pausa arriva quando la voce è scesa, la ripresa risale dal silenzio, e lo stop fa spegnere il brano piano. Senza niente in corso, C e V lo dicono. V chiude anche la selezione che stava suonando, e se un brano stava per partire dopo uno che non si è potuto suonare, impedisce che parta.</p>
+<h3 id="brano-seguente">Il brano seguente</h3>
+<h4>Quando un brano finisce da solo</h4>
+<p>Il brano che segue lo decide la plancia, come la leggeresti scendendo con la freccia giù. Se ciò che suona si vede nella plancia, cioè sta dentro rami tutti aperti, si passa alla voce suonabile che viene dopo: il file o il brano seguente, e dentro i rami aperti tutto ciò che contengono, sottobrani compresi. Un SID con i sottobrani aperti suona i sottobrani uno dopo l'altro; chiuso, lascia il posto al file che viene dopo. Finita una cartella o una playlist, se più avanti ce n'è un'altra aperta si entra lì; se davanti non c'è più niente di aperto, la riproduzione si ferma, e la console dice Fine: davanti non c'è altro da suonare.</p>
+<p>Se ciò che suona non si vede, per esempio una cartella suonata con X da chiusa o un file aperto con Apri file, si segue la lista da cui è partito. Con il loop A-B attivo decide il loop, e con una selezione che suona decide la selezione. I brani saltati e quelli che il filtro della playlist nasconde non suonano mai da soli. Con la riproduzione casuale accesa, Maiuscolo con N, il brano che segue si sceglie a caso nello stesso campo.</p>
+<p>Con la dissolvenza accesa il brano che segue si sceglie con la stessa regola, ma un po' prima della fine, per prepararlo; quando la dissolvenza comincia MeTeOra ricontrolla, e se nel frattempo la plancia è cambiata suona quello giusto. Il capitolo Velocità, tono, equalizzatore e dissolvenza spiega come.</p>
+<h4>Z, B e N</h4>
+<p>Z e B suonano il brano precedente e il successivo. Seguono la plancia come l'avanzamento automatico: se ciò che suona si vede, vanno alla voce suonabile prima o dopo, sottobrani compresi; se non si vede, seguono la lista da cui è partito, o il loop, o la selezione. Al primo e all'ultimo brano la console lo dice. Z, B e N valgono anche dopo lo stop o dopo la fine della lista, e partono dall'ultimo brano suonato, o da quello ripreso all'avvio; solo se non c'è ancora niente da cui partire, o dopo lo stop di una selezione, la console dice che non c'è una playlist in riproduzione.</p>
+<p>N suona un brano a caso fra le voci suonabili che si vedono nella plancia; se ciò che suona non si vede, a caso nella sua lista, o nel loop.</p>
+<h3 id="casuale">La riproduzione casuale</h3>
+<p>Maiuscolo con N accende e spegne la riproduzione casuale. Accesa, quando un brano finisce da solo il seguente si sceglie a caso, fra quelli che l'avanzamento automatico potrebbe suonare: le voci suonabili che si vedono nella plancia, oppure la lista, il loop o la selezione da cui si suona, mai lo stesso brano due volte di fila. Z, B e gli altri tasti restano come sono.</p>
+<p>Come si sceglie lo decide il modello, fra le impostazioni:</p>
+<ul>
+<li>casualità totale: ogni volta un brano qualsiasi, mai lo stesso due volte di fila;</li>
+<li>una volta per brano, poi si ferma: ogni brano suona una volta, poi la riproduzione finisce, e la console dice Fine: ogni brano del mazzo ha suonato una volta;</li>
+<li>una volta per brano, poi ricomincia, il modello di partenza: ogni brano suona una volta, poi si rimescola e si ricomincia.</li>
+</ul>
+<p>Con i due modelli a una volta per brano, ogni brano che suona con la riproduzione casuale accesa esce dal mazzo, anche quello che scegli tu, e non torna finché il mazzo non è finito; finito il mazzo, la riproduzione si ferma e il mazzo si rifà per la volta dopo, oppure si rimescola e si continua. Accendendo la riproduzione casuale, o cambiando modello, il mazzo ricomincia intero. MeTeOra ricorda anche alla riapertura se è accesa e con quale modello; il mazzo invece riparte intero.</p>
+<h3 id="loop">Il loop A-B</h3>
+<p>Maiuscolo con X mette il loop fra due brani della stessa lista, una playlist, i Preferiti o una cartella, e funziona a giro:</p>
+<ul>
+<li>senza loop, mette il punto A sul brano selezionato;</li>
+<li>con il punto A, mette il punto B sul brano selezionato della stessa lista, anche lo stesso brano, che allora si ripete da solo; da quel momento, mentre suoni da quella lista, la riproduzione resta fra A e B, in tondo, e X, Z, B e N lavorano solo lì dentro, e dopo il punto B si torna al punto A, con un suono suo. X su un brano di un'altra lista, o su un'altra lista, la suona lo stesso: il loop resta, e torna a valere quando suoni di nuovo dalla sua lista;</li>
+<li>con A e B, toglie il loop, da qualsiasi punto, e si suona di nuovo tutta la lista.</li>
+</ul>
+<p>Nella plancia i brani dei due punti dicono punto A del loop e punto B del loop. Il punto B va nella stessa lista del punto A: altrove la console lo dice. Su una voce che non è un brano, Maiuscolo con X ricorda che il loop si mette su un brano. Togliendo dalla playlist il brano del punto A, il loop si toglie.</p>
+<h3 id="selezione">La selezione multipla</h3>
+<p>Nella plancia si possono selezionare più voci, come in Esplora risorse. Maiuscolo con freccia su e freccia giù allarga la selezione alle voci vicine; Maiuscolo con Inizio, Fine, Pagina su e Pagina giù la allarga fino alla prima voce, fino all'ultima che si vede o di una pagina. La selezione con Maiuscolo parte dalla voce da cui hai cominciato, e la ricorda finché usi Maiuscolo o Ctrl con questi tasti, anche lasciandoli e ripremendoli. Ctrl con gli stessi tasti muove il fuoco senza cambiare la selezione; Ctrl con la barra spaziatrice seleziona o deseleziona la voce che ha il fuoco, e diventa il punto da cui riparte Maiuscolo con le frecce. NVDA non ripete il nome della plancia a ogni pressione.</p>
+<p>Con più voci selezionate un ramo selezionato vale per tutto ciò che contiene, anche se è chiuso, e una voce dentro un ramo selezionato conta una volta sola. Il cruscotto elenca i tasti della selezione.</p>
+<p>Canc e Maiuscolo con Canc fanno eccezione: valgono solo per le voci selezionate, non per ciò che contengono. Una cartella selezionata non si svuota e non va nel cestino; una playlist selezionata con Canc si elimina, ma con Maiuscolo con Canc i suoi file restano sul disco.</p>
+<ul>
+<li>X suona la selezione come una playlist invisibile, nell'ordine della plancia: Z, B, N e l'avanzamento automatico restano dentro di lei, finché V non la chiude.</li>
+<li>Invio, il tasto Applicazioni o la barra spaziatrice aprono il menu della selezione, con Riproduci le voci selezionate; Crea playlist dalla selezione; Aggiungi alla playlist; Aggiungi ai preferiti; Togli dalle playlist, ed elimina le playlist e i marker selezionati; Manda nel cestino; Leggi i tag e Modifica i tag, fino a mille file.</li>
+<li>Canc toglie i brani dalle loro playlist, elimina le playlist selezionate dopo una conferma ed elimina i marker selezionati, e il fuoco resta sulla voce vicina che rimane; se nella selezione non c'è niente da togliere, lo dice.</li>
+<li>Maiuscolo con Canc manda nel cestino i file dei brani e dei file selezionati, con una sola conferma, e la console dice quanti ci sono andati.</li>
+<li>F4 li mette tutti nei Preferiti, e dice quanti c'erano già.</li>
+<li>Spostare su e giù non vale per le selezioni.</li>
+</ul>
+<h3 id="salti">Muoversi nel brano</h3>
+<p>Q ed E saltano indietro e avanti nel brano, di dieci secondi se non lo cambi, e la console dice dove arrivi, per esempio Avanti a 1:40 di 4:05. Maiuscolo con Q e Maiuscolo con E chiedono di quanti secondi saltano Q ed E, anche con i decimali, come 2.5, o come minuti e secondi, come 1:30; il passo è almeno un decimo di secondo, e MeTeOra se lo ricorda. Un valore più piccolo, o che non si capisce, non si accetta, e il passo resta com'era.</p>
+<p>W va a un tempo del brano, scritto come minuti e secondi, per esempio 1:30, oppure in secondi, anche con i decimali: 1:30.5 oppure 90.5; si scrivono anche le ore, 1:02:03. Il campo dice quanto dura il brano. Con il meno davanti il tempo si conta dalla fine: -12 va a dodici secondi dalla fine, -1:30 a un minuto e mezzo dalla fine, se la durata si sa. Un tempo oltre la fine non si accetta.</p>
+<p>I salti con Q, E e W sono netti, anche con la dissolvenza accesa. Nei SID, nei MIDI e nella musica delle console un salto in avanti appena il brano è partito può dover aspettare qualche secondo, e la console dice quanto: il capitolo Il Commodore 64 spiega perché.</p>
+<h3 id="volume">Il volume</h3>
+<p>Meno e più, sulla tastiera principale, abbassano e alzano il volume, di cinque se non lo cambi, da 0 a 300. Oltre il 100 il volume amplifica, per gli audio registrati troppo bassi, e la console lo dice; ai limiti dice che il volume è già al minimo o al massimo. La riga del volume si riscrive a ogni pressione. Maiuscolo con M chiede di quanto cambiano il volume meno e più, un numero intero da 1 a 50, e MeTeOra se lo ricorda; un numero fuori dai limiti si porta al limite, e la console lo dice. M toglie l'audio, e di nuovo M lo riaccende, dicendo il volume.</p>
+<p>Il volume vale per la musica; gli effetti sonori di MeTeOra hanno il loro, nelle impostazioni, con la voce Volume degli effetti.</p>
+<h3 id="f8-inseguimento">F8 e l'inseguimento</h3>
+<p>F8 porta la selezione della plancia su ciò che suona, caricando la sua playlist e aprendo se serve le cartelle e i rami dei Risultati fino a lì, e porta lì anche il fuoco della tastiera: dalla console, per esempio, passi alla plancia. Di un file aperto con Apri file dice che non è nella plancia.</p>
+<p>Maiuscolo con F8 aggancia o sgancia l'inseguimento, e MeTeOra se lo ricorda. Agganciato, a ogni cambio di brano la selezione della plancia va da sola su ciò che suona, senza portarci il fuoco della tastiera; agganciandolo mentre un brano suona, la selezione ci va subito.</p>
+<h3 id="brano-in-errore">Un brano che non si suona</h3>
+<p>Un file che non si suona, perché non c'è più o è rovinato, fa scrivere alla console Non riesco a suonare, con il suo nome, con il suono dell'errore. Finito quel suono parte il brano seguente; V, intanto, lo ferma.</p>
+<h3 id="esempi-riproduzione">Esempi</h3>
+<h4>Ripetere in tondo tre brani di una playlist</h4>
+<ol>
+<li>Apri la playlist con freccia destra e porta il fuoco sul primo dei tre brani.</li>
+<li>Premi Maiuscolo con X: la console dice Punto A del loop, con il nome del brano.</li>
+<li>Scendi con freccia giù fino al terzo brano e premi di nuovo Maiuscolo con X: la console dice Loop fra i due brani, 3 brani.</li>
+<li>Torna sul primo brano e premi X: i tre brani suonano in tondo, e dopo il terzo si torna al primo.</li>
+<li>Quando hai finito, premi Maiuscolo con X da qualsiasi punto: il loop si toglie.</li>
+</ol>
+<h4>Suonare alcuni brani scelti, senza fare una playlist</h4>
+<ol>
+<li>In una playlist o in una cartella porta il fuoco sul primo brano.</li>
+<li>Premi Maiuscolo con freccia giù due volte: i brani selezionati sono tre.</li>
+<li>Per aggiungere un brano più lontano, scendi con Ctrl e freccia giù fino a lui e premi Ctrl con la barra spaziatrice.</li>
+<li>Premi X: la selezione suona come una playlist invisibile, nell'ordine della plancia.</li>
+<li>Premi V quando hai finito: lo stop chiude la selezione.</li>
+</ol>
+<h4>Andare a un punto preciso di un brano lungo</h4>
+<ol>
+<li>Mentre il brano suona, premi W: il campo dice quanto dura il brano.</li>
+<li>Scrivi 1:02:30 e premi Invio: la console dice Vado a 1:02:30, e la durata.</li>
+<li>Per gli ultimi trenta secondi, premi W, scrivi -30 e premi Invio.</li>
+</ol>
+<h2 id="velocita-tono-equalizzatore-dissolvenza">Velocità, tono, equalizzatore e dissolvenza</h2>
+<p>Velocità, tono, equalizzatore e dissolvenza valgono per tutti i brani, SID compresi, e MeTeOra se li ricorda fra un avvio e l'altro: ogni cambio si salva subito. Se all'avvio la velocità o il tono non sono quelli normali, la console lo dice, con il tasto che li riporta al normale. Ogni tasto ha il suo suono, e uno suo anche quando arriva a un limite; la console lo scrive in una riga breve, che si riscrive a ogni pressione, come quella del volume. Si cambiano anche dalla finestra delle impostazioni.</p>
+<h3 id="velocita">La velocità</h3>
+<p>La velocità va da 0.5, cioè la metà, a 2, il doppio, a passi di 0.05: A rallenta, D accelera, S torna a 1, la velocità normale. Il tono resta quello del brano. La console dice la velocità nuova, per esempio Velocità 0.85, e ai limiti che è già al minimo o al massimo.</p>
+<h3 id="tono">Il tono</h3>
+<p>Il tono va da dodici semitoni sotto a dodici sopra, cioè un'ottava, a passi di un semitono: F lo abbassa, H lo alza, G lo riporta a 0. La velocità resta quella di prima. Come A e D per la velocità, a sinistra si scende e a destra si sale.</p>
+<h3 id="equalizzatore">L'equalizzatore</h3>
+<p>L'equalizzatore ha sette bande, centrate su 60, 150, 400, 1000, 2400, 6000 e 12000 Hz. U e I scelgono la banda, la precedente e la seguente, e si fermano alla prima e all'ultima; all'avvio la banda scelta è la prima, quella dei 60 Hz. La console dice il numero della banda, la frequenza e il guadagno, per esempio Banda 3, 400 Hz: +2 dB, mentre il suono dice la banda a orecchio: un fa di riferimento, poi una nota della scala, da do per la prima a si per la settima.</p>
+<p>O e P abbassano e alzano di un dB la banda scelta, da -12 a +12. Il suono dice il guadagno a orecchio: un fa di riferimento, un'ottava sopra quello di U e I, poi una nota che sta tanto più su o più giù quanto più la banda è alzata o abbassata, fino a un'ottava e mezza. È riporta a 0 la banda scelta, Maiuscolo con È riporta a 0 tutte le bande.</p>
+<p>Le bande seguono il tono: alzandolo di un'ottava salgono anche loro di un'ottava. Contro la saturazione, quando una banda è alzata il volume scende da solo di quanto è alzata la banda più alta; per questo, alzando una banda, il resto sembra scendere. Con una sola banda alzata il suono non satura; le bande però si sovrappongono, e con più bande vicine alzate, o tutte, la risposta sale fino a circa 5.6 dB oltre: dal volume 80 o 90 in su conviene abbassare il volume.</p>
+<h3 id="dissolvenza">La dissolvenza incrociata</h3>
+<p>La dissolvenza incrociata fa sfumare il brano che finisce mentre il seguente entra, a potenza costante, così non si sentono né un buco né un colpo. L la accende e la spegne, lasciando la durata com'era; Maiuscolo con L ne chiede la durata, da mezzo secondo a 15 secondi, anche con i decimali, 4 se non la cambi, e la dissolvenza resta accesa o spenta com'era. Un numero fuori dai limiti si porta al limite, e la console lo dice.</p>
+<p>Vale a ogni cambio di brano: quando un brano finisce da solo, compreso il ritorno al punto A del loop, e quando cambi brano con B, Z, N, J, K, le cifre, X su un altro brano, Riproduci nel menu o i marker di un altro brano. Con la dissolvenza accesa sfumano anche lo stop, che fa spegnere il brano piano mentre MeTeOra è già pronta a suonarne un altro; la pausa, che arriva quando la voce è scesa, e la ripresa, che riparte dal silenzio e risale; X da capo e i salti ai marker con R, Y e Maiuscolo con le cifre, dove il punto di partenza e quello d'arrivo dello stesso brano si incrociano. Restano netti i salti con Q, E e W. Durante una dissolvenza fra due brani, la pausa e lo stop valgono subito per tutti e due. Con un brano corto la dissolvenza dura al massimo metà del brano che entra.</p>
+<p>Quando alla fine di un brano mancano la durata della dissolvenza più un secondo e mezzo, MeTeOra prepara il seguente. Se nel frattempo la plancia cambia, per esempio perché apri o chiudi un ramo, quando la dissolvenza comincia ricontrolla: se il seguente è un altro suona quello giusto, sempre sfumando; se davanti non c'è più niente, il brano che finisce arriva in fondo, e solo dopo la console dice Fine. In pausa la dissolvenza aspetta: se ti sposti in pausa verso la fine di un brano resti in quel brano, e il seguente entra sfumando quando riprendi. Durante la dissolvenza la pausa ferma tutti e due i brani e lo stop li ferma del tutto; un altro cambio di brano fa uscire il brano che si sente di più e ferma l'altro.</p>
+<h3 id="esempi-suono">Esempi</h3>
+<h4>Rallentare un passaggio per studiarlo</h4>
+<ol>
+<li>Mentre il brano suona, premi A tre volte: la console dice Velocità 0.85, e il tono resta quello di prima.</li>
+<li>Torna indietro di dieci secondi con Q e ascolta il passaggio.</li>
+<li>Premi S: la velocità torna a 1, la normale.</li>
+</ol>
+<h4>Alzare i bassi</h4>
+<ol>
+<li>Premi U fino a quando la console dice Banda 1, 60 Hz; all'avvio è già quella.</li>
+<li>Premi P tre volte: la console dice Banda 1, 60 Hz: +3 dB, e il suono sale a ogni pressione.</li>
+<li>Se vuoi più corpo, premi I per passare alla banda dei 150 Hz e alzala con P.</li>
+<li>Per tornare all'equalizzatore piatto, premi Maiuscolo con È.</li>
+</ol>
+<h4>Una dissolvenza di sei secondi</h4>
+<ol>
+<li>Premi Maiuscolo con L: il campo chiede quanti secondi dura la dissolvenza, con la durata di adesso già selezionata.</li>
+<li>Scrivi 6 e premi Invio: la console dice la dissolvenza, accesa o spenta com'era, e 6 secondi.</li>
+<li>Se era spenta, premi L per accenderla: da adesso ogni cambio di brano sfuma in sei secondi.</li>
+</ol>
+<h2 id="marker">I marker</h2>
+<h3 id="marker-concetto">Che cos'è un marker</h3>
+<p>Un marker è un punto con un nome dentro un brano: T lo mette dove sei, R e Y ci saltano, Maiuscolo con le cifre da 1 a 0 va ai primi dieci, Maiuscolo con R, Y e T li tolgono. I nomi automatici sono M1, M2 e così via; per cambiarli si preme T fermi sul marker, o Invio sulla sua voce nella plancia. Tutti i marker insieme si vedono, si cercano, si esportano e si importano dalla finestra delle impostazioni, con le voci Marcatori e Importa marcatori.</p>
+<p>Un marker sta con il file, non con la playlist: lo ritrovi in ogni playlist e in ogni cartella in cui c'è lo stesso file, anche in una copia identica che sta altrove. MeTeOra riconosce il file dal nome e dalla durata, al millesimo; per i file di cui non conosce la durata vale il percorso, e così anche per i SID che non stanno in una collezione HVSC, che una durata vera non ce l'hanno. In un SID con più sottobrani ogni sottobrano ha i suoi marker. Se rinomini il file con Rinomina file, i suoi marker lo seguono.</p>
+<p>I marker si salvano da soli, a ogni cambiamento, nel file MeTeOra - Marcatori.json; se una volta il salvataggio non riesce, MeTeOra lo dice e riprova all'uscita. Se il file non si legge, all'avvio la console lo dice: il file resta com'è, e i marker nuovi vanno in MeTeOra - Marcatori.json.nuovo, che MeTeOra rilegge le volte dopo finché il file vero resta illeggibile.</p>
+<h3 id="marker-tasti">I tasti dei marker</h3>
+<ul>
+<li>T mette un marker nel punto del brano che suona in cui sei, anche in pausa, con un nome automatico, e la console dice il nome e il tempo, con i millesimi. Se lì c'è già un marker, a meno di cinque millesimi di secondo, chiede invece il suo nuovo nome. Senza niente in corso, la console lo dice.</li>
+<li>R e Y vanno al marker precedente e al successivo del brano che suona, anche in pausa, e portano la selezione della plancia sul marker, se il brano si trova nella plancia; R si ferma al primo, Y all'ultimo, e la console lo dice. Mentre il brano suona, R salta il marker superato da meno di un secondo e mezzo: premuto subito dopo un salto, va al marker prima.</li>
+<li>Maiuscolo con R toglie i marker prima del punto in cui sei; Maiuscolo con Y quelli dopo. Il marker su cui sei, se ci sei sopra, resta. Maiuscolo con T toglie tutti i marker del brano, compreso quello. Valgono per il brano che suona; i marker di un altro brano si tolgono con Canc sulla loro voce nella plancia.</li>
+<li>Maiuscolo con le cifre da 1 a 0, cioè i tasti del punto esclamativo, delle virgolette, della sterlina, del dollaro, del percento, della e commerciale, della barra, delle parentesi e dell'uguale, vanno ai primi dieci marker, in ordine di tempo, del brano su cui sta la plancia, o del brano del marker o del sottobrano su cui sta. Su un SID o un file delle console con più sottobrani, chiuso, vale il sottobrano che suona, o se non suona l'iniziale. Suonano il brano da lì, come Vai al marker, rispettando il loop A-B. Il fuoco della plancia resta dov'è: X sul brano continua a farlo ripartire da capo. Se il marker con quel numero non c'è, la console dice quanti marker ha il brano.</li>
+</ul>
+<p>Con la dissolvenza accesa, i salti ai marker dello stesso brano con R, Y e Maiuscolo con le cifre sfumano: il punto di partenza e quello d'arrivo si incrociano.</p>
+<h3 id="marker-plancia">I marker nella plancia</h3>
+<p>Nella plancia, un brano con dei marker dice quanti sono e si apre con freccia destra: dentro ci sono i marker, ciascuno con il nome e il tempo, come M1, 1:23.456. Di un SID con più sottobrani, i marker stanno dentro il loro sottobrano.</p>
+<ul>
+<li>Invio rinomina il marker.</li>
+<li>X fa come sul suo brano, cioè lo suona dall'inizio, o se è il brano in corso lo riprende dalla pausa o lo fa ripartire da capo.</li>
+<li>Canc elimina il marker, e il fuoco va sul marker vicino, o sul brano se era l'ultimo.</li>
+<li>Il menu, con il tasto Applicazioni o la barra spaziatrice, ha Vai al marker, che suona il brano da lì, anche se era in pausa e rispettando il loop A-B; Rinomina ed Elimina.</li>
+<li>Canc con più voci selezionate elimina anche i marker selezionati.</li>
+</ul>
+<p>Il campo del nome propone il nome di adesso, già selezionato; un campo vuoto, o lo stesso nome, lasciano tutto com'è.</p>
+<h3 id="finestra-marcatori">La finestra dei marcatori</h3>
+<p>Nella finestra delle impostazioni, la riga Marcatori dice quanti marker ci sono e in quanti file. Invio apre la finestra dei marcatori, con una lista di tutti i marker, uno per riga: la cartella, il file, il nome del marker e il tempo, raggruppati per cartella e per file. Un sottobrano di un SID ha il suo numero dopo il nome del file; un marker importato non ha la cartella, e sta in fondo alla lista, finché su quel file non metti un marker tuo con T; se il file aveva già dei marker tuoi, prende la loro. Se non ci sono marker, la lista ha una riga sola, Nessun marcatore.</p>
+<p>Nella lista la selezione è multipla, come in Esplora risorse: Maiuscolo con le frecce la allarga, Ctrl con le frecce muove il fuoco senza selezionare, Ctrl con la barra spaziatrice accende e spegne la riga col fuoco. Invio rinomina il marker della riga col fuoco; Canc elimina quelli delle righe selezionate, uno subito, più d'uno dopo una conferma.</p>
+<p>La barra rovesciata cerca un testo nelle righe. Il campo è da una riga, con il testo cercato prima già selezionato, e la ricerca è semplice: il testo si cerca così com'è, senza badare alle maiuscole, mentre gli accenti contano, e l'asterisco, il cancelletto e le virgolette sono caratteri come gli altri. Parte dalla riga dopo quella col fuoco, e arrivata in fondo riparte dalla cima; la riga trovata diventa l'unica selezionata. Per l'occorrenza seguente si ripreme la barra rovesciata, perché Invio rinomina. Ha tre suoni suoi, diversi da quelli della ricerca nella console: per il testo trovato, per il testo trovato ripartendo dalla cima e per il testo che non c'è. Un campo vuoto annulla.</p>
+<p>Il pulsante Cancella tutto toglie tutti i marker di tutti i file, dopo una conferma con No come risposta predefinita. Esc, o il pulsante Chiudi, torna alla finestra delle impostazioni, dove la riga Marcatori ha già i conti nuovi. Ogni cambio si salva subito e si vede anche nella plancia. Dentro la finestra le lettere non sono comandi del lettore.</p>
+<h3 id="esporta-importa">Esportare e importare i marker</h3>
+<p>Il pulsante Esporta selezionati, nella finestra dei marcatori, chiede dove scrivere i marker delle righe selezionate, e propone MeTeOra - Marcatori esportati.json nella cartella del programma; se scrivi un nome senza estensione, aggiunge .json. Il file ha i nomi dei file, le loro durate e i marker, ma non i percorsi, perché su un altro computer gli stessi file possono stare altrove. I marker dei file di cui MeTeOra non conosce la durata non si esportano, e la console dice quanti sono.</p>
+<p>Importa marcatori, nella finestra delle impostazioni, chiede un file esportato da un'altra copia di MeTeOra e ne aggiunge i marker. I file si ritrovano dal nome e dalla durata, quindi i marker arrivano su ogni copia dello stesso file, ovunque stia; un marker che c'è già, a meno di cinque millesimi di secondo, resta con il nome di qui. La console dice quanti marker sono arrivati e quanti c'erano già; un file che non è un'esportazione di MeTeOra, o che è rovinato, per esempio con un tempo impossibile, di oltre trecento anni, fa suonare l'errore, e la console dice perché.</p>
+<h3 id="esempi-marker">Esempi</h3>
+<h4>Mettere un marker e tornarci</h4>
+<ol>
+<li>Suona un brano con X.</li>
+<li>Al punto che ti interessa premi T: la console dice Marker M1 e il tempo.</li>
+<li>Lascia andare avanti il brano, poi premi R: torni a M1.</li>
+<li>Più tardi, anche dopo aver suonato altro, porta la plancia sul brano e premi Maiuscolo con 1, cioè il punto esclamativo: il brano suona da M1.</li>
+</ol>
+<h4>Dare un nome a un marker</h4>
+<ol>
+<li>Metti il brano in pausa con C: mentre suona, il punto in cui sei si allontana subito dal marker.</li>
+<li>Premi R o Y fino al marker: ora sei proprio sopra di lui.</li>
+<li>Premi T: invece di un marker nuovo, il campo chiede il nome di quello su cui sei, con M1 già selezionato.</li>
+<li>Scrivi per esempio Ritornello e premi Invio: la console dice che il marker M1 ora si chiama Ritornello.</li>
+<li>Lo stesso si fa dalla plancia: apri il brano con freccia destra, scendi sul marker e premi Invio.</li>
+</ol>
+<h4>Portare i marker su un altro computer</h4>
+<ol>
+<li>Porta il fuoco sulla voce Impostazioni, l'ultima della plancia, premi Invio, scendi fino a Marcatori e premi Invio.</li>
+<li>Seleziona le righe da portare, con Maiuscolo e le frecce, oppure una per una: ti sposti con Ctrl e le frecce, che non cambiano la selezione, e su ogni riga premi Ctrl con la barra spaziatrice.</li>
+<li>Premi Tab fino al pulsante Esporta selezionati e premi la barra spaziatrice: scegli dove salvare il file e conferma.</li>
+<li>Sull'altro computer, nella finestra delle impostazioni, scegli Importa marcatori e apri quel file: i marker arrivano su ogni copia degli stessi file.</li>
+</ol>
+<h2 id="tag">I tag</h2>
+<p>I tag sono le informazioni scritte dentro un file: titolo, artista, album, anno e così via. MeTeOra li legge e li modifica per i formati elencati più avanti; i filtri e le ricerche li usano.</p>
+<h3 id="tag-leggere">Leggere i tag</h3>
+<p>F11, o Leggi i tag nel menu di un brano o di un file, scrive nella console i tag del brano o del file selezionato, e ci porta il fuoco: prima la riga Tag di, con il nome del file, poi una riga per tag. Vengono prima i dieci comuni, cioè titolo, artista, album, artista dell'album, anno, genere, traccia, disco, compositore e commento, anche quando sono vuoti, e poi gli altri che il file ha, in ordine di nome, come il programma che lo ha codificato o il guadagno di ReplayGain.</p>
+<p>F11 vale solo per i formati di cui MeTeOra scrive i tag. Su un file di un altro formato, come un SID, un MIDI, un modulo dei tracker, un MKV o un AVI, e su una voce che non è un brano o un file, come un sottobrano o un marker, la console ricorda di scegliere un brano o un file audio o video; per questo nel menu di quei file le voci Leggi i tag e Tag non ci sono.</p>
+<h3 id="tag-modificare">Modificare i tag</h3>
+<p>Il sottomenu Tag del menu di un brano o di un file, o Maiuscolo con F11, che lo apre subito, ha una voce per tag con il suo valore, come Titolo: Love Song, o vuoto; un valore più lungo di ottanta caratteri finisce con tre punti. Invio su una voce chiede il valore nuovo, con quello di adesso già selezionato, e il tag si scrive subito nel file; la console lo dice. Un campo vuoto lo cancella; Esc, o lo stesso valore, lo lasciano com'era.</p>
+<ul>
+<li>L'anno si scrive con quattro cifre, 1999, o come data: 1999-05, 1999-05-21, anche con l'ora, come 1999-05-21 07:00.</li>
+<li>Traccia e disco si scrivono come numero, 3, o con il totale dopo la barra, 3/12.</li>
+<li>Un tag con più valori, come due artisti, li mostra divisi dal punto e virgola, e così si riscrive: ogni parte diventa un valore. In un tag che aveva un valore solo, il punto e virgola resta dentro il valore.</li>
+<li>I tag che non sono testo, come le copertine, e quelli su più righe, come i testi delle canzoni, si leggono nel menu ma non si scelgono, e non si modificano.</li>
+<li>Un valore che non va, come un anno scritto male, non si scrive: la console dice perché, e il tag resta com'era.</li>
+</ul>
+<p>Un brano che suona si ferma un istante mentre i suoi tag si scrivono, e riparte dal suo punto. Dopo la scrittura lo schedario rilegge il file, così il filtro e la ricerca trovano subito il valore nuovo.</p>
+<h3 id="tag-piu-file">I tag di più file insieme</h3>
+<p>Con più voci selezionate, Leggi i tag e Modifica i tag, nel menu della selezione, e così F11 e Maiuscolo con F11, valgono per tutti i file della selezione di cui MeTeOra scrive i tag, mentre i file degli altri formati si saltano. Con più di mille file adatti non si fa niente, e la console dice quanti ne ha la selezione. Compaiono solo i tag che i file hanno tutti. Dove i valori sono diversi la voce dice valori diversi, il campo parte vuoto, e quello che scrivi va in tutti, per esempio lo stesso album a un disco intero. Svuotare un tag con valori diversi chiede conferma, con No come risposta predefinita, perché quei valori si perdono.</p>
+<h3 id="tag-wav">Il blocco INFO dei WAV</h3>
+<p>I WAV hanno anche il blocco INFO, quello che leggono Esplora risorse e molti programmi di Windows. MeTeOra lo legge, prende da lì i tag comuni che ID3 non ha, e mostra gli altri campi, come Copyright e Programma, che si leggono e si modificano. Titolo, artista, album, anno, genere, commento e traccia si scrivono nei due posti. Nel blocco INFO il testo va nella codifica di Windows, e un carattere che quella codifica non ha, come una lettera di un altro alfabeto, fa scrivere il campo in UTF-8: MeTeOra lo rilegge giusto. Un WAV con la struttura irregolare, per esempio una registrazione interrotta, non si tocca, e la console lo dice.</p>
+<h3 id="tag-formati">I formati con i tag</h3>
+<p>MeTeOra scrive i tag di MP3, WAV, AIF e AIFF, TTA, FLAC, OGG e OGA, Opus, Speex, M4A, M4B, MP4, M4V, ALAC, APE, WavPack, Musepack, WMA, WMV e ASF. MKV e WebM no: servirebbe un programma a parte. Non hanno tag che MeTeOra legga nemmeno gli altri video, come AVI e MOV, e formati audio come AAC, AC3, DTS, MKA e TAK. I SID, i MIDI, i moduli dei tracker e la musica delle console hanno i loro titoli dentro il file, che non si modificano; dei SID e delle console il filtro e la ricerca usano il titolo, l'autore e l'anno.</p>
+<h3 id="esempi-tag">Esempi</h3>
+<h4>Leggere i tag di un brano</h4>
+<ol>
+<li>Porta il fuoco su un brano, per esempio un MP3.</li>
+<li>Premi F11: la console scrive Tag di, con il nome del file, e una riga per tag, e il fuoco va sulla prima.</li>
+<li>Leggi con freccia giù, poi premi F5 per tornare nella plancia.</li>
+</ol>
+<h4>Cambiare l'album di un intero disco</h4>
+<ol>
+<li>In Questo PC apri con freccia destra la cartella del disco, e porta il fuoco sul primo file.</li>
+<li>Tieni premuto Maiuscolo e scendi con freccia giù fino all'ultimo file del disco: la selezione si allarga.</li>
+<li>Premi Maiuscolo con F11: si apre il menu dei tag dei file selezionati.</li>
+<li>Scendi fino ad Album, che dice il valore comune o valori diversi, e premi Invio.</li>
+<li>Scrivi il nome dell'album e premi Invio: la console dice Album, il numero dei file e il valore nuovo, scritto in tutti.</li>
+</ol>
+<h4>Correggere l'anno di un brano</h4>
+<ol>
+<li>Sul brano premi Maiuscolo con F11, scendi fino ad Anno e premi Invio.</li>
+<li>Scrivi 1987 e premi Invio: la console dice Anno, il nome del file e 1987.</li>
+<li>Se scrivi un anno che non va, per esempio 87, la console dice come si scrive, e il tag resta com'era.</li>
+</ol>
+<h2 id="video">Il video</h2>
+<h3 id="video-finestra">La finestra del video</h3>
+<p>Dei video MeTeOra fa sentire l'audio come di ogni altro brano. Con il video acceso, Maiuscolo con F1, quando parte un brano con il video, con X o con l'avanzamento automatico, si apre la finestra del video, sopra MeTeOra e grande come lei: chi guarda può spostarla, ridimensionarla o metterla a schermo intero. Il titolo della finestra è il nome del file, seguito da video, MeTeOra. Allo stop, o quando parte un brano senza video, la finestra sparisce; se aveva il fuoco, MeTeOra torna davanti con il fuoco dove l'avevi lasciato, e se no il fuoco resta dov'è. MeTeOra ricorda alla riapertura se il video è acceso.</p>
+<p>Spento, Maiuscolo con F1 di nuovo, dei video si sente solo l'audio, e la finestra non si apre. Se quando parte un video è aperto un campo o una finestra di MeTeOra, la finestra del video aspetta che si chiuda, per non rubarle il fuoco. Un video ripreso in pausa all'avvio apre la sua finestra quando lo fai ripartire, con X, con C o andando a un suo marker.</p>
+<p>Per chi vede c'è una barra del tempo, che compare quando il mouse arriva sul bordo inferiore della finestra e si nasconde qualche secondo dopo che il mouse se n'è andato: trascinandola si salta nel video, e la console lo dice come per W.</p>
+<h3 id="video-tasti">I tasti con la finestra del video</h3>
+<p>Con la finestra del video davanti funzionano i tasti di tutta la finestra di MeTeOra: le lettere, le cifre, i segni, i tasti funzione e Ctrl con la barra rovesciata; F5, F6 e F7 riportano davanti la finestra principale, nella plancia, nella console o nel cruscotto. Non funzionano invece i tasti propri della plancia, come Invio, la barra spaziatrice, il tasto Applicazioni, Canc, Backspace, le frecce e la selezione, né Invio della console: per quelli si torna nella finestra principale con F5 o F6.</p>
+<p>Esc, nella finestra del video, toglie lo schermo intero, come Maiuscolo con F5; fuori dallo schermo intero nasconde la finestra per il brano in corso, e il video resta acceso per i brani dopo: la console dice che il prossimo video si apre da sé. Alt con F4, o il pulsante di chiusura, fanno come Esc fuori dallo schermo intero: la finestra si nasconde, ma non si chiude.</p>
+<ul>
+<li>Maiuscolo con F1 accende e spegne il video, e MeTeOra se lo ricorda; spento, il video si stacca del tutto.</li>
+<li>Maiuscolo con F5 mette la finestra del video a schermo intero, e di nuovo in finestra; se la finestra non è aperta, la console lo dice.</li>
+</ul>
+<h3 id="sottotitoli">I sottotitoli letti</h3>
+<p>I sottotitoli letti, Maiuscolo con F2, vanno alla sintesi scelta nelle impostazioni, uno screen reader o la voce di Windows, e si scrivono nella console; funzionano anche con il video spento. Maiuscolo con F2 va a giro: spenti, la prima traccia, la seconda, e di nuovo spenti, e la console dice la traccia con il numero, la lingua, il titolo e il formato, quando il file li dice. Su un brano senza sottotitoli, o senza niente in corso, li accende o li spegne per i brani dopo. Accesi, ogni video che parte usa la sua prima traccia di sottotitoli. MeTeOra prende anche i sottotitoli che stanno accanto al video, con lo stesso nome, per esempio un file .srt, e ricorda alla riapertura se sono accesi.</p>
+<h3 id="tracce-rapporto">Le tracce audio e il rapporto dell'immagine</h3>
+<p>Maiuscolo con F3 sceglie a giro la traccia audio, per i video che ne hanno più di una, e dice il numero, la lingua, il titolo e il formato, quando il file li dice; con una traccia sola lo dice, e così senza niente in corso. Maiuscolo con F6 cambia a giro il rapporto dell'immagine: quello del video, 16:9, 4:3 e 21:9; alla riapertura di MeTeOra torna quello del video.</p>
+<h3 id="esempi-video">Esempi</h3>
+<h4>Guardare un film a schermo intero</h4>
+<ol>
+<li>Premi Maiuscolo con F1: la console dice Video acceso.</li>
+<li>Nella plancia porta il fuoco sul film e premi X: si apre la finestra del video, sopra MeTeOra.</li>
+<li>Premi Maiuscolo con F5: il video va a schermo intero.</li>
+<li>Per la pausa premi C, per cambiare il volume meno e più: funzionano anche dalla finestra del video.</li>
+<li>Premi Esc per togliere lo schermo intero, e di nuovo Esc per nascondere il video; F5 ti riporta nella plancia.</li>
+</ol>
+<h4>Farsi leggere i sottotitoli</h4>
+<ol>
+<li>Mentre suona un video con i sottotitoli, premi Maiuscolo con F2: la console dice la prima traccia, per esempio la lingua.</li>
+<li>Da quel momento ogni sottotitolo arriva allo screen reader e alla console.</li>
+<li>Premi ancora Maiuscolo con F2 per passare alla traccia seguente, fino a spegnerli.</li>
+</ol>
+<h2 id="formati">I formati</h2>
+<h3 id="formati-elenco">I file che MeTeOra suona</h3>
+<p>Questo PC, Questa rete, la ricerca e le cartelle suonate con X mostrano solo i file che MeTeOra sa suonare, riconosciuti dall'estensione:</p>
+<ul>
+<li>l'audio: MP3, MP2, WAV, FLAC, OGG, OGA, Opus, M4A, AAC, WMA, APE, WV, TAK, TTA, MPC, DSF, DFF, AIFF, AIF, ALAC, AC3, DTS, MKA, AU, CAF e SPX; li suona libmpv, con FFmpeg;</li>
+<li>il video: MP4, MKV, AVI, MOV, WMV, WebM, FLV, M4V, MPG, MPEG, TS, M2TS, 3GP, VOB e OGV;</li>
+<li>i SID del Commodore 64, emulati da libsidplayfp: il capitolo Il Commodore 64;</li>
+<li>i moduli dei tracker, come MOD, XM, IT e S3M e i formati dell'Amiga, suonati da libopenmpt: il capitolo L'Amiga e i moduli dei tracker;</li>
+<li>la musica delle console, AY, GBS, GYM, HES, KSS, NSF, NSFE, SAP, SPC, VGM e VGZ, emulata da libgme: il capitolo La musica delle console;</li>
+<li>i MIDI, MID, MIDI e KAR, suonati da FluidSynth: il capitolo I MIDI.</li>
+</ul>
+<p>Il comando Apri file, nella plancia, apre la finestra dei file di Windows, con due filtri, File multimediali e Tutti i file, e suona il file scelto senza metterlo in nessuna playlist: resta finché non suoni altro. Un file aperto così non è nella plancia, e F8 lo dice.</p>
+<h3 id="formati-durate">Le durate</h3>
+<p>Le durate si leggono in sottofondo, e MeTeOra se le ricorda nello schedario, insieme alla dimensione e ai tag dei file. Quasi tutti i formati la dicono, anche i moduli dei tracker e i MIDI; dei SID la dice il database della collezione HVSC, e della musica delle console il file stesso. Un AAC grezzo, con l'estensione aac, non scrive la sua durata: MeTeOra la conta fotogramma per fotogramma, ma durante l'ascolto il lettore ne usa una stima, e W e la dissolvenza possono sbagliare di qualche secondo.</p>
+<h2 id="commodore-64">Il Commodore 64</h2>
+<h3 id="sid-come">Come suonano i SID</h3>
+<p>MeTeOra suona i SID, la musica del Commodore 64, emulando il suo chip sonoro mentre suonano, con libsidplayfp, senza scrivere niente su disco. Velocità, tono, equalizzatore, dissolvenza e marker valgono anche per loro. Il titolo, l'autore e l'anno del copyright scritti nel file li usano il filtro e la ricerca: a=hubbard trova i SID di Rob Hubbard, y&lt;1986 quelli di prima del 1986, k=sid tutti i SID.</p>
+<h3 id="sid-durate">Le durate e la collezione HVSC</h3>
+<p>Per ogni SID MeTeOra usa la durata del database della High Voltage SID Collection, se il file sta in una collezione HVSC: la riconosce perché, risalendo le cartelle dal SID, trova il file DOCUMENTS\Songlengths.md5 della collezione. Altrimenti lo suona per tre minuti, e nella plancia i suoi sottobrani dicono 3:00. Per i marker, un SID fuori da una collezione si riconosce dal percorso, perché una durata vera non ce l'ha.</p>
+<h3 id="sid-sottobrani">I sottobrani</h3>
+<p>Un SID può contenere più brani, i sottobrani. Suonando il file suona il sottobrano iniziale, quello che il file indica; gli altri si scelgono aprendo il ramo del SID. In una cartella o in una playlist, un SID con più sottobrani dice quanti sono e quanto durano in tutto, ed è un ramo: freccia destra mostra i sottobrani, ciascuno con la sua durata, come Sottobrano 3 di 5, 2:31, con il titolo quando il file lo dice. Con il ramo aperto Z, B e l'avanzamento automatico passano da un sottobrano all'altro; chiuso, dopo il SID viene il file seguente.</p>
+<p>Un sottobrano si suona, si mette nei Preferiti e si aggiunge alle playlist come un brano a sé: il suo menu ha Riproduci, Aggiungi alla playlist e Aggiungi ai preferiti, e nella playlist compare con il nome del file e il numero del sottobrano. Ogni sottobrano ha i suoi marker, che stanno dentro la sua voce. Il comando r del filtro conta i sottobrani: r&gt;1 trova i SID che ne hanno più d'uno.</p>
+<h3 id="sid-salti">I salti in un SID</h3>
+<p>Un SID si genera dall'inizio, molte volte più in fretta di come suona: un salto in avanti appena il brano è partito, con E, W o un marker, può dover aspettare qualche secondo, e la console dice quanto, per esempio Il SID si prepara fino a 2:48: circa 9 secondi. Dopo una decina di secondi d'ascolto, di solito, tutto il brano è pronto e i salti sono immediati.</p>
+<h3 id="esempi-sid">Esempi</h3>
+<h4>Ascoltare un sottobrano di un SID</h4>
+<ol>
+<li>Nella plancia porta il fuoco sul SID, per esempio Commando.sid, che dice quanti sottobrani ha.</li>
+<li>Aprilo con freccia destra: compaiono i sottobrani, ciascuno con la sua durata.</li>
+<li>Scendi fino al sottobrano che vuoi e premi X: la console dice In riproduzione e Sottobrano 3 di 5.</li>
+<li>Premi B per il sottobrano seguente; F4 mette nei Preferiti quello selezionato.</li>
+</ol>
+<h4>Trovare i SID di un autore in una collezione</h4>
+<ol>
+<li>In Questo PC porta il fuoco sulla cartella della collezione, per esempio C64Music.</li>
+<li>Premi la barra rovesciata, scrivi k=sid p=galway e premi Invio: cerca i SID che stanno in una cartella con galway nel percorso, come quella di Martin Galway nella collezione HVSC.</li>
+<li>Nei Risultati i SID trovati stanno lungo le loro cartelle: Salva come playlist, nel menu dei Risultati, li fa diventare una playlist.</li>
+</ol>
+<p class="nota">Nella ricerca su disco il comando a, l'autore, trova solo i SID che lo schedario ha già letto, mentre il percorso si conosce sempre: per questo l'esempio usa p.</p>
+<h2 id="amiga">L'Amiga e i moduli dei tracker</h2>
+<h3 id="tracker-formati">I moduli e i loro formati</h3>
+<p>I moduli dei tracker sono la musica nata sull'Amiga e poi sui PC: un file con i suoi campioni e la partitura. MeTeOra li suona con libopenmpt, e li riconosce in tutti i formati che libopenmpt conosce: MOD, XM, IT, S3M e MPTM, e i formati dell'Amiga, come MED, OKT, SFX, STK, DIGI e Future Composer, con le estensioni fc, fc13 e fc14, e molti altri, da 669 a ULT e WOW. Restano fuori solo le estensioni che hanno anche altri usi, come ppm e mus.</p>
+<p>Un modulo si suona come ogni altro brano, con la sua durata nella plancia, e valgono anche per lui velocità, tono, equalizzatore, dissolvenza e marker. I moduli non hanno tag che MeTeOra legga o scriva: il filtro e la ricerca li trovano per il nome del file, per il percorso e per il tipo.</p>
+<h3 id="tracker-trovare">Trovare i moduli</h3>
+<ul>
+<li>k=tracker trova tutti i moduli, di qualsiasi formato.</li>
+<li>k=mod, k=med, k=okt e così via trovano un formato solo; k=mod|k=med ne trova due.</li>
+<li>k=audio comprende anche i moduli, insieme a tutto ciò che non è video.</li>
+</ul>
+<h3 id="esempi-amiga">Esempi</h3>
+<h4>Fare una playlist con i moduli di una cartella di giochi</h4>
+<ol>
+<li>In Questo PC porta il fuoco sulla cartella, per esempio Amiga giochi.</li>
+<li>Premi la barra rovesciata, scrivi k=tracker e premi Invio: la ricerca guarda nella cartella e in tutte le sue sottocartelle.</li>
+<li>Quando la console dice che la ricerca è finita, porta il fuoco sui Risultati, premi Invio e scegli Salva come playlist.</li>
+<li>Scrivi un nome, per esempio Moduli Amiga, e premi Invio: la playlist nasce nel ramo Playlist.</li>
+</ol>
+<h4>Ascoltare di una playlist solo i moduli MED e OKT</h4>
+<ol>
+<li>Porta la plancia sulla playlist e premi la barra verticale.</li>
+<li>Scrivi k=med|k=okt e premi Invio.</li>
+<li>Premi X sulla playlist: suonano solo quei moduli. Togli il filtro, nel menu della playlist, li riporta tutti.</li>
+</ol>
+<h2 id="musica-delle-console">La musica delle console</h2>
+<h3 id="console-sistemi">I sistemi e i file</h3>
+<p>La musica delle console di gioco la suona libgme, emulando i chip sonori come per i SID: NES (nsf, nsfe), Super Nintendo (spc), Game Boy (gbs), Sega (vgm, vgz, gym), ZX Spectrum (ay), PC Engine (hes), MSX (kss) e Atari (sap). Come i SID, un file può avere più brani, che nella plancia diventano sottobrani, con il loro titolo quando il file lo dice: si aprono con freccia destra, si suonano, si mettono nei Preferiti e nelle playlist allo stesso modo. Il filtro li trova con k=chip, e r conta i loro sottobrani; il titolo, l'autore e l'anno scritti nel file valgono per il filtro e la ricerca.</p>
+<p>Anche qui un salto in avanti appena il brano è partito può dover aspettare, e la console dice Il brano della console si prepara, fino a quando e per quanti secondi.</p>
+<h3 id="console-durate">Come finisce un brano</h3>
+<p>Un brano che finisce da sé finisce lì. Uno che gira in tondo sfuma alla durata scritta nel file, come negli SPC e negli NSFE, o in un file m3u; se il file non la scrive, dopo due giri del ritornello, o dopo due minuti e mezzo. La sfumatura finale è quella scritta nel file, o di otto secondi. Se un brano resta muto per sei secondi, libgme smette di generarlo: il resto, fino alla durata che dice la plancia, è silenzio, e il brano seguente parte solo allora.</p>
+<h3 id="console-m3u">Il file m3u</h3>
+<p>Un file m3u accanto, con lo stesso nome, ordina i brani, li nomina e ne dice le durate: MeTeOra lo usa quando c'è e quando nomina proprio quel file, o il suo tipo, così un gioco con un file per sistema, come gioco.nsf e gioco.spc, non prende la lista dell'altro. Gli HES e i KSS non dicono quanti brani hanno, e libgme ne apre sempre 256: con il loro m3u diventano quelli giusti. Rinomina file porta con sé anche il file m3u.</p>
+<h3 id="esempi-console">Esempi</h3>
+<h4>Ascoltare i brani di un gioco del NES</h4>
+<ol>
+<li>Nella plancia porta il fuoco sul file nsf: dice quanti sottobrani ha.</li>
+<li>Aprilo con freccia destra: ogni brano ha il suo numero, e il titolo se il file lo dice.</li>
+<li>Porta il fuoco sul primo e premi X: con il ramo aperto, alla fine di ogni brano parte il seguente.</li>
+<li>Per tenere un brano che ti piace, premi la barra spaziatrice sul suo sottobrano e scegli Aggiungi alla playlist: nella playlist diventa un brano a sé, con il nome del file e il suo numero.</li>
+</ol>
+<h2 id="midi">I MIDI</h2>
+<h3 id="midi-come">Come suonano i MIDI</h3>
+<p>I MIDI, con le estensioni mid, midi e kar, li suona FluidSynth, un sintetizzatore libero, con un banco di suoni General MIDI, così ogni strumento ha il suo suono. Come i SID, un MIDI si genera dall'inizio, molte volte più in fretta di come suona: un salto in avanti appena partito può dover aspettare, e la console dice Il MIDI si prepara, fino a quando e per quanti secondi. La durata nella plancia viene dalla mappa dei tempi del file; se non si legge, MeTeOra lo suona per tre minuti.</p>
+<h3 id="midi-preparazione">La prima volta</h3>
+<p>La prima volta che suoni un MIDI, MeTeOra lo dice e chiede se procedere, con No come risposta predefinita: scarica FluidSynth, circa 3 MB, poi cerca nei dischi fissi i banchi di suoni che hai già, file sf2 o sf3, e la console dice a che punto è, con il numero delle cartelle viste. La ricerca può durare qualche minuto; salta le cartelle di sistema, quelle che cominciano con il dollaro e la cartella dei file temporanei. Tiene solo i banchi General MIDI, con tutti i 128 strumenti e la batteria: quelli di pochi strumenti suonerebbero un MIDI con strumenti sbagliati o mancanti.</p>
+<p>Alla fine propone i banchi trovati in una lista, ciascuno con il nome, la dimensione e la cartella, con in fondo Scarica FluidR3 GM, il banco storico di FluidSynth, circa 148 MB, di cui la console dice l'avanzamento a passi del dieci per cento. Se non ne trova, propone di scaricare quello. Scelto il banco, il MIDI parte. FluidSynth e i banchi scaricati stanno nelle cartelle fluidsynth e banchi, accanto al programma.</p>
+<p>Se rispondi No, la console dice che i MIDI restano da preparare, e che si può fare anche dalle impostazioni; se chiudi con Esc la lista dei banchi, dice che il banco non è cambiato. Mentre la preparazione è in corso, un altro MIDI fa dire alla console Sto preparando i MIDI: un momento.</p>
+<h3 id="midi-banco">Cambiare il banco</h3>
+<p>Il banco si cambia nelle impostazioni, con Banco dei suoni MIDI: Invio apre una lista con Cerca i banchi nel PC, che rifà la ricerca, Scrivi il percorso di un banco e Scarica FluidR3 GM. Un percorso scritto a mano può stare anche fra virgolette, e deve essere un vero file sf2 o sf3; un banco scritto a mano può avere anche pochi strumenti, e la console lo dice. La riga dice il banco in uso, o che si sceglierà al primo MIDI; se il file del banco non si trova più, o FluidSynth è da scaricare, la riga lo dice.</p>
+<h3 id="esempi-midi">Esempi</h3>
+<h4>Preparare i MIDI la prima volta</h4>
+<ol>
+<li>Porta il fuoco su un file MIDI e premi X: si apre la domanda su FluidSynth e sui banchi di suoni.</li>
+<li>Premi S: la console dice Scarico FluidSynth, poi FluidSynth pronto, poi Cerco i banchi di suoni nei dischi, con il conto delle cartelle viste.</li>
+<li>Finita la ricerca, si apre la lista dei banchi trovati: scegline uno con le frecce e premi Invio, oppure scegli l'ultima riga, Scarica FluidR3 GM.</li>
+<li>La console dice con quale banco suonano i MIDI, e il MIDI parte.</li>
+</ol>
+<h2 id="impostazioni">Le impostazioni</h2>
+<h3 id="impostazioni-finestra">La finestra delle impostazioni</h3>
+<p>La voce Impostazioni, l'ultima del primo livello della plancia, apre la finestra delle impostazioni: una lista con una riga per voce, il nome e il valore di adesso, per esempio Volume della musica: 80. Quattro voci dicono fra parentesi il tasto che le cambia: Riproduzione casuale (Maiuscolo+N), Video (Maiuscolo+F1), Sottotitoli letti (Maiuscolo+F2) e Inseguimento della plancia (Maiuscolo+F8). Anche altre voci, come Volume della musica o Dissolvenza, hanno un tasto, che la guida rapida elenca, ma la loro riga non lo dice. Invio su una voce, o il doppio clic, la cambia, o fa la sua azione; Esc, o il pulsante Chiudi, torna alla plancia. Dentro la finestra le lettere non sono comandi del lettore: come in ogni lista di Windows portano alla voce seguente che comincia così, e ripremute alla successiva, e i tasti della finestra principale, compresi i tasti funzione, qui non valgono.</p>
+<p>Ogni valore nuovo vale subito, si salva subito e lo dice la console, con un suono suo; tornando sulla lista, la riga ha già il valore nuovo.</p>
+<h3 id="impostazioni-campi">I campi delle voci di valore</h3>
+<p>Le voci con un valore aprono un campo come quello del filtro: in cima le righe col dollaro spiegano la voce, i limiti e il valore di adesso, con qualche esempio; si scrive nell'ultima riga, dove il valore di adesso arriva già selezionato. Invio conferma, Ctrl con Invio va a capo, Esc annulla, e la console dice che niente è cambiato. Più righe valgono come una, unite da spazi.</p>
+<p>Un numero oltre i limiti si porta al limite, e la console lo dice; la virgola al posto del punto, nei decimali, si accetta. Un testo che non si capisce fa suonare l'errore, la console dice perché, e il campo si riapre con la spiegazione in testa al titolo e con il testo che avevi scritto, da correggere.</p>
+<p>Le voci che si rispondono con sì o no accettano anche s, n, 1, 0, acceso, spento, vero e falso, senza badare alle maiuscole. Alcune voci, come Scheda audio, aprono invece una lista di scelta: Invio conferma la riga, Esc annulla.</p>
+<h3 id="impostazioni-voci">Le voci, una per una</h3>
+<h4>Volume della musica</h4>
+<p>Da 0 a 300, un numero intero; oltre il 100 amplifica. È lo stesso volume di meno e più; di partenza è 80.</p>
+<h4>Passo del volume</h4>
+<p>Di quanto cambiano il volume meno e più, un numero intero da 1 a 50, come con Maiuscolo con M; di partenza è 5.</p>
+<h4>Volume degli effetti</h4>
+<p>Quanto forte suonano gli effetti sonori di MeTeOra, in percentuale da 0 a 100, un numero intero, anche con il segno di percento dopo il numero, come 35%; a 0 tacciono. Il volume della musica non cambia. Di partenza è il 50%.</p>
+<h4>Scheda audio</h4>
+<p>La scheda su cui suonano la musica e gli effetti, una sola per tutti e due. Invio apre una lista: in cima Automatica, con la scheda che MeTeOra sceglie da sola, cioè la più pronta fra quelle che portano alla scheda che Windows usa già; poi tutte le uscite, dalla più pronta alla più lenta, ciascuna con il dispositivo, l'interfaccia e la latenza in millesimi di secondo. Le uscite ASIO prendono la scheda tutta per sé e possono zittire NVDA, e la loro riga lo dice.</p>
+<p>Il suono della scheda nuova arriva già da lei; se gli effetti non riescono ad aprirla, MeTeOra torna alla scelta automatica, e la console lo dice. La prova dell'apertura si fa anche con il volume degli effetti a zero. La musica cerca la stessa scheda per nome: se non la ritrova, per esempio con ASIO, suona sulla scheda di Windows, e la console lo dice.</p>
+<p>Se all'avvio la scheda scelta non c'è, per esempio perché le cuffie sono staccate, o c'è ma gli effetti non riescono ad aprirla, per esempio perché un altro programma la tiene tutta per sé, MeTeOra usa quella automatica e lo dice, con il suono dell'errore; la scelta resta, per quando la scheda torna, e la sua riga dice che intanto suona l'automatica.</p>
+<h4>Salto indietro di Q e Salto avanti di E</h4>
+<p>Di quanti secondi saltano Q ed E, almeno un decimo, anche con i decimali, con il punto o la virgola, o come minuti e secondi, anche con le ore: per esempio 2.5, 90 o 1:30. Minuti e secondi vanno fino a 59. Non c'è un massimo. Un valore sotto il decimo di secondo qui si porta a 0.1, e la console lo dice, mentre Maiuscolo con Q e Maiuscolo con E lo rifiutano; per il resto sono gli stessi valori. Di partenza sono 10 secondi.</p>
+<h4>Velocità</h4>
+<p>Da 0.5 a 2, con il punto per i decimali, o la virgola; 1 è la normale. Va a passi di 0.05: un valore fra due passi va al più vicino, e la console lo dice, per esempio 1.03 diventa 1.05. È la stessa di A, S e D.</p>
+<h4>Tono</h4>
+<p>In semitoni, un numero intero da -12 a +12, per esempio +2 o -3, anche seguito dalla parola semitoni; 0 è il normale. È lo stesso di F, G e H.</p>
+<h4>Equalizzatore</h4>
+<p>I guadagni delle sette bande in dB, numeri interi da -12 a +12 separati da spazi, dalla banda più bassa alla più alta, per esempio 0 0 +2 0 0 0 -3; un numero solo vale per tutte le bande, e il campo vuoto le riporta tutte a 0. Un numero di valori diverso da uno o da sette non si accetta. La riga dice piatto quando sono tutte a 0.</p>
+<h4>Dissolvenza</h4>
+<p>No la spegne, sì la accende, un numero di secondi, da 0.5 a 15, la accende con quella durata; 0 la spegne. Valgono anche spenta e accesa, e dopo il numero la parola secondi. La riga dice per esempio accesa, 4 secondi, oppure spenta, 4 secondi: spenta, la durata resta per quando la riaccendi. Scritte così si possono anche correggere: spenta, 2.5 secondi cambia la durata e la lascia spenta. Di partenza è spenta, con 4 secondi.</p>
+<h4>Riproduzione casuale</h4>
+<p>Sì o no, come Maiuscolo con N. Di partenza è spenta.</p>
+<h4>Modello della riproduzione casuale</h4>
+<p>Invio apre una lista con i tre modelli, ciascuno con la sua spiegazione: casualità totale, una volta per brano poi si ferma, una volta per brano poi ricomincia, che è quello di partenza. Cambiando modello, il mazzo ricomincia intero. Il capitolo La riproduzione spiega come vanno.</p>
+<h4>Video</h4>
+<p>Sì o no, come Maiuscolo con F1. Di partenza è spento.</p>
+<h4>Sottotitoli letti</h4>
+<p>Sì o no; spegnendoli qui si spengono anche nel brano in corso. Maiuscolo con F2 li accende e sceglie anche la traccia. Di partenza sono spenti.</p>
+<h4>Sintesi dei sottotitoli</h4>
+<p>Invio apre una lista con l'automatica, che usa lo screen reader attivo e altrimenti la voce di Windows, e le sintesi che si possono usare adesso, fra NVDA, JAWS, ZDSR, Dolphin, System Access, PC-Talker e la voce di Windows, SAPI5. Una sintesi scelta prima che adesso non risponde resta in fondo alla lista, e lo dice. La riga dice quale usa adesso l'automatica.</p>
+<h4>Banco dei suoni MIDI</h4>
+<p>Invio apre una lista con Cerca i banchi nel PC, Scrivi il percorso di un banco e Scarica FluidR3 GM. Un banco scritto a mano può avere anche pochi strumenti: la console lo dice. La riga dice il banco in uso, o che si sceglierà al primo MIDI. Il capitolo I MIDI spiega tutto.</p>
+<h4>Inseguimento della plancia</h4>
+<p>Sì o no, come Maiuscolo con F8. Di partenza è sganciato.</p>
+<h4>Dimensioni dei caratteri</h4>
+<p>In punti, numeri interi da 6 a 72: tre numeri per plancia, console e cruscotto, oppure uno solo che vale per tutte e tre; due numeri, o quattro, non si accettano. Il campo vuoto torna al carattere di Windows in tutte e tre le aree; un'area sola non si riporta a Windows. Il campo parte con le dimensioni di adesso, oppure vuoto se tutte e tre le aree hanno il carattere di Windows; le istruzioni dicono quanti punti ha il carattere di Windows.</p>
+<p>Il cruscotto cambia altezza con il suo carattere, per tenere cinque righe, ma di solito non occupa più di un terzo della finestra: con caratteri molto grandi ne mostra meno e scorre, così plancia e console restano visibili. Due righe però le tiene sempre, anche quando in una finestra bassa vanno oltre il terzo.</p>
+<h4>Colori dei caratteri e Colori dello sfondo</h4>
+<p>Per ogni area la sua lettera, p plancia, c console, t cruscotto, seguita da tre percentuali da 0 a 100 di rosso, verde e blu, numeri interi separati dal punto; più aree si separano con lo spazio. Per esempio, nei caratteri, p31.31.31 è un bel grigio scuro e c100.100.100 il bianco; nello sfondo t0.0.0 è il nero e c100.100.80 un giallo chiaro. MeTeOra converte le percentuali nei livelli da 0 a 255 dei colori di Windows: 31 diventa 79. La guida rapida, nella sezione I colori, ha i colori più comuni.</p>
+<ul>
+<li>La lettera da sola riporta l'area ai colori di Windows, e p c t le riporta tutte e tre; le aree che non scrivi restano come sono, e il campo vuoto non cambia niente.</li>
+<li>La lettera può essere maiuscola, e se la stacchi dai numeri, come p 31.31.31, si riattacca.</li>
+<li>La stessa area scritta due volte prende l'ultima, e la console lo dice; un numero oltre il 100 diventa 100, e la console lo dice.</li>
+<li>I decimali, la virgola, un numero di parti diverso da tre, una lettera che non è un'area o dei numeri senza lettera non si accettano.</li>
+<li>Il campo parte con i colori di adesso, scritti nello stesso modo.</li>
+</ul>
+<p>Le etichette delle tre aree, Plancia dei comandi, Console e Cruscotto, non cambiano.</p>
+<h4>Righe della console</h4>
+<p>Quante righe tiene la console, da 100 in su, duemila se non lo cambi; un numero sotto 100 diventa 100, e la console lo dice. Un numero più basso di prima toglie subito le righe più vecchie.</p>
+<h4>Salva console</h4>
+<p>Scrive tutta la console in un file di testo nella cartella del programma, con un nome che dice la versione, la data e l'ora, per esempio MeTeOra-V1_51_3-2026_10_01-15_42.txt, così i file si ordinano da soli; se nello stesso minuto ce n'è già uno, il nome finisce con -2, -3 e così via. La console dice il nome del file e quante righe ha scritto.</p>
+<h4>Marcatori e Importa marcatori</h4>
+<p>Marcatori dice quanti marker ci sono e in quanti file, e Invio apre la finestra dei marcatori; Importa marcatori chiede un file esportato da un'altra copia di MeTeOra. Il capitolo I marker le descrive.</p>
+<h3 id="esempi-impostazioni">Esempi</h3>
+<h4>Ingrandire i caratteri</h4>
+<ol>
+<li>Nella plancia premi Fine: il fuoco va sulla voce Impostazioni, l'ultima della plancia; premi Invio.</li>
+<li>Scendi con freccia giù fino a Dimensioni dei caratteri e premi Invio.</li>
+<li>Scrivi 16 e premi Invio: plancia, console e cruscotto passano a 16 punti, e la riga della lista lo dice.</li>
+<li>Premi Esc per tornare nella plancia.</li>
+</ol>
+<h4>Un tema scuro</h4>
+<ol>
+<li>Nella finestra delle impostazioni scendi fino a Colori dello sfondo e premi Invio.</li>
+<li>Scrivi p0.0.0 c0.0.0 t0.0.0 e premi Invio: lo sfondo delle tre aree diventa nero.</li>
+<li>Sali con freccia su a Colori dei caratteri, la voce subito prima, premi Invio, scrivi p100.100.80 c100.100.80 t100.100.80 e premi Invio: i caratteri diventano giallo chiaro.</li>
+<li>Per tornare ai colori di Windows, nei due campi scrivi p c t.</li>
+</ol>
+<h4>Scegliere la scheda audio</h4>
+<ol>
+<li>Nella finestra delle impostazioni scendi fino a Scheda audio e premi Invio: si apre la lista delle uscite.</li>
+<li>Scegli con le frecce l'uscita, per esempio le cuffie con WASAPI, e premi Invio.</li>
+<li>Il suono della scheda arriva già dalle cuffie, e la console dice la scheda scelta; se non si apre, MeTeOra torna all'automatica e lo dice.</li>
+</ol>
+<h2 id="campi-domande-liste">I campi, le domande e le liste</h2>
+<p>Quando un comando ha bisogno di sapere qualcosa, MeTeOra apre un campo, una domanda o una lista, con il suono della domanda. Ognuno ha i suoi tasti, sempre gli stessi.</p>
+<h3 id="campi-piu-righe">I campi con le istruzioni</h3>
+<p>Il filtro, la ricerca nella plancia, la ricerca nella console e le voci di valore delle impostazioni aprono un campo a più righe. In cima ci sono le istruzioni, righe che cominciano con il dollaro e non contano; si scrive nell'ultima riga, dove il testo di prima arriva già selezionato: scrivendo lo si sostituisce, con le frecce lo si corregge. Ogni istruzione è una riga intera, che NVDA e il display braille leggono senza a capo a metà.</p>
+<ul>
+<li>Invio conferma.</li>
+<li>Ctrl con Invio va a capo, e andare a capo vale come uno spazio.</li>
+<li>Esc, o il pulsante Annulla, annulla, e la console dice che niente è cambiato, con il suono dell'annullamento.</li>
+<li>Maiuscolo con Invio e Alt con Invio non fanno niente.</li>
+</ul>
+<p>Un Backspace di troppo in testa all'ultima riga la attacca all'ultima istruzione: il testo scritto si riprende lo stesso.</p>
+<h3 id="campi-una-riga">I campi da una riga</h3>
+<p>Le altre domande aprono un campo da una riga, senza istruzioni. Maiuscolo con Q, Maiuscolo con E, Maiuscolo con M e Maiuscolo con L, Rinomina di una playlist, Rinomina file, il valore di un tag, il nome di un marker, il percorso di un banco dei MIDI e la ricerca nella finestra dei marcatori partono con il valore di adesso, o con il testo cercato prima, tutto selezionato; Crea playlist dalla selezione e Salva come playlist con un nome proposto, anche lui selezionato. W e Aggiungi un percorso di rete partono vuoti, e W dice nella domanda quanto dura il brano. Invio conferma ed Esc annulla, come nei campi di Windows; qui non si va a capo.</p>
+<h3 id="domande">Le domande con Sì e No</h3>
+<p>Nelle domande con Sì e No, come Elimina playlist, Manda nel cestino o Cancella tutto, No è la risposta predefinita, e all'apertura ha il fuoco. Esc vale No, e le lettere S e N rispondono subito; Invio preme il pulsante che ha il fuoco, e Tab passa da Sì a No.</p>
+<h3 id="liste">Le liste di scelta</h3>
+<p>Scheda audio, Modello della riproduzione casuale, Sintesi dei sottotitoli, Banco dei suoni MIDI e la lista dei banchi trovati aprono una lista, con una riga già selezionata: quella della scelta di adesso, quando c'è, altrimenti la prima. Invio, o il doppio clic, confermano la riga; Esc, o il pulsante Annulla, annullano, e la console lo dice.</p>
+<h3 id="dialoghi-e-tasti">I tasti dentro i dialoghi</h3>
+<p>Dentro un campo, una domanda, una lista o una finestra come le impostazioni e i marcatori, valgono solo i tasti di quel dialogo: le lettere che scrivi non diventano comandi del lettore, e nemmeno i tasti funzione o Esc per uscire da MeTeOra. Nelle liste le lettere portano alla riga seguente che comincia così, come in Windows. Se intanto parte un video, la sua finestra aspetta che il dialogo si chiuda.</p>
+<h2 id="file-di-meteora">I file di MeTeOra</h2>
+<h3 id="file-dati">I file dei dati</h3>
+<p>MeTeOra tiene i suoi dati nella cartella del programma: quella dell'eseguibile, o quella dei sorgenti se lo avvii da lì. Sono file di testo in formato JSON, che MeTeOra scrive da solo.</p>
+<ul>
+<li>MeTeOra - Playlist.json: le playlist, con i loro brani e i loro filtri, e i Preferiti. Si salva a ogni modifica, scrivendo prima un file accanto e poi sostituendo quello vero, così un'uscita a metà scrittura non lo lascia troncato.</li>
+<li>MeTeOra - Impostazioni.json: tutte le impostazioni, compresi i percorsi di rete aggiunti a mano, il banco dei MIDI, la scheda audio e il punto di ripresa, cioè il brano e il tempo a cui eri all'uscita.</li>
+<li>MeTeOra - Schedario.json: le durate, le dimensioni e i tag dei file che MeTeOra ha letto, così non li rilegge ogni volta. Dopo un aggiornamento che legge meglio un formato, le schede di quel formato si rileggono da sole.</li>
+<li>MeTeOra - Marcatori.json: i marker di tutti i file.</li>
+<li>MeTeOra - Marcatori esportati.json: il nome proposto da Esporta selezionati, nella finestra dei marcatori.</li>
+<li>I file della console salvata, come MeTeOra-V1_51_3-2026_10_01-15_42.txt, scritti dalla voce Salva console.</li>
+</ul>
+<h3 id="file-illeggibili">Un file che non si legge</h3>
+<p>Un file delle playlist, delle impostazioni o dei marker rovinato, per esempio da una modifica a mano sbagliata, non si sovrascrive: all'avvio la console lo dice, con il suono dell'errore e il motivo, e il file resta com'è, da riparare.</p>
+<ul>
+<li>Le playlist: MeTeOra parte senza playlist, e quelle nuove vanno in MeTeOra - Playlist.json.nuovo. Questo file MeTeOra non lo rilegge: alla volta dopo, se il file vero è ancora illeggibile, riparte di nuovo senza playlist. Per riavere le playlist del .nuovo, a MeTeOra chiuso lo si rinomina al posto del file vero.</li>
+<li>Le impostazioni: MeTeOra parte con quelle predefinite, e quelle nuove vanno in MeTeOra - Impostazioni.json.nuovo, che rilegge le volte dopo finché il file vero resta illeggibile, e la console lo dice.</li>
+<li>I marker: i marker nuovi vanno in MeTeOra - Marcatori.json.nuovo, che MeTeOra rilegge le volte dopo finché il file vero resta illeggibile.</li>
+<li>Lo schedario fa eccezione: se non si legge MeTeOra non lo dice e riparte da uno schedario vuoto, rileggendo in sottofondo le durate e i tag, e al primo salvataggio lo riscrive al posto di quello rovinato. Non perdi niente, perché tutto ciò che contiene si rilegge dai file.</li>
+</ul>
+<h3 id="cartelle-programma">Le cartelle accanto al programma</h3>
+<ul>
+<li>lib: le librerie che suonano, fra cui libmpv-2.dll per quasi tutti i formati e sidshim.dll per i SID. Senza queste due MeTeOra non parte.</li>
+<li>fluidsynth: FluidSynth, scaricato al primo MIDI.</li>
+<li>banchi: i banchi di suoni scaricati, come FluidR3 GM.</li>
+</ul>
+<h2 id="problemi">Quando qualcosa va storto</h2>
+<h3 id="problema-interno">Problema interno</h3>
+<p>Se dentro MeTeOra qualcosa va storto, la console lo dice con una riga che comincia con Problema interno, con un suono suo: il tipo del problema, il suo messaggio e il punto del codice in cui è successo, come in finestra.py alla riga 1234, e il nome della funzione. Problema interno nel motore è lo stesso, per un problema nato dentro il lettore. È il punto da riferire a chi sviluppa. Lo stesso problema ripetuto di seguito non riempie la console: riscrive la sua riga, con il conto delle volte, senza suono.</p>
+<p>Per riferirlo si può copiare la riga, selezionandola nella console e premendo Ctrl con C, oppure salvare tutta la console in un file, con la voce Salva console delle impostazioni, e mandare quel file.</p>
+<h3 id="errori-salvataggio">I salvataggi che non riescono</h3>
+<p>Se le playlist, le impostazioni, lo schedario o i marker non si salvano, per esempio perché il disco è pieno o la cartella è protetta, la console lo dice, con il motivo e il suono dell'errore; i marker riprovano a ogni cambiamento e all'uscita. Se all'uscita qualcosa non si salva, una finestra lo dice prima di chiudere, con l'elenco di ciò che non si è salvato, perché la console sta per sparire.</p>
+<h3 id="errori-avvio">Gli errori all'avvio</h3>
+<ul>
+<li>Se nella cartella lib mancano le librerie che suonano, MeTeOra non parte: una finestra, MeTeOra non può partire, dice quali file mancano e in quale cartella.</li>
+<li>Se il file delle playlist, delle impostazioni o dei marker non si legge, la console lo dice: il capitolo I file di MeTeOra spiega cosa succede.</li>
+<li>Se la scheda audio scelta non c'è, o non si apre, MeTeOra usa quella automatica e lo dice; se la musica non ritrova la scheda, suona su quella di Windows.</li>
+<li>Se il brano da riprendere non c'è più, la console dice Non trovo più, con il suo percorso.</li>
+</ul>
+<h3 id="altri-errori">Altri messaggi d'errore</h3>
+<ul>
+<li>Non riesco a suonare, con il nome del file: il file non c'è più o è rovinato; finito il suono dell'errore parte il seguente, e V lo ferma.</li>
+<li>Non riesco a leggere, con il percorso e il motivo: una cartella che Windows non lascia leggere.</li>
+<li>Non risponde, dopo un percorso di rete: il computer o il disco di rete sono spenti, o la rete non c'è; il ramo resta chiuso, e quando tornano lo riapri con freccia destra.</li>
+<li>Non riesco a mandare nel cestino, con il percorso: Windows non ha potuto spostare il file.</li>
+<li>Non riesco a rinominare, con il motivo, o C'è già, con il nome: Rinomina file lascia il nome com'era.</li>
+<li>Non riesco a leggere i tag, o MeTeOra non sa scrivere i tag, con il nome del file: il file è rovinato, o il suo formato non ha tag che MeTeOra conosca.</li>
+<li>FluidSynth non si scarica, o FluidR3 GM non si scarica, con il motivo: di solito la rete; si riprova dalle impostazioni, con Banco dei suoni MIDI.</li>
+<li>Che adesso non risponde, nella lista Sintesi dei sottotitoli: la sintesi scelta non c'è più, per esempio perché lo screen reader è chiuso.</li>
+</ul>
+<h3 id="esempi-problemi">Esempi</h3>
+<h4>Riferire un problema interno</h4>
+<ol>
+<li>Premi F6, poi la barra rovesciata; scrivi problema interno e premi Invio: il cursore va sulla prima riga che lo contiene. Se è un'altra riga, per esempio della guida rapida, premi Invio per passare alla seguente.</li>
+<li>Premi Maiuscolo con Fine; se la riga del problema va a capo, continua con Maiuscolo con freccia giù e Maiuscolo con Fine finché la selezione arriva all'ora in fondo alla riga. Poi Ctrl con C la copia; incollala nel messaggio per chi sviluppa.</li>
+<li>Oppure apri le impostazioni, scendi fino a Salva console e premi Invio: la console dice il nome del file scritto nella cartella del programma, da allegare al messaggio.</li>
+</ol>
+</body>
+</html>

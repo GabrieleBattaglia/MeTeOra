@@ -8,7 +8,7 @@ Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 
 ## Stato
 
-In sviluppo, senza ancora una release. La versione 1.0.0 chiude la tappa 1: la finestra con la plancia dei comandi, le playlist, Questo PC e la riproduzione, SID compresi. Il piano è in `docs/piano.txt`, le prove di fattibilità in `docs/tappa0-risultati.txt`, il manuale in `manuale.txt`, le novità di ogni versione in `CHANGELOG.md`.
+In sviluppo, senza ancora una release. La versione 1.0.0 chiude la tappa 1: la finestra con la plancia dei comandi, le playlist, Questo PC e la riproduzione, SID compresi. Il piano è in `docs/piano.txt`, le prove di fattibilità in `docs/tappa0-risultati.txt`, il manuale in `manuale.html`, da leggere nel browser (F1 lo apre), le novità di ogni versione in `CHANGELOG.md`.
 
 ## Come è fatto
 
