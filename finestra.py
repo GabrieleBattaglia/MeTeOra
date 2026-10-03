@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo.
 
 """La finestra di MeTeOra.
 
@@ -24,7 +24,8 @@ Tre aree, nell'ordine di tabulazione: la plancia dei comandi (F5), un albero;
 la console (F6), dove scorrono i riscontri di ogni azione; il cruscotto
 (F7), che mostra i tasti del contesto da cui ci si e' arrivati.
 I tasti a lettera valgono in tutta la finestra e li intercetta EVT_CHAR_HOOK,
-prima dei controlli: per questo l'albero non ha la ricerca per iniziale.
+prima dei controlli: per questo l'albero non ha la ricerca per iniziale. Un
+carattere senza comando lo dice, con il suo suono, e all'albero non arriva.
 Il brano in riproduzione e la voce selezionata sono due cose distinte: la
 riproduzione non sposta mai la selezione; lo fa F8, su richiesta.
 """
@@ -57,7 +58,7 @@ import suoni
 import valori
 import version
 from contatore import Contatore
-from dialoghi import DialogoTesto, FinestraImpostazioni, FinestraMarcatori, FinestraScelta
+from dialoghi import DialogoConferma, DialogoTesto, FinestraImpostazioni, FinestraMarcatori, FinestraScelta
 from filtro import COMMENTO, ErroreFiltro, Filtro, modello_della_console
 from impostazioni import Impostazioni
 from marcatori import Marcatori
@@ -155,16 +156,19 @@ TASTI = {
 # I segni sopra le cifre nella tastiera italiana: Maiuscolo con 1 e' il punto
 # esclamativo, e cosi' via fino a Maiuscolo con 0, l'uguale.
 CIFRE_COL_MAIUSCOLO = {"!": 1, '"': 2, "£": 3, "$": 4, "%": 5, "&": 6, "/": 7, "(": 8, ")": 9, "=": 10}
-# I tasti gia' assegnati nel piano a funzioni delle tappe successive: per ora
-# dicono di non essere ancora disponibili.
-# Apostrofo e I accentata, tenuti per la traccia audio fino alla 1.62.4,
-# sono liberi: la traccia audio e' Maiuscolo con F3 (Gabriele, tappa 7).
-FUTURI = {}
-FUTURI_MAIUSCOLI = {}
+# I nomi da leggere dei segni che arrivano come tasti senza comando: la
+# punteggiatura, con la lettura predefinita di NVDA, spesso non si sente.
+NOMI_DEI_SEGNI = {
+    "'": "apostrofo", ",": "virgola", ".": "punto", ";": "punto e virgola", ":": "due punti", "-": "trattino", "_": "trattino basso",
+    "+": "più", "*": "asterisco", "<": "minore", ">": "maggiore", "?": "punto interrogativo", "^": "accento circonflesso",
+    "ì": "i accentata", "é": "e accentata acuta", "ò": "o accentata", "à": "a accentata", "ù": "u accentata", "ç": "c con la cediglia",
+    "°": "grado", "§": "paragrafo", "[": "parentesi quadra aperta", "]": "parentesi quadra chiusa", "{": "parentesi graffa aperta",
+    "}": "parentesi graffa chiusa", "@": "chiocciola", "#": "cancelletto", "€": "euro", "~": "tilde", "`": "accento grave",
+}
 
 TASTI_COMUNI = [
     "X riproduce la voce selezionata o riprende, C pausa, V stop, Z e B brano precedente e successivo, N brano a caso, Maiuscolo con N la riproduzione casuale.",
-    "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, + e - volume, Maiuscolo+M il passo del volume, M muto.",
+    "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, più e meno volume, Maiuscolo+M il passo del volume, M muto.",
     "A e D rallentano e accelerano, S torna alla velocità normale; F e H abbassano e alzano il tono di un semitono, G lo riporta al normale.",
     "U e I scelgono la banda dell'equalizzatore, O e P la abbassano e la alzano di un dB, È la azzera, Maiuscolo con È le azzera tutte.",
     "L accende e spegne la dissolvenza incrociata: con lei sfumano i cambi di brano, lo stop, la pausa, X da capo e i marker; Maiuscolo con L ne chiede la durata.",
@@ -185,7 +189,7 @@ TASTI_DEL_CONTESTO = {
     "preferiti": ("i Preferiti", "Invio, Applicazioni o Spazio: menu con Riproduci e Filtro. Barra verticale: il filtro. Canc su un loro brano lo toglie dai Preferiti."),
     "radice_playlist": ("il ramo Playlist", "Invio, Applicazioni o Spazio: menu con Nuova playlist."),
     "playlist": ("una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Filtro, Rinomina ed Elimina. Barra verticale: il filtro. Canc elimina la playlist, dopo una conferma."),
-    "brano": ("un brano di una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Sposta e Saltato. Canc toglie il brano dalla playlist, Maiuscolo+Canc manda il file nel cestino. Un SID con più sottobrani, o un brano con dei marker, si apre con freccia destra."),
+    "brano": ("un brano di una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Sposta e Saltato. Canc toglie il brano dalla playlist, Maiuscolo+Canc manda il file nel cestino. Un SID o un file delle console con più sottobrani, o un brano con dei marker, si apre con freccia destra."),
     "pc": ("Questo PC", "Freccia destra mostra le unità. Invio, Applicazioni o Spazio: menu con Aggiorna."),
     "rete": ("Questa rete", "Freccia destra mostra i percorsi di rete, i computer della rete e il comando per aggiungere un percorso. Invio, Applicazioni o Spazio: menu con Aggiungi un percorso di rete e Aggiorna."),
     "computer_della_rete": ("i computer della rete", "Freccia destra li cerca, in disparte: può volerci qualche secondo. Invio, Applicazioni o Spazio: menu con Cerca di nuovo."),
@@ -193,8 +197,8 @@ TASTI_DEL_CONTESTO = {
     "attesa": ("una ricerca in corso", "Aspetta: la voce sparisce quando la ricerca finisce."),
     "unita": ("un'unità", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Crea playlist da qui."),
     "cartella": ("una cartella", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Riproduci e Crea playlist da qui."),
-    "file": ("un file", "Invio, Applicazioni o Spazio: menu con Riproduci e Aggiungi alla playlist. Maiuscolo+Canc manda il file nel cestino. Un SID con più sottobrani, o un file con dei marker, si apre con freccia destra."),
-    "sottobrano": ("un sottobrano di un SID", "Invio, Applicazioni o Spazio: menu con Riproduci e Aggiungi alla playlist. Se ha dei marker, freccia destra li mostra."),
+    "file": ("un file", "Invio, Applicazioni o Spazio: menu con Riproduci e Aggiungi alla playlist. Maiuscolo+Canc manda il file nel cestino. Un SID o un file delle console con più sottobrani, o un file con dei marker, si apre con freccia destra."),
+    "sottobrano": ("un sottobrano di un SID o di un file delle console", "Invio, Applicazioni o Spazio: menu con Riproduci e Aggiungi alla playlist. Se ha dei marker, freccia destra li mostra."),
     "marker": ("un marker", "Invio rinomina il marker, Canc lo elimina, X fa come sul suo brano. Applicazioni o Spazio: menu con Vai al marker, che suona il brano da lì, Rinomina ed Elimina."),
     "comando": ("un comando", "Invio esegue il comando."),
 }
@@ -224,6 +228,8 @@ SPIEGAZIONI_DEI_MODELLI = {
 FINE_DEL_MAZZO = object()
 
 
+# La frase dei MIDI lasciati da preparare, con un No a una delle domande.
+MIDI_DA_PREPARARE = "I MIDI restano da preparare: si può fare anche dalle impostazioni, con Banco dei suoni MIDI."
 # Da quanti secondi d'attesa in su la console dice che il SID, il MIDI o il
 # brano della console si prepara.
 ATTESA_DA_DIRE = 1.5
@@ -353,8 +359,13 @@ def righe_del_changelog(testo):
     return righe
 
 
+def al_plurale(n, singolare, plurale):
+    """'1 brano', '3 brani': il numero con la parola giusta."""
+    return f"1 {singolare}" if n == 1 else f"{n} {plurale}"
+
+
 def brani_al_plurale(n):
-    return "1 brano" if n == 1 else f"{n} brani"
+    return al_plurale(n, "brano", "brani")
 
 
 def _passo_nostro(nome_del_file):
@@ -576,8 +587,15 @@ class Finestra(wx.Frame):
         # Il brano su cui la finestra del video e' stata nascosta a mano, con
         # Esc o chiudendola: per lui non si riapre.
         self._video_nascosto_per = None
+        # La finestra del video rimandata perche' era aperto un dialogo, e il
+        # brano ripreso all'avvio in pausa, che la apre con X (tappa 9).
+        self._video_rimandato = False
+        self._video_in_attesa = None
         self._rapporto = 0
-        self._fuoco_prima_del_video = None
+        # La domanda il cui suono aspetta la fine dell'effetto prima, e il
+        # brano seguente che aspetta la fine del suono di un errore.
+        self._domanda_viva = None
+        self._avanzamento_dopo_errore = None
         self._sintesi = sintesi.Sintesi()
         # La banda dell'equalizzatore scelta con U e I, contata da zero: si
         # parte dalla prima, quella dei 60 Hz.
@@ -642,16 +660,24 @@ class Finestra(wx.Frame):
         self._popola_albero()
         self.Bind(wx.EVT_CHAR_HOOK, self._tasto)
         self.Bind(wx.EVT_CLOSE, self._alla_chiusura)
+        self.Bind(wx.EVT_ACTIVATE, self._all_attivazione)
         self.scrivi(f"MeTeOra {version.VERSION} del {version.DATE}. Pronto: F1 apre il manuale, F7 apre il cruscotto con i tasti del punto in cui ti trovi.")
         fuori_dal_normale = self._riproduzione_fuori_dal_normale()
         if fuori_dal_normale:
             self.scrivi(fuori_dal_normale)
+        if self.impostazioni.errore:
+            nuovo = os.path.basename(self.impostazioni.percorso)
+            if self.impostazioni.da_nuovo:
+                testo = f"Il file delle impostazioni non si legge: {self.impostazioni.errore}. Riparto da quelle salvate in {nuovo}."
+            else:
+                testo = f"Il file delle impostazioni non si legge, e parto con quelle predefinite: {self.impostazioni.errore}. Le impostazioni nuove vanno in {nuovo}."
+            self._avviso_all_avvio("errore", testo)
         if errore_archivio:
-            self.scrivi(f"Il file delle playlist non si legge, e parto senza playlist: {errore_archivio}")
+            self._avviso_all_avvio("errore", f"Il file delle playlist non si legge, e parto senza playlist: {errore_archivio}")
             # Il file illeggibile non va sovrascritto alla prima modifica.
             self.archivio.percorso += ".nuovo"
         if self.marcatori.errore:
-            self.scrivi(f"Il file dei marker non si legge, e resta com'è: {self.marcatori.errore}. I marker nuovi vanno in {os.path.basename(self.marcatori.percorso)}.")
+            self._avviso_all_avvio("errore", f"Il file dei marker non si legge, e resta com'è: {self.marcatori.errore}. I marker nuovi vanno in {os.path.basename(self.marcatori.percorso)}.")
         self._scrivi_la_scheda_all_avvio(esito_della_scheda, errore_della_scheda)
         self._chiedi_schede(*self.archivio.playlist, self.archivio.preferiti)
 
@@ -692,6 +718,7 @@ class Finestra(wx.Frame):
         self.albero.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self._invio)
         self.albero.Bind(wx.EVT_TREE_ITEM_MENU, self._menu_da_evento)
         self.albero.Bind(wx.EVT_KEY_DOWN, self._tasto_nell_albero)
+        self.albero.Bind(wx.EVT_CHAR, self._carattere_nell_albero)
         self.albero.Bind(wx.EVT_SET_FOCUS, self._fuoco_all_albero)
         self.console.Bind(wx.EVT_SET_FOCUS, self._fuoco_alla_console)
         self.console.Bind(wx.EVT_KILL_FOCUS, self._console_lasciata)
@@ -830,8 +857,54 @@ class Finestra(wx.Frame):
         return suoni.suona(evento, self.impostazioni["volume_effetti"])
 
     def _riscontro(self, evento, testo, categoria=None):
+        # Un riscontro e' l'esito di una domanda: quella rimandata non suona piu'.
+        self._domanda_viva = None
         self._suono(evento)
         self.scrivi(testo, categoria)
+
+    def _dopo_il_suono(self, funzione, *argomenti):
+        """Chiama funzione quando finisce l'ultimo effetto partito: due suoni
+        nello stesso istante si fondono in uno, e quello che informa non si
+        riconosce piu' (tappa 9). Se non suona niente, subito."""
+        if self._chiusa:
+            return
+        attesa = suoni.attesa()
+        if attesa <= 0:
+            funzione(*argomenti)
+            return
+        # Allo scadere si guarda di nuovo: intanto puo' essere partito un
+        # altro suono, anche lui rimandato.
+        wx.CallLater(round(attesa * 1000) + 30, self._dopo_il_suono, funzione, *argomenti)
+
+    def _riscontro_dopo(self, evento, testo):
+        """Il riscontro con la riga subito e il suono dopo l'ultimo effetto."""
+        self._domanda_viva = None
+        self.scrivi(testo)
+        self._dopo_il_suono(self._suono, evento)
+
+    def _domanda(self):
+        """Il suono della domanda, prima di un campo o di una scelta: dopo
+        l'ultimo effetto, per esempio quello dell'errore che riapre il campo.
+        Se intanto il campo ha gia' un esito, come Esc, non suona piu'."""
+        segno = self._domanda_viva = object()
+        self._dopo_il_suono(self._suona_la_domanda, segno)
+
+    def _suona_la_domanda(self, segno):
+        if segno is self._domanda_viva:
+            self._domanda_viva = None
+            self._suono("domanda")
+
+    def _annullato(self, testo):
+        """Esc in un campo, o No a una domanda: l'operazione non si fa. Il
+        suono aspetta l'effetto prima, per esempio l'errore che ha riaperto
+        il campo."""
+        self._riscontro_dopo("annullamento", testo)
+
+    def _avviso_all_avvio(self, evento, testo):
+        """Un avviso nato mentre la finestra si costruisce: la riga subito, il
+        suono dopo quello dell'avvio, che parte con la finestra mostrata."""
+        self.scrivi(testo)
+        wx.CallAfter(self._dopo_il_suono, self._suono, evento)
 
     # I problemi interni.
 
@@ -951,10 +1024,17 @@ class Finestra(wx.Frame):
                 "Canc toglie i brani dalle playlist ed elimina le playlist e i marker, Maiuscolo+Canc manda i file nel cestino, F4 li mette nei Preferiti.",
                 "Maiuscolo con le frecce allarga la selezione, Ctrl con le frecce muove il fuoco senza selezionare, Ctrl+Spazio accende e spegne la voce col fuoco."]
         else:
-            dati = self._dati(self._voce_corrente()) or {}
+            # La voce su cui agiscono Canc, X, F4 e il menu, che puo' non
+            # essere quella col fuoco (tappa 9).
+            voce = self._voce_di_lavoro()
+            dati = self._dati(voce) or {}
             tipo = "preferiti" if dati.get("tipo") == "playlist" and dati["playlist"] is self.archivio.preferiti else dati.get("tipo")
             nome, riga = TASTI_DEL_CONTESTO.get(tipo, ("la plancia", ""))
             righe = [f"Tasti per {nome}."] + ([riga] if riga else [])
+            if tipo == "cartella" and dati.get("a_mano"):
+                righe.append("Canc, o Togli il percorso nel menu, lo toglie da Questa rete; i file restano dove sono.")
+            if voce != self._voce_corrente():
+                righe.append("Il fuoco è su un'altra voce: le frecce partono da lì, ma Canc, X, F4 e il menu agiscono sulla voce selezionata.")
         return righe + TASTI_COMUNI
 
     def _vai(self, controllo, evento):
@@ -1002,7 +1082,9 @@ class Finestra(wx.Frame):
             evento.Skip()
             return False
         unicode = evento.GetUnicodeKey()
-        if unicode == wx.WXK_NONE or unicode <= 32:
+        # Canc arriva con il codice 127, come Invio, Tab ed Esc con i loro:
+        # non sono caratteri da scrivere, e vanno ai controlli.
+        if unicode == wx.WXK_NONE or unicode <= 32 or not chr(unicode).isprintable():
             evento.Skip()
             return False
         carattere = chr(unicode).lower()
@@ -1019,12 +1101,21 @@ class Finestra(wx.Frame):
         if comando:
             getattr(self, f"_comando_{comando}")()
             return True
-        futuro = FUTURI_MAIUSCOLI.get(carattere) if maiuscolo else FUTURI.get(carattere)
-        if futuro:
-            self._riscontro("non_disponibile", f"Il tasto {chr(unicode)} sarà per: {futuro}. Non ancora disponibile.")
-            return True
+        # Un tasto senza comando lo dice, e non arriva all'albero, che ne
+        # farebbe la sua ricerca per iniziale spostando il fuoco (tappa 9).
+        segno = chr(unicode)
+        nome = NOMI_DEI_SEGNI.get(segno.lower(), segno.upper() if segno.isalpha() else segno)
+        self._riscontro("non_disponibile", f"{'Maiuscolo+' if maiuscolo else 'Il tasto '}{nome} non ha un comando.")
+        return True
+
+    def _carattere_nell_albero(self, evento):
+        """I caratteri che arrivano fino all'albero, per esempio con AltGr o
+        dal tastierino, si fermano qui: la ricerca per iniziale del controllo
+        sposterebbe il fuoco senza un comando (tappa 9)."""
+        codice = evento.GetUnicodeKey()
+        if codice > 32 and chr(codice).isprintable():
+            return
         evento.Skip()
-        return False
 
     def _tasto_nell_albero(self, evento):
         codice = evento.GetKeyCode()
@@ -1081,6 +1172,30 @@ class Finestra(wx.Frame):
         return True
 
     # L'albero.
+
+    def _nome_della_voce(self, voce):
+        """Il nome di una voce per le frasi della console, senza i conti, le
+        durate e gli stati che ha nell'etichetta (tappa 9)."""
+        dati = self._dati(voce) or {}
+        tipo = dati.get("tipo")
+        if tipo == "playlist":
+            return dati["playlist"].nome
+        if tipo == "unita":
+            return dati.get("etichetta") or self.albero.GetItemText(voce)
+        if tipo == "cartella":
+            return dati.get("nome") or os.path.basename(dati["percorso"].rstrip("\\")) or dati["percorso"]
+        if tipo in ("brano", "file"):
+            brano = dati["brano"]
+            return f"{brano.nome_del_file}, sottobrano {brano.sottobrano}" if brano.sottobrano else brano.nome_del_file
+        if tipo == "sottobrano":
+            return f"sottobrano {dati['numero']} di {dati['brano'].nome_del_file}"
+        if tipo == "marker":
+            return f"il marker {dati['marker']['nome']}"
+        if tipo == "risultati":
+            return f"Risultati di {self._testo_della_ricerca}"
+        if tipo == "gruppo_risultati":
+            return dati["gruppo"].nome
+        return self.albero.GetItemText(voce)
 
     def _voce_corrente(self):
         """La voce che ha il fuoco nella plancia. Con la selezione multipla non
@@ -1224,7 +1339,7 @@ class Finestra(wx.Frame):
             return
         self.albero.Collapse(ramo)
         self._seleziona(ramo)
-        self._riscontro("risali", f"Chiuso {self.albero.GetItemText(ramo)}.", "risali")
+        self._riscontro("risali", f"Chiuso {self._nome_della_voce(ramo)}.", "risali")
 
     def _risali_all_antenato(self):
         """Maiuscolo con Backspace: risale di colpo al ramo antenato, quello
@@ -1251,9 +1366,8 @@ class Finestra(wx.Frame):
                 chiusi = chiusi or self.albero.IsExpanded(figlio)
                 self.albero.CollapseAllChildren(figlio)
         self.albero.EnsureVisible(antenato)
-        # Della playlist il nome soltanto, senza i conti dell'etichetta.
-        pl = (self._dati(antenato) or {}).get("playlist")
-        nome = pl.nome if pl is not None else self.albero.GetItemText(antenato)
+        # Il nome soltanto, senza i conti dell'etichetta.
+        nome = self._nome_della_voce(antenato)
         if antenato == voce:
             # Gia' sull'antenato: non si sale, si chiudono solo i rami dentro.
             dentro = " Chiusi i rami aperti al suo interno." if chiusi else ""
@@ -1309,7 +1423,7 @@ class Finestra(wx.Frame):
         parti = [brano.percorso if dati.get("completo") else brano.nome_del_file]
         if brano.sottobrano:
             info = sottobrani.info(brano.percorso)
-            parti[0] += f", sottobrano {brano.sottobrano} di {info['sottobrani'] if info else '?'}"
+            parti[0] += f", sottobrano {brano.sottobrano}" + (f" di {info['sottobrani']}" if info else "")
         parti.extend(self._durata_nella_plancia(brano))
         if quanti:
             parti.append(f"{quanti} marker")
@@ -1397,10 +1511,10 @@ class Finestra(wx.Frame):
         """Il campo del filtro; se il testo non si capisce lo spiega e lo ripropone."""
         testo = pl.filtro
         while True:
-            self._suono("domanda")
+            self._domanda()
             with FinestraFiltro(self, f"Filtro di {pl.nome}", testo, ISTRUZIONI_DEL_FILTRO) as dialogo:
                 if dialogo.ShowModal() != wx.ID_OK:
-                    self.scrivi("Filtro non cambiato.")
+                    self._annullato("Filtro non cambiato.")
                     return
                 testo = " ".join(dialogo.testo.split())
             try:
@@ -1422,14 +1536,16 @@ class Finestra(wx.Frame):
         self._chiedi_schede(pl)
         if brano is not None and self._ammesso(pl, brano):
             self._popola_playlist(seleziona=brano)
-            self._al_sottobrano(dati.get("numero"))
+            self._ritrova_dentro(dati)
         else:
             self._popola_playlist(seleziona=pl if dentro else None)
         passano = sum(1 for b in pl.brani if self._ammesso(pl, b))
         if testo:
-            self._riscontro("filtro_messo", f"Filtro di {pl.nome}: {testo}. Passano {brani_al_plurale(passano)} su {len(pl.brani)}.")
+            self._riscontro("filtro_messo", f"Filtro di {pl.nome}: {testo}. {'Passa' if passano == 1 else 'Passano'} {brani_al_plurale(passano)} su {len(pl.brani)}.")
         else:
-            self._riscontro("filtro_tolto", f"Filtro di {pl.nome} svuotato: passano tutti i {brani_al_plurale(len(pl.brani))}.")
+            totale = len(pl.brani)
+            quanti = "la playlist è vuota" if not totale else "passa l'unico brano" if totale == 1 else f"passano tutti i {totale} brani"
+            self._riscontro("filtro_tolto", f"Filtro di {pl.nome} svuotato: {quanti}.")
 
     def _conto(self, brani):
         """'numero (durata)' di una lista di brani; i brani di cui la durata
@@ -1609,6 +1725,11 @@ class Finestra(wx.Frame):
             dati = self._dati(voce_selezionata) or {}
             dentro = True
             selezionato = "nuova_playlist" if dati.get("comando") == "nuova_playlist" else (dati.get("brano") or dati.get("playlist"))
+        # Un sottobrano o un marker col fuoco si ritrova dentro il suo brano,
+        # che rinasce chiuso (tappa 9).
+        interno = None
+        if seleziona is None and dentro and (self._dati(voce_selezionata) or {}).get("tipo") in ("sottobrano", "marker"):
+            interno = dict(self._dati(voce_selezionata))
         if seleziona is not None:
             selezionato, dentro = seleziona, True
         if dentro:
@@ -1646,6 +1767,8 @@ class Finestra(wx.Frame):
             if da_selezionare is None or self._sotto(da_selezionare, self.nodo_playlist):
                 self.albero.Expand(self.nodo_playlist)
             self._seleziona(da_selezionare or self.nodo_playlist)
+            if interno is not None:
+                self._ritrova_dentro(interno)
         if altre_selezionate:
             for radice in (self.nodo_preferiti, self.nodo_playlist):
                 for voce in self._tutte_le_voci(radice):
@@ -1793,7 +1916,14 @@ class Finestra(wx.Frame):
         ricerca va in disparte, e intanto il ramo mostra una voce d'attesa."""
         computer = dati["tipo"] == "computer_della_rete"
         self.albero.AppendItem(voce, "Cerco i computer della rete..." if computer else "Cerco le cartelle condivise...", data={"tipo": "attesa"})
-        self._riscontro("ricerca_avviata", "Cerco i computer della rete: può volerci qualche secondo." if computer else f"Cerco le cartelle condivise di {dati['nome']}.")
+        testo = "Cerco i computer della rete: può volerci qualche secondo." if computer else f"Cerco le cartelle condivise di {dati['nome']}."
+        if self._freccia_nell_albero:
+            # Il ramo aperto con la freccia suona dopo questo gestore: la
+            # ricerca suona finito lui.
+            self.scrivi(testo)
+            wx.CallAfter(self._dopo_il_suono, self._suono, "ricerca_avviata")
+        else:
+            self._riscontro("ricerca_avviata", testo)
         lavoro = questa_rete.computer if computer else (lambda: questa_rete.condivisioni(dati["percorso"]))
         questa_rete.in_disparte(lavoro, lambda trovati: wx.CallAfter(self._trovati_nella_rete, dati, trovati))
 
@@ -1827,9 +1957,10 @@ class Finestra(wx.Frame):
     def _comando_aggiungi_percorso_di_rete(self):
         """Chiede un percorso di rete, lo ricorda e lo mette in Questa rete,
         anche se adesso non risponde."""
-        self._suono("domanda")
+        self._domanda()
         with DialogoTesto(self, "Il percorso di rete da aggiungere a Questa rete, per esempio \\\\server\\cartella.", "Aggiungi un percorso di rete") as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
+                self._annullato("Nessun percorso aggiunto.")
                 return
             testo = dialogo.GetValue()
         percorso = testo.strip().replace("/", "\\").rstrip("\\")
@@ -1895,7 +2026,7 @@ class Finestra(wx.Frame):
         self.albero.SetItemHasChildren(voce, True)
         if aperto:
             self.albero.Expand(voce)
-        self.scrivi("Aggiornato.")
+        self._riscontro("ramo_aggiornato", f"Aggiornato {self._nome_della_voce(voce)}.")
 
     # Invio, menu contestuale e Canc.
 
@@ -1912,7 +2043,7 @@ class Finestra(wx.Frame):
         elif dati and dati["tipo"] == "comando":
             getattr(self, f"_comando_{dati['comando']}")()
         elif dati and dati["tipo"] == "altri":
-            self._altri_risultati()
+            self._altri_risultati(dati)
         elif dati and dati["tipo"] == "marker":
             self._rinomina_il_marker(dati["chiave"], dati["marker"])
         else:
@@ -1929,8 +2060,19 @@ class Finestra(wx.Frame):
         dati = self._dati(voce)
         if not dati:
             return
-        voci = self._voci_del_menu_della_selezione() if len(self._voci_selezionate()) > 1 else self._voci_del_menu(dati)
+        selezione = len(self._voci_selezionate()) > 1
+        voci = self._voci_del_menu_della_selezione() if selezione else self._voci_del_menu(dati)
         if not voci:
+            # Spazio, Applicazioni o Invio non restano muti (tappa 9).
+            if selezione:
+                testo = "La selezione non ha un menu."
+            elif dati.get("tipo") == "comando":
+                testo = f"{self.albero.GetItemText(voce)} non ha un menu: Invio lo esegue."
+            elif dati.get("tipo") == "attesa":
+                testo = "Ricerca in corso: la voce sparisce quando finisce."
+            else:
+                testo = f"{self.albero.GetItemText(voce)} non ha un menu."
+            self._riscontro("non_disponibile", testo)
             return
         menu = wx.Menu()
         self._riempi_menu(menu, voci)
@@ -1972,7 +2114,7 @@ class Finestra(wx.Frame):
             return [("Riproduci", lambda: self._riproduci_playlist(self.risultati)), ("Salva come playlist", self._salva_risultati),
                 ("Nuova ricerca", self._ricerca_globale), ("Ferma la ricerca", self._ferma_ricerca)]
         if tipo == "altri":
-            return [("Mostra altri risultati", self._altri_risultati)]
+            return [("Mostra altri risultati", lambda: self._altri_risultati(dati))]
         if tipo == "gruppo_risultati":
             gruppo = dati["gruppo"]
             return [("Salva come playlist", lambda: self._salva_risultati(gruppo))]
@@ -2022,11 +2164,11 @@ class Finestra(wx.Frame):
         return []
 
     def _conferma(self, domanda, titolo, genitore=None):
-        """Una domanda con Si' e No, e No come risposta predefinita. Da un
-        dialogo, il genitore e' lui: chiudendosi, la domanda gli rende il
-        fuoco."""
-        self._suono("domanda")
-        with wx.MessageDialog(genitore or self, domanda, titolo, wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION) as dialogo:
+        """Una domanda con Si' e No, e No come risposta predefinita; Esc vale
+        No. Da un dialogo, il genitore e' lui: chiudendosi, la domanda gli
+        rende il fuoco."""
+        self._domanda()
+        with DialogoConferma(genitore or self, domanda, titolo) as dialogo:
             return dialogo.ShowModal() == wx.ID_YES
 
     def _al_cestino(self, voce):
@@ -2035,7 +2177,7 @@ class Finestra(wx.Frame):
         dati = self._dati(voce) or {}
         tipo = dati.get("tipo")
         if tipo == "sottobrano":
-            self._riscontro("non_disponibile", "Un sottobrano non si cestina da solo: Maiuscolo+Canc si usa sul file del SID.")
+            self._riscontro("non_disponibile", "Un sottobrano non si cestina da solo: Maiuscolo+Canc si usa sul file che lo contiene.")
             return
         if tipo not in ("brano", "file"):
             self._riscontro("non_disponibile", "Maiuscolo+Canc manda nel cestino un file, da una playlist o da una cartella.")
@@ -2043,7 +2185,7 @@ class Finestra(wx.Frame):
         pl, brano = dati["playlist"], dati["brano"]
         dove = "" if pl.temporanea else f" Si toglie anche dalla playlist {pl.nome}."
         if not self._conferma(f"Mandare nel cestino di Windows il file {brano.percorso}?{dove}", "Manda nel cestino"):
-            self.scrivi("Il file resta dov'è.")
+            self._annullato("Il file resta dov'è.")
             return
         if self.motore.in_corso == brano.percorso:
             self.motore.stop()
@@ -2155,8 +2297,10 @@ class Finestra(wx.Frame):
         if not brani:
             self._riscontro("niente_da_suonare", "Nella selezione non c'è niente da mettere in una playlist.")
             return
+        self._domanda()
         with DialogoTesto(self, "Nome della nuova playlist:", "Crea playlist dalla selezione", "Selezione") as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
+                self._annullato("Nessuna playlist creata.")
                 return
             nome = dialogo.GetValue().strip() or "Selezione"
         self._aggiungi(None, brani, nome=nome)
@@ -2177,8 +2321,8 @@ class Finestra(wx.Frame):
         self._chiedi_schede(self.archivio.preferiti)
         self._salva_archivio()
         self._popola_playlist()
-        altri = f"; {gia} c'erano già" if gia else ""
-        self._riscontro("preferito_aggiunto", f"Aggiunti ai Preferiti {brani_al_plurale(len(nuovi))}{altri}.")
+        altri = ("; 1 c'era già" if gia == 1 else f"; {gia} c'erano già") if gia else ""
+        self._riscontro("preferito_aggiunto", f"{'Aggiunto' if len(nuovi) == 1 else 'Aggiunti'} ai Preferiti {brani_al_plurale(len(nuovi))}{altri}.")
 
     def _cancella_selezione(self):
         """Canc su piu' voci: toglie i brani dalle loro playlist ed elimina le
@@ -2192,7 +2336,7 @@ class Finestra(wx.Frame):
             self._riscontro("non_disponibile", "Nella selezione non c'è niente che Canc possa togliere: brani di playlist, playlist o marker.")
             return
         if da_eliminare and not self._conferma(f"Eliminare {len(da_eliminare)} playlist? I file restano sul disco.", "Elimina playlist"):
-            self.scrivi("Eliminazione annullata.")
+            self._annullato("Eliminazione annullata.")
             return
         approdo = self._approdo([v for v, d in voci if d.get("tipo") == "playlist" and d["playlist"] in da_eliminare] + [v for v, _pl, _b in da_togliere]
             + [v for v, _k, _m in marker])
@@ -2221,7 +2365,8 @@ class Finestra(wx.Frame):
             parti.append(f"{'eliminata' if len(da_eliminare) == 1 else 'eliminate'} {len(da_eliminare)} playlist")
         if tolti_marker:
             parti.append(f"{'eliminato' if tolti_marker == 1 else 'eliminati'} {tolti_marker} marker")
-        self._riscontro("brano_tolto" if da_togliere or da_eliminare else "marker_eliminato", ", ".join(parti).capitalize() + ".")
+        evento = "brano_tolto" if da_togliere else "playlist_eliminata" if da_eliminare else "marker_eliminato"
+        self._riscontro(evento, ", ".join(parti).capitalize() + ".")
 
     def _ricostruisci_dopo_la_cancellazione(self, approdo, voci_da_togliere=()):
         """Dopo una cancellazione: toglie dalla plancia le voci delle cartelle
@@ -2231,20 +2376,44 @@ class Finestra(wx.Frame):
         mostrano; le altre restano le stesse."""
         rinasce = approdo is not None and approdo not in (self.nodo_preferiti, self.nodo_playlist) and (
             self._sotto(approdo, self.nodo_preferiti) or self._sotto(approdo, self.nodo_playlist))
-        oggetto = numero = None
+        oggetto = interno = None
         if rinasce:
             dati = self._dati(approdo) or {}
             oggetto = "nuova_playlist" if dati.get("comando") == "nuova_playlist" else (dati.get("brano") or dati.get("playlist"))
-            numero = dati.get("numero")
+            interno = dict(dati)
         self.albero.UnselectAll()
         if approdo is not None and not rinasce:
             self._seleziona(approdo)
         for voce in voci_da_togliere:
             self.albero.Delete(voce)
         self._popola_playlist(seleziona=oggetto)
-        self._al_sottobrano(numero)
+        self._ritrova_dentro(interno)
         if approdo is not None and not rinasce:
             self._seleziona(approdo)
+
+    def _ritrova_dentro(self, interno):
+        """Dopo una ricostruzione che ha ritrovato il brano: riporta il fuoco
+        sul sottobrano o sul marker in cui stava; interno sono i dati di
+        quella voce, e per le altre voci non si fa niente."""
+        tipo = (interno or {}).get("tipo")
+        if tipo == "sottobrano":
+            self._al_sottobrano(interno["numero"])
+            return
+        if tipo != "marker":
+            return
+        voce = self._voce_corrente()
+        dati = self._dati(voce) or {}
+        if dati.get("tipo") == "brano" and dati["brano"].sottobrano is None and self._ha_sottobrani(dati["brano"]):
+            # Il marker sta sotto un sottobrano del file.
+            self._al_sottobrano(interno.get("numero"))
+            voce = self._voce_corrente()
+        if not voce.IsOk() or not self.albero.ItemHasChildren(voce):
+            return
+        self.albero.Expand(voce)
+        tempo_del_marker = interno["marker"]["tempo"]
+        figlio = next((v for v in self._figli(voce) if (self._dati(v) or {}).get("tipo") == "marker" and self._dati(v)["marker"]["tempo"] == tempo_del_marker), None)
+        if figlio is not None:
+            self._seleziona(figlio)
 
     def _al_sottobrano(self, numero):
         """Dopo una ricostruzione che ha ritrovato il SID, riapre il SID e
@@ -2267,7 +2436,7 @@ class Finestra(wx.Frame):
             self._riscontro("non_disponibile", "Maiuscolo+Canc manda nel cestino i file: seleziona brani o file.")
             return
         if not self._conferma(f"Mandare nel cestino di Windows {len(bersagli)} file? I brani escono anche dalle loro playlist.", "Manda nel cestino"):
-            self.scrivi("I file restano dove sono.")
+            self._annullato("I file restano dove sono.")
             return
         riusciti, falliti = 0, 0
         cestinate, cancellate = [], []
@@ -2291,7 +2460,7 @@ class Finestra(wx.Frame):
             self._aggiorna_risultati()
         testo = f"Nel cestino di Windows {riusciti} file."
         if falliti:
-            testo += f" {falliti} non ci sono andati."
+            testo += " 1 non c'è andato." if falliti == 1 else f" {falliti} non ci sono andati."
         self._riscontro("cestino", testo)
 
     # Le playlist.
@@ -2325,8 +2494,8 @@ class Finestra(wx.Frame):
         self._chiedi_schede(pl)
         self._salva_archivio()
         self._popola_playlist()
-        cosa = "Creata la playlist" if nuova else "Aggiunti alla playlist"
-        self._riscontro("brano_aggiunto", f"{cosa} {pl.nome}: {brani_al_plurale(len(percorsi_da_aggiungere))}, ora {brani_al_plurale(len(pl.brani))}.")
+        cosa = "Creata la playlist" if nuova else "Aggiunto alla playlist" if len(percorsi_da_aggiungere) == 1 else "Aggiunti alla playlist"
+        self._riscontro("playlist_creata" if nuova else "brano_aggiunto", f"{cosa} {pl.nome}: {brani_al_plurale(len(percorsi_da_aggiungere))}, ora {brani_al_plurale(len(pl.brani))}.")
 
     def _ai_preferiti(self, brano):
         """Mette nei Preferiti una copia del brano: stesso file e sottobrano."""
@@ -2366,10 +2535,10 @@ class Finestra(wx.Frame):
         la ricerca e i Risultati si riempiono mentre procede."""
         testo = self._testo_della_ricerca
         while True:
-            self._suono("domanda")
+            self._domanda()
             with FinestraFiltro(self, "Ricerca in tutto MeTeOra", testo, ISTRUZIONI_DELLA_RICERCA) as dialogo:
                 if dialogo.ShowModal() != wx.ID_OK:
-                    self.scrivi("Ricerca annullata.")
+                    self._annullato("Ricerca annullata.")
                     return
                 testo = " ".join(dialogo.testo.split())
             if not testo:
@@ -2455,24 +2624,45 @@ class Finestra(wx.Frame):
         dati["caricato"] = True
         gruppo = dati["gruppo"]
         figli = list(self._figli(voce))
-        if figli and (self._dati(figli[-1]) or {}).get("tipo") == "altri":
-            self.albero.Delete(figli[-1])
+        altri = figli[-1] if figli and (self._dati(figli[-1]) or {}).get("tipo") == "altri" else None
+        da_mostrare = gruppo.brani[dati["brani"]:dati["pagina"]]
+        if altri is not None and da_mostrare:
+            # I brani nuovi vanno prima della voce, che torna in fondo. Succede
+            # solo dopo Mostra altri risultati, che poi sceglie il primo.
+            self.albero.Delete(altri)
+            altri = None
         for sotto in gruppo.elenco_dei_gruppi[dati["rami"]:]:
             ramo = self.albero.InsertItem(voce, dati["rami"], self._etichetta_del_gruppo(sotto), data=self._dati_del_gruppo("gruppo_risultati", sotto))
             self.albero.SetItemHasChildren(ramo, True)
             dati["rami"] += 1
-        for brano in gruppo.brani[dati["brani"]:dati["pagina"]]:
+        for brano in da_mostrare:
             self._aggiungi_voce(voce, "file", self.risultati, brano)
             dati["brani"] += 1
         restano = len(gruppo.brani) - dati["brani"]
         if restano > 0:
             testo = "Mostra l'ultimo risultato" if restano == 1 else f"Mostra altri {min(restano, PAGINA_DEI_RISULTATI)} risultati, ne restano {restano}"
-            self.albero.AppendItem(voce, testo, data={"tipo": "altri", "ramo": voce})
+            if altri is None:
+                self.albero.AppendItem(voce, testo, data={"tipo": "altri", "ramo": voce})
+            elif self.albero.GetItemText(altri) != testo:
+                # Mentre la ricerca va avanti la voce cambia il testo e resta
+                # dov'e': cancellarla sposterebbe il fuoco di chi ci sta sopra
+                # (tappa 9).
+                self.albero.SetItemText(altri, testo)
+        elif altri is not None:
+            fuoco = altri == self._voce_corrente()
+            self.albero.Delete(altri)
+            figli = list(self._figli(voce))
+            if fuoco and figli:
+                self._seleziona(figli[-1])
 
-    def _altri_risultati(self):
-        altri = self._voce_corrente()
-        ramo = (self._dati(altri) or {}).get("ramo")
+    def _altri_risultati(self, altri=None):
+        """La voce Mostra altri risultati; altri sono i suoi dati, quelli
+        della voce su cui si agisce, o di quella di lavoro."""
+        if altri is None:
+            altri = self._dati(self._voce_di_lavoro()) or {}
+        ramo = altri.get("ramo")
         if ramo is None:
+            self._riscontro("non_disponibile", "Mostra altri risultati si usa sulla sua voce, in fondo a un ramo dei Risultati.")
             return
         dati = self._dati(ramo)
         prima = dati["rami"] + dati["brani"]
@@ -2489,7 +2679,7 @@ class Finestra(wx.Frame):
             return
         self._aggiorna_risultati()
         if self._ricerca.finita:
-            self._riscontro("ricerca_finita", f"Ricerca di {self._testo_della_ricerca} finita: {len(self.risultati.brani)} risultati.")
+            self._riscontro("ricerca_finita", f"Ricerca di {self._testo_della_ricerca} finita: {al_plurale(len(self.risultati.brani), 'risultato', 'risultati')}.")
             self._chiedi_schede(self.risultati)
 
     def _ferma_ricerca(self):
@@ -2498,7 +2688,7 @@ class Finestra(wx.Frame):
             return
         self._ricerca.ferma()
         self._aggiorna_risultati()
-        self._riscontro("ricerca_fermata", f"Ricerca fermata: {len(self.risultati.brani)} risultati.")
+        self._riscontro("ricerca_fermata", f"Ricerca fermata: {al_plurale(len(self.risultati.brani), 'risultato', 'risultati')}.")
 
     def _brani_del_gruppo(self, gruppo):
         """I risultati di un ramo e di tutti quelli che contiene, in ordine."""
@@ -2513,8 +2703,10 @@ class Finestra(wx.Frame):
             self._riscontro("niente_da_suonare", "Non ci sono risultati da salvare.")
             return
         proposta = f"Ricerca {self._testo_della_ricerca}" if gruppo is None else f"{gruppo.nome} {self._testo_della_ricerca}"
+        self._domanda()
         with DialogoTesto(self, "Nome della nuova playlist:", "Salva i risultati", proposta) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
+                self._annullato("Risultati non salvati.")
                 return
             nome = dialogo.GetValue().strip() or "Ricerca"
         self._aggiorna_risultati()
@@ -2531,14 +2723,17 @@ class Finestra(wx.Frame):
         self._chiedi_schede(pl)
         self._salva_archivio()
         self._popola_playlist()
-        self._riscontro("playlist_da_cartella", f"Creata la playlist {pl.nome} con {brani_al_plurale(len(files))}.")
+        self._riscontro("playlist_creata", f"Creata la playlist {pl.nome} con {brani_al_plurale(len(files))}.")
 
     def _rinomina(self, pl):
+        self._domanda()
         with DialogoTesto(self, "Nuovo nome della playlist:", "Rinomina", pl.nome) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
+                self._annullato("Nome della playlist non cambiato.")
                 return
             nome = dialogo.GetValue().strip()
         if not nome or nome == pl.nome:
+            self._annullato("Nome della playlist non cambiato.")
             return
         if any(p is not pl and p.nome.casefold() == nome.casefold() for p in self.archivio.playlist):
             self._riscontro("errore", f"C'è già una playlist che si chiama {nome}.")
@@ -2551,7 +2746,7 @@ class Finestra(wx.Frame):
     def _elimina_playlist(self, pl):
         domanda = f"Eliminare la playlist {pl.nome}, con {brani_al_plurale(len(pl.brani))}? I file restano sul disco."
         if not self._conferma(domanda, "Elimina playlist"):
-            self.scrivi("Eliminazione annullata.")
+            self._annullato("Eliminazione annullata.")
             return
         indice = self.archivio.playlist.index(pl)
         self.archivio.elimina(pl)
@@ -2624,7 +2819,7 @@ class Finestra(wx.Frame):
         if formati.e_midi(brano.percorso) and not self._midi_pronti():
             self._prepara_i_midi(lambda: self._suona(pl, brano, evento, sottobrano, inizio, sfuma_lo_stesso))
             return
-        self._uscente = self._preparato = None
+        self._uscente = self._preparato = self._avanzamento_dopo_errore = None
         self.coda.imposta(pl, brano)
         self._segna_nel_mazzo(pl, brano, sottobrano)
         self.motore.suona(brano.percorso, sottobrano or brano.sottobrano, inizio=inizio, sfuma_lo_stesso=sfuma_lo_stesso)
@@ -2644,7 +2839,7 @@ class Finestra(wx.Frame):
         self._riscontro(evento, testo)
         self._aggiorna_etichette()
         self._insegui()
-        self._video_nascosto_per = None
+        self._video_nascosto_per = self._video_in_attesa = None
         self._aggiorna_il_video()
 
     def _riproduci(self, pl, brano, sottobrano=None):
@@ -3021,6 +3216,14 @@ class Finestra(wx.Frame):
             return
         self._uscente = self._preparato = None
         self._riscontro("errore", f"Non riesco a suonare {os.path.basename(percorso or '')}.")
+        segno = self._avanzamento_dopo_errore = object()
+        self._dopo_il_suono(self._avanza_dopo_l_errore, segno)
+
+    def _avanza_dopo_l_errore(self, segno):
+        if segno is not self._avanzamento_dopo_errore or self.motore.in_corso:
+            # Intanto e' partito altro, per esempio con X, o V ha fermato.
+            return
+        self._avanzamento_dopo_errore = None
         seguente = self._seguente_automatico()
         if seguente:
             nuova, brano, sottobrano = seguente
@@ -3060,7 +3263,8 @@ class Finestra(wx.Frame):
             return
         if self.motore.in_corso and self.motore.in_pausa:
             self.motore.pausa(False, sfumando=True)
-            self._riscontro("ripresa", f"Riprende da {tempo(self.motore.posizione)}.")
+            self._riscontro("ripresa", self._frase_della_ripresa())
+            self._riprende_il_video()
         elif self.motore.in_corso:
             # Come in Winamp: X su cio' che sta suonando lo fa ripartire da capo;
             # con la dissolvenza accesa, sfumando (Gabriele, 2 ottobre 2026).
@@ -3145,7 +3349,7 @@ class Finestra(wx.Frame):
         pl, brano = dati["playlist"], dati["brano"]
         if coda.loop_playlist is None:
             coda.loop_playlist, coda.punto_a, coda.punto_b = pl, brano, None
-            self._riscontro("loop_a_messo", f"Punto A del loop su {brano.nome_del_file}. Maiuscolo+X su un altro brano mette il punto B.")
+            self._riscontro("loop_a_messo", f"Punto A del loop su {brano.nome_del_file}. Maiuscolo+X su un brano della stessa lista, anche questo, mette il punto B.")
         elif coda.loop_playlist is not pl:
             self._riscontro("loop_non_qui", f"Il punto A sta in {coda.loop_playlist.nome}: il punto B va su un brano della stessa lista.")
             return
@@ -3159,11 +3363,22 @@ class Finestra(wx.Frame):
         if self._niente_in_corso():
             return
         if self.motore.pausa(sfumando=True):
-            self._riscontro("pausa", f"Pausa a {tempo(self.motore.posizione)}.")
+            posizione = self.motore.posizione
+            self._riscontro("pausa", f"Pausa a {tempo(posizione)}." if posizione is not None else "Pausa.")
         else:
-            self._riscontro("ripresa", f"Riprende da {tempo(self.motore.posizione)}.")
+            self._riscontro("ripresa", self._frase_della_ripresa())
+            self._riprende_il_video()
+
+    def _frase_della_ripresa(self):
+        posizione = self.motore.posizione
+        return f"Riprende da {tempo(posizione)}." if posizione is not None else "Riprende."
 
     def _comando_stop(self):
+        if self._avanzamento_dopo_errore is not None and not self.motore.in_corso:
+            # Il brano dopo uno che non si suona sta per partire: V lo ferma.
+            self._avanzamento_dopo_errore = None
+            self._riscontro("stop", "Stop: il brano seguente non parte.")
+            return
         if self._niente_in_corso():
             return
         # Con la dissolvenza accesa il brano si spegne piano, e il motore e'
@@ -3235,13 +3450,15 @@ class Finestra(wx.Frame):
         if durata is not None:
             arrivo = min(arrivo, durata)
         self.motore.salta(secondi)
-        self._riscontro(evento, f"{'Avanti' if secondi > 0 else 'Indietro'} a {tempo(arrivo)} di {tempo(durata)}.", "salto")
+        di = f" di {tempo(durata)}" if durata is not None else ""
+        self._riscontro(evento, f"{'Avanti' if secondi > 0 else 'Indietro'} a {tempo(arrivo)}{di}.", "salto")
         self._avvisa_l_attesa_del_sid(arrivo)
 
     def _avvisa_l_attesa_del_sid(self, arrivo):
         """Dopo un salto: se il brano e' un SID, un MIDI o un brano delle
-        console e il punto d'arrivo non e' ancora reso, la console dice quanto c'e' da aspettare, che altrimenti
-        sarebbe silenzio senza spiegazioni (tappa 5, 1.62.0)."""
+        console e il punto d'arrivo non e' ancora reso, la console dice
+        quanto c'e' da aspettare, che altrimenti sarebbe silenzio senza
+        spiegazioni (tappa 5, 1.62.0)."""
         attesa = self.motore.attesa_del_sid(arrivo)
         if attesa >= ATTESA_DA_DIRE:
             in_corso = self.motore.in_corso or ""
@@ -3255,10 +3472,11 @@ class Finestra(wx.Frame):
         self._salto(-self.impostazioni["passo_indietro"], "indietro")
 
     def _chiedi_secondi(self, chiave, verso):
-        self._suono("domanda")
+        self._domanda()
         attuale = self.impostazioni[chiave]
         with DialogoTesto(self, f"Di quanti secondi salta {verso}? Anche con i decimali, per esempio 2.5.", "Passo di salto", secondi_da_leggere(attuale)) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
+                self._annullato(f"Il salto {verso} resta di {valori.scrivi_durata(attuale)}.")
                 return
             testo = dialogo.GetValue()
         secondi = leggi_tempo(testo)
@@ -3267,7 +3485,7 @@ class Finestra(wx.Frame):
             return
         self.impostazioni[chiave] = round(secondi, 3)
         self._salva_impostazioni()
-        self._riscontro("passo_di_salto", f"Il salto {verso} ora è di {secondi_da_leggere(secondi)} secondi.", "passo_di_salto")
+        self._riscontro("passo_di_salto", f"Il salto {verso} ora è di {valori.scrivi_durata(round(secondi, 3))}.", "passo_di_salto")
 
     def _comando_passo_indietro(self):
         self._chiedi_secondi("passo_indietro", "indietro")
@@ -3278,11 +3496,13 @@ class Finestra(wx.Frame):
     def _comando_vai_a_tempo(self):
         if self._niente_in_corso():
             return
-        self._suono("domanda")
+        self._domanda()
         durata = self.motore.durata
-        with DialogoTesto(self, f"A che tempo andare? Minuti e secondi, per esempio 1:30, o dalla fine con il meno, per esempio -12. Il brano dura {tempo(durata)}.",
+        dura = f"Il brano dura {tempo(durata)}." if durata is not None else "La durata del brano non si sa ancora."
+        with DialogoTesto(self, f"A che tempo andare? Minuti e secondi, per esempio 1:30, o dalla fine con il meno, per esempio -12. {dura}",
                 "Vai al tempo") as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
+                self._annullato("Vai al tempo annullato.")
                 return
             testo = dialogo.GetValue()
         secondi = leggi_tempo_nel_brano(testo, durata)
@@ -3290,7 +3510,8 @@ class Finestra(wx.Frame):
             self._riscontro("errore", f"{testo} non è un tempo dentro il brano.")
             return
         self.motore.vai_a(secondi)
-        self._riscontro("vai_a_tempo", f"Vado a {tempo(secondi)} di {tempo(durata)}.")
+        di = f" di {tempo(durata)}" if durata is not None else ""
+        self._riscontro("vai_a_tempo", f"Vado a {tempo(secondi)}{di}.")
         self._avvisa_l_attesa_del_sid(secondi)
 
     def _volume(self, passo):
@@ -3311,18 +3532,23 @@ class Finestra(wx.Frame):
         self._volume(-self.impostazioni["passo_volume"])
 
     def _comando_passo_volume(self):
-        self._suono("domanda")
+        self._domanda()
         attuale = self.impostazioni["passo_volume"]
         with DialogoTesto(self, "Di quanto cambiano il volume più e meno? Da 1 a 50.", "Passo del volume", str(attuale)) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
+                self._annullato("Passo del volume non cambiato.")
                 return
-            testo = dialogo.GetValue().strip()
-        if not testo.isdigit() or not 1 <= int(testo) <= 50:
-            self._riscontro("errore", f"{testo} non è un passo da 1 a 50; resta {attuale}.")
+            testo = dialogo.GetValue()
+        # La lettura delle impostazioni: un numero fuori dai limiti va al
+        # limite, e lo si dice (tappa 9).
+        try:
+            passo, correzioni = valori.leggi_passo_volume(testo)
+        except ErroreValore as e:
+            self._riscontro("errore", f"{e} Il passo resta {attuale}.")
             return
-        self.impostazioni["passo_volume"] = int(testo)
+        self.impostazioni["passo_volume"] = passo
         self._salva_impostazioni()
-        self._riscontro("passo_del_volume", f"Più e meno ora cambiano il volume di {testo}.", "passo_del_volume")
+        self._riscontro("passo_del_volume", " ".join([f"Più e meno ora cambiano il volume di {passo}.", *correzioni]), "passo_del_volume")
 
     def _comando_muto(self):
         self.motore.muto = not self.motore.muto
@@ -3504,7 +3730,7 @@ class Finestra(wx.Frame):
     def _comando_durata_della_dissolvenza(self):
         """Maiuscolo con L: chiede la durata della dissolvenza in secondi. La
         dissolvenza resta accesa o spenta com'era."""
-        self._suono("domanda")
+        self._domanda()
         dissolvenza = self.impostazioni["dissolvenza"]
         attuale = dissolvenza["secondi"]
         da_leggere = valori.scrivi_durata(attuale)
@@ -3513,6 +3739,7 @@ class Finestra(wx.Frame):
         with DialogoTesto(self, f"Quanti secondi dura la dissolvenza? Da {minimo} a {massimo}, anche con i decimali, per esempio 2.5.",
                 "Durata della dissolvenza", numero) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
+                self._annullato(f"La durata della dissolvenza resta di {da_leggere}.")
                 return
             testo = dialogo.GetValue()
         try:
@@ -3526,8 +3753,10 @@ class Finestra(wx.Frame):
         self._riscontro("dissolvenza_durata", " ".join([f"Dissolvenza {valori.scrivi_dissolvenza(dissolvenza)}.", *correzioni]), "dissolvenza")
 
     def _comando_apri_file(self):
+        self._domanda()
         with DialogoDiFile(self, "Apri file", wildcard=formati.filtro_dialogo(), style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
+                self._annullato("Nessun file aperto.")
                 return
             percorso = dialogo.GetPath()
         # Il file aperto non entra in nessuna playlist: resta finche' non si
@@ -3555,8 +3784,8 @@ class Finestra(wx.Frame):
             "passo_volume": lambda: str(imp["passo_volume"]),
             "volume_effetti": lambda: f"{round(imp['volume_effetti'] * 100)}%",
             "scheda_audio": self._scheda_da_leggere,
-            "passo_indietro": lambda: f"{secondi_da_leggere(imp['passo_indietro'])} secondi",
-            "passo_avanti": lambda: f"{secondi_da_leggere(imp['passo_avanti'])} secondi",
+            "passo_indietro": lambda: valori.scrivi_durata(imp["passo_indietro"]),
+            "passo_avanti": lambda: valori.scrivi_durata(imp["passo_avanti"]),
             "velocita": lambda: valori.scrivi_velocita(imp["velocita"]),
             "tono": lambda: valori.scrivi_tono(imp["tono"]),
             "bande": self._bande_da_leggere,
@@ -3630,10 +3859,10 @@ class Finestra(wx.Frame):
         leggi, istruzioni, testo = self._campo(chiave)
         errore = ""
         while True:
-            self._suono("domanda")
+            self._domanda()
             with FinestraFiltro(genitore, f"{errore} {etichetta}" if errore else etichetta, testo, istruzioni) as dialogo:
                 if dialogo.ShowModal() != wx.ID_OK:
-                    self.scrivi(f"{etichetta} non {participio}.")
+                    self._annullato(f"{etichetta} non {participio}.")
                     return
                 # Piu' righe valgono come una, unite da spazi.
                 testo = " ".join(dialogo.testo.splitlines()).strip()
@@ -3677,7 +3906,7 @@ class Finestra(wx.Frame):
             return (lambda testo: valori.leggi_secondi(testo, nome)), [
                 f"Di quanti secondi salta {verso} il tasto {tasto}: almeno 0.1, anche con i decimali.",
                 f"Per esempio 10 o 2.5, oppure minuti e secondi come 1:30. Anche Maiuscolo+{tasto} lo cambia, dalla finestra principale.",
-                f"Adesso è di {attuale} secondi.", REGOLA_DEL_DOLLARO], attuale
+                f"Adesso è di {valori.scrivi_durata(imp[chiave])}.", REGOLA_DEL_DOLLARO], attuale
         if chiave == "velocita":
             minima, massima, passo = (valori.scrivi_velocita(v) for v in (valori.VELOCITA_MINIMA, valori.VELOCITA_MASSIMA, valori.PASSO_VELOCITA))
             return valori.leggi_velocita, [
@@ -3768,7 +3997,7 @@ class Finestra(wx.Frame):
         if chiave == "volume_effetti":
             return f"Gli effetti sonori ora suonano al {round(valore * 100)}%." if valore else "Gli effetti sonori ora tacciono."
         if chiave in ("passo_indietro", "passo_avanti"):
-            return f"Il salto {'indietro' if chiave == 'passo_indietro' else 'avanti'} ora è di {secondi_da_leggere(valore)} secondi."
+            return f"Il salto {'indietro' if chiave == 'passo_indietro' else 'avanti'} ora è di {valori.scrivi_durata(valore)}."
         if chiave == "velocita":
             self.motore.velocita = valore
             return f"La velocità ora è {valori.scrivi_velocita(valore)}{', la normale' if valore == 1 else ''}."
@@ -3892,16 +4121,16 @@ class Finestra(wx.Frame):
             # Con il suono dell'errore: senza, gli effetti tacerebbero per
             # tutta la sessione senza dire perche'.
             if errore is not None:
-                self._riscontro("errore", f"La scheda audio scelta, {scelta['dispositivo']}, non si apre, e non riesco a usare quella automatica: {errore}.")
+                self._avviso_all_avvio("errore", f"La scheda audio scelta, {scelta['dispositivo']}, non si apre, e non riesco a usare quella automatica: {errore}.")
             else:
-                self._riscontro("errore", f"La scheda audio scelta, {scelta['dispositivo']}, non si apre: uso quella automatica.")
+                self._avviso_all_avvio("errore", f"La scheda audio scelta, {scelta['dispositivo']}, non si apre: uso quella automatica.")
         elif errore is not None:
-            self.scrivi(f"Non riesco a usare la scheda audio scelta, {scelta.get('dispositivo', 'automatica')}: {errore}.")
+            self._avviso_all_avvio("errore", f"Non riesco a usare la scheda audio scelta, {scelta.get('dispositivo', 'automatica')}: {errore}.")
         elif esito["mancante"]:
             dove = f", {self._nome_della_scheda(esito['dispositivo'], esito['interfaccia'])}" if esito["dispositivo"] else ""
-            self.scrivi(f"La scheda audio scelta, {scelta['dispositivo']}, non c'è: uso quella automatica{dove}.")
+            self._avviso_all_avvio("errore", f"La scheda audio scelta, {scelta['dispositivo']}, non c'è: uso quella automatica{dove}.")
         elif not esito["musica"]:
-            self.scrivi(f"La musica non ritrova la scheda audio {esito['dispositivo']} e suona sulla scheda di Windows.")
+            self._avviso_all_avvio("errore", f"La musica non ritrova la scheda audio {esito['dispositivo']} e suona sulla scheda di Windows.")
 
     # Il video e i sottotitoli, tappa 7.
 
@@ -3922,7 +4151,8 @@ class Finestra(wx.Frame):
             # chiudere e riaprire la finestra nel frattempo.
             return
         self._sottotitoli_del_brano(tracce)
-        if self.impostazioni["video"] and tracce["video"] and self.motore.in_corso != self._video_nascosto_per:
+        in_attesa = self.motore.in_pausa and self.motore.in_corso == self._video_in_attesa
+        if self.impostazioni["video"] and tracce["video"] and self.motore.in_corso != self._video_nascosto_per and not in_attesa:
             self._mostra_il_video()
         else:
             self._nascondi_il_video()
@@ -3938,7 +4168,7 @@ class Finestra(wx.Frame):
 
     def _mostra_il_video(self):
         if self._video is None:
-            self._video = FinestraVideo(self, lambda: self.motore.posizione, lambda: self.motore.durata, self.motore.vai_a, self._nascondi_a_mano)
+            self._video = FinestraVideo(self, lambda: self.motore.posizione, lambda: self.motore.durata, self._salta_dalla_barra, self._nascondi_a_mano)
         if not self._video_nel_motore:
             self.motore.imposta_il_video(self._video.finestre())
             self._video_nel_motore = True
@@ -3948,21 +4178,34 @@ class Finestra(wx.Frame):
             # Gia' aperta: si aggiorna, senza riprendere il fuoco a chi lo ha.
             self._video.SetTitle(titolo)
             return
-        self._fuoco_prima_del_video = wx.Window.FindFocus()
+        if not ctypes.windll.user32.IsWindowEnabled(self.GetHandle()):
+            # Un dialogo e' aperto: la finestra del video gli ruberebbe il
+            # fuoco, e le lettere scritte nel campo diventerebbero comandi. Si
+            # apre quando MeTeOra torna attiva (tappa 9).
+            self._video_rimandato = True
+            return
         self._video.apri(titolo, self.GetScreenRect())
 
     def _nascondi_il_video(self):
-        """La finestra del video sparisce, e MeTeOra torna davanti con il
-        fuoco dove lo aveva lasciato."""
+        """La finestra del video sparisce. Se aveva il fuoco, MeTeOra torna
+        davanti con il fuoco dove lo aveva lasciato; se no, il fuoco resta
+        dov'e', per esempio in un dialogo o nella console (tappa 9)."""
         if self._video is None or not self._video.IsShown():
             return
+        attiva = self._video.IsActive()
         self._video.chiudi()
+        if not attiva:
+            return
+        # Tornando attiva, la finestra rimette da se' il fuoco sull'ultimo
+        # controllo che lo aveva; la plancia solo se non lo trova.
         self.Raise()
-        fuoco = self._fuoco_prima_del_video
-        self._fuoco_prima_del_video = None
-        if fuoco and fuoco.GetTopLevelParent() is self:
-            fuoco.SetFocus()
-        else:
+        wx.CallAfter(self._fuoco_dopo_il_video)
+
+    def _fuoco_dopo_il_video(self):
+        if self._chiusa:
+            return
+        fuoco = wx.Window.FindFocus()
+        if fuoco is None or fuoco.GetTopLevelParent() is not self:
             self.albero.SetFocus()
 
     def _nascondi_a_mano(self):
@@ -3971,6 +4214,29 @@ class Finestra(wx.Frame):
         dopo."""
         self._video_nascosto_per = self.motore.in_corso
         self._nascondi_il_video()
+        self._riscontro("video_nascosto", "Video nascosto per questo brano: il prossimo video si apre da sé.")
+
+    def _salta_dalla_barra(self, secondi):
+        """La barra del tempo della finestra del video, per chi vede: il
+        salto ha il riscontro di W."""
+        self.motore.vai_a(secondi)
+        durata = self.motore.durata
+        self._riscontro("vai_a_tempo", f"Vado a {tempo(secondi)}" + (f" di {tempo(durata)}." if durata is not None else "."))
+
+    def _all_attivazione(self, evento):
+        """Tornata attiva, per esempio alla chiusura di un dialogo, MeTeOra
+        apre la finestra del video rimandata intanto."""
+        evento.Skip()
+        if evento.GetActive() and self._video_rimandato:
+            self._video_rimandato = False
+            wx.CallAfter(self._aggiorna_il_video)
+
+    def _riprende_il_video(self):
+        """X o C tolgono la pausa del brano ripreso all'avvio: se e' un
+        video, adesso la sua finestra si apre."""
+        if self._video_in_attesa is not None:
+            self._video_in_attesa = None
+            self._aggiorna_il_video()
 
     def _spegni_il_video(self):
         if self._video_nel_motore:
@@ -4065,16 +4331,16 @@ class Finestra(wx.Frame):
             # Una scelta di prima che ora non risponde resta in fondo, e lo dice.
             chiavi.append(attuale)
         righe = [self._riga_della_sintesi(chiave) for chiave in chiavi]
-        self._suono("domanda")
+        self._domanda()
         with FinestraScelta(genitore, "Sintesi dei sottotitoli", righe, chiavi.index(attuale)) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
-                self.scrivi("Sintesi dei sottotitoli non cambiata.")
+                self._annullato("Sintesi dei sottotitoli non cambiata.")
                 return
             indice = dialogo.GetSelection()
         self.impostazioni["sintesi"] = chiavi[indice]
         self._salva_impostazioni()
         genitore.aggiorna("sintesi", self._riga_dell_impostazione("sintesi"))
-        self._riscontro("impostazione_cambiata", f"I sottotitoli ora vanno a {self._sintesi_da_leggere()}.")
+        self._riscontro("impostazione_cambiata", f"Sintesi dei sottotitoli: {self._sintesi_da_leggere()}.")
 
     def _riga_della_sintesi(self, chiave):
         if chiave == sintesi.AUTOMATICA:
@@ -4085,10 +4351,11 @@ class Finestra(wx.Frame):
 
     # I MIDI, tappa 8: FluidSynth e il banco dei suoni.
 
-    def _prepara_i_midi(self, dopo=None):
+    def _prepara_i_midi(self, dopo=None, genitore=None):
         """Al primo MIDI: dice cosa serve, scarica FluidSynth se manca, cerca
         nei dischi i banchi di suoni e li propone; se non ce ne sono propone
-        FluidR3. Tutto in disparte; dopo() arriva quando i MIDI sono pronti."""
+        FluidR3. Tutto in disparte; dopo() arriva quando i MIDI sono pronti.
+        genitore e' il dialogo da cui si parte, se c'e', per le domande."""
         if self._midi_in_preparazione:
             self._riscontro("non_disponibile", "Sto preparando i MIDI: un momento.")
             return
@@ -4098,8 +4365,8 @@ class Finestra(wx.Frame):
                 "Scarico FluidSynth e cerco nei dischi i banchi che hai già? La ricerca può durare qualche minuto.")
         else:
             domanda = "Per suonare i MIDI serve un banco di suoni General MIDI. Cerco nei dischi quelli che hai già? La ricerca può durare qualche minuto."
-        if not self._conferma(domanda, "MIDI"):
-            self.scrivi("I MIDI restano da preparare: si può fare anche dalle impostazioni, con Banco dei suoni MIDI.")
+        if not self._conferma(domanda, "MIDI", self._genitore_valido(genitore)):
+            self._annullato(MIDI_DA_PREPARARE)
             return
         self._midi_in_preparazione = True
 
@@ -4111,12 +4378,17 @@ class Finestra(wx.Frame):
                 except (OSError, ValueError) as e:
                     return ("errore", f"FluidSynth non si scarica: {e}")
                 wx.CallAfter(self._riscontro, "scaricamento_finito", "FluidSynth pronto.")
-            wx.CallAfter(self._riscontro, "ricerca_avviata", "Cerco i banchi di suoni nei dischi.")
+            wx.CallAfter(self._riscontro_dopo, "ricerca_avviata", "Cerco i banchi di suoni nei dischi.")
             return ("trovati", midi.cerca_banchi(avvisa=lambda quante: wx.CallAfter(self.scrivi, f"Cerco i banchi: {quante} cartelle viste.", "banchi")))
 
-        midi_in_disparte(lavoro, lambda esito: wx.CallAfter(self._banchi_cercati, esito, dopo))
+        midi_in_disparte(lavoro, lambda esito: wx.CallAfter(self._banchi_cercati, esito, dopo, genitore))
 
-    def _banchi_cercati(self, esito, dopo):
+    def _genitore_valido(self, genitore):
+        """Il dialogo da cui si e' partiti, se e' ancora aperto, o la finestra
+        principale: un dialogo chiuso nel frattempo non fa da genitore."""
+        return genitore if genitore and genitore.IsShown() else self
+
+    def _banchi_cercati(self, esito, dopo, genitore=None):
         self._midi_in_preparazione = False
         if self._chiusa:
             return
@@ -4125,22 +4397,25 @@ class Finestra(wx.Frame):
             self._riscontro("errore", valore)
             return
         trovati = valore
+        genitore = self._genitore_valido(genitore)
         if not trovati:
             self._riscontro("ricerca_finita", "Nei dischi non ho trovato banchi di suoni.")
-            if self._conferma(f"Scarico FluidR3 GM, il banco storico di FluidSynth, circa {midi.FLUIDR3_DIMENSIONE // 1_000_000} MB?", "MIDI"):
-                self._scarica_fluidr3(dopo)
+            if self._conferma(f"Scarico FluidR3 GM, il banco storico di FluidSynth, circa {midi.FLUIDR3_DIMENSIONE // 1_000_000} MB?", "MIDI", genitore):
+                self._scarica_fluidr3(dopo, genitore)
+            else:
+                self._annullato(MIDI_DA_PREPARARE)
             return
         self._riscontro("ricerca_finita", "Trovato un banco di suoni." if len(trovati) == 1 else f"Trovati {len(trovati)} banchi di suoni.")
-        self._scegli_fra_i_banchi(trovati, self, dopo)
+        self._scegli_fra_i_banchi(trovati, genitore, dopo)
 
     def _scegli_fra_i_banchi(self, trovati, genitore, dopo=None):
         """La lista dei banchi trovati, con in fondo lo scaricamento di FluidR3."""
         righe = [f"{os.path.splitext(os.path.basename(p))[0]}, {round(d / 1_000_000)} MB, in {os.path.dirname(p)}" for p, d in trovati]
         righe.append(f"Scarica FluidR3 GM, circa {midi.FLUIDR3_DIMENSIONE // 1_000_000} MB")
-        self._suono("domanda")
+        self._domanda()
         with FinestraScelta(genitore, "Banco dei suoni MIDI", righe, 0) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
-                self.scrivi("Banco dei suoni MIDI non cambiato.")
+                self._annullato("Banco dei suoni MIDI non cambiato.")
                 return
             indice = dialogo.GetSelection()
         if indice == len(trovati):
@@ -4174,19 +4449,21 @@ class Finestra(wx.Frame):
         if tipo == "errore":
             self._riscontro("errore", valore)
             return
-        self._suono("scaricamento_finito")
-        self._usa_il_banco(valore, dopo, genitore if genitore is not None and genitore.IsShown() else None)
+        self._riscontro("scaricamento_finito", "FluidR3 GM scaricato.")
+        # Il banco nuovo, e il MIDI in attesa, dopo il suono dello scaricamento.
+        self._dopo_il_suono(self._usa_il_banco, valore, dopo, genitore)
 
     def _usa_il_banco(self, percorso, dopo=None, genitore=None):
         """Il banco scelto vale da subito, e si ricorda."""
         self.impostazioni["banco_midi"] = percorso
         self._salva_impostazioni()
         self._applica_il_banco()
-        if genitore is not None and hasattr(genitore, "aggiorna"):
+        # Il dialogo da cui si e' partiti puo' essersi chiuso intanto.
+        if genitore and genitore.IsShown() and hasattr(genitore, "aggiorna"):
             genitore.aggiorna("banco_midi", self._riga_dell_impostazione("banco_midi"))
         self._riscontro("impostazione_cambiata", f"I MIDI suonano con il banco {os.path.basename(percorso)}.")
         if dopo is not None and self._midi_pronti():
-            dopo()
+            self._dopo_il_suono(dopo)
 
     def _banco_da_leggere(self):
         banco = self.impostazioni["banco_midi"]
@@ -4200,24 +4477,24 @@ class Finestra(wx.Frame):
         """La voce Banco dei suoni MIDI: cerca nel PC, scrivi il percorso, o
         scarica FluidR3."""
         righe = ["Cerca i banchi nel PC", "Scrivi il percorso di un banco", f"Scarica FluidR3 GM, circa {midi.FLUIDR3_DIMENSIONE // 1_000_000} MB"]
-        self._suono("domanda")
+        self._domanda()
         with FinestraScelta(genitore, "Banco dei suoni MIDI", righe, 0) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
-                self.scrivi("Banco dei suoni MIDI non cambiato.")
+                self._annullato("Banco dei suoni MIDI non cambiato.")
                 return
             indice = dialogo.GetSelection()
         if indice == 0:
-            self._prepara_i_midi()
+            self._prepara_i_midi(genitore=genitore)
         elif indice == 1:
             self._scrivi_il_banco(genitore)
         else:
             self._scarica_fluidr3(genitore=genitore)
 
     def _scrivi_il_banco(self, genitore):
-        self._suono("domanda")
+        self._domanda()
         with DialogoTesto(genitore, "Il percorso del banco di suoni, un file sf2 o sf3.", "Banco dei suoni MIDI", self.impostazioni["banco_midi"]) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
-                self.scrivi("Banco dei suoni MIDI non cambiato.")
+                self._annullato("Banco dei suoni MIDI non cambiato.")
                 return
             percorso = dialogo.GetValue().strip().strip('"')
         if not midi.e_un_banco(percorso):
@@ -4230,10 +4507,10 @@ class Finestra(wx.Frame):
         collaudo della 1.60.1). Cambiandolo il mazzo si rifa'."""
         chiavi = list(valori.MODELLI_CASUALI)
         righe = [f"{valori.MODELLI_CASUALI[c][0].upper()}{valori.MODELLI_CASUALI[c][1:]}: {SPIEGAZIONI_DEI_MODELLI[c]}" for c in chiavi]
-        self._suono("domanda")
+        self._domanda()
         with FinestraScelta(genitore, "Modello della riproduzione casuale", righe, chiavi.index(self.impostazioni["modello_casuale"])) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
-                self.scrivi("Modello della riproduzione casuale non cambiato.")
+                self._annullato("Modello della riproduzione casuale non cambiato.")
                 return
             indice = dialogo.GetSelection()
         self.impostazioni["modello_casuale"] = chiavi[indice]
@@ -4256,10 +4533,10 @@ class Finestra(wx.Frame):
             return
         righe = [f"Automatica: {schede_audio.etichetta(automatica)}" if automatica else "Automatica", *(schede_audio.etichetta(u) for u in elenco)]
         attuale = schede_audio.ritrova(scelta, elenco)
-        self._suono("domanda")
+        self._domanda()
         with FinestraScelta(genitore, "Scheda audio", righe, elenco.index(attuale) + 1 if attuale is not None else 0) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
-                self.scrivi("Scheda audio non cambiata.")
+                self._annullato("Scheda audio non cambiata.")
                 return
             indice = dialogo.GetSelection()
         self._usa_la_scheda(schede_audio.da_salvare(elenco[indice - 1]) if indice > 0 else {}, genitore)
@@ -4341,7 +4618,7 @@ class Finestra(wx.Frame):
             self._elimina_il_marker(*unici[0])
             return
         if not self._conferma(f"Eliminare {len(unici)} marker?", "Elimina marcatori", genitore):
-            self.scrivi("Eliminazione annullata.")
+            self._annullato("Eliminazione annullata.")
             return
         tolti = sum(self.marcatori.togli(k, m) for k, m in unici)
         self._salva_i_marker(*dict.fromkeys(k for k, _m in unici))
@@ -4356,7 +4633,7 @@ class Finestra(wx.Frame):
             self._riscontro("non_disponibile", "Non ci sono marcatori da cancellare.")
             return
         if not self._conferma(f"Cancellare tutti i marcatori, {quanti} marker in {file} file? Non si possono recuperare.", "Cancella tutto", genitore):
-            self.scrivi("I marcatori restano dove sono.")
+            self._annullato("I marcatori restano dove sono.")
             return
         # Le chiavi da rinfrescare nella plancia si prendono prima di cancellare.
         chiavi = list(voci)
@@ -4372,10 +4649,11 @@ class Finestra(wx.Frame):
         if not esportati:
             self._riscontro("non_disponibile", "I marker scelti non si esportano: MeTeOra non conosce una durata valida dei loro file, e senza la durata un altro computer non li ritroverebbe.")
             return
+        self._domanda()
         with DialogoDiFile(genitore, "Esporta marcatori", defaultDir=os.path.dirname(self.impostazioni.percorso), defaultFile=FILE_DELL_ESPORTAZIONE,
                 wildcard=FILTRO_DEI_MARCATORI, style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
-                self.scrivi("Esportazione annullata.")
+                self._annullato("Esportazione annullata.")
                 return
             percorso = dialogo.GetPath()
         if not os.path.splitext(percorso)[1]:
@@ -4395,10 +4673,11 @@ class Finestra(wx.Frame):
         """Importa marcatori: i marker di un file esportato vanno sui file con
         lo stesso nome e la stessa durata, copie comprese; quelli che ci
         sono gia' restano come sono."""
+        self._domanda()
         with DialogoDiFile(genitore, "Importa marcatori", defaultDir=os.path.dirname(self.impostazioni.percorso), wildcard=FILTRO_DEI_MARCATORI,
                 style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
-                self.scrivi("Importazione annullata.")
+                self._annullato("Importazione annullata.")
                 return
             percorso = dialogo.GetPath()
         try:
@@ -4602,13 +4881,13 @@ class Finestra(wx.Frame):
 
     def _rinomina_il_marker(self, k, marker, genitore=None):
         with DialogoTesto(genitore or self, f"Nome del marker a {durata_lunga(marker['tempo'])}:", "Rinomina il marker", marker["nome"]) as dialogo:
-            self._suono("domanda")
+            self._domanda()
             if dialogo.ShowModal() != wx.ID_OK:
-                self.scrivi("Nome del marker non cambiato.")
+                self._annullato("Nome del marker non cambiato.")
                 return
             nome = " ".join(dialogo.GetValue().split())
         if not nome or nome == marker["nome"]:
-            self.scrivi("Nome del marker non cambiato.")
+            self._annullato("Nome del marker non cambiato.")
             return
         vecchio = marker["nome"]
         self.marcatori.rinomina(k, marker, nome)
@@ -4637,12 +4916,15 @@ class Finestra(wx.Frame):
         stesso = self.motore.in_corso == brano.percorso and (numero is None or self.motore.sottobrano == numero)
         if stesso:
             avanti = marker["tempo"] >= (self.motore.posizione or 0.0)
-            if self.motore.in_pausa:
+            ripartito = self.motore.in_pausa
+            if ripartito:
                 self.motore.vai_a(marker["tempo"])
                 self.motore.pausa(False, sfumando=True)
             else:
                 self._vai_nel_brano(marker["tempo"])
             self._riscontro("marker_avanti" if avanti else "marker_indietro", f"{marker['nome']}, {durata_lunga(marker['tempo'])}.")
+            if ripartito:
+                self._riprende_il_video()
             self._avvisa_l_attesa_del_sid(marker["tempo"])
             return True
         if not self.coda.nel_loop(dati["playlist"], brano):
@@ -4761,7 +5043,7 @@ class Finestra(wx.Frame):
             return
         self.albero.EnsureVisible(voce)
         self._seleziona(voce)
-        self._suono("vai_al_brano")
+        self._riscontro("vai_al_brano", f"Selezione su {self._nome_della_voce(voce)}.")
         self.albero.SetFocus()
 
     def _insegui(self):
@@ -4801,7 +5083,7 @@ class Finestra(wx.Frame):
             return
         self.albero.CollapseAllChildren(voce)
         self._seleziona(voce)
-        self._riscontro("chiudi_tutto", f"Chiuso tutto dentro {self.albero.GetItemText(voce)}.")
+        self._riscontro("chiudi_tutto", f"Chiuso tutto dentro {self._nome_della_voce(voce)}.")
 
     def _apri_ramo(self, voce, con_i_marker=True):
         """Apre la voce e tutti i rami che ha dentro, caricandoli, fino a
@@ -4832,11 +5114,11 @@ class Finestra(wx.Frame):
             self._riscontro("non_disponibile", "Qui non c'è niente da aprire.")
             return
         aperti, fermato = self._apri_ramo(voce)
-        nome = self.albero.GetItemText(voce)
+        nome = self._nome_della_voce(voce)
         if fermato:
             self._riscontro("apri_tutto", f"Aperti {aperti} rami dentro {nome}; mi fermo qui, gli altri restano chiusi.")
         else:
-            self._riscontro("apri_tutto", f"Aperto tutto dentro {nome}: {aperti} rami.")
+            self._riscontro("apri_tutto", f"Aperto tutto dentro {nome}: {al_plurale(aperti, 'ramo', 'rami')}.")
 
     # F1, F2, F3.
 
@@ -4886,25 +5168,30 @@ class Finestra(wx.Frame):
         self.console.ShowPosition(posizione)
 
     def _leggi_risorsa(self, nome):
+        """Il testo di un file del programma, o None se non si legge: la
+        console lo dice con il suono dell'errore (tappa 9)."""
         try:
             with open(percorsi.percorso_risorsa(nome), encoding="utf-8") as f:
                 return f.read()
         except OSError as e:
-            return f"Non riesco a leggere {nome}: {e}"
+            self._riscontro("errore", f"Non riesco a leggere {nome}: {e.strerror or e}.")
+            return None
 
     def _comando_cerca_in_console(self):
         """Il campo della ricerca nella console, con le sue istruzioni come
         commenti; se il testo non si capisce lo spiega e lo ripropone."""
         testo = self._cercato_in_console
         while True:
-            self._suono("domanda")
+            self._domanda()
             with FinestraFiltro(self, "Cerca nella console", testo, ISTRUZIONI_DELLA_CONSOLE) as dialogo:
                 if dialogo.ShowModal() != wx.ID_OK:
+                    self._annullato("Ricerca nella console annullata.")
                     return
                 # Andare a capo vale come uno spazio; gli spazi dentro il
                 # testo contano, perche' si cerca cosi' com'e'.
                 testo = " ".join(dialogo.testo.splitlines()).strip()
             if not testo:
+                self._annullato("Ricerca nella console annullata: il testo è vuoto.")
                 return
             try:
                 modello = modello_della_console(testo)
@@ -4945,6 +5232,8 @@ class Finestra(wx.Frame):
                 self._cerca_in_console(max(self._occorrenza[1], posizione + 1))
             else:
                 self._cerca_in_console(posizione + 1)
+        elif evento.GetKeyCode() in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER) and evento.GetModifiers() == wx.MOD_NONE:
+            self._riscontro("non_disponibile", "Nella console non c'è una ricerca: la barra rovesciata ne apre una.")
         else:
             evento.Skip()
 
@@ -4952,17 +5241,24 @@ class Finestra(wx.Frame):
         """F12: scrive nella console la sezione I tasti del manuale, cosi' la
         documentazione dei tasti e' una sola, e porta il fuoco nella console,
         con il cursore sulla prima riga dell'elenco."""
-        righe = sezione_del_manuale(self._leggi_risorsa("manuale.txt"), "I tasti")
+        manuale = self._leggi_risorsa("manuale.txt")
+        if manuale is None:
+            return
+        righe = sezione_del_manuale(manuale, "I tasti")
         if not righe:
             self._riscontro("errore", "Nel manuale non trovo la sezione I tasti.")
             return
         self._stampa("elenco_dei_tasti", righe)
 
     def _manuale(self):
-        self._stampa("manuale", self._leggi_risorsa("manuale.txt").splitlines())
+        manuale = self._leggi_risorsa("manuale.txt")
+        if manuale is not None:
+            self._stampa("manuale", manuale.splitlines())
 
     def _changelog(self):
-        self._stampa("changelog", ["Novità di MeTeOra", *righe_del_changelog(self._leggi_risorsa("CHANGELOG.md"))])
+        novita = self._leggi_risorsa("CHANGELOG.md")
+        if novita is not None:
+            self._stampa("changelog", ["Novità di MeTeOra", *righe_del_changelog(novita)])
 
     def _crediti(self):
         righe = [
@@ -4973,6 +5269,9 @@ class Finestra(wx.Frame):
             "Riproduzione: libmpv, dal progetto mpv, con FFmpeg e libopenmpt.",
             "SID del Commodore 64: libsidplayfp, con l'emulazione reSIDfp.",
             "Durate dei SID: il database Songlengths della High Voltage SID Collection.",
+            "MIDI: FluidSynth, con il banco di suoni FluidR3 GM quando lo scarichi.",
+            "Musica delle console: libgme, Game Music Emu.",
+            "Sottotitoli letti: accessible_output2.",
             "Effetti sonori: Acusticator, della libreria GBUtils di Gabriele.",
             "Durate e tag dei file audio: mutagen.",
             "Interfaccia: wxPython.",
@@ -5024,7 +5323,7 @@ class Finestra(wx.Frame):
         if not percorso:
             return
         if not os.path.isfile(percorso):
-            self.scrivi(f"Non trovo più {percorso}, che suonava l'ultima volta.")
+            self._riscontro_dopo("errore", f"Non trovo più {percorso}, che suonava l'ultima volta.")
             return
         pl = self._lista_da_riprendere(stato)
         brano = None
@@ -5040,15 +5339,26 @@ class Finestra(wx.Frame):
         posizione = stato.get("posizione") or 0
         self.coda.imposta(pl, brano)
         sottobrano = stato.get("sottobrano") if isinstance(stato.get("sottobrano"), int) else None
+        # Un video ripreso in pausa apre la sua finestra con X, non subito:
+        # il fuoco resta nella plancia (tappa 9).
+        self._video_in_attesa = percorso
         self.motore.suona(percorso, sottobrano, inizio=posizione, in_pausa=True)
         voce = self._trova_voce_che_suona()
         if voce is not None:
             self.albero.EnsureVisible(voce)
             self._seleziona(voce)
         self._aggiorna_etichette()
-        self._riscontro("ripresa_all_avvio", f"Riprendo da dove eri: {percorso}, in pausa a {tempo(posizione)}. X riparte.")
+        # Dopo il suono dell'avvio, che parte un attimo prima.
+        self._riscontro_dopo("ripresa_all_avvio", f"Riprendo da dove eri: {percorso}, in pausa a {tempo(posizione)}. X riparte.")
 
     # L'uscita.
+
+    @staticmethod
+    def _salva_all_uscita(salva, cosa, non_salvati):
+        try:
+            salva()
+        except OSError as e:
+            non_salvati.append(f"{cosa}: {e.strerror or e}")
 
     def _alla_chiusura(self, evento):
         if self._chiusa:
@@ -5058,20 +5368,23 @@ class Finestra(wx.Frame):
         if self._ricerca is not None:
             self._ricerca.ferma()
         self.impostazioni["ripresa"] = self._stato_da_riprendere()
-        self._salva_archivio()
+        non_salvati = []
+        self._salva_all_uscita(self.archivio.salva, "le playlist", non_salvati)
         if self.marcatori.modificato:
-            with contextlib.suppress(OSError):
-                self.marcatori.salva()
+            self._salva_all_uscita(self.marcatori.salva, "i marker", non_salvati)
         self.contatore.ferma()
         self.schedario.ferma()
         if self._video is not None:
             self._video.Destroy()
             self._video = None
-        with contextlib.suppress(OSError):
-            self.schedario.salva()
-        with contextlib.suppress(OSError):
-            self.impostazioni.salva()
+        self._salva_all_uscita(self.schedario.salva, "lo schedario delle durate e dei tag", non_salvati)
+        self._salva_all_uscita(self.impostazioni.salva, "le impostazioni", non_salvati)
         self.motore.chiudi()
+        if non_salvati:
+            # La console sta per sparire: lo dice una finestra, prima di
+            # chiudere (tappa 9).
+            suoni.suona("errore", self.impostazioni["volume_effetti"])
+            wx.MessageBox(f"MeTeOra non è riuscito a salvare {'; '.join(non_salvati)}.", "MeTeOra, uscita", wx.OK | wx.ICON_ERROR, self)
         # Il suono dell'uscita si ascolta intero prima che il processo finisca.
         suoni.suona("uscita", self.impostazioni["volume_effetti"], sync=True)
         evento.Skip()

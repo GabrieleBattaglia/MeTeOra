@@ -2,6 +2,25 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.66.36] - 2026-10-03
+
+Le rifiniture di accessibilità della tappa 9, dopo una verifica dei requisiti del piano.
+
+- Un tasto senza comando, come Maiuscolo+A o l'apostrofo, lo dice con un suono, e nella plancia il fuoco non salta più sulla voce che comincia con quella lettera.
+- Esc in un campo, o No a una domanda, scrive cosa non è cambiato, con un suono nuovo dell'annullamento: prima molti comandi, come Rinomina, W, Maiuscolo con M, Q, E ed L, Apri file e la ricerca nella console, uscivano muti, e altri scrivevano senza suono.
+- Le domande con Sì e No si chiudono con Esc, che vale No; le lettere S e N rispondono subito.
+- Spazio e Applicazioni su un comando, come Nuova playlist, dicono che non ha un menu; Invio nella console senza una ricerca lo dice.
+- La finestra del video non ruba più il fuoco a un campo o a una finestra aperta: aspetta che si chiudano. Alla riapertura di MeTeOra un video ripreso in pausa apre la sua finestra con X, e la plancia tiene il fuoco. Chiudendo il video, il fuoco torna dov'era solo se il video lo aveva.
+- Esc nella finestra del video ha un suono e una riga; a schermo intero ha quelli di Maiuscolo con F5; il salto con la barra del tempo ha quelli di W.
+- Il fuoco su un sottobrano o su un marker resta lì quando la plancia si rifà, per esempio dopo F4; durante una ricerca la voce Mostra altri risultati non sparisce più da sotto il fuoco.
+- Un file delle impostazioni che non si legge non si sovrascrive più con i valori predefiniti: MeTeOra lo dice e salva accanto, con .nuovo. Se all'uscita qualcosa non si salva, lo dice una finestra prima di chiudere. Gli errori all'avvio hanno il loro suono.
+- Due suoni non partono più nello stesso istante, per esempio l'avvio e la ripresa, o l'errore e la domanda che riapre il campo: il secondo aspetta il primo, e la domanda non suona più se intanto hai già chiuso il campo. Dopo un brano che non si suona, il seguente parte finito il suono dell'errore, e V intanto lo ferma.
+- Suoni giusti: eliminare playlist con Canc, creare una playlist con dei brani, Aggiorna, F8, la fine dello scaricamento di FluidR3, la domanda prima di Rinomina, Apri file, Esporta e Importa marcatori.
+- Frasi più chiare: niente punto interrogativo quando la durata non si sa, il singolare con un solo brano, secondo o risultato, il nome della voce senza conti in Backspace, F9, F10 e Aggiorna, "più e meno volume" nel cruscotto, la sintesi dei sottotitoli, il punto B del loop anche sullo stesso brano.
+- Maiuscolo con M legge il passo come le impostazioni: fuori dai limiti va al limite, e lo dice.
+- Il cruscotto dice quando il fuoco è su una voce diversa da quella su cui agiscono Canc, X, F4 e il menu, e su un percorso di rete aggiunto a mano dice come toglierlo; parla anche dei file delle console con più brani.
+- F12 trova nella sezione dei tasti anche Canc sui percorsi di rete, X sui marker ed Esc nella finestra del video. F3 nomina FluidSynth, libgme e accessible_output2. Se il manuale o le novità non si leggono, F1, F2 e F12 lo dicono con il suono dell'errore.
+
 ## [1.66.0] - 2026-10-03
 
 - MeTeOra suona la musica delle console con libgme: NES, Super Nintendo, Game Boy, Sega, ZX Spectrum, PC Engine, MSX e Atari. Come i SID, i brani di un file diventano sottobrani nella plancia, con il loro titolo quando il file lo dice; il filtro ha la famiglia k=chip, e r conta anche i loro sottobrani (tappa 8).

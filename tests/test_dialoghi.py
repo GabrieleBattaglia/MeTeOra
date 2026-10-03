@@ -90,6 +90,33 @@ def test_finestra_delle_impostazioni(genitore):
         dialogo.Destroy()
 
 
+def test_la_domanda_con_si_e_no(genitore, monkeypatch):
+    dialogo = dialoghi.DialogoConferma(genitore, "Eliminare la playlist Rock?", "Elimina playlist")
+    try:
+        assert dialogo.GetTitle() == "Elimina playlist" and dialogo.domanda.GetLabel() == "Eliminare la playlist Rock?"
+        assert (dialogo.si.GetLabelText(), dialogo.no.GetLabelText()) == ("Sì", "No")
+        # No e' la risposta predefinita, ed Esc vale No.
+        assert dialogo.GetDefaultItem() is dialogo.no and dialogo.GetEscapeId() == wx.ID_NO
+        finiti = []
+        monkeypatch.setattr(dialogo, "EndModal", finiti.append)
+        _tasto(dialogo, dialogo.no, carattere="s")
+        _tasto(dialogo, dialogo.no, carattere="N")
+        assert finiti == [wx.ID_YES, wx.ID_NO]
+        assert _tasto(dialogo, dialogo.no, codice=wx.WXK_ESCAPE).GetSkipped()
+        clic = wx.CommandEvent(wx.wxEVT_BUTTON, wx.ID_YES)
+        clic.SetEventObject(dialogo.si)
+        dialogo.si.GetEventHandler().ProcessEvent(clic)
+        assert finiti[-1] == wx.ID_YES
+    finally:
+        dialogo.Destroy()
+    # Una & nella domanda resta com'e'.
+    dialogo = dialoghi.DialogoConferma(genitore, "Eliminare la playlist Simon & Garfunkel?", "Elimina playlist")
+    try:
+        assert dialogo.domanda.GetLabelText() == "Eliminare la playlist Simon & Garfunkel?"
+    finally:
+        dialogo.Destroy()
+
+
 def test_finestra_della_scelta(genitore, monkeypatch):
     voci = ["Automatica: Altoparlanti, WASAPI, 3 ms", "Altoparlanti, WASAPI, 3 ms", "Realtek ASIO, ASIO, 23,2 ms, esclusiva: può zittire NVDA"]
     dialogo = dialoghi.FinestraScelta(genitore, "Scheda audio", voci, 2)

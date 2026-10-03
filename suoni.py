@@ -1,6 +1,6 @@
 # MeTeOra, gli effetti sonori: un suono per ogni azione, con Acusticator.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.51.0 i suoni delle impostazioni, della console salvata, della finestra dei marcatori, della sua ricerca e della scheda audio. Nella 1.55.0 quelli di velocita', tono, equalizzatore e dissolvenza. Nella 1.58.0 i suoni al volo dell'equalizzatore, e il loop con i soffi rimasti liberi. Nella 1.59.0 l'acceso e lo spento della riproduzione casuale. Nella 1.63.0 i suoni del video. Nella 1.64.0 quelli di Questa rete. Nella 1.65.0 quelli dello scaricamento.
+# 30/09/2026: nasce con la tappa 1. Nella 1.51.0 i suoni delle impostazioni, della console salvata, della finestra dei marcatori, della sua ricerca e della scheda audio. Nella 1.55.0 quelli di velocita', tono, equalizzatore e dissolvenza. Nella 1.58.0 i suoni al volo dell'equalizzatore, e il loop con i soffi rimasti liberi. Nella 1.59.0 l'acceso e lo spento della riproduzione casuale. Nella 1.63.0 i suoni del video. Nella 1.64.0 quelli di Questa rete. Nella 1.65.0 quelli dello scaricamento. Nella 1.66.36 l'annullamento, il ramo aggiornato e il video nascosto, e la playlist creata con dei brani ha un suono solo.
 
 """La mappa degli eventi di MeTeOra sui preset della collezione di GBUtils.
 
@@ -43,6 +43,8 @@ EVENTI = {
     "schermo_intero": "meteora_schermo_intero",
     "schermo_in_finestra": "meteora_schermo_in_finestra",
     "rapporto": "meteora_rapporto",
+    # Esc nella finestra del video la nasconde per il brano in corso (1.66.36).
+    "video_nascosto": "meteora_video_nascosto",
     # Questa rete (1.64.0): la ricerca dei computer usa i suoni della ricerca.
     "percorso_aggiunto": "meteora_percorso_aggiunto",
     "percorso_tolto": "meteora_percorso_tolto",
@@ -63,7 +65,9 @@ EVENTI = {
     "muto_spento": "colpo_d_impatto_7",
     "menu": "il_gioco_alto",
     "nuova_playlist": "moneta_raccolta",
-    "playlist_da_cartella": "jingle_livello_superato",
+    # Una playlist nata gia' con dei brani: da una cartella, dalla selezione,
+    # dai Risultati o dal sottomenu Aggiungi alla playlist (1.66.36).
+    "playlist_creata": "jingle_livello_superato",
     "playlist_eliminata": "cancellato",
     "playlist_rinominata": "written_ok",
     "brano_aggiunto": "aggiunta_giocatore",
@@ -130,6 +134,10 @@ EVENTI = {
     "ripartito_nei_marcatori": "meteora_marcatori_ripartito",
     "non_trovato_nei_marcatori": "meteora_marcatori_non_trovato",
     "domanda": "campanellino",
+    # Esc in un campo, o No a una domanda (tappa 9, 1.66.36): l'operazione non
+    # si fa. Non e' lo stop, che ha il preset annullato.
+    "annullamento": "meteora_annullamento",
+    "ramo_aggiornato": "meteora_ramo_aggiornato",
     "non_disponibile": "rifiuto",
     "errore": "errore_secco",
     # Un problema interno di MeTeOra, non un errore di chi lo usa.

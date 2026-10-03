@@ -85,12 +85,29 @@ def test_nuova_playlist_aggiungi_sposta_togli(finestra, suoni_annotati):
 
 
 def test_tasti_liberi_e_numpad(finestra, suoni_annotati):
-    # Dalla 1.63.0 apostrofo e ì sono liberi: la traccia audio e' Maiuscolo con F3.
+    # Un tasto senza comando lo dice, con il suo suono, e non arriva
+    # all'albero (tappa 9); il tastierino resta a NVDA, in silenzio.
+    assert _premi(finestra, "'") == "Il tasto apostrofo non ha un comando." and suoni_annotati[-1] == "non_disponibile"
+    assert _premi(finestra, "ì") == "Il tasto i accentata non ha un comando."
+    assert _premi(finestra, "a", maiuscolo=True) == "Maiuscolo+A non ha un comando."
     righe, suonati = len(finestra._righe), len(suoni_annotati)
-    _tasto(finestra, "'")
-    _tasto(finestra, "ì")
     _tasto(finestra, codice=wx.WXK_NUMPAD_ADD)
     assert len(finestra._righe) == righe and len(suoni_annotati) == suonati
+    # Canc, con il suo codice 127, va all'albero come prima: non e' un
+    # carattere senza comando.
+    for maiuscolo in (False, True):
+        evento = wx.KeyEvent(wx.wxEVT_CHAR_HOOK)
+        evento.SetKeyCode(wx.WXK_DELETE)
+        evento.SetUnicodeKey(wx.WXK_DELETE)
+        evento.SetShiftDown(maiuscolo)
+        assert finestra._esegui_il_tasto(evento) is False and evento.GetSkipped()
+    assert len(finestra._righe) == righe and len(suoni_annotati) == suonati
+    # I caratteri che arrivano fino all'albero, per esempio con AltGr, si fermano li'.
+    for carattere, fermato in (("[", True), (" ", False)):
+        evento = wx.KeyEvent(wx.wxEVT_CHAR)
+        evento.SetUnicodeKey(ord(carattere))
+        finestra._carattere_nell_albero(evento)
+        assert evento.GetSkipped() is not fermato
 
 
 def test_senza_niente_in_corso(finestra, suoni_annotati):
@@ -168,9 +185,9 @@ def test_riproduzione_di_una_cartella_e_selezione_ferma(finestra, suoni_annotati
     assert finestra._voce_corrente() == selezione
     assert suoni_annotati[-1] == "successivo"
     _tasto(finestra, "c")
-    assert _ultima(finestra).startswith("Pausa a")
+    assert _ultima(finestra).startswith("Pausa")
     _tasto(finestra, "x")
-    assert _ultima(finestra).startswith("Riprende da")
+    assert _ultima(finestra).startswith("Riprende")
     _tasto(finestra, "v")
     assert finestra.motore.in_corso is None
     finestra._brano_finito()
@@ -305,6 +322,26 @@ def test_sottobrani_delle_console_nella_plancia(finestra, tmp_path):
     finestra.albero.Expand(voce_file)
     # Il titolo del brano, se il .m3u lo dice; la durata comprende la dissolvenza.
     assert _etichette(finestra, voce_file) == ["Sottobrano 1 di 2, Il secondo, 0:45", "Sottobrano 2 di 2, 1:13"]
+
+
+def test_il_fuoco_resta_sul_sottobrano_dopo_una_ricostruzione(finestra, tmp_path):
+    import chip
+
+    if not chip.presente():
+        pytest.skip("manca lib/libgme.dll: la mette strumenti/prepara_ambiente.py")
+    from test_chip import nsf_di_prova
+
+    finestra._aggiungi(None, [nsf_di_prova(tmp_path / "gioco.nsf"), str(tmp_path / "altro.mp3")])
+    nodo = next(finestra._figli(finestra.nodo_playlist))
+    finestra.albero.Expand(nodo)
+    gioco, altro = list(finestra._figli(nodo))
+    finestra.albero.Expand(gioco)
+    finestra._seleziona(list(finestra._figli(gioco))[1])
+    # F4 su un altro brano rifa' il ramo Playlist: il fuoco torna sul
+    # sottobrano, non sul suo file (tappa 9).
+    finestra._ai_preferiti(finestra._dati(altro)["brano"])
+    dati = finestra._dati(finestra._voce_corrente())
+    assert dati["tipo"] == "sottobrano" and dati["numero"] == 2
 
 
 def test_loop_a_b_con_maiuscolo_x(finestra, suoni_annotati):
@@ -466,7 +503,7 @@ def test_filtro_nella_plancia_e_nella_riproduzione(finestra, suoni_annotati, mon
     finestra._seleziona(nodo)
     finestra._modifica_filtro(pl)
     assert any(r.startswith("Nel filtro non capisco") for r in finestra._righe)
-    assert _ultima(finestra) == "Filtro di Playlist: rock -tre. Passano 1 brano su 3."
+    assert _ultima(finestra) == "Filtro di Playlist: rock -tre. Passa 1 brano su 3."
     # Il filtro sta nell'etichetta della playlist, e il fuoco resta lì.
     nodo = next(finestra._figli(finestra.nodo_playlist))
     assert finestra._voce_corrente() == nodo
@@ -845,7 +882,12 @@ def test_ricerca_globale(finestra, monkeypatch, suoni_annotati, tmp_path):
     assert _etichette(finestra, dentro) == ["rock cinque.mp3", "rock quattro.mp3", "Mostra l'ultimo risultato"]
     musica = finestra.albero.GetItemParent(dentro)
     assert _etichette(finestra, musica) == ["Dentro, 3 risultati", "rock due.mp3"]
-    finestra._seleziona(list(finestra._figli(dentro))[-1])
+    altri = list(finestra._figli(dentro))[-1]
+    finestra._seleziona(altri)
+    # Un aggiornamento della ricerca non ricrea la voce, e il fuoco resta su
+    # di lei (tappa 9).
+    finestra._riempi_gruppo(dentro)
+    assert list(finestra._figli(dentro))[-1] == altri and finestra._voce_corrente() == altri
     finestra._altri_risultati()
     assert _etichette(finestra, dentro) == ["rock cinque.mp3", "rock quattro.mp3", "rock tre.flac"]
     assert finestra.albero.GetItemText(finestra._voce_corrente()) == "rock tre.flac"
@@ -903,6 +945,124 @@ class _DialogoFinto:
 
     def GetValue(self):
         return self.risposta
+
+
+class _DialogoAnnullato(_DialogoFinto):
+    """Un campo, o un dialogo, chiuso con Esc."""
+
+    def __init__(self):
+        super().__init__("")
+
+    def ShowModal(self):
+        return wx.ID_CANCEL
+
+
+def test_esc_nei_campi_lo_dice_con_il_suo_suono(finestra, monkeypatch, suoni_annotati):
+    # Tappa 9: un campo chiuso con Esc non esce muto.
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoAnnullato())
+    monkeypatch.setattr(modulo, "FinestraFiltro", _DialogoAnnullato())
+    monkeypatch.setattr(modulo, "DialogoDiFile", _FileFinto(None))
+    finestra._comando_nuova_playlist()
+    pl = finestra.archivio.playlist[0]
+    for comando, frase in (
+            (lambda: _tasto(finestra, "m", maiuscolo=True), "Passo del volume non cambiato."),
+            (lambda: _tasto(finestra, "q", maiuscolo=True), "Il salto indietro resta di 10 secondi."),
+            (lambda: _tasto(finestra, "l", maiuscolo=True), "La durata della dissolvenza resta di 4 secondi."),
+            (lambda: finestra._rinomina(pl), "Nome della playlist non cambiato."),
+            (finestra._comando_apri_file, "Nessun file aperto."),
+            (finestra._comando_aggiungi_percorso_di_rete, "Nessun percorso aggiunto."),
+            (finestra._comando_cerca_in_console, "Ricerca nella console annullata."),
+            (lambda: finestra._modifica_filtro(pl), "Filtro non cambiato.")):
+        comando()
+        assert _ultima(finestra) == frase and suoni_annotati[-2:] == ["domanda", "annullamento"]
+    # Invio nella console senza una ricerca lo dice.
+    evento = wx.KeyEvent(wx.wxEVT_KEY_DOWN)
+    evento.SetKeyCode(wx.WXK_RETURN)
+    finestra._tasto_nella_console(evento)
+    assert _ultima(finestra) == "Nella console non c'è una ricerca: la barra rovesciata ne apre una." and suoni_annotati[-1] == "non_disponibile"
+
+
+def test_le_conferme_hanno_si_e_no_e_si_chiudono_con_esc(finestra, monkeypatch, suoni_annotati):
+    aperte = []
+
+    class Conferma(_DialogoFinto):
+        def __init__(self, genitore, domanda, titolo):
+            aperte.append((genitore, domanda, titolo))
+            super().__init__("")
+
+        def ShowModal(self):
+            return wx.ID_NO
+
+    monkeypatch.setattr(modulo, "DialogoConferma", Conferma)
+    assert finestra._conferma("Eliminare?", "Elimina playlist") is False
+    assert aperte == [(finestra, "Eliminare?", "Elimina playlist")] and suoni_annotati[-1] == "domanda"
+    # Un No a Elimina playlist ha il suono dell'annullamento.
+    finestra._comando_nuova_playlist()
+    finestra._elimina_playlist(finestra.archivio.playlist[0])
+    assert _ultima(finestra) == "Eliminazione annullata." and suoni_annotati[-1] == "annullamento" and finestra.archivio.playlist
+
+
+def test_una_voce_senza_menu_lo_dice(finestra, suoni_annotati):
+    comando = next(v for v in finestra._figli(finestra.nodo_playlist) if finestra._dati(v).get("tipo") == "comando")
+    finestra._menu(comando)
+    assert _ultima(finestra) == "Nuova playlist non ha un menu: Invio lo esegue." and suoni_annotati[-1] == "non_disponibile"
+
+
+def test_un_suono_aspetta_la_fine_di_quello_prima(finestra, monkeypatch, suoni_annotati):
+    # Due suoni nello stesso istante si fondono: la domanda dopo un errore
+    # aspetta che l'errore finisca (tappa 9).
+    rimandati = []
+    attesa = [0.2]
+    monkeypatch.setattr(modulo.suoni, "attesa", lambda: attesa[0])
+    monkeypatch.setattr(modulo.wx, "CallLater", lambda millesimi, funzione, *argomenti: rimandati.append((millesimi, funzione, argomenti)))
+    finestra._domanda()
+    assert "domanda" not in suoni_annotati and rimandati[0][0] == 230
+    # Allo scadere si guarda di nuovo, e senza altri suoni parte.
+    attesa[0] = 0.0
+    _millesimi, funzione, argomenti = rimandati.pop()
+    funzione(*argomenti)
+    assert suoni_annotati[-1] == "domanda"
+    # Se intanto il campo ha avuto un esito, per esempio Esc, la domanda
+    # rimandata non suona piu'.
+    attesa[0] = 0.2
+    finestra._domanda()
+    attesa[0] = 0.0
+    finestra._annullato("Filtro non cambiato.")
+    _millesimi, funzione, argomenti = rimandati.pop()
+    funzione(*argomenti)
+    assert suoni_annotati[-2:] == ["domanda", "annullamento"]
+
+
+def test_v_ferma_il_brano_che_parte_dopo_un_errore(finestra, monkeypatch, suoni_annotati):
+    suonati = _finto_motore(finestra, monkeypatch)
+    rimandati = []
+    monkeypatch.setattr(modulo.suoni, "attesa", lambda: 0.3)
+    monkeypatch.setattr(modulo.wx, "CallLater", lambda millesimi, funzione, *argomenti: rimandati.append((funzione, argomenti)))
+    _playlist_di_prova(finestra, ("a.mp3", "b.mp3"))
+    pl = finestra.archivio.playlist[0]
+    finestra.coda.imposta(pl, pl.brani[0])
+    finestra._brano_in_errore(pl.brani[0].percorso)
+    assert suoni_annotati[-1] == "errore" and not suonati
+    # V prima della fine del suono dell'errore: il brano seguente non parte.
+    finestra._comando_stop()
+    assert _ultima(finestra) == "Stop: il brano seguente non parte." and suoni_annotati[-1] == "stop"
+    funzione, argomenti = rimandati.pop(0)
+    funzione(*argomenti)
+    assert not suonati
+
+
+def test_all_uscita_quello_che_non_si_salva_lo_dice_una_finestra(finestra, monkeypatch, suoni_annotati):
+    messaggi = []
+    monkeypatch.setattr(modulo.wx, "MessageBox", lambda testo, titolo, stile, genitore: messaggi.append((testo, titolo)))
+
+    def guasto():
+        raise OSError(28, "Spazio esaurito")
+
+    monkeypatch.setattr(finestra.impostazioni, "salva", guasto)
+    _tasto(finestra, codice=wx.WXK_ESCAPE)
+    assert finestra._chiusa
+    assert messaggi == [("MeTeOra non è riuscito a salvare le impostazioni: Spazio esaurito.", "MeTeOra, uscita")]
+    assert suoni_annotati[-2:] == ["errore", "uscita"]
 
 
 def test_z_b_n_seguono_la_plancia(finestra, monkeypatch):
@@ -1170,7 +1330,7 @@ def test_x_su_cio_che_suona_riparte_da_capo(finestra, monkeypatch, suoni_annotat
     monkeypatch.setattr(type(finestra.motore), "in_pausa", property(lambda _self: True))
     monkeypatch.setattr(finestra.motore, "pausa", lambda valore=None, sfumando=False: False)
     _tasto(finestra, "x")
-    assert _ultima(finestra).startswith("Riprende da")
+    assert _ultima(finestra).startswith("Riprende")
 
 
 def test_canc_maiuscolo_canc_f4_e_crea_sulla_selezione(finestra, monkeypatch):
@@ -1508,7 +1668,7 @@ def test_backspace_risale_chiudendo(finestra, suoni_annotati):
     finestra._seleziona(_voce_di(finestra, rock, "b.mp3"))
     _nell_albero(finestra, wx.WXK_BACK)
     assert finestra._voce_corrente() == rock and not finestra.albero.IsExpanded(rock)
-    assert suoni_annotati[-1] == "risali" and _ultima(finestra).startswith("Chiuso Playlist, brani: 2")
+    assert suoni_annotati[-1] == "risali" and _ultima(finestra) == "Chiuso Playlist."
     _nell_albero(finestra, wx.WXK_BACK)
     assert finestra._voce_corrente() == finestra.nodo_playlist and not finestra.albero.IsExpanded(finestra.nodo_playlist)
     # Le due righe sono una sola, riscritta.
@@ -2025,6 +2185,9 @@ class _ListaFinta:
     def aggiorna(self, chiave, testo):
         self.righe[chiave] = testo
         self.a_campo_aperto.append(bool(self.campo and self.campo.aperto))
+
+    def IsShown(self):
+        return True
 
 
 def _cambia(finestra, monkeypatch, chiave, *risposte):
@@ -2712,6 +2875,8 @@ def test_scheda_audio_all_avvio_che_non_si_apre(app, tmp_path, monkeypatch, suon
         assert prova.prove == [(modulo.SILENZIO_DI_PROVA, 2)]
         assert chiamate == [(cuffie, True), ({}, False)]
         assert "La scheda audio scelta, Cuffie USB, non si apre: uso quella automatica." in [_senza_ora(r) for r in f._righe]
+        # Il suono arriva dopo quello dell'avvio (tappa 9).
+        wx.Yield()
         assert "errore" in suoni_annotati
         # La scelta resta, anche nel file, per quando le cuffie tornano libere.
         assert f.impostazioni["scheda_audio"] == cuffie
@@ -3262,6 +3427,36 @@ def _tracce(video=True, audio=1, sottotitoli=0, scelto_audio=0, scelto_sub=None)
     return {"video": video,
             "audio": [{"id": i + 1, "lang": "ita" if i == 0 else "eng", "selected": i == scelto_audio, "codec": "aac"} for i in range(audio)],
             "sub": [{"id": i + 1, "lang": "ita", "title": f"Traccia {i + 1}", "selected": i == scelto_sub, "codec": "subrip"} for i in range(sottotitoli)]}
+
+
+def test_il_video_aspetta_la_chiusura_dei_dialoghi_e_la_ripresa(finestra, monkeypatch, suoni_annotati):
+    stato, _chiamate = _video_finto(finestra, monkeypatch, _tracce())
+    finestra.impostazioni["video"] = True
+    # Con un dialogo aperto la finestra principale e' disabilitata: il video
+    # aspetta che torni attiva, per non rubare il fuoco al dialogo (tappa 9).
+    finestra.Enable(False)
+    try:
+        finestra._aggiorna_il_video()
+        assert (finestra._video is None or not finestra._video.IsShown()) and finestra._video_rimandato
+    finally:
+        finestra.Enable(True)
+    finestra._all_attivazione(wx.ActivateEvent(wx.wxEVT_ACTIVATE, True))
+    wx.Yield()
+    assert finestra._video.IsShown() and not finestra._video_rimandato
+    # Esc nella finestra la nasconde per il brano, e lo dice.
+    finestra._nascondi_a_mano()
+    assert not finestra._video.IsShown() and suoni_annotati[-1] == "video_nascosto"
+    # Il brano ripreso all'avvio in pausa apre la finestra con X, non subito.
+    pausa = [True]
+    monkeypatch.setattr(type(finestra.motore), "in_pausa", property(lambda _self: pausa[0]))
+    stato["in_corso"] = r"C:\m\altro.mkv"
+    finestra._video_in_attesa = stato["in_corso"]
+    finestra._aggiorna_il_video()
+    assert not finestra._video.IsShown()
+    pausa[0] = False
+    finestra._riprende_il_video()
+    assert finestra._video.IsShown() and finestra._video_in_attesa is None
+    finestra._nascondi_il_video()
 
 
 def test_maiuscolo_f1_accende_il_video_e_la_finestra_si_apre_e_si_chiude(finestra, monkeypatch, suoni_annotati):

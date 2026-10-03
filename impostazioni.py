@@ -1,6 +1,6 @@
 # MeTeOra, le impostazioni: i valori che il programma ricorda fra un avvio e l'altro.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 le righe della console. Nella 1.51.0 caratteri, colori e scheda audio, e i limiti controllati alla lettura del file. Nella 1.51.2 un file con un JSON che non e' un dizionario non ferma l'avvio. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza (tappa 4, issue 15). Nella 1.59.0 la riproduzione casuale (issue 17). Nella 1.61.0 il modello della riproduzione casuale. Nella 1.63.0 video, sottotitoli letti e sintesi (tappa 7). Nella 1.64.0 i percorsi di rete scritti a mano. Nella 1.65.0 il banco dei suoni MIDI.
+# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 le righe della console. Nella 1.51.0 caratteri, colori e scheda audio, e i limiti controllati alla lettura del file. Nella 1.51.2 un file con un JSON che non e' un dizionario non ferma l'avvio. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza (tappa 4, issue 15). Nella 1.59.0 la riproduzione casuale (issue 17). Nella 1.61.0 il modello della riproduzione casuale. Nella 1.63.0 video, sottotitoli letti e sintesi (tappa 7). Nella 1.64.0 i percorsi di rete scritti a mano. Nella 1.65.0 il banco dei suoni MIDI. Nella 1.66.36 un file illeggibile non si sovrascrive: si salva accanto, con .nuovo.
 
 """Le impostazioni, in un file JSON accanto al programma.
 
@@ -175,19 +175,42 @@ class Impostazioni(dict):
         # quando la finestra cambia quelli di un'istanza.
         super().__init__(copy.deepcopy(PREDEFINITE))
         self.percorso = percorso
+        # Perche' il file non si e' letto, se non si e' letto, e se le
+        # impostazioni vengono dal .nuovo salvato la volta prima.
+        self.errore = None
+        self.da_nuovo = False
 
     def carica(self):
+        """Legge il file. Un file che non si legge non si sovrascrive, come
+        quelli delle playlist e dei marker: errore dice perche', le
+        impostazioni restano predefinite e si salvano accanto, con .nuovo; alla
+        volta dopo, se il file e' ancora illeggibile, si riparte da quello
+        (tappa 9, 1.66.36)."""
         if not os.path.isfile(self.percorso):
             return
         try:
-            with open(self.percorso, encoding="utf-8") as f:
-                dati = json.load(f)
-        except (OSError, ValueError, RecursionError):
-            return
+            dati = self._leggi(self.percorso)
+        except (OSError, ValueError, RecursionError) as e:
+            self.errore = str(e) or type(e).__name__
+            self.percorso += ".nuovo"
+            try:
+                dati = self._leggi(self.percorso) if os.path.isfile(self.percorso) else {}
+                self.da_nuovo = bool(dati)
+            except (OSError, ValueError, RecursionError):
+                dati = {}
+        self._applica(dati)
+
+    @staticmethod
+    def _leggi(percorso):
+        with open(percorso, encoding="utf-8") as f:
+            dati = json.load(f)
         # Un file che non contiene un dizionario, per esempio una lista, vale
-        # come un file illeggibile: tutto resta predefinito.
+        # come un file illeggibile.
         if not isinstance(dati, dict):
-            return
+            raise ValueError("il file non contiene le impostazioni")
+        return dati
+
+    def _applica(self, dati):
         for chiave, predefinito in PREDEFINITE.items():
             if chiave not in dati:
                 continue

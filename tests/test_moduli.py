@@ -112,6 +112,29 @@ def test_impostazioni_scartano_i_valori_sbagliati(tmp_path):
     assert imp["passo_volume"] == PREDEFINITE["passo_volume"]
 
 
+def test_impostazioni_illeggibili_non_si_sovrascrivono(tmp_path):
+    # Tappa 9: un file che non si legge resta com'e', e le impostazioni nuove
+    # vanno accanto, con .nuovo, da cui si riparte la volta dopo.
+    percorso = tmp_path / "imp.json"
+    for contenuto in ("{rotto", "[1, 2]"):
+        percorso.write_text(contenuto, encoding="utf-8")
+        for nuovo in tmp_path.glob("*.nuovo"):
+            nuovo.unlink()
+        imp = Impostazioni(str(percorso))
+        imp.carica()
+        assert imp.errore and imp.percorso == str(percorso) + ".nuovo" and imp["volume"] == PREDEFINITE["volume"]
+        imp["volume"] = 42
+        imp.salva()
+        assert percorso.read_text(encoding="utf-8") == contenuto
+        assert not imp.da_nuovo
+        di_nuovo = Impostazioni(str(percorso))
+        di_nuovo.carica()
+        assert di_nuovo["volume"] == 42 and di_nuovo.da_nuovo
+    sano = Impostazioni(str(tmp_path / "sano.json"))
+    sano.carica()
+    assert sano.errore is None
+
+
 def test_righe_della_console_dal_file(tmp_path):
     percorso = tmp_path / "imp.json"
     assert PREDEFINITE["righe_della_console"] == 2000

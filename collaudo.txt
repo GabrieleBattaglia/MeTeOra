@@ -1,4 +1,4 @@
-Collaudo di MeTeOra 1.66.0, con NVDA: Questa rete, i MIDI, i tracker e le console. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.66.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Collaudo di MeTeOra 1.66.36, con NVDA: Questa rete, i MIDI, i tracker, le console e le rifiniture della tappa 9. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.66.36. Scrivi le note sulla riga della voce; le voci superate si cancellano.
 Nella plancia, dopo Questo PC, c'è Questa rete; freccia destra la apre.
 Dentro c'è iliadbox (iliadbox_Server), il percorso salvato in Windows: si apre, mostra cartelle e brani, e si suona come una cartella di Questo PC.
 Con la iliadbox spenta, o il cavo staccato, aprire il suo ramo non blocca MeTeOra: dopo pochi secondi la console dice che non risponde, e il ramo si può riaprire.
@@ -24,3 +24,16 @@ Un file con più brani, come un nsf, si apre con freccia destra: i sottobrani ha
 B e Z passano da un brano all'altro dentro il file, come nei SID.
 Un brano che gira in tondo sfuma alla fine invece di troncarsi.
 Il filtro k=chip trova la musica delle console, e r>1 i file con più brani.
+Tappa 9: Maiuscolo+A, l'apostrofo o un altro tasto senza comando dicono che non hanno un comando, con un suono, e nella plancia il fuoco resta dov'è.
+Esc nei campi, per esempio Maiuscolo con M, Q o L, W, Rinomina, Apri file o la ricerca nella console, scrive cosa non è cambiato, con il suono nuovo dell'annullamento: dimmi se ti piace.
+Una domanda con Sì e No, per esempio Elimina playlist: NVDA legge la domanda; Esc vale No, S risponde sì e N no.
+Spazio o Applicazioni su Nuova playlist, Apri file o Impostazioni dicono che non hanno un menu.
+Aggiorna su Questo PC ha un suono nuovo e dice cosa ha aggiornato.
+F8 scrive nella console dove ha portato la selezione.
+Con il video acceso, apri le impostazioni mentre suona una playlist di video: al video seguente la sua finestra si apre solo quando chiudi le impostazioni.
+Esc nella finestra del video la nasconde con un suono nuovo; a schermo intero Esc torna in finestra con il suono di Maiuscolo con F5.
+Esci con un video in pausa e riapri MeTeOra: il fuoco resta nella plancia, e la finestra del video si apre con X.
+Un filtro che lascia passare un solo brano dice Passa 1 brano.
+In una ricerca lunga, con il fuoco su Mostra altri risultati mentre arrivano i risultati, il fuoco non salta.
+Con Ctrl e le frecce su una voce non selezionata, F7 dice che Canc, X, F4 e il menu agiscono sulla voce selezionata.
+F3 nomina FluidSynth, libgme e accessible_output2.

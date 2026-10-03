@@ -1,6 +1,6 @@
-# MeTeOra, i dialoghi: il campo da una riga, la finestra delle impostazioni, la scelta da una lista e la finestra dei marcatori.
+# MeTeOra, i dialoghi: il campo da una riga, la domanda con Si' e No, la finestra delle impostazioni, la scelta da una lista e la finestra dei marcatori.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); DialogoTesto arriva da finestra.py.
+# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); DialogoTesto arriva da finestra.py. Nella 1.66.36 la domanda con Sì e No, che si chiude con Esc.
 
 """I dialoghi di MeTeOra, fuori dalla finestra principale.
 
@@ -37,6 +37,49 @@ class DialogoTesto(wx.TextEntryDialog):
         if campo is not None:
             wx.CallAfter(campo.SelectAll)
         return super().ShowModal()
+
+
+class DialogoConferma(wx.Dialog):
+    """Una domanda con Si' e No, e No come risposta predefinita: Esc vale No,
+    e le lettere S e N rispondono senza cercare il pulsante. ShowModal da'
+    wx.ID_YES o wx.ID_NO. Prende il posto della domanda di Windows, che con i
+    soli Si' e No non si chiude con Esc (tappa 9, 1.66.36)."""
+
+    def __init__(self, genitore, domanda, titolo):
+        from GBwx import STILE_ADATTABILE, adatta_finestra, pannello_scorrevole
+
+        super().__init__(genitore, title=titolo, style=STILE_ADATTABILE)
+        pannello = pannello_scorrevole(self)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        # SetLabelText: una & nel nome di una playlist o di un file resta
+        # com'e', invece di diventare la lettera di un tasto.
+        self.domanda = wx.StaticText(pannello)
+        self.domanda.SetLabelText(domanda)
+        # Le righe vanno a capo a una sessantina di caratteri, misurati sul
+        # carattere in uso.
+        self.domanda.Wrap(self.domanda.GetCharWidth() * 60)
+        self.si = wx.Button(pannello, wx.ID_YES, "&Sì")
+        self.no = wx.Button(pannello, wx.ID_NO, "&No")
+        pulsanti = wx.BoxSizer(wx.HORIZONTAL)
+        for pulsante in (self.si, self.no):
+            pulsanti.Add(pulsante, 0, wx.LEFT, 5)
+        sizer.Add(self.domanda, 0, wx.ALL, 5)
+        sizer.Add(pulsanti, 0, wx.ALL | wx.ALIGN_RIGHT, 5)
+        pannello.SetSizer(sizer)
+        adatta_finestra(self, pannello, (480, 160))
+        self.SetEscapeId(wx.ID_NO)
+        self.no.SetDefault()
+        self.Bind(wx.EVT_BUTTON, lambda evento: self.EndModal(evento.GetId()))
+        self.Bind(wx.EVT_CHAR_HOOK, self._tasto)
+        self.no.SetFocus()
+
+    def _tasto(self, evento):
+        codice = evento.GetUnicodeKey()
+        lettera = chr(codice).lower() if codice != wx.WXK_NONE and evento.GetModifiers() == wx.MOD_NONE else ""
+        if lettera in ("s", "n"):
+            self.EndModal(wx.ID_YES if lettera == "s" else wx.ID_NO)
+            return
+        evento.Skip()
 
 
 class FinestraImpostazioni(wx.Dialog):
@@ -320,9 +363,11 @@ class FinestraMarcatori(wx.Dialog):
         self._azioni["suono"]("domanda")
         with DialogoTesto(self, "Testo da cercare nei marcatori:", "Cerca nei marcatori", self._cercato) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
+                self._azioni["riscontro"]("annullamento", "Ricerca nei marcatori annullata.")
                 return
             testo = " ".join(dialogo.GetValue().split())
         if not testo:
+            self._azioni["riscontro"]("annullamento", "Ricerca nei marcatori annullata: il testo è vuoto.")
             return
         self._cercato = testo
         cercato = testo.casefold()

@@ -1,6 +1,6 @@
 # MeTeOra, la finestra del video: due pannelli per i due lettori, e la barra del tempo per chi vede.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/10/2026: nasce con la tappa 7.
+# 03/10/2026: nasce con la tappa 7. Nella 1.66.36 Esc a schermo intero ha il riscontro di Maiuscolo con F5.
 
 """La finestra del video (tappa 7, piano 5.5).
 
@@ -109,7 +109,8 @@ class FinestraVideo(wx.Frame):
     def _tasto(self, evento):
         if evento.GetKeyCode() == wx.WXK_ESCAPE and evento.GetModifiers() == wx.MOD_NONE:
             if self.IsFullScreen():
-                self.ShowFullScreen(False)
+                # Come Maiuscolo con F5, con il suo suono e la sua riga.
+                self._principale._comando_schermo_intero()
             else:
                 self._nascondi()
             return
