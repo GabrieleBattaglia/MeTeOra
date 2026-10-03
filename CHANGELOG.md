@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.64.0] - 2026-10-03
+
+- Questa rete, un ramo nuovo della plancia accanto a Questo PC: i percorsi di rete salvati in Windows, come il disco della iliadbox, ciascuno con il suo nome; i percorsi che aggiungi con il comando Aggiungi un percorso di rete, ricordati e da togliere con Canc; e il ramo Computer della rete, che cerca in disparte i computer della rete e le loro cartelle condivise. Le cartelle di rete si aprono e si suonano come quelle di Questo PC, e una cartella che non risponde non blocca più MeTeOra: dopo pochi secondi la console lo dice. Chiesto da Gabriele.
+
 ## [1.63.0] - 2026-10-03
 
 - Il video, tappa 7. Maiuscolo con F1 accende e spegne il video: acceso, quando parte un brano con il video si apre la sua finestra, sopra MeTeOra e grande come lei, che chi guarda può spostare, ridimensionare e mettere a schermo intero; allo stop sparisce e MeTeOra torna davanti. Spento, dei video si sente solo l'audio, come finora. Nella finestra del video tutti i tasti di MeTeOra funzionano, ed Esc toglie lo schermo intero o nasconde la finestra per il brano in corso; per chi vede c'è una barra del tempo che compare con il mouse sul bordo inferiore.

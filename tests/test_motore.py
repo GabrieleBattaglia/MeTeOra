@@ -735,9 +735,12 @@ def test_spegnere_la_dissolvenza_scarta_il_preparato(crea, avvisi, tmp_path):
 
 
 def test_ricontrollo_al_passaggio_passa_al_giusto(avvisi, tmp_path):
-    primo = _silenzio(tmp_path / "primo.wav", 2)
-    preparato = _silenzio(tmp_path / "preparato.wav", 4)
-    giusto = _silenzio(tmp_path / "giusto.wav", 4)
+    # Brani e dissolvenza lunghi, e lo stato fotografato nell'istante in cui
+    # il giusto entra: sotto il carico della suite intera, con una
+    # dissolvenza di mezzo secondo, il controllo arrivava a sfumatura finita.
+    primo = _silenzio(tmp_path / "primo.wav", 4)
+    preparato = _silenzio(tmp_path / "preparato.wav", 6)
+    giusto = _silenzio(tmp_path / "giusto.wav", 6)
     m = None
 
     def al_passaggio(percorso, sottobrano):
@@ -748,15 +751,24 @@ def test_ricontrollo_al_passaggio_passa_al_giusto(avvisi, tmp_path):
 
     m = Motore(alla_fine=avvisi("alla_fine"), ao="null", chiedi_il_seguente=lambda: m.prepara(preparato), al_passaggio=al_passaggio)
     try:
-        m.dissolvenza = 0.4
+        m.dissolvenza = 1.0
         m.suona(primo)
-        assert _aspetta(lambda: m.in_corso == giusto, 3)
+        visto = {}
+
+        def entrato():
+            sfumatura = m._sfumatura
+            if m.in_corso != giusto or sfumatura is None:
+                return False
+            visto.update(uscente=sfumatura.uscente, ampiezza=sfumatura.ampiezza, percorsi=[lettore.percorso for lettore in m._lettori])
+            return True
+
+        assert _aspetta(entrato, 6)
         lettore_primo = _lettore_di(m, primo)
         # Il preparato, appena entrato e quasi muto, si ferma; il primo continua
         # a scendere, ora verso il giusto, e si ferma prima della sua fine.
-        assert all(lettore.percorso != preparato for lettore in m._lettori)
-        assert m._sfumatura.uscente is lettore_primo and m._sfumatura.ampiezza > 0.9
-        assert _aspetta(lambda: lettore_primo.percorso is None, 2)
+        assert preparato not in visto["percorsi"]
+        assert visto["uscente"] is lettore_primo and visto["ampiezza"] > 0.9
+        assert _aspetta(lambda: lettore_primo.percorso is None, 3)
         assert _aspetta(lambda: _lettore_di(m, giusto).mpv.volume == 80)
         assert avvisi.nomi() == ["al_passaggio"]
     finally:

@@ -51,7 +51,7 @@ def test_aree_nell_ordine_di_tabulazione(finestra):
 
 
 def test_rami_principali(finestra):
-    assert _etichette(finestra, finestra.albero.GetRootItem()) == ["Preferiti, brani: 0, totali: 0", "Playlist", "Questo PC", "Apri file", "Impostazioni"]
+    assert _etichette(finestra, finestra.albero.GetRootItem()) == ["Preferiti, brani: 0, totali: 0", "Playlist", "Questo PC", "Questa rete", "Apri file", "Impostazioni"]
     assert _etichette(finestra, finestra.nodo_playlist) == ["Nuova playlist"]
 
 
@@ -1461,7 +1461,7 @@ def test_maiuscolo_e_ctrl_con_le_frecce_senza_passare_dall_albero(finestra):
     # Dopo Ctrl l'ancora resta, come in Esplora risorse: Maiuscolo con Fine
     # seleziona da b fino in fondo.
     _nell_albero(finestra, wx.WXK_END, maiuscolo=True)
-    assert _selezionate(finestra) == sorted(["b.mp3", "c.mp3", "d.mp3", "Nuova playlist", "Questo PC", "Apri file", "Impostazioni"])
+    assert _selezionate(finestra) == sorted(["b.mp3", "c.mp3", "d.mp3", "Nuova playlist", "Questo PC", "Questa rete", "Apri file", "Impostazioni"])
     assert finestra.albero.GetItemText(finestra._voce_corrente()) == "Impostazioni"
     # Un altro tasto lascia l'ancora: si riparte dalla voce col fuoco.
     _nell_albero(finestra, wx.WXK_LEFT)
@@ -3418,3 +3418,83 @@ def test_la_barra_del_tempo_della_finestra_del_video(finestra, monkeypatch):
     video.barra.SetValue(500)
     video._lascia(wx.ScrollEvent())
     assert salti == [60.0]
+
+
+def _rete_finta(finestra, monkeypatch, tmp_path):
+    """Questa rete senza rete: un percorso salvato che e' una cartella
+    temporanea con un brano, un computer con una cartella condivisa, e le
+    ricerche in disparte che aspettano la prova."""
+    import questa_rete
+
+    musica = tmp_path / "musica"
+    musica.mkdir()
+    (musica / "canzone.mp3").write_bytes(b"")
+    stato = {"raggiungibile": True, "ricerche": []}
+    monkeypatch.setattr(questa_rete, "percorsi_salvati", lambda cartella=None: [("nas (server)", str(musica))])
+    monkeypatch.setattr(questa_rete, "computer", lambda: [("NAS", r"\\NAS")])
+    monkeypatch.setattr(questa_rete, "condivisioni", lambda server: [("film", str(musica))])
+    monkeypatch.setattr(questa_rete, "raggiungibile", lambda percorso, attesa=3.0: stato["raggiungibile"])
+    monkeypatch.setattr(questa_rete, "in_disparte", lambda lavoro, al_termine: stato["ricerche"].append((lavoro, al_termine)))
+    return stato
+
+
+def test_questa_rete_mostra_i_percorsi_i_computer_e_il_comando(finestra, monkeypatch, tmp_path, suoni_annotati):
+    stato = _rete_finta(finestra, monkeypatch, tmp_path)
+    finestra.impostazioni["percorsi_di_rete"] = [r"\\server\video"]
+    finestra.albero.Expand(finestra.nodo_rete)
+    assert _etichette(finestra, finestra.nodo_rete) == ["nas (server)", r"\\server\video", "Computer della rete", "Aggiungi un percorso di rete"]
+    # Il percorso salvato si apre come una cartella di Questo PC, e tiene il suo nome.
+    salvato = next(finestra._figli(finestra.nodo_rete))
+    finestra.albero.Expand(salvato)
+    assert _etichette(finestra, salvato) == ["canzone.mp3"]
+    finestra._aggiorna_cartelle()
+    assert finestra.albero.GetItemText(salvato).startswith("nas (server)")
+    # Una cartella che non risponde non si apre, e lo si dice.
+    stato["raggiungibile"] = False
+    a_mano = list(finestra._figli(finestra.nodo_rete))[1]
+    finestra.albero.Expand(a_mano)
+    assert _ultima(finestra).startswith(r"\\server\video non risponde") and suoni_annotati[-1] == "errore"
+    assert finestra._dati(a_mano)["caricato"] is False
+    # I computer si cercano in disparte, con una voce d'attesa.
+    computer = list(finestra._figli(finestra.nodo_rete))[2]
+    finestra.albero.Expand(computer)
+    assert _etichette(finestra, computer) == ["Cerco i computer della rete..."] and suoni_annotati[-1] == "ricerca_avviata"
+    lavoro, _al_termine = stato["ricerche"].pop()
+    finestra._trovati_nella_rete(finestra._dati(computer), lavoro())
+    assert _etichette(finestra, computer) == ["NAS"] and _ultima(finestra) == "Trovato 1 computer nella rete." and suoni_annotati[-1] == "ricerca_finita"
+    nas = next(finestra._figli(computer))
+    finestra.albero.Expand(nas)
+    lavoro, _al_termine = stato["ricerche"].pop()
+    finestra._trovati_nella_rete(finestra._dati(nas), lavoro())
+    assert _etichette(finestra, nas) == ["film"] and _ultima(finestra) == "NAS: 1 cartella condivisa."
+    # Una ricerca finita dopo che il suo ramo e' stato rifatto non tocca niente.
+    finestra._aggiorna_ramo(finestra.nodo_rete)
+    finestra._trovati_nella_rete({"tipo": "computer_della_rete"}, [("Altro", r"\\Altro")])
+
+
+def test_aggiungere_e_togliere_un_percorso_di_rete(finestra, monkeypatch, tmp_path, suoni_annotati):
+    _rete_finta(finestra, monkeypatch, tmp_path)
+    finestra.albero.Expand(finestra.nodo_rete)
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("server"))
+    finestra._comando_aggiungi_percorso_di_rete()
+    assert _ultima(finestra) == r"server non è un percorso di rete: si scrive come \\server\cartella." and not finestra.impostazioni["percorsi_di_rete"]
+    import questa_rete
+
+    monkeypatch.setattr(questa_rete, "raggiungibile", lambda percorso, attesa=3.0: False)
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto(r" \\server\video/ "))
+    finestra._comando_aggiungi_percorso_di_rete()
+    assert finestra.impostazioni["percorsi_di_rete"] == [r"\\server\video"] and _salvate(finestra)["percorsi_di_rete"] == [r"\\server\video"]
+    assert _ultima(finestra) == r"Aggiunto a Questa rete \\server\video. Adesso non risponde, ma lo tengo." and suoni_annotati[-1] == "percorso_aggiunto"
+    assert r"\\server\video" in _etichette(finestra, finestra.nodo_rete)
+    assert finestra.albero.GetItemText(finestra._voce_corrente()) == r"\\server\video"
+    finestra._comando_aggiungi_percorso_di_rete()
+    assert _ultima(finestra) == r"\\server\video è già in Questa rete."
+    # Il menu del percorso scritto a mano ha Togli il percorso; Canc lo toglie.
+    voce = finestra._voce_corrente()
+    assert "Togli il percorso" in [nome for nome, _azione in finestra._voci_del_menu(finestra._dati(voce))]
+    finestra._cancella(voce)
+    assert finestra.impostazioni["percorsi_di_rete"] == [] and r"\\server\video" not in _etichette(finestra, finestra.nodo_rete)
+    assert _ultima(finestra) == r"Tolto da Questa rete \\server\video. I file restano dove sono." and suoni_annotati[-1] == "percorso_tolto"
+    # Canc su un percorso salvato in Windows non toglie niente.
+    finestra._cancella(next(finestra._figli(finestra.nodo_rete)))
+    assert _ultima(finestra) == "Qui Canc non cancella niente."

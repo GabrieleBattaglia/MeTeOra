@@ -643,7 +643,7 @@ def test_predefinite_della_tappa_4():
 
 
 def test_carica_i_valori_buoni(tmp_path):
-    buoni = {"volume": 300, "passo_volume": 50, "passo_indietro": 0.1, "passo_avanti": 0.23, "volume_effetti": 1, "insegui": True, "casuale": True, "modello_casuale": "totale", "video": True, "sottotitoli": True, "sintesi": "nvda",
+    buoni = {"volume": 300, "passo_volume": 50, "passo_indietro": 0.1, "passo_avanti": 0.23, "volume_effetti": 1, "insegui": True, "casuale": True, "modello_casuale": "totale", "video": True, "sottotitoli": True, "sintesi": "nvda", "percorsi_di_rete": ["\\\\server\\musica"],
         "ripresa": {"percorso": "x"}, "righe_della_console": 100, "caratteri": {"p": 6, "t": 72}, "colori_testo": {"c": [0, 100, 50]},
         "colori_sfondo": {"p": [31, 31, 31], "c": [100, 100, 100], "t": [0, 0, 0]},
         "scheda_audio": {"dispositivo": "Altoparlanti (Realtek(R) Audio)", "interfaccia": "Windows WASAPI"},
@@ -692,6 +692,7 @@ def test_carica_i_limiti_della_tappa_4(tmp_path):
     ("casuale", 1), ("casuale", "sì"), ("casuale", None),
     ("modello_casuale", "mazzo"), ("modello_casuale", 1), ("modello_casuale", None), ("modello_casuale", ""),
     ("video", 1), ("sottotitoli", "sì"), ("sintesi", "festival"), ("sintesi", 3), ("sintesi", ""),
+    ("percorsi_di_rete", ["C:\\musica"]), ("percorsi_di_rete", [3]), ("percorsi_di_rete", "\\\\server"), ("percorsi_di_rete", ["\\\\"]),
 ])
 def test_carica_scarta_i_valori_fuori_intervallo(tmp_path, chiave, valore):
     imp = _caricate(tmp_path, {chiave: valore, "insegui": True})

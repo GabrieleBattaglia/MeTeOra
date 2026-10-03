@@ -1,0 +1,10 @@
+Collaudo di MeTeOra 1.64.0, con NVDA: Questa rete. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.64.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Nella plancia, dopo Questo PC, c'è Questa rete; freccia destra la apre.
+Dentro c'è iliadbox (iliadbox_Server), il percorso salvato in Windows: si apre, mostra cartelle e brani, e si suona come una cartella di Questo PC.
+Con la iliadbox spenta, o il cavo staccato, aprire il suo ramo non blocca MeTeOra: dopo pochi secondi la console dice che non risponde, e il ramo si può riaprire.
+Computer della rete, con freccia destra: compare Cerco i computer della rete, e dopo qualche secondo arriva iliadbox_Server, con il suono della ricerca finita.
+iliadbox_Server, con freccia destra, mostra le sue cartelle condivise, e ciascuna si apre.
+Aggiungi un percorso di rete, con Invio: chiede un percorso come \\server\cartella; dopo, il percorso sta in Questa rete, con il suo suono.
+Un percorso scritto male, o già presente, viene rifiutato con il motivo.
+Canc su un percorso aggiunto da te lo toglie, con il suo suono; su quello salvato in Windows non toglie niente.
+Chiudi e riapri MeTeOra: i percorsi aggiunti da te ci sono ancora.

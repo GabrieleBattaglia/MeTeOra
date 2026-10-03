@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7).
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete.
 
 """La finestra di MeTeOra.
 
@@ -47,6 +47,7 @@ import wx
 import formati
 import marcatori
 import percorsi
+import questa_rete
 import questo_pc
 import schede_audio
 import sintesi
@@ -185,6 +186,10 @@ TASTI_DEL_CONTESTO = {
     "playlist": ("una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Filtro, Rinomina ed Elimina. Barra verticale: il filtro. Canc elimina la playlist, dopo una conferma."),
     "brano": ("un brano di una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Sposta e Saltato. Canc toglie il brano dalla playlist, Maiuscolo+Canc manda il file nel cestino. Un SID con più sottobrani, o un brano con dei marker, si apre con freccia destra."),
     "pc": ("Questo PC", "Freccia destra mostra le unità. Invio, Applicazioni o Spazio: menu con Aggiorna."),
+    "rete": ("Questa rete", "Freccia destra mostra i percorsi di rete, i computer della rete e il comando per aggiungere un percorso. Invio, Applicazioni o Spazio: menu con Aggiungi un percorso di rete e Aggiorna."),
+    "computer_della_rete": ("i computer della rete", "Freccia destra li cerca, in disparte: può volerci qualche secondo. Invio, Applicazioni o Spazio: menu con Cerca di nuovo."),
+    "computer": ("un computer della rete", "Freccia destra mostra le sue cartelle condivise. Invio, Applicazioni o Spazio: menu con Aggiorna."),
+    "attesa": ("una ricerca in corso", "Aspetta: la voce sparisce quando la ricerca finisce."),
     "unita": ("un'unità", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Crea playlist da qui."),
     "cartella": ("una cartella", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Riproduci e Crea playlist da qui."),
     "file": ("un file", "Invio, Applicazioni o Spazio: menu con Riproduci e Aggiungi alla playlist. Maiuscolo+Canc manda il file nel cestino. Un SID con più sottobrani, o un file con dei marker, si apre con freccia destra."),
@@ -758,6 +763,8 @@ class Finestra(wx.Frame):
         self.nodo_playlist = self.albero.AppendItem(radice, "Playlist", data={"tipo": "radice_playlist"})
         self.nodo_pc = self.albero.AppendItem(radice, "Questo PC", data={"tipo": "pc", "caricato": False})
         self.albero.SetItemHasChildren(self.nodo_pc, True)
+        self.nodo_rete = self.albero.AppendItem(radice, "Questa rete", data={"tipo": "rete", "caricato": False})
+        self.albero.SetItemHasChildren(self.nodo_rete, True)
         self.albero.AppendItem(radice, "Apri file", data={"tipo": "comando", "comando": "apri_file"})
         self.albero.AppendItem(radice, "Impostazioni", data={"tipo": "comando", "comando": "impostazioni"})
         self._popola_playlist()
@@ -1421,11 +1428,12 @@ class Finestra(wx.Frame):
         ignote = len(durate) - len(note)
         return f"{len(brani)} ({durata_lunga(sum(note))}{f', {ignote} senza durata' if ignote else ''})"
 
-    def _etichetta_della_cartella(self, cartella):
+    def _etichetta_della_cartella(self, cartella, nome=None):
         """Il nome della cartella con quanti file suonabili ha, sottocartelle
         comprese, e quanto durano in tutto, appena il contatore e lo schedario
-        lo sanno."""
-        nome = os.path.basename(cartella.rstrip("\\")) or cartella
+        lo sanno. nome, se c'e', e' quello da mostrare al posto del suo, come
+        per i percorsi di rete."""
+        nome = nome or os.path.basename(cartella.rstrip("\\")) or cartella
         files = self.contatore.files(cartella)
         if not files:
             return nome
@@ -1443,9 +1451,9 @@ class Finestra(wx.Frame):
         toglie quelle che il contatore ha trovato senza niente da suonare,
         sottocartelle comprese, anche se il fuoco ci sta sopra o dentro."""
         vuote = set()
-        for voce in self._tutte_le_voci(self.nodo_pc):
+        for voce in [*self._tutte_le_voci(self.nodo_pc), *self._tutte_le_voci(self.nodo_rete)]:
             dati = self._dati(voce) or {}
-            if dati.get("tipo") != "cartella":
+            if dati.get("tipo") != "cartella" or dati.get("radice_di_rete"):
                 continue
             # Una cartella aperta che mostra dei file non e' vuota, qualunque
             # cosa dica un conto fatto su una lettura vecchia.
@@ -1456,7 +1464,7 @@ class Finestra(wx.Frame):
                 if not self._dentro_una_di(voce, vuote):
                     vuote.add(voce)
                 continue
-            nuova = self._etichetta_della_cartella(dati["percorso"])
+            nuova = self._etichetta_della_cartella(dati["percorso"], dati.get("nome"))
             if self.albero.GetItemText(voce) != nuova:
                 self.albero.SetItemText(voce, nuova)
         if vuote:
@@ -1674,6 +1682,21 @@ class Finestra(wx.Frame):
                 figlio = self.albero.AppendItem(voce, etichetta, data={"tipo": "unita", "percorso": radice, "etichetta": etichetta, "caricato": False})
                 self.albero.SetItemHasChildren(figlio, True)
             return
+        if tipo == "rete":
+            self._riempi_la_rete(voce)
+            return
+        if tipo in ("computer_della_rete", "computer"):
+            self._cerca_nella_rete(voce, dati)
+            return
+        if dati.get("rete") and not questa_rete.raggiungibile(dati["percorso"]):
+            # Una cartella di rete spenta farebbe aspettare Windows anche mezzo
+            # minuto: dopo pochi secondi si lascia perdere, e il ramo resta da
+            # riaprire.
+            dati["caricato"] = False
+            self.albero.SetItemHasChildren(voce, True)
+            wx.CallAfter(self.albero.Collapse, voce)
+            self._riscontro("errore", f"{dati['percorso']} non risponde: il computer o il disco di rete sono spenti, o la rete non c'è.")
+            return
         if tipo in ("risultati", "gruppo_risultati"):
             self._riempi_gruppo(voce)
             return
@@ -1726,10 +1749,119 @@ class Finestra(wx.Frame):
             self.albero.SetItemHasChildren(voce, False)
             self._riscontro("niente_da_suonare", "Niente da suonare qui dentro.")
 
+    # Questa rete, 1.64.0.
+
+    def _voce_di_rete(self, genitore, nome, percorso, a_mano=False):
+        """Una cartella condivisa sotto Questa rete o sotto un computer: si
+        apre come le cartelle di Questo PC, ma prima si prova se risponde, e
+        resta nella plancia anche senza niente da suonare."""
+        dati = {"tipo": "cartella", "percorso": percorso, "nome": nome, "caricato": False, "rete": True, "radice_di_rete": True}
+        if a_mano:
+            dati["a_mano"] = True
+        voce = self.albero.AppendItem(genitore, nome, data=dati)
+        self.albero.SetItemHasChildren(voce, True)
+        return voce
+
+    def _riempi_la_rete(self, voce):
+        """I figli di Questa rete: i percorsi salvati in Windows, quelli
+        scritti a mano, i computer della rete e il comando per aggiungere."""
+        for nome, percorso in questa_rete.percorsi_salvati():
+            self._voce_di_rete(voce, nome, percorso)
+        for percorso in self.impostazioni["percorsi_di_rete"]:
+            self._voce_di_rete(voce, percorso, percorso, a_mano=True)
+        computer = self.albero.AppendItem(voce, "Computer della rete", data={"tipo": "computer_della_rete", "caricato": False})
+        self.albero.SetItemHasChildren(computer, True)
+        self.albero.AppendItem(voce, "Aggiungi un percorso di rete", data={"tipo": "comando", "comando": "aggiungi_percorso_di_rete"})
+
+    def _cerca_nella_rete(self, voce, dati):
+        """I computer della rete, o le cartelle condivise di un computer: la
+        ricerca va in disparte, e intanto il ramo mostra una voce d'attesa."""
+        computer = dati["tipo"] == "computer_della_rete"
+        self.albero.AppendItem(voce, "Cerco i computer della rete..." if computer else "Cerco le cartelle condivise...", data={"tipo": "attesa"})
+        self._riscontro("ricerca_avviata", "Cerco i computer della rete: può volerci qualche secondo." if computer else f"Cerco le cartelle condivise di {dati['nome']}.")
+        lavoro = questa_rete.computer if computer else (lambda: questa_rete.condivisioni(dati["percorso"]))
+        questa_rete.in_disparte(lavoro, lambda trovati: wx.CallAfter(self._trovati_nella_rete, dati, trovati))
+
+    def _trovati_nella_rete(self, dati, trovati):
+        """Il risultato di una ricerca nella rete, se il suo ramo c'e' ancora."""
+        if self._chiusa:
+            return
+        voce = next((v for v in self._tutte_le_voci(self.nodo_rete) if self._dati(v) is dati), None)
+        if voce is None:
+            return
+        self.albero.DeleteChildren(voce)
+        computer = dati["tipo"] == "computer_della_rete"
+        for nome, percorso in trovati:
+            if computer:
+                figlio = self.albero.AppendItem(voce, nome, data={"tipo": "computer", "nome": nome, "percorso": percorso, "caricato": False})
+                self.albero.SetItemHasChildren(figlio, True)
+            else:
+                self._voce_di_rete(voce, nome, percorso)
+        if not trovati:
+            self.albero.SetItemHasChildren(voce, False)
+            dati["caricato"] = False
+            self._riscontro("non_disponibile", "Nella rete non ho trovato computer." if computer else f"{dati['nome']} non mostra cartelle condivise.")
+            return
+        quanti = len(trovati)
+        if computer:
+            testo = "Trovato 1 computer nella rete." if quanti == 1 else f"Trovati {quanti} computer nella rete."
+        else:
+            testo = f"{dati['nome']}: 1 cartella condivisa." if quanti == 1 else f"{dati['nome']}: {quanti} cartelle condivise."
+        self._riscontro("ricerca_finita", testo)
+
+    def _comando_aggiungi_percorso_di_rete(self):
+        """Chiede un percorso di rete, lo ricorda e lo mette in Questa rete,
+        anche se adesso non risponde."""
+        self._suono("domanda")
+        with DialogoTesto(self, "Il percorso di rete da aggiungere a Questa rete, per esempio \\\\server\\cartella.", "Aggiungi un percorso di rete") as dialogo:
+            if dialogo.ShowModal() != wx.ID_OK:
+                return
+            testo = dialogo.GetValue()
+        percorso = testo.strip().replace("/", "\\").rstrip("\\")
+        parti = percorso[2:].split("\\") if questa_rete.e_di_rete(percorso) else []
+        if len(parti) < 2 or not all(parti):
+            self._riscontro("errore", f"{testo.strip()} non è un percorso di rete: si scrive come \\\\server\\cartella.")
+            return
+        presenti = [p.casefold() for p in self.impostazioni["percorsi_di_rete"]] + [p.casefold() for _n, p in questa_rete.percorsi_salvati()]
+        if percorso.casefold() in presenti:
+            self._riscontro("non_disponibile", f"{percorso} è già in Questa rete.")
+            return
+        self.impostazioni["percorsi_di_rete"].append(percorso)
+        self._salva_impostazioni()
+        self._ricarica_la_rete(percorso)
+        avviso = "" if questa_rete.raggiungibile(percorso) else " Adesso non risponde, ma lo tengo."
+        self._riscontro("percorso_aggiunto", f"Aggiunto a Questa rete {percorso}.{avviso}")
+
+    def _togli_percorso_di_rete(self, percorso):
+        """Toglie un percorso scritto a mano: dalle impostazioni e dalla
+        plancia. I file restano dove sono."""
+        self.impostazioni["percorsi_di_rete"] = [p for p in self.impostazioni["percorsi_di_rete"] if p != percorso]
+        self._salva_impostazioni()
+        voce = next((v for v in self._figli(self.nodo_rete) if (self._dati(v) or {}).get("percorso") == percorso), None)
+        if voce is not None:
+            self._togli_dalla_plancia({voce})
+        self._riscontro("percorso_tolto", f"Tolto da Questa rete {percorso}. I file restano dove sono.")
+
+    def _ricarica_la_rete(self, da_selezionare=None):
+        """Rifa' i figli di Questa rete se e' gia' stata aperta, e porta la
+        selezione sul percorso dato."""
+        dati = self._dati(self.nodo_rete)
+        if not dati.get("caricato"):
+            return
+        aperta = self.albero.IsExpanded(self.nodo_rete)
+        self.albero.DeleteChildren(self.nodo_rete)
+        self._riempi_la_rete(self.nodo_rete)
+        if aperta:
+            self.albero.Expand(self.nodo_rete)
+        voce = next((v for v in self._figli(self.nodo_rete) if (self._dati(v) or {}).get("percorso") == da_selezionare), None)
+        if voce is not None and aperta:
+            self._seleziona(voce)
+
     def _aggiorna_cartella(self, cartella):
         """Aggiorna dal menu: la voce si cerca quando la si sceglie, perche'
         mentre il menu e' aperto una cartella vuota puo' sparire."""
-        voce = next((v for v in self._tutte_le_voci(self.nodo_pc) if (self._dati(v) or {}).get("percorso") == cartella), None)
+        radice = self.nodo_rete if questa_rete.e_di_rete(cartella) else self.nodo_pc
+        voce = next((v for v in self._tutte_le_voci(radice) if (self._dati(v) or {}).get("percorso") == cartella), None)
         if voce is None:
             self._riscontro("non_disponibile", f"{cartella} non è più nella plancia: dentro non c'è niente da suonare.")
             return
@@ -1846,12 +1978,20 @@ class Finestra(wx.Frame):
                 ("Aggiungi ai preferiti", lambda: self._ai_preferiti(brano)), ("Manda nel cestino", lambda: self._al_cestino(self._voce_di_lavoro()))]
         if tipo == "pc":
             return [("Aggiorna", lambda: self._aggiorna_ramo(self.nodo_pc))]
+        if tipo == "rete":
+            return [("Aggiungi un percorso di rete", self._comando_aggiungi_percorso_di_rete), ("Aggiorna", lambda: self._aggiorna_ramo(self.nodo_rete))]
+        if tipo in ("computer_della_rete", "computer"):
+            voce = self._voce_di_lavoro()
+            return [("Cerca di nuovo" if tipo == "computer_della_rete" else "Aggiorna", lambda: self._aggiorna_ramo(voce))]
         if tipo in ("unita", "cartella"):
             cartella = dati["percorso"]
-            nome = dati.get("etichetta", "").split("\\", 1)[-1] if tipo == "unita" else os.path.basename(cartella)
-            return [("Riproduci", lambda: self._riproduci_cartella(cartella)), ("Crea playlist da qui", lambda: self._crea_da_qui(cartella, nome)),
+            nome = dati.get("etichetta", "").split("\\", 1)[-1] if tipo == "unita" else dati.get("nome") or os.path.basename(cartella)
+            voci = [("Riproduci", lambda: self._riproduci_cartella(cartella)), ("Crea playlist da qui", lambda: self._crea_da_qui(cartella, nome)),
                 ("Aggiungi alla playlist", self._menu_aggiungi(lambda: [Brano(p) for p in questo_pc.file_ricorsivi(cartella)])),
                 ("Aggiorna", lambda: self._aggiorna_cartella(cartella))]
+            if dati.get("a_mano"):
+                voci.append(("Togli il percorso", lambda: self._togli_percorso_di_rete(cartella)))
+            return voci
         if tipo == "file":
             pl, brano = dati["playlist"], dati["brano"]
             return [("Riproduci", lambda: self._riproduci(pl, brano)), ("Aggiungi alla playlist", self._menu_aggiungi(lambda: [Brano(brano.percorso)])),
@@ -1921,6 +2061,8 @@ class Finestra(wx.Frame):
             self._togli(dati["playlist"], dati["brano"])
         elif dati.get("tipo") == "marker":
             self._elimina_il_marker(dati["chiave"], dati["marker"], voce)
+        elif dati.get("a_mano"):
+            self._togli_percorso_di_rete(dati["percorso"])
         else:
             self._riscontro("non_disponibile", "Qui Canc non cancella niente.")
 
@@ -2557,10 +2699,10 @@ class Finestra(wx.Frame):
         return next((v for v in self._figli(voce) if (self._dati(v) or {}).get("brano") is brano), None)
 
     def _apri_fino_a(self, cartella):
-        """Apre in Questo PC i rami fino alla cartella e ne restituisce la
-        voce; None se non la trova."""
-        self.albero.Expand(self.nodo_pc)
-        voce = self.nodo_pc
+        """Apre in Questo PC, o in Questa rete per le cartelle di rete, i rami
+        fino alla cartella e ne restituisce la voce; None se non la trova."""
+        voce = self.nodo_rete if questa_rete.e_di_rete(cartella) else self.nodo_pc
+        self.albero.Expand(voce)
         chiave = os.path.normcase(os.path.abspath(cartella))
         while True:
             figlio = next((v for v in self._figli(voce) if (self._dati(v) or {}).get("tipo") in ("unita", "cartella")

@@ -1,6 +1,6 @@
 # MeTeOra, le impostazioni: i valori che il programma ricorda fra un avvio e l'altro.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 le righe della console. Nella 1.51.0 caratteri, colori e scheda audio, e i limiti controllati alla lettura del file. Nella 1.51.2 un file con un JSON che non e' un dizionario non ferma l'avvio. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza (tappa 4, issue 15). Nella 1.59.0 la riproduzione casuale (issue 17). Nella 1.61.0 il modello della riproduzione casuale. Nella 1.63.0 video, sottotitoli letti e sintesi (tappa 7).
+# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 le righe della console. Nella 1.51.0 caratteri, colori e scheda audio, e i limiti controllati alla lettura del file. Nella 1.51.2 un file con un JSON che non e' un dizionario non ferma l'avvio. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza (tappa 4, issue 15). Nella 1.59.0 la riproduzione casuale (issue 17). Nella 1.61.0 il modello della riproduzione casuale. Nella 1.63.0 video, sottotitoli letti e sintesi (tappa 7). Nella 1.64.0 i percorsi di rete scritti a mano.
 
 """Le impostazioni, in un file JSON accanto al programma.
 
@@ -63,6 +63,8 @@ PREDEFINITE = {
     "video": False,
     "sottotitoli": False,
     "sintesi": "automatica",
+    # I percorsi di rete scritti a mano in Questa rete, come \\server\cartella.
+    "percorsi_di_rete": [],
     # Cosa suonava all'uscita, per riprendere da li' in pausa.
     "ripresa": {},
     # Quante righe tiene la console.
@@ -160,6 +162,7 @@ CONTROLLI = {
     "dissolvenza": _dissolvenza_valida,
     "modello_casuale": lambda valore: valore in MODELLI_CASUALI,
     "sintesi": lambda valore: valore == "automatica" or valore in USCITE_DELLA_SINTESI,
+    "percorsi_di_rete": lambda valore: all(isinstance(p, str) and p.startswith("\\\\") and len(p) > 2 for p in valore),
 }
 
 
