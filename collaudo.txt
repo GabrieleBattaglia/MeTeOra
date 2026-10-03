@@ -1,0 +1,12 @@
+Collaudo di MeTeOra 1.69.0, con NVDA: i tag. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.69.0. Fai le prove su copie dei tuoi file. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+F11 su un brano MP3: la console mostra i tag, i dieci comuni anche vuoti e poi gli altri del file, e il fuoco va sulla prima riga.
+Menu del brano, Leggi i tag: lo stesso di F11.
+Menu del brano, Tag: una voce per tag con il suo valore; Invio chiede il nuovo, e la console lo conferma con un suono nuovo.
+Svuota il campo di un tag e Invio: il tag si cancella, con un altro suono nuovo.
+Maiuscolo+F11 apre subito il menu dei tag.
+Un anno scritto male, per esempio 99, o una traccia con lettere: la console spiega, e il tag resta com'era.
+Seleziona più file, per esempio un album, e dal menu della selezione Tag: dove i valori sono diversi la voce lo dice; l'album scritto vale per tutti.
+Cambia un tag del brano che suona: la musica si ferma un istante e riparte dal suo punto.
+Dopo aver cambiato l'artista, il filtro lo trova, per esempio a=il nome nuovo.
+Se li hai, prova anche un FLAC, un M4A e un WMA.
+Ascolta i tre suoni nuovi: tag letti, tag cambiato e tag cancellato.

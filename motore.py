@@ -703,12 +703,21 @@ class Motore:
         con quel file si scarta, e si richiedera'; se lo tengono il brano in
         corso, chi esce o la coda di uno stop, si ferma tutto. mpv chiude il
         file poco dopo, nel suo filo (Rinomina file, 1.67.0)."""
-        stesso = os.path.normcase(percorso)
+        def suo(lettore):
+            return lettore is not None and lettore.percorso and os.path.normcase(lettore.percorso) == os.path.normcase(percorso)
+
         with self._blocco:
-            if self._preparato is not None and self._preparato.percorso and os.path.normcase(self._preparato.percorso) == stesso:
+            if self._preparato is not None and suo(self._preparato):
                 self._scarta_il_preparato()
                 self._chiesto = False
-            fermare = any(lettore.percorso and os.path.normcase(lettore.percorso) == stesso for lettore in self._lettori)
+            fermare = suo(self._attivo)
+            if not fermare:
+                # Chi esce da una dissolvenza, o la coda di uno stop sfumato,
+                # si chiude da solo: il brano che entra continua.
+                if self._sfumatura is not None and suo(self._uscente):
+                    self._chiudi_la_sfumatura()
+                if self._coda is not None and suo(self._coda.lettore):
+                    self._chiudi_la_coda()
         if fermare:
             self.stop()
 

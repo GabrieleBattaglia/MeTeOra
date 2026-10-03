@@ -2,6 +2,12 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.69.0] - 2026-10-03
+
+- F11 scrive nella console i tag del brano o del file selezionato: i dieci comuni, anche vuoti, e gli altri che il file ha. C'è anche la voce Leggi i tag nel menu (tappa 10, chiesto da Gabriele).
+- Il sottomenu Tag del menu, o Maiuscolo con F11, modifica i tag uno alla volta: Invio su un tag chiede il valore nuovo e lo scrive nel file, un campo vuoto lo cancella. Con più file selezionati il valore va in tutti, e dove sono diversi la voce lo dice; svuotare un tag con valori diversi chiede conferma. Un tag con più valori resta diviso; i testi su più righe e le copertine si leggono soltanto. Vale per MP3, WAV, AIFF, TTA, FLAC, OGG, Opus, M4A, MP4, WMA, WMV, APE, WavPack e Musepack.
+- Il filtro e la ricerca trovano anche i tag dei file WAV, AIFF, WMA e TTA.
+
 ## [1.67.4] - 2026-10-03
 
 - Nel menu dei brani e dei file c'è Rinomina file: cambia il nome del file sul disco, e l'estensione resta. I sottotitoli accanto con lo stesso nome lo seguono, come la lista m3u della musica delle console; playlist, Preferiti, marker e durate passano al nome nuovo. Un brano che suona continua a suonare. Chiesto da Gabriele.

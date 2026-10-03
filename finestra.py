@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag.
 
 """La finestra di MeTeOra.
 
@@ -56,6 +56,7 @@ import schede_audio
 import sintesi
 import sottobrani
 import suoni
+import tag
 import valori
 import version
 from contatore import Contatore
@@ -178,7 +179,7 @@ TASTI_COMUNI = [
     "J e K aprono e suonano la playlist precedente e successiva, le cifre da 1 a 0 le prime dieci playlist.",
     "Nella plancia Backspace chiude il ramo in cui sei e risale di un livello, Maiuscolo con Backspace risale di colpo all'unità o alla playlist, Preferiti compresi, e chiude i rami al suo interno.",
     "T mette un marker dove sei, o rinomina quello su cui sei; R e Y vanno al marker precedente e successivo; Maiuscolo con R, Y e T tolgono i marker prima, dopo e tutti; Maiuscolo con le cifre da 1 a 0 va ai primi dieci marker del brano della plancia.",
-    "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione sul brano in riproduzione e Maiuscolo+F8 ce la tiene agganciata, F9 chiude e F10 apre tutto il ramo selezionato.",
+    "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione sul brano in riproduzione e Maiuscolo+F8 ce la tiene agganciata, F9 chiude e F10 apre tutto il ramo selezionato, F11 legge i tag del brano selezionato e Maiuscolo+F11 apre il menu per modificarli.",
     "Barra rovesciata: nella console cerca nella console, altrove in tutte le playlist e in tutte le unità. Barra verticale: il filtro della playlist in cui sta la plancia, anche dalla console.",
     "F1 manuale, F2 novità, F3 crediti e F12 elenco dei tasti, tutti nella console. Esc esce salvando tutto.",
 ]
@@ -190,7 +191,7 @@ TASTI_DEL_CONTESTO = {
     "preferiti": ("i Preferiti", "Invio, Applicazioni o Spazio: menu con Riproduci e Filtro. Barra verticale: il filtro. Canc su un loro brano lo toglie dai Preferiti."),
     "radice_playlist": ("il ramo Playlist", "Invio, Applicazioni o Spazio: menu con Nuova playlist."),
     "playlist": ("una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Filtro, Rinomina ed Elimina. Barra verticale: il filtro. Canc elimina la playlist, dopo una conferma."),
-    "brano": ("un brano di una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Sposta, Saltato e Rinomina file. Canc toglie il brano dalla playlist, Maiuscolo+Canc manda il file nel cestino. Un SID o un file delle console con più sottobrani, o un brano con dei marker, si apre con freccia destra."),
+    "brano": ("un brano di una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Sposta, Saltato, Rinomina file, Leggi i tag e Tag. Canc toglie il brano dalla playlist, Maiuscolo+Canc manda il file nel cestino. Un SID o un file delle console con più sottobrani, o un brano con dei marker, si apre con freccia destra."),
     "pc": ("Questo PC", "Freccia destra mostra le unità. Invio, Applicazioni o Spazio: menu con Aggiorna."),
     "rete": ("Questa rete", "Freccia destra mostra i percorsi di rete, i computer della rete e il comando per aggiungere un percorso. Invio, Applicazioni o Spazio: menu con Aggiungi un percorso di rete e Aggiorna."),
     "computer_della_rete": ("i computer della rete", "Freccia destra li cerca, in disparte: può volerci qualche secondo. Invio, Applicazioni o Spazio: menu con Cerca di nuovo."),
@@ -198,7 +199,7 @@ TASTI_DEL_CONTESTO = {
     "attesa": ("una ricerca in corso", "Aspetta: la voce sparisce quando la ricerca finisce."),
     "unita": ("un'unità", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Crea playlist da qui."),
     "cartella": ("una cartella", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Riproduci e Crea playlist da qui."),
-    "file": ("un file", "Invio, Applicazioni o Spazio: menu con Riproduci, Aggiungi alla playlist e Rinomina file. Maiuscolo+Canc manda il file nel cestino. Un SID o un file delle console con più sottobrani, o un file con dei marker, si apre con freccia destra."),
+    "file": ("un file", "Invio, Applicazioni o Spazio: menu con Riproduci, Aggiungi alla playlist, Rinomina file, Leggi i tag e Tag. Maiuscolo+Canc manda il file nel cestino. Un SID o un file delle console con più sottobrani, o un file con dei marker, si apre con freccia destra."),
     "sottobrano": ("un sottobrano di un SID o di un file delle console", "Invio, Applicazioni o Spazio: menu con Riproduci e Aggiungi alla playlist. Se ha dei marker, freccia destra li mostra."),
     "marker": ("un marker", "Invio rinomina il marker, Canc lo elimina, X fa come sul suo brano. Applicazioni o Spazio: menu con Vai al marker, che suona il brano da lì, Rinomina ed Elimina."),
     "comando": ("un comando", "Invio esegue il comando."),
@@ -229,6 +230,8 @@ SPIEGAZIONI_DEI_MODELLI = {
 FINE_DEL_MAZZO = object()
 
 
+# Su quanti file insieme si leggono e si modificano i tag.
+MASSIMO_DI_FILE_PER_I_TAG = 1000
 # La frase dei MIDI lasciati da preparare, con un No a una delle domande.
 MIDI_DA_PREPARARE = "I MIDI restano da preparare: si può fare anche dalle impostazioni, con Banco dei suoni MIDI."
 # Da quanti secondi d'attesa in su la console dice che il SID, il MIDI o il
@@ -1021,7 +1024,7 @@ class Finestra(wx.Frame):
                 "La barra rovesciata cerca nella console, anche con i jolly e le virgolette, e Invio passa all'occorrenza seguente."]
         elif len(self._voci_selezionate()) > 1:
             righe = [f"Tasti per {len(self._voci_selezionate())} voci selezionate: un ramo selezionato vale per tutto ciò che contiene.",
-                "X suona la selezione come una playlist invisibile, che resta finché non premi V. Invio, Applicazioni o Spazio: menu della selezione. "
+                "X suona la selezione come una playlist invisibile, che resta finché non premi V. Invio, Applicazioni o Spazio: menu della selezione, con Leggi i tag e Modifica i tag. "
                 "Canc toglie i brani dalle playlist ed elimina le playlist e i marker, Maiuscolo+Canc manda i file nel cestino, F4 li mette nei Preferiti.",
                 "Maiuscolo con le frecce allarga la selezione, Ctrl con le frecce muove il fuoco senza selezionare, Ctrl+Spazio accende e spegne la voce col fuoco."]
         else:
@@ -1064,7 +1067,7 @@ class Finestra(wx.Frame):
         tasti_funzione = {
             wx.WXK_F1: self._manuale, wx.WXK_F2: self._changelog, wx.WXK_F3: self._crediti,
             wx.WXK_F5: lambda: self._vai(self.albero, "plancia"), wx.WXK_F6: lambda: self._vai(self.console, "console"),
-            wx.WXK_F7: lambda: self._vai(self.cruscotto, "cruscotto"), wx.WXK_F4: self._f4, wx.WXK_F8: self._vai_al_brano, wx.WXK_F9: self._chiudi_tutto, wx.WXK_F10: self._apri_tutto, wx.WXK_F12: self._elenco_dei_tasti,
+            wx.WXK_F7: lambda: self._vai(self.cruscotto, "cruscotto"), wx.WXK_F4: self._f4, wx.WXK_F8: self._vai_al_brano, wx.WXK_F9: self._chiudi_tutto, wx.WXK_F10: self._apri_tutto, wx.WXK_F11: self._comando_leggi_i_tag, wx.WXK_F12: self._elenco_dei_tasti,
             wx.WXK_ESCAPE: self.Close,
         }
         if modificatori == wx.MOD_NONE and codice in tasti_funzione:
@@ -1072,6 +1075,9 @@ class Finestra(wx.Frame):
             return True
         if modificatori == wx.MOD_SHIFT and codice == wx.WXK_F8:
             self._aggancia()
+            return True
+        if modificatori == wx.MOD_SHIFT and codice == wx.WXK_F11:
+            self._comando_modifica_i_tag()
             return True
         tasti_del_video = {wx.WXK_F1: self._comando_video, wx.WXK_F2: self._comando_sottotitoli, wx.WXK_F3: self._comando_traccia_audio,
             wx.WXK_F5: self._comando_schermo_intero, wx.WXK_F6: self._comando_rapporto}
@@ -2086,7 +2092,10 @@ class Finestra(wx.Frame):
         """voci: lista di (etichetta, azione) o (etichetta, [sottovoci]);
         un'azione che e' una tupla (funzione, spuntato) fa una voce a spunta."""
         for etichetta, azione in voci:
-            if isinstance(azione, list):
+            if azione is None:
+                # Si legge ma non si sceglie, come un tag che non e' testo.
+                menu.Append(wx.ID_ANY, etichetta).Enable(False)
+            elif isinstance(azione, list):
                 sottomenu = wx.Menu()
                 self._riempi_menu(sottomenu, azione)
                 menu.AppendSubMenu(sottomenu, etichetta)
@@ -2134,7 +2143,7 @@ class Finestra(wx.Frame):
                 ("Sposta in cima", lambda: self._sposta(pl, brano, "cima")), ("Sposta in fondo", lambda: self._sposta(pl, brano, "fondo")),
                 ("Saltato", (lambda: self._salta(pl, brano), brano.saltato)), ("Togli dalla playlist", lambda: self._togli(pl, brano)),
                 ("Aggiungi ai preferiti", lambda: self._ai_preferiti(brano)), ("Rinomina file", lambda: self._rinomina_file(brano)),
-                ("Manda nel cestino", lambda: self._al_cestino(self._voce_di_lavoro()))]
+                *self._voci_dei_tag([brano.percorso]), ("Manda nel cestino", lambda: self._al_cestino(self._voce_di_lavoro()))]
         if tipo == "pc":
             return [("Aggiorna", lambda: self._aggiorna_ramo(self.nodo_pc))]
         if tipo == "rete":
@@ -2155,7 +2164,7 @@ class Finestra(wx.Frame):
             pl, brano = dati["playlist"], dati["brano"]
             return [("Riproduci", lambda: self._riproduci(pl, brano)), ("Aggiungi alla playlist", self._menu_aggiungi(lambda: [Brano(brano.percorso)])),
                 ("Aggiungi ai preferiti", lambda: self._ai_preferiti(brano)), ("Rinomina file", lambda: self._rinomina_file(brano)),
-                ("Manda nel cestino", lambda: self._al_cestino(self._voce_di_lavoro()))]
+                *self._voci_dei_tag([brano.percorso]), ("Manda nel cestino", lambda: self._al_cestino(self._voce_di_lavoro()))]
         if tipo == "marker":
             return [("Vai al marker", lambda: self._vai_al_marker(dati)), ("Rinomina", lambda: self._rinomina_il_marker(dati["chiave"], dati["marker"])),
                 ("Elimina", lambda: self._elimina_il_marker(dati["chiave"], dati["marker"], self._voce_di_lavoro()))]
@@ -2255,14 +2264,7 @@ class Finestra(wx.Frame):
             # Un SID, un MIDI o un brano delle console suonano dalla memoria.
             self.motore.rinomina_il_file(vecchio, nuovo)
             return None
-        stesso = os.path.normcase(vecchio)
-        ripresa = None
-        if self.motore.in_corso and os.path.normcase(self.motore.in_corso) == stesso:
-            ripresa = (self.motore.posizione or 0.0, self.motore.in_pausa, self.motore.sottobrano if self.motore.sottobrani else None)
-            self._uscente = self._preparato = None
-        elif self._preparato is not None and os.path.normcase(self._preparato[1].percorso) == stesso:
-            self._preparato = None
-        self.motore.lascia_il_file(vecchio)
+        ripresa = self._lascia_il_file(vecchio)
         # mpv chiude il file nel suo filo: si riprova per qualche istante.
         fine = time.monotonic() + 3
         while True:
@@ -2275,6 +2277,21 @@ class Finestra(wx.Frame):
                         self.motore.suona(vecchio, ripresa[2], inizio=ripresa[0], in_pausa=ripresa[1])
                     raise
                 time.sleep(0.05)
+
+    def _lascia_il_file(self, percorso):
+        """Il motore lascia il file, per rinominarlo o scriverci: il seguente
+        preparato con quel file si scarta, il brano in corso si ferma. Torna
+        (posizione, pausa, sottobrano) del brano fermato, da far ripartire,
+        o None se il file non suonava."""
+        stesso = os.path.normcase(percorso)
+        ripresa = None
+        if self.motore.in_corso and os.path.normcase(self.motore.in_corso) == stesso:
+            ripresa = (self.motore.posizione or 0.0, self.motore.in_pausa, self.motore.sottobrano if self.motore.sottobrani else None)
+            self._uscente = self._preparato = None
+        elif self._preparato is not None and os.path.normcase(self._preparato[1].percorso) == stesso:
+            self._preparato = None
+        self.motore.lascia_il_file(percorso)
+        return ripresa
 
     def _segui_la_rinomina(self, vecchio, nuovo, durate):
         """Dopo Rinomina file: playlist, Preferiti, Risultati, cartelle aperte
@@ -2292,6 +2309,144 @@ class Finestra(wx.Frame):
         if chiavi:
             self._salva_i_marker(*chiavi)
         self._popola_playlist()
+        self._aggiorna_etichette()
+
+    # I tag, tappa 10 (1.69.0): F11 li legge nella console; il sottomenu Tag
+    # del menu, o Maiuscolo+F11, li modifica uno alla volta, anche su piu'
+    # file insieme (Gabriele, 3 ottobre 2026).
+
+    def _file_dei_tag(self):
+        """I file dei brani selezionati, o della voce di lavoro, di cui MeTeOra
+        sa scrivere i tag, senza doppioni: un ramo selezionato vale per i
+        suoi brani."""
+        if len(self._voci_selezionate()) > 1:
+            percorsi = [brano.percorso for _pl, brano, _sottobrano in self._brani_della_selezione()]
+        else:
+            dati = self._dati(self._voce_di_lavoro()) or {}
+            percorsi = [dati["brano"].percorso] if dati.get("tipo") in ("brano", "file") else []
+        return list({os.path.normcase(p): p for p in percorsi if tag.modificabile(p)}.values())
+
+    def _di_chi(self, percorsi):
+        return os.path.basename(percorsi[0]) if len(percorsi) == 1 else f"{len(percorsi)} file"
+
+    def _voci_dei_tag(self, percorsi):
+        """Le voci Leggi i tag e Tag del menu, per i file di cui MeTeOra sa
+        scrivere i tag; nessuna per gli altri."""
+        percorsi = [p for p in percorsi if tag.modificabile(p)]
+        if not percorsi:
+            return []
+        return [("Leggi i tag", lambda: self._leggi_i_tag(percorsi)), ("Tag", self._sottomenu_dei_tag(percorsi))]
+
+    def _sottomenu_dei_tag(self, percorsi):
+        """Il sottomenu Tag: una voce per tag, "Titolo: Love Song", che con
+        Invio chiede il valore nuovo; i tag che non sono testo, come le
+        copertine, si leggono ma non si scelgono."""
+        with wx.BusyCursor():
+            letti, errori = tag.leggi_insieme(percorsi)
+        if not letti:
+            return [((errori or ["I tag non si leggono."])[0].replace("&", "&&"), None)]
+        voci = []
+        for t in letti:
+            valore = "valori diversi" if t.get("diversi") else t["valore"] or "vuoto"
+            if len(valore) > 80:
+                valore = valore[:80].rstrip() + "..."
+            etichetta = f"{t['nome']}: {valore}".replace("&", "&&")
+            voci.append((etichetta, (lambda t=t: self._cambia_tag(percorsi, t)) if t["testo"] else None))
+        return voci
+
+    def _comando_leggi_i_tag(self):
+        """F11: i tag del brano selezionato, o dei file selezionati, nella console."""
+        with wx.BusyCursor():
+            percorsi = self._file_dei_tag()
+        if not percorsi:
+            self._riscontro("non_disponibile", "F11 legge i tag di un brano o di un file audio o video: scegline uno nella plancia. I SID, i MIDI, i tracker e MKV non hanno tag che MeTeOra sappia leggere.")
+            return
+        if self._troppi_per_i_tag(percorsi):
+            return
+        self._leggi_i_tag(percorsi)
+
+    def _troppi_per_i_tag(self, percorsi):
+        if len(percorsi) <= MASSIMO_DI_FILE_PER_I_TAG:
+            return False
+        self._riscontro("non_disponibile", f"I tag si leggono e si modificano al massimo su {MASSIMO_DI_FILE_PER_I_TAG} file insieme: la selezione ne ha {len(percorsi)}.")
+        return True
+
+    def _leggi_i_tag(self, percorsi):
+        with wx.BusyCursor():
+            letti, errori = tag.leggi_insieme(percorsi)
+        if not letti:
+            self._riscontro("errore", " ".join(errori))
+            return
+        righe = [f"Tag di {self._di_chi(percorsi)}."]
+        righe += [f"{t['nome']}: {'valori diversi' if t.get('diversi') else t['valore'] or 'vuoto'}." for t in letti]
+        self._stampa("tag_letti", righe + errori)
+
+    def _comando_modifica_i_tag(self):
+        """Maiuscolo+F11: il sottomenu Tag del brano selezionato, o dei file
+        selezionati, aperto subito."""
+        with wx.BusyCursor():
+            percorsi = self._file_dei_tag()
+        if not percorsi:
+            self._riscontro("non_disponibile", "Maiuscolo+F11 modifica i tag di un brano o di un file audio o video: scegline uno nella plancia.")
+            return
+        if self._troppi_per_i_tag(percorsi):
+            return
+        menu = wx.Menu()
+        self._riempi_menu(menu, self._sottomenu_dei_tag(percorsi))
+        self._suono("menu")
+        voce = self._voce_di_lavoro()
+        rettangolo = self.albero.GetBoundingRect(voce, textOnly=True) if voce.IsOk() else None
+        self.albero.PopupMenu(menu, rettangolo.GetBottomLeft() if rettangolo else wx.DefaultPosition)
+        menu.Destroy()
+
+    def _cambia_tag(self, percorsi, t):
+        """Chiede il valore nuovo del tag e lo scrive in tutti i file; un
+        campo vuoto lo cancella. Un brano che suona si ferma un istante e
+        riparte dal suo punto: mpv legge il file mentre mutagen lo riscrive."""
+        nome, chi = t["nome"], self._di_chi(percorsi)
+        diversi = " I file hanno valori diversi: quello che scrivi va in tutti." if t.get("diversi") else ""
+        self._domanda()
+        with DialogoTesto(self, f"{nome} di {chi}. Un campo vuoto cancella il tag.{diversi}", f"Tag {nome}", t["valore"]) as dialogo:
+            if dialogo.ShowModal() != wx.ID_OK:
+                self._annullato(f"Tag {nome} non cambiato.")
+                return
+            scritto = dialogo.GetValue()
+        if not t.get("diversi") and tag.pulito(scritto) == t["valore"]:
+            # Un valore lasciato com'era non si controlla: un anno con l'ora,
+            # o una traccia come A1, restano dove sono.
+            self._annullato(f"Tag {nome} non cambiato.")
+            return
+        try:
+            valore = tag.controlla(t["chiave"], scritto)
+        except tag.ErroreTag as e:
+            self._riscontro("errore", f"{e} Il tag {nome} resta com'era.")
+            return
+        if not valore and t.get("diversi") and len(percorsi) > 1 and not self._conferma(
+                f"Cancellare il tag {nome} da {len(percorsi)} file? Hanno valori diversi, che si perdono.", f"Tag {nome}"):
+            # Il campo dei valori diversi parte vuoto: un Invio distratto non
+            # deve cancellare il tag da tutti.
+            self._annullato(f"Tag {nome} non cambiato.")
+            return
+        scritti, errori = 0, []
+        for percorso in percorsi:
+            ripresa = self._lascia_il_file(percorso)
+            try:
+                tag.scrivi(percorso, t["chiave"], valore)
+                scritti += 1
+            except tag.ErroreTag as e:
+                errori.append(str(e))
+            finally:
+                if ripresa is not None:
+                    posizione, in_pausa, sottobrano = ripresa
+                    self.motore.suona(percorso, sottobrano, inizio=posizione, in_pausa=in_pausa)
+            # Lo schedario rilegge i tag, per il filtro e la ricerca.
+            self.schedario.leggi_subito(percorso)
+        if not scritti:
+            self._riscontro("errore", " ".join(errori))
+            return
+        chi = self._di_chi(percorsi) if scritti == len(percorsi) else f"{scritti} file su {len(percorsi)}"
+        testo = f"{nome} di {chi}: {valore}." if valore else f"Tag {nome} cancellato da {chi}."
+        self._riscontro("tag_cambiato" if valore else "tag_cancellato", " ".join([testo, *errori]))
         self._aggiorna_etichette()
 
     def _al_cestino(self, voce):
@@ -2413,7 +2568,10 @@ class Finestra(wx.Frame):
         n = len(self._voci_selezionate())
         return [(f"Riproduci le {n} voci selezionate", self._suona_selezione), ("Crea playlist dalla selezione", self._crea_dalla_selezione),
             ("Aggiungi alla playlist", self._menu_aggiungi(self._copie_della_selezione)), ("Aggiungi ai preferiti", self._selezione_ai_preferiti),
-            ("Togli dalle playlist, ed elimina le playlist e i marker selezionati", self._cancella_selezione), ("Manda nel cestino", self._cestina_selezione)]
+            ("Togli dalle playlist, ed elimina le playlist e i marker selezionati", self._cancella_selezione), ("Manda nel cestino", self._cestina_selezione),
+            # I file e i loro tag si leggono solo alla scelta: aprire il menu
+            # di una selezione con un'unita' intera non deve fermare tutto.
+            ("Leggi i tag", self._comando_leggi_i_tag), ("Modifica i tag", self._comando_modifica_i_tag)]
 
     def _crea_dalla_selezione(self):
         brani = self._copie_della_selezione()
@@ -5398,7 +5556,7 @@ class Finestra(wx.Frame):
             "Musica delle console: libgme, Game Music Emu.",
             "Sottotitoli letti: accessible_output2.",
             "Effetti sonori: Acusticator, della libreria GBUtils di Gabriele.",
-            "Durate e tag dei file audio: mutagen.",
+            "Durate, lettura e scrittura dei tag dei file audio: mutagen.",
             "Interfaccia: wxPython.",
             "Licenza: GPL 3.",
         ]

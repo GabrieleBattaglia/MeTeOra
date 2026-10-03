@@ -1,6 +1,6 @@
 # MeTeOra, lo schedario: durata, dimensione e tag dei file, ricordati fra un avvio e l'altro.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la 1.7.0, per le durate delle playlist (issue 4) e poi per il filtro (issue 2). Nella 1.62.4 le durate da libmpv per i formati che mutagen non conosce, e quella esatta dell'AAC grezzo. Nella 1.66.0 le schede della musica delle console, con i sottobrani. Nella 1.67.0 la scheda segue un file rinominato.
+# 30/09/2026: nasce con la 1.7.0, per le durate delle playlist (issue 4) e poi per il filtro (issue 2). Nella 1.62.4 le durate da libmpv per i formati che mutagen non conosce, e quella esatta dell'AAC grezzo. Nella 1.66.0 le schede della musica delle console, con i sottobrani. Nella 1.67.0 la scheda segue un file rinominato. Nella 1.69.0 i tag letti con tag.py, anche di WAV, AIFF, WMA e TTA.
 
 """Lo schedario dei file.
 
@@ -24,6 +24,10 @@ import time
 
 import formati
 import sottobrani
+import tag
+
+# I formati di cui lo schedario, prima della 1.69.0, non leggeva i tag.
+TAG_DA_RILEGGERE = frozenset({".wav", ".aif", ".aiff", ".wma", ".wmv", ".asf", ".tta"})
 
 VERSIONE_DEL_FILE = 1
 # Le chiavi dei tag, come le usa il filtro.
@@ -149,7 +153,10 @@ def leggi_scheda(percorso):
     try:
         import mutagen
 
-        audio = mutagen.File(percorso, easy=True)
+        # I formati di cui MeTeOra scrive i tag si leggono come li legge tag.py,
+        # senza la modalita' easy, che per WAV, AIFF, WMA e TTA non ha i nomi
+        # comuni (1.69.0).
+        audio = mutagen.File(percorso, easy=not tag.modificabile(percorso))
     except Exception:  # noqa: BLE001 - un file rovinato non deve fermare lo schedario
         audio = None
     if formati.estensione(percorso) == ".aac":
@@ -165,7 +172,16 @@ def leggi_scheda(percorso):
         scheda["durata"] = float(audio.info.length)
     if scheda["durata"] is None:
         scheda["durata"] = durata_da_mpv(percorso)
-    if audio is not None:
+    if audio is not None and tag.modificabile(percorso):
+        comuni = tag.comuni_del_file(audio)
+        anno = comuni.get("anno")
+        scheda["tag"] = {"titolo": comuni.get("titolo"), "autore": comuni.get("artista"), "album": comuni.get("album"),
+            "genere": comuni.get("genere"), "anno": _anno(anno) if anno else None}
+        scheda["tag"] = {k: v for k, v in scheda["tag"].items() if v}
+        # Il segno della lettura dei tag con tag.py: le schede di prima della
+        # 1.69.0 dei formati che la modalita' easy non leggeva si rifanno.
+        scheda["tag_v"] = 1
+    elif audio is not None:
         tags = audio.tags or {}
 
         def primo(chiave):
@@ -209,8 +225,11 @@ class Schedario:
             # Dalla 1.62.4 le durate che mutagen non sapeva le legge libmpv, e
             # quella dell'AAC grezzo si conta: le schede senza durata, e quelle
             # degli AAC, si rileggono.
+            # Dalla 1.69.0 i tag di WAV, AIFF, WMA, WMV e TTA si leggono: le
+            # loro schede di prima si rileggono.
             self.schede = {chiave: scheda for chiave, scheda in dati["schede"].items()
-                if formati.ha_sottobrani(chiave) or (scheda.get("durata") is not None and formati.estensione(chiave) != ".aac")}
+                if formati.ha_sottobrani(chiave) or (scheda.get("durata") is not None and formati.estensione(chiave) != ".aac"
+                    and not (formati.estensione(chiave) in TAG_DA_RILEGGERE and "tag_v" not in scheda))}
 
     def salva(self):
         if not self._modificato:

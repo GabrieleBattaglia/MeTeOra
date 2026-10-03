@@ -1174,6 +1174,106 @@ def test_rinomina_un_file_che_suona(finestra, monkeypatch, suoni_annotati, tmp_p
     finestra.motore.stop()
 
 
+def test_i_tag_con_f11_e_il_sottomenu(finestra, monkeypatch, suoni_annotati, tmp_path):
+    import tag
+
+    canzone = _wav_di_prova(tmp_path / "canzone.wav", 1)
+    altra = _wav_di_prova(tmp_path / "altra.wav", 1)
+    finestra._aggiungi(None, [canzone, altra])
+    nodo = next(finestra._figli(finestra.nodo_playlist))
+    finestra.albero.Expand(nodo)
+    prima, seconda = list(finestra._figli(nodo))
+    finestra._seleziona(prima)
+    # F11 scrive i tag nella console.
+    _tasto(finestra, codice=wx.WXK_F11)
+    righe = [_senza_ora(r) for r in finestra._righe]
+    assert "Tag di canzone.wav." in righe and "Titolo: vuoto." in righe and suoni_annotati[-1] == "tag_letti"
+    # Il menu del brano ha Leggi i tag e il sottomenu Tag, una voce per tag.
+    voci = dict(finestra._voci_del_menu(finestra._dati(prima)))
+    assert "Leggi i tag" in voci and voci["Tag"][0][0] == "Titolo: vuoto"
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("Ballata & co"))
+    voci["Tag"][0][1]()
+    assert _ultima(finestra) == "Titolo di canzone.wav: Ballata & co." and suoni_annotati[-2:] == ["domanda", "tag_cambiato"]
+    assert finestra.schedario.scheda(canzone)["tag"]["titolo"] == "Ballata & co"
+    voci = dict(finestra._voci_del_menu(finestra._dati(prima)))
+    assert voci["Tag"][0][0] == "Titolo: Ballata && co"
+    # Un anno scritto male non si scrive; lo stesso valore e Esc non cambiano niente.
+    anno = next(azione for etichetta, azione in voci["Tag"] if etichetta.startswith("Anno"))
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("99"))
+    anno()
+    assert _ultima(finestra).startswith("99 non è un anno") and _ultima(finestra).endswith("Il tag Anno resta com'era.") and suoni_annotati[-1] == "errore"
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("Ballata & co"))
+    voci["Tag"][0][1]()
+    assert _ultima(finestra) == "Tag Titolo non cambiato." and suoni_annotati[-1] == "annullamento"
+    # Il campo vuoto cancella il tag.
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto(""))
+    voci["Tag"][0][1]()
+    assert _ultima(finestra) == "Tag Titolo cancellato da canzone.wav." and suoni_annotati[-1] == "tag_cancellato"
+    assert finestra.schedario.scheda(canzone)["tag"].get("titolo") is None
+    # Piu' file insieme: dove i valori sono diversi la voce lo dice, e il
+    # valore nuovo va in tutti.
+    tag.scrivi(canzone, "album", "Uno")
+    finestra.albero.SelectItem(seconda)
+    # Il menu della selezione non legge i tag mentre si apre: li legge la voce scelta.
+    voci = dict(finestra._voci_del_menu_della_selezione())
+    assert voci["Leggi i tag"] == finestra._comando_leggi_i_tag and voci["Modifica i tag"] == finestra._comando_modifica_i_tag
+    album = next((etichetta, azione) for etichetta, azione in finestra._sottomenu_dei_tag(finestra._file_dei_tag()) if etichetta.startswith("Album"))
+    assert album[0] == "Album: valori diversi"
+    # Svuotare un tag con valori diversi chiede conferma: con No resta.
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto(""))
+    monkeypatch.setattr(finestra, "_conferma", lambda domanda, titolo, genitore=None: False)
+    album[1]()
+    assert _ultima(finestra) == "Tag Album non cambiato." and suoni_annotati[-1] == "annullamento"
+    assert next(t["valore"] for t in tag.leggi(canzone) if t["chiave"] == "album") == "Uno"
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("Raccolta"))
+    album[1]()
+    assert _ultima(finestra) == "Album di 2 file: Raccolta." and suoni_annotati[-1] == "tag_cambiato"
+    assert [next(t["valore"] for t in tag.leggi(p) if t["chiave"] == "album") for p in (canzone, altra)] == ["Raccolta", "Raccolta"]
+    # Maiuscolo+F11 apre subito il menu dei tag.
+    aperti = []
+    monkeypatch.setattr(finestra.albero, "PopupMenu", lambda menu, posizione: aperti.append([v.GetItemLabelText() for v in menu.GetMenuItems()]))
+    finestra.albero.UnselectAll()
+    finestra._seleziona(prima)
+    _tasto(finestra, codice=wx.WXK_F11, maiuscolo=True)
+    assert aperti and aperti[0][:3] == ["Titolo: vuoto", "Artista: vuoto", "Album: Raccolta"]
+    # Un file senza tag che MeTeOra sappia leggere lo dice.
+    finestra._aggiungi(None, [os.path.join(r"C:\m", "canzone.mid")])
+    nodo_midi = list(finestra._figli(finestra.nodo_playlist))[1]
+    finestra.albero.Expand(nodo_midi)
+    finestra.albero.UnselectAll()
+    finestra._seleziona(next(finestra._figli(nodo_midi)))
+    _tasto(finestra, codice=wx.WXK_F11)
+    assert _ultima(finestra).startswith("F11 legge i tag di un brano o di un file audio o video") and suoni_annotati[-1] == "non_disponibile"
+
+
+def test_un_tag_scritto_mentre_il_brano_suona(finestra, monkeypatch, suoni_annotati, tmp_path):
+    # mpv legge il file mentre mutagen lo riscrive: il brano si ferma un
+    # istante e riparte dal suo punto, in pausa se era in pausa.
+    import tag
+
+    canzone = _wav_di_prova(tmp_path / "canzone.wav", 6)
+    finestra._aggiungi(None, [canzone])
+    pl = finestra.archivio.playlist[0]
+    finestra._suona(pl, pl.brani[0])
+    fine = time.monotonic() + 10
+    while time.monotonic() < fine and not (finestra.motore.posizione or 0) > 0.3:
+        wx.Yield()
+        time.sleep(0.02)
+    finestra.motore.pausa(True)
+    prima = finestra.motore.posizione
+    titolo = next(t for t in tag.leggi(canzone) if t["chiave"] == "titolo")
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("Mentre suona"))
+    finestra._cambia_tag([canzone], titolo)
+    assert _ultima(finestra) == "Titolo di canzone.wav: Mentre suona."
+    assert finestra.motore.in_corso == canzone and finestra.motore.in_pausa
+    fine = time.monotonic() + 10
+    while time.monotonic() < fine and finestra.motore.posizione is None:
+        wx.Yield()
+        time.sleep(0.02)
+    assert finestra.motore.posizione == pytest.approx(prima, abs=0.3)
+    finestra.motore.stop()
+
+
 def test_z_b_n_seguono_la_plancia(finestra, monkeypatch):
     suonati = _finto_motore(finestra, monkeypatch)
     finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n in ("a.mp3", "b.mp3")])
