@@ -8,7 +8,6 @@ Aggiungi un percorso di rete, con Invio: chiede un percorso come \\server\cartel
 Un percorso scritto male, o già presente, viene rifiutato con il motivo.
 Canc su un percorso aggiunto da te lo toglie, con il suo suono; su quello salvato in Windows non toglie niente.
 Chiudi e riapri MeTeOra: i percorsi aggiunti da te ci sono ancora.
-Prima l'ascolto alla cieca dei banchi di suoni, quando vuoi: dalla cartella E:\git\tmp\player-accessibile\ascolti_midi, python ascolto_banchi.py.
 Il primo MIDI, con X: MeTeOra chiede se scaricare FluidSynth e cercare i banchi; con No i MIDI restano da preparare e non suonano.
 Con Sì scarica FluidSynth, cerca nei dischi dicendo nella console a che punto è, e propone i banchi trovati, con in fondo Scarica FluidR3 GM.
 Scelto il banco, il MIDI parte da solo, e ogni strumento ha il suo suono.
