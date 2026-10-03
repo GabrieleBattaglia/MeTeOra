@@ -1,6 +1,6 @@
 # MeTeOra
 
-Un lettore audio e video per Windows pensato per chi usa uno screen reader e un display braille. Motore di riproduzione solido, moltissimi formati, compresa la musica del Commodore 64 in formato SID, controllo completo da tastiera, e un riscontro scritto e sonoro per ogni azione. Niente streaming, skin o copertine.
+Un lettore audio e video per Windows pensato per chi usa uno screen reader e un display braille. Motore di riproduzione solido, moltissimi formati, compresa la musica del Commodore 64 in formato SID, controllo completo da tastiera, e un riscontro scritto e sonoro per ogni azione. Niente skin o copertine.
 
 MeTeOra è formato da tre parole italiane, una dedica alla mia ragazza Ginevra, e insieme sono una parola luminosa.
 
