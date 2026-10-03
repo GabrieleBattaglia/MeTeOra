@@ -1,3 +1,0 @@
-Collaudo di MeTeOra 1.63.0, con NVDA: il video, tappa 7. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.63.0. Un video di prova con i sottotitoli accanto è in E:\git\tmp\player-accessibile\video_prova. Scrivi le note sulla riga della voce; le voci superate si cancellano.
-Per chi vede: la barra del tempo compare con il mouse sul bordo inferiore della finestra del video, si nasconde dopo qualche secondo, e trascinandola si salta.
-Rimandata. Per ora diamola per passata.
