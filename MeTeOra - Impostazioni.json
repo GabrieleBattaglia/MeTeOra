@@ -7,13 +7,16 @@
  "insegui": true,
  "casuale": true,
  "modello_casuale": "una_volta",
+ "video": false,
+ "sottotitoli": true,
+ "sintesi": "automatica",
  "ripresa": {
-  "percorso": "E:\\Music\\Le Canzoni della Melevisione - Gli scacchi sono un sogno.mp3",
+  "percorso": "E:\\git\\tmp\\player-accessibile\\video_prova\\Prova del video.mp4",
   "sottobrano": null,
   "numero": 0,
-  "posizione": 77.99897959183672,
+  "posizione": 0.023219954648526137,
   "tipo": "cartella",
-  "cartella": "E:\\Music"
+  "cartella": "E:\\git\\tmp\\player-accessibile\\video_prova"
  },
  "righe_della_console": 2000,
  "caratteri": {},
