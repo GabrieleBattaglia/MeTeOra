@@ -1274,6 +1274,55 @@ def test_un_tag_scritto_mentre_il_brano_suona(finestra, monkeypatch, suoni_annot
     finestra.motore.stop()
 
 
+class _RicercaFinta(_DialogoFinto):
+    """Il campo della ricerca, che annota titolo e prima istruzione."""
+
+    def __init__(self, risposta):
+        super().__init__(risposta)
+        self.aperture = []
+
+    def __call__(self, genitore, titolo, testo, istruzioni):
+        self.aperture.append((titolo, istruzioni[0]))
+        return self
+
+
+def test_la_barra_rovesciata_cerca_nel_ramo(finestra, monkeypatch, tmp_path):
+    # 1.71.0: la barra rovesciata cerca nel ramo della plancia, Ctrl con la
+    # barra rovesciata ovunque.
+    cartella = tmp_path / "Amiga giochi"
+    (cartella / "Turrican").mkdir(parents=True)
+    (cartella / "Turrican" / "titolo.mp3").write_bytes(b"")
+    campo = _RicercaFinta("titolo")
+    avviate = []
+    monkeypatch.setattr(modulo, "FinestraFiltro", campo)
+    monkeypatch.setattr(finestra, "_avvia_ricerca", lambda testo, filtro, unita=None, brani=None, dove=modulo.OVUNQUE: avviate.append((testo, unita, brani, dove)))
+    finestra.albero.Expand(finestra.nodo_pc)
+    nodo = finestra.albero.AppendItem(finestra.nodo_pc, "Amiga giochi", data={"tipo": "cartella", "percorso": str(cartella), "caricato": False})
+    finestra._seleziona(nodo)
+    _tasto(finestra, "\\")
+    assert campo.aperture[-1] == ("Ricerca in Amiga giochi", "Puoi usare questi comandi per comporre la ricerca, in Amiga giochi.")
+    assert avviate[-1] == ("titolo", [str(cartella)], [], "in Amiga giochi")
+    # Un brano di una playlist: la sua playlist sola.
+    finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n in ("a.mp3", "b.mp3")])
+    nodo_pl = next(finestra._figli(finestra.nodo_playlist))
+    finestra.albero.Expand(nodo_pl)
+    finestra._seleziona(next(finestra._figli(nodo_pl)))
+    _tasto(finestra, "\\")
+    pl = finestra.archivio.playlist[0]
+    assert avviate[-1] == ("titolo", [], [(b, "Playlist Playlist") for b in pl.brani], "nella playlist Playlist")
+    # Questo PC: tutti i dischi, e nessuna playlist.
+    finestra._seleziona(finestra.nodo_pc)
+    _tasto(finestra, "\\")
+    assert avviate[-1] == ("titolo", None, [], "in Questo PC")
+    # Ctrl con la barra rovesciata: ovunque, come prima la barra da sola.
+    evento = wx.KeyEvent(wx.wxEVT_CHAR_HOOK)
+    evento.SetKeyCode(ord("\\"))
+    evento.SetUnicodeKey(ord("\\"))
+    evento.SetControlDown(True)
+    finestra._tasto(evento)
+    assert campo.aperture[-1][0] == "Ricerca in tutto MeTeOra" and avviate[-1] == ("titolo", None, None, modulo.OVUNQUE)
+
+
 def test_z_b_n_seguono_la_plancia(finestra, monkeypatch):
     suonati = _finto_motore(finestra, monkeypatch)
     finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n in ("a.mp3", "b.mp3")])

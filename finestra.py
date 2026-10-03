@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque.
 
 """La finestra di MeTeOra.
 
@@ -180,7 +180,7 @@ TASTI_COMUNI = [
     "Nella plancia Backspace chiude il ramo in cui sei e risale di un livello, Maiuscolo con Backspace risale di colpo all'unità o alla playlist, Preferiti compresi, e chiude i rami al suo interno.",
     "T mette un marker dove sei, o rinomina quello su cui sei; R e Y vanno al marker precedente e successivo; Maiuscolo con R, Y e T tolgono i marker prima, dopo e tutti; Maiuscolo con le cifre da 1 a 0 va ai primi dieci marker del brano della plancia.",
     "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione sul brano in riproduzione e Maiuscolo+F8 ce la tiene agganciata, F9 chiude e F10 apre tutto il ramo selezionato, F11 legge i tag del brano selezionato e Maiuscolo+F11 apre il menu per modificarli.",
-    "Barra rovesciata: nella console cerca nella console, altrove in tutte le playlist e in tutte le unità. Barra verticale: il filtro della playlist in cui sta la plancia, anche dalla console.",
+    "Barra rovesciata: nella console cerca nella console, nella plancia nel ramo in cui sei; Ctrl con la barra rovesciata in tutte le playlist e in tutte le unità. Barra verticale: il filtro della playlist in cui sta la plancia, anche dalla console.",
     "F1 manuale, F2 novità, F3 crediti e F12 elenco dei tasti, tutti nella console. Esc esce salvando tutto.",
 ]
 # Le righe del cruscotto proprie di ogni tipo di voce della plancia.
@@ -452,6 +452,8 @@ _GRAMMATICA_DEL_FILTRO = [
 ]
 ISTRUZIONI_DEL_FILTRO = ["Puoi usare questi comandi per comporre il filtro.", *_GRAMMATICA_DEL_FILTRO]
 ISTRUZIONI_DELLA_RICERCA = ["Puoi usare questi comandi per comporre la ricerca, in tutte le playlist e in tutte le unità.", *_GRAMMATICA_DEL_FILTRO]
+# Dove cerca Ctrl con la barra rovesciata, la ricerca in tutto MeTeOra.
+OVUNQUE = "nelle playlist e nelle unità"
 ISTRUZIONI_DELLA_CONSOLE = [
     "Puoi usare questi segni per comporre la ricerca nella console.",
     "Il testo si cerca così com'è, spazi compresi; maiuscole e minuscole non contano. Andare a capo vale come uno spazio.",
@@ -616,6 +618,7 @@ class Finestra(wx.Frame):
         # playlist temporanea, e quanti se ne mostrano nella plancia.
         self._ricerca = None
         self._testo_della_ricerca = ""
+        self._dove_si_cerca = OVUNQUE
         self.risultati = None
         # Quanti risultati della ricerca sono gia' passati nella plancia.
         self._risultati_letti = 0
@@ -1083,6 +1086,10 @@ class Finestra(wx.Frame):
             wx.WXK_F5: self._comando_schermo_intero, wx.WXK_F6: self._comando_rapporto}
         if modificatori == wx.MOD_SHIFT and codice in tasti_del_video:
             tasti_del_video[codice]()
+            return True
+        if modificatori == wx.MOD_CONTROL and (evento.GetUnicodeKey() in (ord("\\"), 0x1C) or codice == ord("\\")):
+            # Ctrl con la barra rovesciata: la ricerca in tutto MeTeOra (1.71.0).
+            self._ricerca_globale()
             return True
         # Il tastierino numerico resta a NVDA, e Ctrl e Alt ai comandi di Windows.
         if modificatori not in (wx.MOD_NONE, wx.MOD_SHIFT) or wx.WXK_NUMPAD0 <= codice <= wx.WXK_NUMPAD_DIVIDE:
@@ -2805,19 +2812,71 @@ class Finestra(wx.Frame):
 
     def _comando_ricerca(self):
         """La barra rovesciata: dalla console cerca nella console, da ogni
-        altro punto fa la ricerca in tutto MeTeOra."""
+        altro punto nel ramo della plancia in cui si e' (Gabriele, 3 ottobre
+        2026, 1.71.0). Ctrl con la barra rovesciata cerca in tutto MeTeOra."""
         if wx.Window.FindFocus() is self.console:
             self._comando_cerca_in_console()
-        else:
-            self._ricerca_globale()
+            return
+        ramo = self._ramo_della_ricerca()
+        if ramo is None:
+            self._riscontro("non_disponibile", "Qui non c'è niente in cui cercare: Ctrl con la barra rovesciata cerca in tutto MeTeOra.")
+            return
+        self._ricerca_globale(*ramo)
 
-    def _ricerca_globale(self):
+    def _ramo_della_ricerca(self):
+        """Il ramo in cui cerca la barra rovesciata, dalla voce su cui si
+        agisce: (dove, brani delle playlist, radici del disco), con dove come
+        si legge nelle frasi, per esempio "in Amiga giochi". Una cartella o
+        un'unita' con le sottocartelle, una playlist, i Preferiti, i Risultati
+        o un loro ramo; Questo PC sono tutti i dischi, il ramo Playlist tutte
+        le playlist, Questa rete i suoi percorsi. Un brano o un file valgono
+        per la lista in cui stanno. Dalle voci di primo livello senza un
+        contenuto, la ricerca in tutto MeTeOra. None se li' non c'e' niente."""
+        voce = self._voce_di_lavoro()
+        while voce.IsOk() and voce != self.albero.GetRootItem():
+            dati = self._dati(voce) or {}
+            tipo = dati.get("tipo")
+            if tipo in ("cartella", "unita"):
+                return f"in {self._nome_della_voce(voce)}", [], [dati["percorso"]]
+            if tipo == "pc":
+                return "in Questo PC", [], None
+            if tipo == "radice_playlist":
+                return "nelle playlist", [(b, f"Playlist {pl.nome}") for pl in self.archivio.playlist for b in pl.brani], []
+            if tipo in ("risultati", "gruppo_risultati"):
+                return "nei Risultati", [(b, None) for b in self._brani_del_gruppo(dati["gruppo"])], []
+            if tipo == "rete":
+                # Anche a ramo chiuso: i percorsi salvati in Windows e quelli aggiunti a mano.
+                percorsi = list(dict.fromkeys([p for _nome, p in questa_rete.percorsi_salvati()] + list(self.impostazioni["percorsi_di_rete"])))
+                return ("in Questa rete", [], percorsi) if percorsi else None
+            if tipo == "computer":
+                percorsi = [d["percorso"] for d in (self._dati(v) for v in self._figli(voce)) if d.get("tipo") == "cartella"]
+                return (f"in {dati['nome']}", [], percorsi) if percorsi else None
+            if tipo in ("playlist", "brano", "file", "sottobrano", "marker"):
+                pl = dati["playlist"]
+                if pl is self.risultati:
+                    voce = self.albero.GetItemParent(voce)
+                    continue
+                if pl is self.archivio.preferiti:
+                    return "nei Preferiti", [(b, "Preferiti") for b in pl.brani], []
+                if pl in self.archivio.playlist:
+                    return f"nella playlist {pl.nome}", [(b, f"Playlist {pl.nome}") for b in pl.brani], []
+                if pl.cartella:
+                    # Il file di una cartella: la cartella, con le sue sottocartelle.
+                    return f"in {os.path.basename(pl.cartella.rstrip(chr(92))) or pl.cartella}", [], [pl.cartella]
+                return None
+            voce = self.albero.GetItemParent(voce)
+        return "nelle playlist e nelle unità", None, None
+
+    def _ricerca_globale(self, dove=OVUNQUE, brani=None, unita=None):
         """Il campo della ricerca, uguale a quello del filtro; con Invio parte
-        la ricerca e i Risultati si riempiono mentre procede."""
+        la ricerca e i Risultati si riempiono mentre procede. Senza argomenti
+        cerca in tutto MeTeOra; dove, brani e unita la limitano a un ramo."""
         testo = self._testo_della_ricerca
+        titolo = "Ricerca in tutto MeTeOra" if dove == OVUNQUE else f"Ricerca {dove}"
+        istruzioni = ISTRUZIONI_DELLA_RICERCA if dove == OVUNQUE else [f"Puoi usare questi comandi per comporre la ricerca, {dove}.", *_GRAMMATICA_DEL_FILTRO]
         while True:
             self._domanda()
-            with FinestraFiltro(self, "Ricerca in tutto MeTeOra", testo, ISTRUZIONI_DELLA_RICERCA) as dialogo:
+            with FinestraFiltro(self, titolo, testo, istruzioni) as dialogo:
                 if dialogo.ShowModal() != wx.ID_OK:
                     self._annullato("Ricerca annullata.")
                     return
@@ -2831,16 +2890,24 @@ class Finestra(wx.Frame):
                 self._riscontro("errore", f"Nella ricerca non capisco: {e}")
                 continue
             break
-        self._avvia_ricerca(testo, filtro)
+        self._avvia_ricerca(testo, filtro, unita, brani, dove)
 
-    def _avvia_ricerca(self, testo, filtro, unita=None):
+    def _avvia_ricerca(self, testo, filtro, unita=None, brani=None, dove=OVUNQUE):
+        """brani sono le coppie (brano, nome della playlist) da guardare, di
+        tutte le playlist e dei Preferiti se None; unita le radici del disco,
+        di tutte le unita' se None, nessuna se vuota."""
         if self._ricerca is not None:
             self._ricerca.ferma()
         self._testo_della_ricerca = testo
+        if brani is None:
+            brani = [(b, "Preferiti") for b in self.archivio.preferiti.brani]
+            brani += [(b, f"Playlist {pl.nome}") for pl in self.archivio.playlist for b in pl.brani]
+        else:
+            # I brani si prendono prima che i Risultati, se sono loro, si svuotino.
+            brani = list(brani)
         self.risultati = Playlist("Risultati", cartella="")
         self._risultati_letti = 0
-        brani = [(b, "Preferiti") for b in self.archivio.preferiti.brani]
-        brani += [(b, f"Playlist {pl.nome}") for pl in self.archivio.playlist for b in pl.brani]
+        self._dove_si_cerca = dove
         self._ricerca = Ricerca(filtro, brani, self.schedario, avvisa=lambda: wx.CallAfter(self._risultati_arrivati), unita=unita)
         self._albero_dei_risultati = AlberoDeiRisultati(dict(questo_pc.unita()))
         if self.nodo_risultati is None:
@@ -2852,7 +2919,7 @@ class Finestra(wx.Frame):
         self.albero.SetItemHasChildren(self.nodo_risultati, True)
         self._aggiorna_risultati()
         self._ricerca.avvia()
-        self._riscontro("ricerca_avviata", f"Cerco {testo} nelle playlist e nelle unità. I Risultati si riempiono mentre cerco.")
+        self._riscontro("ricerca_avviata", f"Cerco {testo} {dove}. I Risultati si riempiono mentre cerco.")
 
     def _etichetta_dei_risultati(self):
         trovati = self._ricerca.quanti() if self._ricerca else 0
@@ -2960,7 +3027,8 @@ class Finestra(wx.Frame):
             return
         self._aggiorna_risultati()
         if self._ricerca.finita:
-            self._riscontro("ricerca_finita", f"Ricerca di {self._testo_della_ricerca} finita: {al_plurale(len(self.risultati.brani), 'risultato', 'risultati')}.")
+            dove = "" if self._dove_si_cerca == OVUNQUE else f" {self._dove_si_cerca}"
+            self._riscontro("ricerca_finita", f"Ricerca di {self._testo_della_ricerca}{dove} finita: {al_plurale(len(self.risultati.brani), 'risultato', 'risultati')}.")
             self._chiedi_schede(self.risultati)
 
     def _ferma_ricerca(self):

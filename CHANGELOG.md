@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.71.0] - 2026-10-03
+
+- La barra rovesciata cerca nel ramo della plancia in cui sei, sottocartelle comprese: una cartella, un'unità, una playlist, i Preferiti o i Risultati; su Questo PC tutti i dischi, sul ramo Playlist tutte le playlist, su Questa rete i suoi percorsi. Così cercare in una cartella, per esempio nei giochi Amiga, è molto più veloce. Ctrl con la barra rovesciata cerca in tutto MeTeOra, come prima la barra da sola. Chiesto da Gabriele.
+
 ## [1.70.0] - 2026-10-03
 
 - I tag dei WAV comprendono il blocco INFO, quello di Esplora risorse: MeTeOra lo legge, con i tag comuni presi da lì quando ID3 non li ha, e scrive titolo, artista, album, anno, genere, commento e traccia sia in ID3 sia nel blocco INFO; gli altri campi, come Copyright e Programma, si leggono e si modificano nel blocco INFO. Il filtro e la ricerca li trovano. Un WAV con la struttura irregolare, come una registrazione interrotta, non si tocca, e la console lo dice. Chiesto da Gabriele.

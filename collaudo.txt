@@ -1,4 +1,4 @@
-Collaudo di MeTeOra 1.70.0, con NVDA: i tag, anche quelli INFO dei WAV. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.70.0. Fai le prove su copie dei tuoi file. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Collaudo di MeTeOra 1.71.0, con NVDA: i tag, anche quelli INFO dei WAV, e la ricerca nel ramo. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.71.0. Fai le prove su copie dei tuoi file. Scrivi le note sulla riga della voce; le voci superate si cancellano.
 F11 su un brano MP3: la console mostra i tag, i dieci comuni anche vuoti e poi gli altri del file, e il fuoco va sulla prima riga.
 Menu del brano, Leggi i tag: lo stesso di F11.
 Menu del brano, Tag: una voce per tag con il suo valore; Invio chiede il nuovo, e la console lo conferma con un suono nuovo.
@@ -12,3 +12,6 @@ Se li hai, prova anche un FLAC, un M4A e un WMA.
 Ascolta i tre suoni nuovi: tag letti, tag cambiato e tag cancellato.
 Su una copia di un WAV di esperimenti audio con il blocco INFO, F11: i tag comuni vengono da lì, e compaiono anche Copyright e Programma.
 Cambia il titolo di quella copia e guardalo in Esplora risorse, Proprietà, Dettagli: il titolo nuovo c'è, e il WAV suona come prima.
+Ricerca nel ramo: in Questo PC, su E:\audio\Amiga giochi, la barra rovesciata apre Ricerca in Amiga giochi; cerca per esempio turrican, e i Risultati vengono solo da lì, in fretta.
+La barra rovesciata su un brano di una playlist cerca solo in quella playlist; su Questo PC in tutti i dischi; nei Risultati dentro i risultati.
+Ctrl con la barra rovesciata apre Ricerca in tutto MeTeOra, come prima la barra da sola. Maiuscolo con la barra rovesciata è ancora il filtro.
