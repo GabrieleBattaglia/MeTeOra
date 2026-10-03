@@ -1,22 +1,24 @@
 {
- "volume": 101,
+ "volume": 164,
  "passo_volume": 3,
  "passo_indietro": 3.0,
- "passo_avanti": 10.0,
+ "passo_avanti": 30.0,
  "volume_effetti": 0.45,
  "insegui": true,
- "casuale": true,
+ "casuale": false,
  "modello_casuale": "una_volta",
  "video": false,
  "sottotitoli": true,
  "sintesi": "automatica",
+ "percorsi_di_rete": [],
+ "banco_midi": "E:\\VstPlugins\\SF2 Instruments\\FluidR3 GM.sf2",
  "ripresa": {
-  "percorso": "E:\\git\\tmp\\player-accessibile\\video_prova\\Prova del video.mp4",
+  "percorso": "E:\\Audio\\MIDI\\50 special.mid",
   "sottobrano": null,
-  "numero": 0,
-  "posizione": 0.023219954648526137,
+  "numero": 10,
+  "posizione": 16.123178998392287,
   "tipo": "cartella",
-  "cartella": "E:\\git\\tmp\\player-accessibile\\video_prova"
+  "cartella": "E:\\Audio\\MIDI"
  },
  "righe_della_console": 2000,
  "caratteri": {},
@@ -67,7 +69,7 @@
   0
  ],
  "dissolvenza": {
-  "accesa": true,
+  "accesa": false,
   "secondi": 7.0
  }
 }
