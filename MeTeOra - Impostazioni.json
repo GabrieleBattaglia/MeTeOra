@@ -13,12 +13,12 @@
  "percorsi_di_rete": [],
  "banco_midi": "E:\\VstPlugins\\SF2 Instruments\\FluidR3 GM.sf2",
  "ripresa": {
-  "percorso": "E:\\Audio\\MODULE\\ACTIONS.MOD",
+  "percorso": "E:\\Audio\\Amiga giochi\\Prova MIX e ORG\\mod.beatbox_T002_MIX.mp3",
   "sottobrano": null,
-  "numero": 10,
+  "numero": 2,
   "posizione": 0,
   "tipo": "cartella",
-  "cartella": "E:\\Audio\\MODULE"
+  "cartella": "E:\\Audio\\Amiga giochi\\Prova MIX e ORG"
  },
  "righe_della_console": 2000,
  "caratteri": {},
