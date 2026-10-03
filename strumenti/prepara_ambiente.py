@@ -1,17 +1,19 @@
 # MeTeOra, preparazione dell'ambiente di sviluppo: scarica e compila le librerie native.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 29/09/2026: nasce con il repository.
+# 29/09/2026: nasce con il repository. Nella 1.66.0 anche libgme, per la musica delle console.
 
 """Mette in lib/ le DLL che il repository non contiene.
 
 1. libmpv-2.dll: l'ultima build di shinchiro/mpv-winbuild-cmake da GitHub.
 2. sidshim.dll: compilata da sidshim/sidshim.cpp con MSYS2 (UCRT64), insieme
    a libsidplayfp e alle altre DLL di cui ha bisogno.
+3. libgme.dll, per la musica delle console (tappa 8): dal pacchetto MSYS2
+   di libgme, con le DLL di cui ha bisogno.
 
 MSYS2 si cerca nella cartella indicata dalla variabile METEORA_MSYS2, poi in
 strumenti/msys64; se non c'e' si scarica la versione portatile in
 strumenti/msys64, che git ignora. Serve 7-Zip installato.
-Uso: python strumenti/prepara_ambiente.py [--solo-mpv | --solo-sid]
+Uso: python strumenti/prepara_ambiente.py [--solo-mpv | --solo-sid | --solo-gme]
 """
 
 import json
@@ -28,6 +30,7 @@ LIB = os.path.join(RADICE, "lib")
 SETTEZIP = r"C:\Program Files\7-Zip\7z.exe"
 MSYS2_URL = "https://github.com/msys2/msys2-installer/releases/download/nightly-x86_64/msys2-base-x86_64-latest.sfx.exe"
 PACCHETTI = ["mingw-w64-ucrt-x86_64-gcc", "mingw-w64-ucrt-x86_64-libsidplayfp", "mingw-w64-ucrt-x86_64-pkgconf"]
+PACCHETTO_GME = "mingw-w64-ucrt-x86_64-libgme"
 
 
 def scarica(url, destinazione):
@@ -81,9 +84,24 @@ def prepara_sid():
     print(f"sidshim.dll pronta con libsidplayfp {versione}, dipendenze copiate: {', '.join(dipendenze)}", flush=True)
 
 
+def prepara_gme():
+    msys2 = trova_msys2()
+    print(f"MSYS2 in {msys2}", flush=True)
+    bash(msys2, f"pacman -S --noconfirm --needed {PACCHETTO_GME}")
+    shutil.copy2(os.path.join(msys2, "ucrt64", "bin", "libgme.dll"), LIB)
+    dipendenze = re.findall(r"=> /ucrt64/bin/(\S+\.dll)", bash(msys2, "ldd /ucrt64/bin/libgme.dll"))
+    for nome in dipendenze:
+        shutil.copy2(os.path.join(msys2, "ucrt64", "bin", nome), LIB)
+    versione = bash(msys2, f"pacman -Q {PACCHETTO_GME}").split()[-1]
+    print(f"libgme.dll pronta, versione {versione}, dipendenze copiate: {', '.join(dipendenze)}", flush=True)
+
+
 if __name__ == "__main__":
     os.makedirs(LIB, exist_ok=True)
-    if "--solo-sid" not in sys.argv:
+    solo = next((a for a in sys.argv[1:] if a.startswith("--solo-")), None)
+    if solo in (None, "--solo-mpv"):
         prepara_mpv()
-    if "--solo-mpv" not in sys.argv:
+    if solo in (None, "--solo-sid"):
         prepara_sid()
+    if solo in (None, "--solo-gme"):
+        prepara_gme()

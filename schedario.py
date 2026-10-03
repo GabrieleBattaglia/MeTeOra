@@ -1,6 +1,6 @@
 # MeTeOra, lo schedario: durata, dimensione e tag dei file, ricordati fra un avvio e l'altro.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la 1.7.0, per le durate delle playlist (issue 4) e poi per il filtro (issue 2). Nella 1.62.4 le durate da libmpv per i formati che mutagen non conosce, e quella esatta dell'AAC grezzo.
+# 30/09/2026: nasce con la 1.7.0, per le durate delle playlist (issue 4) e poi per il filtro (issue 2). Nella 1.62.4 le durate da libmpv per i formati che mutagen non conosce, e quella esatta dell'AAC grezzo. Nella 1.66.0 le schede della musica delle console, con i sottobrani.
 
 """Lo schedario dei file.
 
@@ -23,7 +23,7 @@ import threading
 import time
 
 import formati
-import songlengths
+import sottobrani
 
 VERSIONE_DEL_FILE = 1
 # Le chiavi dei tag, come le usa il filtro.
@@ -128,15 +128,19 @@ def durata_da_mpv(percorso):
 
 def leggi_scheda(percorso):
     """La scheda di un file: dimensione, data di modifica, durata in secondi
-    (None se non si sa), tag, e per i SID il numero dei sottobrani."""
+    (None se non si sa), tag, e per i SID e le console il numero dei
+    sottobrani."""
     stato = os.stat(percorso)
     scheda = {"dim": stato.st_size, "mod": stato.st_mtime, "durata": None, "tag": {}, "sottobrani": None, "durate_sid": None}
-    if formati.e_sid(percorso):
-        info = songlengths.info_del_sid(percorso)
+    if formati.ha_sottobrani(percorso):
+        # SID e console. La chiave durate_sid tiene il suo nome anche per le
+        # console: e' quello degli schedari gia' salvati.
+        info = sottobrani.info(percorso)
         if info:
             scheda["tag"] = {"titolo": info["titolo"], "autore": info["autore"], "anno": _anno(info["copyright"])}
+            scheda["tag"] = {chiave: valore for chiave, valore in scheda["tag"].items() if valore}
             scheda["sottobrani"] = info["sottobrani"]
-            durate = songlengths.durate_del_file(percorso)
+            durate = sottobrani.durate(percorso)
             scheda["durate_sid"] = durate
             iniziale = info["iniziale"] or 1
             if durate and iniziale <= len(durate):
@@ -206,7 +210,7 @@ class Schedario:
             # quella dell'AAC grezzo si conta: le schede senza durata, e quelle
             # degli AAC, si rileggono.
             self.schede = {chiave: scheda for chiave, scheda in dati["schede"].items()
-                if formati.e_sid(chiave) or (scheda.get("durata") is not None and formati.estensione(chiave) != ".aac")}
+                if formati.ha_sottobrani(chiave) or (scheda.get("durata") is not None and formati.estensione(chiave) != ".aac")}
 
     def salva(self):
         if not self._modificato:

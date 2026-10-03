@@ -284,6 +284,29 @@ def test_sottobrani_nella_plancia(finestra, suoni_annotati, tmp_path):
     assert pl.brani[0].sottobrano == 5
 
 
+def test_sottobrani_delle_console_nella_plancia(finestra, tmp_path):
+    import chip
+
+    if not chip.presente():
+        pytest.skip("manca lib/libgme.dll: la mette strumenti/prepara_ambiente.py")
+    from test_chip import nsf_di_prova
+
+    cartella = tmp_path / "nes"
+    cartella.mkdir()
+    nsf_di_prova(cartella / "gioco.nsf")
+    (cartella / "gioco.m3u").write_text("gioco.nsf::NSF,2,Il secondo,0:42,,3\ngioco.nsf::NSF,1,,1:05,,\n", encoding="cp1252")
+    finestra.albero.Expand(finestra.nodo_pc)
+    nodo = finestra.albero.AppendItem(finestra.nodo_pc, "nes", data={"tipo": "cartella", "percorso": str(cartella), "caricato": False})
+    finestra.albero.SetItemHasChildren(nodo, True)
+    finestra.albero.Expand(nodo)
+    voce_file = next(finestra._figli(nodo))
+    assert finestra.albero.GetItemText(voce_file).startswith("gioco.nsf")
+    assert finestra.albero.ItemHasChildren(voce_file)
+    finestra.albero.Expand(voce_file)
+    # Il titolo del brano, se il .m3u lo dice; la durata comprende la dissolvenza.
+    assert _etichette(finestra, voce_file) == ["Sottobrano 1 di 2, Il secondo, 0:45", "Sottobrano 2 di 2, 1:13"]
+
+
 def test_loop_a_b_con_maiuscolo_x(finestra, suoni_annotati):
     finestra._aggiungi(None, [os.path.join(r"C:\m", f"{n}.mp3") for n in range(1, 6)])
     pl = finestra.archivio.playlist[0]

@@ -1,6 +1,6 @@
 # MeTeOra, il motore di riproduzione: libmpv, e i SID in tempo reale.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7). Nella 1.65.0 i MIDI resi da FluidSynth (tappa 8).
+# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7). Nella 1.65.0 i MIDI resi da FluidSynth (tappa 8). Nella 1.66.0 la musica delle console con libgme.
 
 """Due lettori libmpv per tutti i formati.
 
@@ -50,10 +50,11 @@ import librerie  # noqa: F401
 # isort: split
 import mpv
 
+import chip
 import formati
 import midi
 import sid
-import songlengths
+import sottobrani
 import valori
 
 # La durata di un SID che non sta in nessun database: tre minuti, come fanno
@@ -90,16 +91,19 @@ _EVENTI_UTILI = frozenset({mpv.MpvEventID.START_FILE, mpv.MpvEventID.FILE_LOADED
 
 
 def durata_del_sottobrano(percorso, sottobrano):
-    """I secondi di un sottobrano di un SID: dal database, o la durata predefinita."""
-    durate = songlengths.durate_del_file(percorso)
-    return durate[sottobrano - 1] if durate and sottobrano <= len(durate) else DURATA_SID_PREDEFINITA
+    """I secondi di un sottobrano: per i SID dal database della collezione,
+    per le console da libgme; se non si sa, la durata predefinita."""
+    durate = sottobrani.durate(percorso)
+    durata = durate[sottobrano - 1] if durate and sottobrano <= len(durate) else None
+    return durata if durata is not None else DURATA_SID_PREDEFINITA
 
 
 def sottobrano_risolto(percorso, sottobrano=None):
     """Il sottobrano che il motore suona per un file e un sottobrano chiesto:
-    per un SID quello chiesto, o l'iniziale, o il primo, entro i
-    sottobrani; None per gli altri file e per i SID che non si leggono."""
-    info = songlengths.info_del_sid(percorso) if formati.e_sid(percorso) else None
+    per un SID o un file delle console quello chiesto, o l'iniziale, o il
+    primo, entro i sottobrani; None per gli altri file e per quelli che non
+    si leggono."""
+    info = sottobrani.info(percorso)
     if not info:
         return None
     return min(sottobrano or info["iniziale"] or 1, max(1, info["sottobrani"]))
@@ -120,6 +124,12 @@ def _apri_sid(uri):
     # sid://<sottobrano>/<secondi>/<percorso>
     sottobrano, secondi, percorso = uri[len("sid://"):].split("/", 2)
     return sid.apri_flusso(percorso, int(sottobrano), float(secondi))
+
+
+def _apri_chip(uri):
+    # chip://<sottobrano>/<secondi>/<percorso>, la musica delle console.
+    sottobrano, secondi, percorso = uri[len("chip://"):].split("/", 2)
+    return chip.apri_flusso(percorso, int(sottobrano), float(secondi))
 
 
 # Le opzioni di loadfile per i flussi WAV resi in RAM, SID e MIDI. Il formato
@@ -155,9 +165,10 @@ class _Brano:
         self.sottobrano = sottobrano_risolto(percorso, sottobrano)
         self.sottobrani = None
         if self.sottobrano is not None:
-            self.sottobrani = max(1, songlengths.info_del_sid(percorso)["sottobrani"])
+            self.sottobrani = max(1, sottobrani.info(percorso)["sottobrani"])
             secondi = durata_del_sottobrano(percorso, self.sottobrano)
-            self.indirizzo = f"sid://{self.sottobrano}/{max(1.0, secondi)}/{percorso}"
+            protocollo = "chip" if formati.e_chip(percorso) else "sid"
+            self.indirizzo = f"{protocollo}://{self.sottobrano}/{max(1.0, secondi)}/{percorso}"
             self.opzioni.update(_OPZIONI_DEL_FLUSSO)
         elif banco_midi and formati.e_midi(percorso):
             # Un MIDI, con un banco di suoni: lo rende FluidSynth (tappa 8).
@@ -202,10 +213,16 @@ class _Lettore:
         self.flusso = None
         self.mpv.register_stream_protocol("sid", self._apri_sid)
         self.mpv.register_stream_protocol("midi", self._apri_midi)
+        self.mpv.register_stream_protocol("chip", self._apri_chip)
         self.mpv.register_event_callback(functools.partial(motore._evento, self))
 
     def _apri_sid(self, uri):
         flusso = _apri_sid(uri)
+        self.flusso = flusso
+        return flusso
+
+    def _apri_chip(self, uri):
+        flusso = _apri_chip(uri)
         self.flusso = flusso
         return flusso
 
@@ -508,7 +525,7 @@ class Motore:
 
     @property
     def sottobrano(self):
-        """Il sottobrano che suona, per i SID; None per gli altri file."""
+        """Il sottobrano che suona, per i SID e le console; None per gli altri file."""
         return self._attivo.sottobrano
 
     @sottobrano.setter

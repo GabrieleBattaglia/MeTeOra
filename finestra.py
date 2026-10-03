@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8).
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID.
 
 """La finestra di MeTeOra.
 
@@ -52,7 +52,7 @@ import questa_rete
 import questo_pc
 import schede_audio
 import sintesi
-import songlengths
+import sottobrani
 import suoni
 import valori
 import version
@@ -224,7 +224,8 @@ SPIEGAZIONI_DEI_MODELLI = {
 FINE_DEL_MAZZO = object()
 
 
-# Da quanti secondi d'attesa in su la console dice che il SID si prepara.
+# Da quanti secondi d'attesa in su la console dice che il SID, il MIDI o il
+# brano della console si prepara.
 ATTESA_DA_DIRE = 1.5
 
 
@@ -423,9 +424,9 @@ _GRAMMATICA_DEL_FILTRO = [
     "t tempo, come t<=3:00 o t>90.",
     "d dimensione, come d>5m o d<700k.",
     "y anno, come y<1990.",
-    "r sottobrani dei SID, come r>1.",
+    "r sottobrani dei SID e della musica delle console, come r>1.",
     "Questi solo con l'uguale:",
-    "k tipo: k=sid, k=audio, k=video, k=tracker, k=midi, o un'estensione come k=flac.",
+    "k tipo: k=sid, k=audio, k=video, k=tracker, k=midi, k=chip, o un'estensione come k=flac.",
     "a autore, come a=hubbard.",
     "n titolo, come n=commando.",
     "l album.",
@@ -1281,10 +1282,11 @@ class Finestra(wx.Frame):
             yield from self._tutte_le_voci(figlio)
 
     def _ha_sottobrani(self, brano):
-        """Vero per un SID con piu' sottobrani, che nella plancia diventa un ramo."""
-        if brano.sottobrano is not None or not formati.e_sid(brano.percorso):
+        """Vero per un SID o un file delle console con piu' sottobrani, che
+        nella plancia diventa un ramo."""
+        if brano.sottobrano is not None or not formati.ha_sottobrani(brano.percorso):
             return False
-        info = songlengths.info_del_sid(brano.percorso)
+        info = sottobrani.info(brano.percorso)
         return bool(info) and info["sottobrani"] > 1
 
     def _etichetta(self, dati):
@@ -1296,7 +1298,9 @@ class Finestra(wx.Frame):
         quanti = len(self._marker_della_voce(dati))
         if dati["tipo"] == "sottobrano":
             n = dati["numero"]
-            parti = [f"Sottobrano {n} di {dati['totale']}, {tempo(durata_del_sottobrano(brano.percorso, n))}"]
+            titoli = (sottobrani.info(brano.percorso) or {}).get("titoli") or []
+            titolo = f", {titoli[n - 1]}" if n <= len(titoli) and titoli[n - 1] else ""
+            parti = [f"Sottobrano {n} di {dati['totale']}{titolo}, {tempo(durata_del_sottobrano(brano.percorso, n))}"]
             if quanti:
                 parti.append(f"{quanti} marker")
             if suona and self.motore.sottobrano == n:
@@ -1304,7 +1308,7 @@ class Finestra(wx.Frame):
             return ", ".join(parti)
         parti = [brano.percorso if dati.get("completo") else brano.nome_del_file]
         if brano.sottobrano:
-            info = songlengths.info_del_sid(brano.percorso)
+            info = sottobrani.info(brano.percorso)
             parti[0] += f", sottobrano {brano.sottobrano} di {info['sottobrani'] if info else '?'}"
         parti.extend(self._durata_nella_plancia(brano))
         if quanti:
@@ -1324,7 +1328,7 @@ class Finestra(wx.Frame):
         """La durata da mostrare accanto al brano, se si sa: per un SID con piu'
         sottobrani, quanti sono e quanto durano in tutto."""
         if self._ha_sottobrani(brano):
-            totale = songlengths.info_del_sid(brano.percorso)["sottobrani"]
+            totale = sottobrani.info(brano.percorso)["sottobrani"]
             durate = (self.schedario.scheda(brano.percorso) or {}).get("durate_sid")
             return [f"{totale} sottobrani" + (f", {durata_lunga(sum(durate))} in tutto" if durate else "")]
         durata = self.schedario.durata(brano)
@@ -1719,7 +1723,7 @@ class Finestra(wx.Frame):
             return
         if tipo in ("brano", "file") and self._ha_sottobrani(dati["brano"]):
             brano = dati["brano"]
-            totale = songlengths.info_del_sid(brano.percorso)["sottobrani"]
+            totale = sottobrani.info(brano.percorso)["sottobrani"]
             for n in range(1, totale + 1):
                 figlio = {"tipo": "sottobrano", "playlist": dati["playlist"], "brano": brano, "numero": n, "totale": totale}
                 sotto = self.albero.AppendItem(voce, self._etichetta(figlio), data=figlio)
@@ -3235,12 +3239,13 @@ class Finestra(wx.Frame):
         self._avvisa_l_attesa_del_sid(arrivo)
 
     def _avvisa_l_attesa_del_sid(self, arrivo):
-        """Dopo un salto: se il brano e' un SID e il punto d'arrivo non e'
-        ancora reso, la console dice quanto c'e' da aspettare, che altrimenti
+        """Dopo un salto: se il brano e' un SID, un MIDI o un brano delle
+        console e il punto d'arrivo non e' ancora reso, la console dice quanto c'e' da aspettare, che altrimenti
         sarebbe silenzio senza spiegazioni (tappa 5, 1.62.0)."""
         attesa = self.motore.attesa_del_sid(arrivo)
         if attesa >= ATTESA_DA_DIRE:
-            che = "Il MIDI" if formati.e_midi(self.motore.in_corso or "") else "Il SID"
+            in_corso = self.motore.in_corso or ""
+            che = "Il MIDI" if formati.e_midi(in_corso) else "Il brano della console" if formati.e_chip(in_corso) else "Il SID"
             self.scrivi(f"{che} si prepara fino a {tempo(arrivo)}: circa {max(2, round(attesa))} secondi.")
 
     def _comando_avanti(self):
@@ -4422,10 +4427,10 @@ class Finestra(wx.Frame):
         e' None, e allora vale il percorso: per un SID fuori dal database la
         durata predefinita di tre minuti non e' una durata vera. Con leggi,
         se lo schedario non ha ancora letto il file, lo legge subito."""
-        if formati.e_sid(percorso):
-            info = songlengths.info_del_sid(percorso)
+        if formati.ha_sottobrani(percorso):
+            info = sottobrani.info(percorso)
             numero = sottobrano or (info or {}).get("iniziale") or 1
-            durate = songlengths.durate_del_file(percorso)
+            durate = sottobrani.durate(percorso)
             return (durate[numero - 1] if durate and numero <= len(durate) else None), numero
         scheda = self.schedario.scheda(percorso)
         if scheda is None and leggi:
@@ -4555,7 +4560,7 @@ class Finestra(wx.Frame):
         elif multiplo:
             # Di un SID con piu' sottobrani conta quello che suona, se suona
             # lui, altrimenti l'iniziale.
-            info = songlengths.info_del_sid(brano.percorso) or {}
+            info = sottobrani.info(brano.percorso) or {}
             sottobrano = self.motore.sottobrano if self.motore.in_corso == brano.percorso else (info.get("iniziale") or 1)
         else:
             sottobrano = brano.sottobrano

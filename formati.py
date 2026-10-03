@@ -1,6 +1,6 @@
 # MeTeOra, i formati: quali file il programma sa suonare.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1.
+# 30/09/2026: nasce con la tappa 1. Nella 1.65.0 i MIDI e i tracker a parte, nella 1.66.0 la musica delle console.
 
 """Le estensioni dei file supportati.
 
@@ -16,6 +16,8 @@ import os
 SID = frozenset({".sid"})
 # I MIDI li rende FluidSynth, dalla 1.65.0 (tappa 8, issue 16).
 MIDI = frozenset({".mid", ".midi", ".kar"})
+# La musica delle console la rende libgme, dalla 1.66.0 (tappa 8).
+CHIP = frozenset({".ay", ".gbs", ".gym", ".hes", ".kss", ".nsf", ".nsfe", ".sap", ".spc", ".vgm", ".vgz"})
 # I moduli dei tracker, che libmpv legge con libopenmpt: dalla 1.65.0 tutte
 # le estensioni di libopenmpt, compresi i formati Amiga classici (OKT, MED,
 # SFX, STK, DIGI, Future Composer...), tranne quelle che hanno anche altri
@@ -31,7 +33,7 @@ AUDIO = frozenset({
     ".mpc", ".dsf", ".dff", ".aiff", ".aif", ".alac", ".ac3", ".dts", ".mka", ".au", ".caf", ".spx",
 }) | TRACKER
 VIDEO = frozenset({".mp4", ".mkv", ".avi", ".mov", ".wmv", ".webm", ".flv", ".m4v", ".mpg", ".mpeg", ".ts", ".m2ts", ".3gp", ".vob", ".ogv"})
-TUTTI = SID | MIDI | AUDIO | VIDEO
+TUTTI = SID | MIDI | CHIP | AUDIO | VIDEO
 
 
 def estensione(percorso):
@@ -48,6 +50,15 @@ def e_sid(percorso):
 
 def e_midi(percorso):
     return estensione(percorso) in MIDI
+
+
+def e_chip(percorso):
+    return estensione(percorso) in CHIP
+
+
+def ha_sottobrani(percorso):
+    """Vero per i file che possono avere piu' brani dentro: SID e console."""
+    return estensione(percorso) in SID | CHIP
 
 
 def filtro_dialogo():

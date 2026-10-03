@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.66.0] - 2026-10-03
+
+- MeTeOra suona la musica delle console con libgme: NES, Super Nintendo, Game Boy, Sega, ZX Spectrum, PC Engine, MSX e Atari. Come i SID, i brani di un file diventano sottobrani nella plancia, con il loro titolo quando il file lo dice; il filtro ha la famiglia k=chip, e r conta anche i loro sottobrani (tappa 8).
+- Un brano delle console che gira in tondo sfuma alla durata scritta nel file, o dopo due giri del ritornello; un file m3u accanto, con lo stesso nome, ordina i brani, li nomina e ne dice le durate.
+
 ## [1.65.0] - 2026-10-03
 
 - I MIDI suonano con FluidSynth e un banco di suoni General MIDI: ogni strumento ha il suo suono, invece di uno solo per tutti. La prima volta MeTeOra chiede se procedere, scarica FluidSynth, cerca nei dischi i banchi che hai già e te li propone; se non ce ne sono, propone di scaricare FluidR3 GM. Il banco si cambia nelle impostazioni, con la voce nuova Banco dei suoni MIDI. Chiesto da Gabriele (issue 16, tappa 8).

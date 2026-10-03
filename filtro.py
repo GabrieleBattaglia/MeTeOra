@@ -40,11 +40,12 @@ OPERATORI = ("<=", ">=", "<", ">", "=")
 _TERMINE = re.compile(r'-?(?:"[^"]*"|[^\s"|]+)(?:\|(?:"[^"]*"|[^\s"|]+))*|\|')
 _COMANDO = re.compile(r"^([a-z])(<=|>=|<|>|=)(.*)$", re.IGNORECASE)
 FAMIGLIE = {
-    "audio": formati.AUDIO | formati.SID | formati.MIDI,
+    "audio": formati.AUDIO | formati.SID | formati.MIDI | formati.CHIP,
     "video": formati.VIDEO,
     "sid": formati.SID,
     "tracker": formati.TRACKER,
     "midi": formati.MIDI,
+    "chip": formati.CHIP,
 }
 NUMERICI = {"t", "d", "y", "r"}
 TESTUALI = {"a": "autore", "n": "titolo", "l": "album", "g": "genere"}

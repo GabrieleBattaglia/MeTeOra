@@ -14,6 +14,7 @@ In sviluppo, senza ancora una release. La versione 1.0.0 chiude la tappa 1: la f
 
 - Riproduzione con libmpv, tramite python-mpv.
 - I SID sono emulati in tempo reale da libsidplayfp, con una piccola DLL scritta per MeTeOra (`sidshim/sidshim.cpp`): il brano si rende in memoria mentre suona, e libmpv lo riceve come un normale file WAV. Le durate e i sottobrani vengono dal database Songlengths della High Voltage SID Collection.
+- I MIDI li rende FluidSynth, scaricato al primo MIDI, con un banco di suoni General MIDI; la musica delle console la rende libgme. Anche loro si rendono in memoria e arrivano a libmpv come file WAV.
 - Interfaccia in wxPython con un albero dei comandi, la console e il cruscotto.
 
 ## Preparare l'ambiente di sviluppo
@@ -25,7 +26,7 @@ pip install -r requirements.txt
 python strumenti/prepara_ambiente.py
 ```
 
-Lo script scarica libmpv, scarica MSYS2 in versione portatile se non c'è, compila la DLL dei SID e mette tutto nella cartella `lib`. Se MSYS2 è già su disco, la variabile `METEORA_MSYS2` gli dice dove trovarlo.
+Lo script scarica libmpv, scarica MSYS2 in versione portatile se non c'è, compila la DLL dei SID, installa libgme con pacman e mette tutto nella cartella `lib`. Se MSYS2 è già su disco, la variabile `METEORA_MSYS2` gli dice dove trovarlo.
 
 Poi MeTeOra si avvia con `python meteora.py`, e le prove con `python -m pytest`: le finestre delle prove nascono su un desktop di Windows nascosto e gli effetti sonori tacciono.
 
@@ -33,4 +34,4 @@ I prototipi della cartella `prototipi` si avviano da lì dentro, per esempio `py
 
 ## Licenza
 
-GPL 3. libsidplayfp è distribuita sotto GPL, e MeTeOra la usa.
+GPL 3. libsidplayfp è distribuita sotto GPL, e MeTeOra la usa; FluidSynth e libgme sono sotto LGPL 2.1.
