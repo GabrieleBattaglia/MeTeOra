@@ -321,3 +321,31 @@ def test_lettura_tollerante_di_un_file_ritoccato(tmp_path):
         {"file": "Canzone.mp3", "durata": 200.0, "sottobrano": None, "marker": [{"tempo": 1.5, "nome": "Primo"}, {"tempo": 9.0, "nome": "Due righe"}]},
         {"file": "Senza durata.mp3", "durata": None, "sottobrano": None, "marker": []},
     ]
+
+
+def test_i_marker_seguono_un_file_rinominato(tmp_path):
+    # Rinomina file, 1.67.0: il percorso del file, o il nome e la durata per
+    # i marker importati senza percorsi.
+    archivio = Marcatori(str(tmp_path / "marcatori.json"))
+    a, nuovo = r"C:\Musica\a.mp3", r"C:\Musica\Alfa.mp3"
+    archivio.aggiungi(K_A, 5.0, a, 50.0)
+    archivio.importa([{"file": "Z.sid", "durata": 120.0, "sottobrano": 2, "marker": [{"tempo": 7.0, "nome": "Ritornello"}]}])
+    assert archivio.rinomina_file(a, nuovo, [50.0]) == [marcatori.chiave(nuovo, 50.0)]
+    assert K_A not in archivio.voci and [m["tempo"] for m in archivio.elenco(marcatori.chiave(nuovo, 50.0))] == [5.0]
+    assert archivio.forse(nuovo) and not archivio.forse(a) and archivio.modificato
+    # Un sottobrano importato si riconosce dalla sua durata.
+    assert archivio.rinomina_file(r"D:\SID\Z.sid", r"D:\SID\Zeta.sid", [90.0, 120.0]) == [marcatori.chiave("Zeta.sid", 120.0, 2)]
+    # Una copia con il nome vecchio che resta altrove si tiene i suoi marker.
+    copia = r"E:\Copia\b.mp3"
+    archivio.aggiungi(K_B, 9.0, r"C:\Musica\B.mp3", 100.0)
+    archivio.voci[K_B]["percorsi"].append(copia)
+    nuova = marcatori.chiave("Beta.mp3", 100.0)
+    assert archivio.rinomina_file(r"C:\Musica\B.mp3", r"C:\Musica\Beta.mp3", [100.0]) == [nuova]
+    assert archivio.voci[K_B]["percorsi"] == [copia] and archivio.voci[nuova]["percorsi"] == [r"C:\Musica\Beta.mp3"]
+    # Un nome nuovo che ha gia' dei marker li unisce, senza doppioni.
+    archivio.aggiungi(K_B, 11.0, copia, 100.0)
+    archivio.rinomina_file(copia, r"E:\Copia\Beta.mp3", [100.0])
+    assert [m["tempo"] for m in archivio.elenco(nuova)] == [9.0, 11.0] and K_B not in archivio.voci
+    assert archivio.voci[nuova]["percorsi"] == [r"C:\Musica\Beta.mp3", r"E:\Copia\Beta.mp3"]
+    # Un file senza marker non tocca niente.
+    assert archivio.rinomina_file(r"C:\Altro\x.mp3", r"C:\Altro\y.mp3", [10.0]) == []

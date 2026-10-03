@@ -1,4 +1,4 @@
-Collaudo di MeTeOra 1.66.36, con NVDA: Questa rete, i MIDI, i tracker, le console e le rifiniture della tappa 9. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.66.36. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Collaudo di MeTeOra 1.67.4, con NVDA: Questa rete, i MIDI, i tracker, le console, le rifiniture della tappa 9 e Rinomina file. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.67.4. Scrivi le note sulla riga della voce; le voci superate si cancellano.
 Nella plancia, dopo Questo PC, c'è Questa rete; freccia destra la apre.
 Dentro c'è iliadbox (iliadbox_Server), il percorso salvato in Windows: si apre, mostra cartelle e brani, e si suona come una cartella di Questo PC.
 Con la iliadbox spenta, o il cavo staccato, aprire il suo ramo non blocca MeTeOra: dopo pochi secondi la console dice che non risponde, e il ramo si può riaprire.
@@ -36,3 +36,9 @@ Un filtro che lascia passare un solo brano dice Passa 1 brano.
 In una ricerca lunga, con il fuoco su Mostra altri risultati mentre arrivano i risultati, il fuoco non salta.
 Con Ctrl e le frecce su una voce non selezionata, F7 dice che Canc, X, F4 e il menu agiscono sulla voce selezionata.
 F3 nomina FluidSynth, libgme e accessible_output2.
+Rinomina file, dal menu di un brano o di un file: il campo propone il nome senza l'estensione; scrivi il nuovo e Invio. Il file cambia nome sul disco, e la plancia lo mostra.
+Su un video con i sottotitoli accanto, per esempio film.srt: anche i sottotitoli cambiano nome, e il video li ritrova.
+Rinomina un brano mentre suona: continua a suonare, e F8 lo ritrova con il nome nuovo.
+Un brano con dei marker, rinominato, li tiene.
+Esc nel campo, un nome già preso o un carattere come i due punti: il file resta com'è, e la console dice perché.
+Impostazioni, Banco dei suoni MIDI, Cerca i banchi nel PC: nella lista ci sono solo i banchi General MIDI, con le dimensioni in MB, i piccoli con un decimale.

@@ -45,27 +45,51 @@ def midi_di_prova(percorso, battiti=8):
     return str(percorso)
 
 
-def _banco(percorso):
+def banco_di_prova(percorso, general_midi=True):
+    """Un banco SoundFont senza campioni, con il solo elenco dei preset: i
+    128 programmi del banco 0 e la batteria del 128 se general_midi,
+    altrimenti un pianoforte solo, come i banchi di uno strumento."""
     percorso.parent.mkdir(parents=True, exist_ok=True)
-    percorso.write_bytes(b"RIFF" + b"\0\0\0\0" + b"sfbk" + bytes(20))
+    preset = [*((p, 0) for p in range(128)), (0, 128)] if general_midi else [(0, 0)]
+    record = b"".join(struct.pack("<20sHHHIII", f"P{n}".encode(), p, b, 0, 0, 0, 0) for n, (p, b) in enumerate(preset))
+    record += struct.pack("<20sHHHIII", b"EOP", 0, 0, 0, 0, 0, 0)
+
+    def lista(tipo, contenuto):
+        return b"LIST" + struct.pack("<I", 4 + len(contenuto)) + tipo + contenuto
+
+    corpo = b"sfbk" + lista(b"INFO", b"ifil" + struct.pack("<IHH", 4, 2, 1)) + lista(b"sdta", b"") + lista(b"pdta", b"phdr" + struct.pack("<I", len(record)) + record)
+    percorso.write_bytes(b"RIFF" + struct.pack("<I", len(corpo)) + corpo)
     return str(percorso)
+
+
+_banco = banco_di_prova
 
 
 def test_e_un_banco(tmp_path):
     assert midi.e_un_banco(_banco(tmp_path / "buono.sf2"))
+    # General MIDI: i 128 programmi e la batteria; un banco di uno strumento no.
+    assert midi.general_midi(str(tmp_path / "buono.sf2"))
+    assert midi.e_un_banco(banco_di_prova(tmp_path / "piano.sf2", general_midi=False)) and not midi.general_midi(str(tmp_path / "piano.sf2"))
+    (tmp_path / "corto.sf2").write_bytes(b"RIFF\0\0\0\0sfbk" + bytes(20))
+    assert not midi.general_midi(str(tmp_path / "corto.sf2"))
+    assert (midi.dimensione_da_leggere(4_200_000), midi.dimensione_da_leggere(148_398_306), midi.dimensione_da_leggere(200_000)) == ("4.2 MB", "148 MB", "0.2 MB")
     (tmp_path / "falso.sf2").write_bytes(b"RIFF\0\0\0\0WAVEfmt ")
     assert not midi.e_un_banco(str(tmp_path / "falso.sf2"))
     assert not midi.e_un_banco(str(tmp_path / "manca.sf2"))
 
 
-def test_cerca_banchi(tmp_path):
+def test_cerca_banchi(tmp_path, monkeypatch):
     _banco(tmp_path / "Musica" / "Banchi" / "Zeta.sf2")
     _banco(tmp_path / "Alfa.SF3")
     _banco(tmp_path / "Windows" / "Nascosto.sf2")
     _banco(tmp_path / "$Recycle.Bin" / "Cestinato.sf2")
     (tmp_path / "Musica" / "falso.sf2").write_bytes(b"niente")
+    # Un banco di uno strumento solo, e uno nella cartella dei temporanei, restano fuori.
+    banco_di_prova(tmp_path / "Strumenti" / "Piano.sf2", general_midi=False)
+    _banco(tmp_path / "Temp" / "Di passaggio.sf2")
+    monkeypatch.setattr(midi.tempfile, "gettempdir", lambda: str(tmp_path / "Temp"))
     trovati = midi.cerca_banchi([str(tmp_path)])
-    assert [os.path.basename(p) for p, _d in trovati] == ["Alfa.SF3", "Zeta.sf2"] and trovati[0][1] == 32
+    assert [os.path.basename(p) for p, _d in trovati] == ["Alfa.SF3", "Zeta.sf2"] and trovati[0][1] == os.path.getsize(tmp_path / "Alfa.SF3")
     # fermo interrompe la ricerca.
     assert midi.cerca_banchi([str(tmp_path)], fermo=lambda: True) == []
 

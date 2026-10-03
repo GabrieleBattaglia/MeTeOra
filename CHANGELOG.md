@@ -2,6 +2,14 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.67.4] - 2026-10-03
+
+- Nel menu dei brani e dei file c'è Rinomina file: cambia il nome del file sul disco, e l'estensione resta. I sottotitoli accanto con lo stesso nome lo seguono, come la lista m3u della musica delle console; playlist, Preferiti, marker e durate passano al nome nuovo. Un brano che suona continua a suonare. Chiesto da Gabriele.
+- La ricerca dei banchi dei MIDI propone solo i banchi General MIDI, con tutti i 128 strumenti e la batteria: i banchi di uno strumento solo, come i pianoforti o gli esempi di Csound, suonerebbero un MIDI con strumenti sbagliati o mancanti. Un banco scritto a mano che non è General MIDI si può usare lo stesso, e la console lo dice.
+- La ricerca dei banchi salta la cartella dei file temporanei di Windows, dove c'erano i banchi finti delle prove automatiche di MeTeOra.
+- Le dimensioni dei banchi sotto i 10 MB si scrivono con un decimale: prima un banco piccolo diceva 0 MB.
+- Le prove automatiche cancellano le loro cartelle temporanee quando riescono.
+
 ## [1.66.36] - 2026-10-03
 
 Le rifiniture di accessibilità della tappa 9, dopo una verifica dei requisiti del piano.

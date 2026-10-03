@@ -1,6 +1,6 @@
 # MeTeOra, i marker: punti con un nome dentro un brano, salvati in un file JSON.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.39.0, tappa 3, issue 12 e 14. Nella 1.51.0 l'elenco di tutti i marker, Cancella tutto, l'esportazione e l'importazione.
+# 01/10/2026: nasce con la 1.39.0, tappa 3, issue 12 e 14. Nella 1.51.0 l'elenco di tutti i marker, Cancella tutto, l'esportazione e l'importazione. Nella 1.67.0 i marker seguono un file rinominato.
 
 """I marker dei brani.
 
@@ -168,6 +168,48 @@ class Marcatori:
         self._nomi.add(voce["file"].casefold())
         self.modificato = True
         return marker
+
+    def rinomina_file(self, vecchio, nuovo, durate=()):
+        """Un file rinominato sul disco: i suoi marker passano al nome nuovo.
+        Sono suoi le voci che hanno il suo percorso, e quelle importate,
+        senza percorsi, con il suo nome e una delle sue durate. Se la voce
+        ha anche altri percorsi, copie con il nome vecchio che restano, i
+        marker si copiano invece di spostarsi; se il nome nuovo ha gia' dei
+        marker, si uniscono. Torna le chiavi nuove (1.67.0)."""
+        stesso = os.path.normcase(os.path.abspath(vecchio))
+        nome = os.path.basename(vecchio).casefold()
+        nuove = []
+        for k, voce in list(self.voci.items()):
+            percorsi = [str(p) for p in voce.get("percorsi") or []]
+            suoi = [p for p in percorsi if os.path.normcase(os.path.abspath(p)) == stesso]
+            durata = _durata_valida(voce.get("durata"))
+            importata = (not percorsi and _nome_del_file(k, voce).casefold() == nome and durata is not None
+                and any(d and abs(durata - d) < 0.0005 for d in durate))
+            if not suoi and not importata:
+                continue
+            altri = [p for p in percorsi if p not in suoi]
+            sottobrano = voce.get("sottobrano")
+            nuova = chiave(nuovo, None if k.startswith("percorso|") else durata, sottobrano if isinstance(sottobrano, int) else None)
+            marker = [dict(m) for m in voce["marker"]]
+            if altri:
+                voce["percorsi"] = altri
+            else:
+                del self.voci[k]
+            gia = self.voci.get(nuova)
+            if gia is None:
+                self.voci[nuova] = {**voce, "file": os.path.basename(nuovo), "percorsi": [nuovo], "marker": marker}
+            else:
+                for m in marker:
+                    if not any(abs(e["tempo"] - m["tempo"]) <= TOLLERANZA for e in gia["marker"]):
+                        gia["marker"].append(m)
+                gia["marker"].sort(key=lambda m: m["tempo"])
+                if nuovo not in gia["percorsi"]:
+                    gia["percorsi"].append(nuovo)
+            nuove.append(nuova)
+        if nuove:
+            self._nomi = {_nome_del_file(k, v).casefold() for k, v in self.voci.items()}
+            self.modificato = True
+        return nuove
 
     def rinomina(self, k, marker, nome):
         for m in self.voci.get(k, {}).get("marker", []):

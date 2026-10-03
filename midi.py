@@ -1,6 +1,6 @@
 # MeTeOra, i MIDI: FluidSynth con un banco di suoni General MIDI, resa in RAM come i SID.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/10/2026: nasce con la tappa 8 (issue 16).
+# 03/10/2026: nasce con la tappa 8 (issue 16). Nella 1.67.4 solo i banchi General MIDI, e la cartella dei temporanei saltata.
 
 """I MIDI di MeTeOra (tappa 8, issue 16).
 
@@ -20,6 +20,8 @@ import hashlib
 import io
 import os
 import string
+import struct
+import tempfile
 import threading
 import time
 import urllib.request
@@ -49,6 +51,62 @@ def e_un_banco(percorso):
     return len(testa) == 12 and testa[:4] == b"RIFF" and testa[8:12] == b"sfbk"
 
 
+def general_midi(percorso):
+    """Vero se il banco ha tutti gli strumenti del General MIDI: i 128
+    programmi nel banco 0 e una batteria nel banco 128. Lo dice l'elenco dei
+    preset, il chunk phdr dentro la lista pdta; i campioni, che possono
+    pesare un gigabyte, si saltano senza leggerli (1.67.4)."""
+    try:
+        with open(percorso, "rb") as f:
+            testa = f.read(12)
+            if len(testa) < 12 or testa[:4] != b"RIFF" or testa[8:12] != b"sfbk":
+                return False
+            fine = 8 + struct.unpack("<I", testa[4:8])[0]
+            while f.tell() + 8 <= fine:
+                intestazione = f.read(8)
+                if len(intestazione) < 8:
+                    return False
+                nome, dimensione = intestazione[:4], struct.unpack("<I", intestazione[4:])[0]
+                if nome == b"LIST" and f.read(4) == b"pdta":
+                    fine_della_lista = f.tell() + dimensione - 4
+                    while f.tell() + 8 <= fine_della_lista:
+                        sotto = f.read(8)
+                        if len(sotto) < 8:
+                            return False
+                        nome_sotto, dimensione_sotto = sotto[:4], struct.unpack("<I", sotto[4:])[0]
+                        if nome_sotto == b"phdr":
+                            return _preset_general_midi(f.read(dimensione_sotto))
+                        f.seek(dimensione_sotto + (dimensione_sotto & 1), 1)
+                    return False
+                if nome == b"LIST":
+                    f.seek(dimensione - 4 + (dimensione & 1), 1)
+                else:
+                    f.seek(dimensione + (dimensione & 1), 1)
+    except (OSError, struct.error):
+        return False
+    return False
+
+
+def _preset_general_midi(dati):
+    """Dai record del phdr, 38 byte l'uno con l'ultimo che chiude l'elenco:
+    vero se ci sono i 128 programmi del banco 0 e una batteria nel 128."""
+    programmi, batteria = set(), False
+    for indice in range(len(dati) // 38 - 1):
+        programma, banco = struct.unpack_from("<HH", dati, indice * 38 + 20)
+        if banco == 0 and programma < 128:
+            programmi.add(programma)
+        elif banco == 128:
+            batteria = True
+    return len(programmi) == 128 and batteria
+
+
+def dimensione_da_leggere(byte):
+    """La dimensione di un banco in MB: con un decimale sotto i 10 MB, il punto
+    come separatore, perche' sotto il mezzo MB l'arrotondamento dava 0 MB."""
+    mega = byte / 1_000_000
+    return f"{mega:.1f} MB" if mega < 10 else f"{round(mega)} MB"
+
+
 def dischi_fissi():
     """Le radici dei dischi fissi del computer, per esempio C:\\ ed E:\\."""
     kernel32 = ctypes.windll.kernel32
@@ -62,13 +120,17 @@ def dischi_fissi():
 
 
 def cerca_banchi(radici=None, avvisa=None, fermo=None):
-    """I banchi di suoni validi nelle radici, di partenza tutti i dischi
-    fissi: lista di (percorso, dimensione in byte), in ordine di nome.
+    """I banchi General MIDI nelle radici, di partenza tutti i dischi fissi:
+    lista di (percorso, dimensione in byte), in ordine di nome. I banchi di
+    pochi strumenti, che suonerebbero un MIDI con strumenti sbagliati o
+    mancanti, restano fuori (Gabriele, 3 ottobre 2026).
     avvisa(cartelle) arriva ogni tanto con le cartelle visitate fin li';
     fermo(), se c'e' e torna vero, interrompe la ricerca. Le cartelle di
-    sistema, nascoste o illeggibili si saltano."""
+    sistema, nascoste o illeggibili si saltano, e anche quella dei file
+    temporanei, dove i banchi sono di passaggio."""
     trovati = []
     visitate = 0
+    temporanei = os.path.normcase(tempfile.gettempdir())
     for radice in radici if radici is not None else dischi_fissi():
         for cartella, sottocartelle, files in os.walk(radice, onerror=lambda _errore: None):
             if fermo is not None and fermo():
@@ -76,11 +138,12 @@ def cerca_banchi(radici=None, avvisa=None, fermo=None):
             visitate += 1
             if avvisa is not None and visitate % 2000 == 0:
                 avvisa(visitate)
-            sottocartelle[:] = [s for s in sottocartelle if s.casefold() not in CARTELLE_DA_SALTARE and not s.startswith("$")]
+            sottocartelle[:] = [s for s in sottocartelle if s.casefold() not in CARTELLE_DA_SALTARE and not s.startswith("$")
+                and os.path.normcase(os.path.join(cartella, s)) != temporanei]
             for nome in files:
                 if nome.lower().endswith(ESTENSIONI_DEI_BANCHI):
                     percorso = os.path.join(cartella, nome)
-                    if e_un_banco(percorso):
+                    if general_midi(percorso):
                         with contextlib.suppress(OSError):
                             trovati.append((percorso, os.path.getsize(percorso)))
     return sorted(trovati, key=lambda t: os.path.basename(t[0]).casefold())

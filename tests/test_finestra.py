@@ -1065,6 +1065,115 @@ def test_all_uscita_quello_che_non_si_salva_lo_dice_una_finestra(finestra, monke
     assert suoni_annotati[-2:] == ["errore", "uscita"]
 
 
+def _wav_di_prova(percorso, secondi=4):
+    """Un WAV di silenzio, stereo a 48 kHz."""
+    import wave
+
+    with wave.open(str(percorso), "wb") as f:
+        f.setnchannels(2)
+        f.setsampwidth(2)
+        f.setframerate(48000)
+        f.writeframes(bytes(4 * 48000 * secondi))
+    return str(percorso)
+
+
+def test_rinomina_file(finestra, monkeypatch, suoni_annotati, tmp_path):
+    import json
+
+    cartella = tmp_path / "Musica"
+    cartella.mkdir()
+    canzone = _wav_di_prova(cartella / "canzone.wav", 1)
+    (cartella / "canzone.srt").write_text("1\n00:00:00,000 --> 00:00:01,000\nCiao\n", encoding="utf-8")
+    (cartella / "canzone.it.srt").write_text("1\n00:00:00,000 --> 00:00:01,000\nCiao\n", encoding="utf-8")
+    (cartella / "canzone.flac").write_bytes(b"")
+    finestra._aggiungi(None, [canzone])
+    pl = finestra.archivio.playlist[0]
+    brano = pl.brani[0]
+    k = finestra._chiave_dei_marker(canzone, leggi=True)
+    finestra.marcatori.aggiungi(k, 0.5, canzone, finestra._durata_dei_marker(canzone)[0])
+    # Esc, e lo stesso nome, non cambiano niente.
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoAnnullato())
+    finestra._rinomina_file(brano)
+    assert _ultima(finestra) == "Nome del file non cambiato." and suoni_annotati[-1] == "annullamento"
+    # Un carattere che Windows non accetta, o un nome gia' preso, si rifiutano.
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("canzone: bis"))
+    finestra._rinomina_file(brano)
+    assert _ultima(finestra) == "Nel nome di un file non possono stare: due punti. Il nome resta canzone.wav." and suoni_annotati[-1] == "errore"
+    _wav_di_prova(cartella / "occupato.wav", 1)
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("occupato"))
+    finestra._rinomina_file(brano)
+    assert _ultima(finestra) == f"In {cartella} c'è già occupato.wav: il nome resta canzone.wav."
+    # L'estensione scritta per abitudine non si raddoppia; i sottotitoli
+    # seguono il file, l'altro audio con lo stesso nome no.
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("Ballata.WAV"))
+    finestra._rinomina_file(brano)
+    nuovo = str(cartella / "Ballata.wav")
+    assert _ultima(finestra) == "canzone.wav ora si chiama Ballata.wav. Con lui anche Ballata.it.srt, Ballata.srt." and suoni_annotati[-1] == "file_rinominato"
+    assert sorted(os.listdir(cartella)) == ["Ballata.it.srt", "Ballata.srt", "Ballata.wav", "canzone.flac", "occupato.wav"]
+    # La playlist, lo schedario e i marker seguono il nome nuovo.
+    with open(finestra.archivio.percorso, encoding="utf-8") as f:
+        salvate = f.read()
+    assert brano.percorso == nuovo and json.dumps(nuovo)[1:-1] in salvate and json.dumps(canzone)[1:-1] not in salvate
+    assert finestra.schedario.scheda(nuovo) is not None and finestra.schedario.scheda(canzone) is None
+    assert [m["tempo"] for m in finestra.marcatori.elenco(finestra._chiave_dei_marker(nuovo))] == [0.5]
+    # Un file che non c'e' piu' lo dice.
+    os.remove(nuovo)
+    finestra._rinomina_file(brano)
+    assert _ultima(finestra) == f"Non trovo {nuovo} sul disco."
+
+
+def test_rinomina_un_file_che_suona(finestra, monkeypatch, suoni_annotati, tmp_path):
+    # mpv apre i file lasciando che Windows li rinomini: il brano continua,
+    # con il nome nuovo. Se invece il file e' tenuto aperto, MeTeOra lo
+    # lascia, lo rinomina e lo fa ripartire dal suo punto, in pausa se era
+    # in pausa.
+    canzone = _wav_di_prova(tmp_path / "canzone.wav", 6)
+    finestra._aggiungi(None, [canzone])
+    pl = finestra.archivio.playlist[0]
+    finestra._suona(pl, pl.brani[0])
+    fine = time.monotonic() + 10
+    while time.monotonic() < fine and not (finestra.motore.posizione or 0) > 0.3:
+        wx.Yield()
+        time.sleep(0.02)
+    finestra.motore.pausa(True)
+    prima = finestra.motore.posizione
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("rinominata"))
+    finestra._rinomina_file(pl.brani[0])
+    nuovo = str(tmp_path / "rinominata.wav")
+    assert os.path.isfile(nuovo) and not os.path.exists(canzone)
+    assert _ultima(finestra) == "canzone.wav ora si chiama rinominata.wav."
+    assert finestra.motore.in_corso == nuovo and finestra.motore.in_pausa
+    fine = time.monotonic() + 10
+    while time.monotonic() < fine and finestra.motore.posizione is None:
+        wx.Yield()
+        time.sleep(0.02)
+    assert finestra.motore.posizione == pytest.approx(prima, abs=0.3)
+    # Il file tenuto aperto: il primo tentativo fallisce come con Windows.
+    vero_rename, tentativi, lasciati = os.rename, [], []
+    lascia = finestra.motore.lascia_il_file
+
+    def rename(vecchio, nuovo):
+        tentativi.append(vecchio)
+        if len(tentativi) == 1:
+            raise PermissionError(32, "Il file è in uso da un altro processo")
+        vero_rename(vecchio, nuovo)
+
+    monkeypatch.setattr(modulo.os, "rename", rename)
+    monkeypatch.setattr(finestra.motore, "lascia_il_file", lambda percorso: lasciati.append(percorso) or lascia(percorso))
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("di nuovo"))
+    finestra._rinomina_file(pl.brani[0])
+    monkeypatch.setattr(modulo.os, "rename", vero_rename)
+    ancora = str(tmp_path / "di nuovo.wav")
+    assert lasciati == [nuovo] and os.path.isfile(ancora) and _ultima(finestra) == "rinominata.wav ora si chiama di nuovo.wav."
+    assert finestra.motore.in_corso == ancora and finestra.motore.in_pausa
+    fine = time.monotonic() + 10
+    while time.monotonic() < fine and finestra.motore.posizione is None:
+        wx.Yield()
+        time.sleep(0.02)
+    assert finestra.motore.posizione == pytest.approx(prima, abs=0.3)
+    finestra.motore.stop()
+
+
 def test_z_b_n_seguono_la_plancia(finestra, monkeypatch):
     suonati = _finto_motore(finestra, monkeypatch)
     finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n in ("a.mp3", "b.mp3")])
@@ -3720,10 +3829,10 @@ def test_aggiungere_e_togliere_un_percorso_di_rete(finestra, monkeypatch, tmp_pa
 
 
 def _banco_finto(cartella, nome="Banco.sf2"):
-    """Un file con l'intestazione di un banco di suoni: basta a e_un_banco."""
-    percorso = cartella / nome
-    percorso.write_bytes(b"RIFF" + b"\0\0\0\0" + b"sfbk" + bytes(20))
-    return str(percorso)
+    """Un banco General MIDI senza campioni: basta a e_un_banco e a general_midi."""
+    from test_midi import banco_di_prova
+
+    return banco_di_prova(cartella / nome)
 
 
 def _midi_finti(finestra, monkeypatch, presente=True):

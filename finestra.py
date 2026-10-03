@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI.
 
 """La finestra di MeTeOra.
 
@@ -39,6 +39,7 @@ import random
 import re
 import sys
 import threading
+import time
 import traceback
 import warnings
 from ctypes import wintypes
@@ -189,7 +190,7 @@ TASTI_DEL_CONTESTO = {
     "preferiti": ("i Preferiti", "Invio, Applicazioni o Spazio: menu con Riproduci e Filtro. Barra verticale: il filtro. Canc su un loro brano lo toglie dai Preferiti."),
     "radice_playlist": ("il ramo Playlist", "Invio, Applicazioni o Spazio: menu con Nuova playlist."),
     "playlist": ("una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Filtro, Rinomina ed Elimina. Barra verticale: il filtro. Canc elimina la playlist, dopo una conferma."),
-    "brano": ("un brano di una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Sposta e Saltato. Canc toglie il brano dalla playlist, Maiuscolo+Canc manda il file nel cestino. Un SID o un file delle console con più sottobrani, o un brano con dei marker, si apre con freccia destra."),
+    "brano": ("un brano di una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Sposta, Saltato e Rinomina file. Canc toglie il brano dalla playlist, Maiuscolo+Canc manda il file nel cestino. Un SID o un file delle console con più sottobrani, o un brano con dei marker, si apre con freccia destra."),
     "pc": ("Questo PC", "Freccia destra mostra le unità. Invio, Applicazioni o Spazio: menu con Aggiorna."),
     "rete": ("Questa rete", "Freccia destra mostra i percorsi di rete, i computer della rete e il comando per aggiungere un percorso. Invio, Applicazioni o Spazio: menu con Aggiungi un percorso di rete e Aggiorna."),
     "computer_della_rete": ("i computer della rete", "Freccia destra li cerca, in disparte: può volerci qualche secondo. Invio, Applicazioni o Spazio: menu con Cerca di nuovo."),
@@ -197,7 +198,7 @@ TASTI_DEL_CONTESTO = {
     "attesa": ("una ricerca in corso", "Aspetta: la voce sparisce quando la ricerca finisce."),
     "unita": ("un'unità", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Crea playlist da qui."),
     "cartella": ("una cartella", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Riproduci e Crea playlist da qui."),
-    "file": ("un file", "Invio, Applicazioni o Spazio: menu con Riproduci e Aggiungi alla playlist. Maiuscolo+Canc manda il file nel cestino. Un SID o un file delle console con più sottobrani, o un file con dei marker, si apre con freccia destra."),
+    "file": ("un file", "Invio, Applicazioni o Spazio: menu con Riproduci, Aggiungi alla playlist e Rinomina file. Maiuscolo+Canc manda il file nel cestino. Un SID o un file delle console con più sottobrani, o un file con dei marker, si apre con freccia destra."),
     "sottobrano": ("un sottobrano di un SID o di un file delle console", "Invio, Applicazioni o Spazio: menu con Riproduci e Aggiungi alla playlist. Se ha dei marker, freccia destra li mostra."),
     "marker": ("un marker", "Invio rinomina il marker, Canc lo elimina, X fa come sul suo brano. Applicazioni o Spazio: menu con Vai al marker, che suona il brano da lì, Rinomina ed Elimina."),
     "comando": ("un comando", "Invio esegue il comando."),
@@ -2132,7 +2133,8 @@ class Finestra(wx.Frame):
                 ("Sposta su", lambda: self._sposta(pl, brano, "su")), ("Sposta giù", lambda: self._sposta(pl, brano, "giu")),
                 ("Sposta in cima", lambda: self._sposta(pl, brano, "cima")), ("Sposta in fondo", lambda: self._sposta(pl, brano, "fondo")),
                 ("Saltato", (lambda: self._salta(pl, brano), brano.saltato)), ("Togli dalla playlist", lambda: self._togli(pl, brano)),
-                ("Aggiungi ai preferiti", lambda: self._ai_preferiti(brano)), ("Manda nel cestino", lambda: self._al_cestino(self._voce_di_lavoro()))]
+                ("Aggiungi ai preferiti", lambda: self._ai_preferiti(brano)), ("Rinomina file", lambda: self._rinomina_file(brano)),
+                ("Manda nel cestino", lambda: self._al_cestino(self._voce_di_lavoro()))]
         if tipo == "pc":
             return [("Aggiorna", lambda: self._aggiorna_ramo(self.nodo_pc))]
         if tipo == "rete":
@@ -2152,7 +2154,8 @@ class Finestra(wx.Frame):
         if tipo == "file":
             pl, brano = dati["playlist"], dati["brano"]
             return [("Riproduci", lambda: self._riproduci(pl, brano)), ("Aggiungi alla playlist", self._menu_aggiungi(lambda: [Brano(brano.percorso)])),
-                ("Aggiungi ai preferiti", lambda: self._ai_preferiti(brano)), ("Manda nel cestino", lambda: self._al_cestino(self._voce_di_lavoro()))]
+                ("Aggiungi ai preferiti", lambda: self._ai_preferiti(brano)), ("Rinomina file", lambda: self._rinomina_file(brano)),
+                ("Manda nel cestino", lambda: self._al_cestino(self._voce_di_lavoro()))]
         if tipo == "marker":
             return [("Vai al marker", lambda: self._vai_al_marker(dati)), ("Rinomina", lambda: self._rinomina_il_marker(dati["chiave"], dati["marker"])),
                 ("Elimina", lambda: self._elimina_il_marker(dati["chiave"], dati["marker"], self._voce_di_lavoro()))]
@@ -2170,6 +2173,126 @@ class Finestra(wx.Frame):
         self._domanda()
         with DialogoConferma(genitore or self, domanda, titolo) as dialogo:
             return dialogo.ShowModal() == wx.ID_YES
+
+    def _rinomina_file(self, brano):
+        """Rinomina file, dal menu di un brano o di un file: cambia il nome del
+        file sul disco, e l'estensione resta. I file accanto con lo stesso
+        nome, come i sottotitoli, cambiano con lui; playlist, Preferiti,
+        cartelle aperte, marker e schedario seguono il nome nuovo. Un audio o
+        un video che suona si ferma un istante e riparte dal suo punto
+        (Gabriele, 3 ottobre 2026, 1.67.0)."""
+        vecchio = brano.percorso
+        if not os.path.isfile(vecchio):
+            self._riscontro("errore", f"Non trovo {vecchio} sul disco.")
+            return
+        cartella, nome_del_file = os.path.split(vecchio)
+        nome, estensione = os.path.splitext(nome_del_file)
+        resta = f" L'estensione {estensione} resta." if estensione else ""
+        self._domanda()
+        with DialogoTesto(self, f"Nuovo nome del file {nome_del_file}.{resta}", "Rinomina file", nome) as dialogo:
+            if dialogo.ShowModal() != wx.ID_OK:
+                self._annullato("Nome del file non cambiato.")
+                return
+            # Windows toglie da se' punti e spazi in fondo al nome.
+            scritto = dialogo.GetValue().strip().rstrip(". ")
+        if estensione and scritto.casefold().endswith(estensione.casefold()):
+            # L'estensione scritta per abitudine non si raddoppia.
+            scritto = scritto[:-len(estensione)].rstrip(". ")
+        if not scritto or scritto == nome:
+            self._annullato("Nome del file non cambiato.")
+            return
+        problema = questo_pc.nome_non_valido(scritto)
+        if problema:
+            self._riscontro("errore", f"{problema} Il nome resta {nome_del_file}.")
+            return
+        nuovo = os.path.join(cartella, scritto + estensione)
+        compagni = [(p, os.path.join(cartella, scritto + coda)) for p, coda in questo_pc.file_compagni(vecchio, m3u=formati.e_chip(vecchio))]
+        occupati = [os.path.basename(d) for o, d in ((vecchio, nuovo), *compagni) if os.path.exists(d) and os.path.normcase(d) != os.path.normcase(o)]
+        if occupati:
+            self._riscontro("errore", f"In {cartella} c'è già {', '.join(occupati)}: il nome resta {nome_del_file}.")
+            return
+        # Le durate con cui il file si riconosce per i marker, prima che cambi nome.
+        if formati.ha_sottobrani(vecchio):
+            durate = [d for d in (sottobrani.durate(vecchio) or []) if d]
+        else:
+            durate = [self._durata_dei_marker(vecchio)[0]]
+        try:
+            ripresa = self._rinomina_sul_disco(vecchio, nuovo)
+        except OSError as e:
+            self._riscontro("errore", f"Non riesco a rinominare {nome_del_file}: {e.strerror or e}.")
+            return
+        rinominati, falliti = [], []
+        for o, d in compagni:
+            try:
+                os.rename(o, d)
+                rinominati.append(os.path.basename(d))
+            except OSError:
+                falliti.append(os.path.basename(o))
+        self._segui_la_rinomina(vecchio, nuovo, durate)
+        if ripresa is not None:
+            posizione, in_pausa, sottobrano = ripresa
+            self.motore.suona(nuovo, sottobrano, inizio=posizione, in_pausa=in_pausa)
+            self._aggiorna_etichette()
+        testo = f"{nome_del_file} ora si chiama {scritto + estensione}."
+        if rinominati:
+            testo += f" Con lui anche {', '.join(rinominati)}."
+        if falliti:
+            testo += f" Non ho potuto rinominare {', '.join(falliti)}."
+        self._riscontro("file_rinominato", testo)
+
+    def _rinomina_sul_disco(self, vecchio, nuovo):
+        """Cambia il nome del file. Se il motore lo tiene aperto, cioe' un
+        audio o un video che suona o che e' pronto a entrare, prima lo
+        lascia: torna allora (posizione, pausa, sottobrano) del brano
+        fermato, da far ripartire con il nome nuovo, o None. Se non riesce
+        solleva OSError, dopo aver fatto ripartire il brano con il nome di
+        prima."""
+        try:
+            os.rename(vecchio, nuovo)
+        except PermissionError:
+            pass
+        else:
+            # Un SID, un MIDI o un brano delle console suonano dalla memoria.
+            self.motore.rinomina_il_file(vecchio, nuovo)
+            return None
+        stesso = os.path.normcase(vecchio)
+        ripresa = None
+        if self.motore.in_corso and os.path.normcase(self.motore.in_corso) == stesso:
+            ripresa = (self.motore.posizione or 0.0, self.motore.in_pausa, self.motore.sottobrano if self.motore.sottobrani else None)
+            self._uscente = self._preparato = None
+        elif self._preparato is not None and os.path.normcase(self._preparato[1].percorso) == stesso:
+            self._preparato = None
+        self.motore.lascia_il_file(vecchio)
+        # mpv chiude il file nel suo filo: si riprova per qualche istante.
+        fine = time.monotonic() + 3
+        while True:
+            try:
+                os.rename(vecchio, nuovo)
+                return ripresa
+            except PermissionError:
+                if time.monotonic() >= fine:
+                    if ripresa is not None:
+                        self.motore.suona(vecchio, ripresa[2], inizio=ripresa[0], in_pausa=ripresa[1])
+                    raise
+                time.sleep(0.05)
+
+    def _segui_la_rinomina(self, vecchio, nuovo, durate):
+        """Dopo Rinomina file: playlist, Preferiti, Risultati, cartelle aperte
+        nella plancia, schedario e marker passano al nome nuovo."""
+        stesso = os.path.normcase(vecchio)
+        liste = [*self.archivio.playlist, self.archivio.preferiti, self.risultati, self.coda.playlist]
+        liste += [dati["playlist"] for dati in (self._dati(v) for v in self._tutte_le_voci()) if dati and dati.get("playlist") is not None]
+        for pl in {id(p): p for p in liste if p is not None}.values():
+            for brano in pl.brani:
+                if os.path.normcase(brano.percorso) == stesso:
+                    brano.percorso = nuovo
+        self.schedario.rinomina(vecchio, nuovo)
+        chiavi = self.marcatori.rinomina_file(vecchio, nuovo, durate)
+        self._salva_archivio()
+        if chiavi:
+            self._salva_i_marker(*chiavi)
+        self._popola_playlist()
+        self._aggiorna_etichette()
 
     def _al_cestino(self, voce):
         """Maiuscolo+Canc: il file del brano va nel cestino di Windows, e il
@@ -4399,18 +4522,18 @@ class Finestra(wx.Frame):
         trovati = valore
         genitore = self._genitore_valido(genitore)
         if not trovati:
-            self._riscontro("ricerca_finita", "Nei dischi non ho trovato banchi di suoni.")
+            self._riscontro("ricerca_finita", "Nei dischi non ho trovato banchi di suoni General MIDI.")
             if self._conferma(f"Scarico FluidR3 GM, il banco storico di FluidSynth, circa {midi.FLUIDR3_DIMENSIONE // 1_000_000} MB?", "MIDI", genitore):
                 self._scarica_fluidr3(dopo, genitore)
             else:
                 self._annullato(MIDI_DA_PREPARARE)
             return
-        self._riscontro("ricerca_finita", "Trovato un banco di suoni." if len(trovati) == 1 else f"Trovati {len(trovati)} banchi di suoni.")
+        self._riscontro("ricerca_finita", "Trovato un banco General MIDI." if len(trovati) == 1 else f"Trovati {len(trovati)} banchi General MIDI.")
         self._scegli_fra_i_banchi(trovati, genitore, dopo)
 
     def _scegli_fra_i_banchi(self, trovati, genitore, dopo=None):
         """La lista dei banchi trovati, con in fondo lo scaricamento di FluidR3."""
-        righe = [f"{os.path.splitext(os.path.basename(p))[0]}, {round(d / 1_000_000)} MB, in {os.path.dirname(p)}" for p, d in trovati]
+        righe = [f"{os.path.splitext(os.path.basename(p))[0]}, {midi.dimensione_da_leggere(d)}, in {os.path.dirname(p)}" for p, d in trovati]
         righe.append(f"Scarica FluidR3 GM, circa {midi.FLUIDR3_DIMENSIONE // 1_000_000} MB")
         self._domanda()
         with FinestraScelta(genitore, "Banco dei suoni MIDI", righe, 0) as dialogo:
@@ -4501,6 +4624,8 @@ class Finestra(wx.Frame):
             self._riscontro("errore", f"{percorso} non è un banco di suoni: serve un file sf2 o sf3.")
             return
         self._usa_il_banco(percorso, genitore=genitore)
+        if not midi.general_midi(percorso):
+            self.scrivi("Non è un banco General MIDI completo: alcuni strumenti dei MIDI potrebbero mancare o suonare con un altro timbro.")
 
     def _scegli_il_modello_casuale(self, genitore):
         """Il modello della riproduzione casuale, da una lista (Gabriele,

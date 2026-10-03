@@ -286,3 +286,17 @@ def test_marcatori_file_illeggibile_e_tempi_vicini(tmp_path):
     sano.aggiungi("c|9.000", 1.0, r"C:\c.mp3", 9.0)
     secondo = sano.aggiungi("c|9.000", 1.0054, r"C:\c.mp3", 9.0)
     assert sano.successivo("c|9.000", 1.0) is secondo and sano.trova("c|9.000", 1.0054) is secondo
+
+
+def test_nomi_dei_file_e_file_compagni(tmp_path):
+    # Rinomina file, 1.67.0.
+    assert questo_pc.nome_non_valido("Ballata d'autunno, 1999") is None
+    assert questo_pc.nome_non_valido("a/b*c") == "Nel nome di un file non possono stare: barra, asterisco."
+    assert questo_pc.nome_non_valido("con") == "con è un nome riservato di Windows."
+    assert questo_pc.nome_non_valido("LPT1.bis") == "LPT1.bis è un nome riservato di Windows."
+    for nome in ("film.mkv", "film.srt", "film.it.srt", "film.ass", "film.flac", "film.m3u", "filmato.srt", "altro.srt"):
+        (tmp_path / nome).write_bytes(b"")
+    compagni = questo_pc.file_compagni(str(tmp_path / "film.mkv"))
+    assert [os.path.basename(p) for p, _coda in compagni] == ["film.ass", "film.it.srt", "film.srt"]
+    assert [coda for _p, coda in compagni] == [".ass", ".it.srt", ".srt"]
+    assert "film.m3u" in [os.path.basename(p) for p, _c in questo_pc.file_compagni(str(tmp_path / "film.mkv"), m3u=True)]

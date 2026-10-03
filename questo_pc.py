@@ -1,6 +1,6 @@
 # MeTeOra, Questo PC: unita', cartelle e file supportati.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.4.0 il cestino, nella 1.5.0 le cartelle ricorsive.
+# 30/09/2026: nasce con la tappa 1. Nella 1.4.0 il cestino, nella 1.5.0 le cartelle ricorsive. Nella 1.67.0 i nomi validi e i file compagni, per Rinomina file.
 
 """Cosa mostra il ramo Questo PC della plancia.
 
@@ -16,6 +16,15 @@ import string
 from ctypes import wintypes
 
 import formati
+
+# I caratteri che Windows non accetta nei nomi dei file, con il nome da
+# leggere, e i nomi riservati (Rinomina file, 1.67.0).
+CARATTERI_VIETATI = {"<": "minore", ">": "maggiore", ":": "due punti", '"': "virgolette", "/": "barra", "\\": "barra rovesciata",
+    "|": "barra verticale", "?": "punto interrogativo", "*": "asterisco"}
+NOMI_RISERVATI = frozenset({"con", "prn", "aux", "nul", *(f"com{n}" for n in range(1, 10)), *(f"lpt{n}" for n in range(1, 10))})
+# I file che accompagnano un brano con il suo stesso nome, e che cambiano
+# nome con lui: i sottotitoli e i testi sincronizzati.
+ESTENSIONI_COMPAGNE = frozenset({".srt", ".ass", ".ssa", ".vtt", ".sub", ".idx", ".sup", ".lrc"})
 
 _NASCOSTO = 0x2
 _SISTEMA = 0x4
@@ -128,3 +137,32 @@ def nel_cestino(percorso):
     )
     esito = ctypes.windll.shell32.SHFileOperationW(ctypes.byref(operazione))
     return esito == 0 and not operazione.fAnyOperationsAborted and not os.path.exists(percorso)
+
+
+def nome_non_valido(nome):
+    """Perche' nome non va bene come nome di un file in Windows, o None."""
+    vietati = [CARATTERI_VIETATI[c] for c in dict.fromkeys(nome) if c in CARATTERI_VIETATI]
+    if vietati:
+        return f"Nel nome di un file non possono stare: {', '.join(vietati)}."
+    if any(ord(c) < 32 for c in nome):
+        return "Nel nome di un file non possono stare caratteri di controllo."
+    if nome.split(".")[0].strip().casefold() in NOMI_RISERVATI:
+        return f"{nome} è un nome riservato di Windows."
+    return None
+
+
+def file_compagni(percorso, m3u=False):
+    """I file accanto con lo stesso nome e un'estensione da compagno, come i
+    sottotitoli, anche con la lingua in mezzo come film.it.srt; con m3u
+    anche la lista della musica delle console. Lista di (percorso, coda del
+    nome dopo quello del file, per esempio .it.srt)."""
+    cartella, nome_del_file = os.path.split(percorso)
+    base = os.path.splitext(nome_del_file)[0]
+    estensioni = ESTENSIONI_COMPAGNE | ({".m3u"} if m3u else frozenset())
+    try:
+        nomi = sorted(os.listdir(cartella), key=str.casefold)
+    except OSError:
+        return []
+    return [(os.path.join(cartella, nome), nome[len(base):]) for nome in nomi
+        if nome.casefold() != nome_del_file.casefold() and nome.casefold().startswith(base.casefold() + ".")
+        and os.path.splitext(nome)[1].casefold() in estensioni]
