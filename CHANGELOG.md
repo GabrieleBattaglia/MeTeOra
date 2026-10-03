@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.74.0] - 2026-10-04
+
+- Con la riproduzione casuale accesa B sceglie a caso, con lo stesso modello e lo stesso mazzo del passaggio automatico, e Z torna ai brani suonati prima, uno alla volta, come in Winamp. Dopo Z, B e la fine di un brano ripercorrono in avanti la stessa strada prima di scegliere di nuovo a caso; un brano scelto con X, N, J, K o le cifre va in fondo alla strada. Al primo brano della strada Z lo dice, e con il mazzo finito B lo dice e ricomincia il giro. Chiesto da Gabriele, che prima aveva voluto il caso solo a fine brano.
+
 ## [1.73.0] - 2026-10-04
 
 - Ctrl con la barra rovesciata cerca anche in rete, per ultima, dopo le playlist e i dischi del PC: nelle unità di rete con la lettera e nei percorsi aggiunti a mano in Questa rete, senza cercare due volte la stessa cartella. Le condivisioni intere salvate in Windows no: si cercano con la barra rovesciata sul loro ramo. Chiesto da Gabriele, che ha scelto così dopo il banco sul router.

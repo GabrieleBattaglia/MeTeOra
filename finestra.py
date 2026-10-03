@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima.
 
 """La finestra di MeTeOra.
 
@@ -170,7 +170,8 @@ NOMI_DEI_SEGNI = {
 }
 
 TASTI_COMUNI = [
-    "X suona la voce selezionata, riprende dalla pausa o fa ripartire da capo il brano che suona già; C pausa, V stop, Z e B brano precedente e successivo, N brano a caso, Maiuscolo con N la riproduzione casuale.",
+    "X suona la voce selezionata, riprende dalla pausa o fa ripartire da capo il brano che suona già; C pausa, V stop, Z e B brano precedente e successivo, N brano a caso, "
+    "Maiuscolo con N la riproduzione casuale, con cui B sceglie a caso e Z torna ai brani suonati prima.",
     "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, più e meno volume, Maiuscolo con M il passo del volume, M muto.",
     "A e D rallentano e accelerano, S torna alla velocità normale; F e H abbassano e alzano il tono di un semitono, G lo riporta al normale.",
     "U e I scelgono la banda dell'equalizzatore, O e P la abbassano e la alzano di un dB, È la azzera, Maiuscolo con È le azzera tutte.",
@@ -230,6 +231,8 @@ SPIEGAZIONI_DEI_MODELLI = {
     "una_volta": "ogni brano suona una volta, poi la riproduzione finisce",
     "a_giro": "ogni brano suona una volta, poi si rimescola e si ricomincia",
 }
+# Quanti brani ricorda la storia della riproduzione casuale, che Z ripercorre.
+MASSIMO_DELLA_STORIA = 1000
 # Il segno che il mazzo della riproduzione casuale e' finito, e che la
 # riproduzione si ferma.
 FINE_DEL_MAZZO = object()
@@ -636,6 +639,16 @@ class Finestra(wx.Frame):
         self._mazzo = set()
         self._mazzo_tenuti = []
         self._mazzo_finito = False
+        # La storia della riproduzione casuale (1.74.0): i posti (playlist,
+        # brano, sottobrano) suonati con il casuale acceso, e l'indice di
+        # quello in cui si e'. Z ci torna indietro; B e l'avanzamento
+        # automatico, dopo Z, ci rivanno avanti prima di scegliere a caso,
+        # come in Winamp. Si azzera quando il casuale si accende o si spegne.
+        self._storia = []
+        self._nella_storia = -1
+        # Il posto della storia che Z, B o l'avanzamento stanno per suonare:
+        # solo lui sposta l'indice, ogni altro brano che parte va in fondo.
+        self._atteso_dalla_storia = None
         # Il video, tappa 7: la sua finestra, nata al primo video; se il
         # motore disegna gia' nei suoi pannelli; il rapporto dell'immagine
         # scelto con Maiuscolo+F6, come indice di RAPPORTI; la finestra che
@@ -3460,6 +3473,11 @@ class Finestra(wx.Frame):
         voce = self._voce_da_seguire(sottobrano)
         self._mazzo_finito = False
         if self.impostazioni["casuale"]:
+            # Dopo Z si ripercorre la storia, prima di scegliere a caso.
+            avanti = self._dalla_storia(1)
+            if avanti is not None:
+                self._atteso_dalla_storia = avanti
+                return avanti
             seguente = self._seguente_casuale(voce, sottobrano)
             if seguente is FINE_DEL_MAZZO:
                 self._mazzo_finito = True
@@ -3529,6 +3547,53 @@ class Finestra(wx.Frame):
             return
         self._mazzo.update({(id(pl), id(brano), numero), (id(pl), id(brano), None)})
         self._mazzo_tenuti.append((pl, brano))
+        self._segna_nella_storia((pl, brano, numero))
+
+    def _segna_nella_storia(self, posto):
+        """Il brano che parte, nella storia della riproduzione casuale: se
+        e' il posto atteso, cioe' quello prima o dopo che B, Z o l'avanzamento
+        hanno preso dalla storia, ci si sposta li'; se e' quello in cui si e',
+        come X da capo, niente cambia; altrimenti, anche se e' il brano di
+        prima scelto con X, la storia da qui in avanti si dimentica e lui va
+        in fondo, come in un browser."""
+        i = self._nella_storia
+        atteso, self._atteso_dalla_storia = self._atteso_dalla_storia, None
+        if atteso is not None and _stesso_posto(atteso, posto):
+            for vicino in (i + 1, i - 1):
+                if 0 <= vicino < len(self._storia) and _stesso_posto(self._storia[vicino], posto):
+                    self._nella_storia = vicino
+                    return
+        if 0 <= i < len(self._storia) and _stesso_posto(self._storia[i], posto):
+            return
+        del self._storia[i + 1:]
+        self._storia.append(posto)
+        del self._storia[:-MASSIMO_DELLA_STORIA]
+        self._nella_storia = len(self._storia) - 1
+
+    def _dalla_storia(self, verso):
+        """Il posto della storia della riproduzione casuale subito prima
+        (verso -1) o subito dopo (verso 1) di dove si e', saltando e
+        dimenticando quelli che non sono piu' nella loro playlist; None se non
+        ce n'e'."""
+        i = self._nella_storia + verso
+        while 0 <= i < len(self._storia):
+            pl, brano, _numero = self._storia[i]
+            if any(b is brano for b in pl.brani):
+                return self._storia[i]
+            del self._storia[i]
+            if verso < 0:
+                self._nella_storia -= 1
+                i -= 1
+        return None
+
+    def _azzera_la_storia(self):
+        """La storia della riproduzione casuale ricomincia: con il casuale
+        acceso, da cio' che suona."""
+        self._storia = []
+        self._nella_storia = -1
+        self._atteso_dalla_storia = None
+        if self.impostazioni["casuale"] and self.motore.in_corso and self.coda.corrente is not None:
+            self._segna_nella_storia((self.coda.playlist, self.coda.corrente, self.motore.sottobrano if self.motore.sottobrani else None))
 
     def _ricomincia_il_mazzo(self):
         """Il mazzo torna intero, e la scelta ricordata si dimentica; con la
@@ -3848,10 +3913,43 @@ class Finestra(wx.Frame):
         self._suona(playlist, brano, evento, sottobrano)
 
     def _comando_successivo(self):
+        if self.impostazioni["casuale"] and self.coda.playlist:
+            self._successivo_a_caso()
+            return
         self._vicino(1, "successivo", "È l'ultimo brano.")
 
     def _comando_precedente(self):
+        if self.impostazioni["casuale"] and self.coda.playlist:
+            # Z torna al brano suonato prima, non a quello che sta prima.
+            indietro = self._dalla_storia(-1)
+            if indietro is None:
+                self._riscontro("nessun_altro_brano", "È il primo brano suonato a caso.")
+                return
+            self._atteso_dalla_storia = indietro
+            pl, brano, numero = indietro
+            self._suona(pl, brano, "precedente", numero)
+            return
         self._vicino(-1, "precedente", "È il primo brano.")
+
+    def _successivo_a_caso(self):
+        """B con la riproduzione casuale accesa (Gabriele, 4 ottobre 2026):
+        se Z e' tornata indietro, il brano dopo nella storia; altrimenti uno
+        a caso, con lo stesso modello e lo stesso mazzo dell'avanzamento
+        automatico, e lo stesso brano gia' scelto per la dissolvenza."""
+        seguente = self._dalla_storia(1)
+        if seguente is None:
+            seguente = self._seguente_casuale(self._voce_da_seguire(), None)
+        else:
+            self._atteso_dalla_storia = seguente
+        if seguente is FINE_DEL_MAZZO:
+            self._ricomincia_il_mazzo()
+            self._riscontro("nessun_altro_brano", "Ogni brano del mazzo ha suonato una volta: B ricomincia un giro nuovo.")
+            return
+        if seguente is None:
+            self._riscontro("nessun_altro_brano", "Non c'è un altro brano da scegliere a caso.")
+            return
+        pl, brano, numero = seguente
+        self._suona(pl, brano, "successivo", numero)
 
     def _comando_casuale(self, scelta=random.choice):
         """N: a caso fra le voci suonabili che si vedono nella plancia, se cio'
@@ -4152,11 +4250,12 @@ class Finestra(wx.Frame):
 
     def _comando_riproduzione_casuale(self):
         """Maiuscolo con N: accende e spegne la riproduzione casuale (issue
-        17). Vale solo quando un brano finisce da solo: Z, B e gli altri tasti
-        restano come sono."""
+        17): a caso il brano che segue quando uno finisce da solo, e dalla
+        1.74.0 anche B, mentre Z torna ai brani suonati prima."""
         accesa = not self.impostazioni["casuale"]
         self.impostazioni["casuale"] = accesa
         self._ricomincia_il_mazzo()
+        self._azzera_la_storia()
         self._salva_impostazioni()
         self._riscontro("casuale_acceso" if accesa else "casuale_spento", _frase_della_casuale(accesa, self.impostazioni["modello_casuale"]))
 
@@ -4445,6 +4544,7 @@ class Finestra(wx.Frame):
             return f"La dissolvenza ora è {valori.scrivi_dissolvenza(valore)}."
         if chiave == "casuale":
             self._ricomincia_il_mazzo()
+            self._azzera_la_storia()
             return _frase_della_casuale(valore, imp["modello_casuale"])
         if chiave == "video":
             if not valore:

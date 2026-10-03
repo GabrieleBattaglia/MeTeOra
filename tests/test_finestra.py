@@ -729,9 +729,9 @@ def test_riproduzione_casuale_nella_plancia(finestra, monkeypatch, suoni_annotat
     finestra.albero.Collapse(rock)
     finestra._brano_finito()
     assert scelte[-1] == ["x.mp3"] and suonati[-1] == ("x.mp3", None)
-    # Z e B restano in ordine.
+    # Dalla 1.74.0 anche B sceglie a caso, nello stesso campo, con il suo suono.
     _tasto(finestra, "b")
-    assert suonati[-1] == ("y.mp3", None) and len(scelte) == 2
+    assert scelte[-1] == ["y.mp3"] and suonati[-1] == ("y.mp3", None) and suoni_annotati[-1] == "successivo"
 
 
 def test_riproduzione_casuale_nella_lista_e_nel_loop(finestra, monkeypatch, suoni_annotati):
@@ -770,6 +770,63 @@ def test_riproduzione_casuale_nella_lista_e_nel_loop(finestra, monkeypatch, suon
         brano.saltato = True
     finestra._brano_finito()
     assert _ultima(finestra).startswith("Fine")
+
+
+def test_con_il_casuale_b_sceglie_a_caso_e_z_torna_indietro(finestra, monkeypatch, suoni_annotati):
+    # 1.74.0, Gabriele: con la riproduzione casuale accesa B sceglie a caso,
+    # con il mazzo, e Z torna ai brani suonati prima; dopo Z, B e
+    # l'avanzamento automatico ripercorrono la storia prima di scegliere.
+    pl, suonati, scelte = _mazzo_di_quattro(finestra, monkeypatch, "a_giro")
+    finestra._suona(pl, pl.brani[0])
+    _tasto(finestra, "b")
+    _tasto(finestra, "b")
+    assert scelte == [["b.mp3", "c.mp3", "d.mp3"], ["c.mp3", "d.mp3"]]
+    assert [s[0] for s in suonati] == ["a.mp3", "b.mp3", "c.mp3"]
+    _tasto(finestra, "z")
+    assert suonati[-1] == ("b.mp3", None) and suoni_annotati[-1] == "precedente"
+    _tasto(finestra, "z")
+    assert suonati[-1] == ("a.mp3", None)
+    _tasto(finestra, "z")
+    assert _ultima(finestra) == "È il primo brano suonato a caso." and suoni_annotati[-1] == "nessun_altro_brano" and len(suonati) == 5
+    # Avanti nella storia, senza nuove scelte: con B e a fine brano.
+    _tasto(finestra, "b")
+    assert suonati[-1] == ("b.mp3", None)
+    finestra._brano_finito()
+    assert suonati[-1] == ("c.mp3", None) and len(scelte) == 2
+    # In fondo alla storia B torna a scegliere, dal mazzo: resta d.
+    _tasto(finestra, "b")
+    assert scelte[-1] == ["d.mp3"] and suonati[-1] == ("d.mp3", None)
+    # Tornati indietro, un brano scelto da chi ascolta fa dimenticare il resto della storia.
+    _tasto(finestra, "z")
+    _tasto(finestra, "z")
+    assert suonati[-1] == ("b.mp3", None)
+    finestra._suona(pl, pl.brani[3])
+    _tasto(finestra, "z")
+    assert suonati[-1] == ("b.mp3", None)
+    _tasto(finestra, "b")
+    assert suonati[-1] == ("d.mp3", None)
+    # Riaccendere il casuale fa ricominciare la storia da cio' che suona.
+    finestra.motore._in_corso = pl.brani[3].percorso
+    _tasto(finestra, "n", maiuscolo=True)
+    _tasto(finestra, "n", maiuscolo=True)
+    _tasto(finestra, "z")
+    assert _ultima(finestra) == "È il primo brano suonato a caso."
+    # A casuale spento Z e B vanno in ordine.
+    _tasto(finestra, "n", maiuscolo=True)
+    _tasto(finestra, "z")
+    assert suonati[-1] == ("c.mp3", None)
+
+
+def test_con_il_casuale_b_dice_la_fine_del_mazzo(finestra, monkeypatch, suoni_annotati):
+    pl, suonati, _scelte = _mazzo_di_quattro(finestra, monkeypatch, "una_volta")
+    finestra._suona(pl, pl.brani[0])
+    for _ in range(3):
+        _tasto(finestra, "b")
+    assert [s[0] for s in suonati] == ["a.mp3", "b.mp3", "c.mp3", "d.mp3"]
+    _tasto(finestra, "b")
+    assert _ultima(finestra) == "Ogni brano del mazzo ha suonato una volta: B ricomincia un giro nuovo." and len(suonati) == 4
+    _tasto(finestra, "b")
+    assert len(suonati) == 5 and suonati[-1][0] != "d.mp3"
 
 
 def _mazzo_di_quattro(finestra, monkeypatch, modello):

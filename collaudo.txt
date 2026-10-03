@@ -1,4 +1,4 @@
-Collaudo di MeTeOra 1.73.0, con NVDA: il manuale in HTML, F1 e F12, e la ricerca anche in rete. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.73.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Collaudo di MeTeOra 1.74.0, con NVDA: il manuale in HTML, F1 e F12, la ricerca anche in rete, B e Z con la riproduzione casuale. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.74.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
 F1: si apre il browser con il manuale, e la console dice che il manuale si apre nel browser.
 Nel browser H e Maiuscolo con H passano da un titolo all'altro, e 2 salta da un capitolo all'altro.
 L'indice in cima al manuale porta ai capitoli: Invio su un collegamento salta lì.
@@ -9,3 +9,7 @@ F7 su un brano di una playlist, su una cartella e su un file: il cruscotto elenc
 In Questa rete aggiungi il percorso \\iliadbox_Server\iliadbox\Video. Poi Ctrl con la barra rovesciata, cerca per esempio Mercury: prima arrivano i risultati dei dischi, poi il film della cartella Video, sotto il ramo iliadbox (iliadbox_Server) e poi Video.
 Durante quella ricerca, Ferma la ricerca dal menu dei Risultati: si ferma subito, anche se la rete sta lavorando.
 Se la ricerca arriva in fondo, la console dice quanti risultati ha trovato ed eventualmente quali percorsi di rete non hanno risposto; annota quanto ci ha messo.
+In una cartella di E:\, con la riproduzione casuale accesa, X su un brano e poi B più volte: ogni volta un brano a caso, e mai uno già uscito finché il mazzo non è finito.
+Poi Z più volte: torna ai brani suonati, all'indietro, fino a dire che è il primo brano suonato a caso.
+Poi B: ripercorre in avanti gli stessi brani di prima, e solo in fondo sceglie di nuovo a caso; lo stesso a fine brano.
+Spenta la riproduzione casuale con Maiuscolo con N, Z e B tornano in ordine.
