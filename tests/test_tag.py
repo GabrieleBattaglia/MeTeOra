@@ -5,6 +5,7 @@
 """I file delle prove li codifica libmpv, a uscita nulla, da un secondo di
 silenzio: nessun suono. Ogni prova lavora su una copia."""
 
+import os
 import shutil
 import wave
 
@@ -251,7 +252,148 @@ def test_lo_schedario_rilegge_i_formati_senza_tag(tmp_path):
     file = tmp_path / "schedario.json"
     vecchia = {"dim": 1, "mod": 1.0, "durata": 3.0, "tag": {}, "sottobrani": None, "durate_sid": None}
     file.write_text(json.dumps({"versione": schedario.VERSIONE_DEL_FILE, "schede": {
-        r"C:\m\a.wav": vecchia, r"C:\m\b.wma": vecchia, r"C:\m\c.mp3": vecchia, r"C:\m\d.wav": {**vecchia, "tag_v": 1}}}), encoding="utf-8")
+        r"C:\m\a.wav": vecchia, r"C:\m\b.wma": vecchia, r"C:\m\c.mp3": vecchia, r"C:\m\d.wav": {**vecchia, "tag_v": 1},
+        r"C:\m\e.wav": {**vecchia, "tag_v": 2}, r"C:\m\f.wma": {**vecchia, "tag_v": 1}}}), encoding="utf-8")
     s = schedario.Schedario(str(file))
     s.carica()
-    assert sorted(s.schede) == [r"C:\m\c.mp3", r"C:\m\d.wav"]
+    # I WAV si rileggono anche se schedati dalla 1.69.0, che non leggeva il blocco INFO.
+    assert sorted(s.schede) == [r"C:\m\c.mp3", r"C:\m\e.wav", r"C:\m\f.wma"]
+
+
+def _wav_con_info(percorso, campi=None):
+    """Un WAV fatto a mano: fmt, il blocco INFO se ci sono campi, e mezzo
+    secondo di dati, di valori diversi per riconoscerli dopo."""
+    import struct
+
+    fmt = struct.pack("<HHIIHH", 1, 2, 48000, 48000 * 4, 4, 16)
+    dati = bytes(range(256)) * 375
+    spezzoni = b"fmt " + struct.pack("<I", len(fmt)) + fmt
+    if campi:
+        corpo = b""
+        for nome, testo in campi.items():
+            byte = testo.encode("cp1252") + b"\x00"
+            corpo += nome.encode() + struct.pack("<I", len(byte)) + byte + (b"\x00" if len(byte) & 1 else b"")
+        spezzoni += b"LIST" + struct.pack("<I", 4 + len(corpo)) + b"INFO" + corpo
+    spezzoni += b"data" + struct.pack("<I", len(dati)) + dati
+    percorso.write_bytes(b"RIFF" + struct.pack("<I", 4 + len(spezzoni)) + b"WAVE" + spezzoni)
+    return str(percorso), dati
+
+
+def _controlla_il_wav(percorso, dati):
+    """Il RIFF ha la dimensione giusta, e l'audio e' quello di prima."""
+    import struct
+
+    with open(percorso, "rb") as f:
+        byte = f.read()
+    assert struct.unpack("<I", byte[4:8])[0] == len(byte) - 8
+    with wave.open(percorso) as f:
+        assert f.readframes(f.getnframes()) == dati
+
+
+def test_il_blocco_info_dei_wav(tmp_path):
+    from mutagen.wave import WAVE
+
+    percorso, dati = _wav_con_info(tmp_path / "con_info.wav", {"INAM": "Vecchio titolo", "ICOP": "(c) 2001 Gabriele", "ISFT": "Registratore"})
+    letti = _tag(percorso)
+    assert letti["titolo"]["valore"] == "Vecchio titolo"
+    assert letti["~INFO:ICOP"]["nome"] == "Copyright" and letti["~INFO:ICOP"]["valore"] == "(c) 2001 Gabriele"
+    assert schedario.leggi_scheda(percorso)["tag"]["titolo"] == "Vecchio titolo"
+    # Un tag comune va in ID3 e nel blocco INFO; gli altri campi restano.
+    tag.scrivi(percorso, "titolo", "Nuovo è")
+    assert str(WAVE(percorso).tags["TIT2"]) == "Nuovo è"
+    assert tag.leggi_info(percorso) == {"INAM": "Nuovo è", "ICOP": "(c) 2001 Gabriele", "ISFT": "Registratore"}
+    _controlla_il_wav(percorso, dati)
+    # Un campo che ID3 non ha si scrive e si toglie solo nel blocco INFO.
+    tag.scrivi(percorso, "~INFO:ICOP", "")
+    tag.scrivi(percorso, "~INFO:ISFT", "MeTeOra")
+    assert tag.leggi_info(percorso) == {"INAM": "Nuovo è", "ISFT": "MeTeOra"}
+    _controlla_il_wav(percorso, dati)
+
+
+def test_il_blocco_info_nasce_e_i_falsi_wav(tmp_path):
+    percorso, dati = _wav_con_info(tmp_path / "senza_info.wav")
+    tag.scrivi(percorso, "artista", "Gabriele")
+    assert tag.leggi_info(percorso) == {"IART": "Gabriele"} and _tag(percorso)["artista"]["valore"] == "Gabriele"
+    _controlla_il_wav(percorso, dati)
+    # Il blocco svuotato sparisce.
+    tag.scrivi(percorso, "artista", "")
+    assert tag.leggi_info(percorso) == {}
+    _controlla_il_wav(percorso, dati)
+    finto = tmp_path / "finto.wav"
+    finto.write_bytes(b"niente di buono")
+    assert tag.leggi_info(str(finto)) == {}
+    with pytest.raises(tag.ErroreTag):
+        tag.scrivi_info(str(finto), {"INAM": "x"})
+
+
+def _spezzoni_del_file(percorso):
+    with open(percorso, "rb") as f:
+        return [s[0] for s in tag._Riff(f).spezzoni]
+
+
+def test_i_wav_senza_riempimento_del_modulo_wave(tmp_path):
+    # Il modulo wave di Python non scrive il riempimento dopo dati dispari.
+    percorso = str(tmp_path / "dispari.wav")
+    with wave.open(percorso, "wb") as f:
+        f.setnchannels(1)
+        f.setsampwidth(1)
+        f.setframerate(8000)
+        f.writeframes(bytes(range(256)) * 10 + b"\x01")
+    with wave.open(percorso) as f:
+        dati = f.readframes(f.getnframes())
+    for titolo in ("Uno", "Due", "Tre"):
+        tag.scrivi(percorso, "titolo", titolo)
+    assert _spezzoni_del_file(percorso).count(b"LIST") == 1 and _spezzoni_del_file(percorso).count(b"id3 ") == 1
+    assert tag.leggi_info(percorso) == {"INAM": "Tre"} and _tag(percorso)["titolo"]["valore"] == "Tre"
+    _controlla_il_wav(percorso, dati)
+
+
+def test_un_wav_irregolare_non_si_tocca(tmp_path):
+    import struct
+
+    # Una registrazione interrotta: RIFF e data mai finiti, l'audio dopo.
+    fmt = struct.pack("<HHIIHH", 1, 2, 48000, 48000 * 4, 4, 16)
+    interrotta = tmp_path / "interrotta.wav"
+    interrotta.write_bytes(b"RIFF" + struct.pack("<I", 36) + b"WAVEfmt " + struct.pack("<I", 16) + fmt + b"data" + struct.pack("<I", 0) + bytes(range(250)) * 16)
+    prima = interrotta.read_bytes()
+    with pytest.raises(tag.ErroreTag, match="non è regolare"):
+        tag.scrivi(str(interrotta), "titolo", "x")
+    assert interrotta.read_bytes() == prima
+    # Un RIFF dispari che non conta il riempimento si scrive bene.
+    dati = bytes(range(101))
+    dispari = tmp_path / "riff_dispari.wav"
+    fmt8 = struct.pack("<HHIIHH", 1, 1, 8000, 8000, 1, 8)
+    dispari.write_bytes(b"RIFF" + struct.pack("<I", 4 + 24 + 8 + 101) + b"WAVEfmt " + struct.pack("<I", 16) + fmt8 + b"data" + struct.pack("<I", 101) + dati + b"\x00")
+    tag.scrivi(str(dispari), "titolo", "Uno")
+    tag.scrivi(str(dispari), "titolo", "Due")
+    assert tag.leggi_info(str(dispari)) == {"INAM": "Due"} and _spezzoni_del_file(str(dispari)).count(b"LIST") == 1
+    _controlla_il_wav(str(dispari), dati)
+
+
+def test_due_blocchi_info_e_caratteri_fuori_dalla_cp1252(tmp_path):
+    import struct
+
+    percorso, dati = _wav_con_info(tmp_path / "doppio.wav", {"INAM": "Primo", "ICOP": "Vecchio"})
+    # Un secondo blocco INFO in coda, con un ICOP diverso.
+    secondo = b"ICOP" + struct.pack("<I", 8) + b"Secondo\x00"
+    with open(percorso, "ab") as f:
+        f.write(b"LIST" + struct.pack("<I", 4 + len(secondo)) + b"INFO" + secondo)
+    with open(percorso, "rb+") as f:
+        f.seek(0, os.SEEK_END)
+        totale = f.tell()
+        f.seek(4)
+        f.write(struct.pack("<I", totale - 8))
+    assert tag.leggi_info(percorso) == {"INAM": "Primo", "ICOP": "Vecchio"}
+    # Togliere un campo lo toglie da tutti i blocchi, che diventano uno.
+    tag.scrivi(percorso, "~INFO:ICOP", "")
+    assert tag.leggi_info(percorso) == {"INAM": "Primo"} and _spezzoni_del_file(percorso).count(b"LIST") == 1
+    _controlla_il_wav(percorso, dati)
+    # Un testo che la cp1252 non sa scrivere va in UTF-8, e si rilegge uguale.
+    tag.scrivi(percorso, "~INFO:ISBJ", "音楽 è")
+    assert tag.leggi_info(percorso)["ISBJ"] == "音楽 è"
+    # Una scrittura che non cambia niente lascia il file com'era.
+    with open(percorso, "rb") as f:
+        prima = f.read()
+    tag.scrivi_info(percorso, {"INAM": "Primo"})
+    with open(percorso, "rb") as f:
+        assert f.read() == prima

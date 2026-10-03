@@ -26,8 +26,12 @@ import formati
 import sottobrani
 import tag
 
-# I formati di cui lo schedario, prima della 1.69.0, non leggeva i tag.
-TAG_DA_RILEGGERE = frozenset({".wav", ".aif", ".aiff", ".wma", ".wmv", ".asf", ".tta"})
+# La versione della lettura dei tag, e quella che serve a ogni formato:
+# prima della 1.69.0 lo schedario non leggeva i tag di WAV, AIFF, WMA, WMV e
+# TTA, e prima della 1.70.0 il blocco INFO dei WAV. Le schede piu' vecchie si
+# rileggono.
+VERSIONE_DEI_TAG = 2
+TAG_DA_RILEGGERE = {".wav": 2, ".aif": 1, ".aiff": 1, ".wma": 1, ".wmv": 1, ".asf": 1, ".tta": 1}
 
 VERSIONE_DEL_FILE = 1
 # Le chiavi dei tag, come le usa il filtro.
@@ -180,7 +184,7 @@ def leggi_scheda(percorso):
         scheda["tag"] = {k: v for k, v in scheda["tag"].items() if v}
         # Il segno della lettura dei tag con tag.py: le schede di prima della
         # 1.69.0 dei formati che la modalita' easy non leggeva si rifanno.
-        scheda["tag_v"] = 1
+        scheda["tag_v"] = VERSIONE_DEI_TAG
     elif audio is not None:
         tags = audio.tags or {}
 
@@ -229,7 +233,7 @@ class Schedario:
             # loro schede di prima si rileggono.
             self.schede = {chiave: scheda for chiave, scheda in dati["schede"].items()
                 if formati.ha_sottobrani(chiave) or (scheda.get("durata") is not None and formati.estensione(chiave) != ".aac"
-                    and not (formati.estensione(chiave) in TAG_DA_RILEGGERE and "tag_v" not in scheda))}
+                    and scheda.get("tag_v", 0) >= TAG_DA_RILEGGERE.get(formati.estensione(chiave), 0))}
 
     def salva(self):
         if not self._modificato:

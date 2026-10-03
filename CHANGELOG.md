@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.70.0] - 2026-10-03
+
+- I tag dei WAV comprendono il blocco INFO, quello di Esplora risorse: MeTeOra lo legge, con i tag comuni presi da lì quando ID3 non li ha, e scrive titolo, artista, album, anno, genere, commento e traccia sia in ID3 sia nel blocco INFO; gli altri campi, come Copyright e Programma, si leggono e si modificano nel blocco INFO. Il filtro e la ricerca li trovano. Un WAV con la struttura irregolare, come una registrazione interrotta, non si tocca, e la console lo dice. Chiesto da Gabriele.
+
 ## [1.69.0] - 2026-10-03
 
 - F11 scrive nella console i tag del brano o del file selezionato: i dieci comuni, anche vuoti, e gli altri che il file ha. C'è anche la voce Leggi i tag nel menu (tappa 10, chiesto da Gabriele).

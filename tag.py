@@ -1,6 +1,6 @@
 # MeTeOra, i tag dei file: letti, scritti e cancellati con mutagen.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/10/2026: nasce con la tappa 10, punto d.
+# 03/10/2026: nasce con la tappa 10, punto d. Nella 1.70.0 il blocco INFO dei WAV.
 
 """I tag dei file audio e video, con mutagen (tappa 10, 1.69.0).
 
@@ -20,10 +20,17 @@ campo da una riga ne perderebbe l'impaginazione.
 Un tag con piu' valori, come due artisti, si legge con i valori divisi da
 punto e virgola, e si riscrive diviso allo stesso modo; un tag con un
 valore solo resta di un valore solo.
+I WAV hanno anche il blocco RIFF LIST/INFO, quello che legge e scrive
+Esplora risorse, e che mutagen non conosce: MeTeOra lo legge, con i tag
+comuni presi da li' quando ID3 non li ha, e scrive i tag comuni in tutti e
+due i posti (1.70.0, Gabriele). Il testo va nella codifica di Windows, la
+cp1252, o in UTF-8 se non ci sta. Un WAV con la struttura irregolare, come
+una registrazione interrotta, non si tocca.
 """
 
 import os
 import re
+import struct
 
 # I dieci tag comuni, nell'ordine in cui si mostrano.
 COMUNI = (("titolo", "Titolo"), ("artista", "Artista"), ("album", "Album"), ("artista_album", "Artista dell'album"), ("anno", "Anno"),
@@ -65,6 +72,17 @@ NOMI_NOTI = {
     "asf": {"WM/Picture": "Copertina", "WM/EncodedBy": "Codificato da", "WM/ToolName": "Programma di codifica", "WM/Lyrics": "Testo",
         "WM/Publisher": "Editore", "Copyright": "Copyright", "WM/BeatsPerMinute": "BPM"},
 }
+# I campi del blocco INFO dei WAV: quelli dei tag comuni, e i nomi da
+# leggere degli altri piu' diffusi.
+INFO_COMUNI = {"titolo": "INAM", "artista": "IART", "album": "IPRD", "anno": "ICRD", "genere": "IGNR", "commento": "ICMT", "traccia": "ITRK"}
+NOMI_INFO = {"ICOP": "Copyright", "ISFT": "Programma", "IENG": "Tecnico del suono", "ITCH": "Tecnico della digitalizzazione", "ISRC": "Fonte",
+    "IKEY": "Parole chiave", "ISBJ": "Soggetto", "IARL": "Archivio", "ICMS": "Commissionato da", "IMED": "Supporto", "ISRF": "Supporto originale",
+    "IMUS": "Compositore", "IPRT": "Parte"}
+INFO = "INFO:"
+# Un nome di quattro caratteri stampabili, come quelli degli spezzoni RIFF.
+_FOURCC = re.compile(rb"[\x20-\x7e]{4}")
+# Quanti byte dopo la fine del RIFF si lasciano stare, come un ID3v1 in coda.
+CODA_AMMESSA = 1024
 # Il separatore fra piu' valori dello stesso tag.
 SEPARATORE = "; "
 # Una data come la scrivono i tag, dall'anno solo fino all'ora: 1999,
@@ -146,10 +164,28 @@ def leggi(percorso):
     except Exception as e:
         # Un frame rovinato non deve fermare chi legge.
         raise ErroreTag(f"Non riesco a leggere i tag di {os.path.basename(percorso)}: {_motivo(e)}") from e
+    if _e_un_wav(file):
+        _unisci_info(percorso, comuni, altri)
     risultato = [comuni.get(chiave) or _voce(chiave, nome, []) for chiave, nome in COMUNI]
     for voce, (chiave, nome) in zip(risultato, COMUNI, strict=True):
         voce["chiave"], voce["nome"] = chiave, nome
     return risultato + sorted(altri, key=lambda t: t["nome"].casefold())
+
+
+def _e_un_wav(file):
+    return type(file).__name__ == "WAVE"
+
+
+def _unisci_info(percorso, comuni, altri):
+    """I campi del blocco INFO: i comuni dove ID3 non li ha, gli altri a parte."""
+    per_campo = {campo: chiave for chiave, campo in INFO_COMUNI.items()}
+    for campo, valore in leggi_info(percorso).items():
+        chiave = per_campo.get(campo)
+        if chiave is not None:
+            if not (comuni.get(chiave) or {}).get("valore"):
+                comuni[chiave] = _voce(chiave, "", [valore])
+        else:
+            altri.append(_voce(ALTRO + INFO + campo, NOMI_INFO.get(campo, campo), [valore]))
 
 
 def comuni_del_file(file):
@@ -159,10 +195,12 @@ def comuni_del_file(file):
     usa lo schedario, per il filtro e la ricerca, senza aprire il file due
     volte."""
     famiglia = _FAMIGLIE.get(type(file).__name__)
-    if famiglia is None or file.tags is None:
+    if famiglia is None:
         return {}
     try:
-        comuni, _altri = _LETTURE[famiglia](file.tags)
+        comuni = _LETTURE[famiglia](file.tags)[0] if file.tags is not None else {}
+        if _e_un_wav(file):
+            _unisci_info(file.filename, comuni, [])
         risultato = {chiave: voce["valore"] for chiave, voce in comuni.items() if voce["valore"]}
         if famiglia == "vorbis" and "anno" not in risultato and file.tags.get("year"):
             # Qualche programma scrive l'anno in YEAR invece che in DATE.
@@ -315,10 +353,18 @@ def scrivi(percorso, chiave, valore):
     dei comuni o una di quelle, con la tilde, che leggi ha dato per il
     file. Solleva ErroreTag."""
     valore = controlla(chiave, valore)
+    if os.path.splitext(percorso)[1].casefold() == ".wav":
+        # Prima di mutagen: un WAV irregolare non si tocca, e il riempimento
+        # che manca si aggiunge, o mutagen non ritroverebbe il suo id3.
+        prepara_il_wav(percorso)
     file, famiglia = _apri(percorso)
     comune = not chiave.startswith(ALTRO)
     k = CHIAVI[famiglia][chiave] if comune else chiave[len(ALTRO):]
     try:
+        if _e_un_wav(file) and not comune and k.startswith(INFO):
+            # Un campo del blocco INFO che ID3 non ha: solo li'.
+            scrivi_info(percorso, {k[len(INFO):]: valore})
+            return
         _SCRITTURE[famiglia](file.tags, k, valore, comune)
         _salva(file, famiglia)
     except ErroreTag:
@@ -326,6 +372,14 @@ def scrivi(percorso, chiave, valore):
     except Exception as e:
         # mutagen su un file rovinato solleva di tutto.
         raise ErroreTag(f"Non riesco a scrivere i tag di {os.path.basename(percorso)}: {_motivo(e)}") from e
+    if _e_un_wav(file) and chiave in INFO_COMUNI:
+        # I tag comuni dei WAV vanno anche nel blocco INFO, per Esplora risorse.
+        try:
+            scrivi_info(percorso, {INFO_COMUNI[chiave]: valore})
+        except ErroreTag as e:
+            raise ErroreTag(f"ID3 scritto, il blocco INFO no: {e}") from e
+        except Exception as e:
+            raise ErroreTag(f"ID3 scritto, il blocco INFO di {os.path.basename(percorso)} no: {_motivo(e)}") from e
 
 
 def _salva(file, famiglia):
@@ -438,6 +492,189 @@ def _scrivi_asf(tags, k, valore, _comune):
 
 
 _SCRITTURE = {"id3": _scrivi_id3, "vorbis": _scrivi_vorbis, "mp4": _scrivi_mp4, "ape": _scrivi_ape, "asf": _scrivi_asf}
+
+
+class _Riff:
+    """La struttura di un WAV RIFF, letta senza toccarla: gli spezzoni
+    (nome, inizio, dimensione dei dati, tipo della lista), la fine del RIFF
+    con il suo byte di riempimento, i punti in cui manca il riempimento dopo
+    uno spezzone dispari, come nei WAV scritti dal modulo wave di Python, e
+    se la struttura e' abbastanza sana da modificarla. Non lo e' se uno
+    spezzone sborda, se il giro non finisce sulla fine del RIFF, se dopo il
+    RIFF c'e' piu' di un ID3v1 o poco piu', come nelle registrazioni
+    interrotte, o se il file passa i 4 GB."""
+
+    def __init__(self, f):
+        self.spezzoni, self.pad_mancanti, self.sicuro, self.valido, self.fine = [], [], False, False, 0
+        f.seek(0, os.SEEK_END)
+        self.dimensione_del_file = f.tell()
+        f.seek(0)
+        testa = f.read(12)
+        if len(testa) < 12 or testa[:4] != b"RIFF" or testa[8:12] != b"WAVE":
+            return
+        self.valido = True
+        dichiarata = struct.unpack("<I", testa[4:8])[0]
+        self.fine = min(8 + dichiarata + (dichiarata & 1), self.dimensione_del_file)
+        sicuro = self.dimensione_del_file <= 0xFFFFFFFF + 8
+        posizione = 12
+        while posizione + 8 <= self.fine:
+            f.seek(posizione)
+            nome, dimensione = struct.unpack("<4sI", f.read(8))
+            fine_dei_dati = posizione + 8 + dimensione
+            if not _FOURCC.fullmatch(nome) or fine_dei_dati > self.fine:
+                sicuro = False
+                break
+            tipo = f.read(4) if nome == b"LIST" and dimensione >= 4 else b""
+            self.spezzoni.append((nome, posizione, dimensione, tipo))
+            posizione = fine_dei_dati
+            if dimensione & 1:
+                f.seek(posizione)
+                qui = f.read(5)
+                if posizione >= self.fine or (_FOURCC.fullmatch(qui[:4]) and not _FOURCC.fullmatch(qui[1:5])):
+                    # Il riempimento manca: il file finisce qui, o comincia subito un altro spezzone.
+                    self.pad_mancanti.append(posizione)
+                else:
+                    posizione += 1
+        if posizione != self.fine or self.dimensione_del_file - self.fine > CODA_AMMESSA:
+            sicuro = False
+        self.sicuro = sicuro
+
+
+def _campi_info(dati):
+    """I campi di un blocco INFO, in ordine: lista di [nome, byte]. Un
+    campo dispari senza riempimento si riconosce dal nome che segue. None se
+    il blocco e' incoerente."""
+    campi, i = [], 0
+    while i + 8 <= len(dati):
+        nome, lunghezza = struct.unpack_from("<4sI", dati, i)
+        if not _FOURCC.fullmatch(nome) or i + 8 + lunghezza > len(dati):
+            return None
+        campi.append([nome.decode("ascii"), dati[i + 8:i + 8 + lunghezza]])
+        i += 8 + lunghezza
+        if lunghezza & 1 and not (_FOURCC.fullmatch(dati[i:i + 4]) and not _FOURCC.fullmatch(dati[i + 1:i + 5])):
+            i += 1
+    return campi if len(dati) - i <= 1 else None
+
+
+def _testo_info(byte):
+    byte = byte.split(b"\x00", 1)[0]
+    try:
+        return byte.decode("utf-8")
+    except UnicodeDecodeError:
+        return byte.decode("cp1252", "replace")
+
+
+def _codifica_info(testo):
+    """Il testo per il blocco INFO: nella codifica di Windows se ci sta,
+    altrimenti in UTF-8, che leggi_info prova per prima."""
+    try:
+        return testo.encode("cp1252") + b"\x00"
+    except UnicodeEncodeError:
+        return testo.encode("utf-8") + b"\x00"
+
+
+def _blocchi_info(f, riff):
+    """I blocchi INFO del RIFF: lista di (spezzone, campi o None se incoerente)."""
+    blocchi = []
+    for spezzone in riff.spezzoni:
+        if spezzone[0] == b"LIST" and spezzone[3] == b"INFO":
+            f.seek(spezzone[1] + 12)
+            blocchi.append((spezzone, _campi_info(f.read(spezzone[2] - 4))))
+    return blocchi
+
+
+def leggi_info(percorso):
+    """I campi non vuoti dei blocchi INFO di un WAV, dal nome al testo, con
+    la precedenza al primo; vuoto se il file non li ha o non e' un WAV RIFF."""
+    risultato = {}
+    try:
+        with open(percorso, "rb") as f:
+            riff = _Riff(f)
+            if not riff.valido:
+                return {}
+            for _spezzone, campi in _blocchi_info(f, riff):
+                for nome, byte in campi or []:
+                    testo = _testo_info(byte)
+                    if nome not in risultato and testo.strip():
+                        risultato[nome] = testo
+    except (OSError, struct.error):
+        return {}
+    return risultato
+
+
+def prepara_il_wav(percorso):
+    """Prima di scrivere i tag di un WAV: ErroreTag se la struttura non e'
+    sana, e il riempimento che manca dopo uno spezzone dispari aggiunto,
+    perche' ne' mutagen ne' il blocco INFO ritroverebbero gli spezzoni dopo."""
+    from mutagen._util import insert_bytes
+
+    nome = os.path.basename(percorso)
+    try:
+        with open(percorso, "rb+") as f:
+            riff = _Riff(f)
+            if not riff.valido or not riff.sicuro:
+                raise ErroreTag(f"La struttura di {nome} non è regolare, per esempio una registrazione interrotta: i suoi tag restano com'erano.")
+            if not riff.pad_mancanti:
+                return
+            for posizione in reversed(riff.pad_mancanti):
+                insert_bytes(f, 1, posizione)
+                f.seek(posizione)
+                f.write(b"\x00")
+            f.seek(4)
+            f.write(struct.pack("<I", riff.fine + len(riff.pad_mancanti) - 8))
+    except OSError as e:
+        raise ErroreTag(f"Non riesco a preparare {nome}: {_motivo(e)}") from e
+
+
+def scrivi_info(percorso, cambi):
+    """Cambia i campi del blocco INFO di un WAV: cambi va dal nome del campo
+    al testo nuovo, vuoto per toglierlo. Si cambia il primo campo con quel
+    nome; togliendolo si tolgono tutti. Piu' blocchi INFO diventano uno
+    solo; senza, il blocco nasce in fondo al RIFF. La modifica e' in posto,
+    come quella di mutagen per ID3, e solo se qualcosa cambia davvero."""
+    from mutagen._util import resize_bytes
+
+    nome_del_file = os.path.basename(percorso)
+    with open(percorso, "rb+") as f:
+        riff = _Riff(f)
+        if not riff.valido or not riff.sicuro or riff.pad_mancanti:
+            raise ErroreTag(f"La struttura di {nome_del_file} non è regolare: il blocco INFO resta com'era.")
+        blocchi = _blocchi_info(f, riff)
+        if any(campi is None for _spezzone, campi in blocchi):
+            raise ErroreTag(f"Il blocco INFO di {nome_del_file} è rovinato: resta com'era.")
+        campi = [campo for _spezzone, uno in blocchi for campo in uno]
+        nuovi = [list(campo) for campo in campi]
+        for nome, testo in cambi.items():
+            if testo:
+                byte = _codifica_info(testo)
+                primo = next((campo for campo in nuovi if campo[0] == nome), None)
+                if primo is None:
+                    nuovi.append([nome, byte])
+                else:
+                    primo[1] = byte
+            else:
+                nuovi = [campo for campo in nuovi if campo[0] != nome]
+        if nuovi == campi and len(blocchi) <= 1:
+            return
+        corpo = b"".join(nome.encode("ascii") + struct.pack("<I", len(byte)) + byte + (b"\x00" if len(byte) & 1 else b"") for nome, byte in nuovi)
+        nuovo = b"LIST" + struct.pack("<I", 4 + len(corpo)) + b"INFO" + corpo if corpo else b""
+        differenza = 0
+        # I blocchi in piu' si tolgono partendo dall'ultimo: gli inizi di prima restano buoni.
+        for spezzone, _uno in reversed(blocchi[1:]):
+            vecchia = 8 + spezzone[2] + (spezzone[2] & 1)
+            resize_bytes(f, vecchia, 0, spezzone[1])
+            differenza -= vecchia
+        if blocchi:
+            spezzone = blocchi[0][0]
+            inizio, vecchia = spezzone[1], 8 + spezzone[2] + (spezzone[2] & 1)
+        else:
+            inizio, vecchia = riff.fine, 0
+        resize_bytes(f, vecchia, len(nuovo), inizio)
+        f.seek(inizio)
+        f.write(nuovo)
+        differenza += len(nuovo) - vecchia
+        f.seek(4)
+        f.write(struct.pack("<I", riff.fine + differenza - 8))
 
 
 def leggi_insieme(percorsi):
