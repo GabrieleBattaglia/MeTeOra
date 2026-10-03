@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi.
 
 """La finestra di MeTeOra.
 
@@ -67,7 +67,7 @@ from impostazioni import Impostazioni
 from marcatori import Marcatori
 from motore import VOLUME_MASSIMO, durata_del_sottobrano, sottobrano_risolto
 from playlist import Archivio, Brano, Coda, Playlist
-from ricerca import AlberoDeiRisultati, Ricerca
+from ricerca import AlberoDeiRisultati, Ricerca, senza_annidati
 from schedario import Schedario
 from valori import AREE, ErroreValore, leggi_tempo, leggi_tempo_nel_brano, secondi_da_leggere
 from video import FinestraVideo
@@ -507,9 +507,9 @@ _GRAMMATICA_DEL_FILTRO = [
     REGOLA_DEL_DOLLARO,
 ]
 ISTRUZIONI_DEL_FILTRO = ["Puoi usare questi comandi per comporre il filtro.", *_GRAMMATICA_DEL_FILTRO]
-ISTRUZIONI_DELLA_RICERCA = ["Puoi usare questi comandi per comporre la ricerca, in tutte le playlist e in tutte le unità.", *_GRAMMATICA_DEL_FILTRO]
+ISTRUZIONI_DELLA_RICERCA = ["Puoi usare questi comandi per comporre la ricerca, in tutte le playlist, in tutte le unità e nei percorsi di rete aggiunti a mano.", *_GRAMMATICA_DEL_FILTRO]
 # Dove cerca Ctrl con la barra rovesciata, la ricerca in tutto MeTeOra.
-OVUNQUE = "nelle playlist e nelle unità"
+OVUNQUE = "nelle playlist, nei dischi e in rete"
 ISTRUZIONI_DELLA_CONSOLE = [
     "Puoi usare questi segni per comporre la ricerca nella console.",
     "Il testo si cerca così com'è, spazi compresi; maiuscole e minuscole non contano. Andare a capo vale come uno spazio.",
@@ -2902,8 +2902,7 @@ class Finestra(wx.Frame):
             if tipo in ("risultati", "gruppo_risultati"):
                 return "nei Risultati", [(b, None) for b in self._brani_del_gruppo(dati["gruppo"])], []
             if tipo == "rete":
-                # Anche a ramo chiuso: i percorsi salvati in Windows e quelli aggiunti a mano.
-                percorsi = list(dict.fromkeys([p for _nome, p in questa_rete.percorsi_salvati()] + list(self.impostazioni["percorsi_di_rete"])))
+                percorsi = self._percorsi_di_questa_rete()
                 return ("in Questa rete", [], percorsi) if percorsi else None
             if tipo == "computer":
                 percorsi = [d["percorso"] for d in (self._dati(v) for v in self._figli(voce)) if d.get("tipo") == "cartella"]
@@ -2922,7 +2921,15 @@ class Finestra(wx.Frame):
                     return f"in {os.path.basename(pl.cartella.rstrip(chr(92))) or pl.cartella}", [], [pl.cartella]
                 return None
             voce = self.albero.GetItemParent(voce)
-        return "nelle playlist e nelle unità", None, None
+        return OVUNQUE, None, None
+
+    def _percorsi_di_questa_rete(self, salvati=None):
+        """I percorsi di Questa rete, anche a ramo chiuso: quelli salvati in
+        Windows e quelli aggiunti a mano, senza doppioni e senza quelli che
+        stanno dentro un altro."""
+        if salvati is None:
+            salvati = questa_rete.percorsi_salvati()
+        return senza_annidati([p for _nome, p in salvati] + list(self.impostazioni["percorsi_di_rete"]))
 
     def _ricerca_globale(self, dove=OVUNQUE, brani=None, unita=None):
         """Il campo della ricerca, uguale a quello del filtro; con Invio parte
@@ -2952,7 +2959,11 @@ class Finestra(wx.Frame):
     def _avvia_ricerca(self, testo, filtro, unita=None, brani=None, dove=OVUNQUE):
         """brani sono le coppie (brano, nome della playlist) da guardare, di
         tutte le playlist e dei Preferiti se None; unita le radici del disco,
-        di tutte le unita' se None, nessuna se vuota."""
+        di tutte le unita' se None, nessuna se vuota. La ricerca in tutto
+        MeTeOra cerca per ultime le unita' di rete e i percorsi aggiunti a mano
+        in Questa rete, non le condivisioni intere salvate in Windows: sul
+        disco dell'Iliadbox, con decine di migliaia di cartelle di backup, il
+        Samba si pianta dopo circa 17 mila (Gabriele, 4 ottobre 2026, 1.73.0)."""
         if self._ricerca is not None:
             self._ricerca.ferma()
         self._testo_della_ricerca = testo
@@ -2965,8 +2976,14 @@ class Finestra(wx.Frame):
         self.risultati = Playlist("Risultati", cartella="")
         self._risultati_letti = 0
         self._dove_si_cerca = dove
-        self._ricerca = Ricerca(filtro, brani, self.schedario, avvisa=lambda: wx.CallAfter(self._risultati_arrivati), unita=unita)
-        self._albero_dei_risultati = AlberoDeiRisultati(dict(questo_pc.unita()))
+        salvati = questa_rete.percorsi_salvati()
+        ovunque = unita is None and dove == OVUNQUE
+        # Le unita' di rete con la lettera le trova il filo della ricerca, perche' su un server fermo si fanno aspettare.
+        self._ricerca = Ricerca(filtro, brani, self.schedario, avvisa=lambda: wx.CallAfter(self._risultati_arrivati), unita=unita,
+            rete=list(self.impostazioni["percorsi_di_rete"]) if ovunque else (), lettere_di_rete=ovunque)
+        # I rami dei risultati in rete prendono il nome che hanno in Questa rete.
+        nomi = {percorso + "\\": nome for nome, percorso in salvati}
+        self._albero_dei_risultati = AlberoDeiRisultati({**nomi, **dict(questo_pc.unita())})
         if self.nodo_risultati is None:
             self.nodo_risultati = self.albero.InsertItem(self.albero.GetRootItem(), self.nodo_preferiti, "Risultati")
         else:
@@ -3085,8 +3102,18 @@ class Finestra(wx.Frame):
         self._aggiorna_risultati()
         if self._ricerca.finita:
             dove = "" if self._dove_si_cerca == OVUNQUE else f" {self._dove_si_cerca}"
-            self._riscontro("ricerca_finita", f"Ricerca di {self._testo_della_ricerca}{dove} finita: {al_plurale(len(self.risultati.brani), 'risultato', 'risultati')}.")
-            self._chiedi_schede(self.risultati)
+            muti = self._ricerca.senza_risposta
+            # Le radici di rete che non hanno risposto, con il nome di Questa rete se ce l'hanno.
+            nomi = {os.path.normcase(p): n for n, p in questa_rete.percorsi_salvati()} if muti else {}
+            silenzio = f" In rete non {'ha' if len(muti) == 1 else 'hanno'} risposto: {', '.join(nomi.get(os.path.normcase(p), p) for p in muti)}." if muti else ""
+            saltate = len(self._ricerca.cartelle_mute)
+            if saltate:
+                silenzio += f" In rete {'una cartella non ha' if saltate == 1 else f'{saltate} cartelle non hanno'} risposto, e la ricerca è andata avanti senza."
+            self._riscontro("ricerca_finita", f"Ricerca di {self._testo_della_ricerca}{dove} finita: {al_plurale(len(self.risultati.brani), 'risultato', 'risultati')}.{silenzio}")
+            # Lo schedario legge senza tempo massimo: i file delle radici che
+            # non hanno risposto lo terrebbero fermo.
+            mute = tuple(os.path.normcase(p).rstrip("\\") + "\\" for p in muti)
+            self.schedario.chiedi([b.percorso for b in self.risultati.brani if not os.path.normcase(b.percorso).startswith(mute)])
 
     def _ferma_ricerca(self):
         if self._ricerca is None or self._ricerca.finita or self._ricerca.fermata:

@@ -1,4 +1,4 @@
-Collaudo di MeTeOra 1.72.0, con NVDA: il manuale in HTML, F1 e F12. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.72.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Collaudo di MeTeOra 1.73.0, con NVDA: il manuale in HTML, F1 e F12, e la ricerca anche in rete. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.73.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
 F1: si apre il browser con il manuale, e la console dice che il manuale si apre nel browser.
 Nel browser H e Maiuscolo con H passano da un titolo all'altro, e 2 salta da un capitolo all'altro.
 L'indice in cima al manuale porta ai capitoli: Invio su un collegamento salta lì.
@@ -6,3 +6,6 @@ F12: la console scrive la guida rapida e il fuoco va sulla riga Guida rapida; sc
 Nella console, con la barra rovesciata, cerca Maiuscolo con F11: trovi la sua riga nella guida.
 Leggi a campione qualche capitolo, per esempio La rete, Il Commodore 64 e Le impostazioni, e annota sulla riga quello che non torna o non è chiaro.
 F7 su un brano di una playlist, su una cartella e su un file: il cruscotto elenca le voci vere dei loro menu.
+In Questa rete aggiungi il percorso \\iliadbox_Server\iliadbox\Video. Poi Ctrl con la barra rovesciata, cerca per esempio Mercury: prima arrivano i risultati dei dischi, poi il film della cartella Video, sotto il ramo iliadbox (iliadbox_Server) e poi Video.
+Durante quella ricerca, Ferma la ricerca dal menu dei Risultati: si ferma subito, anche se la rete sta lavorando.
+Se la ricerca arriva in fondo, la console dice quanti risultati ha trovato ed eventualmente quali percorsi di rete non hanno risposto; annota quanto ci ha messo.

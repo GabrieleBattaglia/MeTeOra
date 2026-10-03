@@ -1,12 +1,21 @@
 # MeTeOra, la ricerca globale: cerca con il filtro in tutte le playlist e in tutte le unita'.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 # 30/09/2026: nasce con la 1.15.0, issue 10. Nella 1.23.0 l'albero della provenienza dei risultati; nella 1.34.6 i risultati cestinati escono dal ramo.
+# Nella 1.73.0 la ricerca ovunque anche in rete, dopo i dischi, con le letture di rete a tempo.
 
 """La ricerca in tutto MeTeOra.
 
 Usa la grammatica del filtro. Cerca prima nei Preferiti e nelle playlist,
-poi nelle unita' di Questo PC, dischi e chiavette; salta le unita' di rete e
-i CD, che possono essere lentissimi o vuoti. I file sul disco li giudica con
+poi nelle unita' di Questo PC, dischi e chiavette, e per ultime nelle radici
+di rete che riceve, cioe' le unita' di rete e i percorsi aggiunti a mano in
+Questa rete; salta i CD, che possono essere lentissimi o vuoti. In rete ogni
+cartella si legge in un filo a parte, con un tempo massimo fra una voce e
+l'altra: il Samba dell'Iliadbox, percorso tutto, dopo circa 17 mila cartelle
+lascia appesa una lettura per venti minuti e piu' (banco del 4 ottobre 2026).
+Allora si tenta di annullarla, in un filo usa e getta perche' anche
+l'annullamento puo' restare fermo, e la cartella si salta; alla terza cartella
+muta, o se tace la radice stessa, si salta tutta la radice, ricordandola in
+senza_risposta, come una radice che risponde subito con un errore. I file sul disco li giudica con
 la scheda dello schedario, se c'e': un file mai visto si conosce solo per il
 nome e il percorso, quindi i comandi su durata e tag non lo trovano.
 Il lavoro lo fa un filo a parte, che si puo' fermare; chi aspetta viene
@@ -21,12 +30,21 @@ import os
 import threading
 import time
 
+import questa_rete
 import questo_pc
 from playlist import Brano
 
 # I tipi di unita' in cui si cerca: rimovibili, dischi fissi, dischi in memoria.
 UNITA_DA_CERCARE = (2, 3, 6)
+UNITA_DI_RETE = 4
 INTERVALLO_DEGLI_AVVISI = 0.5
+# Quanti secondi aspetta, fra una voce e l'altra, la lettura di una cartella
+# di rete prima di darla per persa: abbastanza per un disco del router che si
+# risveglia (1.73.0).
+ATTESA_IN_RETE = 15.0
+# Dopo quante cartelle mute si lascia perdere tutta la radice: ognuna lascia
+# un filo appeso, quindi non si insiste.
+CARTELLE_MUTE = 3
 
 
 def _tipo_di_unita(radice):
@@ -35,17 +53,107 @@ def _tipo_di_unita(radice):
     return ctypes.windll.kernel32.GetDriveTypeW(radice)
 
 
+def in_rete(percorso):
+    r"""Vero per un percorso di rete, come \\server\cartella, o su un'unita' di rete."""
+    return questa_rete.e_di_rete(percorso) or _tipo_di_unita(os.path.splitdrive(percorso)[0] + "\\") == UNITA_DI_RETE
+
+
+def _percorso_di_rete(radice):
+    """Il percorso \\\\server\\cartella a cui porta un'unita' di rete con la
+    lettera, o la radice com'e'."""
+    import ctypes
+    from ctypes import wintypes
+
+    unita, resto = os.path.splitdrive(radice)
+    if not unita.endswith(":"):
+        return radice
+    spazio = ctypes.create_unicode_buffer(1024)
+    lunghezza = wintypes.DWORD(1024)
+    if ctypes.WinDLL("mpr").WNetGetConnectionW(unita, spazio, ctypes.byref(lunghezza)) != 0:
+        return radice
+    return spazio.value + resto
+
+
+def senza_annidati(radici):
+    """Le radici senza i doppioni e senza quelle che stanno dentro un'altra:
+    la stessa cartella si cerca una volta sola, anche se arriva da un'unita'
+    di rete e da un percorso salvato."""
+    chiavi = [os.path.normcase(_percorso_di_rete(r)).rstrip("\\") + "\\" for r in radici]
+    tenute = []
+    for i, radice in enumerate(radici):
+        dentro = any(j != i and chiavi[i].startswith(chiavi[j]) and (chiavi[i] != chiavi[j] or j < i) for j in range(len(radici)))
+        if not dentro:
+            tenute.append(radice)
+    return tenute
+
+
+def lettere_di_rete():
+    """Le radici delle unita' di rete con la lettera, come Z:\\, senza
+    chiedere il nome del volume, che su un server fermo si fa aspettare."""
+    import ctypes
+
+    maschera = ctypes.windll.kernel32.GetLogicalDrives()
+    radici = [f"{chr(65 + i)}:\\" for i in range(26) if maschera >> i & 1]
+    return [r for r in radici if _tipo_di_unita(r) == UNITA_DI_RETE]
+
+
+def radici_di_rete(percorsi):
+    """Le radici di rete della ricerca ovunque: i percorsi dati, cioe' quelli
+    aggiunti a mano in Questa rete, e le unita' di rete con la lettera, senza
+    doppioni. Si chiama nel filo della ricerca."""
+    return senza_annidati(list(percorsi) + lettere_di_rete())
+
+
+def _annulla_la_lettura(filo, per_quanto=3.0):
+    """Annulla la lettura su cui il filo e' fermo, con CancelSynchronousIo:
+    senza, un filo bloccato su una condivisione che tace resta li' finche'
+    Windows non si arrende. Se il server ignora l'annullamento, questa
+    chiamata resta ferma anche lei: va fatta in un filo a parte. Si ripete
+    finche' il filo e' vivo, per per_quanto secondi: un annullamento che arriva
+    fra una lettura e l'altra non vale per quella dopo."""
+    import ctypes
+    from ctypes import wintypes
+
+    kernel32 = ctypes.WinDLL("kernel32")
+    kernel32.OpenThread.restype = wintypes.HANDLE
+    kernel32.OpenThread.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+    kernel32.CancelSynchronousIo.argtypes = [wintypes.HANDLE]
+    kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
+    # 1 e' THREAD_TERMINATE, il permesso che CancelSynchronousIo chiede.
+    maniglia = kernel32.OpenThread(1, False, filo.native_id or 0)
+    if not maniglia:
+        return
+    try:
+        scadenza = time.monotonic() + per_quanto
+        while filo.is_alive() and time.monotonic() < scadenza:
+            kernel32.CancelSynchronousIo(maniglia)
+            filo.join(0.05)
+    finally:
+        kernel32.CloseHandle(maniglia)
+
+
+class _NonRisponde(Exception):
+    """Una cartella di rete che non ha risposto in tempo."""
+
+
 class Ricerca:
-    def __init__(self, filtro, brani_delle_playlist, schedario, avvisa=None, unita=None):
+    def __init__(self, filtro, brani_delle_playlist, schedario, avvisa=None, unita=None, rete=(), lettere_di_rete=False):
         """brani_delle_playlist: coppie (brano, nome della playlist) dei
         Preferiti e delle playlist, da guardare per primi; unita: le radici da
         cercare, se si vogliono diverse da quelle di Questo PC, per esempio
-        nelle prove."""
+        nelle prove; rete: le radici di rete da cercare per ultime, a cui
+        lettere_di_rete aggiunge le unita' di rete con la lettera."""
         self.filtro = filtro
         self._brani = list(brani_delle_playlist)
         self._schedario = schedario
         self._avvisa = avvisa
         self._unita = unita
+        self._rete = list(rete)
+        self._lettere_di_rete = lettere_di_rete
+        # Le radici di rete saltate perche' non rispondevano, e le cartelle
+        # mute saltate dentro radici che invece rispondevano.
+        self.senza_risposta = []
+        self.cartelle_mute = []
         self.risultati = []
         self.origini = []
         self._visti = set()
@@ -95,7 +203,8 @@ class Ricerca:
             if self.filtro.ammette(brano, self._schedario.scheda(brano.percorso)):
                 self._trovato(brano, playlist)
         radici = self._unita if self._unita is not None else [r for r, _nome in questo_pc.unita() if _tipo_di_unita(r) in UNITA_DA_CERCARE]
-        for radice in radici:
+        rete = radici_di_rete(self._rete) if self._lettere_di_rete else self._rete
+        for radice in [*radici, *rete]:
             self._cerca_in(radice)
             if self.fermata:
                 return
@@ -104,12 +213,27 @@ class Ricerca:
             self._avvisa()
 
     def _cerca_in(self, cartella):
+        di_rete = in_rete(cartella)
+        mute = []
         pendenti = [cartella]
         while pendenti and not self.fermata:
             attuale = pendenti.pop()
             try:
-                cartelle, files = questo_pc.contenuto(attuale)
+                cartelle, files = self._leggi_in_rete(attuale) if di_rete else questo_pc.contenuto(attuale)
+            except _NonRisponde:
+                mute.append(attuale)
+                if attuale == cartella or len(mute) >= CARTELLE_MUTE:
+                    # La radice intera si dice da sola, senza le sue cartelle.
+                    self.cartelle_mute = [m for m in self.cartelle_mute if m not in mute]
+                    self.senza_risposta.append(cartella)
+                    return
+                self.cartelle_mute.append(attuale)
+                continue
             except OSError:
+                # Una radice di rete che risponde subito con un errore, come
+                # un server spento, si dice come una che tace.
+                if di_rete and attuale == cartella:
+                    self.senza_risposta.append(cartella)
                 continue
             for percorso in files:
                 if self.fermata:
@@ -119,6 +243,38 @@ class Ricerca:
                     self._trovato(brano)
             # In ordine alfabetico: le cartelle si prendono dalla fine della pila.
             pendenti.extend(reversed(cartelle))
+
+    def _leggi_in_rete(self, cartella):
+        """Il contenuto di una cartella di rete, letto in un filo a parte:
+        se per ATTESA_IN_RETE non arriva nemmeno una voce la lettura si
+        annulla e solleva _NonRisponde; una cartella grande che risponde a
+        blocchi non scade. Mentre aspetta, ferma() vale subito."""
+        esito = []
+        passo = [time.monotonic()]
+
+        def al_passo():
+            passo[0] = time.monotonic()
+
+        def leggi():
+            try:
+                esito.append(questo_pc.contenuto(cartella, al_passo=al_passo))
+            except Exception as errore:  # noqa: BLE001 - torna al filo della ricerca, che lo solleva
+                esito.append(errore)
+
+        filo = threading.Thread(target=leggi, name="MeTeOra, ricerca in rete", daemon=True)
+        filo.start()
+        while filo.is_alive() and not self.fermata and time.monotonic() - passo[0] < ATTESA_IN_RETE:
+            filo.join(0.1)
+        if filo.is_alive():
+            threading.Thread(target=_annulla_la_lettura, args=(filo,), name="MeTeOra, annullamento in rete", daemon=True).start()
+            if self.fermata:
+                return [], []
+            raise _NonRisponde(cartella)
+        if not esito:
+            raise OSError(f"La lettura di {cartella} si e' interrotta.")
+        if isinstance(esito[0], Exception):
+            raise esito[0]
+        return esito[0]
 
 
 class Gruppo:

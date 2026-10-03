@@ -71,13 +71,16 @@ def _in_ordine(nomi):
     return sorted(nomi, key=lambda n: os.path.basename(n).casefold())
 
 
-def contenuto(cartella):
+def contenuto(cartella, al_passo=None):
     """Sottocartelle e file supportati di una cartella, in ordine
     alfabetico: (cartelle, file), percorsi completi. Solleva OSError se la
-    cartella non si puo' leggere."""
+    cartella non si puo' leggere. al_passo, se c'e', si chiama a ogni voce
+    letta: la ricerca in rete lo usa per sapere che la lettura va avanti."""
     cartelle, files = [], []
     with os.scandir(cartella) as voci:
         for voce in voci:
+            if al_passo is not None:
+                al_passo()
             if not _visibile(voce):
                 continue
             if voce.is_dir(follow_symlinks=False):

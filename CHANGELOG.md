@@ -2,6 +2,13 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.73.0] - 2026-10-04
+
+- Ctrl con la barra rovesciata cerca anche in rete, per ultima, dopo le playlist e i dischi del PC: nelle unità di rete con la lettera e nei percorsi aggiunti a mano in Questa rete, senza cercare due volte la stessa cartella. Le condivisioni intere salvate in Windows no: si cercano con la barra rovesciata sul loro ramo. Chiesto da Gabriele, che ha scelto così dopo il banco sul router.
+- In rete una cartella ha quindici secondi per far arrivare qualcosa, anche con la barra rovesciata su un ramo di rete: una cartella grande che arriva a pezzi non scade. Una lettura rimasta appesa si annulla, con la funzione di Windows fatta apposta, e la cartella si salta; se tace il percorso stesso, o tacciono tre sue cartelle, o il server risponde subito con un errore, si salta tutto il percorso. Alla fine la console dice quali percorsi e quante cartelle non hanno risposto, e lo schedario non legge i file dei percorsi muti, che lo terrebbero fermo. Ferma la ricerca vale subito anche mentre la rete tace. Il banco sul disco dell'Iliadbox, percorso tutto in rete: mille cartelle al secondo, ma dopo circa 17 mila il Samba lascia appesa una lettura per una ventina di minuti, e l'annullamento stesso resta fermo, quindi parte in un filo a parte.
+- Nei Risultati, una condivisione di rete salvata in Windows prende il nome che ha in Questa rete.
+- La barra rovesciata su Questa rete non cerca due volte la stessa cartella, nemmeno scritta con maiuscole diverse o dentro un altro percorso. Le unità di rete con la lettera si trovano nel filo della ricerca, senza chiedere il nome del volume, che su un server fermo farebbe aspettare l'interfaccia.
+
 ## [1.72.0] - 2026-10-04
 
 - Il manuale è in HTML, manuale.html, e si naviga per titoli: un capitolo per argomento, come la finestra, i Preferiti, le playlist, Questo PC, la rete, la ricerca e il filtro, la riproduzione, i marker, i tag, il video, il Commodore 64, l'Amiga, la musica delle console, i MIDI e le impostazioni, ognuno con il concetto, i tasti e degli esempi. Chiesto da Gabriele.

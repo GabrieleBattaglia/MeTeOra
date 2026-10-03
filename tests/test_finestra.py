@@ -905,6 +905,50 @@ def test_ricerca_globale(finestra, monkeypatch, suoni_annotati, tmp_path):
     assert finestra.albero.GetItemText(finestra.nodo_risultati) == "Risultati di jazz: 1 trovato"
 
 
+def test_la_ricerca_ovunque_cerca_anche_in_rete(finestra, monkeypatch, suoni_annotati, tmp_path):
+    # 1.73.0: Ctrl con la barra rovesciata passa alla ricerca le radici di
+    # rete aggiunte a mano, per ultime; una ricerca in un ramo no. Alla fine la console dice
+    # quali non hanno risposto, con il nome di Questa rete.
+    from filtro import Filtro
+
+    class RicercaFinta:
+        def __init__(self, filtro, brani, schedario, avvisa=None, unita=None, rete=(), lettere_di_rete=False):
+            self.rete, self.unita, self.lettere_di_rete = list(rete), unita, lettere_di_rete
+            self.finita, self.fermata, self.senza_risposta, self.cartelle_mute = False, False, [], []
+
+        def avvia(self):
+            pass
+
+        def ferma(self):
+            self.fermata = True
+
+        def quanti(self):
+            return 0
+
+        def pezzo(self, _inizio, _fine):
+            return []
+
+    monkeypatch.setattr(modulo, "Ricerca", RicercaFinta)
+    monkeypatch.setattr(modulo.questa_rete, "percorsi_salvati", lambda: [("La box", "\\\\box\\dati")])
+    finestra.impostazioni["percorsi_di_rete"] = ["\\\\nas\\musica"]
+    finestra._avvia_ricerca("rock", Filtro("rock"))
+    # Le condivisioni intere salvate in Windows no: solo i percorsi aggiunti a mano.
+    assert finestra._ricerca.unita is None and finestra._ricerca.rete == ["\\\\nas\\musica"] and finestra._ricerca.lettere_di_rete
+    assert _ultima(finestra) == "Cerco rock nelle playlist, nei dischi e in rete. I Risultati si riempiono mentre cerco."
+    # Allo schedario non vanno i file delle radici mute, che lo terrebbero fermo.
+    chiesti = []
+    monkeypatch.setattr(finestra.schedario, "chiedi", chiesti.extend)
+    finestra.risultati.brani[:] = [Brano(os.path.join(str(tmp_path), "rock.mp3")), Brano("\\\\nas\\musica\\rock.mp3")]
+    finestra._ricerca.finita, finestra._ricerca.senza_risposta = True, ["\\\\box\\dati", "\\\\nas\\musica"]
+    finestra._ricerca.cartelle_mute = ["\\\\box\\dati\\uno", "\\\\box\\dati\\due"]
+    finestra._risultati_arrivati()
+    assert _ultima(finestra) == ("Ricerca di rock finita: 2 risultati. In rete non hanno risposto: La box, \\\\nas\\musica. "
+        "In rete 2 cartelle non hanno risposto, e la ricerca è andata avanti senza.")
+    assert chiesti == [os.path.join(str(tmp_path), "rock.mp3")]
+    finestra._avvia_ricerca("rock", Filtro("rock"), unita=[str(tmp_path)], dove="in Musica")
+    assert finestra._ricerca.rete == [] and not finestra._ricerca.lettere_di_rete
+
+
 def test_w_va_a_un_tempo_anche_dalla_fine(finestra, monkeypatch, suoni_annotati):
     salti = []
     monkeypatch.setattr(type(finestra.motore), "in_corso", property(lambda _self: r"C:\m\a.mp3"))
