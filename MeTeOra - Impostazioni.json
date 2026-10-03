@@ -5,7 +5,7 @@
  "passo_avanti": 30.0,
  "volume_effetti": 0.45,
  "insegui": true,
- "casuale": true,
+ "casuale": false,
  "modello_casuale": "una_volta",
  "video": false,
  "sottotitoli": true,
@@ -13,12 +13,12 @@
  "percorsi_di_rete": [],
  "banco_midi": "E:\\VstPlugins\\SF2 Instruments\\FluidR3 GM.sf2",
  "ripresa": {
-  "percorso": "E:\\Audio\\Divertenti\\Pubblicità regresso - Luano.mp3",
+  "percorso": "E:\\Audio\\Belgio 2004\\DM-10032.mp3",
   "sottobrano": null,
-  "numero": null,
+  "numero": 14,
   "posizione": 0,
   "tipo": "cartella",
-  "cartella": "E:\\Audio\\Divertenti"
+  "cartella": "E:\\Audio\\Belgio 2004"
  },
  "righe_della_console": 2000,
  "caratteri": {},
