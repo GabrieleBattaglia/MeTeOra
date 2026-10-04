@@ -1,20 +1,4 @@
 Collaudo di MeTeOra 1.83.0, con NVDA: il manuale in HTML, F1 e F12, la ricerca anche in rete, B e Z con la riproduzione casuale, l'invito a offrire un caffè, la cartella vuota nel cestino, i dettagli dei contenitori, i conti in rete, Maiuscolo con F9 e F10, i sottotitoli fatti di immagini, il filtro delle impostazioni, il karaoke, la barra braille a blocchi. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.83.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
-Impostazioni, ultima voce Dona per questo progetto, Invio: il suono dell'invito, e il fuoco sul testo, che NVDA legge.
-Invio nel testo, o Esc, chiudono l'invito e si torna alle impostazioni; Tab passa a Dona con PayPal e a Chiudi.
-Dona con PayPal apre la pagina di PayPal nel browser, e la console ringrazia.
-Esci da MeTeOra con Esc più volte, riaprendolo: circa una volta su cinque l'invito compare per ultimo, prima del suono dell'uscita, e chiuso l'invito MeTeOra esce.
-In Questo PC, Maiuscolo con Canc su una cartella vuota: la domanda, con No predefinito; Sì la manda nel cestino, la voce sparisce e il fuoco va sulla vicina.
-Maiuscolo con Canc su una cartella con dentro file che MeTeOra non suona, per esempio solo immagini: la console dice che non è vuota, e la cartella resta.
-Se hai una chiavetta, Maiuscolo con Canc su un file di prova: la domanda dice Cancellare per sempre.
-F11 su E:\audio\Amiga giochi: la console scrive i dettagli, con un suono nuovo, e il fuoco va sulla prima riga; controlla che i numeri tornino.
-F11 sull'unità E:: prima lo spazio, capacità, libero e occupato con la percentuale, poi i conti; ci vuole qualche secondo, e la console dice che sta raccogliendo.
-F11 su Questo PC, su una playlist, sui Preferiti e sul ramo Playlist: i dettagli di ciascuno.
-Il menu di una cartella e di una playlist ha Leggi i dettagli, che fa come F11.
-Apri una cartella con pochi file di prova, mandane uno nel cestino con Maiuscolo con Canc e risali con freccia sinistra: l'etichetta dice già un file in meno.
-Manda nel cestino anche gli altri: la cartella resta, e dice (vuota); Maiuscolo con Canc su di lei la manda nel cestino.
-In Questa rete apri la radice dell'Iliadbox: le sue cartelle compaiono; dopo un po' backups e CronologiePC dicono almeno tanti file, la rete non risponde del tutto, o la rete non risponde.
-Intanto apri una cartella dei dischi del PC: i suoi conti arrivano lo stesso.
-Poi apri una sottocartella dei backup: la console dice subito che non risponde. Aggiorna su Questa rete la riprova.
 Maiuscolo con F10: un suono di inizio, la console dice che apre tutta la plancia, poi un suono di fine con quanti rami ha aperto; Questa rete resta chiusa. Ascolta i due suoni nuovi.
 Durante l'apertura premi una freccia: si ferma, e la console lo dice.
 Scendi in fondo a una cartella aperta e premi Maiuscolo con F9: si chiude tutto, con un suono nuovo, e il fuoco va sulla voce di primo livello, per esempio Questo PC.
