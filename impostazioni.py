@@ -41,6 +41,7 @@ from valori import (
     PASSO_VOLUME_MINIMO,
     PERCENTUALE_MASSIMA,
     RIGHE_MINIME,
+    RIPRESA_MASSIMA,
     SECONDI_MINIMI,
     TONO_MASSIMO,
     VELOCITA_MASSIMA,
@@ -56,6 +57,9 @@ PREDEFINITE = {
     "volume_effetti": 0.5,
     # Maiuscolo+F8: la selezione della plancia segue il brano che suona.
     "insegui": False,
+    # I file piu' lunghi di tanti minuti riprendono dal punto lasciato
+    # (1.92.0): 0 mai.
+    "ripresa_oltre": 10,
     # La barra dei comandi per il mouse, per chi vede (1.87.0): accesa di
     # partenza, perche' a chi usa la tastiera non da' niente.
     "barra_dei_comandi": True,
@@ -198,6 +202,7 @@ CONTROLLI = {
     "karaoke": lambda valore: valore in MODI_DEL_KARAOKE,
     "anticipo_karaoke": _intero_fra(0, ANTICIPO_MASSIMO_DEL_KARAOKE),
     "celle_braille": _intero_fra(0, CELLE_MASSIME),
+    "ripresa_oltre": _intero_fra(0, RIPRESA_MASSIMA),
     "lettura_minima": _intero_fra(LETTURA_MINIMA, LETTURA_MASSIMA),
     "versione": lambda valore: all(parte.isdigit() and parte.isascii() for parte in valore.split(".")) if valore else True,
     "percorsi_di_rete": lambda valore: all(isinstance(p, str) and p.startswith("\\\\") and len(p) > 2 for p in valore),

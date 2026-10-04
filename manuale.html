@@ -142,6 +142,7 @@ kbd {
 <li><a href="#salti">Muoversi nel brano</a></li>
 <li><a href="#volume">Il volume</a></li>
 <li><a href="#f8-inseguimento">F8 e l'inseguimento</a></li>
+<li><a href="#file-lunghi">I file lunghi: audiolibri e film</a></li>
 <li><a href="#brano-in-errore">Un brano che non si suona</a></li>
 <li><a href="#esempi-riproduzione">Esempi</a></li>
 </ul></li>
@@ -948,6 +949,8 @@ kbd {
 <h3 id="f8-inseguimento">F8 e l'inseguimento</h3>
 <p>F8 porta la selezione della plancia su ciò che suona, caricando la sua playlist e aprendo se serve le cartelle e i rami dei Risultati fino a lì, e porta lì anche il fuoco della tastiera: dalla console, per esempio, passi alla plancia. Di un file aperto con Apri file dice che non è nella plancia.</p>
 <p>Maiuscolo con F8 aggancia o sgancia l'inseguimento, e MeTeOra se lo ricorda. Agganciato, a ogni cambio di brano la selezione della plancia va da sola su ciò che suona, senza portarci il fuoco della tastiera; agganciandolo mentre un brano suona, la selezione ci va subito.</p>
+<h3 id="file-lunghi">I file lunghi: audiolibri e film</h3>
+<p>I file più lunghi di dieci minuti, come gli audiolibri, i podcast e i film, ricordano il punto in cui li hai lasciati: quando li suoni di nuovo, da qualunque parte, riprendono da lì, e la console dice Riprendo da, con il tempo, dove l'avevi lasciato. X, sul file ripreso, lo fa ripartire da capo, come su ogni brano che suona. I file più corti, come le canzoni, ripartono da capo come sempre; un file ascoltato fino alla fine, o lasciato nei primi o negli ultimi trenta secondi, non ha un punto da riprendere. Il limite dei dieci minuti si cambia nelle impostazioni, con la voce Punto lasciato dei file lunghi, e 0 spegne la ripresa. I marker, W e la ripresa all'avvio vanno sempre dove dicono loro.</p>
 <h3 id="brano-in-errore">Un brano che non si suona</h3>
 <p>Un file che non si suona, perché non c'è più o è rovinato, fa scrivere alla console Non riesco a suonare, con il suo nome, con il suono dell'errore. Finito quel suono parte il brano seguente; V, intanto, lo ferma.</p>
 <h3 id="esempi-riproduzione">Esempi</h3>
@@ -1147,7 +1150,7 @@ kbd {
 <h3 id="formati-elenco">I file che MeTeOra suona</h3>
 <p>Questo PC, Questa rete, la ricerca e le cartelle suonate con X mostrano solo i file che MeTeOra sa suonare, riconosciuti dall'estensione:</p>
 <ul>
-<li>l'audio: MP3, MP2, WAV, FLAC, OGG, OGA, Opus, M4A, AAC, WMA, APE, WV, TAK, TTA, MPC, DSF, DFF, AIFF, AIF, ALAC, AC3, DTS, MKA, AU, CAF e SPX; li suona libmpv, con FFmpeg;</li>
+<li>l'audio: MP3, MP2, WAV, FLAC, OGG, OGA, Opus, M4A, M4B, il formato degli audiolibri, AAC, WMA, APE, WV, TAK, TTA, MPC, DSF, DFF, AIFF, AIF, ALAC, AC3, DTS, MKA, AU, CAF e SPX; li suona libmpv, con FFmpeg;</li>
 <li>il video: MP4, MKV, AVI, MOV, WMV, WebM, FLV, M4V, MPG, MPEG, TS, M2TS, 3GP, VOB e OGV;</li>
 <li>i SID del Commodore 64, emulati da libsidplayfp: il capitolo Il Commodore 64;</li>
 <li>i moduli dei tracker, come MOD, XM, IT e S3M e i formati dell'Amiga, suonati da libopenmpt: il capitolo L'Amiga e i moduli dei tracker;</li>
@@ -1330,6 +1333,8 @@ kbd {
 <p>Invio apre una lista con Cerca i banchi nel PC, Scrivi il percorso di un banco e Scarica FluidR3 GM. Un banco scritto a mano può avere anche pochi strumenti: la console lo dice. La riga dice il banco in uso, o che si sceglierà al primo MIDI. Il capitolo I MIDI spiega tutto.</p>
 <h4>Inseguimento della plancia</h4>
 <p>Sì o no, come Maiuscolo con F8. Di partenza è sganciato.</p>
+<h4>Punto lasciato dei file lunghi</h4>
+<p>I file più lunghi di tanti minuti riprendono dal punto in cui li hai lasciati, come spiega il capitolo La riproduzione; di partenza 10, da 0 a 600, e 0 vuol dire mai.</p>
 <h4>Dimensioni dei caratteri</h4>
 <p>In punti, numeri interi da 6 a 72: tre numeri per plancia, console e cruscotto, oppure uno solo che vale per tutte e tre; due numeri, o quattro, non si accettano. Il campo vuoto torna al carattere di Windows in tutte e tre le aree; un'area sola non si riporta a Windows. Il campo parte con le dimensioni di adesso, oppure vuoto se tutte e tre le aree hanno il carattere di Windows; le istruzioni dicono quanti punti ha il carattere di Windows.</p>
 <p>Il cruscotto cambia altezza con il suo carattere, per tenere cinque righe, ma di solito non occupa più di un terzo della finestra: con caratteri molto grandi ne mostra meno e scorre, così plancia e console restano visibili. Due righe però le tiene sempre, anche quando in una finestra bassa vanno oltre il terzo.</p>
@@ -1408,8 +1413,9 @@ kbd {
 <li>MeTeOra - Impostazioni.json: tutte le impostazioni, compresi i percorsi di rete aggiunti a mano, il banco dei MIDI, la scheda audio e il punto di ripresa, cioè il brano e il tempo a cui eri all'uscita.</li>
 <li>MeTeOra - Schedario.json: le durate, le dimensioni e i tag dei file che MeTeOra ha letto, così non li rilegge ogni volta. Dopo un aggiornamento che legge meglio un formato, le schede di quel formato si rileggono da sole.</li>
 <li>MeTeOra - Marcatori.json: i marker di tutti i file.</li>
+<li>MeTeOra - Posizioni.json: il punto in cui hai lasciato i file lunghi, fino a mille, i più recenti.</li>
 <li>MeTeOra - Marcatori esportati.json: il nome proposto da Esporta selezionati, nella finestra dei marcatori.</li>
-<li>La cartella copie: le ultime tre versioni diverse di MeTeOra - Playlist.json, MeTeOra - Marcatori.json e MeTeOra - Impostazioni.json, una per avvio, con il numero in fondo al nome: .1 è la più recente. Se una sessione è andata storta, per esempio hai svuotato una playlist per sbaglio, a MeTeOra chiuso copi la versione che vuoi al posto del file vero, togliendo il numero in fondo al nome. Lo schedario non ha copie: si rifà da solo rileggendo i file.</li>
+<li>La cartella copie: le ultime tre versioni diverse di MeTeOra - Playlist.json, MeTeOra - Marcatori.json, MeTeOra - Impostazioni.json e MeTeOra - Posizioni.json, una per avvio, con il numero in fondo al nome: .1 è la più recente. Se una sessione è andata storta, per esempio hai svuotato una playlist per sbaglio, a MeTeOra chiuso copi la versione che vuoi al posto del file vero, togliendo il numero in fondo al nome. Lo schedario non ha copie: si rifà da solo rileggendo i file.</li>
 <li>MeTeOra - Errori.log, con la sua copia MeTeOra - Errori.log.1, e, dopo un crash, MeTeOra - Crash precedente.log: il registro degli errori e dei crash, descritto nel capitolo Quando qualcosa va storto.</li>
 <li>I file della console salvata, come MeTeOra-V1_51_3-2026_10_01-15_42.txt, scritti dalla voce Salva console.</li>
 </ul>

@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.92.0] - 2026-10-04
+
+- I file lunghi riprendono dal punto lasciato, tappa 12 e del piano: audiolibri, podcast e film più lunghi di dieci minuti, il limite scelto da Gabriele, ricordano dove li hai lasciati, e quando li suoni di nuovo riprendono da lì; la console lo dice, e X li fa ripartire da capo. Il limite è la voce Punto lasciato dei file lunghi delle impostazioni, e 0 spegne la ripresa. I punti stanno in MeTeOra - Posizioni.json, fino a mille, e entrano nelle copie dei dati.
+- MeTeOra suona anche i file M4B, il formato degli audiolibri.
+
 ## [1.91.0] - 2026-10-04
 
 - Aprire i file da Windows, tappa 12 d del piano: MeTeOra suona i file e le cartelle passati sulla riga di comando, aperti da Esplora risorse o trascinati sulla finestra; più file insieme suonano come una lista che non entra fra le playlist, una cartella sola con tutte le sue sottocartelle.

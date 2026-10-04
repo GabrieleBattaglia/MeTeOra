@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura. Nella 1.83.1 Maiuscolo con F10 lascia chiuso Questo PC, e la plancia molto aperta non ferma piu' la finestra. Nella 1.83.2 F10 a fette, e i suoni delle aperture che non si sovrappongono. Nella 1.84.0 la proposta dell'aggiornamento, il suo avanzamento e la chiusura per aggiornarsi. Nella 1.85.0 i crediti con la licenza e le licenze dei componenti. Nella 1.85.5 i rami di rete che si riprovano sempre. Nella 1.86.0 Maiuscolo con F12 spegne e riaccende i tasti rapidi a carattere. Nella 1.87.0 la barra dei comandi per il mouse. Nella 1.88.0 anche sopra il video, con la linea del tempo. Nella 1.88.1 F2 scrive solo le versioni recenti. Nella 1.89.0 i problemi interni anche nel registro degli errori. Nella 1.90.0 le copie dei dati che non riescono. Nella 1.91.0 i file aperti da Windows, il trascinamento e le associazioni dei formati.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura. Nella 1.83.1 Maiuscolo con F10 lascia chiuso Questo PC, e la plancia molto aperta non ferma piu' la finestra. Nella 1.83.2 F10 a fette, e i suoni delle aperture che non si sovrappongono. Nella 1.84.0 la proposta dell'aggiornamento, il suo avanzamento e la chiusura per aggiornarsi. Nella 1.85.0 i crediti con la licenza e le licenze dei componenti. Nella 1.85.5 i rami di rete che si riprovano sempre. Nella 1.86.0 Maiuscolo con F12 spegne e riaccende i tasti rapidi a carattere. Nella 1.87.0 la barra dei comandi per il mouse. Nella 1.88.0 anche sopra il video, con la linea del tempo. Nella 1.88.1 F2 scrive solo le versioni recenti. Nella 1.89.0 i problemi interni anche nel registro degli errori. Nella 1.90.0 le copie dei dati che non riescono. Nella 1.91.0 i file aperti da Windows, il trascinamento e le associazioni dei formati. Nella 1.92.0 i file lunghi riprendono dal punto lasciato.
 
 """La finestra di MeTeOra.
 
@@ -58,6 +58,7 @@ import marcatori
 import midi
 import ocr
 import percorsi
+import posizioni
 import questa_rete
 import questo_pc
 import registro
@@ -94,6 +95,11 @@ FILE_PLAYLIST = "MeTeOra - Playlist.json"
 FILE_IMPOSTAZIONI = "MeTeOra - Impostazioni.json"
 FILE_SCHEDARIO = "MeTeOra - Schedario.json"
 FILE_MARCATORI = "MeTeOra - Marcatori.json"
+FILE_POSIZIONI = "MeTeOra - Posizioni.json"
+# Ogni quanti millisecondi si guarda il punto del file lungo che suona, e
+# ogni quanti giri si scrive il file delle posizioni (1.92.0).
+GIRO_DELLE_POSIZIONI = 5000
+GIRI_PER_SALVARE = 12
 # Il nome proposto per l'esportazione dei marcatori, e il filtro dei dialoghi
 # che la scrivono e la leggono.
 FILE_DELL_ESPORTAZIONE = "MeTeOra - Marcatori esportati.json"
@@ -338,6 +344,7 @@ VOCI_DELLE_IMPOSTAZIONI = {
     "lettura_minima": ("Tempo minimo di lettura in braille", "cambiato"),
     "banco_midi": ("Banco dei suoni MIDI", "cambiato"),
     "insegui": ("Inseguimento della plancia (Maiuscolo+F8)", "cambiato"),
+    "ripresa_oltre": ("Punto lasciato dei file lunghi", "cambiato"),
     "caratteri": ("Dimensioni dei caratteri", "cambiate"),
     "colori_testo": ("Colori dei caratteri", "cambiati"),
     "colori_sfondo": ("Colori dello sfondo", "cambiati"),
@@ -832,6 +839,13 @@ class Finestra(wx.Frame):
         # una: si contano, e la fine lo dice (1.83.1).
         self._taciuti = None
         self.marcatori = Marcatori(os.path.join(cartella_dati, FILE_MARCATORI))
+        # I punti dei file lunghi (1.92.0).
+        self.posizioni = posizioni.Posizioni(os.path.join(cartella_dati, FILE_POSIZIONI))
+        self._giri_delle_posizioni = 0
+        self._posizioni_non_salvate = False
+        self._orologio_delle_posizioni = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self._giro_delle_posizioni, self._orologio_delle_posizioni)
+        self._orologio_delle_posizioni.Start(GIRO_DELLE_POSIZIONI)
         self.marcatori.carica()
         # Le playlist temporanee nate dalle cartelle di Questo PC, per cartella:
         # rigiocando un file della stessa cartella si riusa la stessa.
@@ -1227,6 +1241,35 @@ class Finestra(wx.Frame):
         # cartella vuota la tiene fuori da Questo PC.
         pl = Playlist("file aperti" if len(brani) > 1 else "file aperto", brani, cartella="")
         self._suona(pl, pl.brani[0], "file_aperto")
+
+    # I punti dei file lunghi (Gabriele, 4 ottobre 2026, 1.92.0).
+
+    def _ricorda_la_posizione(self):
+        """Il punto del file che suona, se e' piu' lungo del limite delle
+        impostazioni; non per i file con piu' sottobrani, che sono canzoni."""
+        limite = self.impostazioni["ripresa_oltre"] * 60
+        percorso = self.motore.in_corso
+        if not limite or not percorso or self.motore.sottobrani:
+            return
+        durata = self.motore.durata
+        if durata is not None and durata >= limite:
+            self.posizioni.ricorda(percorso, self.motore.posizione, durata)
+
+    def _giro_delle_posizioni(self, _evento):
+        """Ogni GIRO_DELLE_POSIZIONI il punto; ogni GIRI_PER_SALVARE il file.
+        Un salvataggio che non riesce lo si dice una volta sola."""
+        if self._chiusa:
+            return
+        self._ricorda_la_posizione()
+        self._giri_delle_posizioni += 1
+        if self._giri_delle_posizioni % GIRI_PER_SALVARE or not self.posizioni.modificate:
+            return
+        try:
+            self.posizioni.salva()
+        except OSError as e:
+            if not self._posizioni_non_salvate:
+                self._posizioni_non_salvate = True
+                self._riscontro("errore", f"Non riesco a salvare le posizioni dei file lunghi: {e.strerror or e}.")
 
     def copie_mancate(self, nomi):
         """All'avvio, se una copia dei dati non e' riuscita (1.90.0)."""
@@ -3958,10 +4001,18 @@ class Finestra(wx.Frame):
             self._prepara_i_midi(lambda: self._suona(pl, brano, evento, sottobrano, inizio, sfuma_lo_stesso))
             return
         self._uscente = self._preparato = self._avanzamento_dopo_errore = None
+        # Il punto del file lungo che si lascia, e quello a cui riprendere il
+        # nuovo, se nessuno ne chiede un altro (1.92.0).
+        self._ricorda_la_posizione()
+        ripresa = None
+        if inizio is None and not (sottobrano or brano.sottobrano) and evento != "da_capo" and self.impostazioni["ripresa_oltre"]:
+            ripresa = inizio = self.posizioni.dove(brano.percorso)
         self.coda.imposta(pl, brano)
         self._segna_nel_mazzo(pl, brano, sottobrano)
         self.motore.suona(brano.percorso, sottobrano or brano.sottobrano, inizio=inizio, sfuma_lo_stesso=sfuma_lo_stesso)
         self._annuncia(pl, brano, evento)
+        if ripresa:
+            self.scrivi(f"Riprendo da {tempo(ripresa)}, dove l'avevi lasciato: X lo fa ripartire da capo.")
 
     def _annuncia(self, pl, brano, evento):
         """Il riscontro del brano appena partito, con la sua posizione nella
@@ -4314,6 +4365,9 @@ class Finestra(wx.Frame):
         entrasse con la dissolvenza: si suona il seguente, se c'e'."""
         if self._chiusa:
             return
+        # Il file lungo arrivato alla fine non ha piu' un punto da riprendere.
+        if self.coda.corrente is not None:
+            self.posizioni.dimentica(self.coda.corrente.percorso)
         self._uscente = self._preparato = None
         seguente = self._seguente_automatico()
         if seguente:
@@ -4572,6 +4626,7 @@ class Finestra(wx.Frame):
             return
         if self._niente_in_corso():
             return
+        self._ricorda_la_posizione()
         # Con la dissolvenza accesa il brano si spegne piano, e il motore e'
         # subito libero (Gabriele, 2 ottobre 2026).
         self.motore.stop(sfumando=True)
@@ -5032,6 +5087,7 @@ class Finestra(wx.Frame):
             "lettura_minima": lambda: f"{imp['lettura_minima']} ms",
             "banco_midi": self._banco_da_leggere,
             "insegui": lambda: "sì" if imp["insegui"] else "no",
+            "ripresa_oltre": lambda: f"oltre {imp['ripresa_oltre']} minuti" if imp["ripresa_oltre"] else "mai",
             "caratteri": self._caratteri_da_leggere,
             "colori_testo": lambda: self._colori_da_leggere("colori_testo"),
             "colori_sfondo": lambda: self._colori_da_leggere("colori_sfondo"),
@@ -5228,6 +5284,11 @@ class Finestra(wx.Frame):
                 f"Più aree si separano con lo spazio. Per esempio {esempi}.",
                 "La lettera da sola torna ai colori di Windows; le aree che non scrivi restano come sono.",
                 f"Adesso: {self._colori_da_leggere(chiave)}.", REGOLA_DEL_DOLLARO], valori.scrivi_colori(imp[chiave])
+        if chiave == "ripresa_oltre":
+            return valori.leggi_ripresa_oltre, [
+                f"I file più lunghi di tanti minuti, da 0 a {valori.RIPRESA_MASSIMA}, riprendono dal punto in cui li hai lasciati: audiolibri, podcast, film.",
+                "I file più corti, come le canzoni, ripartono da capo. 0 vuol dire mai. Su un file ripreso, X lo fa ripartire da capo.",
+                f"Adesso: {imp['ripresa_oltre']}.", REGOLA_DEL_DOLLARO], str(imp["ripresa_oltre"])
         if chiave == "anticipo_karaoke":
             return valori.leggi_anticipo_del_karaoke, [
                 f"Quanti millesimi di secondo prima del canto arriva il testo del karaoke: da 0 a {valori.ANTICIPO_MASSIMO_DEL_KARAOKE}.",
@@ -5314,6 +5375,8 @@ class Finestra(wx.Frame):
             return f"Sottotitoli e karaoke ora arrivano al braille in blocchi di {valore} celle al più." if valore else "Sottotitoli e karaoke ora arrivano al braille interi."
         if chiave == "lettura_minima":
             return f"Ogni blocco ora resta sulla barra braille almeno {valore} millesimi."
+        if chiave == "ripresa_oltre":
+            return f"I file più lunghi di {valore} minuti ora riprendono dal punto lasciato." if valore else "I file ora ripartono sempre da capo."
         if chiave == "anticipo_karaoke":
             self._applica_il_karaoke()
             return f"Il testo del karaoke ora arriva {valore} millesimi prima del canto." if valore else "Il testo del karaoke ora arriva quando comincia il canto."
@@ -7144,8 +7207,12 @@ class Finestra(wx.Frame):
         if self._ricerca is not None:
             self._ricerca.ferma()
         self.impostazioni["ripresa"] = self._stato_da_riprendere()
+        self._orologio_delle_posizioni.Stop()
+        self._ricorda_la_posizione()
         non_salvati = []
         self._salva_all_uscita(self.archivio.salva, "le playlist", non_salvati)
+        if self.posizioni.modificate:
+            self._salva_all_uscita(self.posizioni.salva, "le posizioni dei file lunghi", non_salvati)
         if self.marcatori.modificato:
             self._salva_all_uscita(self.marcatori.salva, "i marker", non_salvati)
         self.contatore.ferma()

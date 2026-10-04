@@ -40,10 +40,10 @@ def main():
         return 1
     import copie
     import suoni
-    from finestra import FILE_IMPOSTAZIONI, FILE_MARCATORI, FILE_PLAYLIST, Finestra
+    from finestra import FILE_IMPOSTAZIONI, FILE_MARCATORI, FILE_PLAYLIST, FILE_POSIZIONI, Finestra
 
     # Le copie dei dati, prima di leggerli: una per sessione (1.90.0).
-    mancate = copie.ruota(percorsi.cartella_programma(), [FILE_PLAYLIST, FILE_MARCATORI, FILE_IMPOSTAZIONI])
+    mancate = copie.ruota(percorsi.cartella_programma(), [FILE_PLAYLIST, FILE_MARCATORI, FILE_IMPOSTAZIONI, FILE_POSIZIONI])
     finestra = Finestra()
     finestra.ascolta_i_problemi()
     if mancate:

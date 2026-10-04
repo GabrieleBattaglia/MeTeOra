@@ -2725,6 +2725,7 @@ def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_an
         ("lettura_minima", "Tempo minimo di lettura in braille: 2000 ms"),
         ("banco_midi", "Banco dei suoni MIDI: nessuno, si sceglie al primo MIDI"),
         ("insegui", "Inseguimento della plancia (Maiuscolo+F8): no"),
+        ("ripresa_oltre", "Punto lasciato dei file lunghi: oltre 10 minuti"),
         ("caratteri", "Dimensioni dei caratteri: quelle di Windows"),
         ("colori_testo", "Colori dei caratteri: quelli di Windows"),
         ("colori_sfondo", "Colori dello sfondo: quelli di Windows"),
@@ -5701,3 +5702,57 @@ def test_le_associazioni_dalle_impostazioni(finestra, monkeypatch, suoni_annotat
     assert _ultima(finestra).startswith("MeTeOra ora compare in Apri con per 150 formati.")
     finestra._associa_i_formati(None)
     assert fatti[-1] == ("togli",) and _ultima(finestra) == "MeTeOra non è più nelle associazioni dei formati."
+
+
+def test_i_file_lunghi_riprendono_dal_punto_lasciato(finestra, monkeypatch, tmp_path):
+    # 1.92.0: un file piu' lungo del limite riprende dal punto lasciato; X da
+    # capo, i file corti e la fine del brano no.
+    chiamate = []
+    stato = {"in_corso": None, "durata": 3600.0, "posizione": 0.0}
+    monkeypatch.setattr(finestra.motore, "suona", lambda percorso, sottobrano=None, inizio=None, **_altro: chiamate.append((percorso, inizio))
+        or stato.update(in_corso=percorso))
+    monkeypatch.setattr(type(finestra.motore), "in_corso", property(lambda _self: stato["in_corso"]))
+    monkeypatch.setattr(type(finestra.motore), "durata", property(lambda _self: stato["durata"]))
+    monkeypatch.setattr(type(finestra.motore), "posizione", property(lambda _self: stato["posizione"]))
+    finestra.motore.sottobrani = None
+    libro = r"C:\m\libro.m4b"
+    pl = modulo.Playlist("prova", [modulo.Brano(libro), modulo.Brano(r"C:\m\canzone.mp3")], cartella="")
+    finestra.posizioni.ricorda(libro, 1500, 3600)
+    finestra._suona(pl, pl.brani[0])
+    assert chiamate[-1] == (libro, 1500.0)
+    assert any(_senza_ora(r) == "Riprendo da 25:00, dove l'avevi lasciato: X lo fa ripartire da capo." for r in finestra._righe)
+    # X da capo riparte dall'inizio.
+    finestra._suona(pl, pl.brani[0], "da_capo")
+    assert chiamate[-1] == (libro, None)
+    # Mentre suona, il giro ricorda il punto; lo stop anche.
+    stato["posizione"] = 2000.0
+    finestra._ricorda_la_posizione()
+    assert finestra.posizioni.dove(libro) == 2000.0
+    stato["posizione"] = 2100.0
+    monkeypatch.setattr(finestra.motore, "stop", lambda sfumando=False: None)
+    finestra._comando_stop()
+    assert finestra.posizioni.dove(libro) == 2100.0
+    # Un file corto non ha un punto.
+    stato["durata"] = 200.0
+    stato["in_corso"] = r"C:\m\canzone.mp3"
+    stato["posizione"] = 100.0
+    finestra._ricorda_la_posizione()
+    assert finestra.posizioni.dove(r"C:\m\canzone.mp3") is None
+    # Con il limite a 0 nessun file riprende.
+    finestra.impostazioni["ripresa_oltre"] = 0
+    finestra._suona(pl, pl.brani[0])
+    assert chiamate[-1] == (libro, None)
+    finestra.impostazioni["ripresa_oltre"] = 10
+    # Arrivato alla fine, il file dimentica il punto.
+    finestra.coda.imposta(pl, pl.brani[0])
+    monkeypatch.setattr(finestra, "_seguente_automatico", lambda: None)
+    monkeypatch.setattr(finestra, "_fine_della_lista", lambda: None)
+    finestra._brano_finito()
+    assert finestra.posizioni.dove(libro) is None
+
+
+def test_le_posizioni_si_salvano_ogni_tanto(finestra, tmp_path):
+    finestra.posizioni.ricorda(r"C:\m\film.mkv", 600, 7200)
+    for _ in range(modulo.GIRI_PER_SALVARE):
+        finestra._giro_delle_posizioni(None)
+    assert (tmp_path / modulo.FILE_POSIZIONI).exists() and not finestra.posizioni.modificate

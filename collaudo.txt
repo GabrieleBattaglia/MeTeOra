@@ -30,3 +30,7 @@ Con MeTeOra aperto dai sorgenti, in un altro terminale scrivi python meteora.py 
 Seleziona tre brani in Esplora risorse e premi Invio con MeTeOra predefinito (dal compilato): suonano come una lista sola, file aperti.
 Trascina una cartella sulla plancia, se qualcuno ti aiuta: suona con le sottocartelle.
 Dal programma compilato, Impostazioni, Associazioni dei formati, Associa: si apre la pagina delle app predefinite di Windows, e MeTeOra compare in Apri con per gli mp3; poi Togli, e sparisce.
+Suona un audiolibro o un film più lungo di dieci minuti, fermalo a metà con V, suona altro, poi torna a lui: riprende da dove eri, e la console dice Riprendo da.
+Sul file ripreso, X: riparte da capo.
+Esci da MeTeOra mentre suona un file lungo, riaprilo, suona un'altra cosa e poi il file lungo: riprende dal punto.
+Un M4B, se ne hai uno: si vede nella plancia e suona.

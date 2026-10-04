@@ -29,7 +29,7 @@ TRACKER = frozenset({
     ".rtm", ".sfx", ".sfx2", ".smod", ".st26", ".stk", ".stp", ".stx", ".symmod", ".ult", ".wow",
 })
 AUDIO = frozenset({
-    ".mp3", ".mp2", ".wav", ".flac", ".ogg", ".oga", ".opus", ".m4a", ".aac", ".wma", ".ape", ".wv", ".tak", ".tta",
+    ".mp3", ".mp2", ".wav", ".flac", ".ogg", ".oga", ".opus", ".m4a", ".m4b", ".aac", ".wma", ".ape", ".wv", ".tak", ".tta",
     ".mpc", ".dsf", ".dff", ".aiff", ".aif", ".alac", ".ac3", ".dts", ".mka", ".au", ".caf", ".spx",
 }) | TRACKER
 VIDEO = frozenset({".mp4", ".mkv", ".avi", ".mov", ".wmv", ".webm", ".flv", ".m4v", ".mpg", ".mpeg", ".ts", ".m2ts", ".3gp", ".vob", ".ogv"})

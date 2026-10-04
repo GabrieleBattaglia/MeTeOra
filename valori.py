@@ -42,6 +42,8 @@ ANTICIPO_MASSIMO_DEL_KARAOKE = 10000
 # La barra braille a blocchi (1.83.0): le celle della barra, 0 per il testo
 # intero, e il tempo minimo di lettura di un blocco, in millesimi.
 CELLE_MASSIME = 160
+# Oltre quanti minuti un file riprende dal punto lasciato (1.92.0): 0 mai.
+RIPRESA_MASSIMA = 600
 LETTURA_MINIMA, LETTURA_MASSIMA = 100, 60000
 # Le dimensioni dei caratteri, in punti.
 CARATTERI_MINIMI, CARATTERI_MASSIMI = 6, 72
@@ -242,6 +244,11 @@ def leggi_si_no(testo, nome="Inseguimento della plancia"):
 def leggi_anticipo_del_karaoke(testo):
     """Quanti millesimi prima del canto arriva il testo del karaoke."""
     return leggi_intero(testo, 0, ANTICIPO_MASSIMO_DEL_KARAOKE, "Anticipo del karaoke")
+
+
+def leggi_ripresa_oltre(testo):
+    """Oltre quanti minuti un file riprende dal punto lasciato: 0 mai."""
+    return leggi_intero(testo, 0, RIPRESA_MASSIMA, "Punto lasciato dei file lunghi")
 
 
 def leggi_celle_braille(testo):
