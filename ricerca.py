@@ -132,8 +132,49 @@ def _annulla_la_lettura(filo, per_quanto=3.0):
         kernel32.CloseHandle(maniglia)
 
 
-class _NonRisponde(Exception):
-    """Una cartella di rete che non ha risposto in tempo."""
+class NonRisponde(OSError):
+    """Una cartella di rete che non ha risposto in tempo. E' un OSError: chi
+    tratta una cartella illeggibile la tratta gia' bene anche cosi'."""
+
+
+_NonRisponde = NonRisponde
+
+
+def leggi_in_rete(cartella, fermo=None, attesa=None):
+    """Il contenuto di una cartella di rete, come questo_pc.contenuto, letto
+    in un filo a parte: se per attesa secondi, ATTESA_IN_RETE se non si dice,
+    non arriva nemmeno una voce, la lettura si annulla, in un altro filo
+    perche' anche l'annullamento puo' restare fermo, e si solleva
+    NonRisponde; una cartella grande che risponde a blocchi non scade.
+    fermo, se c'e', si chiede mentre si aspetta: vero, e si torna subito con
+    ([], []). La usano la ricerca, il contatore e la plancia (1.77.1)."""
+    attesa = ATTESA_IN_RETE if attesa is None else attesa
+    esito = []
+    passo = [time.monotonic()]
+
+    def al_passo():
+        passo[0] = time.monotonic()
+
+    def leggi():
+        try:
+            esito.append(questo_pc.contenuto(cartella, al_passo=al_passo))
+        except Exception as errore:  # noqa: BLE001 - torna a chi aspetta, che lo solleva
+            esito.append(errore)
+
+    filo = threading.Thread(target=leggi, name="MeTeOra, lettura in rete", daemon=True)
+    filo.start()
+    while filo.is_alive() and not (fermo is not None and fermo()) and time.monotonic() - passo[0] < attesa:
+        filo.join(0.1)
+    if filo.is_alive():
+        threading.Thread(target=_annulla_la_lettura, args=(filo,), name="MeTeOra, annullamento in rete", daemon=True).start()
+        if fermo is not None and fermo():
+            return [], []
+        raise NonRisponde(cartella)
+    if not esito:
+        raise OSError(f"La lettura di {cartella} si e' interrotta.")
+    if isinstance(esito[0], Exception):
+        raise esito[0]
+    return esito[0]
 
 
 class Ricerca:
@@ -245,36 +286,8 @@ class Ricerca:
             pendenti.extend(reversed(cartelle))
 
     def _leggi_in_rete(self, cartella):
-        """Il contenuto di una cartella di rete, letto in un filo a parte:
-        se per ATTESA_IN_RETE non arriva nemmeno una voce la lettura si
-        annulla e solleva _NonRisponde; una cartella grande che risponde a
-        blocchi non scade. Mentre aspetta, ferma() vale subito."""
-        esito = []
-        passo = [time.monotonic()]
-
-        def al_passo():
-            passo[0] = time.monotonic()
-
-        def leggi():
-            try:
-                esito.append(questo_pc.contenuto(cartella, al_passo=al_passo))
-            except Exception as errore:  # noqa: BLE001 - torna al filo della ricerca, che lo solleva
-                esito.append(errore)
-
-        filo = threading.Thread(target=leggi, name="MeTeOra, ricerca in rete", daemon=True)
-        filo.start()
-        while filo.is_alive() and not self.fermata and time.monotonic() - passo[0] < ATTESA_IN_RETE:
-            filo.join(0.1)
-        if filo.is_alive():
-            threading.Thread(target=_annulla_la_lettura, args=(filo,), name="MeTeOra, annullamento in rete", daemon=True).start()
-            if self.fermata:
-                return [], []
-            raise _NonRisponde(cartella)
-        if not esito:
-            raise OSError(f"La lettura di {cartella} si e' interrotta.")
-        if isinstance(esito[0], Exception):
-            raise esito[0]
-        return esito[0]
+        """La lettura protetta di una cartella di rete; ferma() vale subito."""
+        return leggi_in_rete(cartella, fermo=lambda: self.fermata)
 
 
 class Gruppo:

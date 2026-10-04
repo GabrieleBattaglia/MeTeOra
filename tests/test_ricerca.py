@@ -195,3 +195,35 @@ def test_radici_di_rete_con_le_lettere(monkeypatch):
     vero = ricerca._percorso_di_rete
     monkeypatch.setattr(ricerca, "_percorso_di_rete", lambda r: "\\\\s\\a\\" if r == "Z:\\" else vero(r))
     assert ricerca.radici_di_rete(["\\\\s\\a\\Video", "\\\\t\\x"]) == ["\\\\t\\x", "Z:\\"]
+
+
+def test_il_contatore_in_rete_non_si_pianta(contenuto_finto, monkeypatch):
+    # 1.77.1: una sottocartella che tace non ferma il contatore; la radice
+    # finisce fra le mute, il conto e' parziale, e le letture dopo nella
+    # stessa radice non si tentano piu' fino ad Aggiorna.
+    import contatore as modulo_contatore
+
+    monkeypatch.setattr(ricerca, "ATTESA_IN_RETE", 0.3)
+    monkeypatch.setattr(modulo_contatore, "in_rete", lambda percorso: percorso.startswith(RETE))
+
+    def lettura(cartella, rilascio, al_passo):
+        if cartella == RETE:
+            return [_sotto("A"), _sotto("B")], []
+        if cartella == _sotto("A"):
+            return [], [_sotto("A", "uno.mp3")]
+        return _tace(cartella, rilascio, al_passo)
+
+    contenuto_finto["lettura"] = lettura
+    conta = modulo_contatore.Contatore()
+    inizio = time.monotonic()
+    conta.chiedi([RETE])
+    conta.aspetta(10)
+    assert time.monotonic() - inizio < 5
+    assert conta.files(RETE) == [_sotto("A", "uno.mp3")] and RETE in conta.parziali
+    assert os.path.splitdrive(RETE)[0].lower() in conta.mute
+    letture = len(contenuto_finto["fili"])
+    conta.chiedi([_sotto("B")])
+    conta.aspetta(10)
+    assert len(contenuto_finto["fili"]) == letture and conta.files(_sotto("B")) == [] and _sotto("B") in conta.parziali
+    conta.dimentica_tutto()
+    assert not conta.mute and not conta.parziali

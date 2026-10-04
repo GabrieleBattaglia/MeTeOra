@@ -1,6 +1,6 @@
 # MeTeOra, il contatore delle cartelle: quanti file suonabili ha una cartella, sottocartelle comprese.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la 1.22.0, dal collaudo della 1.20.0. Nella 1.34.6 le letture rinfrescate e Aggiorna su Questo PC. Nella 1.77.0 la cartella cambiata, dopo il cestino.
+# 30/09/2026: nasce con la 1.22.0, dal collaudo della 1.20.0. Nella 1.34.6 le letture rinfrescate e Aggiorna su Questo PC. Nella 1.77.0 la cartella cambiata, dopo il cestino. Nella 1.77.1 la rete letta con la protezione della ricerca.
 
 """Il conto dei file di una cartella, con tutto cio' che ha sotto.
 
@@ -10,13 +10,21 @@ ogni sottocartella: lo fa un filo a parte. Ogni cartella del disco si legge
 una volta sola per sessione, e il conto di una cartella si ricava da quelli
 delle sue sottocartelle. Chi aspetta viene avvisato al massimo una volta al
 secondo e alla fine; lo schedario riceve i file contati, per le durate.
+In rete ogni cartella si legge con la lettura protetta della ricerca: il
+Samba dell'Iliadbox, percorso tutto, dopo circa 17 mila cartelle lascia
+appesa una lettura, e il contatore restava fermo per il resto della
+sessione, senza piu' contare nemmeno i dischi del PC. Una condivisione che
+non risponde finisce in mute e non si legge piu' fino ad Aggiorna; i conti
+che la comprendono sono parziali (1.77.1).
 """
 
+import os
 import queue
 import threading
 import time
 
 import questo_pc
+from ricerca import NonRisponde, in_rete, leggi_in_rete
 
 INTERVALLO_DEGLI_AVVISI = 1.0
 
@@ -37,6 +45,12 @@ class Contatore:
         # mentre una di loro cambiava si rifa', invece di salvare quello
         # vecchio (1.77.0).
         self._cambiate = []
+        # Le radici di rete, come \\server\cartella o Z:, che non hanno
+        # risposto: non si leggono piu' fino ad Aggiorna. E le cartelle il cui
+        # conto ne ha saltato una parte.
+        self.mute = set()
+        self.parziali = set()
+        self._parziale = False
 
     def files(self, cartella):
         """I file suonabili della cartella e delle sue sottocartelle, o None
@@ -69,6 +83,9 @@ class Contatore:
             for mappa in (self.conti, self._letture):
                 for c in [c for c in mappa if legate(c)]:
                     del mappa[c]
+            self.parziali = {c for c in self.parziali if not legate(c)}
+            # Aggiorna su una cartella di rete la riprova.
+            self.mute.discard(_radice(cartella))
 
     def cambiata(self, cartella):
         """La cartella ha perso qualcosa, per esempio un file mandato nel
@@ -90,6 +107,8 @@ class Contatore:
         with self._lucchetto:
             self.conti.clear()
             self._letture.clear()
+            self.mute.clear()
+            self.parziali.clear()
 
     def rinfresca(self, cartella, lettura):
         """La cartella e' stata appena letta da chi la mostra: se la lettura
@@ -110,7 +129,17 @@ class Contatore:
     def _lettura(self, cartella):
         if cartella not in self._letture:
             try:
-                self._letture[cartella] = questo_pc.contenuto(cartella)
+                if in_rete(cartella):
+                    if _radice(cartella) in self.mute:
+                        raise NonRisponde(cartella)
+                    self._letture[cartella] = leggi_in_rete(cartella, fermo=lambda: self._fermo)
+                else:
+                    self._letture[cartella] = questo_pc.contenuto(cartella)
+            except NonRisponde:
+                # Non si tiene: Aggiorna, dopo, la riprova.
+                self.mute.add(_radice(cartella))
+                self._parziale = True
+                return [], []
             except OSError:
                 self._letture[cartella] = ([], [])
         return self._letture[cartella]
@@ -144,6 +173,7 @@ class Contatore:
                 break
             with self._lucchetto:
                 visti = len(self._cambiate)
+            self._parziale = False
             files = self._conta(cartella)
             if self._fermo:
                 break
@@ -154,6 +184,10 @@ class Contatore:
                     self._coda.put(cartella)
                     continue
                 self.conti[cartella] = files
+                if self._parziale:
+                    self.parziali.add(cartella)
+                else:
+                    self.parziali.discard(cartella)
                 self._in_coda.discard(cartella)
                 if self._coda.empty():
                     self._cambiate.clear()
@@ -174,3 +208,8 @@ class Contatore:
         """Per le prove."""
         if self._filo is not None:
             self._filo.join(timeout=secondi)
+
+
+def _radice(cartella):
+    """La radice di un percorso, come \\\\server\\cartella o E:, minuscola."""
+    return os.path.splitdrive(cartella)[0].lower()

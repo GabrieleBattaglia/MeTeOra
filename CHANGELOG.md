@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.77.1] - 2026-10-04
+
+- Il contatore delle cartelle legge la rete con la protezione della ricerca: quindici secondi al massimo senza che arrivi niente, poi la lettura si annulla in un filo a parte e il percorso si salta fino ad Aggiorna. Prima, aprendo la radice dell'Iliadbox in Questa rete, il contatore entrava nei backup, si piantava dopo circa 17 mila cartelle e restava fermo fino alla chiusura, e nessuna cartella, nemmeno dei dischi del PC, mostrava più i suoi conti. Un conto che ha saltato qualcosa lo dice l'etichetta, e la cartella non sparisce.
+- Anche l'apertura di un ramo di rete legge con un tempo massimo, otto secondi, e un ramo di un percorso che si è già fermato dice subito che non risponde. Prima si controllava solo il primo livello di Questa rete, e una sottocartella poteva fermare la finestra.
+
 ## [1.77.0] - 2026-10-04
 
 - F11 su un contenitore ne scrive i dettagli nella console, una informazione per riga, con un suono nuovo. Su una cartella: i file da suonare e quanto occupano, i tipi, la durata, il più lungo e il più corto, le sottocartelle dirette e in tutto, tutti i file con la dimensione, le date, il file cambiato per ultimo, gli attributi. Su un'unità prima lo spazio: capacità, libero e occupato con la percentuale, nome del volume, tipo e file system. Su Questo PC lo spazio di ogni unità e in tutto. Su una playlist, i Preferiti, i Risultati e i loro rami: brani, spazio sul disco, tipi, durata, saltati, mancanti sul disco, il filtro; sul ramo Playlist una riga per playlist. I conti si fanno in sottofondo, e un altro F11 interrompe quello di prima. Nei menu dei contenitori c'è anche la voce Leggi i dettagli. Chiesto da Gabriele.

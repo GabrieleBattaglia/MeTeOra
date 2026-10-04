@@ -4547,3 +4547,25 @@ def test_i_dettagli_del_menu_e_quelli_in_ritardo(finestra, monkeypatch, suoni_an
     finestra._dettagli_attesi = None
     al_termine(lavoro())
     assert len(finestra._righe) == righe_prima
+
+
+def test_le_cartelle_di_rete_che_non_rispondono(finestra, monkeypatch, suoni_annotati, tmp_path):
+    # 1.77.1: un conto parziale lo dice l'etichetta, e la cartella non
+    # sparisce; un ramo di una radice muta non si apre, e lo dice.
+    (tmp_path / "Rete" / "Muta").mkdir(parents=True)
+    finestra.albero.Expand(finestra.nodo_pc)
+    nodo = finestra.albero.AppendItem(finestra.nodo_pc, "Muta", data={"tipo": "cartella", "percorso": str(tmp_path / "Rete" / "Muta"), "caricato": False})
+    finestra.contatore.conti[str(tmp_path / "Rete" / "Muta")] = []
+    finestra.contatore.parziali.add(str(tmp_path / "Rete" / "Muta"))
+    finestra._aggiorna_cartelle()
+    assert finestra.albero.GetItemText(nodo) == "Muta (la rete non risponde)"
+    finestra.contatore.conti[str(tmp_path / "Rete" / "Muta")] = [str(tmp_path / "a.mp3")]
+    finestra._aggiorna_cartelle()
+    assert finestra.albero.GetItemText(nodo) == "Muta, almeno 1 file: la rete non risponde del tutto"
+    monkeypatch.setattr(modulo, "in_rete", lambda percorso: True)
+    finestra.contatore.mute.add(os.path.splitdrive(str(tmp_path))[0].lower())
+    figlio = finestra.albero.AppendItem(finestra.nodo_pc, "Altra", data={"tipo": "cartella", "percorso": str(tmp_path / "Rete"), "caricato": False})
+    finestra.albero.SetItemHasChildren(figlio, True)
+    finestra.albero.Expand(figlio)
+    assert suoni_annotati[-1] == "errore" and _ultima(finestra).startswith(f"{tmp_path / 'Rete'} non risponde: ")
+    assert not list(finestra._figli(figlio))
