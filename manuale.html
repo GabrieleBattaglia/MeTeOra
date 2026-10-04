@@ -248,6 +248,12 @@ kbd {
 <li><a href="#altri-errori">Altri messaggi d'errore</a></li>
 <li><a href="#esempi-problemi">Esempi</a></li>
 </ul></li>
+<li><a href="#licenze">Licenze e crediti</a>
+<ul>
+<li><a href="#licenza-meteora">La licenza di MeTeOra</a></li>
+<li><a href="#componenti">I componenti di altri autori</a></li>
+<li><a href="#sorgenti">Il codice sorgente</a></li>
+</ul></li>
 </ul>
 </nav>
 <h2 id="guida-rapida">Guida rapida</h2>
@@ -557,7 +563,7 @@ kbd {
 <h3 id="manuale-e-guida">Il manuale, la guida rapida, le novità e i crediti</h3>
 <p>F1 apre questo manuale nel browser predefinito di Windows. È fatto per la lettura con i titoli: con NVDA, in modalità navigazione, H porta al titolo seguente e Maiuscolo con H al precedente, il 2 ai capitoli, il 3 alle loro sezioni e il 4 alle sottosezioni; in cima c'è l'indice, con un collegamento per ogni capitolo e sezione.</p>
 <p>F12 scrive nella console la guida rapida, il primo capitolo di questo manuale: tutti i tasti, divisi per aree, i comandi della ricerca e del filtro e i codici dei colori, una riga per tasto. Porta il fuoco nella console con il cursore sulla prima riga, così non ti ricordi un tasto, premi F12, scorri e lo trovi. La guida resta intera anche se è più lunga delle righe che la console tiene.</p>
-<p>F2 scrive nella console le novità di ogni versione, dalla più recente, ciascuna introdotta da una riga come Versione 1.71.0 del 2026-10-03. F3 scrive i crediti: la versione, gli autori, le librerie su cui MeTeOra si regge e la licenza. Come F12, ci portano il fuoco con il cursore sulla prima riga. Se il file del manuale o delle novità non si legge, la console lo dice con il suono dell'errore.</p>
+<p>F2 scrive nella console le novità di ogni versione, dalla più recente, ciascuna introdotta da una riga come Versione 1.71.0 del 2026-10-03. F3 scrive i crediti: la versione, gli autori, la licenza di MeTeOra, dove sono i testi delle licenze e i sorgenti, e le librerie su cui MeTeOra si regge, con le loro licenze; il capitolo Licenze e crediti dice di più. Come F12, ci portano il fuoco con il cursore sulla prima riga. Se il file del manuale o delle novità non si legge, la console lo dice con il suono dell'errore.</p>
 <h3 id="avvio">L'avvio</h3>
 <p>MeTeOra si apre a tutta finestra, con il fuoco nella plancia, sui Preferiti, e un suono. La prima riga della console dice la versione e la data, e ricorda F1, F12 e F7. Se la velocità o il tono non sono quelli normali, la riga dopo lo dice, con il tasto che li riporta al normale. Se il file delle playlist, delle impostazioni o dei marker non si legge, o la scheda audio scelta non c'è, la console lo dice con il suono dell'errore: il capitolo Quando qualcosa va storto spiega cosa succede.</p>
 <p>Alla riapertura ritrovi, in pausa, il brano e il punto a cui eri all'uscita, con la selezione della plancia su di lui, e la console dice Riprendo da dove eri, con il percorso e il tempo. MeTeOra ritrova anche la lista da cui suonava: la playlist, i Preferiti, la cartella, o la cartella suonata con tutte le sottocartelle, così Z, B e l'avanzamento continuano lì; se la lista non c'è più, il brano resta da solo, come un file aperto con Apri file. X riparte dal punto, e se è un video apre anche la sua finestra; fino ad allora il fuoco resta nella plancia. Se il file non c'è più, la console dice Non trovo più, con il suo percorso, che suonava l'ultima volta.</p>
@@ -1237,7 +1243,7 @@ kbd {
 <ul>
 <li>Testo del karaoke: per riga, il modo di partenza, o per strofa, dove il file le segna, come nei kar e nei LRC con le righe vuote fra le strofe; dove non le segna si va per riga. Mai per parola o per sillaba.</li>
 <li>Anticipo del karaoke: quanti millesimi di secondo prima del canto arriva il testo, da 0 a 10000, per avere il tempo di leggerlo; di partenza 0.</li>
-<li>Dove vanno sottotitoli e karaoke: alla sintesi e al braille, solo alla sintesi o solo al braille. Vale anche per i sottotitoli dei video. Il braille arriva con NVDA, JAWS e System Access; con le altre sintesi, voce di Windows compresa, solo al braille vuol dire solo nella console.</li>
+<li>Dove vanno sottotitoli e karaoke: alla sintesi e al braille, solo alla sintesi o solo al braille. Vale anche per i sottotitoli dei video. Il braille arriva con NVDA e JAWS; con la voce di Windows solo al braille vuol dire solo nella console.</li>
 </ul>
 <p>Cambiando il modo o l'anticipo, il testo del brano in corso si rifà subito: la riga dopo arriva già con il modo e l'anticipo nuovi.</p>
 <h3 id="braille-a-blocchi">La barra braille a blocchi</h3>
@@ -1298,9 +1304,9 @@ kbd {
 <h4>Sottotitoli impressi</h4>
 <p>Invio apre una lista con i due modi: letti al volo, mentre il video suona, con circa mezzo secondo di ritardo, il modo di partenza; oppure letti prima, con una passata che salva accanto al video un file usato le volte dopo. Il capitolo Il video, alla sezione I sottotitoli fatti di immagini, li spiega.</p>
 <h4>Sintesi di sottotitoli e karaoke</h4>
-<p>Invio apre una lista con l'automatica, che usa lo screen reader attivo e altrimenti la voce di Windows, e le sintesi che si possono usare adesso, fra NVDA, JAWS, ZDSR, Dolphin, System Access, PC-Talker e la voce di Windows, SAPI5. Una sintesi scelta prima che adesso non risponde resta in fondo alla lista, e lo dice. La riga dice quale usa adesso l'automatica.</p>
+<p>Invio apre una lista con l'automatica, che usa lo screen reader attivo e altrimenti la voce di Windows, e le sintesi che si possono usare adesso, fra NVDA, JAWS e la voce di Windows, SAPI5. Una sintesi scelta prima che adesso non risponde resta in fondo alla lista, e lo dice. La riga dice quale usa adesso l'automatica.</p>
 <h4>Dove vanno sottotitoli e karaoke</h4>
-<p>Invio apre una lista: alla sintesi e al braille, il modo di partenza, solo alla sintesi, o solo al braille. Vale per i sottotitoli dei video, per quelli letti con il riconoscimento dei caratteri e per il testo del karaoke. Il braille arriva con NVDA, JAWS e System Access; con le altre sintesi, voce di Windows compresa, solo al braille vuol dire solo nella console, e la console lo dice quando scegli.</p>
+<p>Invio apre una lista: alla sintesi e al braille, il modo di partenza, solo alla sintesi, o solo al braille. Vale per i sottotitoli dei video, per quelli letti con il riconoscimento dei caratteri e per il testo del karaoke. Il braille arriva con NVDA e JAWS; con la voce di Windows solo al braille vuol dire solo nella console, e la console lo dice quando scegli.</p>
 <h4>Testo del karaoke</h4>
 <p>Invio apre una lista: per riga, il modo di partenza, o per strofa, dove il file le segna; altrimenti per riga. Il capitolo Il karaoke spiega tutto.</p>
 <h4>Celle della barra braille</h4>
@@ -1403,6 +1409,7 @@ kbd {
 <li>lib: le librerie che suonano, fra cui libmpv-2.dll per quasi tutti i formati e sidshim.dll per i SID. Senza queste due MeTeOra non parte.</li>
 <li>fluidsynth: FluidSynth, scaricato al primo MIDI.</li>
 <li>banchi: i banchi di suoni scaricati, come FluidR3 GM.</li>
+<li>licenze: i testi delle licenze dei componenti, con LEGGIMI.txt e SORGENTI.txt; accanto c'è il file LICENSE, la licenza di MeTeOra. Il capitolo Licenze e crediti spiega.</li>
 </ul>
 <h2 id="problemi">Quando qualcosa va storto</h2>
 <h3 id="problema-interno">Problema interno</h3>
@@ -1435,5 +1442,27 @@ kbd {
 <li>Premi Maiuscolo con Fine; se la riga del problema va a capo, continua con Maiuscolo con freccia giù e Maiuscolo con Fine finché la selezione arriva all'ora in fondo alla riga. Poi Ctrl con C la copia; incollala nel messaggio per chi sviluppa.</li>
 <li>Oppure apri le impostazioni, scendi fino a Salva console e premi Invio: la console dice il nome del file scritto nella cartella del programma, da allegare al messaggio.</li>
 </ol>
+<h2 id="licenze">Licenze e crediti</h2>
+<h3 id="licenza-meteora">La licenza di MeTeOra</h3>
+<p>MeTeOra è copyright 2026 di Gabriele Battaglia (IZ4APU). È software libero: puoi ridistribuirlo e modificarlo secondo la GNU General Public License, versione 3 o, a tua scelta, qualunque versione successiva. È distribuito nella speranza che sia utile, ma senza alcuna garanzia, nemmeno quella implicita di commerciabilità o di idoneità a uno scopo particolare. Il testo completo della licenza è nel file LICENSE, accanto al programma. F3 scrive nella console i crediti, con la licenza e i componenti.</p>
+<h3 id="componenti">I componenti di altri autori</h3>
+<p>MeTeOra si regge su librerie libere di altri autori. Ognuna ha la sua licenza, il cui testo sta nella cartella licenze accanto al programma; il file LEGGIMI.txt di quella cartella le elenca tutte, con la versione esatta.</p>
+<ul>
+<li>libmpv, del progetto mpv, con FFmpeg, libopenmpt e le altre librerie della build di shinchiro: la riproduzione. GPL 3 o successiva.</li>
+<li>libsidplayfp, con l'emulazione reSIDfp: i SID del Commodore 64. GPL 2 o successiva. Le durate dei SID vengono dal database Songlengths della High Voltage SID Collection.</li>
+<li>libgme, Game Music Emu: la musica delle console. LGPL 2.1 o successiva.</li>
+<li>FluidSynth e libsndfile: i MIDI. LGPL 2.1 o successiva. Non sono nel pacchetto: MeTeOra li scarica dal sito di FluidSynth al primo MIDI. Il banco di suoni FluidR3 GM, di Frank Wen, ha licenza MIT e si scarica solo se lo chiedi.</li>
+<li>wxPython e wxWidgets: l'interfaccia. wxWindows Library Licence.</li>
+<li>accessible_output2, licenza MIT, con il client di controllo di NVDA, LGPL 2.1: la sintesi e il braille dello screen reader.</li>
+<li>mutagen, GPL 2 o successiva: durate e tag dei file audio. python-mpv, GPL 2 o successiva: il collegamento con libmpv.</li>
+<li>I pacchetti winrt, licenza MIT, e Pillow: il riconoscimento dei caratteri di Windows.</li>
+<li>numpy, scipy e sounddevice su PortAudio: i calcoli e gli effetti sonori di Acusticator, della libreria GBUtils di Gabriele, GPL 3.</li>
+<li>requests, con i suoi pacchetti: gli scaricamenti e l'aggiornamento automatico. Apache 2.0.</li>
+<li>Python, della Python Software Foundation, e PyInstaller, che crea il pacchetto.</li>
+</ul>
+<p>Questo software si basa in parte sul lavoro dell'Independent JPEG Group. Parti di questo software sono copyright The FreeType Project (www.freetype.org). Tutti i diritti riservati.</p>
+<p>Fra le sintesi non ci sono ZDSR, Dolphin, System Access e PC-Talker: le loro librerie non sono libere e non danno il permesso di ridistribuirle, quindi MeTeOra non le porta con sé.</p>
+<h3 id="sorgenti">Il codice sorgente</h3>
+<p>Il codice sorgente di MeTeOra è su GitHub, all'indirizzo https://github.com/GabrieleBattaglia/MeTeOra, e quello di GBUtils all'indirizzo https://github.com/GabrieleBattaglia/GBUtils. Il file SORGENTI.txt della cartella licenze dice, per ogni libreria inclusa, la versione esatta e dove trovarne il codice sorgente. Se un indirizzo non fosse più raggiungibile, chiedilo con una segnalazione su GitHub, nella pagina Issues di MeTeOra.</p>
 </body>
 </html>

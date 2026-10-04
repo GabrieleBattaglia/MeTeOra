@@ -1,6 +1,6 @@
 # MeTeOra, la sintesi dei sottotitoli: gli screen reader e la voce di Windows, con accessible_output2.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/10/2026: nasce con la tappa 7, per i sottotitoli letti. Nella 1.82.0 dove vanno i testi, alla voce, al braille o a tutti e due, chiamati uno per uno. Nella 1.83.3 la voce di Windows aperta da MeTeOra quando accessible_output2 non ci riesce.
+# 03/10/2026: nasce con la tappa 7, per i sottotitoli letti. Nella 1.82.0 dove vanno i testi, alla voce, al braille o a tutti e due, chiamati uno per uno. Nella 1.83.3 la voce di Windows aperta da MeTeOra quando accessible_output2 non ci riesce. Nella 1.85.0 fuori ZDSR, Dolphin, System Access e PC-Talker.
 
 """Le uscite a cui MeTeOra manda i sottotitoli letti (tappa 7).
 
@@ -18,13 +18,13 @@ import importlib
 AUTOMATICA = "automatica"
 # Le uscite, nell'ordine della scelta automatica: chiave salvata nelle
 # impostazioni, (modulo di accessible_output2, classe, nome da leggere).
+# ZDSR, Dolphin, System Access e PC-Talker non ci sono piu' (1.85.0): le loro
+# DLL sono proprietarie, senza un permesso di ridistribuirle, e restano fuori
+# dal pacchetto; Dolphin e System Access, poi, hanno solo DLL a 32 bit, che
+# MeTeOra a 64 bit non potrebbe comunque caricare (decisione di Gabriele).
 USCITE = {
     "nvda": ("nvda", "NVDA", "NVDA"),
     "jaws": ("jaws", "Jaws", "JAWS"),
-    "zdsr": ("zdsr", "ZDSR", "ZDSR"),
-    "dolphin": ("dolphin", "Dolphin", "Dolphin"),
-    "system_access": ("system_access", "SystemAccess", "System Access"),
-    "pc_talker": ("pc_talker", "PCTalker", "PC-Talker"),
     "sapi5": ("sapi5", "SAPI5", "la voce di Windows, SAPI5"),
 }
 VOCE_DI_SISTEMA = "sapi5"
@@ -33,7 +33,7 @@ VOCE_DI_SISTEMA = "sapi5"
 DESTINAZIONI = {"entrambi": "alla sintesi e al braille", "sintesi": "solo alla sintesi", "braille": "solo al braille"}
 # Le uscite che hanno il braille, in accessible_output2: con le altre il
 # braille non arriva.
-CON_IL_BRAILLE = frozenset({"nvda", "jaws", "system_access"})
+CON_IL_BRAILLE = frozenset({"nvda", "jaws"})
 
 
 class _VoceDiWindows:

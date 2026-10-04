@@ -5007,7 +5007,7 @@ def test_la_destinazione_dice_se_il_braille_non_arriva(finestra, monkeypatch, su
     monkeypatch.setattr(modulo, "FinestraScelta", _SceltaFinta(2))
     finestra._cambia_impostazione("destinazione", _ListaFinta())
     assert _ultima(finestra) == ("Sottotitoli e karaoke ora vanno solo al braille. Con la voce di Windows, SAPI5, il braille non arriva: "
-        "ce l'hanno NVDA, JAWS e System Access.")
+        "ce l'hanno NVDA e JAWS.")
     monkeypatch.setattr(modulo, "FinestraScelta", _SceltaFinta(1))
     finestra._cambia_impostazione("destinazione", _ListaFinta())
     assert _ultima(finestra) == "Sottotitoli e karaoke ora vanno solo alla sintesi."
@@ -5222,3 +5222,21 @@ def test_dopo_l_aggiornamento_la_console_lo_dice(app, tmp_path):
     finally:
         g.Close(force=True)
         g.Destroy()
+
+
+def test_i_crediti_dicono_licenza_garanzia_e_sorgenti(finestra):
+    # 1.85.0: la GPL 3 chiede nell'interfaccia il copyright, la licenza, la garanzia assente e dove leggere la licenza.
+    finestra._crediti()
+    testo = "\n".join(_senza_ora(r) for r in finestra._righe)
+    assert "Copyright (C) 2026 Gabriele Battaglia (IZ4APU)." in testo
+    assert "GNU General Public License, versione 3 o, a tua scelta, qualunque versione successiva. È distribuito senza alcuna garanzia." in testo
+    assert "nel file LICENSE accanto al programma" in testo and "licenze\\SORGENTI.txt" in testo
+    assert "Licenza: GPL 3." not in testo
+
+
+def test_restano_le_uscite_libere():
+    # 1.85.0: ZDSR, Dolphin, System Access e PC-Talker hanno DLL proprietarie, fuori dal pacchetto.
+    import sintesi
+
+    assert list(sintesi.USCITE) == ["nvda", "jaws", "sapi5"]
+    assert {"nvda", "jaws"} == sintesi.CON_IL_BRAILLE

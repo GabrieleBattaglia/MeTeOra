@@ -34,4 +34,4 @@ I prototipi della cartella `prototipi` si avviano da lì dentro, per esempio `py
 
 ## Licenza
 
-GPL 3. libsidplayfp è distribuita sotto GPL, e MeTeOra la usa; FluidSynth e libgme sono sotto LGPL 2.1.
+MeTeOra è software libero sotto la GNU General Public License, versione 3 o, a tua scelta, qualunque versione successiva (GPL-3.0-or-later): il testo è in `LICENSE`. La libmpv che porta con sé è una build GPL 3; libsidplayfp e mutagen sono GPL 2 o successiva, libgme e FluidSynth LGPL 2.1 o successiva. Le licenze di tutti i componenti, e dove trovarne il codice sorgente esatto, sono nella cartella `licenze`, che si rifà con `python strumenti/raccogli_licenze.py` quando cambia una libreria.

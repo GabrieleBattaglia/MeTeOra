@@ -1,0 +1,44 @@
+Il codice sorgente dei componenti di MeTeOra 1.85.0.
+Il codice sorgente corrispondente di ogni componente incluso nel pacchetto si trova agli indirizzi qui sotto, alla versione esatta. Se uno non fosse più raggiungibile, chiedilo con una segnalazione su https://github.com/GabrieleBattaglia/MeTeOra/issues e lo riceverai.
+MeTeOra 1.85.0, con sidshim.dll e lo script che prepara le librerie (strumenti\prepara_ambiente.py): https://github.com/GabrieleBattaglia/MeTeOra, alla release della versione 1.85.0.
+GBUtils V196: https://github.com/GabrieleBattaglia/GBUtils/tree/fb098834acbf2a5b6d86571cfb2ea1fe7b2f98e2.
+libmpv-2.dll, build 20260928 di shinchiro, impronta SHA-256 0d5b9dbecb73e179ef39dc94314ff8905fab926a80f8d60a2367d824b7254e2e:
+mpv: https://github.com/mpv-player/mpv/tree/e470f8986e
+FFmpeg: https://github.com/FFmpeg/FFmpeg/tree/939c2c733
+Gli script della build, con l'elenco e la provenienza di ogni libreria inclusa (cartella packages): https://github.com/shinchiro/mpv-winbuild-cmake/tree/05a60b3cfd04e3e3b89918f4a27f3dde2935dff2
+La build: https://github.com/shinchiro/mpv-winbuild-cmake/releases/tag/20260928
+libsidplayfp 2.16.1-1: https://repo.msys2.org/mingw/sources/mingw-w64-libsidplayfp-2.16.1-1.src.tar.zst
+libgcrypt 1.12.4-1: https://repo.msys2.org/mingw/sources/mingw-w64-libgcrypt-1.12.4-1.src.tar.zst
+libgpg-error 1.61-1: https://repo.msys2.org/mingw/sources/mingw-w64-libgpg-error-1.61-1.src.tar.zst
+libusb 1.0.30-1: https://repo.msys2.org/mingw/sources/mingw-w64-libusb-1.0.30-1.src.tar.zst
+libgme 0.6.5-2: https://repo.msys2.org/mingw/sources/mingw-w64-libgme-0.6.5-2.src.tar.zst
+zlib 1.3.2-2: https://repo.msys2.org/mingw/sources/mingw-w64-zlib-1.3.2-2.src.tar.zst
+libgcc 16.2.0-4: https://repo.msys2.org/mingw/sources/mingw-w64-gcc-16.2.0-4.src.tar.zst
+libstdc++ 16.2.0-4: https://repo.msys2.org/mingw/sources/mingw-w64-gcc-16.2.0-4.src.tar.zst
+libwinpthread 14.0.0.r426.g4564ee4b5-1: https://repo.msys2.org/mingw/sources/mingw-w64-winpthreads-14.0.0.r426.g4564ee4b5-1.src.tar.zst
+nvdaControllerClient64.dll, impronta SHA-256 41c1f5df5997e798fcfbf7c8f2589de811e768b069a60710600cf57cb23a0b09: https://github.com/nvaccess/nvda/tree/master/extras/controllerClient
+Python 3.14.5: https://www.python.org/downloads/release/python-3145/
+python-mpv 1.0.8: https://pypi.org/project/python-mpv/1.0.8/#files
+mutagen 1.48.1: https://pypi.org/project/mutagen/1.48.1/#files
+wxPython 4.3.1: https://pypi.org/project/wxPython/4.3.1/#files
+accessible_output2 0.17: https://pypi.org/project/accessible_output2/0.17/#files
+libloader 1.4.3: https://pypi.org/project/libloader/1.4.3/#files
+platform_utils 1.6.3: https://pypi.org/project/platform_utils/1.6.3/#files
+pywin32 312: https://pypi.org/project/pywin32/312/#files
+numpy 2.5.3: https://pypi.org/project/numpy/2.5.3/#files
+scipy 1.18.1: https://pypi.org/project/scipy/1.18.1/#files
+pillow 12.3.0: https://pypi.org/project/pillow/12.3.0/#files
+winrt-runtime 3.2.1: https://pypi.org/project/winrt-runtime/3.2.1/#files
+I moduli winrt e il testo della loro licenza: https://github.com/pywinrt/pywinrt
+sounddevice 0.5.6: https://pypi.org/project/sounddevice/0.5.6/#files
+cffi 2.1.1: https://pypi.org/project/cffi/2.1.1/#files
+pycparser 3.0: https://pypi.org/project/pycparser/3.0/#files
+requests 2.34.2: https://pypi.org/project/requests/2.34.2/#files
+urllib3 2.8.0: https://pypi.org/project/urllib3/2.8.0/#files
+idna 3.20: https://pypi.org/project/idna/3.20/#files
+charset_normalizer 3.5.2: https://pypi.org/project/charset_normalizer/3.5.2/#files
+certifi 2026.7.22: https://pypi.org/project/certifi/2026.7.22/#files
+platformdirs 4.12.2: https://pypi.org/project/platformdirs/4.12.2/#files
+typing_extensions 4.16.0: https://pypi.org/project/typing_extensions/4.16.0/#files
+pyinstaller 6.22.3: https://pypi.org/project/pyinstaller/6.22.3/#files
+FluidSynth: https://github.com/FluidSynth/fluidsynth; FluidR3 GM: https://github.com/pianobooster/fluid-soundfont

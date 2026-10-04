@@ -40,3 +40,7 @@ Lascia la finestra aperta due minuti senza rispondere: si chiude da sola, come c
 Aggiorna adesso: la console dice a che punto è lo scaricamento, poi una finestra dice che MeTeOra si chiude.
 Dopo l'OK MeTeOra si chiude senza l'invito al caffè e si riapre aggiornato.
 Al riavvio la console dice MeTeOra è stato aggiornato, dalla versione vecchia alla nuova; playlist, impostazioni e marker ci sono tutti.
+F3: i crediti dicono il copyright, la licenza GPL 3 o successiva, la garanzia assente, e dove sono il file LICENSE, la cartella licenze e i sorgenti.
+Nelle impostazioni, Sintesi di sottotitoli e karaoke: la lista ha l'automatica, NVDA, JAWS e la voce di Windows; niente ZDSR, Dolphin, System Access e PC-Talker.
+Nel pacchetto compilato, accanto a MeTeOra.exe: il file LICENSE e la cartella licenze, con LEGGIMI.txt e SORGENTI.txt che si leggono nel Blocco note.
+Nel manuale, il capitolo Licenze e crediti, in fondo, raggiungibile dall'indice.

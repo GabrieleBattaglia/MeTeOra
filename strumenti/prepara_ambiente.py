@@ -1,10 +1,16 @@
 # MeTeOra, preparazione dell'ambiente di sviluppo: scarica e compila le librerie native.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 29/09/2026: nasce con il repository. Nella 1.66.0 anche libgme, per la musica delle console.
+# 29/09/2026: nasce con il repository. Nella 1.66.0 anche libgme, per la musica delle console. Nella 1.85.0 la build di libmpv fissata.
 
 """Mette in lib/ le DLL che il repository non contiene.
 
-1. libmpv-2.dll: l'ultima build di shinchiro/mpv-winbuild-cmake da GitHub.
+1. libmpv-2.dll: la build MPV_BUILD di shinchiro/mpv-winbuild-cmake da
+   GitHub, con l'impronta dell'archivio controllata. E' fissata perche' gli
+   avvisi della cartella licenze nominano i sorgenti esatti di quella build
+   (1.85.0): per cambiarla si aggiornano qui la build, l'archivio, la sua
+   impronta e i tre commit, poi si rifa' la cartella licenze con
+   raccogli_licenze.py. shinchiro toglie le build vecchie: se questa sparisce,
+   va scelta la nuova.
 2. sidshim.dll: compilata da sidshim/sidshim.cpp con MSYS2 (UCRT64), insieme
    a libsidplayfp e alle altre DLL di cui ha bisogno.
 3. libgme.dll, per la musica delle console (tappa 8): dal pacchetto MSYS2
@@ -16,6 +22,7 @@ strumenti/msys64, che git ignora. Serve 7-Zip installato.
 Uso: python strumenti/prepara_ambiente.py [--solo-mpv | --solo-sid | --solo-gme]
 """
 
+import hashlib
 import json
 import os
 import re
@@ -31,6 +38,16 @@ SETTEZIP = r"C:\Program Files\7-Zip\7z.exe"
 MSYS2_URL = "https://github.com/msys2/msys2-installer/releases/download/nightly-x86_64/msys2-base-x86_64-latest.sfx.exe"
 PACCHETTI = ["mingw-w64-ucrt-x86_64-gcc", "mingw-w64-ucrt-x86_64-libsidplayfp", "mingw-w64-ucrt-x86_64-pkgconf"]
 PACCHETTO_GME = "mingw-w64-ucrt-x86_64-libgme"
+# La build di libmpv (1.85.0): il tag della release di shinchiro, l'archivio
+# e la sua impronta, come li da' GitHub; i commit di mpv e FFmpeg dentro la
+# DLL (mpv-version e ffmpeg-version), e quello degli script della build, dal
+# lavoro di GitHub che l'ha prodotta.
+MPV_BUILD = "20260928"
+MPV_ARCHIVIO = "mpv-dev-x86_64-20260928-git-e470f8986e.7z"
+MPV_IMPRONTA = "81795d759e01016f1550fd71651a1a5d59ab5c28ef31c0b6793224e9cff39459"
+MPV_COMMIT = "e470f8986e"
+FFMPEG_COMMIT = "939c2c733"
+WINBUILD_COMMIT = "05a60b3cfd04e3e3b89918f4a27f3dde2935dff2"
 
 
 def scarica(url, destinazione):
@@ -41,15 +58,21 @@ def scarica(url, destinazione):
 
 
 def prepara_mpv():
-    richiesta = urllib.request.Request("https://api.github.com/repos/shinchiro/mpv-winbuild-cmake/releases/latest", headers={"User-Agent": "MeTeOra"})
+    url = f"https://api.github.com/repos/shinchiro/mpv-winbuild-cmake/releases/tags/{MPV_BUILD}"
+    richiesta = urllib.request.Request(url, headers={"User-Agent": "MeTeOra"})
     with urllib.request.urlopen(richiesta) as risposta:  # noqa: S310
         rilascio = json.load(risposta)
-    asset = next(a for a in rilascio["assets"] if re.fullmatch(r"mpv-dev-x86_64-\d{8}-git-\w+\.7z", a["name"]))
+    asset = next((a for a in rilascio["assets"] if a["name"] == MPV_ARCHIVIO), None)
+    if asset is None:
+        sys.exit(f"La build {MPV_BUILD} di libmpv non ha piu' l'archivio {MPV_ARCHIVIO}: va scelta una build nuova.")
     with tempfile.TemporaryDirectory() as cartella:
         archivio = os.path.join(cartella, asset["name"])
         scarica(asset["browser_download_url"], archivio)
+        with open(archivio, "rb") as f:
+            if hashlib.sha256(f.read()).hexdigest() != MPV_IMPRONTA:
+                sys.exit(f"L'archivio {MPV_ARCHIVIO} non ha l'impronta attesa: non lo uso.")
         subprocess.run([SETTEZIP, "e", "-y", f"-o{LIB}", archivio, "libmpv-2.dll"], check=True, stdout=subprocess.DEVNULL)
-    print(f"libmpv-2.dll pronta, build {rilascio['tag_name']}", flush=True)
+    print(f"libmpv-2.dll pronta, build {MPV_BUILD}", flush=True)
 
 
 def trova_msys2():

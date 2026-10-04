@@ -2,6 +2,15 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.85.0] - 2026-10-04
+
+- Licenze e crediti, per la prima release: MeTeOra è GPL-3.0-or-later, la GNU General Public License versione 3 o, a scelta, successiva, come la libmpv che porta con sé (Gabriele). F3 ora dice il copyright, la licenza, la garanzia assente e dove sono i testi delle licenze e i sorgenti, e nomina la licenza di ogni componente.
+- La cartella licenze, accanto all'eseguibile insieme al file LICENSE: LEGGIMI.txt elenca ogni componente con la versione esatta e la licenza, SORGENTI.txt dice dove trovarne il codice sorgente esatto, e ci sono i testi delle licenze. La fa strumenti/raccogli_licenze.py, che controlla anche che le DLL di lib siano proprio quelle dei pacchetti che nomina.
+- Fra le sintesi non ci sono più ZDSR, Dolphin, System Access e PC-Talker: le loro DLL sono proprietarie, senza un permesso di ridistribuirle, e restano fuori dal pacchetto; Dolphin e System Access, poi, le hanno solo a 32 bit, che MeTeOra non può caricare. Il braille arriva con NVDA e JAWS. Chi aveva scelto una di quelle sintesi torna all'automatica.
+- Il pacchetto non porta più la DLL a 32 bit di NVDA, le varianti di PortAudio che MeTeOra non usa, né cinque pacchetti Python tirati dentro da import facoltativi o di prova: psutil, chardet, cryptography, setuptools e tomli.
+- strumenti/prepara_ambiente.py scarica la build 20260928 di libmpv, controllando l'impronta dell'archivio, e non più l'ultima: gli avvisi delle licenze nominano i sorgenti esatti di quella build.
+- Nuovo capitolo del manuale, Licenze e crediti.
+
 ## [1.84.0] - 2026-10-04
 
 - L'aggiornamento automatico, condizione di Gabriele per il primo rilascio: a ogni avvio del programma compilato MeTeOra controlla in sottofondo su GitHub se c'è una versione nuova, con l'auto updater di GBUtils, come Dadillo, Tornello e Terminal Beast. Dai sorgenti non controlla.

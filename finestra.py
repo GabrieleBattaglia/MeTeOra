@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura. Nella 1.83.1 Maiuscolo con F10 lascia chiuso Questo PC, e la plancia molto aperta non ferma piu' la finestra. Nella 1.83.2 F10 a fette, e i suoni delle aperture che non si sovrappongono. Nella 1.84.0 la proposta dell'aggiornamento, il suo avanzamento e la chiusura per aggiornarsi.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura. Nella 1.83.1 Maiuscolo con F10 lascia chiuso Questo PC, e la plancia molto aperta non ferma piu' la finestra. Nella 1.83.2 F10 a fette, e i suoni delle aperture che non si sovrappongono. Nella 1.84.0 la proposta dell'aggiornamento, il suo avanzamento e la chiusura per aggiornarsi. Nella 1.85.0 i crediti con la licenza e le licenze dei componenti.
 
 """La finestra di MeTeOra.
 
@@ -5809,7 +5809,7 @@ class Finestra(wx.Frame):
         frase = f"Sottotitoli e karaoke ora vanno {sintesi.DESTINAZIONI[chiave]}."
         effettiva = self._sintesi.scelta(self.impostazioni["sintesi"])
         if chiave != "sintesi" and effettiva is not None and effettiva not in sintesi.CON_IL_BRAILLE:
-            frase += f" Con {sintesi.nome(effettiva)}, il braille non arriva: ce l'hanno NVDA, JAWS e System Access."
+            frase += f" Con {sintesi.nome(effettiva)}, il braille non arriva: ce l'hanno NVDA e JAWS."
         return frase
 
     def _scegli_il_modo_del_karaoke(self, genitore):
@@ -6773,17 +6773,29 @@ class Finestra(wx.Frame):
             "Crediti di MeTeOra",
             f"MeTeOra {version.VERSION} del {version.DATE}.",
             f"Autori: {version.AUTHOR}.",
+            # La nota di copyright, la licenza, la garanzia assente e dove
+            # sono i testi: la GPL 3 li chiede nell'interfaccia (1.85.0).
+            "Copyright (C) 2026 Gabriele Battaglia (IZ4APU).",
+            "MeTeOra è software libero: puoi ridistribuirlo e modificarlo secondo la GNU General Public License, versione 3 o, a tua scelta, "
+            "qualunque versione successiva. È distribuito senza alcuna garanzia.",
+            "Il testo della licenza è nel file LICENSE accanto al programma; le licenze dei componenti sono nella cartella licenze, e il file "
+            "licenze\\SORGENTI.txt dice dove trovarne il codice sorgente. Quello di MeTeOra è su https://github.com/GabrieleBattaglia/MeTeOra.",
             "MeTeOra è formato da tre parole italiane, una dedica di Gabriele alla sua ragazza Ginevra.",
-            "Riproduzione: libmpv, dal progetto mpv, con FFmpeg e libopenmpt.",
-            "SID del Commodore 64: libsidplayfp, con l'emulazione reSIDfp.",
+            "Riproduzione: libmpv, del progetto mpv, con FFmpeg, libopenmpt e le altre librerie della build di shinchiro, GPL 3 o successiva.",
+            "SID del Commodore 64: libsidplayfp, con l'emulazione reSIDfp, GPL 2 o successiva.",
             "Durate dei SID: il database Songlengths della High Voltage SID Collection.",
-            "MIDI: FluidSynth, con il banco di suoni FluidR3 GM quando lo scarichi.",
-            "Musica delle console: libgme, Game Music Emu.",
-            "Sottotitoli letti: accessible_output2.",
-            "Effetti sonori: Acusticator, della libreria GBUtils di Gabriele.",
-            "Durate, lettura e scrittura dei tag dei file audio: mutagen.",
-            "Interfaccia: wxPython.",
-            "Licenza: GPL 3.",
+            "MIDI: FluidSynth e libsndfile, LGPL 2.1 o successiva, scaricati al primo MIDI; il banco di suoni FluidR3 GM di Frank Wen, "
+            "licenza MIT, quando lo scarichi.",
+            "Musica delle console: libgme, Game Music Emu, LGPL 2.1 o successiva.",
+            "Interfaccia: wxPython e wxWidgets, wxWindows Library Licence.",
+            "Sintesi e braille: accessible_output2, licenza MIT, con il client di controllo di NVDA, LGPL 2.1.",
+            "Riconoscimento dei caratteri: il motore di Windows con i pacchetti winrt, licenza MIT, e Pillow.",
+            "Durate, lettura e scrittura dei tag dei file audio: mutagen, GPL 2 o successiva. Collegamento con libmpv: python-mpv, "
+            "GPL 2 o successiva.",
+            "Effetti sonori: Acusticator, della libreria GBUtils di Gabriele, GPL 3, con numpy, scipy e sounddevice su PortAudio.",
+            "Python, della Python Software Foundation; pacchetto creato con PyInstaller.",
+            "Questo software si basa in parte sul lavoro dell'Independent JPEG Group.",
+            "Parti di questo software sono copyright The FreeType Project (www.freetype.org). Tutti i diritti riservati.",
         ]
         self._stampa("crediti", righe)
 

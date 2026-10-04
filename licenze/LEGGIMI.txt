@@ -1,0 +1,40 @@
+Le licenze dei componenti di MeTeOra 1.85.0.
+MeTeOra è copyright 2026 di Gabriele Battaglia (IZ4APU), software libero sotto la GNU General Public License, versione 3 o, a tua scelta, qualunque versione successiva (GPL-3.0-or-later), senza alcuna garanzia. Il testo è nel file LICENSE accanto al programma, e una copia in testi\GPL-3.0.txt.
+Qui sotto, un componente per riga: a che cosa serve, la versione, la licenza e dove sono i suoi testi in questa cartella. Il file SORGENTI.txt dice dove trovare il codice sorgente esatto di ognuno.
+MeTeOra 1.85.0, con sidshim.dll, il suo ponte verso libsidplayfp: GPL-3.0-or-later, testi\GPL-3.0.txt.
+GBUtils V196, la libreria di Gabriele, con gli effetti sonori di Acusticator: GPL-3.0, testi\GPL-3.0.txt.
+libmpv-2.dll, la riproduzione: mpv e470f8986e con FFmpeg 939c2c733, libopenmpt e le altre librerie della build 20260928 di shinchiro/mpv-winbuild-cmake: GPL-3.0-or-later nel suo insieme, testi\GPL-3.0.txt; mpv è GPL-2.0-or-later con parti LGPL-2.1-or-later, testi\GPL-2.0.txt e testi\LGPL-2.1.txt.
+libsidplayfp-6.dll, i SID del Commodore 64, con l'emulazione reSIDfp: libsidplayfp 2.16.1-1, GPL-2.0-or-later, libsidplayfp\COPYING.
+libgcrypt-20.dll, per libsidplayfp: libgcrypt 1.12.4-1, LGPL-2.1-or-later, libgcrypt\COPYING e libgcrypt\COPYING.LIB.
+libgpg-error-0.dll, per libgcrypt: libgpg-error 1.61-1, LGPL-2.1-or-later, libgpg-error\COPYING e libgpg-error\COPYING.LIB.
+libusb-1.0.dll, per libsidplayfp: libusb 1.0.30-1, LGPL-2.1-or-later, libusb\COPYING.
+libgme.dll, la musica delle console, Game Music Emu: libgme 0.6.5-2, LGPL-2.1-or-later, libgme\license.txt.
+zlib1.dll, per libgme: zlib 1.3.2-2, Zlib, zlib\LICENSE.
+libgcc_s_seh-1.dll, il runtime di GCC per sidshim e libsidplayfp: libgcc 16.2.0-4, GPL-3.0-or-later WITH GCC-exception-3.1, libgcc\COPYING.RUNTIME e libgcc\COPYING3.
+libstdc++-6.dll, il runtime C++ di GCC per sidshim e libsidplayfp: libstdc++ 16.2.0-4, GPL-3.0-or-later WITH GCC-exception-3.1, libstdc++\COPYING.RUNTIME e libstdc++\COPYING3.
+libwinpthread-1.dll, i thread di mingw-w64: libwinpthread 14.0.0.r426.g4564ee4b5-1, MIT AND BSD-3-Clause-Clear, libwinpthread\COPYING.
+nvdaControllerClient64.dll, il collegamento con NVDA, dentro accessible_output2: LGPL-2.1, testi\LGPL-2.1.txt.
+Python 3.14.5, della Python Software Foundation, con OpenSSL, libffi e le altre parti che contiene: PSF-2.0, python\LICENSE.txt, che elenca anche le licenze delle parti.
+python-mpv 1.0.8, il collegamento con libmpv: GPL-2.0-or-later OR LGPL-2.1-or-later, usato come GPL, python\python-mpv-1.0.8.
+mutagen 1.48.1, le durate e i tag dei file audio: GPL-2.0-or-later, python\mutagen-1.48.1.
+wxPython 4.3.1, l'interfaccia, con le DLL di wxWidgets: LGPL-2.0-or-later WITH WxWindows-exception-3.1, python\wxPython-4.3.1.
+accessible_output2 0.17, la sintesi e il braille degli screen reader: MIT, python\accessible_output2-0.17.
+libloader 1.4.3, il caricamento delle DLL di accessible_output2: MIT, python\libloader-1.4.3.
+platform_utils 1.6.3, le cartelle di sistema per accessible_output2: MIT, python\platform_utils-1.6.3.
+pywin32 312, le cartelle di rete e la voce di Windows: PSF-2.0, python\pywin32-312.
+numpy 2.5.3, i calcoli degli effetti sonori: BSD-3-Clause, con OpenBLAS e il runtime di GCC, python\numpy-2.5.3.
+scipy 1.18.1, la sintesi degli effetti sonori di Acusticator: BSD-3-Clause, con OpenBLAS e il runtime di GCC, python\scipy-1.18.1.
+pillow 12.3.0, le immagini del riconoscimento dei caratteri: MIT-CMU, python\pillow-12.3.0.
+winrt-runtime 3.2.1, con winrt-Windows.Foundation 3.2.1, winrt-Windows.Foundation.Collections 3.2.1, winrt-Windows.Globalization 3.2.1, winrt-Windows.Graphics.Imaging 3.2.1, winrt-Windows.Media.Ocr 3.2.1, winrt-Windows.Storage.Streams 3.2.1, il riconoscimento dei caratteri di Windows, con i moduli winrt: MIT, il testo nel repository del progetto, indicato in SORGENTI.txt.
+sounddevice 0.5.6, il suono degli effetti, con PortAudio: MIT, python\sounddevice-0.5.6.
+cffi 2.1.1, il collegamento di sounddevice con PortAudio: MIT-0, python\cffi-2.1.1.
+pycparser 3.0, per cffi: BSD-3-Clause, python\pycparser-3.0.
+requests 2.34.2, gli scaricamenti e l'aggiornamento automatico: Apache-2.0, python\requests-2.34.2.
+urllib3 2.8.0, per requests: MIT, python\urllib3-2.8.0.
+idna 3.20, per requests: BSD-3-Clause, python\idna-3.20.
+charset_normalizer 3.5.2, per requests: MIT, python\charset_normalizer-3.5.2.
+certifi 2026.7.22, i certificati per requests: MPL-2.0, python\certifi-2026.7.22.
+platformdirs 4.12.2, le cartelle di sistema: MIT, python\platformdirs-4.12.2.
+typing_extensions 4.16.0, per i pacchetti qui sopra: PSF-2.0, python\typing_extensions-4.16.0.
+pyinstaller 6.22.3, il pacchetto, con il suo avviatore: GPL-2.0-or-later WITH Bootloader-exception, python\pyinstaller-6.22.3.
+Non sono nel pacchetto, e MeTeOra li scarica solo quando servono: FluidSynth 2.6.1 con libsndfile, per i MIDI, LGPL-2.1-or-later, dal sito di FluidSynth; il banco di suoni FluidR3 GM di Frank Wen, licenza MIT, se lo chiedi. Le durate dei SID vengono dal database Songlengths della High Voltage SID Collection, che MeTeOra legge dalla tua copia.
