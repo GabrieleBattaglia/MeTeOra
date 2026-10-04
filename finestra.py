@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura. Nella 1.83.1 Maiuscolo con F10 lascia chiuso Questo PC, e la plancia molto aperta non ferma piu' la finestra.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura. Nella 1.83.1 Maiuscolo con F10 lascia chiuso Questo PC, e la plancia molto aperta non ferma piu' la finestra. Nella 1.83.2 F10 a fette, e i suoni delle aperture che non si sovrappongono.
 
 """La finestra di MeTeOra.
 
@@ -111,6 +111,9 @@ MASSIMO_DI_VOCI = 10000
 # secondo, e farne uno a ogni avviso del contatore e dello schedario fermava
 # la finestra (collaudo della 1.83.0).
 PAUSA_FRA_I_RINFRESCHI = 3
+# Le aperture in blocco, F10 e Maiuscolo con F10, dicono il loro inizio, con
+# il suono, solo se durano piu' di tanti secondi (1.83.2).
+RITARDO_DELL_AVVIO = 0.4
 # Quanti risultati della ricerca si mostrano alla volta.
 PAGINA_DEI_RISULTATI = 1000
 
@@ -778,7 +781,6 @@ class Finestra(wx.Frame):
         # cartelle vuote e quelle che non si leggono non suonano una per
         # una: si contano, e la fine lo dice (1.83.1).
         self._taciuti = None
-        self._ultimi_taciuti = ""
         self.marcatori = Marcatori(os.path.join(cartella_dati, FILE_MARCATORI))
         self.marcatori.carica()
         # Le playlist temporanee nate dalle cartelle di Questo PC, per cartella:
@@ -6421,28 +6423,67 @@ class Finestra(wx.Frame):
 
     def _apri_la_plancia(self):
         """Maiuscolo con F10 (Gabriele, 4 ottobre 2026): apre i Preferiti, i
-        Risultati e le playlist con tutto quello che hanno dentro, fino a
-        MASSIMO_DI_RAMI rami e MASSIMO_DI_VOCI voci. Questo PC e Questa rete
-        restano chiusi: aprire i dischi interi caricava decine di migliaia di
-        cartelle, contatore e schedario lavoravano per minuti, e la finestra
-        si fermava, con una cacofonia di suoni (collaudo della 1.83.0;
-        Gabriele ci rinuncia). Lavora un decimo di secondo alla volta, cosi'
-        la finestra risponde, con un suono all'inizio e uno alla fine, come
-        la ricerca; le voci vuote non suonano una per una, e un tasto
-        qualsiasi la ferma."""
-        segno = self._apertura_della_plancia = object()
+        Risultati e le playlist con tutto quello che hanno dentro. Questo PC e
+        Questa rete restano chiusi: aprire i dischi interi caricava decine di
+        migliaia di cartelle, contatore e schedario lavoravano per minuti, e
+        la finestra si fermava, con una cacofonia di suoni (collaudo della
+        1.83.0; Gabriele ci rinuncia)."""
         radice = self.albero.GetRootItem()
-        da_aprire = [v for v in self._figli(radice) if v not in (self.nodo_rete, self.nodo_pc) and self.albero.ItemHasChildren(v)]
-        aperti, voci = [0], [sum(1 for _v in self._tutte_le_voci())]
-        self._taciuti = {"vuote": 0, "illeggibili": 0}
-        self._riscontro("apri_la_plancia", "Apro tutta la plancia, tranne Questo PC e Questa rete: ci vuole un po', e un tasto qualsiasi mi ferma.")
+        rami = [v for v in self._figli(radice) if v not in (self.nodo_rete, self.nodo_pc) and self.albero.ItemHasChildren(v)]
 
-        def ancora():
-            return da_aprire and aperti[0] < MASSIMO_DI_RAMI and voci[0] < MASSIMO_DI_VOCI
+        def avvio():
+            self._riscontro("apri_la_plancia", "Apro tutta la plancia, tranne Questo PC e Questa rete: ci vuole un po', e un tasto qualsiasi mi ferma.")
+
+        def finito(aperti, voci, fermato, taciuti):
+            if fermato:
+                return "plancia_aperta", f"Aperti {aperti} rami, {voci} voci; mi fermo qui, gli altri restano chiusi.{taciuti}"
+            return "plancia_aperta", f"Aperta tutta la plancia, tranne Questo PC e Questa rete: {al_plurale(aperti, 'ramo', 'rami')}.{taciuti}"
+
+        self._apri_in_blocco(rami, avvio, finito)
+
+    def _apri_tutto(self):
+        """F10: apre la voce col fuoco e tutti i rami che ha dentro, a fette
+        come Maiuscolo con F10 (Gabriele, 1.83.2): sotto Questo PC ci sono
+        dischi interi, e tutto d'un fiato la finestra si fermava."""
+        voce = self._ramo_di_lavoro()
+        if voce is None:
+            self._riscontro("non_disponibile", "Qui non c'è niente da aprire.")
+            return
+        nome = self._nome_della_voce(voce)
+
+        def avvio():
+            self._riscontro("apri_la_plancia", f"Apro tutto dentro {nome}: ci vuole un po', e un tasto qualsiasi mi ferma.")
+
+        def finito(aperti, voci, fermato, taciuti):
+            if fermato:
+                return "apri_tutto", f"Aperti {aperti} rami, {voci} voci dentro {nome}; mi fermo qui, gli altri restano chiusi.{taciuti}"
+            return "apri_tutto", f"Aperto tutto dentro {nome}: {al_plurale(aperti, 'ramo', 'rami')}.{taciuti}"
+
+        self._apri_in_blocco([voce], avvio, finito)
+
+    def _apri_in_blocco(self, rami, avvio, finito):
+        """Apre i rami e tutto quello che hanno dentro, fino a MASSIMO_DI_RAMI
+        rami e MASSIMO_DI_VOCI voci, un decimo di secondo alla volta: la
+        finestra risponde, e un tasto qualsiasi ferma l'apertura. Le
+        cartelle vuote e quelle che non si leggono non suonano una per una:
+        la fine le conta. avvio() dice l'inizio, con il suo suono, solo se
+        il lavoro dura piu' di RITARDO_DELL_AVVIO secondi: quasi sempre
+        l'apertura e' istantanea, e i suoni di inizio e di fine si sarebbero
+        sovrapposti (Gabriele, 1.83.2); se e' suonato, quello di fine aspetta
+        che finisca. finito(aperti, voci, fermato, taciuti) da' (evento,
+        frase) della fine."""
+        segno = self._apertura_della_plancia = object()
+        da_aprire = list(rami)
+        aperti, voci, avviato = [0], [0], [False]
+        partenza = time.monotonic()
+        self._taciuti = {"vuote": 0, "illeggibili": 0}
 
         def passo():
             if segno is not self._apertura_della_plancia or self._chiusa:
                 return
+            if not avviato[0] and time.monotonic() - partenza >= RITARDO_DELL_AVVIO:
+                avviato[0] = True
+                avvio()
             fine = time.monotonic() + 0.1
             self._cedi.set()
             try:
@@ -6457,19 +6498,21 @@ class Finestra(wx.Frame):
                     da_aprire.extend(figli)
             finally:
                 self._cedi.clear()
-            if ancora():
+            if da_aprire and aperti[0] < MASSIMO_DI_RAMI and voci[0] < MASSIMO_DI_VOCI:
                 wx.CallLater(1, passo)
                 return
             self._apertura_della_plancia = None
-            taciuti = self._frase_dei_taciuti()
+            evento, frase = finito(aperti[0], voci[0], bool(da_aprire), self._frase_dei_taciuti())
             # Le cartelle rimaste senza niente da suonare spariscono adesso.
             self._aggiorna_cartelle()
-            if da_aprire:
-                self._riscontro("plancia_aperta", f"Aperti {aperti[0]} rami, {voci[0]} voci; mi fermo qui, gli altri restano chiusi.{taciuti}")
+            if avviato[0]:
+                self._riscontro_dopo(evento, frase)
             else:
-                self._riscontro("plancia_aperta", f"Aperta tutta la plancia, tranne Questo PC e Questa rete: {al_plurale(aperti[0], 'ramo', 'rami')}.{taciuti}")
+                self._riscontro(evento, frase)
 
-        wx.CallAfter(passo)
+        # La prima fetta subito: un ramo piccolo finisce qui, con il suo solo
+        # suono di fine.
+        passo()
 
     def _ferma_l_apertura(self):
         self._apertura_della_plancia = None
@@ -6489,47 +6532,28 @@ class Finestra(wx.Frame):
         return f" Trovate {' e '.join(parti)}." if parti else ""
 
     def _apri_ramo(self, voce, con_i_marker=True):
-        """Apre la voce e tutti i rami che ha dentro, caricandoli, fino a
-        MASSIMO_DI_RAMI. Torna (rami aperti, vero se si e' fermato prima).
-        Senza con_i_marker restano chiusi i brani che dentro hanno solo
-        marker: J e K aprono la playlist per suonarla, non per leggerli."""
+        """Apre la voce e tutti i rami che ha dentro, caricandoli, tutto
+        d'un fiato, fino a MASSIMO_DI_RAMI rami e MASSIMO_DI_VOCI voci: serve
+        a J e K, che aprono una playlist per suonarla. Torna (rami aperti,
+        vero se si e' fermato prima). Senza con_i_marker restano chiusi i
+        brani che dentro hanno solo marker."""
         aperti, voci = 0, 0
         da_aprire = [voce]
-        taciuti_prima, self._taciuti = self._taciuti, self._taciuti or {"vuote": 0, "illeggibili": 0}
-        try:
-            with wx.BusyCursor():
-                while da_aprire and aperti < MASSIMO_DI_RAMI and voci < MASSIMO_DI_VOCI:
-                    ramo = da_aprire.pop(0)
-                    if not self.albero.ItemHasChildren(ramo):
-                        continue
-                    dati = self._dati(ramo) or {}
-                    if not con_i_marker and dati.get("tipo") in ("brano", "file", "sottobrano") and not (
-                            dati["tipo"] != "sottobrano" and self._ha_sottobrani(dati["brano"])):
-                        continue
-                    self.albero.Expand(ramo)
-                    aperti += 1
-                    figli = list(self._figli(ramo))
-                    voci += len(figli)
-                    da_aprire.extend(figli)
-        finally:
-            if taciuti_prima is None:
-                self._ultimi_taciuti = self._frase_dei_taciuti()
+        with wx.BusyCursor():
+            while da_aprire and aperti < MASSIMO_DI_RAMI and voci < MASSIMO_DI_VOCI:
+                ramo = da_aprire.pop(0)
+                if not self.albero.ItemHasChildren(ramo):
+                    continue
+                dati = self._dati(ramo) or {}
+                if not con_i_marker and dati.get("tipo") in ("brano", "file", "sottobrano") and not (
+                        dati["tipo"] != "sottobrano" and self._ha_sottobrani(dati["brano"])):
+                    continue
+                self.albero.Expand(ramo)
+                aperti += 1
+                figli = list(self._figli(ramo))
+                voci += len(figli)
+                da_aprire.extend(figli)
         return aperti, bool(da_aprire)
-
-    def _apri_tutto(self):
-        """Apre la voce e tutti i rami che ha dentro, caricandoli; si ferma a
-        MASSIMO_DI_RAMI, perche' sotto Questo PC ci sono dischi interi."""
-        voce = self._ramo_di_lavoro()
-        if voce is None:
-            self._riscontro("non_disponibile", "Qui non c'è niente da aprire.")
-            return
-        aperti, fermato = self._apri_ramo(voce)
-        nome = self._nome_della_voce(voce)
-        taciuti = self._ultimi_taciuti
-        if fermato:
-            self._riscontro("apri_tutto", f"Aperti {aperti} rami dentro {nome}; mi fermo qui, gli altri restano chiusi.{taciuti}")
-        else:
-            self._riscontro("apri_tutto", f"Aperto tutto dentro {nome}: {al_plurale(aperti, 'ramo', 'rami')}.{taciuti}")
 
     # F1, F2, F3.
 

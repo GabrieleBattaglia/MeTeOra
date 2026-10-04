@@ -4619,7 +4619,8 @@ def test_maiuscolo_f10_apre_tutta_la_plancia_e_maiuscolo_f9_la_chiude(finestra, 
     # resta chiuso, come Questa rete: i dischi interi fermavano la finestra.
     _plancia_di_prova(finestra, monkeypatch, tmp_path)
     _tasto(finestra, codice=wx.WXK_F10, maiuscolo=True)
-    assert "apri_la_plancia" in suoni_annotati and suoni_annotati[-1] == "plancia_aperta"
+    # Istantanea: solo il suono di fine, che non si sovrappone a quello d'inizio (1.83.2).
+    assert "apri_la_plancia" not in suoni_annotati and suoni_annotati[-1] == "plancia_aperta"
     assert _ultima(finestra).startswith("Aperta tutta la plancia, tranne Questo PC e Questa rete: ")
     playlist = next(finestra._figli(finestra.nodo_playlist))
     assert finestra.albero.IsExpanded(finestra.nodo_playlist) and finestra.albero.IsExpanded(playlist)
@@ -5129,3 +5130,21 @@ def test_i_rinfreschi_si_accorpano_e_i_fili_cedono_il_passo(finestra, monkeypatc
     assert pianificati[-1][0] > 1500
     pianificati.pop()[1]()
     assert visti[-1] == ("conti", True)
+
+
+def test_f10_lungo_dice_l_inizio_e_la_fine_dopo(finestra, monkeypatch, suoni_annotati, tmp_path):
+    # 1.83.2: un'apertura che dura suona l'inizio, e la fine aspetta che
+    # l'inizio sia finito; F10 lavora a fette come Maiuscolo con F10.
+    _plancia_di_prova(finestra, monkeypatch, tmp_path)
+    monkeypatch.setattr(modulo, "RITARDO_DELL_AVVIO", 0)
+    rimandati = []
+    monkeypatch.setattr(finestra, "_dopo_il_suono", lambda funzione, *argomenti: rimandati.append((funzione, argomenti)))
+    finestra.albero.Expand(finestra.nodo_pc)
+    disco = next(finestra._figli(finestra.nodo_pc))
+    finestra._seleziona(disco)
+    _tasto(finestra, codice=wx.WXK_F10)
+    assert suoni_annotati[-1] == "apri_la_plancia" and any(r.startswith("Apro tutto dentro ") for r in finestra._righe)
+    assert _ultima(finestra).startswith("Aperto tutto dentro ") and [f.__name__ for f, _a in rimandati] == ["_suono"]
+    assert rimandati[0][1] == ("apri_tutto",)
+    uno = next(v for v in finestra._figli(disco) if finestra.albero.GetItemText(v).startswith("Uno"))
+    assert finestra.albero.IsExpanded(uno)

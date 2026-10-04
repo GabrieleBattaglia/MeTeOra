@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.83.2] - 2026-10-04
+
+- F10 lavora a fette come Maiuscolo con F10, chiesto da Gabriele: su un ramo con decine di migliaia di cartelle la finestra risponde durante l'apertura, e un tasto qualsiasi la ferma.
+- Il suono d'inizio delle due aperture suona solo se l'apertura dura più di quattro decimi di secondo, e quello della fine aspetta che finisca: quasi sempre l'apertura è istantanea, e i due suoni si sarebbero sovrapposti (Gabriele).
+
 ## [1.83.1] - 2026-10-04
 
 - Collaudo di Gabriele: Maiuscolo con F10 faceva partire una cacofonia di suoni e fermava MeTeOra, che andava chiuso a forza. Riprodotto con una copia dei suoi dati: ogni cartella vuota o illeggibile aperta suonava il suo suono, decine in pochi secondi; e i dischi interi caricavano decine di migliaia di cartelle, mentre ogni rinfresco della plancia risommava le durate di tutti i file di un disco per ogni cartella aperta, e la finestra restava ferma oltre un minuto.
