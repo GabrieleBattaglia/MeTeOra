@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni.
 
 """La finestra di MeTeOra.
 
@@ -61,7 +61,7 @@ import tag
 import valori
 import version
 from contatore import Contatore
-from dialoghi import DialogoConferma, DialogoTesto, FinestraImpostazioni, FinestraMarcatori, FinestraScelta
+from dialoghi import DialogoConferma, DialogoDonazione, DialogoTesto, FinestraImpostazioni, FinestraMarcatori, FinestraScelta
 from filtro import COMMENTO, ErroreFiltro, Filtro, modello_della_console
 from impostazioni import Impostazioni
 from marcatori import Marcatori
@@ -301,6 +301,7 @@ VOCI_DELLE_IMPOSTAZIONI = {
     "salva_console": ("Salva console", None),
     "marcatori": ("Marcatori", None),
     "importa_marcatori": ("Importa marcatori", None),
+    "dona": ("Dona per questo progetto", None),
 }
 # L'ultima riga delle istruzioni di ogni campo.
 REGOLA_DEL_DOLLARO = "Le righe che cominciano con il dollaro non contano: scrivi nell'ultima riga."
@@ -4336,6 +4337,7 @@ class Finestra(wx.Frame):
             "salva_console": lambda: "scrive la console in un file di testo",
             "marcatori": self._marcatori_da_leggere,
             "importa_marcatori": lambda: "da un file esportato da MeTeOra",
+            "dona": lambda: "offri un caffè all'autore, con PayPal",
         }[chiave]()
         return f"{VOCI_DELLE_IMPOSTAZIONI[chiave][0]}: {valore}"
 
@@ -4374,6 +4376,7 @@ class Finestra(wx.Frame):
             "salva_console": lambda _genitore: self._salva_console(),
             "marcatori": self._finestra_dei_marcatori,
             "importa_marcatori": self._importa_i_marcatori,
+            "dona": self._dona,
         }
         if chiave in azioni:
             azioni[chiave](genitore)
@@ -5133,6 +5136,28 @@ class Finestra(wx.Frame):
             return
         quante = len(self._righe)
         self._riscontro("console_salvata", f"Console salvata in {nome}, nella cartella del programma: {'1 riga' if quante == 1 else f'{quante} righe'}.")
+
+    # L'invito a offrire un caffe' (Gabriele, 4 ottobre 2026, 1.75.0).
+
+    def _invito_alla_donazione(self, genitore, probabilita=20):
+        """Il testo lo da' Donazione di GBUtils, o None se il sorteggio non
+        passa: una volta su cinque, se non si chiede altro. La finestra e'
+        come quella di Tornello, con il suo suono. Restituisce come si e'
+        chiusa, wx.ID_YES se si e' aperto PayPal, o None se non si e' aperta."""
+        from GBUtils import Donazione
+
+        testo = Donazione(lang="it", probabilita=probabilita, stampa=False)
+        if testo is None:
+            return None
+        self._suono("donazione")
+        with DialogoDonazione(genitore, testo) as dialogo:
+            return dialogo.ShowModal()
+
+    def _dona(self, genitore):
+        """La voce Dona per questo progetto delle impostazioni: l'invito
+        compare sempre."""
+        if self._invito_alla_donazione(genitore, probabilita=100) == wx.ID_YES:
+            self.scrivi("PayPal si apre nel browser: grazie di cuore!")
 
     # La finestra dei marcatori e l'importazione, piano 5.8.5 e 5.8.7.
 
@@ -5932,6 +5957,13 @@ class Finestra(wx.Frame):
             # chiudere (tappa 9).
             suoni.suona("errore", self.impostazioni["volume_effetti"])
             wx.MessageBox(f"MeTeOra non è riuscito a salvare {'; '.join(non_salvati)}.", "MeTeOra, uscita", wx.OK | wx.ICON_ERROR, self)
+        # L'invito a offrire un caffe', una volta su cinque, per ultimo:
+        # tutto e' gia' salvato e la musica e' ferma. Un guasto dell'invito
+        # non deve impedire l'uscita (1.75.0).
+        try:
+            self._invito_alla_donazione(self)
+        except Exception:  # noqa: BLE001 - l'uscita viene prima dell'invito
+            traceback.print_exc()
         # Il suono dell'uscita si ascolta intero prima che il processo finisca.
         suoni.suona("uscita", self.impostazioni["volume_effetti"], sync=True)
         evento.Skip()

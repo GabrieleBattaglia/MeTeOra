@@ -2706,6 +2706,7 @@ def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_an
         ("salva_console", "Salva console: scrive la console in un file di testo"),
         ("marcatori", "Marcatori: nessuno"),
         ("importa_marcatori", "Importa marcatori: da un file esportato da MeTeOra"),
+        ("dona", "Dona per questo progetto: offri un caffè all'autore, con PayPal"),
     ]
 
 
@@ -4254,3 +4255,79 @@ def test_impostazioni_banco_dei_suoni_midi(finestra, monkeypatch, tmp_path, suon
     assert _ultima(finestra) == "I MIDI suonano con il banco Banco.sf2." and suoni_annotati[-1] == "impostazione_cambiata"
     os.remove(banco)
     assert finestra._riga_dell_impostazione("banco_midi") == f"Banco dei suoni MIDI: {banco}, che non si trova più"
+
+
+class _InvitoFinto:
+    """La finestra dell'invito a offrire un caffe', senza finestra: annota i
+    testi e risponde come le si dice."""
+
+    def __init__(self, risposta=wx.ID_NO):
+        self.risposta = risposta
+        self.testi = []
+
+    def __call__(self, genitore, testo):
+        self.testi.append(testo)
+        return self
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_argomenti):
+        return False
+
+    def ShowModal(self):
+        return self.risposta
+
+
+def _donazione(monkeypatch, esito):
+    """Donazione di GBUtils sostituita: annota gli argomenti e restituisce
+    esito, o lo solleva se e' un'eccezione."""
+    import GBUtils
+
+    chiamate = []
+
+    def finta(**argomenti):
+        chiamate.append(argomenti)
+        if isinstance(esito, Exception):
+            raise esito
+        return esito
+
+    monkeypatch.setattr(GBUtils, "Donazione", finta)
+    return chiamate
+
+
+def test_alla_chiusura_l_invito_a_offrire_un_caffe(finestra, monkeypatch, suoni_annotati):
+    # 1.75.0, Gabriele: alla chiusura una volta su cinque, per ultimo, con
+    # il suo suono, prima di quello dell'uscita.
+    chiamate = _donazione(monkeypatch, "Offrimi un caffè.")
+    invito = _InvitoFinto()
+    monkeypatch.setattr(modulo, "DialogoDonazione", invito)
+    finestra._alla_chiusura(types.SimpleNamespace(Skip=lambda: None))
+    assert chiamate == [{"lang": "it", "probabilita": 20, "stampa": False}]
+    assert invito.testi == ["Offrimi un caffè."] and suoni_annotati[-2:] == ["donazione", "uscita"]
+
+
+def test_alla_chiusura_senza_invito_o_con_un_guasto(finestra, monkeypatch, suoni_annotati):
+    invito = _InvitoFinto()
+    monkeypatch.setattr(modulo, "DialogoDonazione", invito)
+    _donazione(monkeypatch, RuntimeError("guasto finto"))
+    finestra._alla_chiusura(types.SimpleNamespace(Skip=lambda: None))
+    # Il guasto non ferma l'uscita, e senza testo la finestra non si apre.
+    assert invito.testi == [] and suoni_annotati[-1] == "uscita" and "donazione" not in suoni_annotati
+
+
+def test_la_voce_dona_per_questo_progetto(finestra, monkeypatch, suoni_annotati):
+    # Dalle impostazioni l'invito compare sempre.
+    chiamate = _donazione(monkeypatch, "Offrimi un caffè.")
+    invito = _InvitoFinto(wx.ID_YES)
+    monkeypatch.setattr(modulo, "DialogoDonazione", invito)
+    assert finestra._riga_dell_impostazione("dona") == "Dona per questo progetto: offri un caffè all'autore, con PayPal"
+    finestra._cambia_impostazione("dona", None)
+    assert chiamate == [{"lang": "it", "probabilita": 100, "stampa": False}]
+    assert invito.testi == ["Offrimi un caffè."] and suoni_annotati[-1] == "donazione"
+    assert _ultima(finestra) == "PayPal si apre nel browser: grazie di cuore!"
+    # Chiuso con Chiudi, la console non dice niente di nuovo.
+    invito.risposta = wx.ID_NO
+    righe = len(finestra._righe)
+    finestra._cambia_impostazione("dona", None)
+    assert len(finestra._righe) == righe and len(invito.testi) == 2

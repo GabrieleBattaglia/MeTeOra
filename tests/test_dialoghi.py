@@ -333,3 +333,33 @@ def test_dialogo_testo_e_riga_del_marcatore(genitore):
         dialogo.Destroy()
     voce = {"file": "z.sid", "sottobrano": 3, "percorsi": []}
     assert dialoghi.riga_del_marcatore(voce, {"tempo": 3723.5, "nome": "Assolo"}) == r"z.sid, sottobrano 3\Assolo, 1:02:03.500"
+
+
+def test_l_invito_a_offrire_un_caffe(genitore, monkeypatch):
+    # 1.75.0: come in Tornello. Il fuoco nel testo, Chiudi predefinito, Esc e
+    # Invio nel testo chiudono; Dona con PayPal apre il browser.
+    import webbrowser
+
+    dialogo = dialoghi.DialogoDonazione(genitore, "Offrimi un caffè su PayPal.")
+    try:
+        assert dialogo.GetTitle() == "Offri un caffè" and dialogo.testo.GetValue() == "Offrimi un caffè su PayPal."
+        assert (dialogo.dona.GetLabelText(), dialogo.chiudi.GetLabelText()) == ("Dona con PayPal", "Chiudi")
+        assert dialogo.GetDefaultItem() is dialogo.chiudi and dialogo.GetEscapeId() == wx.ID_NO
+        finiti = []
+        monkeypatch.setattr(dialogo, "EndModal", finiti.append)
+        _tasto(dialogo, dialogo.testo)
+        assert finiti == [wx.ID_NO]
+        # Sui pulsanti Invio resta loro.
+        assert _tasto(dialogo, dialogo.dona).GetSkipped()
+        aperti = []
+        monkeypatch.setattr(webbrowser, "open", aperti.append)
+        clic = wx.CommandEvent(wx.wxEVT_BUTTON, wx.ID_YES)
+        clic.SetEventObject(dialogo.dona)
+        dialogo.dona.GetEventHandler().ProcessEvent(clic)
+        assert aperti == [dialoghi.INDIRIZZO_PAYPAL] and finiti[-1] == wx.ID_YES
+        # Un browser che non parte non tiene aperto l'invito.
+        monkeypatch.setattr(webbrowser, "open", lambda _indirizzo: 1 / 0)
+        dialogo.dona.GetEventHandler().ProcessEvent(clic)
+        assert finiti[-1] == wx.ID_YES
+    finally:
+        dialogo.Destroy()

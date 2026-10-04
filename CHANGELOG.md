@@ -2,6 +2,12 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.75.0] - 2026-10-04
+
+- All'uscita, una volta su cinque, per ultimo, l'invito a offrire un caffè, come in Tornello: il testo di Donazione di GBUtils, con il suo suono, e i pulsanti Dona con PayPal, che apre PayPal nel browser, e Chiudi, il predefinito; Invio nel testo ed Esc chiudono. Un guasto dell'invito non impedisce l'uscita. Chiesto da Gabriele.
+- Nelle impostazioni, l'ultima voce Dona per questo progetto apre l'invito sempre; con Dona con PayPal la console ringrazia.
+- Il suono dell'invito è quello di Tornello e Terminal Beast, e nella collezione di GBUtils V192 lo firma anche MeTeOra.
+
 ## [1.74.0] - 2026-10-04
 
 - Con la riproduzione casuale accesa B sceglie a caso, con lo stesso modello e lo stesso mazzo del passaggio automatico, e Z torna ai brani suonati prima, uno alla volta, come in Winamp. Dopo Z, B e la fine di un brano ripercorrono in avanti la stessa strada prima di scegliere di nuovo a caso; un brano scelto con X, N, J, K o le cifre va in fondo alla strada. Al primo brano della strada Z lo dice, e con il mazzo finito B lo dice e ricomincia il giro. Chiesto da Gabriele, che prima aveva voluto il caso solo a fine brano.

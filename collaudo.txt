@@ -1,4 +1,4 @@
-Collaudo di MeTeOra 1.74.0, con NVDA: il manuale in HTML, F1 e F12, la ricerca anche in rete, B e Z con la riproduzione casuale. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.74.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Collaudo di MeTeOra 1.75.0, con NVDA: il manuale in HTML, F1 e F12, la ricerca anche in rete, B e Z con la riproduzione casuale, l'invito a offrire un caffè. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.75.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
 F1: si apre il browser con il manuale, e la console dice che il manuale si apre nel browser.
 Nel browser H e Maiuscolo con H passano da un titolo all'altro, e 2 salta da un capitolo all'altro.
 L'indice in cima al manuale porta ai capitoli: Invio su un collegamento salta lì.
@@ -13,3 +13,7 @@ In una cartella di E:\, con la riproduzione casuale accesa, X su un brano e poi 
 Poi Z più volte: torna ai brani suonati, all'indietro, fino a dire che è il primo brano suonato a caso.
 Poi B: ripercorre in avanti gli stessi brani di prima, e solo in fondo sceglie di nuovo a caso; lo stesso a fine brano.
 Spenta la riproduzione casuale con Maiuscolo con N, Z e B tornano in ordine.
+Impostazioni, ultima voce Dona per questo progetto, Invio: il suono dell'invito, e il fuoco sul testo, che NVDA legge.
+Invio nel testo, o Esc, chiudono l'invito e si torna alle impostazioni; Tab passa a Dona con PayPal e a Chiudi.
+Dona con PayPal apre la pagina di PayPal nel browser, e la console ringrazia.
+Esci da MeTeOra con Esc più volte, riaprendolo: circa una volta su cinque l'invito compare per ultimo, prima del suono dell'uscita, e chiuso l'invito MeTeOra esce.

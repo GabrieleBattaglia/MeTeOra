@@ -2,6 +2,7 @@
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 # 30/09/2026: nasce con la tappa 1, sul modello di tests/conftest.py di Tornello.
 # 03/10/2026, 1.72.0: os.startfile vietato, perche' F1 apre il manuale nel browser.
+# 04/10/2026, 1.75.0: il browser vietato e Donazione muta, per l'invito a offrire un caffe'.
 
 """Le regole comuni delle prove.
 
@@ -77,6 +78,28 @@ def startfile_vietato(monkeypatch):
         raise AssertionError(f"os.startfile chiamato da una prova senza sostituirlo: {argomenti}")
 
     monkeypatch.setattr(os, "startfile", vietato, raising=False)
+
+
+@pytest.fixture(autouse=True)
+def browser_vietato(monkeypatch):
+    """webbrowser.open non apre mai niente durante le prove, come os.startfile:
+    il pulsante Dona con PayPal lo chiama."""
+    import webbrowser
+
+    def vietato(*argomenti, **opzioni):
+        raise AssertionError(f"webbrowser.open chiamato da una prova senza sostituirlo: {argomenti}")
+
+    monkeypatch.setattr(webbrowser, "open", vietato)
+
+
+@pytest.fixture(autouse=True)
+def donazione_muta(monkeypatch):
+    """Donazione di GBUtils non sorteggia mai: alla chiusura della finestra
+    l'invito comparirebbe una volta su cinque, con una finestra modale che
+    fermerebbe la suite. Le prove dell'invito la sostituiscono a loro volta."""
+    import GBUtils
+
+    monkeypatch.setattr(GBUtils, "Donazione", lambda *argomenti, **opzioni: None)
 
 
 @pytest.fixture(autouse=True)

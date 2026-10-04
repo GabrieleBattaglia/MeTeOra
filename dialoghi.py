@@ -1,6 +1,6 @@
-# MeTeOra, i dialoghi: il campo da una riga, la domanda con Si' e No, la finestra delle impostazioni, la scelta da una lista e la finestra dei marcatori.
+# MeTeOra, i dialoghi: il campo da una riga, la domanda con Si' e No, la finestra delle impostazioni, la scelta da una lista, la finestra dei marcatori e l'invito a offrire un caffe'.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); DialogoTesto arriva da finestra.py. Nella 1.66.36 la domanda con Sì e No, che si chiude con Esc.
+# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); DialogoTesto arriva da finestra.py. Nella 1.66.36 la domanda con Sì e No, che si chiude con Esc. Nella 1.75.0 l'invito a offrire un caffe', come in Tornello.
 
 """I dialoghi di MeTeOra, fuori dalla finestra principale.
 
@@ -17,11 +17,15 @@ Le azioni vere, come rinominare o eliminare un marker, le fa la finestra
 principale: i dialoghi mostrano, chiedono e chiamano.
 """
 
+import contextlib
+
 import wx
 
 # La riga della lista dei marcatori quando non ce n'e' nessuno: una lista
 # vuota, per NVDA, non dice niente.
 NESSUN_MARCATORE = "Nessun marcatore."
+# Il PayPal.Me dell'autore, lo stesso di Tornello.
+INDIRIZZO_PAYPAL = "https://paypal.me/GabrieleBattaglia780"
 
 
 def _premuto_invio(evento):
@@ -80,6 +84,56 @@ class DialogoConferma(wx.Dialog):
             self.EndModal(wx.ID_YES if lettera == "s" else wx.ID_NO)
             return
         evento.Skip()
+
+
+class DialogoDonazione(wx.Dialog):
+    """L'invito a offrire un caffe', come in Tornello: il testo di Donazione
+    di GBUtils in un campo di sola lettura, che ha il fuoco all'apertura, e
+    i pulsanti Dona con PayPal, che apre PayPal nel browser, e Chiudi, il
+    predefinito: Invio nel testo ed Esc chiudono. ShowModal da' wx.ID_YES se
+    si e' aperto PayPal, wx.ID_NO altrimenti (1.75.0)."""
+
+    def __init__(self, genitore, testo):
+        from GBwx import STILE_ADATTABILE, adatta_finestra, pannello_scorrevole
+
+        super().__init__(genitore, title="Offri un caffè", style=STILE_ADATTABILE)
+        pannello = pannello_scorrevole(self)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        self.testo = wx.TextCtrl(pannello, value=testo, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2)
+        self.testo.SetName("Offri un caffè")
+        self.dona = wx.Button(pannello, wx.ID_YES, "&Dona con PayPal")
+        self.chiudi = wx.Button(pannello, wx.ID_NO, "&Chiudi")
+        pulsanti = wx.BoxSizer(wx.HORIZONTAL)
+        for pulsante in (self.dona, self.chiudi):
+            pulsanti.Add(pulsante, 0, wx.LEFT, 5)
+        sizer.Add(self.testo, 1, wx.EXPAND | wx.ALL, 5)
+        sizer.Add(pulsanti, 0, wx.ALL | wx.ALIGN_RIGHT, 5)
+        pannello.SetSizer(sizer)
+        adatta_finestra(self, pannello, (480, 240))
+        self.SetEscapeId(wx.ID_NO)
+        self.chiudi.SetDefault()
+        self.dona.Bind(wx.EVT_BUTTON, self._dona)
+        self.chiudi.Bind(wx.EVT_BUTTON, lambda _evento: self.EndModal(wx.ID_NO))
+        self.Bind(wx.EVT_CHAR_HOOK, self._tasto)
+        self.testo.SetFocus()
+
+    def _tasto(self, evento):
+        """Invio nel testo, un campo su piu' righe che se lo terrebbe, preme
+        Chiudi, come nelle finestre di messaggio; sui pulsanti Invio resta
+        loro. Un Invio tenuto giu' non preme niente."""
+        nel_testo = evento.GetEventObject() is self.testo
+        if _premuto_invio(evento) and not evento.IsAutoRepeat() and nel_testo:
+            self.EndModal(wx.ID_NO)
+            return
+        evento.Skip()
+
+    def _dona(self, _evento):
+        import webbrowser
+
+        # Un browser che non parte non deve tenere aperto l'invito.
+        with contextlib.suppress(Exception):
+            webbrowser.open(INDIRIZZO_PAYPAL)
+        self.EndModal(wx.ID_YES)
 
 
 class FinestraImpostazioni(wx.Dialog):
