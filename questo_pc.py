@@ -132,8 +132,38 @@ _FOF_SILENT = 0x4
 _FOF_NOERRORUI = 0x400
 
 
+# I file che Windows e gli altri sistemi lasciano da soli nelle cartelle:
+# una cartella che ha solo loro conta come vuota (1.76.0).
+FILE_DI_SERVIZIO = {"desktop.ini", "thumbs.db", ".ds_store"}
+
+
+def cartella_vuota(cartella):
+    """Vero se nella cartella e nelle sue sottocartelle non c'e' nessun file,
+    a parte quelli di servizio, nascosti compresi: si ferma al primo.
+    Solleva OSError se la cartella, o una sottocartella, non si legge."""
+
+    def errore(eccezione):
+        raise eccezione
+
+    for _radice, _cartelle, files in os.walk(cartella, onerror=errore):
+        if any(nome.lower() not in FILE_DI_SERVIZIO for nome in files):
+            return False
+    return True
+
+
+def ha_il_cestino(percorso):
+    """Falso dove Windows non ha il cestino e cancella per sempre: in rete,
+    sulle unita' rimovibili come le chiavette e sui CD."""
+    unita = os.path.splitdrive(os.path.abspath(percorso))[0]
+    if not unita.endswith(":"):
+        return False
+    return ctypes.windll.kernel32.GetDriveTypeW(unita + "\\") not in (2, 4, 5)
+
+
 def nel_cestino(percorso):
-    """Manda un file nel cestino di Windows. Vero se ci e' andato."""
+    """Manda un file, o una cartella, nel cestino di Windows; dove il
+    cestino non c'e' (vedi ha_il_cestino) Windows lo cancella per sempre.
+    Vero se non c'e' piu'."""
     operazione = _SHFILEOPSTRUCTW(
         hwnd=None, wFunc=_FO_DELETE, pFrom=os.path.abspath(percorso) + "\0", pTo=None,
         fFlags=_FOF_ALLOWUNDO | _FOF_NOCONFIRMATION | _FOF_SILENT | _FOF_NOERRORUI,

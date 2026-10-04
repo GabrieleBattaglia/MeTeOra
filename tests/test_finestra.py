@@ -4331,3 +4331,69 @@ def test_la_voce_dona_per_questo_progetto(finestra, monkeypatch, suoni_annotati)
     righe = len(finestra._righe)
     finestra._cambia_impostazione("dona", None)
     assert len(finestra._righe) == righe and len(invito.testi) == 2
+
+def test_cartella_vuota_e_cestino(tmp_path):
+    # 1.76.0: vuota anche con sottocartelle vuote o i soli file di servizio;
+    # un file vero, anche nascosto o che MeTeOra non suona, la rende piena.
+    import questo_pc
+
+    vuota = tmp_path / "vuota"
+    (vuota / "dentro" / "piu dentro").mkdir(parents=True)
+    (vuota / "desktop.ini").write_text("[.ShellClassInfo]")
+    (vuota / "dentro" / "Thumbs.db").write_bytes(b"")
+    assert questo_pc.cartella_vuota(str(vuota))
+    (vuota / "dentro" / "piu dentro" / "note.txt").write_text("una nota")
+    assert not questo_pc.cartella_vuota(str(vuota))
+    assert questo_pc.ha_il_cestino(str(tmp_path)) and not questo_pc.ha_il_cestino("\\\\server\\cartella\\a.mp3")
+
+
+def test_maiuscolo_canc_su_una_cartella_vuota(finestra, suoni_annotati, tmp_path, monkeypatch):
+    import questo_pc
+
+    cestinati, domande = [], []
+    monkeypatch.setattr(questo_pc, "nel_cestino", lambda p: cestinati.append(p) or True)
+    risposte = [False, True]
+    monkeypatch.setattr(finestra, "_conferma", lambda domanda, titolo: domande.append((domanda, titolo)) or risposte.pop(0))
+    (tmp_path / "Vuota" / "Dentro").mkdir(parents=True)
+    (tmp_path / "Piena").mkdir()
+    (tmp_path / "Piena" / "copertina.jpg").write_bytes(b"")
+    finestra.albero.Expand(finestra.nodo_pc)
+    vuota = finestra.albero.AppendItem(finestra.nodo_pc, "Vuota", data={"tipo": "cartella", "percorso": str(tmp_path / "Vuota"), "caricato": False})
+    piena = finestra.albero.AppendItem(finestra.nodo_pc, "Piena", data={"tipo": "cartella", "percorso": str(tmp_path / "Piena"), "caricato": False})
+    # Una cartella con dei file resta, senza domande.
+    finestra._al_cestino(piena)
+    assert not domande and suoni_annotati[-1] == "non_disponibile"
+    assert _ultima(finestra) == "Piena non è vuota: ci sono dei file, anche se MeTeOra magari non li suona. Maiuscolo+Canc manda nel cestino solo le cartelle vuote."
+    # Quella vuota chiede, con No che la lascia dov'e'.
+    finestra._al_cestino(vuota)
+    assert domande[-1] == (f"Mandare nel cestino di Windows la cartella vuota {tmp_path / 'Vuota'}?", "Manda nel cestino")
+    assert _ultima(finestra) == "La cartella resta dov'è." and not cestinati
+    finestra._seleziona(vuota)
+    finestra._al_cestino(vuota)
+    assert cestinati == [str(tmp_path / "Vuota")] and suoni_annotati[-1] == "cestino"
+    assert _ultima(finestra) == "La cartella Vuota è nel cestino di Windows."
+    # La voce sparisce, e la selezione va sulla vicina.
+    assert "Vuota" not in _etichette(finestra, finestra.nodo_pc) and finestra.albero.GetItemText(finestra._voce_corrente()) == "Piena"
+
+
+def test_maiuscolo_canc_dove_il_cestino_non_c_e(finestra, suoni_annotati, tmp_path, monkeypatch):
+    # In rete e sulle chiavette Windows cancella per sempre: la domanda e la
+    # risposta lo dicono, invece di parlare del cestino.
+    import questo_pc
+
+    domande = []
+    monkeypatch.setattr(questo_pc, "nel_cestino", lambda p: True)
+    monkeypatch.setattr(questo_pc, "ha_il_cestino", lambda p: False)
+    monkeypatch.setattr(finestra, "_conferma", lambda domanda, titolo: domande.append((domanda, titolo)) or True)
+    (tmp_path / "a.mp3").write_bytes(b"")
+    finestra._aggiungi(None, [str(tmp_path / "a.mp3")])
+    nodo = next(finestra._figli(finestra.nodo_playlist))
+    finestra.albero.Expand(nodo)
+    finestra._al_cestino(next(finestra._figli(nodo)))
+    assert domande[-1][1] == "Cancella per sempre" and domande[-1][0].startswith(f"Cancellare per sempre il file {tmp_path / 'a.mp3'}? Lì il cestino di Windows non c'è.")
+    assert _ultima(finestra) == "a.mp3 è cancellato per sempre."
+    # Un percorso di Questa rete non e' una cartella da cestinare.
+    finestra.albero.Expand(finestra.nodo_rete)
+    radice = finestra.albero.AppendItem(finestra.nodo_rete, "nas", data={"tipo": "cartella", "percorso": "\\\\nas\\musica", "caricato": False})
+    finestra._al_cestino(radice)
+    assert _ultima(finestra) == "nas è un percorso di rete, non una cartella da cestinare." and len(domande) == 1

@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice.
 
 """La finestra di MeTeOra.
 
@@ -203,7 +203,8 @@ TASTI_DEL_CONTESTO = {
     "computer": ("un computer della rete", "Freccia destra mostra le sue cartelle condivise. Invio, Applicazioni o Spazio: menu con Aggiorna."),
     "attesa": ("una ricerca in corso", "Aspetta: la voce sparisce quando la ricerca finisce."),
     "unita": ("un'unità", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Riproduci, Crea playlist da qui, Aggiungi alla playlist e Aggiorna."),
-    "cartella": ("una cartella", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Riproduci, Crea playlist da qui, Aggiungi alla playlist e Aggiorna."),
+    "cartella": ("una cartella", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Riproduci, Crea playlist da qui, Aggiungi alla playlist e Aggiorna. "
+        "Maiuscolo con Canc la manda nel cestino, se è vuota."),
     "file": ("un file", "Invio, Applicazioni o Spazio: menu con Riproduci, Aggiungi alla playlist, Aggiungi ai preferiti, Rinomina file, Leggi i tag e Tag per i formati che li hanno, e Manda nel cestino. "
         "Maiuscolo con Canc manda il file nel cestino. Un SID o un file delle console con più sottobrani, o un file con dei marker, si apre con freccia destra."),
     "sottobrano": ("un sottobrano di un SID o di un file delle console", "Invio, Applicazioni o Spazio: menu con Riproduci, Aggiungi alla playlist e Aggiungi ai preferiti. Se ha dei marker, freccia destra li mostra."),
@@ -2529,18 +2530,24 @@ class Finestra(wx.Frame):
 
     def _al_cestino(self, voce):
         """Maiuscolo+Canc: il file del brano va nel cestino di Windows, e il
-        brano esce dalla playlist o dalla cartella in cui sta."""
+        brano esce dalla playlist o dalla cartella in cui sta. Su una
+        cartella vuota, la cartella (1.76.0)."""
         dati = self._dati(voce) or {}
         tipo = dati.get("tipo")
+        if tipo == "cartella":
+            self._cartella_al_cestino(voce, dati)
+            return
         if tipo == "sottobrano":
             self._riscontro("non_disponibile", "Un sottobrano non si cestina da solo: Maiuscolo+Canc si usa sul file che lo contiene.")
             return
         if tipo not in ("brano", "file"):
-            self._riscontro("non_disponibile", "Maiuscolo+Canc manda nel cestino un file, da una playlist o da una cartella.")
+            self._riscontro("non_disponibile", "Maiuscolo+Canc manda nel cestino un file, da una playlist o da una cartella, o una cartella vuota.")
             return
         pl, brano = dati["playlist"], dati["brano"]
         dove = "" if pl.temporanea else f" Si toglie anche dalla playlist {pl.nome}."
-        if not self._conferma(f"Mandare nel cestino di Windows il file {brano.percorso}?{dove}", "Manda nel cestino"):
+        cestino = questo_pc.ha_il_cestino(brano.percorso)
+        domanda = f"Mandare nel cestino di Windows il file {brano.percorso}?" if cestino else f"Cancellare per sempre il file {brano.percorso}? Lì il cestino di Windows non c'è."
+        if not self._conferma(domanda + dove, "Manda nel cestino" if cestino else "Cancella per sempre"):
             self._annullato("Il file resta dov'è.")
             return
         if self.motore.in_corso == brano.percorso:
@@ -2562,7 +2569,42 @@ class Finestra(wx.Frame):
                 self._aggiorna_risultati()
         else:
             self._togli(pl, brano, annuncia=False)
-        self._riscontro("cestino", f"{brano.nome_del_file} è nel cestino di Windows.")
+        self._riscontro("cestino", f"{brano.nome_del_file} è nel cestino di Windows." if cestino else f"{brano.nome_del_file} è cancellato per sempre.")
+
+    def _cartella_al_cestino(self, voce, dati):
+        """Maiuscolo+Canc su una cartella (Gabriele, 4 ottobre 2026): va nel
+        cestino solo se e' vuota, cioe' senza file nemmeno nelle
+        sottocartelle, a parte quelli di servizio come desktop.ini; con dei
+        file dentro, anche che MeTeOra non suona, resta. Le cartelle prime di
+        Questa rete e di un computer sono condivisioni, e non si toccano."""
+        percorso = dati["percorso"]
+        nome = self.albero.GetItemText(voce)
+        genitore = self.albero.GetItemParent(voce)
+        if dati.get("a_mano") or (self._dati(genitore) or {}).get("tipo") in ("rete", "computer"):
+            self._riscontro("non_disponibile", f"{nome} è un percorso di rete, non una cartella da cestinare.")
+            return
+        try:
+            vuota = questo_pc.cartella_vuota(percorso)
+        except OSError as e:
+            self._riscontro("errore", f"Non riesco a leggere {nome}: {e.strerror or e}.")
+            return
+        if not vuota:
+            self._riscontro("non_disponibile", f"{nome} non è vuota: ci sono dei file, anche se MeTeOra magari non li suona. Maiuscolo+Canc manda nel cestino solo le cartelle vuote.")
+            return
+        cestino = questo_pc.ha_il_cestino(percorso)
+        domanda = f"Mandare nel cestino di Windows la cartella vuota {percorso}?" if cestino else f"Cancellare per sempre la cartella vuota {percorso}? Lì il cestino di Windows non c'è."
+        if not self._conferma(domanda, "Manda nel cestino" if cestino else "Cancella per sempre"):
+            self._annullato("La cartella resta dov'è.")
+            return
+        if not questo_pc.nel_cestino(percorso):
+            self._riscontro("errore", f"Non riesco a mandare nel cestino {percorso}.")
+            return
+        vicina = self.albero.GetNextSibling(voce)
+        if not vicina.IsOk():
+            vicina = self.albero.GetPrevSibling(voce)
+        self._seleziona(vicina if vicina.IsOk() else genitore)
+        self.albero.Delete(voce)
+        self._riscontro("cestino", f"La cartella {nome} è nel cestino di Windows." if cestino else f"La cartella {nome} è cancellata per sempre.")
 
     def _cancella(self, voce):
         dati = self._dati(voce) or {}
@@ -2794,7 +2836,12 @@ class Finestra(wx.Frame):
         if not bersagli:
             self._riscontro("non_disponibile", "Maiuscolo+Canc manda nel cestino i file: seleziona brani o file.")
             return
-        if not self._conferma(f"Mandare nel cestino di Windows {len(bersagli)} file? I brani escono anche dalle loro playlist.", "Manda nel cestino"):
+        senza_cestino = sum(1 for _v, _pl, brano in bersagli if not questo_pc.ha_il_cestino(brano.percorso))
+        avviso = ""
+        if senza_cestino:
+            # In rete e sulle chiavette Windows cancella per sempre: lo si dice prima.
+            avviso = f" {'1 sta' if senza_cestino == 1 else f'{senza_cestino} stanno'} dove il cestino non c'è, e si {'cancella' if senza_cestino == 1 else 'cancellano'} per sempre."
+        if not self._conferma(f"Mandare nel cestino di Windows {len(bersagli)} file? I brani escono anche dalle loro playlist.{avviso}", "Manda nel cestino"):
             self._annullato("I file restano dove sono.")
             return
         riusciti, falliti = 0, 0
@@ -2817,7 +2864,7 @@ class Finestra(wx.Frame):
         self._ricostruisci_dopo_la_cancellazione(approdo, cancellate)
         if any(pl is self.risultati for _v, pl, _b in bersagli):
             self._aggiorna_risultati()
-        testo = f"Nel cestino di Windows {riusciti} file."
+        testo = f"Nel cestino di Windows {riusciti} file." if not senza_cestino else f"Tolti {riusciti} file: quelli dove il cestino non c'è sono cancellati per sempre."
         if falliti:
             testo += " 1 non c'è andato." if falliti == 1 else f" {falliti} non ci sono andati."
         self._riscontro("cestino", testo)

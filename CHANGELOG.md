@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.76.0] - 2026-10-04
+
+- Maiuscolo con Canc su una cartella vuota la manda nel cestino, dopo la domanda con No predefinito. Vuota vuol dire senza file nemmeno nelle sottocartelle, a parte quelli di servizio come desktop.ini e Thumbs.db; una cartella con dei file, anche che MeTeOra non suona, resta, e la console lo dice. Le unità e i percorsi di Questa rete non si toccano. Chiesto da Gabriele.
+- In rete e sulle chiavette Windows non ha il cestino, e Maiuscolo con Canc cancellava per sempre dicendo che il file era nel cestino: ora la domanda dice Cancellare per sempre, e la console che il file è cancellato per sempre, anche con più file selezionati.
+
 ## [1.75.0] - 2026-10-04
 
 - All'uscita, una volta su cinque, per ultimo, l'invito a offrire un caffè, come in Tornello: il testo di Donazione di GBUtils, con il suo suono, e i pulsanti Dona con PayPal, che apre PayPal nel browser, e Chiudi, il predefinito; Invio nel testo ed Esc chiudono. Un guasto dell'invito non impedisce l'uscita. Chiesto da Gabriele.
