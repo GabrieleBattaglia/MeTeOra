@@ -137,6 +137,7 @@ kbd {
 <li><a href="#x-c-v">Suonare, mettere in pausa, fermare</a></li>
 <li><a href="#brano-seguente">Il brano seguente</a></li>
 <li><a href="#casuale">La riproduzione casuale</a></li>
+<li><a href="#ripetizione">La ripetizione</a></li>
 <li><a href="#loop">Il loop A-B</a></li>
 <li><a href="#selezione">La selezione multipla</a></li>
 <li><a href="#salti">Muoversi nel brano</a></li>
@@ -293,6 +294,7 @@ kbd {
 <li><kbd>B</kbd>: suona il brano successivo, con la stessa regola di Z; con la riproduzione casuale accesa ne sceglie uno a caso.</li>
 <li><kbd>N</kbd>: suona un brano a caso fra quelli che si vedono nella plancia, o nella lista da cui suona.</li>
 <li><kbd>Maiuscolo con N</kbd>: accende e spegne la riproduzione casuale, che sceglie a caso il brano seguente quando uno finisce da solo e quando premi B.</li>
+<li><kbd>Maiuscolo con V</kbd>: cambia la ripetizione, a giro: del brano, che ricomincia quando finisce; della lista, che dopo l'ultimo brano riparte dal primo; spenta.</li>
 <li><kbd>Maiuscolo con X</kbd>: a giro, mette il punto A del loop sul brano selezionato, poi il punto B, poi toglie il loop.</li>
 <li><kbd>F4</kbd>: mette nei Preferiti il brano, il file o il sottobrano selezionato.</li>
 <li><kbd>F8</kbd>: porta la selezione e il fuoco della plancia su ciò che suona, aprendo i rami che servono.</li>
@@ -906,7 +908,7 @@ kbd {
 <h3 id="brano-seguente">Il brano seguente</h3>
 <h4>Quando un brano finisce da solo</h4>
 <p>Il brano che segue lo decide la plancia, come la leggeresti scendendo con la freccia giù. Se ciò che suona si vede nella plancia, cioè sta dentro rami tutti aperti, si passa alla voce suonabile che viene dopo: il file o il brano seguente, e dentro i rami aperti tutto ciò che contengono, sottobrani compresi. Un SID con i sottobrani aperti suona i sottobrani uno dopo l'altro; chiuso, lascia il posto al file che viene dopo. Finita una cartella o una playlist, se più avanti ce n'è un'altra aperta si entra lì; se davanti non c'è più niente di aperto, la riproduzione si ferma, e la console dice Fine: davanti non c'è altro da suonare.</p>
-<p>Se ciò che suona non si vede, per esempio una cartella suonata con X da chiusa o un file aperto con Apri file, si segue la lista da cui è partito. Con il loop A-B attivo decide il loop, e con una selezione che suona decide la selezione. I brani saltati e quelli che il filtro della playlist nasconde non suonano mai da soli. Con la riproduzione casuale accesa, Maiuscolo con N, il brano che segue si sceglie a caso nello stesso campo.</p>
+<p>Se ciò che suona non si vede, per esempio una cartella suonata con X da chiusa o un file aperto con Apri file, si segue la lista da cui è partito. Con il loop A-B attivo decide il loop, e con una selezione che suona decide la selezione. I brani saltati e quelli che il filtro della playlist nasconde non suonano mai da soli. Con la riproduzione casuale accesa, Maiuscolo con N, il brano che segue si sceglie a caso nello stesso campo; con la ripetizione, Maiuscolo con V, si ripete il brano, o dove non c'è altro si riparte dal primo.</p>
 <p>Con la dissolvenza accesa il brano che segue si sceglie con la stessa regola, ma un po' prima della fine, per prepararlo; quando la dissolvenza comincia MeTeOra ricontrolla, e se nel frattempo la plancia è cambiata suona quello giusto. Il capitolo Velocità, tono, equalizzatore e dissolvenza spiega come.</p>
 <h4>Z, B e N</h4>
 <p>Z e B suonano il brano precedente e il successivo; con la riproduzione casuale accesa vanno come spiega la sezione La riproduzione casuale. Seguono la plancia come l'avanzamento automatico: se ciò che suona si vede, vanno alla voce suonabile prima o dopo, sottobrani compresi; se non si vede, seguono la lista da cui è partito, o il loop, o la selezione. Al primo e all'ultimo brano la console lo dice. Z, B e N valgono anche dopo lo stop o dopo la fine della lista, e partono dall'ultimo brano suonato, o da quello ripreso all'avvio; solo se non c'è ancora niente da cui partire, o dopo lo stop di una selezione, la console dice che non c'è una playlist in riproduzione.</p>
@@ -921,6 +923,14 @@ kbd {
 <li>una volta per brano, poi ricomincia, il modello di partenza: ogni brano suona una volta, poi si rimescola e si ricomincia.</li>
 </ul>
 <p>Con i due modelli a una volta per brano, ogni brano che suona con la riproduzione casuale accesa esce dal mazzo, anche quello che scegli tu, e non torna finché il mazzo non è finito; finito il mazzo, la riproduzione si ferma e il mazzo si rifà per la volta dopo, oppure si rimescola e si continua. Accendendo la riproduzione casuale, o cambiando modello, il mazzo ricomincia intero. MeTeOra ricorda anche alla riapertura se è accesa e con quale modello; il mazzo invece riparte intero.</p>
+<h3 id="ripetizione">La ripetizione</h3>
+<p>Maiuscolo con V cambia la ripetizione, a giro, e la console lo dice, ognuna con il suo suono:</p>
+<ul>
+<li>del brano: il brano che finisce da solo ricomincia da capo, con lo stesso sottobrano se è un SID; se intanto lo hai saltato, tolto dalla lista o nascosto con il filtro, si va avanti come sempre;</li>
+<li>della lista: dove l'avanzamento automatico non avrebbe più niente da suonare, si riparte dal primo. Se decide la plancia, dalla prima voce suonabile che vi si vede, anche in un'altra playlist o cartella aperta; altrimenti dal primo brano della lista, della selezione o del loop;</li>
+<li>spenta, come di partenza: alla fine ci si ferma.</li>
+</ul>
+<p>La ripetizione vale quando un brano finisce da solo: Z, B e N vanno dove vanno sempre, e con la ripetizione del brano B passa al successivo, che poi si ripete lui. Con la riproduzione casuale accesa, la ripetizione del brano risuona lo stesso brano invece di sceglierne un altro; la ripetizione della lista, con il modello una volta per brano poi si ferma, alla fine del mazzo rimescola e continua, come il modello a giro. Con la dissolvenza accesa, anche il brano che si ripete entra sfumando sulla sua fine. MeTeOra ricorda la ripetizione anche alla riapertura, e la voce Ripetizione delle impostazioni la sceglie da una lista.</p>
 <h3 id="loop">Il loop A-B</h3>
 <p>Maiuscolo con X mette il loop fra due brani della stessa lista, una playlist, i Preferiti o una cartella, e funziona a giro:</p>
 <ul>
@@ -955,7 +965,7 @@ kbd {
 <p>I file più lunghi di dieci minuti, come gli audiolibri, i podcast e i film, ricordano il punto in cui li hai lasciati: quando li suoni di nuovo, da qualunque parte, riprendono da lì, e la console dice Riprendo da, con il tempo, dove l'avevi lasciato. X, sul file ripreso, lo fa ripartire da capo, come su ogni brano che suona. I file più corti, come le canzoni, ripartono da capo come sempre; un file ascoltato fino alla fine, o lasciato nei primi o negli ultimi trenta secondi, non ha un punto da riprendere. Il limite dei dieci minuti si cambia nelle impostazioni, con la voce Punto lasciato dei file lunghi, e 0 spegne la ripresa. I marker, W e la ripresa all'avvio vanno sempre dove dicono loro.</p>
 <p>Molti audiolibri, soprattutto gli M4B, e molti film hanno i capitoli. Mentre suonano, la virgola va al capitolo precedente e il punto al successivo, e la console dice quale, per esempio Capitolo 3 di 12: Il ritorno, 23:10; la virgola, oltre i primi tre secondi di un capitolo, torna al suo inizio, come nei lettori. Nella plancia, un file con i capitoli è un ramo: dentro ci sono i capitoli, prima dei marker, e X, Invio o il menu su un capitolo suonano il file da lì. I capitoli della plancia vengono dai tag, e MeTeOra li legge negli M4B, negli M4A, negli MP4 e negli MP3; quelli degli MKV si vedono solo mentre il file suona, con la virgola e il punto.</p>
 <h3 id="brano-in-errore">Un brano che non si suona</h3>
-<p>Un file che non si suona, perché non c'è più o è rovinato, fa scrivere alla console Non riesco a suonare, con il suo nome, con il suono dell'errore. Finito quel suono parte il brano seguente; V, intanto, lo ferma.</p>
+<p>Un file che non si suona, perché non c'è più o è rovinato, fa scrivere alla console Non riesco a suonare, con il suo nome, con il suono dell'errore. Finito quel suono parte il brano seguente; V, intanto, lo ferma. Con la ripetizione del brano, quello che non si suona non si ripete: si passa al seguente. Con la ripetizione della lista, se nessun brano si riesce a suonare, dal primo si riparte una volta sola, e poi ci si ferma.</p>
 <h3 id="esempi-riproduzione">Esempi</h3>
 <h4>Ripetere in tondo tre brani di una playlist</h4>
 <ol>
@@ -1282,7 +1292,7 @@ kbd {
 </ol>
 <h2 id="impostazioni">Le impostazioni</h2>
 <h3 id="impostazioni-finestra">La finestra delle impostazioni</h3>
-<p>La voce Impostazioni, l'ultima del primo livello della plancia, apre la finestra delle impostazioni: una lista con una riga per voce, il nome e il valore di adesso, per esempio Volume della musica: 80. Quattro voci dicono fra parentesi il tasto che le cambia: Riproduzione casuale (Maiuscolo+N), Video (Maiuscolo+F1), Sottotitoli letti (Maiuscolo+F2) e Inseguimento della plancia (Maiuscolo+F8). Anche altre voci, come Volume della musica o Dissolvenza, hanno un tasto, che la guida rapida elenca, ma la loro riga non lo dice. Invio su una voce, o il doppio clic, la cambia, o fa la sua azione; Esc, o il pulsante Chiudi, torna alla plancia. Dentro la finestra le lettere non sono comandi del lettore: come in ogni lista di Windows portano alla voce seguente che comincia così, e ripremute alla successiva, e i tasti della finestra principale, compresi i tasti funzione, qui non valgono.</p>
+<p>La voce Impostazioni, l'ultima del primo livello della plancia, apre la finestra delle impostazioni: una lista con una riga per voce, il nome e il valore di adesso, per esempio Volume della musica: 80. Cinque voci dicono fra parentesi il tasto che le cambia: Riproduzione casuale (Maiuscolo+N), Ripetizione (Maiuscolo+V), Video (Maiuscolo+F1), Sottotitoli letti (Maiuscolo+F2) e Inseguimento della plancia (Maiuscolo+F8). Anche altre voci, come Volume della musica o Dissolvenza, hanno un tasto, che la guida rapida elenca, ma la loro riga non lo dice. Invio su una voce, o il doppio clic, la cambia, o fa la sua azione; Esc, o il pulsante Chiudi, torna alla plancia. Dentro la finestra le lettere non sono comandi del lettore: come in ogni lista di Windows portano alla voce seguente che comincia così, e ripremute alla successiva, e i tasti della finestra principale, compresi i tasti funzione, qui non valgono.</p>
 <p>Le voci sono tante: per trovarne una senza scorrere la lista c'è il filtro delle voci, un campo subito prima della lista, che si raggiunge con Maiuscolo con Tab. Mentre scrivi, la lista mostra solo le voci il cui nome contiene il testo scritto, senza badare a maiuscole e accenti: con vol restano Volume della musica, Passo del volume e Volume degli effetti. Conta solo il nome, non il valore dopo i due punti. Invio nel filtro torna alla lista, dove la selezione resta sull'ultima voce che avevi scelto, se è fra quelle mostrate, anche dopo un errore di battitura che l'aveva nascosta; altrimenti va sulla prima. Se nessuna voce va bene, la lista ha una riga sola che lo dice. Cancellando il testo tornano tutte le voci. Alla riapertura il filtro è vuoto.</p>
 <p>Ogni valore nuovo vale subito, si salva subito e lo dice la console, con un suono suo; tornando sulla lista, la riga ha già il valore nuovo.</p>
 <h3 id="impostazioni-campi">I campi delle voci di valore</h3>
@@ -1314,6 +1324,8 @@ kbd {
 <p>Sì o no, come Maiuscolo con N. Di partenza è spenta.</p>
 <h4>Modello della riproduzione casuale</h4>
 <p>Invio apre una lista con i tre modelli, ciascuno con la sua spiegazione: casualità totale, una volta per brano poi si ferma, una volta per brano poi ricomincia, che è quello di partenza. Cambiando modello, il mazzo ricomincia intero. Il capitolo La riproduzione spiega come vanno.</p>
+<h4>Ripetizione</h4>
+<p>Invio apre una lista con le tre scelte: spenta, quella di partenza, del brano e della lista, come Maiuscolo con V. Il capitolo La riproduzione, alla sezione La ripetizione, spiega come vanno.</p>
 <h4>Video</h4>
 <p>Sì o no, come Maiuscolo con F1. Di partenza è spento.</p>
 <h4>Sottotitoli letti</h4>

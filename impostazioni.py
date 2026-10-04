@@ -41,6 +41,7 @@ from valori import (
     PASSO_VOLUME_MINIMO,
     PERCENTUALE_MASSIMA,
     RIGHE_MINIME,
+    RIPETIZIONI,
     RIPRESA_MASSIMA,
     SECONDI_MINIMI,
     TONO_MASSIMO,
@@ -70,6 +71,9 @@ PREDEFINITE = {
     # valori.MODELLI_CASUALI: di partenza una volta per brano, poi si
     # ricomincia (1.61.0).
     "modello_casuale": "a_giro",
+    # La ripetizione, una chiave di valori.RIPETIZIONI: a giro con Maiuscolo
+    # con V, spenta di partenza (1.94.0).
+    "ripetizione": "spenta",
     # Il video (tappa 7): Maiuscolo con F1 lo accende e lo spegne, Maiuscolo
     # con F2 i sottotitoli letti; la sintesi a cui vanno, una chiave di
     # sintesi.USCITE o l'automatica.
@@ -196,6 +200,7 @@ CONTROLLI = {
     "bande": _bande_valide,
     "dissolvenza": _dissolvenza_valida,
     "modello_casuale": lambda valore: valore in MODELLI_CASUALI,
+    "ripetizione": lambda valore: valore in RIPETIZIONI,
     "impressi": lambda valore: valore in ("al_volo", "passata"),
     "sintesi": lambda valore: valore == "automatica" or valore in USCITE_DELLA_SINTESI,
     "destinazione": lambda valore: valore in DESTINAZIONI,

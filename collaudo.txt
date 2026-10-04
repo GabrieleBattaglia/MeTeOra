@@ -37,3 +37,8 @@ Un M4B, se ne hai uno: si vede nella plancia e suona.
 Un audiolibro M4B con i capitoli, o un film MKV: mentre suona, punto va al capitolo successivo e la console dice quale; virgola, a metà capitolo, torna al suo inizio; virgola di nuovo, al precedente.
 Nella plancia, il file con i capitoli si apre con freccia destra: dentro i capitoli; X su uno suona da lì.
 Un file senza capitoli: punto dice che non ne ha.
+Maiuscolo con V tre volte: ripetizione del brano, della lista, spenta, ognuna con il suo suono.
+Ripetizione del brano su un brano breve: alla fine ricomincia; B passa al successivo, che poi si ripete.
+Ripetizione della lista: suona l'ultimo brano di una playlist chiusa, e alla fine riparte il primo.
+Ripetizione della lista con la dissolvenza accesa: l'ultimo brano sfuma nel primo.
+Ripetizione del brano con la dissolvenza accesa: il brano sfuma su se stesso.

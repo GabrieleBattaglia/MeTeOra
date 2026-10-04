@@ -2715,6 +2715,7 @@ def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_an
         ("dissolvenza", "Dissolvenza: spenta, 4 secondi"),
         ("casuale", "Riproduzione casuale (Maiuscolo+N): no"),
         ("modello_casuale", "Modello della riproduzione casuale: una volta per brano, poi ricomincia"),
+        ("ripetizione", "Ripetizione (Maiuscolo+V): spenta"),
         ("video", "Video (Maiuscolo+F1): no"),
         ("sottotitoli", "Sottotitoli letti (Maiuscolo+F2): no"),
         ("sintesi", "Sintesi di sottotitoli e karaoke: automatica, adesso NVDA"),
@@ -5807,3 +5808,103 @@ def test_i_capitoli_nella_plancia(finestra, monkeypatch):
     _tasto(finestra, "x")
     assert chiamate[-1] == (libro, 900.0)
     assert any(_senza_ora(r) == "Dal capitolo 2 di 2: Meta', 15:00." for r in finestra._righe)
+
+
+def test_maiuscolo_v_cambia_la_ripetizione_a_giro(finestra, suoni_annotati):
+    # 1.94.0: del brano, della lista, spenta; e la scelta si salva.
+    _tasto(finestra, "v", maiuscolo=True)
+    assert finestra.impostazioni["ripetizione"] == "brano" and _salvate(finestra)["ripetizione"] == "brano"
+    assert suoni_annotati[-1] == "ripetizione_brano" and _ultima(finestra) == "Ripetizione del brano: quando finisce, ricomincia."
+    _tasto(finestra, "v", maiuscolo=True)
+    assert suoni_annotati[-1] == "ripetizione_lista" and _ultima(finestra) == "Ripetizione della lista: dopo l'ultimo brano, si riparte dal primo."
+    _tasto(finestra, "v", maiuscolo=True)
+    assert finestra.impostazioni["ripetizione"] == "spenta" and _salvate(finestra)["ripetizione"] == "spenta"
+    assert suoni_annotati[-1] == "ripetizione_spenta" and _ultima(finestra) == "Ripetizione spenta."
+    assert any(riga.startswith("Ripetizione (Maiuscolo+V): spenta") for _chiave, riga in finestra._voci_delle_impostazioni())
+
+
+def test_ripetizione_del_brano(finestra, monkeypatch, suoni_annotati):
+    # 1.94.0: il brano che finisce da solo ricomincia, anche nel loop, senza
+    # il suono del ritorno al punto A; B va avanti lo stesso.
+    suonati = _finto_motore(finestra, monkeypatch)
+    finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n in ("a.mp3", "b.mp3")])
+    pl = finestra.archivio.playlist[0]
+    finestra.impostazioni["ripetizione"] = "brano"
+    finestra._suona(pl, pl.brani[0])
+    finestra._brano_finito()
+    finestra._brano_finito()
+    assert suonati == [("a.mp3", None)] * 3 and suoni_annotati[-1] == "brano_seguente_da_solo"
+    _tasto(finestra, "b")
+    assert suonati[-1] == ("b.mp3", None)
+    finestra.coda.loop_playlist, finestra.coda.punto_a, finestra.coda.punto_b = pl, pl.brani[0], pl.brani[1]
+    finestra._brano_finito()
+    assert suonati[-1] == ("b.mp3", None) and suoni_annotati[-1] == "brano_seguente_da_solo"
+    # Il brano saltato non si ripete: nel loop si torna al punto A.
+    pl.brani[1].saltato = True
+    finestra._brano_finito()
+    assert suonati[-1] == ("a.mp3", None) and suoni_annotati[-1] == "ritorno_al_punto_a"
+
+
+def test_ripetizione_della_lista(finestra, monkeypatch, suoni_annotati):
+    # 1.94.0: con la playlist chiusa decide la lista, che dopo l'ultimo
+    # riparte dal primo.
+    suonati = _finto_motore(finestra, monkeypatch)
+    finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n in ("a.mp3", "b.mp3")])
+    pl = finestra.archivio.playlist[0]
+    finestra.impostazioni["ripetizione"] = "lista"
+    finestra._suona(pl, pl.brani[1])
+    finestra._brano_finito()
+    assert suonati[-1] == ("a.mp3", None) and not any(r.startswith("Fine") for r in finestra._righe)
+    finestra._brano_finito()
+    assert suonati[-1] == ("b.mp3", None)
+
+
+def test_ripetizione_della_lista_nella_plancia(finestra, monkeypatch):
+    # 1.94.0: se decide la plancia, si riparte dalla prima voce suonabile
+    # che vi si vede, anche in un'altra playlist.
+    suonati = _finto_motore(finestra, monkeypatch)
+    _playlist_di_prova(finestra, ("a.mp3", "b.mp3"), ("c.mp3", "d.mp3"))
+    _prima, seconda = finestra.archivio.playlist
+    finestra.impostazioni["ripetizione"] = "lista"
+    finestra._suona(seconda, seconda.brani[1])
+    finestra._brano_finito()
+    assert suonati[-1] == ("a.mp3", None)
+
+
+def test_ripetizione_della_lista_con_il_mazzo_finito(finestra, monkeypatch, suoni_annotati):
+    # 1.94.0: con la casuale una volta per brano, il mazzo finito si rimescola.
+    pl, suonati, scelte = _mazzo_di_quattro(finestra, monkeypatch, "una_volta")
+    finestra.impostazioni["ripetizione"] = "lista"
+    finestra._suona(pl, pl.brani[0])
+    for _ in range(4):
+        finestra._brano_finito()
+    assert scelte[-1] == ["a.mp3", "b.mp3", "c.mp3"] and suonati[-1] == ("a.mp3", None) and len(suonati) == 5
+
+
+def test_ripetizione_dopo_un_errore(finestra, monkeypatch, suoni_annotati):
+    # 1.94.0: il brano che non si suona non si ripete; e fra file che non si
+    # suonano dal primo si riparte una volta sola, finche' uno non parte.
+    suonati = _finto_motore(finestra, monkeypatch)
+    monkeypatch.setattr(modulo.suoni, "attesa", lambda: 0.0)
+    finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n in ("a.mp3", "b.mp3")])
+    pl = finestra.archivio.playlist[0]
+
+    def errore():
+        finestra.motore._in_corso = None
+        finestra._brano_in_errore(finestra.coda.corrente.percorso)
+
+    finestra.impostazioni["ripetizione"] = "brano"
+    finestra._suona(pl, pl.brani[0])
+    errore()
+    assert suonati[-1] == ("b.mp3", None)
+    finestra.impostazioni["ripetizione"] = "lista"
+    errore()
+    assert suonati[-1] == ("a.mp3", None)
+    errore()
+    assert suonati[-1] == ("b.mp3", None)
+    errore()
+    assert len(suonati) == 4
+    # Un brano scelto da chi ascolta chiude la catena: si riparte di nuovo.
+    finestra._suona(pl, pl.brani[1])
+    errore()
+    assert suonati[-1] == ("a.mp3", None)

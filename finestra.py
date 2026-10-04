@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura. Nella 1.83.1 Maiuscolo con F10 lascia chiuso Questo PC, e la plancia molto aperta non ferma piu' la finestra. Nella 1.83.2 F10 a fette, e i suoni delle aperture che non si sovrappongono. Nella 1.84.0 la proposta dell'aggiornamento, il suo avanzamento e la chiusura per aggiornarsi. Nella 1.85.0 i crediti con la licenza e le licenze dei componenti. Nella 1.85.5 i rami di rete che si riprovano sempre. Nella 1.86.0 Maiuscolo con F12 spegne e riaccende i tasti rapidi a carattere. Nella 1.87.0 la barra dei comandi per il mouse. Nella 1.88.0 anche sopra il video, con la linea del tempo. Nella 1.88.1 F2 scrive solo le versioni recenti. Nella 1.89.0 i problemi interni anche nel registro degli errori. Nella 1.90.0 le copie dei dati che non riescono. Nella 1.91.0 i file aperti da Windows, il trascinamento e le associazioni dei formati. Nella 1.92.0 i file lunghi riprendono dal punto lasciato. Nella 1.93.0 i capitoli, con virgola e punto e nella plancia.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura. Nella 1.83.1 Maiuscolo con F10 lascia chiuso Questo PC, e la plancia molto aperta non ferma piu' la finestra. Nella 1.83.2 F10 a fette, e i suoni delle aperture che non si sovrappongono. Nella 1.84.0 la proposta dell'aggiornamento, il suo avanzamento e la chiusura per aggiornarsi. Nella 1.85.0 i crediti con la licenza e le licenze dei componenti. Nella 1.85.5 i rami di rete che si riprovano sempre. Nella 1.86.0 Maiuscolo con F12 spegne e riaccende i tasti rapidi a carattere. Nella 1.87.0 la barra dei comandi per il mouse. Nella 1.88.0 anche sopra il video, con la linea del tempo. Nella 1.88.1 F2 scrive solo le versioni recenti. Nella 1.89.0 i problemi interni anche nel registro degli errori. Nella 1.90.0 le copie dei dati che non riescono. Nella 1.91.0 i file aperti da Windows, il trascinamento e le associazioni dei formati. Nella 1.92.0 i file lunghi riprendono dal punto lasciato. Nella 1.93.0 i capitoli, con virgola e punto e nella plancia. Nella 1.94.0 la ripetizione del brano e della lista, con Maiuscolo con V.
 
 """La finestra di MeTeOra.
 
@@ -145,6 +145,8 @@ TASTI = {
     ("x", True): "loop",
     ("c", False): "pausa",
     ("v", False): "stop",
+    # La ripetizione a giro (Gabriele, 1.94.0).
+    ("v", True): "ripetizione",
     ("b", False): "successivo",
     ("n", False): "casuale",
     ("n", True): "riproduzione_casuale",
@@ -210,7 +212,8 @@ NOMI_DEI_SEGNI = {
 
 TASTI_COMUNI = [
     "X suona la voce selezionata, riprende dalla pausa o fa ripartire da capo il brano che suona già; C pausa, V stop, Z e B brano precedente e successivo, N brano a caso, "
-    "Maiuscolo con N la riproduzione casuale, con cui B sceglie a caso e Z torna ai brani suonati prima.",
+    "Maiuscolo con N la riproduzione casuale, con cui B sceglie a caso e Z torna ai brani suonati prima; "
+    "Maiuscolo con V la ripetizione, a giro: del brano, della lista, spenta.",
     "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, più e meno volume, Maiuscolo con M il passo del volume, M muto.",
     "Virgola e punto vanno al capitolo precedente e successivo, negli audiolibri e nei film che ne hanno; la virgola, oltre i primi secondi di un capitolo, torna al suo inizio.",
     "A e D rallentano e accelerano, S torna alla velocità normale; F e H abbassano e alzano il tono di un semitono, G lo riporta al normale.",
@@ -264,6 +267,11 @@ def _stesso_posto(a, b):
     return a[0] is b[0] and a[1] is b[1] and a[2] == b[2]
 
 
+def _frase_della_ripetizione(ripetizione):
+    """Il riscontro della ripetizione, una chiave di valori.RIPETIZIONI (1.94.0)."""
+    return FRASI_DELLA_RIPETIZIONE[ripetizione]
+
+
 def _frase_della_casuale(accesa, modello):
     if accesa:
         return f"Riproduzione casuale accesa: {valori.MODELLI_CASUALI[modello]}."
@@ -271,6 +279,11 @@ def _frase_della_casuale(accesa, modello):
 
 
 # Le righe della lista dei modelli della riproduzione casuale.
+FRASI_DELLA_RIPETIZIONE = {
+    "spenta": "Ripetizione spenta.",
+    "brano": "Ripetizione del brano: quando finisce, ricomincia.",
+    "lista": "Ripetizione della lista: dopo l'ultimo brano, si riparte dal primo.",
+}
 SPIEGAZIONI_DEI_MODELLI = {
     "totale": "ogni volta un brano qualsiasi, mai lo stesso due volte di fila",
     "una_volta": "ogni brano suona una volta, poi la riproduzione finisce",
@@ -339,6 +352,7 @@ VOCI_DELLE_IMPOSTAZIONI = {
     "dissolvenza": ("Dissolvenza", "cambiata"),
     "casuale": ("Riproduzione casuale (Maiuscolo+N)", "cambiata"),
     "modello_casuale": ("Modello della riproduzione casuale", "cambiato"),
+    "ripetizione": ("Ripetizione (Maiuscolo+V)", "cambiata"),
     "video": ("Video (Maiuscolo+F1)", "cambiato"),
     "sottotitoli": ("Sottotitoli letti (Maiuscolo+F2)", "cambiati"),
     "sintesi": ("Sintesi di sottotitoli e karaoke", "cambiata"),
@@ -807,6 +821,13 @@ class Finestra(wx.Frame):
         # brano seguente che aspetta la fine del suono di un errore.
         self._domanda_viva = None
         self._avanzamento_dopo_errore = None
+        # Con la ripetizione della lista, vero se dopo un errore si e' gia'
+        # ripartiti dal primo senza che niente si sia potuto suonare: un
+        # secondo giro fra file che non si suonano non finirebbe mai (1.94.0).
+        # Lo rimettono a falso la fine vera di un brano e i brani fatti
+        # partire da chi ascolta; non il caricamento, perche' un file rovinato
+        # puo' caricarsi e poi non suonare.
+        self._da_capo_dopo_errore = False
         self._sintesi = sintesi.Sintesi()
         # La barra braille a blocchi (1.83.0): i testi letti in fila, con il
         # tempo minimo di lettura; le attese sono di wx, nel filo della finestra.
@@ -4091,6 +4112,9 @@ class Finestra(wx.Frame):
             self._prepara_i_midi(lambda: self._suona(pl, brano, evento, sottobrano, inizio, sfuma_lo_stesso))
             return
         self._uscente = self._preparato = self._avanzamento_dopo_errore = None
+        if evento not in ("brano_seguente_da_solo", "ritorno_al_punto_a"):
+            # Un brano scelto da chi ascolta chiude la catena degli errori.
+            self._da_capo_dopo_errore = False
         # Il punto del file lungo che si lascia, e quello a cui riprendere il
         # nuovo, se nessuno ne chiede un altro (1.92.0).
         self._ricorda_la_posizione()
@@ -4294,7 +4318,7 @@ class Finestra(wx.Frame):
         dati = self._dati(voce)
         return dati["playlist"], dati["brano"], dati.get("numero")
 
-    def _seguente_automatico(self, sottobrano=None):
+    def _seguente_automatico(self, sottobrano=None, dopo_errore=False):
         """Cosa suonare quando un brano finisce da solo: (playlist, brano,
         sottobrano) o None. Se cio' che suona si vede nella plancia, decide la
         plancia: la voce suonabile che viene dopo, dentro i rami aperti,
@@ -4302,7 +4326,19 @@ class Finestra(wx.Frame):
         vede, per esempio una cartella suonata chiusa o un file aperto con
         Apri file, decide la lista. Con il loop A-B decide il loop.
         sottobrano e' quello del brano che finisce, se non e' quello del
-        motore, come al passaggio della dissolvenza."""
+        motore, come al passaggio della dissolvenza.
+        La ripetizione (1.94.0): del brano, si risuona lo stesso, con lo
+        stesso sottobrano; della lista, dove non c'e' altro si riparte dal
+        primo. Dopo un errore, dopo_errore, il brano che non si suona non si
+        ripete, e dal primo si riparte una volta sola."""
+        ripetizione = self.impostazioni["ripetizione"]
+        pl, corrente = self.coda.playlist, self.coda.corrente
+        if (ripetizione == "brano" and not dopo_errore and corrente is not None and not corrente.saltato
+                and self.coda.ammesso(pl, corrente) and any(b is corrente for b in pl.brani)):
+            # Un brano saltato, tolto dalla lista o nascosto dal filtro non si
+            # ripete: si va avanti come sempre.
+            self._mazzo_finito = False
+            return pl, corrente, self.motore.sottobrano if sottobrano is None else sottobrano
         voce = self._voce_da_seguire(sottobrano)
         self._mazzo_finito = False
         if self.impostazioni["casuale"]:
@@ -4312,15 +4348,46 @@ class Finestra(wx.Frame):
                 self._atteso_dalla_storia = avanti
                 return avanti
             seguente = self._seguente_casuale(voce, sottobrano)
+            if seguente is FINE_DEL_MAZZO and ripetizione == "lista":
+                # Il mazzo finito si rimescola, come nel modello a giro.
+                self._ricomincia_il_mazzo()
+                seguente = self._seguente_casuale(voce, sottobrano)
             if seguente is FINE_DEL_MAZZO:
                 self._mazzo_finito = True
                 return None
             if seguente is not None:
                 return seguente
         if voce is not None:
-            return self._passo_in_plancia(voce, 1)
-        seguente = self.coda.successivo()
-        return (self.coda.playlist, seguente, None) if seguente else None
+            seguente = self._passo_in_plancia(voce, 1)
+        else:
+            dopo = self.coda.successivo()
+            seguente = (self.coda.playlist, dopo, None) if dopo else None
+        if seguente is None and ripetizione == "lista":
+            seguente = self._da_capo(voce, dopo_errore)
+        return seguente
+
+    def _da_capo(self, voce, dopo_errore):
+        """Con la ripetizione della lista, il primo di cio' che l'avanzamento
+        suonerebbe: se decide la plancia, la prima voce suonabile che vi si
+        vede; altrimenti il primo della lista, del loop o della selezione.
+        None se non c'e', o se dopo un errore si e' gia' ripartiti una volta
+        senza che niente si suonasse."""
+        if dopo_errore:
+            if self._da_capo_dopo_errore:
+                return None
+            self._da_capo_dopo_errore = True
+        if voce is not None:
+            prima, _cookie = self.albero.GetFirstChild(self.albero.GetRootItem())
+            prima = prima if prima.IsOk() else None
+            while prima is not None and not self._suonabile_in_plancia(prima):
+                prima = self._dopo(prima)
+            if prima is None:
+                return None
+            dati = self._dati(prima)
+            return dati["playlist"], dati["brano"], dati.get("numero")
+        pl = self.coda.playlist
+        primo = self.coda.primo(pl) if pl is not None else None
+        return (pl, primo, None) if primo is not None else None
 
     def _candidati_in_plancia(self, voce):
         """Le voci suonabili che si vedono nella plancia, tranne voce."""
@@ -4444,6 +4511,9 @@ class Finestra(wx.Frame):
         if self.impostazioni["casuale"] and brano is not self.coda.corrente:
             # A caso non si torna al punto A: si va da un'altra parte.
             return "brano_seguente_da_solo"
+        if self.impostazioni["ripetizione"] == "brano" and brano is self.coda.corrente and nuova is self.coda.playlist:
+            # Il brano che si ripete non torna al punto A del loop.
+            return "brano_seguente_da_solo"
         pl = self.coda.playlist
         prima = pl.indice(self.coda.corrente) if pl else None
         dopo = nuova.indice(brano)
@@ -4459,6 +4529,7 @@ class Finestra(wx.Frame):
         if self.coda.corrente is not None:
             self.posizioni.dimentica(self.coda.corrente.percorso)
         self._uscente = self._preparato = None
+        self._da_capo_dopo_errore = False
         seguente = self._seguente_automatico()
         if seguente:
             nuova, brano, sottobrano = seguente
@@ -4524,6 +4595,7 @@ class Finestra(wx.Frame):
         pl, corrente, sottobrano_uscente = uscente
         if self.coda.playlist is not pl or self.coda.corrente is not corrente:
             return
+        self._da_capo_dopo_errore = False
         seguente = self._seguente_automatico(sottobrano_uscente)
         if seguente is None:
             # La plancia non ha piu' niente dopo: come a fine lista, il brano
@@ -4559,7 +4631,7 @@ class Finestra(wx.Frame):
             # Intanto e' partito altro, per esempio con X, o V ha fermato.
             return
         self._avanzamento_dopo_errore = None
-        seguente = self._seguente_automatico()
+        seguente = self._seguente_automatico(dopo_errore=True)
         if seguente:
             nuova, brano, sottobrano = seguente
             self._suona(nuova, brano, "brano_seguente_da_solo", sottobrano)
@@ -5105,6 +5177,16 @@ class Finestra(wx.Frame):
         self._salva_impostazioni()
         self._riscontro("casuale_acceso" if accesa else "casuale_spento", _frase_della_casuale(accesa, self.impostazioni["modello_casuale"]))
 
+    def _comando_ripetizione(self):
+        """Maiuscolo con V (Gabriele, 1.94.0): la ripetizione a giro, del
+        brano, della lista, spenta. Il seguente gia' preparato per la
+        dissolvenza si ricontrolla al passaggio, come sempre."""
+        chiavi = list(valori.RIPETIZIONI)
+        ripetizione = chiavi[(chiavi.index(self.impostazioni["ripetizione"]) + 1) % len(chiavi)]
+        self.impostazioni["ripetizione"] = ripetizione
+        self._salva_impostazioni()
+        self._riscontro(f"ripetizione_{ripetizione}", _frase_della_ripetizione(ripetizione))
+
     def _comando_durata_della_dissolvenza(self):
         """Maiuscolo con L: chiede la durata della dissolvenza in secondi. La
         dissolvenza resta accesa o spenta com'era."""
@@ -5170,6 +5252,7 @@ class Finestra(wx.Frame):
             "dissolvenza": lambda: valori.scrivi_dissolvenza(imp["dissolvenza"]),
             "casuale": lambda: "sì" if imp["casuale"] else "no",
             "modello_casuale": lambda: valori.MODELLI_CASUALI[imp["modello_casuale"]],
+            "ripetizione": lambda: valori.RIPETIZIONI[imp["ripetizione"]],
             "video": lambda: "sì" if imp["video"] else "no",
             "sottotitoli": lambda: "sì" if imp["sottotitoli"] else "no",
             "sintesi": self._sintesi_da_leggere,
@@ -5225,6 +5308,7 @@ class Finestra(wx.Frame):
         azioni = {
             "scheda_audio": self._scegli_la_scheda_audio,
             "modello_casuale": self._scegli_il_modello_casuale,
+            "ripetizione": lambda genitore: self._scegli_da_una_lista(genitore, "ripetizione", valori.RIPETIZIONI, _frase_della_ripetizione),
             "sintesi": self._scegli_la_sintesi,
             "banco_midi": self._scegli_il_banco,
             "salva_console": lambda _genitore: self._salva_console(),

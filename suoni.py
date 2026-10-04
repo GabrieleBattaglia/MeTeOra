@@ -166,6 +166,11 @@ EVENTI = {
     # Virgola e punto, i capitoli (1.93.0): due tic che scendono e due che salgono.
     "capitolo_precedente": "meditimer_giro_piu_lento",
     "capitolo_successivo": "meditimer_giro_piu_veloce",
+    # Maiuscolo con V, la ripetizione a giro (1.94.0): spenta, del brano con
+    # tre tic uguali, della lista con tre tic che salgono.
+    "ripetizione_spenta": "eliminato",
+    "ripetizione_brano": "meditimer_giro_uguale",
+    "ripetizione_lista": "meditimer_banco_salvato",
     # Esc in un campo, o No a una domanda (tappa 9, 1.66.36): l'operazione non
     # si fa. Non e' lo stop, che ha il preset annullato.
     "annullamento": "meteora_annullamento",

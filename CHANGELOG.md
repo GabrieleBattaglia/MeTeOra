@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.94.0] - 2026-10-04
+
+- La ripetizione, tappa 12 e del piano: Maiuscolo con V, il tasto scelto da Gabriele, la cambia a giro, del brano, della lista, spenta, ognuna con il suo suono dalla collezione di GBUtils (V198). Del brano, quello che finisce da solo ricomincia; della lista, dove non c'è altro si riparte dal primo, nella plancia dalla prima voce suonabile che si vede. Con la riproduzione casuale una volta per brano, la ripetizione della lista rimescola il mazzo finito. La ripetizione si ricorda alla riapertura ed è anche una voce delle impostazioni.
+- Un brano che non si suona non si ripete, e fra file che non si suonano dal primo si riparte una volta sola: nessun giro senza fine.
+
 ## [1.93.0] - 2026-10-04
 
 - I capitoli, tappa 12 e del piano: negli audiolibri e nei film che ne hanno, la virgola va al capitolo precedente e il punto al successivo, i tasti scelti da Gabriele, e la console dice quale, con il titolo e il tempo; la virgola, oltre i primi tre secondi di un capitolo, torna al suo inizio. Due suoni nuovi dalla collezione di GBUtils (V198).

@@ -77,6 +77,13 @@ MODELLI_CASUALI = {
     "una_volta": "una volta per brano, poi si ferma",
     "a_giro": "una volta per brano, poi ricomincia",
 }
+# La ripetizione (1.94.0), a giro con Maiuscolo con V: il nome salvato nelle
+# impostazioni e la forma da leggere.
+RIPETIZIONI = {
+    "spenta": "spenta",
+    "brano": "del brano",
+    "lista": "della lista",
+}
 # Le parole che accendono e spengono la dissolvenza: quelle del si' e del no,
 # senza le cifre, che li' sono secondi, e anche al femminile.
 _ACCESA = frozenset(parola for parola in SI if not parola.isdigit()) | {"accesa"}
