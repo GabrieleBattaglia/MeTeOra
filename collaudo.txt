@@ -42,3 +42,8 @@ Ripetizione del brano su un brano breve: alla fine ricomincia; B passa al succes
 Ripetizione della lista: suona l'ultimo brano di una playlist chiusa, e alla fine riparte il primo.
 Ripetizione della lista con la dissolvenza accesa: l'ultimo brano sfuma nel primo.
 Ripetizione del brano con la dissolvenza accesa: il brano sfuma su se stesso.
+Maiuscolo con S, scrivi 1: dopo un minuto la musica sfuma per venti secondi e si ferma, con il suono e la console che lo dicono.
+Maiuscolo con S di nuovo prima che scada: la domanda dice fra quanto scade e a che ora.
+Mentre sfuma, premi X su un brano: suona al volume pieno, e il timer non c'è più.
+Maiuscolo con S, scrivi f: il brano arriva in fondo e il seguente non parte, anche con la dissolvenza accesa.
+Maiuscolo con S, scrivi 0: il timer si toglie.

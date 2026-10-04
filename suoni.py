@@ -171,6 +171,12 @@ EVENTI = {
     "ripetizione_spenta": "eliminato",
     "ripetizione_brano": "meditimer_giro_uguale",
     "ripetizione_lista": "meditimer_banco_salvato",
+    # Maiuscolo con S, il timer di spegnimento (1.95.0): impostato con una
+    # scivolata che sale, tolto con una che scende, scaduto con due note
+    # basse e morbide.
+    "timer_impostato": "meditimer_timer_impostato",
+    "timer_tolto": "meditimer_annullato",
+    "timer_scaduto": "meditimer_cronometro_fermato",
     # Esc in un campo, o No a una domanda (tappa 9, 1.66.36): l'operazione non
     # si fa. Non e' lo stop, che ha il preset annullato.
     "annullamento": "meteora_annullamento",

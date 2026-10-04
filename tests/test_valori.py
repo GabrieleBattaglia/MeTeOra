@@ -781,3 +781,13 @@ def test_i_valori_letti_passano_i_controlli():
     for chiave, valori_letti in letti.items():
         for valore in valori_letti:
             assert CONTROLLI[chiave](valore), (chiave, valore)
+
+
+def test_leggi_timer():
+    # 1.95.0: i minuti, f o fine per la fine del brano, 0 per togliere.
+    assert valori.leggi_timer("30") == (30, [])
+    assert valori.leggi_timer(" F ") == (valori.FINE_DEL_BRANO, []) and valori.leggi_timer("Fine") == (valori.FINE_DEL_BRANO, [])
+    assert valori.leggi_timer("0") == (0, [])
+    assert valori.leggi_timer("700") == (600, ["Timer di spegnimento: 700 è oltre il massimo, ho messo 600."])
+    with pytest.raises(valori.ErroreValore, match=re.escape("non è un numero; scrivi un numero intero da 0 a 600. Oppure f, per fermarla alla fine del brano.") + "$"):
+        valori.leggi_timer("mezz'ora")

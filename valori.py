@@ -44,6 +44,10 @@ ANTICIPO_MASSIMO_DEL_KARAOKE = 10000
 CELLE_MASSIME = 160
 # Oltre quanti minuti un file riprende dal punto lasciato (1.92.0): 0 mai.
 RIPRESA_MASSIMA = 600
+# Il timer di spegnimento (1.95.0): al massimo dieci ore; e la scelta della
+# fine del brano, scritta f o fine.
+TIMER_MASSIMO = 600
+FINE_DEL_BRANO = "fine"
 LETTURA_MINIMA, LETTURA_MASSIMA = 100, 60000
 # Le dimensioni dei caratteri, in punti.
 CARATTERI_MINIMI, CARATTERI_MASSIMI = 6, 72
@@ -256,6 +260,17 @@ def leggi_anticipo_del_karaoke(testo):
 def leggi_ripresa_oltre(testo):
     """Oltre quanti minuti un file riprende dal punto lasciato: 0 mai."""
     return leggi_intero(testo, 0, RIPRESA_MASSIMA, "Punto lasciato dei file lunghi")
+
+
+def leggi_timer(testo):
+    """Il timer di spegnimento (1.95.0): (minuti, correzioni), con 0 per
+    toglierlo, oppure (FINE_DEL_BRANO, []) per la fine del brano."""
+    if _pulito(testo).lower() in ("f", "fine"):
+        return FINE_DEL_BRANO, []
+    try:
+        return leggi_intero(testo, 0, TIMER_MASSIMO, "Timer di spegnimento")
+    except ErroreValore as e:
+        raise ErroreValore(f"{e} Oppure f, per fermarla alla fine del brano.") from None
 
 
 def leggi_celle_braille(testo):

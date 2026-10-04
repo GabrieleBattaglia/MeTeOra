@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.95.0] - 2026-10-04
+
+- Il timer di spegnimento, tappa 12 e del piano: Maiuscolo con S, il tasto scelto da Gabriele, chiede fra quanti minuti fermare la riproduzione, da 1 a 600, oppure f per la fine del brano, o 0 per togliere il timer. Allo scadere la musica sfuma per venti secondi, sempre, anche con la dissolvenza spenta, e si ferma; alla fine del brano il seguente non parte. Tre suoni nuovi dalla collezione di GBUtils (V198).
+- Mentre sfuma, V ferma subito, un brano scelto da chi ascolta torna al volume pieno, e Maiuscolo con S con 0 toglie la sfumatura. Il motore ha un'attenuazione sopra il volume e le dissolvenze, che non tocca il volume scelto.
+
 ## [1.94.0] - 2026-10-04
 
 - La ripetizione, tappa 12 e del piano: Maiuscolo con V, il tasto scelto da Gabriele, la cambia a giro, del brano, della lista, spenta, ognuna con il suo suono dalla collezione di GBUtils (V198). Del brano, quello che finisce da solo ricomincia; della lista, dove non c'è altro si riparte dal primo, nella plancia dalla prima voce suonabile che si vede. Con la riproduzione casuale una volta per brano, la ripetizione della lista rimescola il mazzo finito. La ripetizione si ricorda alla riapertura ed è anche una voce delle impostazioni.

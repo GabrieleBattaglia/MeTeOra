@@ -3,6 +3,7 @@
 # 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15).
 
 import datetime
+import math
 import os
 import re
 import threading
@@ -5908,3 +5909,91 @@ def test_ripetizione_dopo_un_errore(finestra, monkeypatch, suoni_annotati):
     finestra._suona(pl, pl.brani[1])
     errore()
     assert suonati[-1] == ("a.mp3", None)
+
+
+def test_maiuscolo_s_imposta_e_toglie_il_timer(finestra, monkeypatch, suoni_annotati):
+    # 1.95.0: i minuti, la fine del brano, 0 che lo toglie, e i valori sbagliati.
+    adesso = [1000.0]
+    finestra._adesso = lambda: adesso[0]
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("45"))
+    _tasto(finestra, "s", maiuscolo=True)
+    assert suoni_annotati[-1] == "timer_impostato" and _ultima(finestra).startswith("Timer impostato: la riproduzione si ferma fra 45 minuti, alle ")
+    assert finestra._sveglia_del_timer.IsRunning() and finestra._timer_scade == 1000.0 + 45 * 60
+    adesso[0] += 30 * 60 + 1
+    assert finestra._frase_del_timer().startswith("Adesso scade fra 15 minuti, alle ")
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("f"))
+    _tasto(finestra, "s", maiuscolo=True)
+    assert not finestra._sveglia_del_timer.IsRunning() and finestra._timer_a_fine_brano and finestra._timer_scade is None
+    assert _ultima(finestra) == "Timer impostato: la riproduzione si ferma alla fine del brano."
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("0"))
+    _tasto(finestra, "s", maiuscolo=True)
+    assert suoni_annotati[-1] == "timer_tolto" and _ultima(finestra) == "Timer tolto." and not finestra._timer_a_fine_brano
+    _tasto(finestra, "s", maiuscolo=True)
+    assert _ultima(finestra) == "Non c'era un timer da togliere."
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("mezz'ora"))
+    _tasto(finestra, "s", maiuscolo=True)
+    assert suoni_annotati[-1] == "errore" and _ultima(finestra).endswith("Oppure f, per fermarla alla fine del brano. Timer non cambiato.")
+    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoAnnullato())
+    _tasto(finestra, "s", maiuscolo=True)
+    assert _ultima(finestra) == "Timer non cambiato. Adesso non c'è un timer."
+
+
+def _timer_che_sfuma(finestra, monkeypatch):
+    """Un brano che suona, l'orologio del timer in mano alla prova e le
+    attenuazioni chieste al motore, in una lista."""
+    suonati = _finto_motore(finestra, monkeypatch)
+    adesso = [1000.0]
+    finestra._adesso = lambda: adesso[0]
+    attenuazioni = []
+    monkeypatch.setattr(type(finestra.motore), "attenuazione",
+        property(lambda _self: attenuazioni[-1] if attenuazioni else 1.0, lambda _self, valore: attenuazioni.append(valore)))
+    finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n in ("a.mp3", "b.mp3")])
+    pl = finestra.archivio.playlist[0]
+    finestra._suona(pl, pl.brani[0])
+    return pl, suonati, adesso, attenuazioni
+
+
+def test_il_timer_scaduto_sfuma_e_ferma(finestra, monkeypatch, suoni_annotati):
+    # 1.95.0: venti secondi di sfumatura, con il coseno, poi lo stop e il
+    # volume pieno a motore fermo.
+    _pl, _suonati, adesso, attenuazioni = _timer_che_sfuma(finestra, monkeypatch)
+    finestra._scade_il_timer()
+    assert _ultima(finestra) == "Timer scaduto: la musica sfuma." and finestra._orologio_della_sfumatura.IsRunning()
+    assert finestra._frase_del_timer() == "Adesso il timer è scaduto, e la musica sta sfumando."
+    adesso[0] += modulo.SFUMATURA_DEL_TIMER / 2
+    finestra._passo_della_sfumatura()
+    assert attenuazioni[-1] == pytest.approx(math.cos(math.pi / 4))
+    adesso[0] += modulo.SFUMATURA_DEL_TIMER / 2
+    finestra._passo_della_sfumatura()
+    assert attenuazioni[-2:] == [pytest.approx(0.0, abs=1e-9), 1.0] and finestra.motore.in_corso is None
+    assert suoni_annotati[-1] == "timer_scaduto" and _ultima(finestra) == "Timer scaduto: riproduzione fermata."
+    assert not finestra._orologio_della_sfumatura.IsRunning()
+    # Senza niente che suona, scade e basta.
+    finestra._scade_il_timer()
+    assert _ultima(finestra) == "Timer scaduto." and len(attenuazioni) == 3
+
+
+def test_la_sfumatura_del_timer_la_fermano_x_e_v(finestra, monkeypatch, suoni_annotati):
+    # 1.95.0: un brano scelto da chi ascolta torna al volume pieno; V ferma
+    # senza la dissolvenza, perche' la musica sta gia' sfumando.
+    pl, suonati, adesso, attenuazioni = _timer_che_sfuma(finestra, monkeypatch)
+    finestra._scade_il_timer()
+    adesso[0] += 5
+    finestra._passo_della_sfumatura()
+    finestra._suona(pl, pl.brani[1])
+    assert attenuazioni[-1] == 1.0 and finestra._inizio_della_sfumatura is None and suonati[-1] == ("b.mp3", None)
+    fermi = []
+    monkeypatch.setattr(finestra.motore, "stop", lambda sfumando=False: fermi.append(sfumando))
+    finestra._scade_il_timer()
+    _tasto(finestra, "v")
+    assert fermi == [False] and attenuazioni[-1] == 1.0 and suoni_annotati[-1] == "stop"
+
+
+def test_il_timer_alla_fine_del_brano(finestra, monkeypatch, suoni_annotati):
+    # 1.95.0: niente si prepara per la dissolvenza, e a fine brano ci si ferma.
+    _pl, suonati, _adesso, _attenuazioni = _timer_che_sfuma(finestra, monkeypatch)
+    finestra._timer_a_fine_brano = True
+    assert finestra._seguente_automatico() is None
+    finestra._brano_finito()
+    assert suonati == [("a.mp3", None)] and suoni_annotati[-1] == "timer_scaduto"
+    assert _ultima(finestra) == "Timer scaduto: il brano è finito, e la riproduzione si ferma." and not finestra._timer_a_fine_brano

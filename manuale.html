@@ -138,6 +138,7 @@ kbd {
 <li><a href="#brano-seguente">Il brano seguente</a></li>
 <li><a href="#casuale">La riproduzione casuale</a></li>
 <li><a href="#ripetizione">La ripetizione</a></li>
+<li><a href="#timer">Il timer di spegnimento</a></li>
 <li><a href="#loop">Il loop A-B</a></li>
 <li><a href="#selezione">La selezione multipla</a></li>
 <li><a href="#salti">Muoversi nel brano</a></li>
@@ -295,6 +296,7 @@ kbd {
 <li><kbd>N</kbd>: suona un brano a caso fra quelli che si vedono nella plancia, o nella lista da cui suona.</li>
 <li><kbd>Maiuscolo con N</kbd>: accende e spegne la riproduzione casuale, che sceglie a caso il brano seguente quando uno finisce da solo e quando premi B.</li>
 <li><kbd>Maiuscolo con V</kbd>: cambia la ripetizione, a giro: del brano, che ricomincia quando finisce; della lista, che dopo l'ultimo brano riparte dal primo; spenta.</li>
+<li><kbd>Maiuscolo con S</kbd>: il timer di spegnimento: chiede fra quanti minuti fermare la riproduzione, che prima sfuma, oppure f per fermarla alla fine del brano, o 0 per togliere il timer.</li>
 <li><kbd>Maiuscolo con X</kbd>: a giro, mette il punto A del loop sul brano selezionato, poi il punto B, poi toglie il loop.</li>
 <li><kbd>F4</kbd>: mette nei Preferiti il brano, il file o il sottobrano selezionato.</li>
 <li><kbd>F8</kbd>: porta la selezione e il fuoco della plancia su ciò che suona, aprendo i rami che servono.</li>
@@ -931,6 +933,9 @@ kbd {
 <li>spenta, come di partenza: alla fine ci si ferma.</li>
 </ul>
 <p>La ripetizione vale quando un brano finisce da solo: Z, B e N vanno dove vanno sempre, e con la ripetizione del brano B passa al successivo, che poi si ripete lui. Con la riproduzione casuale accesa, la ripetizione del brano risuona lo stesso brano invece di sceglierne un altro; la ripetizione della lista, con il modello una volta per brano poi si ferma, alla fine del mazzo rimescola e continua, come il modello a giro. Con la dissolvenza accesa, anche il brano che si ripete entra sfumando sulla sua fine. MeTeOra ricorda la ripetizione anche alla riapertura, e la voce Ripetizione delle impostazioni la sceglie da una lista.</p>
+<h3 id="timer">Il timer di spegnimento</h3>
+<p>Maiuscolo con S apre la domanda del timer di spegnimento, che dice anche il timer di adesso. Scrivi i minuti, da 1 a 600: passati quelli, la musica sfuma per venti secondi e si ferma, come con V, e la console lo dice, con il suo suono; i file lunghi, come sempre allo stop, si ricordano il punto. Scrivi f, o fine, per fermare la riproduzione alla fine del brano che suona: il seguente non parte, e con la dissolvenza accesa non entra. Scrivi 0 per togliere il timer. Un timer nuovo prende il posto di quello di prima, e Esc lascia tutto com'è.</p>
+<p>Mentre la musica sfuma, se non dormi ancora, V la ferma subito, un brano scelto da te, con X, Z, B o gli altri tasti, suona al volume di sempre, e Maiuscolo con S seguito da 0 toglie la sfumatura, e la musica continua. Se allo scadere niente suona, o la musica è in pausa, la riproduzione si ferma senza sfumare. MeTeOra non ricorda il timer alla riapertura; il campo ripropone i minuti dell'ultima volta, e la prima volta 30.</p>
 <h3 id="loop">Il loop A-B</h3>
 <p>Maiuscolo con X mette il loop fra due brani della stessa lista, una playlist, i Preferiti o una cartella, e funziona a giro:</p>
 <ul>

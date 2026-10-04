@@ -1183,3 +1183,22 @@ def test_il_karaoke_di_un_brano_reso_in_ram(avvisi, tmp_path):
         assert (m.posizione or 0) > 1.4
     finally:
         m.chiudi()
+
+
+def test_l_attenuazione_abbassa_senza_toccare_il_volume(crea, tmp_path):
+    # 1.95.0: la sfumatura del timer di spegnimento. L'ampiezza 0.125 e' il
+    # volume a meta', per la legge cubica di mpv; vale anche per un brano nuovo.
+    primo = _seno(tmp_path / "primo.wav", 5)
+    secondo = _seno(tmp_path / "secondo.wav", 5)
+    m = crea(volume=80)
+    m.suona(primo)
+    m.attenuazione = 0.125
+    assert m.volume == 80 and m.attenuazione == 0.125
+    assert _aspetta(lambda: abs(m._attivo.mpv.volume - 40) < 0.5)
+    m.volume = 60
+    assert _aspetta(lambda: abs(m._attivo.mpv.volume - 30) < 0.5)
+    m.suona(secondo)
+    assert _aspetta(lambda: m._attivo.percorso == secondo and abs(m._attivo.mpv.volume - 30) < 0.5)
+    m.attenuazione = 2
+    assert m.attenuazione == 1.0
+    assert _aspetta(lambda: abs(m._attivo.mpv.volume - 60) < 0.5)
