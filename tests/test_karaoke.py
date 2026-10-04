@@ -168,6 +168,9 @@ def test_i_blocchi_per_riga_e_per_strofa():
         (9.5, 19.5, "Ritornello")]
     # L'ultima strofa dura fino a dieci secondi dopo la sua ultima riga.
     assert karaoke.blocchi(righe, "strofa") == [(0.5, 6.5, "Prima riga\nRitornello\nParole"), (7.5, 19.5, "Seconda strofa\nRitornello")]
+    # Una riga di soli segni e' una pausa: non si legge.
+    segni = [Riga(1.0, "Uno", True), Riga(3.0, "=====", False), Riga(5.0, "* * *", False), Riga(7.0, "Due", False)]
+    assert karaoke.blocchi(segni) == [(1.0, 3.0, "Uno"), (7.0, 17.0, "Due")]
     # Senza strofe segnate, per strofa vale per riga.
     senza = [Riga(1.0, "Uno", True), Riga(2.0, "Due", False)]
     assert karaoke.blocchi(senza, "strofa") == karaoke.blocchi(senza) == [(1.0, 2.0, "Uno"), (2.0, 12.0, "Due")]

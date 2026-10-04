@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.83.0] - 2026-10-04
+
+- La barra braille a blocchi, tappa 10 punto g, chiesta da Gabriele per chi ha una barra corta: la voce Celle della barra braille divide sottotitoli e karaoke in blocchi lunghi al più quanto la barra, spezzati fra le parole, e i blocchi si mostrano uno dopo l'altro. Ognuno resta per la sua parte del tempo che resta al testo, in proporzione alla lunghezza, e mai meno della voce Tempo minimo di lettura in braille, di partenza 2000 millesimi; i testi che arrivano prima aspettano in fila, che si smaltisce nei silenzi o in pausa. Alla sintesi il testo arriva subito e intero. Con 0 celle, il valore di partenza, il testo resta intero, ma il tempo minimo vale anche per lui.
+- La revisione prima della pubblicazione ha trovato otto difetti, corretti: un testo nuovo aspettava anche la parte di tempo del blocco mostrato, e un cartello lungo sovrapposto ai dialoghi fermava la barra per mezzo minuto, ora aspetta solo il minimo e il tempo di un testo vale al più quindici secondi; la fila non si svuotava ai salti, allo stop, ai brani nuovi, al cambio di traccia e di impostazioni; le passate degli impressi di un video potevano finire sul video caricato dopo; le righe del karaoke fatte di soli segni, come =====, si leggevano; il manuale prometteva la riga ridetta cambiando l'anticipo, e consigliava male il timeout di NVDA; e ora dice che ogni carattere conta una cella, come nel braille a otto punti.
+
 ## [1.82.0] - 2026-10-04
 
 - Il testo del karaoke, tappa 10 punto e: i MIDI, con i kar, anche quelli che si chiamano mid, e il testo cantato, i file LRC accanto al brano o al video, anche con i tempi per parola, e i testi sincronizzati SYLT nei tag. Maiuscolo con F2 lo accende e lo spegne come i sottotitoli, e con i sottotitoli letti accesi arriva da solo; dopo un salto arriva subito la riga in corso.

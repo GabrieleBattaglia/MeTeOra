@@ -1,4 +1,4 @@
-Collaudo di MeTeOra 1.82.0, con NVDA: il manuale in HTML, F1 e F12, la ricerca anche in rete, B e Z con la riproduzione casuale, l'invito a offrire un caffè, la cartella vuota nel cestino, i dettagli dei contenitori, i conti in rete, Maiuscolo con F9 e F10, i sottotitoli fatti di immagini, il filtro delle impostazioni, il karaoke. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.82.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Collaudo di MeTeOra 1.83.0, con NVDA: il manuale in HTML, F1 e F12, la ricerca anche in rete, B e Z con la riproduzione casuale, l'invito a offrire un caffè, la cartella vuota nel cestino, i dettagli dei contenitori, i conti in rete, Maiuscolo con F9 e F10, i sottotitoli fatti di immagini, il filtro delle impostazioni, il karaoke, la barra braille a blocchi. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.83.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
 Impostazioni, ultima voce Dona per questo progetto, Invio: il suono dell'invito, e il fuoco sul testo, che NVDA legge.
 Invio nel testo, o Esc, chiudono l'invito e si torna alle impostazioni; Tab passa a Dona con PayPal e a Chiudi.
 Dona con PayPal apre la pagina di PayPal nel browser, e la console ringrazia.
@@ -38,3 +38,8 @@ Dove vanno sottotitoli e karaoke, solo al braille: il testo arriva sul display e
 E:\Sounds\midi\antonacci\BiagioAntonacci_NonParliMai.kar: arriva il testo, non i nomi degli accordi.
 Un kar francese, per esempio Daniel Balavoine - Sauver l'Amour in E:\Audio\MIDI\Covers\Songs: le a accentate si leggono giuste.
 Un video con due sottotitoli uguali di fila, se ne trovi uno: si sentono tutti e due.
+Nelle impostazioni, Celle della barra braille: scrivi 40, o le celle della tua barra; con un video con i sottotitoli, ogni riga lunga arriva sul display a blocchi, senza spostarti.
+Tempo minimo di lettura in braille: prova 1000 e 4000, e senti quale ritmo ti va; in NVDA, impostazioni del braille, Mostra messaggi a tempo indeterminato, o un timeout lungo.
+Mentre la fila ha ancora blocchi, premi Q: la fila si svuota, e la riga del punto d'arrivo arriva subito.
+Con un kar per strofa e 20 celle: i blocchi della strofa arrivano uno dopo l'altro, e se la fila resta indietro una pausa la smaltisce.
+Spegni i sottotitoli letti con Maiuscolo con F2 mentre la fila ha ancora blocchi: la barra smette subito.

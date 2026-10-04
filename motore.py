@@ -1,6 +1,6 @@
 # MeTeOra, il motore di riproduzione: libmpv, e i SID in tempo reale.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7). Nella 1.65.0 i MIDI resi da FluidSynth (tappa 8). Nella 1.66.0 la musica delle console con libgme. Nella 1.67.0 il file lasciato o rinominato per Rinomina file. Nella 1.82.0 il testo del karaoke come traccia in memoria, senza i .lrc caricati da mpv, e due sottotitoli uguali di fila detti tutti e due.
+# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7). Nella 1.65.0 i MIDI resi da FluidSynth (tappa 8). Nella 1.66.0 la musica delle console con libgme. Nella 1.67.0 il file lasciato o rinominato per Rinomina file. Nella 1.82.0 il testo del karaoke come traccia in memoria, senza i .lrc caricati da mpv, e due sottotitoli uguali di fila detti tutti e due. Nella 1.83.0 il tempo che resta al sottotitolo, per la barra braille a blocchi.
 
 """Due lettori libmpv per tutti i formati.
 
@@ -400,7 +400,7 @@ class _Calo:
 
 class Motore:
     def __init__(self, alla_fine=None, all_errore=None, ao="wasapi", volume=80, chiedi_il_seguente=None, al_passaggio=None, opzioni_mpv=None,
-            al_caricamento=None, ai_sottotitoli=None, ai_sottotitoli_a_immagini=None):
+            al_caricamento=None, ai_sottotitoli=None, ai_sottotitoli_a_immagini=None, al_salto=None):
         """alla_fine() quando un brano finisce da solo e non c'e' un seguente
         preparato, o quando arriva in fondo in pausa, con un salto oltre la
         fine, e allora il preparato si scarta; all_errore(percorso) quando un brano non si puo' aprire o
@@ -417,7 +417,9 @@ class Motore:
         brano, e se ne possono leggere le tracce; ai_sottotitoli(testo) a
         ogni sottotitolo nuovo del brano in corso. Dalla 1.80.0
         ai_sottotitoli_a_immagini() quando comincia un sottotitolo del brano in
-        corso, anche di una traccia a immagini, che testo non ne ha."""
+        corso, anche di una traccia a immagini, che testo non ne ha. Dalla
+        1.83.0 al_salto() a ogni suona, stop e salto, nel filo di chi li
+        chiede: i testi in fila per il braille non valgono piu'."""
         self._alla_fine = alla_fine
         self._all_errore = all_errore
         self._chiedi_il_seguente = chiedi_il_seguente
@@ -425,6 +427,7 @@ class Motore:
         self._al_caricamento = al_caricamento
         self._ai_sottotitoli = ai_sottotitoli
         self._ai_sottotitoli_a_immagini = ai_sottotitoli_a_immagini
+        self._al_salto = al_salto
         # Le finestre del video, o None a video spento; e se il video va
         # decodificato anche spento, perche' si leggono i suoi sottotitoli
         # fatti di immagini (1.80.0).
@@ -623,6 +626,8 @@ class Motore:
         sfuma_lo_stesso, per X da capo e per i marker con la dissolvenza
         accesa (Gabriele, 2 ottobre 2026), lo stesso brano riparte dal punto
         chiesto sull'altro lettore e i due punti si incrociano."""
+        if self._al_salto is not None:
+            self._al_salto()
         brano = _Brano(percorso, sottobrano, inizio, self._banco_midi)
         with self._blocco:
             if self._chiuso:
@@ -738,6 +743,8 @@ class Motore:
         brano che si sente, il brano si spegne piano sull'altro lettore,
         come coda, e il motore e' subito libero: in_corso vale None, e un
         brano avviato intanto parte senza aspettare la coda."""
+        if self._al_salto is not None:
+            self._al_salto()
         with self._blocco:
             attivo = self._attivo
             si_sente = attivo.percorso is not None and attivo.pronto and not attivo.finito and not self._pausa
@@ -826,6 +833,8 @@ class Motore:
         self._seek(secondi, "absolute")
 
     def _seek(self, secondi, riferimento):
+        if self._al_salto is not None:
+            self._al_salto()
         # Un salto chiude la sfumatura: chi esce si ferma, chi entra torna a
         # piena voce. La catena si riscrive prima: il seek perde i guadagni
         # dati al volo.
@@ -873,23 +882,44 @@ class Motore:
         if ripeti and self._ai_sottotitoli is not None:
             self._ai_sottotitoli(ripeti)
 
-    def _aggiungi_le_passate(self, lettore, poi=None):
-        """Un video appena aperto: i file .srt delle passate dei sottotitoli
-        impressi fatte prima, accanto a lui, diventano tracce, senza
-        sceglierle; poi(), se c'e', arriva quando mpv le ha aggiunte, cosi'
-        chi legge le tracce le trova. Nel filo degli eventi del lettore, fuori
-        dal blocco."""
+    def resto_del_sottotitolo(self):
+        """I secondi d'orologio che restano al sottotitolo mostrato adesso dal
+        brano in corso, contando la velocita', o None se non si sa: servono
+        alla barra braille a blocchi, per dividerli fra i blocchi (1.83.0)."""
+        with self._blocco:
+            lettore = self._attivo
+            if self._chiuso or lettore.percorso is None or not lettore.pronto:
+                return None
+            velocita = self._velocita
+        # Le proprieta' si leggono come attributi: le parentesi quadre di
+        # python-mpv leggono le opzioni.
+        try:
+            fine, ora = lettore.mpv.sub_end, lettore.mpv.time_pos
+        except Exception:  # noqa: BLE001 - un lettore che si chiude, o niente sottotitolo
+            return None
+        if fine is None or ora is None or fine <= ora:
+            return None
+        return (fine - ora) / max(velocita, 0.01)
+
+    def _aggiungi_le_passate(self, lettore, video, numero, poi=None):
+        """Un video appena aperto, il caricamento numero del lettore: i file
+        .srt delle passate dei sottotitoli impressi fatte prima, accanto a
+        lui, diventano tracce, senza sceglierle; poi(), se c'e', arriva quando
+        mpv le ha aggiunte, cosi' chi legge le tracce le trova. Nel filo degli
+        eventi del lettore, fuori dal blocco; un video ricaricato intanto non
+        prende le passate di questo caricamento (revisione della 1.83.0)."""
         import sottotitoli_ocr
 
-        passate = sottotitoli_ocr.passate_esistenti(lettore.percorso) if formati.e_video(lettore.percorso or "") else []
-        if not passate:
-            if poi is not None:
-                poi()
-            return
-        for numero, percorso in enumerate(passate, 1):
-            lingua = os.path.splitext(percorso)[0].rsplit(".", 1)[-1]
-            risposta = (lambda _errore, _esito: poi()) if poi is not None and numero == len(passate) else None
-            lettore.comando("sub-add", percorso, "auto", "Sottotitoli impressi", lingua, risposta=risposta)
+        passate = sottotitoli_ocr.passate_esistenti(video) if formati.e_video(video or "") else []
+        with self._blocco:
+            if passate and lettore._richieste == numero and not self._chiuso:
+                for posto, percorso in enumerate(passate, 1):
+                    lingua = os.path.splitext(percorso)[0].rsplit(".", 1)[-1]
+                    risposta = (lambda _errore, _esito: poi()) if poi is not None and posto == len(passate) else None
+                    lettore.comando("sub-add", percorso, "auto", "Sottotitoli impressi", lingua, risposta=risposta)
+                return
+        if poi is not None:
+            poi()
 
     def _aggiungi_le_tracce(self, lettore, percorso, numero, poi=None):
         """Un brano appena aperto, il caricamento numero del lettore: ai video
@@ -897,7 +927,7 @@ class Motore:
         video musicale o a un audio .webm con il suo .lrc accanto, che mpv non
         carica piu' da se'; poi(), se c'e', quando mpv li ha aggiunti."""
         if formati.e_video(percorso or ""):
-            self._aggiungi_le_passate(lettore, functools.partial(self._aggiungi_il_karaoke, lettore, percorso, numero, poi))
+            self._aggiungi_le_passate(lettore, percorso, numero, functools.partial(self._aggiungi_il_karaoke, lettore, percorso, numero, poi))
         else:
             self._aggiungi_il_karaoke(lettore, percorso, numero, poi)
 
@@ -933,8 +963,7 @@ class Motore:
         eventi del lettore. Resta solo l'ultima traccia del karaoke, quella
         appena aggiunta, perche' le aggiunte vanno una alla volta e mpv da'
         numeri crescenti; se una vecchia era scelta, la scelta passa alla
-        nuova, e mpv ridice la riga in corso. Se intanto un'impostazione e'
-        cambiata, la traccia si rifa'."""
+        nuova. Se intanto un'impostazione e' cambiata, la traccia si rifa'."""
         with self._blocco:
             stesso = lettore._richieste == numero and not self._chiuso
             if stesso:
@@ -964,8 +993,8 @@ class Motore:
         """Il testo del karaoke per riga o per strofa, una chiave di
         karaoke.MODI, e quanti millesimi prima del canto (1.82.0). Le tracce
         del karaoke dei brani aperti si rifanno, e quella scelta resta
-        scelta: mpv ridice la riga in corso. Una traccia ancora in arrivo si
-        rifa' quando arriva."""
+        scelta: la riga dopo arriva gia' con il modo e l'anticipo nuovi. Una
+        traccia ancora in arrivo si rifa' quando arriva."""
         with self._blocco:
             nuovo = (modo, anticipo / 1000)
             if nuovo == self._karaoke:

@@ -2700,6 +2700,8 @@ def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_an
         ("destinazione", "Dove vanno sottotitoli e karaoke: alla sintesi e al braille"),
         ("karaoke", "Testo del karaoke: per riga"),
         ("anticipo_karaoke", "Anticipo del karaoke: 0 ms"),
+        ("celle_braille", "Celle della barra braille: 0, il testo intero"),
+        ("lettura_minima", "Tempo minimo di lettura in braille: 2000 ms"),
         ("banco_midi", "Banco dei suoni MIDI: nessuno, si sceglie al primo MIDI"),
         ("insegui", "Inseguimento della plancia (Maiuscolo+F8): no"),
         ("caratteri", "Dimensioni dei caratteri: quelle di Windows"),
@@ -4751,14 +4753,18 @@ def test_il_motore_aggiunge_i_file_delle_passate(finestra, tmp_path):
         if risposta is not None:
             risposta(None, None)
 
-    lettore = types.SimpleNamespace(percorso=str(tmp_path / "Film.mkv"), comando=comando)
+    film = str(tmp_path / "Film.mkv")
+    lettore = types.SimpleNamespace(percorso=film, _richieste=1, comando=comando)
     # L'avviso del caricamento arriva quando mpv ha aggiunto il file: chi
     # legge le tracce lo trova.
-    finestra.motore._aggiungi_le_passate(lettore, lambda: avvisi.append(len(comandi)))
+    finestra.motore._aggiungi_le_passate(lettore, film, 1, lambda: avvisi.append(len(comandi)))
     assert comandi == [("sub-add", str(tmp_path / "Film.impressi.it.srt"), "auto", "Sottotitoli impressi", "it")] and avvisi == [1]
-    lettore.percorso = str(tmp_path / "Film.mp3")
-    finestra.motore._aggiungi_le_passate(lettore, lambda: avvisi.append(len(comandi)))
+    finestra.motore._aggiungi_le_passate(lettore, str(tmp_path / "Film.mp3"), 1, lambda: avvisi.append(len(comandi)))
     assert len(comandi) == 1 and avvisi == [1, 1]
+    # Revisione 1.83.0: un video ricaricato intanto non prende le passate.
+    lettore._richieste = 2
+    finestra.motore._aggiungi_le_passate(lettore, film, 1, lambda: avvisi.append(len(comandi)))
+    assert len(comandi) == 1 and avvisi == [1, 1, 1]
 
 
 def test_senza_riconoscimento_il_giro_arriva_a_spenti(finestra, monkeypatch, suoni_annotati):
@@ -4976,3 +4982,41 @@ def test_la_destinazione_dice_se_il_braille_non_arriva(finestra, monkeypatch, su
     monkeypatch.setattr(modulo, "FinestraScelta", _SceltaFinta(1))
     finestra._cambia_impostazione("destinazione", _ListaFinta())
     assert _ultima(finestra) == "Sottotitoli e karaoke ora vanno solo alla sintesi."
+
+
+def test_la_barra_braille_a_blocchi(finestra, monkeypatch, suoni_annotati, sintesi_finta):
+    # 1.83.0: alla voce il testo intero, subito; al braille i blocchi in fila.
+    monkeypatch.setattr(finestra.motore, "resto_del_sottotitolo", lambda: 9.0)
+    _campo, lista = _cambia(finestra, monkeypatch, "celle_braille", "20")
+    assert finestra.impostazioni["celle_braille"] == 20 and lista.righe["celle_braille"] == "Celle della barra braille: 20"
+    assert _ultima(finestra) == "Sottotitoli e karaoke ora arrivano al braille in blocchi di 20 celle al più."
+    _campo, lista = _cambia(finestra, monkeypatch, "lettura_minima", "50")
+    assert finestra.impostazioni["lettura_minima"] == 100 and lista.righe["lettura_minima"] == "Tempo minimo di lettura in braille: 100 ms"
+    _cambia(finestra, monkeypatch, "lettura_minima", "1500")
+    assert _ultima(finestra) == "Ogni blocco ora resta sulla barra braille almeno 1500 millesimi."
+    finestra.impostazioni["sottotitoli"] = True
+    finestra._sottotitolo("Partir effacer sur le Gange la douleur pouvoir parler à un ange")
+    assert sintesi_finta.detti == [("nvda", "Partir effacer sur le Gange la douleur pouvoir parler à un ange")]
+    assert sintesi_finta.braille == [("nvda", "Partir effacer sur")] and finestra._braille.in_fila == 3
+    assert _ultima(finestra) == "Partir effacer sur le Gange la douleur pouvoir parler à un ange"
+    # Spenti i sottotitoli, la fila si svuota; e anche a ogni salto del motore.
+    finestra._applica_l_impostazione("sottotitoli", False)
+    assert finestra._braille.in_fila == 0
+    finestra.impostazioni["sottotitoli"] = True
+    finestra._sottotitolo("Partir effacer sur le Gange la douleur pouvoir parler à un ange")
+    assert finestra._braille.in_fila == 3
+    finestra.motore.salta(5)
+    assert finestra._braille.in_fila == 0
+    finestra._sottotitolo("Partir effacer sur le Gange la douleur pouvoir parler à un ange")
+    finestra.motore.stop()
+    assert finestra._braille.in_fila == 0
+    finestra.impostazioni["sottotitoli"] = False
+    # Con 0 celle il testo arriva intero; solo alla sintesi, al braille niente.
+    finestra.impostazioni.update(sottotitoli=True, celle_braille=0)
+    finestra._braille.svuota()
+    finestra._sottotitolo("Seconda riga")
+    assert sintesi_finta.braille[-1] == ("nvda", "Seconda riga")
+    finestra.impostazioni["destinazione"] = "sintesi"
+    finestra._braille.svuota()
+    finestra._sottotitolo("Terza riga")
+    assert sintesi_finta.braille[-1] == ("nvda", "Seconda riga") and sintesi_finta.detti[-1] == ("nvda", "Terza riga")

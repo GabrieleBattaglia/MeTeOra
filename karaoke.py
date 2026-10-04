@@ -442,7 +442,8 @@ def blocchi(righe, modo="riga", anticipo=0.0):
     """I blocchi della traccia, [(inizio, fine, testo)]: uno per riga, o per
     strofa se il modo e' strofa e il file le segna, altrimenti per riga
     (Gabriele, 4 ottobre 2026). Un blocco dura fino al seguente, o alla
-    pausa; l'ultimo fino a DURATA_DELL_ULTIMA dopo la sua ultima riga.
+    pausa, anche fatta di soli segni come =====; l'ultimo fino a
+    DURATA_DELL_ULTIMA dopo la sua ultima riga.
     L'anticipo, in secondi, sposta tutto prima; i blocchi che cosi'
     cominciano insieme, o a meno di DURATA_MINIMA uno dall'altro, diventano
     uno: libmpv li mostrerebbe sovrapposti, e il testo si direbbe tre volte."""
@@ -457,7 +458,8 @@ def blocchi(righe, modo="riga", anticipo=0.0):
             aperto = None
 
     for riga in righe:
-        if not riga.testo:
+        # Una riga di soli segni, come ===== o * * *, e' una pausa.
+        if not any(carattere.isalnum() for carattere in riga.testo):
             chiudi(riga.inizio)
         elif aperto is None or not per_strofa or riga.strofa:
             chiudi(riga.inizio)

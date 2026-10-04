@@ -1145,6 +1145,10 @@ def test_il_karaoke_di_un_lrc_accanto_al_brano(avvisi, tmp_path):
         sottotitoli = m.tracce()["sub"]
         assert [t.get("title") for t in sottotitoli] == ["Testo del karaoke, dal file LRC"]
         m.scegli_traccia("sid", str(sottotitoli[0]["id"]))
+        assert _aspetta(lambda: detti, 4)
+        # Il tempo che resta alla riga, per la barra braille a blocchi.
+        resto = m.resto_del_sottotitolo()
+        assert resto is not None and 0 < resto <= 1.05
         assert _aspetta(lambda: detti == ["Prima riga", "Ritornello", "Ritornello"], 6)
         # L'anticipo rifa' la traccia, che resta scelta e sola, anche con due
         # cambi di fila.

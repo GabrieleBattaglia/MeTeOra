@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura.
 
 """La finestra di MeTeOra.
 
@@ -47,6 +47,7 @@ from html.parser import HTMLParser
 
 import wx
 
+import braille
 import dettagli
 import formati
 import karaoke
@@ -306,6 +307,8 @@ VOCI_DELLE_IMPOSTAZIONI = {
     "destinazione": ("Dove vanno sottotitoli e karaoke", "cambiato"),
     "karaoke": ("Testo del karaoke", "cambiato"),
     "anticipo_karaoke": ("Anticipo del karaoke", "cambiato"),
+    "celle_braille": ("Celle della barra braille", "cambiate"),
+    "lettura_minima": ("Tempo minimo di lettura in braille", "cambiato"),
     "banco_midi": ("Banco dei suoni MIDI", "cambiato"),
     "insegui": ("Inseguimento della plancia (Maiuscolo+F8)", "cambiato"),
     "caratteri": ("Dimensioni dei caratteri", "cambiate"),
@@ -653,7 +656,8 @@ class Finestra(wx.Frame):
             chiedi_il_seguente=lambda: wx.CallAfter(self._prepara_il_seguente),
             al_passaggio=lambda percorso, sottobrano: wx.CallAfter(self._passaggio, percorso, sottobrano),
             al_caricamento=lambda: wx.CallAfter(self._aggiorna_il_video),
-            ai_sottotitoli=lambda testo: wx.CallAfter(self._sottotitolo, testo), ai_sottotitoli_a_immagini=self._sottotitolo_a_immagini)
+            ai_sottotitoli=lambda testo: wx.CallAfter(self._sottotitolo, testo), ai_sottotitoli_a_immagini=self._sottotitolo_a_immagini,
+            al_salto=self._testo_superato)
         # Velocita', tono, equalizzatore e dissolvenza salvati valgono per tutti
         # i brani, dal primo.
         self._applica_la_riproduzione()
@@ -720,6 +724,9 @@ class Finestra(wx.Frame):
         self._domanda_viva = None
         self._avanzamento_dopo_errore = None
         self._sintesi = sintesi.Sintesi()
+        # La barra braille a blocchi (1.83.0): i testi letti in fila, con il
+        # tempo minimo di lettura; le attese sono di wx, nel filo della finestra.
+        self._braille = braille.Coda(self._mostra_in_braille, lambda secondi, funzione: wx.CallLater(max(1, round(secondi * 1000)), funzione))
         # La banda dell'equalizzatore scelta con U e I, contata da zero: si
         # parte dalla prima, quella dei 60 Hz.
         self._banda = 0
@@ -4032,6 +4039,7 @@ class Finestra(wx.Frame):
         esce finisce da solo, e il Fine lo dice _brano_finito alla sua fine
         vera. Un avviso superato, perche' nel frattempo e' partito altro, non
         conta."""
+        self._testo_superato()
         uscente, preparato = self._uscente, self._preparato
         self._uscente = self._preparato = None
         if self._chiusa or uscente is None or preparato is None or preparato[1].percorso != percorso:
@@ -4692,6 +4700,8 @@ class Finestra(wx.Frame):
             "destinazione": lambda: sintesi.DESTINAZIONI[imp["destinazione"]],
             "karaoke": lambda: MODI_DEL_KARAOKE[imp["karaoke"]],
             "anticipo_karaoke": lambda: f"{imp['anticipo_karaoke']} ms",
+            "celle_braille": lambda: str(imp["celle_braille"]) if imp["celle_braille"] else "0, il testo intero",
+            "lettura_minima": lambda: f"{imp['lettura_minima']} ms",
             "banco_midi": self._banco_da_leggere,
             "insegui": lambda: "sì" if imp["insegui"] else "no",
             "caratteri": self._caratteri_da_leggere,
@@ -4885,6 +4895,17 @@ class Finestra(wx.Frame):
                 f"Quanti millesimi di secondo prima del canto arriva il testo del karaoke: da 0 a {valori.ANTICIPO_MASSIMO_DEL_KARAOKE}.",
                 "Per esempio 500, mezzo secondo prima. Vale per i MIDI, i file LRC e i testi nei tag, non per i sottotitoli dei video.",
                 f"Adesso: {imp['anticipo_karaoke']}.", REGOLA_DEL_DOLLARO], str(imp["anticipo_karaoke"])
+        if chiave == "celle_braille":
+            return valori.leggi_celle_braille, [
+                f"Quante celle ha la tua barra braille, da 0 a {valori.CELLE_MASSIME}: sottotitoli e karaoke arrivano in blocchi lunghi al più così, spezzati fra le parole.",
+                "Ogni carattere conta una cella, come nel braille informatico a otto punti: con le tabelle a sei punti, dove maiuscole e numeri prendono più celle, scrivi qualche cella in meno.",
+                "Per esempio 40; 0 manda il testo intero, senza dividerlo.",
+                f"Adesso: {imp['celle_braille']}.", REGOLA_DEL_DOLLARO], str(imp["celle_braille"])
+        if chiave == "lettura_minima":
+            return valori.leggi_lettura_minima, [
+                f"Per quanti millesimi di secondo resta almeno ogni blocco sulla barra braille: da {valori.LETTURA_MINIMA} a {valori.LETTURA_MASSIMA}.",
+                "Per esempio 2000, il valore di partenza. I testi che arrivano prima aspettano il loro turno.",
+                f"Adesso: {imp['lettura_minima']}.", REGOLA_DEL_DOLLARO], str(imp["lettura_minima"])
         return valori.leggi_righe_della_console, [
             f"Quante righe tiene la console: da {valori.RIGHE_MINIME} in su. Le più vecchie si tolgono dalla cima.",
             "Per esempio 2000, il valore di partenza. Un testo lungo, come le novità di F2, resta comunque intero.",
@@ -4928,6 +4949,8 @@ class Finestra(wx.Frame):
             self._aggiorna_il_video()
             return _frase_del_video(valore)
         if chiave == "sottotitoli":
+            if not valore:
+                self._braille.svuota()
             if not valore and self.motore.in_corso:
                 self.motore.scegli_traccia("sid", "no")
             self._aggiorna_il_video()
@@ -4938,6 +4961,13 @@ class Finestra(wx.Frame):
             if self.motore.in_corso:
                 self._insegui()
             return "Inseguimento agganciato: la selezione della plancia segue il brano che suona."
+        if chiave in ("celle_braille", "lettura_minima"):
+            # I blocchi in fila erano fatti con i valori di prima.
+            self._testo_superato()
+        if chiave == "celle_braille":
+            return f"Sottotitoli e karaoke ora arrivano al braille in blocchi di {valore} celle al più." if valore else "Sottotitoli e karaoke ora arrivano al braille interi."
+        if chiave == "lettura_minima":
+            return f"Ogni blocco ora resta sulla barra braille almeno {valore} millesimi."
         if chiave == "anticipo_karaoke":
             self._applica_il_karaoke()
             return f"Il testo del karaoke ora arriva {valore} millesimi prima del canto." if valore else "Il testo del karaoke ora arriva quando comincia il canto."
@@ -5174,12 +5204,32 @@ class Finestra(wx.Frame):
 
     def _sottotitolo(self, testo):
         """Un sottotitolo del brano in corso: alla sintesi scelta e nella
-        console, se i sottotitoli letti sono accesi."""
+        console, se i sottotitoli letti sono accesi. Alla voce va subito,
+        intero; al braille in fila, a blocchi lunghi quanto la barra, con il
+        tempo che resta al sottotitolo diviso fra i blocchi e il tempo minimo
+        di lettura (1.83.0)."""
         testo = " ".join(testo.split())
         if self._chiusa or not testo or not self.impostazioni["sottotitoli"]:
             return
-        self._sintesi.dici(testo, self.impostazioni["sintesi"], self.impostazioni["destinazione"])
+        imp = self.impostazioni
+        if imp["destinazione"] in ("entrambi", "sintesi"):
+            self._sintesi.dici(testo, imp["sintesi"], "sintesi")
+        if imp["destinazione"] in ("entrambi", "braille"):
+            self._braille.aggiungi(testo, imp["celle_braille"], imp["lettura_minima"] / 1000, self.motore.resto_del_sottotitolo())
         self.scrivi(testo)
+
+    def _testo_superato(self):
+        """Un salto, uno stop, un brano nuovo o un'altra traccia: i blocchi in
+        fila per il braille non valgono piu', e il testo dopo arriva subito
+        (revisione della 1.83.0)."""
+        coda = getattr(self, "_braille", None)
+        if coda is not None:
+            coda.svuota()
+
+    def _mostra_in_braille(self, blocco):
+        """Un blocco della coda del braille, sulla barra."""
+        if not self._chiusa:
+            self._sintesi.dici(blocco, self.impostazioni["sintesi"], "braille")
 
     def _comando_video(self):
         """Maiuscolo con F1: il video acceso o spento."""
@@ -5226,6 +5276,7 @@ class Finestra(wx.Frame):
         self._salva_impostazioni()
         self._riscontro("sottotitoli_accesi" if acceso else "sottotitoli_spenti", frase)
         if not acceso:
+            self._braille.svuota()
             self._aggiorna_la_lettura(tracce, scelta=None)
 
     def _scegli_i_sottotitoli(self, tracce, traccia, indice, quante):
@@ -5233,6 +5284,7 @@ class Finestra(wx.Frame):
         di immagini, la legge il riconoscimento dei caratteri."""
         self.impostazioni["impressi_scelti"] = False
         self.impostazioni["sottotitoli"] = True
+        self._testo_superato()
         self.motore.scegli_traccia("sid", str(traccia["id"]))
         titolo = traccia.get("title") or ""
         if titolo.startswith(karaoke.TITOLO):
@@ -5257,6 +5309,7 @@ class Finestra(wx.Frame):
         volo, e con la passata scelta nelle impostazioni la passata parte."""
         self.impostazioni["impressi_scelti"] = True
         self.impostazioni["sottotitoli"] = True
+        self._testo_superato()
         if passata is not None:
             self.motore.scegli_traccia("sid", str(passata["id"]))
             self._aggiorna_la_lettura(tracce, scelta=passata)
@@ -5612,7 +5665,8 @@ class Finestra(wx.Frame):
     def _scegli_la_destinazione(self, genitore):
         """Dove vanno sottotitoli e karaoke: alla sintesi, al braille o a
         tutti e due (Gabriele, 4 ottobre 2026)."""
-        self._scegli_da_una_lista(genitore, "destinazione", sintesi.DESTINAZIONI, self._frase_della_destinazione)
+        if self._scegli_da_una_lista(genitore, "destinazione", sintesi.DESTINAZIONI, self._frase_della_destinazione):
+            self._testo_superato()
 
     def _frase_della_destinazione(self, chiave):
         """La destinazione scelta, e se il braille non arrivera', perche'
@@ -6594,6 +6648,7 @@ class Finestra(wx.Frame):
             evento.Skip()
             return
         self._chiusa = True
+        self._braille.svuota()
         if self._ricerca is not None:
             self._ricerca.ferma()
         self.impostazioni["ripresa"] = self._stato_da_riprendere()

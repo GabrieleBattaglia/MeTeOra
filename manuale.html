@@ -215,6 +215,7 @@ kbd {
 <ul>
 <li><a href="#karaoke-testi">I testi a tempo</a></li>
 <li><a href="#karaoke-lettura">Come arriva il testo</a></li>
+<li><a href="#braille-a-blocchi">La barra braille a blocchi</a></li>
 <li><a href="#esempi-karaoke">Esempi</a></li>
 </ul></li>
 <li><a href="#impostazioni">Le impostazioni</a>
@@ -1237,7 +1238,11 @@ kbd {
 <li>Anticipo del karaoke: quanti millesimi di secondo prima del canto arriva il testo, da 0 a 10000, per avere il tempo di leggerlo; di partenza 0.</li>
 <li>Dove vanno sottotitoli e karaoke: alla sintesi e al braille, solo alla sintesi o solo al braille. Vale anche per i sottotitoli dei video. Il braille arriva con NVDA, JAWS e System Access; con le altre sintesi, voce di Windows compresa, solo al braille vuol dire solo nella console.</li>
 </ul>
-<p>Cambiando il modo o l'anticipo, il testo del brano in corso si rifà subito, e la riga in corso arriva di nuovo.</p>
+<p>Cambiando il modo o l'anticipo, il testo del brano in corso si rifà subito: la riga dopo arriva già con il modo e l'anticipo nuovi.</p>
+<h3 id="braille-a-blocchi">La barra braille a blocchi</h3>
+<p>Un sottotitolo o una strofa possono essere più lunghi della barra braille, e per leggerli tutti bisogna spostarsi lungo la riga. Con la voce Celle della barra braille delle impostazioni scrivi quante celle ha la tua barra, per esempio 40: sottotitoli, sottotitoli letti con il riconoscimento dei caratteri e testo del karaoke arrivano al braille in blocchi lunghi al più così, spezzati fra le parole, e si leggono senza spostarsi. Con 0, il valore di partenza, il testo arriva intero. Ogni carattere conta una cella, come nel braille informatico a otto punti; con le tabelle a sei punti o contratte, dove maiuscole e numeri prendono più celle, scrivi qualche cella in meno di quelle della barra.</p>
+<p>Un messaggio braille prende il posto di quello di prima, quindi i blocchi si mostrano uno dopo l'altro. Ognuno resta per la sua parte del tempo del testo, in proporzione alla sua lunghezza, al più quindici secondi in tutto, e mai meno del Tempo minimo di lettura in braille, di partenza 2000 millesimi, perché ognuno ha la sua velocità. Un testo nuovo aspetta solo il tempo minimo del blocco mostrato; se arriva prima, aspetta il suo turno: la fila si smaltisce nei silenzi, o mettendo in pausa, perché il tempo è quello dell'orologio, non quello del brano. Il tempo minimo vale anche per i testi interi. Alla sintesi il testo arriva subito, intero, e nella console si scrive intero. La fila si svuota, e il testo dopo arriva subito, a ogni salto nel brano, allo stop, a un brano nuovo, scegliendo un'altra traccia, spegnendo i sottotitoli letti e cambiando le voci del braille.</p>
+<p>Quanto resta sulla barra un messaggio lo decide anche lo screen reader: in NVDA, nelle impostazioni del braille, Mostra messaggi e Timeout dei messaggi, di partenza 4 secondi. Un blocco può restare più del tempo minimo, fino alla sua parte del tempo del testo: la scelta più semplice è mostrare i messaggi a tempo indeterminato, così ogni blocco resta finché arriva il seguente; altrimenti il timeout deve coprire il blocco più lungo, non solo il tempo minimo.</p>
 <h3 id="esempi-karaoke">Esempi</h3>
 <h4>Un kar con un secondo di anticipo</h4>
 <ol>
@@ -1297,6 +1302,10 @@ kbd {
 <p>Invio apre una lista: alla sintesi e al braille, il modo di partenza, solo alla sintesi, o solo al braille. Vale per i sottotitoli dei video, per quelli letti con il riconoscimento dei caratteri e per il testo del karaoke. Il braille arriva con NVDA, JAWS e System Access; con le altre sintesi, voce di Windows compresa, solo al braille vuol dire solo nella console, e la console lo dice quando scegli.</p>
 <h4>Testo del karaoke</h4>
 <p>Invio apre una lista: per riga, il modo di partenza, o per strofa, dove il file le segna; altrimenti per riga. Il capitolo Il karaoke spiega tutto.</p>
+<h4>Celle della barra braille</h4>
+<p>Quante celle ha la tua barra braille, da 0 a 160: sottotitoli e karaoke arrivano al braille in blocchi lunghi al più così; ogni carattere conta una cella, come nel braille a otto punti. Con 0, il valore di partenza, arrivano interi. Il capitolo Il karaoke, alla sezione La barra braille a blocchi, spiega tutto.</p>
+<h4>Tempo minimo di lettura in braille</h4>
+<p>Per quanti millesimi di secondo resta almeno ogni blocco sulla barra braille, da 100 a 60000; di partenza 2000. I testi che arrivano prima aspettano il loro turno.</p>
 <h4>Anticipo del karaoke</h4>
 <p>Quanti millesimi di secondo prima del canto arriva il testo del karaoke, da 0 a 10000; di partenza 0. Non vale per i sottotitoli dei video.</p>
 <h4>Banco dei suoni MIDI</h4>
