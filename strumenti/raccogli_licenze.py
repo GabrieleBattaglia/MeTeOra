@@ -1,6 +1,6 @@
 # MeTeOra, utilita': raccoglie nella cartella licenze i testi delle licenze dei componenti e i loro sorgenti esatti.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.85.0, per la prima release.
+# 04/10/2026: nasce con la 1.85.0, per la prima release. Nella 1.85.2 i testi scaricati da scarica_licenze.py.
 
 """Prepara la cartella licenze, che il pacchetto porta accanto all'eseguibile.
 
@@ -16,7 +16,10 @@ vengono le DLL di lib. Le versioni si leggono dai pacchetti installati, dal
 database di pacman e da prepara_ambiente.py per libmpv; e lo script controlla
 che le DLL di lib siano proprio quelle dei pacchetti MSYS2 che nomina.
 MSYS2 si cerca come in prepara_ambiente.py, nella cartella di METEORA_MSYS2
-o in strumenti/msys64, ma qui non si scarica.
+o in strumenti/msys64, ma qui non si scarica. I testi che sul disco non ci
+sono, quelli delle librerie dentro libmpv, dei pacchetti winrt e di FluidR3 GM,
+li scarica prima scarica_licenze.py, con il loro elenco in
+strumenti/licenze_scaricate.json: qui si leggono e si nominano.
 
 Lo script scrive e sovrascrive, non cancella: alla fine elenca i file della
 cartella che non ha scritto, da togliere a mano se non servono piu'.
@@ -26,6 +29,7 @@ Uso: python strumenti/raccogli_licenze.py
 import contextlib
 import hashlib
 import importlib.metadata as metadati
+import json
 import os
 import shutil
 import subprocess
@@ -40,6 +44,7 @@ import prepara_ambiente  # noqa: E402
 import version  # noqa: E402
 
 LICENZE = os.path.join(RADICE, "licenze")
+SCARICATE = os.path.join(RADICE, "strumenti", "licenze_scaricate.json")
 LIB = os.path.join(RADICE, "lib")
 REPOSITORY = "https://github.com/GabrieleBattaglia/MeTeOra"
 SEGNALAZIONI = f"{REPOSITORY}/issues"
@@ -127,6 +132,13 @@ class Raccolta:
             f.write("\n".join(righe) + "\n")
         self.scritti.add(os.path.normcase(os.path.abspath(arrivo)))
 
+    def gia_scritto(self, destinazione):
+        """Un file messo nella cartella da scarica_licenze.py, che deve esserci."""
+        arrivo = os.path.join(LICENZE, destinazione)
+        if not os.path.isfile(arrivo):
+            sys.exit(f"Manca licenze\\{destinazione}: rifai scarica_licenze.py.")
+        self.scritti.add(os.path.normcase(os.path.abspath(arrivo)))
+
     def superati(self):
         """I file della cartella che questa raccolta non ha scritto."""
         restano = []
@@ -186,6 +198,14 @@ def commit_di_gbutils():
 def main():
     msys2 = trova_msys2()
     raccolta = Raccolta()
+    with open(SCARICATE, encoding="utf-8") as f:
+        scaricate = json.load(f)
+    if scaricate["build"] != prepara_ambiente.MPV_BUILD:
+        sys.exit(f"I testi scaricati sono della build {scaricate['build']} di libmpv, non della {prepara_ambiente.MPV_BUILD}: rifai scarica_licenze.py.")
+    altri = {voce["nome"]: voce for voce in scaricate["altri"]}
+    for voce in scaricate["altri"]:
+        for file in voce["file"]:
+            raccolta.gia_scritto(os.path.join(voce["nome"], file))
     leggimi = [
         f"Le licenze dei componenti di MeTeOra {version.VERSION}.",
         "MeTeOra è copyright 2026 di Gabriele Battaglia (IZ4APU), software libero sotto la GNU General Public License, versione 3 o, a tua "
@@ -219,13 +239,28 @@ def main():
     dll_mpv = os.path.join(LIB, "libmpv-2.dll")
     leggimi.append(f"libmpv-2.dll, la riproduzione: mpv {prepara_ambiente.MPV_COMMIT} con FFmpeg {prepara_ambiente.FFMPEG_COMMIT}, libopenmpt "
         f"e le altre librerie della build {prepara_ambiente.MPV_BUILD} di shinchiro/mpv-winbuild-cmake: GPL-3.0-or-later nel suo insieme, "
-        "testi\\GPL-3.0.txt; mpv è GPL-2.0-or-later con parti LGPL-2.1-or-later, testi\\GPL-2.0.txt e testi\\LGPL-2.1.txt.")
+        "testi\\GPL-3.0.txt; mpv è GPL-2.0-or-later con parti LGPL-2.1-or-later, testi\\GPL-2.0.txt e testi\\LGPL-2.1.txt. Le librerie che "
+        "contiene sono nelle righe seguenti, ciascuna con i file di licenza del suo progetto, nella cartella libmpv.")
+    for voce in scaricate["libmpv"]:
+        testi = []
+        for file in voce["file"]:
+            raccolta.gia_scritto(os.path.join("libmpv", voce["nome"], file))
+            testi.append(f"libmpv\\{voce['nome']}\\{file}")
+        dove = " e ".join(testi)
+        if voce.get("licenza"):
+            dove = f"{voce['licenza']}" + (f", {dove}" if dove else "")
+        leggimi.append(f"{voce['nome']}, dentro libmpv-2.dll: {dove}.")
     sorgenti.append(f"libmpv-2.dll, build {prepara_ambiente.MPV_BUILD} di shinchiro, impronta SHA-256 {impronta(dll_mpv)}:")
     sorgenti.append(f"mpv: https://github.com/mpv-player/mpv/tree/{prepara_ambiente.MPV_COMMIT}")
     sorgenti.append(f"FFmpeg: https://github.com/FFmpeg/FFmpeg/tree/{prepara_ambiente.FFMPEG_COMMIT}")
     sorgenti.append(f"Gli script della build, con l'elenco e la provenienza di ogni libreria inclusa (cartella packages): "
         f"https://github.com/shinchiro/mpv-winbuild-cmake/tree/{prepara_ambiente.WINBUILD_COMMIT}")
     sorgenti.append(f"La build: https://github.com/shinchiro/mpv-winbuild-cmake/releases/tag/{prepara_ambiente.MPV_BUILD}")
+    sorgenti.append(f"Le librerie dentro libmpv-2.dll, dai loro repository; la build {prepara_ambiente.MPV_BUILD} ha preso quelle senza una "
+        "versione fissata negli script dal ramo principale del giorno della build:")
+    for voce in scaricate["libmpv"]:
+        if voce["nome"] not in ("mpv", "ffmpeg"):
+            sorgenti.append(f"{voce['nome']}: {voce['repository']}")
 
     # Le DLL di MSYS2, controllate una per una.
     for nome, dll, ruolo, licenza in MSYS2:
@@ -262,7 +297,7 @@ def main():
         for origine, relativo in file_di_licenza(distribuzione):
             raccolta.copia(origine, os.path.join("python", cartella, relativo))
             testi.append(relativo)
-        dove = f"python\\{cartella}" if testi else "il testo nel repository del progetto, indicato in SORGENTI.txt"
+        dove = f"python\\{cartella}" if testi else "winrt\\" + " e winrt\\".join(altri["winrt"]["file"])
         extra = ""
         if nome == "winrt-runtime":
             moduli = ", ".join(f"{m} {metadati.version(m)}" for m in WINRT)
@@ -270,11 +305,12 @@ def main():
         leggimi.append(f"{nome} {versione}{extra}, {ruolo}: {licenza}, {dove}.")
         sorgenti.append(f"{nome} {versione}: https://pypi.org/project/{nome}/{versione}/#files")
         if nome == "winrt-runtime":
-            sorgenti.append("I moduli winrt e il testo della loro licenza: https://github.com/pywinrt/pywinrt")
+            sorgenti.append(f"I moduli winrt: {altri['winrt']['repository']}")
 
     # I componenti che MeTeOra non porta con se'.
     leggimi.append("Non sono nel pacchetto, e MeTeOra li scarica solo quando servono: FluidSynth 2.6.1 con libsndfile, per i MIDI, "
-        "LGPL-2.1-or-later, dal sito di FluidSynth; il banco di suoni FluidR3 GM di Frank Wen, licenza MIT, se lo chiedi. "
+        "LGPL-2.1-or-later, dal sito di FluidSynth; il banco di suoni FluidR3 GM di Frank Wen, licenza MIT, se lo chiedi, con il testo in "
+        + " e ".join(f"fluidr3\\{file}" for file in altri["fluidr3"]["file"]) + ". "
         "Le durate dei SID vengono dal database Songlengths della High Voltage SID Collection, che MeTeOra legge dalla tua copia.")
     sorgenti.append("FluidSynth: https://github.com/FluidSynth/fluidsynth; FluidR3 GM: https://github.com/pianobooster/fluid-soundfont")
 

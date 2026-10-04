@@ -1,0 +1,662 @@
+{
+ "build": "20260928",
+ "commit_degli_script": "05a60b3cfd04e3e3b89918f4a27f3dde2935dff2",
+ "libmpv": [
+  {
+   "nome": "amf-headers",
+   "repository": "https://github.com/GPUOpen-LibrariesAndSDKs/AMF",
+   "file": [
+    "LICENSE.txt"
+   ]
+  },
+  {
+   "nome": "angle-headers",
+   "repository": "https://github.com/google/angle",
+   "file": [
+    "LICENSE"
+   ]
+  },
+  {
+   "nome": "aom",
+   "repository": "https://aomedia.googlesource.com/aom",
+   "file": [
+    "LICENSE",
+    "PATENTS"
+   ]
+  },
+  {
+   "nome": "avisynth-headers",
+   "repository": "https://github.com/AviSynth/AviSynthPlus",
+   "file": [],
+   "licenza": "solo le intestazioni di AviSynth+, per usarlo se è installato; la licenza è scritta in testa ai file"
+  },
+  {
+   "nome": "brotli",
+   "repository": "https://github.com/google/brotli",
+   "file": [
+    "LICENSE"
+   ]
+  },
+  {
+   "nome": "bzip2",
+   "repository": "https://gitlab.com/bzip2/bzip2",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "c-ares",
+   "repository": "https://github.com/c-ares/c-ares",
+   "file": [
+    "LICENSE.md"
+   ]
+  },
+  {
+   "nome": "curl",
+   "repository": "https://github.com/curl/curl",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "dav1d",
+   "repository": "https://code.videolan.org/videolan/dav1d",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "davs2",
+   "repository": "https://github.com/saindriches/davs2",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "fast_float",
+   "repository": "https://github.com/fastfloat/fast_float",
+   "file": [
+    "LICENSE-APACHE",
+    "LICENSE-BOOST",
+    "LICENSE-MIT"
+   ]
+  },
+  {
+   "nome": "ffmpeg",
+   "repository": "https://github.com/FFmpeg/FFmpeg",
+   "file": [
+    "COPYING.GPLv2",
+    "COPYING.GPLv3",
+    "COPYING.LGPLv2.1",
+    "COPYING.LGPLv3",
+    "LICENSE.md"
+   ]
+  },
+  {
+   "nome": "fontconfig",
+   "repository": "https://gitlab.freedesktop.org/fontconfig/fontconfig",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "freetype2",
+   "repository": "https://github.com/freetype/freetype",
+   "file": [
+    "LICENSE.TXT"
+   ]
+  },
+  {
+   "nome": "fribidi",
+   "repository": "https://github.com/fribidi/fribidi",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "glad",
+   "repository": "https://github.com/Dav1dde/glad",
+   "file": [
+    "LICENSE"
+   ]
+  },
+  {
+   "nome": "glslang",
+   "repository": "https://github.com/KhronosGroup/glslang",
+   "file": [
+    "LICENSE.txt"
+   ]
+  },
+  {
+   "nome": "graphengine",
+   "repository": "https://github.com/sekrit-twc/graphengine",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "harfbuzz",
+   "repository": "https://github.com/harfbuzz/harfbuzz",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "highway",
+   "repository": "https://github.com/google/highway",
+   "file": [
+    "LICENSE"
+   ]
+  },
+  {
+   "nome": "lame",
+   "repository": "https://gitlab.com/shinchiro/lame",
+   "file": [
+    "COPYING",
+    "LICENSE"
+   ]
+  },
+  {
+   "nome": "lcms2",
+   "repository": "https://github.com/mm2/Little-CMS",
+   "file": [
+    "LICENSE"
+   ]
+  },
+  {
+   "nome": "libarchive",
+   "repository": "https://github.com/libarchive/libarchive",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "libaribcaption",
+   "repository": "https://github.com/xqq/libaribcaption",
+   "file": [
+    "LICENSE"
+   ]
+  },
+  {
+   "nome": "libass",
+   "repository": "https://github.com/libass/libass",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "libbluray",
+   "repository": "https://code.videolan.org/videolan/libbluray",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "libbs2b",
+   "repository": "https://github.com/alexmarsev/libbs2b",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "libdvdcss",
+   "repository": "https://code.videolan.org/videolan/libdvdcss",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "libdvdnav",
+   "repository": "https://code.videolan.org/videolan/libdvdnav",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "libdvdread",
+   "repository": "https://code.videolan.org/videolan/libdvdread",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "libiconv",
+   "repository": "https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.18.tar.gz",
+   "file": [],
+   "licenza": "LGPL-2.1-or-later, testi\\LGPL-2.1.txt"
+  },
+  {
+   "nome": "libjpeg",
+   "repository": "https://github.com/libjpeg-turbo/libjpeg-turbo",
+   "file": [
+    "LICENSE.md"
+   ]
+  },
+  {
+   "nome": "libjxl",
+   "repository": "https://github.com/libjxl/libjxl",
+   "file": [
+    "LICENSE",
+    "PATENTS"
+   ]
+  },
+  {
+   "nome": "libmodplug",
+   "repository": "https://github.com/Konstanty/libmodplug",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "libmysofa",
+   "repository": "https://github.com/hoene/libmysofa",
+   "file": [
+    "LICENSE"
+   ]
+  },
+  {
+   "nome": "libopenmpt",
+   "repository": "https://github.com/OpenMPT/openmpt",
+   "file": [
+    "LICENSE"
+   ]
+  },
+  {
+   "nome": "libplacebo",
+   "repository": "https://github.com/haasn/libplacebo",
+   "file": [
+    "LICENSE"
+   ]
+  },
+  {
+   "nome": "libpng",
+   "repository": "https://github.com/glennrp/libpng",
+   "file": [
+    "LICENSE.md"
+   ]
+  },
+  {
+   "nome": "libpsl",
+   "repository": "https://github.com/rockdaboot/libpsl",
+   "file": [
+    "COPYING",
+    "LICENSE"
+   ]
+  },
+  {
+   "nome": "libsamplerate",
+   "repository": "https://github.com/libsndfile/libsamplerate",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "libsdl2",
+   "repository": "https://github.com/libsdl-org/SDL",
+   "file": [
+    "LICENSE.txt"
+   ]
+  },
+  {
+   "nome": "libsixel",
+   "repository": "https://github.com/saitoha/libsixel",
+   "file": [
+    "LICENSE",
+    "LICENSE.images",
+    "LICENSE.mesa",
+    "LICENSE.pngsuite",
+    "LICENSE.pnmcolormap",
+    "LICENSE.sdump",
+    "LICENSE.sixel",
+    "LICENSE.stb"
+   ]
+  },
+  {
+   "nome": "libsoxr",
+   "repository": "https://gitlab.com/shinchiro/soxr",
+   "file": [
+    "COPYING.LGPL",
+    "LICENCE"
+   ]
+  },
+  {
+   "nome": "libsrt",
+   "repository": "https://github.com/Haivision/srt",
+   "file": [
+    "LICENSE"
+   ]
+  },
+  {
+   "nome": "libssh",
+   "repository": "https://gitlab.com/libssh/libssh-mirror",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "libudfread",
+   "repository": "https://code.videolan.org/videolan/libudfread",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "libunibreak",
+   "repository": "https://github.com/adah1972/libunibreak",
+   "file": [
+    "LICENCE"
+   ]
+  },
+  {
+   "nome": "libva",
+   "repository": "https://github.com/intel/libva",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "libvpl",
+   "repository": "https://github.com/intel/libvpl",
+   "file": [
+    "LICENSE"
+   ]
+  },
+  {
+   "nome": "libvpx",
+   "repository": "https://chromium.googlesource.com/webm/libvpx",
+   "file": [
+    "LICENSE",
+    "PATENTS"
+   ]
+  },
+  {
+   "nome": "libwebp",
+   "repository": "https://chromium.googlesource.com/webm/libwebp",
+   "file": [
+    "COPYING",
+    "PATENTS"
+   ]
+  },
+  {
+   "nome": "libxml2",
+   "repository": "https://github.com/GNOME/libxml2",
+   "file": [
+    "Copyright"
+   ]
+  },
+  {
+   "nome": "libzimg",
+   "repository": "https://github.com/sekrit-twc/zimg",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "libzvbi",
+   "repository": "https://github.com/zapping-vbi/zvbi",
+   "file": [
+    "COPYING.md"
+   ]
+  },
+  {
+   "nome": "luajit",
+   "repository": "https://github.com/openresty/luajit2",
+   "file": [
+    "COPYRIGHT"
+   ]
+  },
+  {
+   "nome": "lzo",
+   "repository": "https://www.oberhumer.com/opensource/lzo/download/lzo-2.10.tar.gz",
+   "file": [],
+   "licenza": "GPL-2.0-or-later, testi\\GPL-2.0.txt"
+  },
+  {
+   "nome": "mpv",
+   "repository": "https://github.com/mpv-player/mpv",
+   "file": [
+    "Copyright",
+    "LICENSE.GPL",
+    "LICENSE.LGPL"
+   ]
+  },
+  {
+   "nome": "mujs",
+   "repository": "https://codeberg.org/ccxvii/mujs",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "nghttp2",
+   "repository": "https://github.com/nghttp2/nghttp2",
+   "file": [
+    "COPYING",
+    "LICENSE"
+   ]
+  },
+  {
+   "nome": "nghttp3",
+   "repository": "https://github.com/ngtcp2/nghttp3",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "ngtcp2",
+   "repository": "https://github.com/ngtcp2/ngtcp2",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "nvcodec-headers",
+   "repository": "https://github.com/FFmpeg/nv-codec-headers",
+   "file": [],
+   "licenza": "solo le intestazioni delle schede NVIDIA, per usarle se ci sono; la licenza è scritta in testa ai file"
+  },
+  {
+   "nome": "ogg",
+   "repository": "https://github.com/xiph/ogg",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "openal-soft",
+   "repository": "https://github.com/kcat/openal-soft",
+   "file": [
+    "COPYING",
+    "LICENSE-pffft",
+    "LICENSE.Apache-2.0.txt",
+    "LICENSE.BSD-3-Clause.txt"
+   ]
+  },
+  {
+   "nome": "openssl",
+   "repository": "https://github.com/openssl/openssl",
+   "file": [
+    "LICENSE.txt"
+   ]
+  },
+  {
+   "nome": "opus",
+   "repository": "https://github.com/xiph/opus",
+   "file": [
+    "COPYING",
+    "LICENSE_PLEASE_READ.txt"
+   ]
+  },
+  {
+   "nome": "opus-dnn",
+   "repository": "https://media.xiph.org/opus/models/opus_data-8a07d57c4fce6fb30f23b3e0d264004e04f1d7b421f5392ef61543d021a439af.tar.gz",
+   "file": [],
+   "licenza": "i modelli di Opus, con la licenza di Opus (libmpv\\opus)"
+  },
+  {
+   "nome": "rubberband",
+   "repository": "https://github.com/breakfastquay/rubberband",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "shaderc",
+   "repository": "https://github.com/google/shaderc",
+   "file": [
+    "LICENSE"
+   ]
+  },
+  {
+   "nome": "speex",
+   "repository": "https://github.com/xiph/speex",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "spirv-cross",
+   "repository": "https://github.com/KhronosGroup/SPIRV-Cross",
+   "file": [
+    "LICENSE"
+   ]
+  },
+  {
+   "nome": "spirv-headers",
+   "repository": "https://github.com/KhronosGroup/SPIRV-Headers",
+   "file": [
+    "LICENSE"
+   ]
+  },
+  {
+   "nome": "spirv-tools",
+   "repository": "https://github.com/KhronosGroup/SPIRV-Tools",
+   "file": [
+    "LICENSE"
+   ]
+  },
+  {
+   "nome": "subrandr",
+   "repository": "https://github.com/afishhh/subrandr",
+   "file": [
+    "LICENSE"
+   ]
+  },
+  {
+   "nome": "svtav1",
+   "repository": "https://gitlab.com/AOMediaCodec/SVT-AV1",
+   "file": [
+    "LICENSE-BSD2.md",
+    "LICENSE.md",
+    "PATENTS.md"
+   ]
+  },
+  {
+   "nome": "uavs3d",
+   "repository": "https://github.com/uavs3/uavs3d",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "uchardet",
+   "repository": "https://gitlab.freedesktop.org/uchardet/uchardet",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "vapoursynth",
+   "repository": "https://github.com/vapoursynth/vapoursynth",
+   "file": [
+    "COPYING.LESSER"
+   ]
+  },
+  {
+   "nome": "vorbis",
+   "repository": "https://github.com/xiph/vorbis",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "vulkan",
+   "repository": "https://github.com/KhronosGroup/Vulkan-Loader",
+   "file": [
+    "LICENSE.txt"
+   ]
+  },
+  {
+   "nome": "vulkan-header",
+   "repository": "https://github.com/KhronosGroup/Vulkan-Headers",
+   "file": [
+    "LICENSE.md"
+   ]
+  },
+  {
+   "nome": "x264",
+   "repository": "https://code.videolan.org/videolan/x264",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "x265",
+   "repository": "https://github.com/Multicorewareinc/x265",
+   "file": [
+    "COPYING"
+   ]
+  },
+  {
+   "nome": "xxhash",
+   "repository": "https://github.com/Cyan4973/xxHash",
+   "file": [
+    "LICENSE"
+   ]
+  },
+  {
+   "nome": "xz",
+   "repository": "https://github.com/tukaani-project/xz",
+   "file": [
+    "COPYING",
+    "COPYING.0BSD",
+    "COPYING.GPLv2",
+    "COPYING.GPLv3",
+    "COPYING.LGPLv2.1"
+   ]
+  },
+  {
+   "nome": "zlib",
+   "repository": "https://github.com/zlib-ng/zlib-ng",
+   "file": [
+    "LICENSE.md"
+   ]
+  },
+  {
+   "nome": "zstd",
+   "repository": "https://github.com/facebook/zstd",
+   "file": [
+    "COPYING",
+    "LICENSE"
+   ]
+  }
+ ],
+ "altri": [
+  {
+   "nome": "winrt",
+   "repository": "https://github.com/pywinrt/pywinrt",
+   "ruolo": "i pacchetti winrt del riconoscimento dei caratteri",
+   "file": [
+    "LICENSE"
+   ]
+  },
+  {
+   "nome": "fluidr3",
+   "repository": "https://github.com/pianobooster/fluid-soundfont",
+   "ruolo": "il banco di suoni FluidR3 GM, scaricato per i MIDI",
+   "file": [
+    "COPYING"
+   ]
+  }
+ ]
+}

@@ -1,12 +1,98 @@
-Il codice sorgente dei componenti di MeTeOra 1.85.0.
+Il codice sorgente dei componenti di MeTeOra 1.85.2.
 Il codice sorgente corrispondente di ogni componente incluso nel pacchetto si trova agli indirizzi qui sotto, alla versione esatta. Se uno non fosse più raggiungibile, chiedilo con una segnalazione su https://github.com/GabrieleBattaglia/MeTeOra/issues e lo riceverai.
-MeTeOra 1.85.0, con sidshim.dll e lo script che prepara le librerie (strumenti\prepara_ambiente.py): https://github.com/GabrieleBattaglia/MeTeOra, alla release della versione 1.85.0.
+MeTeOra 1.85.2, con sidshim.dll e lo script che prepara le librerie (strumenti\prepara_ambiente.py): https://github.com/GabrieleBattaglia/MeTeOra, alla release della versione 1.85.2.
 GBUtils V196: https://github.com/GabrieleBattaglia/GBUtils/tree/fb098834acbf2a5b6d86571cfb2ea1fe7b2f98e2.
 libmpv-2.dll, build 20260928 di shinchiro, impronta SHA-256 0d5b9dbecb73e179ef39dc94314ff8905fab926a80f8d60a2367d824b7254e2e:
 mpv: https://github.com/mpv-player/mpv/tree/e470f8986e
 FFmpeg: https://github.com/FFmpeg/FFmpeg/tree/939c2c733
 Gli script della build, con l'elenco e la provenienza di ogni libreria inclusa (cartella packages): https://github.com/shinchiro/mpv-winbuild-cmake/tree/05a60b3cfd04e3e3b89918f4a27f3dde2935dff2
 La build: https://github.com/shinchiro/mpv-winbuild-cmake/releases/tag/20260928
+Le librerie dentro libmpv-2.dll, dai loro repository; la build 20260928 ha preso quelle senza una versione fissata negli script dal ramo principale del giorno della build:
+amf-headers: https://github.com/GPUOpen-LibrariesAndSDKs/AMF
+angle-headers: https://github.com/google/angle
+aom: https://aomedia.googlesource.com/aom
+avisynth-headers: https://github.com/AviSynth/AviSynthPlus
+brotli: https://github.com/google/brotli
+bzip2: https://gitlab.com/bzip2/bzip2
+c-ares: https://github.com/c-ares/c-ares
+curl: https://github.com/curl/curl
+dav1d: https://code.videolan.org/videolan/dav1d
+davs2: https://github.com/saindriches/davs2
+fast_float: https://github.com/fastfloat/fast_float
+fontconfig: https://gitlab.freedesktop.org/fontconfig/fontconfig
+freetype2: https://github.com/freetype/freetype
+fribidi: https://github.com/fribidi/fribidi
+glad: https://github.com/Dav1dde/glad
+glslang: https://github.com/KhronosGroup/glslang
+graphengine: https://github.com/sekrit-twc/graphengine
+harfbuzz: https://github.com/harfbuzz/harfbuzz
+highway: https://github.com/google/highway
+lame: https://gitlab.com/shinchiro/lame
+lcms2: https://github.com/mm2/Little-CMS
+libarchive: https://github.com/libarchive/libarchive
+libaribcaption: https://github.com/xqq/libaribcaption
+libass: https://github.com/libass/libass
+libbluray: https://code.videolan.org/videolan/libbluray
+libbs2b: https://github.com/alexmarsev/libbs2b
+libdvdcss: https://code.videolan.org/videolan/libdvdcss
+libdvdnav: https://code.videolan.org/videolan/libdvdnav
+libdvdread: https://code.videolan.org/videolan/libdvdread
+libiconv: https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.18.tar.gz
+libjpeg: https://github.com/libjpeg-turbo/libjpeg-turbo
+libjxl: https://github.com/libjxl/libjxl
+libmodplug: https://github.com/Konstanty/libmodplug
+libmysofa: https://github.com/hoene/libmysofa
+libopenmpt: https://github.com/OpenMPT/openmpt
+libplacebo: https://github.com/haasn/libplacebo
+libpng: https://github.com/glennrp/libpng
+libpsl: https://github.com/rockdaboot/libpsl
+libsamplerate: https://github.com/libsndfile/libsamplerate
+libsdl2: https://github.com/libsdl-org/SDL
+libsixel: https://github.com/saitoha/libsixel
+libsoxr: https://gitlab.com/shinchiro/soxr
+libsrt: https://github.com/Haivision/srt
+libssh: https://gitlab.com/libssh/libssh-mirror
+libudfread: https://code.videolan.org/videolan/libudfread
+libunibreak: https://github.com/adah1972/libunibreak
+libva: https://github.com/intel/libva
+libvpl: https://github.com/intel/libvpl
+libvpx: https://chromium.googlesource.com/webm/libvpx
+libwebp: https://chromium.googlesource.com/webm/libwebp
+libxml2: https://github.com/GNOME/libxml2
+libzimg: https://github.com/sekrit-twc/zimg
+libzvbi: https://github.com/zapping-vbi/zvbi
+luajit: https://github.com/openresty/luajit2
+lzo: https://www.oberhumer.com/opensource/lzo/download/lzo-2.10.tar.gz
+mujs: https://codeberg.org/ccxvii/mujs
+nghttp2: https://github.com/nghttp2/nghttp2
+nghttp3: https://github.com/ngtcp2/nghttp3
+ngtcp2: https://github.com/ngtcp2/ngtcp2
+nvcodec-headers: https://github.com/FFmpeg/nv-codec-headers
+ogg: https://github.com/xiph/ogg
+openal-soft: https://github.com/kcat/openal-soft
+openssl: https://github.com/openssl/openssl
+opus: https://github.com/xiph/opus
+opus-dnn: https://media.xiph.org/opus/models/opus_data-8a07d57c4fce6fb30f23b3e0d264004e04f1d7b421f5392ef61543d021a439af.tar.gz
+rubberband: https://github.com/breakfastquay/rubberband
+shaderc: https://github.com/google/shaderc
+speex: https://github.com/xiph/speex
+spirv-cross: https://github.com/KhronosGroup/SPIRV-Cross
+spirv-headers: https://github.com/KhronosGroup/SPIRV-Headers
+spirv-tools: https://github.com/KhronosGroup/SPIRV-Tools
+subrandr: https://github.com/afishhh/subrandr
+svtav1: https://gitlab.com/AOMediaCodec/SVT-AV1
+uavs3d: https://github.com/uavs3/uavs3d
+uchardet: https://gitlab.freedesktop.org/uchardet/uchardet
+vapoursynth: https://github.com/vapoursynth/vapoursynth
+vorbis: https://github.com/xiph/vorbis
+vulkan: https://github.com/KhronosGroup/Vulkan-Loader
+vulkan-header: https://github.com/KhronosGroup/Vulkan-Headers
+x264: https://code.videolan.org/videolan/x264
+x265: https://github.com/Multicorewareinc/x265
+xxhash: https://github.com/Cyan4973/xxHash
+xz: https://github.com/tukaani-project/xz
+zlib: https://github.com/zlib-ng/zlib-ng
+zstd: https://github.com/facebook/zstd
 libsidplayfp 2.16.1-1: https://repo.msys2.org/mingw/sources/mingw-w64-libsidplayfp-2.16.1-1.src.tar.zst
 libgcrypt 1.12.4-1: https://repo.msys2.org/mingw/sources/mingw-w64-libgcrypt-1.12.4-1.src.tar.zst
 libgpg-error 1.61-1: https://repo.msys2.org/mingw/sources/mingw-w64-libgpg-error-1.61-1.src.tar.zst
@@ -29,7 +115,7 @@ numpy 2.5.3: https://pypi.org/project/numpy/2.5.3/#files
 scipy 1.18.1: https://pypi.org/project/scipy/1.18.1/#files
 pillow 12.3.0: https://pypi.org/project/pillow/12.3.0/#files
 winrt-runtime 3.2.1: https://pypi.org/project/winrt-runtime/3.2.1/#files
-I moduli winrt e il testo della loro licenza: https://github.com/pywinrt/pywinrt
+I moduli winrt: https://github.com/pywinrt/pywinrt
 sounddevice 0.5.6: https://pypi.org/project/sounddevice/0.5.6/#files
 cffi 2.1.1: https://pypi.org/project/cffi/2.1.1/#files
 pycparser 3.0: https://pypi.org/project/pycparser/3.0/#files

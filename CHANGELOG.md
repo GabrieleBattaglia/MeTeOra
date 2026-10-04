@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.85.2] - 2026-10-04
+
+- La cartella licenze è completa: ci sono anche i file di licenza delle 87 librerie chiuse dentro libmpv-2.dll, da FFmpeg e x264 a FreeType e libjpeg, molte BSD o MIT, che chiedono di riportare la loro nota con il programma compilato; e i testi dei pacchetti winrt e del banco FluidR3 GM. LEGGIMI.txt ha una riga per ognuna, SORGENTI.txt il suo repository.
+- Li scarica strumenti/scarica_licenze.py, con il permesso di Gabriele: segue le dipendenze di mpv negli script della build fissata di libmpv e prende i file di licenza dal repository ufficiale di ogni libreria. raccogli_licenze.py li legge, e si ferma se sono di un'altra build.
+
 ## [1.85.1] - 2026-10-04
 
 - Se libmpv non si carica, MeTeOra non si ferma più su un errore di Python: la finestra MeTeOra non può partire dice il motivo. Il caso tipico è vulkan-1.dll, che libmpv chiede per il video e che installano i driver della scheda video: su una macchina virtuale o con driver vecchi può mancare, e la finestra dice di aggiornare i driver o di installare il Vulkan Runtime (Gabriele).
