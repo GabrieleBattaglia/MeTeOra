@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura. Nella 1.83.1 Maiuscolo con F10 lascia chiuso Questo PC, e la plancia molto aperta non ferma piu' la finestra. Nella 1.83.2 F10 a fette, e i suoni delle aperture che non si sovrappongono. Nella 1.84.0 la proposta dell'aggiornamento, il suo avanzamento e la chiusura per aggiornarsi. Nella 1.85.0 i crediti con la licenza e le licenze dei componenti. Nella 1.85.5 i rami di rete che si riprovano sempre. Nella 1.86.0 Maiuscolo con F12 spegne e riaccende i tasti rapidi a carattere. Nella 1.87.0 la barra dei comandi per il mouse. Nella 1.88.0 anche sopra il video, con la linea del tempo. Nella 1.88.1 F2 scrive solo le versioni recenti. Nella 1.89.0 i problemi interni anche nel registro degli errori. Nella 1.90.0 le copie dei dati che non riescono. Nella 1.91.0 i file aperti da Windows, il trascinamento e le associazioni dei formati. Nella 1.92.0 i file lunghi riprendono dal punto lasciato.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura. Nella 1.83.1 Maiuscolo con F10 lascia chiuso Questo PC, e la plancia molto aperta non ferma piu' la finestra. Nella 1.83.2 F10 a fette, e i suoni delle aperture che non si sovrappongono. Nella 1.84.0 la proposta dell'aggiornamento, il suo avanzamento e la chiusura per aggiornarsi. Nella 1.85.0 i crediti con la licenza e le licenze dei componenti. Nella 1.85.5 i rami di rete che si riprovano sempre. Nella 1.86.0 Maiuscolo con F12 spegne e riaccende i tasti rapidi a carattere. Nella 1.87.0 la barra dei comandi per il mouse. Nella 1.88.0 anche sopra il video, con la linea del tempo. Nella 1.88.1 F2 scrive solo le versioni recenti. Nella 1.89.0 i problemi interni anche nel registro degli errori. Nella 1.90.0 le copie dei dati che non riescono. Nella 1.91.0 i file aperti da Windows, il trascinamento e le associazioni dei formati. Nella 1.92.0 i file lunghi riprendono dal punto lasciato. Nella 1.93.0 i capitoli, con virgola e punto e nella plancia.
 
 """La finestra di MeTeOra.
 
@@ -154,6 +154,9 @@ TASTI = {
     ("q", True): "passo_indietro",
     ("e", True): "passo_avanti",
     ("w", False): "vai_a_tempo",
+    # I capitoli degli audiolibri e dei film (Gabriele, 1.93.0).
+    (",", False): "capitolo_precedente",
+    (".", False): "capitolo_successivo",
     ("+", False): "volume_su",
     ("-", False): "volume_giu",
     ("\\", False): "ricerca",
@@ -209,6 +212,7 @@ TASTI_COMUNI = [
     "X suona la voce selezionata, riprende dalla pausa o fa ripartire da capo il brano che suona già; C pausa, V stop, Z e B brano precedente e successivo, N brano a caso, "
     "Maiuscolo con N la riproduzione casuale, con cui B sceglie a caso e Z torna ai brani suonati prima.",
     "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, più e meno volume, Maiuscolo con M il passo del volume, M muto.",
+    "Virgola e punto vanno al capitolo precedente e successivo, negli audiolibri e nei film che ne hanno; la virgola, oltre i primi secondi di un capitolo, torna al suo inizio.",
     "A e D rallentano e accelerano, S torna alla velocità normale; F e H abbassano e alzano il tono di un semitono, G lo riporta al normale.",
     "U e I scelgono la banda dell'equalizzatore, O e P la abbassano e la alzano di un dB, È la azzera, Maiuscolo con È le azzera tutte.",
     "L accende e spegne la dissolvenza incrociata: con lei sfumano i cambi di brano, lo stop, la pausa, X da capo e i marker; Maiuscolo con L ne chiede la durata.",
@@ -247,6 +251,7 @@ TASTI_DEL_CONTESTO = {
     "file": ("un file", "Invio, Applicazioni o Spazio: menu con Riproduci, Aggiungi alla playlist, Aggiungi ai preferiti, Rinomina file, Leggi i tag e Tag per i formati che li hanno, e Manda nel cestino. "
         "Maiuscolo con Canc manda il file nel cestino. Un SID o un file delle console con più sottobrani, o un file con dei marker, si apre con freccia destra."),
     "sottobrano": ("un sottobrano di un SID o di un file delle console", "Invio, Applicazioni o Spazio: menu con Riproduci, Aggiungi alla playlist e Aggiungi ai preferiti. Se ha dei marker, freccia destra li mostra."),
+    "capitolo": ("un capitolo", "X, Invio, Applicazioni o Spazio suonano il file da questo capitolo. Virgola e punto, mentre suona, vanno al capitolo precedente e successivo."),
     "marker": ("un marker", "Invio rinomina il marker, Canc lo elimina, X fa come sul suo brano. Applicazioni o Spazio: menu con Vai al marker, che suona il brano da lì, Rinomina ed Elimina."),
     "comando": ("un comando", "Invio esegue il comando."),
 }
@@ -489,6 +494,16 @@ class _Trascinamento(wx.FileDropTarget):
 # Quante righe del changelog scrive F2, a versioni intere (Gabriele, 1.88.1).
 RIGHE_DEL_CHANGELOG = 50
 CHANGELOG_SU_GITHUB = "https://github.com/GabrieleBattaglia/MeTeOra/blob/main/CHANGELOG.md"
+
+
+# Oltre quanti secondi di un capitolo la virgola torna al suo inizio, invece
+# che al capitolo prima, come nei lettori (1.93.0).
+RITORNO_AL_CAPITOLO = 3.0
+
+
+def frase_del_capitolo(numero, totale, titolo, secondi):
+    """Capitolo 3 di 12: Il titolo, 23:10."""
+    return f"Capitolo {numero} di {totale}{f': {titolo}' if titolo else ''}, {tempo(secondi)}"
 
 
 def novita_recenti(righe, massimo=RIGHE_DEL_CHANGELOG):
@@ -1271,6 +1286,67 @@ class Finestra(wx.Frame):
                 self._posizioni_non_salvate = True
                 self._riscontro("errore", f"Non riesco a salvare le posizioni dei file lunghi: {e.strerror or e}.")
 
+    # I capitoli (Gabriele, 4 ottobre 2026, 1.93.0).
+
+    def _capitoli_della_voce(self, dati):
+        """I capitoli di un brano o di un file della plancia, dalla sua scheda:
+        [(secondi, titolo)]. Non per i sottobrani e i file che ne hanno."""
+        if dati.get("tipo") not in ("brano", "file") or dati["brano"].sottobrano or self._ha_sottobrani(dati["brano"]):
+            return []
+        scheda = self.schedario.scheda(dati["brano"].percorso) or {}
+        return [tuple(capitolo) for capitolo in scheda.get("capitoli") or []]
+
+    def _capitoli_in_corso(self):
+        """I capitoli del brano che suona: quelli di libmpv, che li vede tutti,
+        altrimenti quelli dei tag nello schedario."""
+        elenco = self.motore.capitoli()
+        if not elenco and self.motore.in_corso:
+            scheda = self.schedario.scheda(self.motore.in_corso) or {}
+            elenco = [tuple(capitolo) for capitolo in scheda.get("capitoli") or []]
+        return elenco
+
+    def _comando_capitolo_precedente(self):
+        self._vai_al_capitolo(-1)
+
+    def _comando_capitolo_successivo(self):
+        self._vai_al_capitolo(1)
+
+    def _vai_al_capitolo(self, passo):
+        """Virgola e punto: il capitolo prima o dopo. La virgola, oltre i primi
+        RITORNO_AL_CAPITOLO secondi del capitolo, torna al suo inizio."""
+        if self._niente_in_corso():
+            return
+        elenco = self._capitoli_in_corso()
+        if not elenco:
+            self._riscontro("non_disponibile", f"{os.path.basename(self.motore.in_corso)} non ha capitoli.")
+            return
+        posizione = self.motore.posizione or 0.0
+        attuale = max((i for i, (secondi, _titolo) in enumerate(elenco) if secondi <= posizione + 0.5), default=0)
+        if passo < 0:
+            indice = attuale if posizione - elenco[attuale][0] > RITORNO_AL_CAPITOLO else attuale - 1
+            if indice < 0:
+                self._riscontro("nessun_altro_brano", "È il primo capitolo.")
+                return
+        else:
+            indice = attuale + 1
+            if indice >= len(elenco):
+                self._riscontro("nessun_altro_brano", "È l'ultimo capitolo.")
+                return
+        secondi, titolo = elenco[indice]
+        self.motore.vai_a(secondi)
+        self._riscontro("capitolo_precedente" if passo < 0 else "capitolo_successivo", f"{frase_del_capitolo(indice + 1, len(elenco), titolo, secondi)}.")
+
+    def _suona_il_capitolo(self, dati):
+        """X, Invio o il menu su un capitolo della plancia: il file da li'; se
+        suona gia', un salto."""
+        frase = f"{frase_del_capitolo(dati['numero'], dati['totale'], dati['titolo'], dati['secondi'])}."
+        if self.motore.in_corso and dati["brano"] is self.coda.corrente:
+            self.motore.vai_a(dati["secondi"])
+            self._riscontro("capitolo_successivo", frase)
+            return
+        self._suona(dati["playlist"], dati["brano"], inizio=dati["secondi"])
+        self.scrivi(f"Dal {frase[0].lower()}{frase[1:]}")
+
     def copie_mancate(self, nomi):
         """All'avvio, se una copia dei dati non e' riuscita (1.90.0)."""
         self._riscontro("errore", f"Non riesco a fare la copia di {', '.join(nomi)} nella cartella copie: forse il disco è pieno o protetto.")
@@ -1594,6 +1670,8 @@ class Finestra(wx.Frame):
             return f"sottobrano {dati['numero']} di {dati['brano'].nome_del_file}"
         if tipo == "marker":
             return f"il marker {dati['marker']['nome']}"
+        if tipo == "capitolo":
+            return f"il capitolo {dati['numero']} di {dati['brano'].nome_del_file}"
         if tipo == "risultati":
             return f"Risultati di {self._testo_della_ricerca}"
         if tipo == "gruppo_risultati":
@@ -1811,6 +1889,8 @@ class Finestra(wx.Frame):
         brano = dati["brano"]
         if dati["tipo"] == "marker":
             return f"{dati['marker']['nome']}, {durata_lunga(dati['marker']['tempo'])}"
+        if dati["tipo"] == "capitolo":
+            return frase_del_capitolo(dati["numero"], dati["totale"], dati["titolo"], dati["secondi"])
         suona = bool(self.motore.in_corso) and brano is self.coda.corrente
         quanti = len(self._marker_della_voce(dati))
         if dati["tipo"] == "sottobrano":
@@ -1859,7 +1939,7 @@ class Finestra(wx.Frame):
         if completo:
             dati["completo"] = True
         voce = self.albero.AppendItem(genitore, self._etichetta(dati), data=dati)
-        if self._ha_sottobrani(brano) or self._marker_della_voce(dati):
+        if self._ha_sottobrani(brano) or self._marker_della_voce(dati) or self._capitoli_della_voce(dati):
             dati["caricato"] = False
             self.albero.SetItemHasChildren(voce, True)
         return voce
@@ -1877,7 +1957,7 @@ class Finestra(wx.Frame):
             nuova = self._etichetta(dati)
             if self.albero.GetItemText(voce) != nuova:
                 self.albero.SetItemText(voce, nuova)
-                if dati["tipo"] != "marker" and not self.albero.ItemHasChildren(voce) and self._marker_della_voce(dati):
+                if not self.albero.ItemHasChildren(voce) and (self._marker_della_voce(dati) or self._capitoli_della_voce(dati)):
                     dati["caricato"] = False
                     self.albero.SetItemHasChildren(voce, True)
 
@@ -2075,7 +2155,7 @@ class Finestra(wx.Frame):
                 tipo = (self._dati(figlio) or {}).get("tipo")
                 if tipo == "file":
                     ha_file = True
-                elif tipo not in ("brano", "sottobrano", "marker"):
+                elif tipo not in ("brano", "sottobrano", "marker", "capitolo"):
                     dentro.append(figlio)
             if dati.get("tipo") == "cartella":
                 yield voce, dati, bool(dati.get("caricato")) and ha_file
@@ -2401,6 +2481,12 @@ class Finestra(wx.Frame):
                     self.albero.SetItemHasChildren(sotto, True)
             return
         if tipo in ("brano", "file", "sottobrano"):
+            # Prima i capitoli, nell'ordine del file; poi i marker (1.93.0).
+            elenco = self._capitoli_della_voce(dati)
+            for numero, (secondi, titolo) in enumerate(elenco, 1):
+                figlio = {"tipo": "capitolo", "playlist": dati["playlist"], "brano": dati["brano"], "numero": numero, "totale": len(elenco),
+                    "secondi": secondi, "titolo": titolo}
+                self.albero.AppendItem(voce, self._etichetta(figlio), data=figlio)
             for marker in self._marker_della_voce(dati):
                 figlio = {"tipo": "marker", "playlist": dati["playlist"], "brano": dati["brano"], "numero": dati.get("numero") or dati["brano"].sottobrano,
                     "chiave": self._chiave_della_voce(dati), "marker": marker}
@@ -2626,6 +2712,8 @@ class Finestra(wx.Frame):
             self._altri_risultati(dati)
         elif dati and dati["tipo"] == "marker":
             self._rinomina_il_marker(dati["chiave"], dati["marker"])
+        elif dati and dati["tipo"] == "capitolo":
+            self._suona_il_capitolo(dati)
         else:
             self._menu(voce)
 
@@ -2740,6 +2828,8 @@ class Finestra(wx.Frame):
             return [("Riproduci", lambda: self._riproduci(pl, brano)), ("Aggiungi alla playlist", self._menu_aggiungi(lambda: [Brano(brano.percorso)])),
                 ("Aggiungi ai preferiti", lambda: self._ai_preferiti(brano)), ("Rinomina file", lambda: self._rinomina_file(brano)),
                 *self._voci_dei_tag([brano.percorso]), ("Manda nel cestino", lambda: self._al_cestino(self._voce_di_lavoro()))]
+        if tipo == "capitolo":
+            return [("Suona da questo capitolo", lambda: self._suona_il_capitolo(dati))]
         if tipo == "marker":
             return [("Vai al marker", lambda: self._vai_al_marker(dati)), ("Rinomina", lambda: self._rinomina_il_marker(dati["chiave"], dati["marker"])),
                 ("Elimina", lambda: self._elimina_il_marker(dati["chiave"], dati["marker"], self._voce_di_lavoro()))]
@@ -4489,6 +4579,9 @@ class Finestra(wx.Frame):
         dati = self._dati(self._voce_di_lavoro()) or {}
         tipo = dati.get("tipo")
         corrente = self.coda.corrente
+        if tipo == "capitolo":
+            self._suona_il_capitolo(dati)
+            return
         if tipo == "marker":
             # X su un marker vale come X sul suo brano: lo suona dall'inizio, o
             # lo fa ripartire da capo se suona gia'. Da un marker suonano R, Y,
@@ -6637,6 +6730,8 @@ class Finestra(wx.Frame):
                 da_rifare.append((voce, dati))
         ha_marker = bool(self.marcatori.elenco(k))
         for voce, dati in da_rifare:
+            # Il ramo resta anche per i capitoli (1.93.0).
+            ha_figli = ha_marker or bool(self._capitoli_della_voce(dati))
             self.albero.SetItemText(voce, self._etichetta(dati))
             fuoco_dentro = genitore_del_fuoco is not None and genitore_del_fuoco == voce
             if fuoco_dentro:
@@ -6646,13 +6741,13 @@ class Finestra(wx.Frame):
             aperta = self.albero.IsExpanded(voce)
             self.albero.DeleteChildren(voce)
             dati["caricato"] = False
-            self.albero.SetItemHasChildren(voce, ha_marker)
-            if not (aperta and ha_marker):
+            self.albero.SetItemHasChildren(voce, ha_figli)
+            if not (aperta and ha_figli):
                 continue
             self._carica(voce, dati)
             self.albero.Expand(voce)
             if fuoco_dentro:
-                figlio = next((v for v in self._figli(voce) if abs((self._dati(v) or {})["marker"]["tempo"] - tempo_corrente) < 1e-6), None)
+                figlio = next((v for v in self._figli(voce) if abs((self._dati(v) or {}).get("marker", {}).get("tempo", float("inf")) - tempo_corrente) < 1e-6), None)
                 if figlio is not None:
                     self._seleziona(figlio)
 

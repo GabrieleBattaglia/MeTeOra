@@ -34,3 +34,6 @@ Suona un audiolibro o un film più lungo di dieci minuti, fermalo a metà con V,
 Sul file ripreso, X: riparte da capo.
 Esci da MeTeOra mentre suona un file lungo, riaprilo, suona un'altra cosa e poi il file lungo: riprende dal punto.
 Un M4B, se ne hai uno: si vede nella plancia e suona.
+Un audiolibro M4B con i capitoli, o un film MKV: mentre suona, punto va al capitolo successivo e la console dice quale; virgola, a metà capitolo, torna al suo inizio; virgola di nuovo, al precedente.
+Nella plancia, il file con i capitoli si apre con freccia destra: dentro i capitoli; X su uno suona da lì.
+Un file senza capitoli: punto dice che non ne ha.

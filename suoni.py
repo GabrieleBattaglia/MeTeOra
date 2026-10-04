@@ -1,6 +1,6 @@
 # MeTeOra, gli effetti sonori: un suono per ogni azione, con Acusticator.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.51.0 i suoni delle impostazioni, della console salvata, della finestra dei marcatori, della sua ricerca e della scheda audio. Nella 1.55.0 quelli di velocita', tono, equalizzatore e dissolvenza. Nella 1.58.0 i suoni al volo dell'equalizzatore, e il loop con i soffi rimasti liberi. Nella 1.59.0 l'acceso e lo spento della riproduzione casuale. Nella 1.63.0 i suoni del video. Nella 1.64.0 quelli di Questa rete. Nella 1.65.0 quelli dello scaricamento. Nella 1.66.36 l'annullamento, il ramo aggiornato e il video nascosto, e la playlist creata con dei brani ha un suono solo. Nella 1.67.0 il file rinominato. Nella 1.69.0 i suoni dei tag. Nella 1.75.0 il suono dell'invito a offrire un caffe'. Nella 1.84.0 quello dell'aggiornamento accettato. Nella 1.86.0 i tasti rapidi spenti e accesi.
+# 30/09/2026: nasce con la tappa 1. Nella 1.51.0 i suoni delle impostazioni, della console salvata, della finestra dei marcatori, della sua ricerca e della scheda audio. Nella 1.55.0 quelli di velocita', tono, equalizzatore e dissolvenza. Nella 1.58.0 i suoni al volo dell'equalizzatore, e il loop con i soffi rimasti liberi. Nella 1.59.0 l'acceso e lo spento della riproduzione casuale. Nella 1.63.0 i suoni del video. Nella 1.64.0 quelli di Questa rete. Nella 1.65.0 quelli dello scaricamento. Nella 1.66.36 l'annullamento, il ramo aggiornato e il video nascosto, e la playlist creata con dei brani ha un suono solo. Nella 1.67.0 il file rinominato. Nella 1.69.0 i suoni dei tag. Nella 1.75.0 il suono dell'invito a offrire un caffe'. Nella 1.84.0 quello dell'aggiornamento accettato. Nella 1.86.0 i tasti rapidi spenti e accesi. Nella 1.93.0 i capitoli.
 
 """La mappa degli eventi di MeTeOra sui preset della collezione di GBUtils.
 
@@ -163,6 +163,9 @@ EVENTI = {
     # scendono quando si spengono, tre che salgono quando si riaccendono.
     "tasti_spenti": "meditimer_cronometro_pausa",
     "tasti_accesi": "meditimer_cronometro_ripreso",
+    # Virgola e punto, i capitoli (1.93.0): due tic che scendono e due che salgono.
+    "capitolo_precedente": "meditimer_giro_piu_lento",
+    "capitolo_successivo": "meditimer_giro_piu_veloce",
     # Esc in un campo, o No a una domanda (tappa 9, 1.66.36): l'operazione non
     # si fa. Non e' lo stop, che ha il preset annullato.
     "annullamento": "meteora_annullamento",

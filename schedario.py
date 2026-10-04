@@ -22,6 +22,7 @@ import queue
 import threading
 import time
 
+import capitoli
 import formati
 import sottobrani
 import tag
@@ -30,8 +31,13 @@ import tag
 # prima della 1.69.0 lo schedario non leggeva i tag di WAV, AIFF, WMA, WMV e
 # TTA, e prima della 1.70.0 il blocco INFO dei WAV. Le schede piu' vecchie si
 # rileggono.
-VERSIONE_DEI_TAG = 2
+VERSIONE_DEI_TAG = 3
 TAG_DA_RILEGGERE = {".wav": 2, ".aif": 1, ".aiff": 1, ".wma": 1, ".wmv": 1, ".asf": 1, ".tta": 1}
+# Dalla 1.93.0 la scheda ha anche i capitoli: si rileggono le schede piu'
+# vecchie dei formati che li hanno, ma solo dei file lunghi, che sono quelli
+# con i capitoli; rileggere ogni canzone costerebbe troppo.
+CON_I_CAPITOLI = frozenset({".mp3", ".m4a", ".m4b", ".mp4", ".m4v"})
+DURATA_CON_I_CAPITOLI = 600
 
 VERSIONE_DEL_FILE = 1
 # Le chiavi dei tag, come le usa il filtro.
@@ -136,6 +142,13 @@ def durata_da_mpv(percorso):
         return _SONDA[0].durata(percorso)
 
 
+def _senza_capitoli(percorso, scheda):
+    """Vero per la scheda di un file lungo, di un formato con i capitoli,
+    letta prima che lo schedario li leggesse (1.93.0)."""
+    return (formati.estensione(percorso) in CON_I_CAPITOLI and scheda.get("tag_v", 0) < VERSIONE_DEI_TAG
+        and (scheda.get("durata") or 0) >= DURATA_CON_I_CAPITOLI)
+
+
 def leggi_scheda(percorso):
     """La scheda di un file: dimensione, data di modifica, durata in secondi
     (None se non si sa), tag, e per i SID e le console il numero dei
@@ -187,6 +200,10 @@ def leggi_scheda(percorso):
         # Il segno della lettura dei tag con tag.py: le schede di prima della
         # 1.69.0 dei formati che la modalita' easy non leggeva si rifanno.
         scheda["tag_v"] = VERSIONE_DEI_TAG
+        # I capitoli, solo se ci sono: la chiave vuota peserebbe su ogni scheda.
+        elenco = capitoli.dai_tag(audio)
+        if elenco:
+            scheda["capitoli"] = [list(capitolo) for capitolo in elenco]
     elif audio is not None:
         tags = audio.tags or {}
 
@@ -268,9 +285,11 @@ class Schedario:
             # degli AAC, si rileggono.
             # Dalla 1.69.0 i tag di WAV, AIFF, WMA, WMV e TTA si leggono: le
             # loro schede di prima si rileggono.
+            # Dalla 1.93.0 i capitoli: si rileggono le schede vecchie dei file
+            # lunghi dei formati che li hanno.
             self.schede = {chiave: scheda for chiave, scheda in dati["schede"].items()
                 if formati.ha_sottobrani(chiave) or (scheda.get("durata") is not None and formati.estensione(chiave) != ".aac"
-                    and scheda.get("tag_v", 0) >= TAG_DA_RILEGGERE.get(formati.estensione(chiave), 0))}
+                    and scheda.get("tag_v", 0) >= TAG_DA_RILEGGERE.get(formati.estensione(chiave), 0) and not _senza_capitoli(chiave, scheda))}
 
     def salva(self):
         if not self._modificato:

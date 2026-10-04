@@ -5756,3 +5756,54 @@ def test_le_posizioni_si_salvano_ogni_tanto(finestra, tmp_path):
     for _ in range(modulo.GIRI_PER_SALVARE):
         finestra._giro_delle_posizioni(None)
     assert (tmp_path / modulo.FILE_POSIZIONI).exists() and not finestra.posizioni.modificate
+
+
+def test_virgola_e_punto_vanno_ai_capitoli(finestra, monkeypatch, suoni_annotati):
+    # 1.93.0: virgola e punto, con i capitoli di libmpv; oltre i primi secondi
+    # la virgola torna all'inizio del capitolo.
+    stato = {"posizione": 700.0}
+    salti = []
+    monkeypatch.setattr(type(finestra.motore), "in_corso", property(lambda _self: r"C:\m\libro.m4b"))
+    monkeypatch.setattr(type(finestra.motore), "posizione", property(lambda _self: stato["posizione"]))
+    monkeypatch.setattr(finestra.motore, "capitoli", lambda: [(0.0, "Uno"), (600.0, "Due"), (1200.0, "")])
+    monkeypatch.setattr(finestra.motore, "vai_a", lambda secondi: salti.append(secondi) or stato.update(posizione=secondi))
+    _tasto(finestra, ".")
+    assert salti == [1200.0] and suoni_annotati[-1] == "capitolo_successivo" and _ultima(finestra) == "Capitolo 3 di 3, 20:00."
+    _tasto(finestra, ".")
+    assert _ultima(finestra) == "È l'ultimo capitolo." and len(salti) == 1
+    stato["posizione"] = 1210.0
+    _tasto(finestra, ",")
+    assert salti[-1] == 1200.0 and suoni_annotati[-1] == "capitolo_precedente"
+    _tasto(finestra, ",")
+    assert salti[-1] == 600.0 and _ultima(finestra) == "Capitolo 2 di 3: Due, 10:00."
+    _tasto(finestra, ",")
+    _tasto(finestra, ",")
+    assert salti[-1] == 0.0 and _ultima(finestra) == "È il primo capitolo."
+    # Senza capitoli, lo si dice; e con i capitoli dei tag nello schedario si va lo stesso.
+    monkeypatch.setattr(finestra.motore, "capitoli", lambda: [])
+    _tasto(finestra, ".")
+    assert _ultima(finestra) == "libro.m4b non ha capitoli."
+    finestra.schedario.schede[r"C:\m\libro.m4b"] = {"durata": 1800.0, "capitoli": [[0, "A"], [900, "B"]]}
+    _tasto(finestra, ".")
+    assert salti[-1] == 900.0
+
+
+def test_i_capitoli_nella_plancia(finestra, monkeypatch):
+    # 1.93.0: un file con i capitoli nella scheda diventa un ramo; X su un
+    # capitolo suona il file da li'.
+    chiamate = []
+    monkeypatch.setattr(finestra.motore, "suona", lambda percorso, sottobrano=None, inizio=None, **_altro: chiamate.append((percorso, inizio)))
+    libro = r"C:\m\libro.m4b"
+    finestra.schedario.schede[libro] = {"dim": 1, "mod": 0, "durata": 1800.0, "tag": {}, "capitoli": [[0, "Inizio"], [900, "Meta'"]]}
+    finestra._aggiungi(None, [libro, r"C:\m\canzone.mp3"])
+    nodo = next(finestra._figli(finestra.nodo_playlist))
+    finestra.albero.Expand(nodo)
+    file_libro, file_canzone = list(finestra._figli(nodo))
+    assert finestra.albero.ItemHasChildren(file_libro) and not finestra.albero.ItemHasChildren(file_canzone)
+    finestra.albero.Expand(file_libro)
+    assert _etichette(finestra, file_libro) == ["Capitolo 1 di 2: Inizio, 0:00", "Capitolo 2 di 2: Meta', 15:00"]
+    secondo = list(finestra._figli(file_libro))[1]
+    finestra._seleziona(secondo)
+    _tasto(finestra, "x")
+    assert chiamate[-1] == (libro, 900.0)
+    assert any(_senza_ora(r) == "Dal capitolo 2 di 2: Meta', 15:00." for r in finestra._righe)

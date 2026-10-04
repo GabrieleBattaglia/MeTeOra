@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.93.0] - 2026-10-04
+
+- I capitoli, tappa 12 e del piano: negli audiolibri e nei film che ne hanno, la virgola va al capitolo precedente e il punto al successivo, i tasti scelti da Gabriele, e la console dice quale, con il titolo e il tempo; la virgola, oltre i primi tre secondi di un capitolo, torna al suo inizio. Due suoni nuovi dalla collezione di GBUtils (V198).
+- Nella plancia un file con i capitoli è un ramo, con dentro i capitoli e poi i marker: X, Invio o il menu su un capitolo suonano il file da lì. I capitoli si leggono dai tag di M4B, M4A, MP4 e MP3; quelli degli MKV li vede libmpv mentre il file suona. Lo schedario rilegge da sé le schede vecchie dei file lunghi di quei formati.
+
 ## [1.92.0] - 2026-10-04
 
 - I file lunghi riprendono dal punto lasciato, tappa 12 e del piano: audiolibri, podcast e film più lunghi di dieci minuti, il limite scelto da Gabriele, ricordano dove li hai lasciati, e quando li suoni di nuovo riprendono da lì; la console lo dice, e X li fa ripartire da capo. Il limite è la voce Punto lasciato dei file lunghi delle impostazioni, e 0 spegne la ripresa. I punti stanno in MeTeOra - Posizioni.json, fino a mille, e entrano nelle copie dei dati.

@@ -1179,6 +1179,18 @@ class Motore:
             return None
         return lettore.durata_vera or lettore.mpv.duration
 
+    def capitoli(self):
+        """I capitoli del brano in corso come li vede libmpv: [(secondi,
+        titolo)], vuota se non ne ha (1.93.0)."""
+        lettore = self._attivo
+        if not lettore.pronto or lettore.finito:
+            return []
+        try:
+            elenco = lettore.mpv.chapter_list or []
+        except Exception:  # noqa: BLE001 - un lettore che si chiude intanto non ha capitoli
+            return []
+        return [(float(c.get("time") or 0.0), str(c.get("title") or "").strip()) for c in elenco if isinstance(c, dict)]
+
     # Volume, muto e scheda: li ricorda il motore.
 
     @property
