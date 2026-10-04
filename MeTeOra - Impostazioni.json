@@ -1,5 +1,5 @@
 {
- "volume": 100,
+ "volume": 118,
  "passo_volume": 3,
  "passo_indietro": 3.0,
  "passo_avanti": 30.0,
@@ -15,6 +15,7 @@
  "anticipo_karaoke": 0,
  "celle_braille": 0,
  "lettura_minima": 2000,
+ "versione": "1.85.2",
  "impressi": "al_volo",
  "impressi_scelti": false,
  "percorsi_di_rete": [
@@ -66,14 +67,14 @@
   ]
  },
  "scheda_audio": {},
- "velocita": 1.4,
+ "velocita": 1.0,
  "tono": 0,
  "bande": [
   0,
   0,
   0,
   0,
-  8,
+  0,
   0,
   0
  ],
