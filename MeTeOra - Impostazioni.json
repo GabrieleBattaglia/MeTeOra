@@ -10,15 +10,17 @@
  "video": false,
  "sottotitoli": true,
  "sintesi": "automatica",
- "percorsi_di_rete": [],
+ "percorsi_di_rete": [
+  "\\\\iliadbox_Server\\iliadbox\\Video"
+ ],
  "banco_midi": "E:\\VstPlugins\\SF2 Instruments\\FluidR3 GM.sf2",
  "ripresa": {
-  "percorso": "E:\\13 ilbarzellettiere\\001 l'ebreo di ghiaccio.mp3",
+  "percorso": "\\\\iliadbox_Server\\iliadbox\\Video\\53 In.Linea.Con.L'assassino.2002.BDRe.x264.a1080.Italian.AC3.mkv",
   "sottobrano": null,
   "numero": 0,
   "posizione": 0,
   "tipo": "cartella",
-  "cartella": "E:\\13 ilbarzellettiere"
+  "cartella": "\\\\iliadbox_Server\\iliadbox\\Video"
  },
  "righe_della_console": 2000,
  "caratteri": {},
@@ -57,7 +59,7 @@
   ]
  },
  "scheda_audio": {},
- "velocita": 1.35,
+ "velocita": 1.4,
  "tono": 0,
  "bande": [
   0,
