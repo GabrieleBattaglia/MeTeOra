@@ -58,7 +58,7 @@ def test_finestra_delle_impostazioni(genitore):
     dialogo = dialoghi.FinestraImpostazioni(genitore, voci, lambda chiave, d: cambi.append((chiave, d)))
     try:
         assert dialogo.GetTitle() == "Impostazioni"
-        assert _etichette(dialogo) == ["Impostazioni. Invio cambia la voce, Esc chiude."]
+        assert _etichette(dialogo) == ["Filtro delle voci:", "Impostazioni. Invio cambia la voce, Esc chiude, Maiuscolo con Tab va al filtro."]
         assert dialogo.lista.GetName() == "Impostazioni"
         assert not dialogo.lista.HasMultipleSelection()
         assert dialogo.lista.GetStrings() == [testo for _chiave, testo in voci]
@@ -88,6 +88,81 @@ def test_finestra_delle_impostazioni(genitore):
         assert cambi[-1] == ("passo_volume", dialogo)
     finally:
         dialogo.Destroy()
+
+
+def test_il_filtro_delle_impostazioni(genitore, monkeypatch):
+    cambi = []
+    voci = [("volume", "Volume della musica: 80"), ("passo_volume", "Passo del volume: 5"), ("velocita", "Velocità: 1.0"),
+        ("marcatori", "Marcatori: nessuno"), ("sintesi", "Sintesi dei sottotitoli: automatica, adesso NVDA")]
+    dialogo = dialoghi.FinestraImpostazioni(genitore, voci, lambda chiave, d: cambi.append((chiave, d)))
+    try:
+        # Il filtro viene prima della lista, nell'ordine del Tab, e ha un
+        # nome; subito prima della lista ci sono le istruzioni, che Windows le
+        # da' come nome, e subito prima del filtro la sua etichetta.
+        figli = list(dialogo.lista.GetParent().GetChildren())
+        assert figli.index(dialogo.filtro) < figli.index(dialogo.lista)
+        assert figli[figli.index(dialogo.lista) - 1].GetLabel().startswith("Impostazioni. Invio cambia la voce")
+        assert figli[figli.index(dialogo.filtro) - 1].GetLabel() == "Filtro delle voci:"
+        assert dialogo.filtro.GetName() == "Filtro delle voci" and dialogo.filtro.GetValue() == ""
+        # Maiuscole e accenti non contano; la selezione resta sulla voce.
+        _scegli(dialogo, 1)
+        dialogo.filtro.SetValue("VOL")
+        assert _righe_della_lista(dialogo) == ["Volume della musica: 80", "Passo del volume: 5"]
+        assert dialogo.lista.GetSelection() == 1
+        dialogo.filtro.SetValue("velocita")
+        assert _righe_della_lista(dialogo) == ["Velocità: 1.0"] and dialogo.lista.GetSelection() == 0
+        # Conta solo il nome, non il valore: NVDA sta nel valore della sintesi.
+        dialogo.filtro.SetValue("nvda")
+        assert _righe_della_lista(dialogo) == ["Nessuna voce contiene nvda."] and dialogo.lista.GetSelection() == 0
+        _tasto(dialogo, dialogo.lista)
+        assert cambi == []
+        # Invio cambia la voce giusta anche con la lista filtrata.
+        dialogo.filtro.SetValue("  del   volume ")
+        assert _righe_della_lista(dialogo) == ["Passo del volume: 5"]
+        _tasto(dialogo, dialogo.lista)
+        assert cambi == [("passo_volume", dialogo)]
+        # Una voce nascosta si aggiorna lo stesso, e ricompare col testo nuovo.
+        dialogo.aggiorna("marcatori", "Marcatori: 3 in 1 file")
+        dialogo.aggiorna("passo_volume", "Passo del volume: 7")
+        assert _righe_della_lista(dialogo) == ["Passo del volume: 7"]
+        dialogo.filtro.SetValue("")
+        assert _righe_della_lista(dialogo) == ["Volume della musica: 80", "Passo del volume: 7", "Velocità: 1.0", "Marcatori: 3 in 1 file",
+            "Sintesi dei sottotitoli: automatica, adesso NVDA"]
+        assert dialogo.lista.GetSelection() == 1
+        # Un errore di battitura non fa perdere il posto: la voce scelta torna
+        # selezionata quando ricompare, anche dopo la riga senza voci.
+        dialogo.filtro.SetValue("vol")
+        _scegli(dialogo, 1)
+        for scritto in ("volx", "vol", "volu", ""):
+            dialogo.filtro.SetValue(scritto)
+        assert dialogo.lista.GetStringSelection() == "Passo del volume: 7"
+        dialogo.filtro.SetValue("marc")
+        assert dialogo.lista.GetStringSelection() == "Marcatori: 3 in 1 file"
+        dialogo.filtro.SetValue("")
+        assert dialogo.lista.GetStringSelection() == "Passo del volume: 7"
+        # Invio nel filtro torna alla lista, senza cambiare niente.
+        fuoco = []
+        monkeypatch.setattr(dialogo.lista, "SetFocus", lambda: fuoco.append(True))
+        evento = _tasto(dialogo, dialogo.filtro)
+        assert fuoco == [True] and not evento.GetSkipped() and len(cambi) == 1
+        # Le lettere nel filtro vanno al campo.
+        assert _tasto(dialogo, dialogo.filtro, carattere="a").GetSkipped()
+    finally:
+        dialogo.Destroy()
+
+
+def _righe_della_lista(dialogo):
+    return list(dialogo.lista.GetStrings())
+
+
+def _scegli(dialogo, indice):
+    """La selezione mossa da chi usa la lista: su Windows SetSelection non
+    manda EVT_LISTBOX, le frecce si'."""
+    dialogo.lista.SetSelection(indice)
+    evento = wx.CommandEvent(wx.wxEVT_LISTBOX, dialogo.lista.GetId())
+    evento.SetEventObject(dialogo.lista)
+    evento.SetInt(indice)
+    dialogo.lista.GetEventHandler().ProcessEvent(evento)
 
 
 def test_la_domanda_con_si_e_no(genitore, monkeypatch):

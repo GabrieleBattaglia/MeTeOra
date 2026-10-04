@@ -1,4 +1,4 @@
-Collaudo di MeTeOra 1.80.0, con NVDA: il manuale in HTML, F1 e F12, la ricerca anche in rete, B e Z con la riproduzione casuale, l'invito a offrire un caffè, la cartella vuota nel cestino, i dettagli dei contenitori, i conti in rete, Maiuscolo con F9 e F10, i sottotitoli fatti di immagini. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.80.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Collaudo di MeTeOra 1.81.0, con NVDA: il manuale in HTML, F1 e F12, la ricerca anche in rete, B e Z con la riproduzione casuale, l'invito a offrire un caffè, la cartella vuota nel cestino, i dettagli dei contenitori, i conti in rete, Maiuscolo con F9 e F10, i sottotitoli fatti di immagini, il filtro delle impostazioni. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.81.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
 Impostazioni, ultima voce Dona per questo progetto, Invio: il suono dell'invito, e il fuoco sul testo, che NVDA legge.
 Invio nel testo, o Esc, chiudono l'invito e si torna alle impostazioni; Tab passa a Dona con PayPal e a Chiudi.
 Dona con PayPal apre la pagina di PayPal nel browser, e la console ringrazia.
@@ -24,3 +24,8 @@ Maiuscolo con F2 ancora, dopo l'ultima traccia: Sottotitoli impressi, letti al v
 Maiuscolo con F2 ancora: spenti, e la lettura si ferma.
 Nelle impostazioni, Sottotitoli impressi, scegli letti prima, con una passata; poi su un video corto, Maiuscolo con F2 fino a Sottotitoli impressi: suono di inizio, la console dice quanti minuti, poi l'avanzamento; alla fine il suono di fine e il file accanto al video, se ha trovato del testo.
 Chiudi e riapri MeTeOra con gli impressi scelti e lo stesso video: la lettura riparte da sola, e se la passata ha scritto il file legge da lì, a tempo, anche con il modo al volo.
+Apri le impostazioni: NVDA legge il nome della lista, Impostazioni. Invio cambia la voce, eccetera, e la prima voce.
+Nelle impostazioni, Maiuscolo con Tab dalla lista: NVDA dice Filtro delle voci, campo di testo.
+Scrivi vol: Tab torna alla lista, che ha solo Volume della musica, Passo del volume e Volume degli effetti.
+Scrivi xyz nel filtro: la lista ha una riga sola, Nessuna voce contiene xyz; Invio nel filtro porta lì.
+Cancella il filtro: tornano tutte le voci, con la selezione sull'ultima voce scelta nella lista, anche se un filtro intermedio l'aveva nascosta.

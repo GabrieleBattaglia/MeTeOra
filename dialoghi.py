@@ -1,6 +1,6 @@
 # MeTeOra, i dialoghi: il campo da una riga, la domanda con Si' e No, la finestra delle impostazioni, la scelta da una lista, la finestra dei marcatori e l'invito a offrire un caffe'.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); DialogoTesto arriva da finestra.py. Nella 1.66.36 la domanda con Sì e No, che si chiude con Esc. Nella 1.75.0 l'invito a offrire un caffe', come in Tornello.
+# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); DialogoTesto arriva da finestra.py. Nella 1.66.36 la domanda con Sì e No, che si chiude con Esc. Nella 1.75.0 l'invito a offrire un caffe', come in Tornello. Nella 1.81.0 il filtro delle impostazioni.
 
 """I dialoghi di MeTeOra, fuori dalla finestra principale.
 
@@ -20,6 +20,8 @@ principale: i dialoghi mostrano, chiedono e chiamano.
 import contextlib
 
 import wx
+
+from filtro import normale
 
 # La riga della lista dei marcatori quando non ce n'e' nessuno: una lista
 # vuota, per NVDA, non dice niente.
@@ -141,29 +143,53 @@ class FinestraImpostazioni(wx.Dialog):
     "Etichetta: valore". voci e' una lista di (chiave, testo della riga).
     Invio sulla lista, o il doppio clic, chiama al_cambio(chiave, dialogo):
     e' la finestra principale a chiedere il valore nuovo, ad applicarlo e a
-    riscrivere la riga con aggiorna. Il pulsante Chiudi, o Esc, chiude."""
+    riscrivere la riga con aggiorna. Il pulsante Chiudi, o Esc, chiude.
+    Prima della lista, con Maiuscolo e Tab, il filtro (1.81.0): restano solo
+    le voci il cui nome, la parte prima dei due punti, contiene il testo
+    scritto, senza badare a maiuscole e accenti, come il filtro della
+    plancia. Invio nel filtro torna alla lista."""
 
     def __init__(self, genitore, voci, al_cambio):
         from GBwx import STILE_ADATTABILE, adatta_finestra, pannello_scorrevole
 
         super().__init__(genitore, title="Impostazioni", style=STILE_ADATTABILE)
         self._chiavi = [chiave for chiave, _testo in voci]
+        self._testi = dict(voci)
+        # Le voci mostrate dalla lista, nel suo ordine: tutte, finche' il
+        # filtro e' vuoto.
+        self._visibili = list(self._chiavi)
+        # La voce scelta da chi usa la lista: resta anche quando il filtro la
+        # nasconde, e ritorna selezionata quando ricompare.
+        self._scelta = self._chiavi[0] if self._chiavi else None
         self._al_cambio = al_cambio
         pannello = pannello_scorrevole(self)
         sizer = wx.BoxSizer(wx.VERTICAL)
-        etichetta = wx.StaticText(pannello, label="Impostazioni. Invio cambia la voce, Esc chiude.")
+        # L'ordine di creazione e' quello del Tab, e Windows da' a un
+        # controllo il nome del testo creato subito prima: il filtro, poi le
+        # istruzioni, che sono il nome della lista, poi la lista. Il sizer
+        # mette comunque le istruzioni in cima.
+        etichetta_del_filtro = wx.StaticText(pannello, label="Filtro delle voci:")
+        self.filtro = wx.TextCtrl(pannello)
+        self.filtro.SetName("Filtro delle voci")
+        etichetta = wx.StaticText(pannello, label="Impostazioni. Invio cambia la voce, Esc chiude, Maiuscolo con Tab va al filtro.")
         self.lista = wx.ListBox(pannello, choices=[testo for _chiave, testo in voci], style=wx.LB_SINGLE)
         self.lista.SetName("Impostazioni")
         # Almeno tante righe quante sono le voci, misurate sul carattere.
         self.lista.SetMinSize(wx.Size(-1, self.lista.GetCharHeight() * (len(voci) + 2)))
         chiudi = wx.Button(pannello, wx.ID_CANCEL, "Chiudi")
         sizer.Add(etichetta, 0, wx.ALL, 5)
+        riga_del_filtro = wx.BoxSizer(wx.HORIZONTAL)
+        riga_del_filtro.Add(etichetta_del_filtro, 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 5)
+        riga_del_filtro.Add(self.filtro, 1)
+        sizer.Add(riga_del_filtro, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
         sizer.Add(self.lista, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
         sizer.Add(chiudi, 0, wx.ALL | wx.ALIGN_RIGHT, 5)
         pannello.SetSizer(sizer)
         adatta_finestra(self, pannello, (560, 420))
         self.Bind(wx.EVT_CHAR_HOOK, self._tasto)
         self.lista.Bind(wx.EVT_LISTBOX_DCLICK, lambda _evento: self._cambia())
+        self.lista.Bind(wx.EVT_LISTBOX, lambda _evento: self._ricorda_la_scelta())
+        self.filtro.Bind(wx.EVT_TEXT, lambda _evento: self._filtra())
         if voci:
             self.lista.SetSelection(0)
         self.lista.SetFocus()
@@ -172,18 +198,50 @@ class FinestraImpostazioni(wx.Dialog):
         if evento.GetEventObject() is self.lista and _premuto_invio(evento):
             self._cambia()
             return
+        if evento.GetEventObject() is self.filtro and _premuto_invio(evento):
+            self.lista.SetFocus()
+            return
         evento.Skip()
+
+    def _ricorda_la_scelta(self):
+        """La selezione l'ha mossa chi usa la lista, con le frecce, le
+        lettere o il mouse: la voce si ricorda. SetSelection, su Windows,
+        non arriva qui."""
+        indice = self.lista.GetSelection()
+        if 0 <= indice < len(self._visibili):
+            self._scelta = self._visibili[indice]
+
+    def _filtra(self):
+        """Il testo del filtro e' cambiato: la lista mostra le voci il cui
+        nome lo contiene, con selezionata la voce scelta, se c'e', altrimenti
+        la prima, che pero' non diventa la scelta: un errore di battitura
+        non fa perdere il posto. Senza voci, una riga lo dice: una lista
+        vuota, per NVDA, non dice niente."""
+        scritto = " ".join(self.filtro.GetValue().split())
+        cercato = normale(scritto)
+        self._visibili = [chiave for chiave in self._chiavi if cercato in normale(self._testi[chiave].split(": ", 1)[0])]
+        if self._visibili:
+            self.lista.Set([self._testi[chiave] for chiave in self._visibili])
+            self.lista.SetSelection(self._visibili.index(self._scelta) if self._scelta in self._visibili else 0)
+        else:
+            self.lista.Set([f"Nessuna voce contiene {scritto}."])
+            self.lista.SetSelection(0)
 
     def _cambia(self):
         indice = self.lista.GetSelection()
-        if indice != wx.NOT_FOUND:
-            self._al_cambio(self._chiavi[indice], self)
+        if 0 <= indice < len(self._visibili):
+            self._scelta = self._visibili[indice]
+            self._al_cambio(self._scelta, self)
 
     def aggiorna(self, chiave, testo):
-        """Riscrive la riga della voce senza spostare la selezione."""
-        if chiave not in self._chiavi:
+        """Riscrive la riga della voce senza spostare la selezione; una voce
+        nascosta dal filtro ha il testo nuovo quando ricompare."""
+        if chiave not in self._testi:
             return
-        indice = self._chiavi.index(chiave)
+        self._testi[chiave] = testo
+        if chiave not in self._visibili:
+            return
+        indice = self._visibili.index(chiave)
         if self.lista.GetString(indice) == testo:
             return
         selezionata = self.lista.GetSelection()

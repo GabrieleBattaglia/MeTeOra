@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.81.0] - 2026-10-04
+
+- Il filtro delle voci nella finestra delle impostazioni, chiesto da Gabriele: un campo da una riga subito prima della lista, che si raggiunge con Maiuscolo con Tab. Mentre si scrive restano solo le voci il cui nome contiene il testo, senza badare a maiuscole e accenti, come il filtro della plancia; Invio nel filtro torna alla lista, con la selezione sull'ultima voce scelta se è fra quelle mostrate, anche dopo un errore di battitura che l'aveva nascosta. Senza voci, una riga dice che nessuna contiene quel testo.
+- La revisione prima della pubblicazione ha trovato tre difetti, corretti: il campo del filtro, creato fra le istruzioni e la lista, toglieva alla lista il nome che NVDA legge; un errore di battitura nel filtro faceva perdere la voce selezionata; l'intestazione del collaudo diceva ancora 1.80.0.
+
 ## [1.80.0] - 2026-10-04
 
 - I sottotitoli fatti di immagini si leggono, con il riconoscimento dei caratteri di Windows, nella lingua della traccia o in italiano. Le tracce dei DVD e dei Blu-ray, VobSub e PGS, scelte con Maiuscolo con F2: a ogni sottotitolo nuovo MeTeOra lo fotografa e lo legge: a video spento il fotogramma si annerisce e basta una foto, a video acceso ne servono due, con e senza sottotitolo, e si legge la differenza; sul banco, 20 sottotitoli su 20 letti esatti, in 14 millesimi l'uno. Tappa 10, punto b.
