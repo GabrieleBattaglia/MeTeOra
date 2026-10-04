@@ -397,3 +397,24 @@ def test_due_blocchi_info_e_caratteri_fuori_dalla_cp1252(tmp_path):
     tag.scrivi_info(percorso, {"INAM": "Primo"})
     with open(percorso, "rb") as f:
         assert f.read() == prima
+
+
+def test_tak_dsf_dff_e_l_autore_dei_speex():
+    # 1.83.3, dalla prova con i campioni di FFmpeg: TAK nella famiglia APE,
+    # DSF e DFF in quella ID3; speexenc scrive l'artista in AUTHOR.
+    from mutagen.id3 import ID3, TIT2, TPE1
+
+    assert {".tak", ".dsf", ".dff"} <= tag.ESTENSIONI and tag.modificabile(r"C:\m\a.tak") and tag.modificabile(r"C:\m\a.dff")
+    id3 = ID3()
+    id3.add(TIT2(encoding=3, text=["Romance"]))
+    id3.add(TPE1(encoding=3, text=["TrondheimSolistene"]))
+    dsf = type("DSF", (), {"tags": id3, "filename": "a.dsf"})()
+    assert tag.comuni_del_file(dsf) == {"titolo": "Romance", "artista": "TrondheimSolistene"}
+    from mutagen.oggspeex import OggSpeexVComment
+
+    commento = OggSpeexVComment.__new__(OggSpeexVComment)
+    commento.clear()
+    commento["title"] = ["OLS 2004"]
+    commento["author"] = ["Dave McCracken"]
+    speex = type("OggSpeex", (), {"tags": commento, "filename": "a.spx"})()
+    assert tag.comuni_del_file(speex) == {"titolo": "OLS 2004", "artista": "Dave McCracken"}

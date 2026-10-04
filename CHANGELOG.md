@@ -2,6 +2,14 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.83.3] - 2026-10-04
+
+- Prova con file veri, scaricati dall'archivio dei campioni di FFmpeg: APE, TAK, Musepack SV7 e SV8, Speex, DSF e DFF si suonano, saltano e arrivano in fondo senza errori.
+- La durata dei Musepack SV8 e dei DSF ora viene da mutagen: libmpv la stimava, più corta fino a un secondo e mezzo nei Musepack, e con la dissolvenza la fine del brano si perdeva; più lunga nei DSF, quanto pesano i loro tag.
+- I tag dei TAK si leggono e si scrivono anche dalla finestra dei tag, e quelli dei DSF e DFF, che nessuno leggeva, anche nello schedario, quindi nel filtro e nella ricerca. Dei Speex si legge l'autore che speexenc scrive in AUTHOR.
+- La voce di Windows, il ripiego senza screen reader, non si apriva sul PC di Gabriele: accessible_output2 legge l'elenco delle voci all'apertura, e l'elenco falliva. Ora la apre MeTeOra.
+- La ricetta di PyInstaller, MeTeOra.spec, per il pacchetto a cartella della tappa 11: compilato, parte, apre la finestra e si chiude pulito; da congelati funzionano libmpv, i SID, il riconoscimento dei caratteri, il karaoke e la sintesi.
+
 ## [1.83.2] - 2026-10-04
 
 - F10 lavora a fette come Maiuscolo con F10, chiesto da Gabriele: su un ramo con decine di migliaia di cartelle la finestra risponde durante l'apertura, e un tasto qualsiasi la ferma.

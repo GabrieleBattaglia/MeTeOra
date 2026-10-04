@@ -1,6 +1,6 @@
 # MeTeOra, il motore di riproduzione: libmpv, e i SID in tempo reale.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7). Nella 1.65.0 i MIDI resi da FluidSynth (tappa 8). Nella 1.66.0 la musica delle console con libgme. Nella 1.67.0 il file lasciato o rinominato per Rinomina file. Nella 1.82.0 il testo del karaoke come traccia in memoria, senza i .lrc caricati da mpv, e due sottotitoli uguali di fila detti tutti e due. Nella 1.83.0 il tempo che resta al sottotitolo, per la barra braille a blocchi.
+# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7). Nella 1.65.0 i MIDI resi da FluidSynth (tappa 8). Nella 1.66.0 la musica delle console con libgme. Nella 1.67.0 il file lasciato o rinominato per Rinomina file. Nella 1.82.0 il testo del karaoke come traccia in memoria, senza i .lrc caricati da mpv, e due sottotitoli uguali di fila detti tutti e due. Nella 1.83.0 il tempo che resta al sottotitolo, per la barra braille a blocchi. Nella 1.83.3 la durata vera di Musepack e DSF, da mutagen.
 
 """Due lettori libmpv per tutti i formati.
 
@@ -90,6 +90,11 @@ _FINE_PER_ERRORE = mpv.MpvEventEndFile.ERROR
 OPZIONI_DI_BASE = {"vo": "null", "video": "no", "config": False, "ytdl": False, "input_default_bindings": False, "osc": False,
     "load_stats_overlay": False, "load_console": False, "load_auto_profiles": False, "load_select": False, "load_commands": False,
     "load_positioning": False, "load_context_menu": False, "input_vo_keyboard": False, "input_cursor": False}
+# I formati di cui libmpv stima la durata, dai pacchetti o dalla dimensione
+# del file: quella vera la sa mutagen. Prova del 4 ottobre 2026 sui campioni
+# di FFmpeg: i Musepack SV8 piu' corti fino a un secondo e mezzo, che con la
+# dissolvenza perdevano la fine; i DSF piu' lunghi quanto pesano i loro tag.
+DURATA_DA_MUTAGEN = frozenset({".mpc", ".dsf"})
 # Il filtro che annerisce il fotogramma per leggere le tracce a immagini a
 # video spento: una foto con i sottotitoli ha solo le loro lettere (1.80.0).
 FILTRO_DEL_NERO = "lavfi=[drawbox=x=0:y=0:w=iw:h=ih:color=black:t=fill]"
@@ -129,6 +134,17 @@ def catena_dei_filtri(bande):
     saturazione dentro il filtro sui file a 16 bit."""
     filtri = ",".join(f"equalizer@b{i}=f={f}:t=q:w={Q_DELLE_BANDE}:g={g:g}:precision=f64" for i, (f, g) in enumerate(zip(valori.FREQUENZE_DELLE_BANDE, bande, strict=True)))
     return f"@eq:lavfi=[{filtri}],scaletempo2"
+
+
+def _durata_da_mutagen(percorso):
+    """La durata letta da mutagen, o None se non la sa."""
+    try:
+        import mutagen
+
+        info = getattr(mutagen.File(percorso), "info", None)
+        return float(info.length) if info is not None and info.length else None
+    except Exception:  # noqa: BLE001 - un file che mutagen non legge tiene la durata di libmpv
+        return None
 
 
 def _apri_sid(uri):
@@ -237,6 +253,8 @@ class _Lettore:
         # quando torna: le aggiunte vanno una alla volta.
         self.karaoke = None
         self.formato_imposto = None
+        # La durata vera, quando libmpv la stima male (DURATA_DA_MUTAGEN).
+        self.durata_vera = None
         self.karaoke_in_volo = False
         self.karaoke_da_rifare = False
         # L'ultimo sottotitolo di testo visto, se e' arrivato dopo l'ultimo
@@ -284,6 +302,7 @@ class _Lettore:
         istante senza. Di quello che c'era non arrivera' piu' niente."""
         self.percorso = brano.percorso
         self.karaoke = None
+        self.durata_vera = None
         self.formato_imposto = brano.opzioni.get("demuxer-lavf-format")
         self.karaoke_in_volo = self.karaoke_da_rifare = False
         self.testo_visto, self.testo_nuovo, self.inizio_visto = None, False, None
@@ -330,7 +349,7 @@ class _Lettore:
     def leggi(self):
         """Posizione e durata, lette da mpv in modo sincrono: da chiamare
         senza il lucchetto del motore."""
-        return self.mpv.time_pos, self.mpv.duration
+        return self.mpv.time_pos, self.durata_vera or self.mpv.duration
 
     def chiudi(self):
         self.mpv.terminate()
@@ -925,7 +944,14 @@ class Motore:
         """Un brano appena aperto, il caricamento numero del lettore: ai video
         i file delle passate, e poi a tutti il testo del karaoke, anche a un
         video musicale o a un audio .webm con il suo .lrc accanto, che mpv non
-        carica piu' da se'; poi(), se c'e', quando mpv li ha aggiunti."""
+        carica piu' da se'; poi(), se c'e', quando mpv li ha aggiunti. Prima
+        la durata vera dei formati che libmpv stima male, cosi' chi legge la
+        durata dopo l'avviso la trova gia' giusta."""
+        if os.path.splitext(percorso or "")[1].lower() in DURATA_DA_MUTAGEN:
+            durata = _durata_da_mutagen(percorso)
+            with self._blocco:
+                if lettore._richieste == numero:
+                    lettore.durata_vera = durata
         if formati.e_video(percorso or ""):
             self._aggiungi_le_passate(lettore, percorso, numero, functools.partial(self._aggiungi_il_karaoke, lettore, percorso, numero, poi))
         else:
@@ -1151,7 +1177,7 @@ class Motore:
         lettore = self._attivo
         if not lettore.pronto or lettore.finito:
             return None
-        return lettore.mpv.duration
+        return lettore.durata_vera or lettore.mpv.duration
 
     # Volume, muto e scheda: li ricorda il motore.
 

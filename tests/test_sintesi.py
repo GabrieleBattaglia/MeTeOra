@@ -6,6 +6,9 @@
 
 import sintesi
 
+# La _crea vera: il conftest la sostituisce in ogni prova.
+_CREA_VERA = sintesi._crea
+
 
 def test_disponibili_e_automatica(sintesi_finta):
     assert sintesi.disponibili() == ["nvda", "sapi5"]
@@ -54,3 +57,30 @@ def test_dove_vanno_i_testi(sintesi_finta):
     assert sintesi_finta.detti == [("nvda", "uno"), ("nvda", "due")] and sintesi_finta.braille == [("nvda", "uno"), ("nvda", "tre")]
     assert voce.dici("quattro", "sapi5", "braille") and sintesi_finta.braille[-1] == ("nvda", "tre")
     assert set(sintesi.DESTINAZIONI) == {"entrambi", "sintesi", "braille"}
+
+
+def test_la_voce_di_windows_si_apre_anche_senza_l_elenco_delle_voci(monkeypatch):
+    # 1.83.3: accessible_output2 legge l'elenco delle voci all'apertura, e sul
+    # PC di Gabriele l'elenco fallisce: la voce di Windows la apre MeTeOra.
+    import win32com.client
+
+    detti = []
+
+    class Voce:
+        def Speak(self, testo, segni):
+            detti.append((testo, segni))
+
+    def rotto(_nome):
+        raise RuntimeError("elenco delle voci non letto")
+
+    monkeypatch.setattr(sintesi.importlib, "import_module", rotto)
+    monkeypatch.setattr(win32com.client, "Dispatch", lambda nome: Voce() if nome == "SAPI.SpVoice" else None)
+    voce = _CREA_VERA("sapi5")
+    assert type(voce).__name__ == "_VoceDiWindows" and voce.is_active() and voce.braille("x") is False
+    voce.speak("ciao")
+    voce.speak("basta", interrupt=True)
+    assert detti == [("ciao", 1), ("basta", 3)]
+    # Le altre uscite, se non si aprono, restano chiuse.
+    assert _CREA_VERA("nvda") is None
+    monkeypatch.setattr(win32com.client, "Dispatch", lambda nome: (_ for _ in ()).throw(OSError("niente SAPI")))
+    assert _CREA_VERA("sapi5") is None

@@ -1,6 +1,6 @@
 # MeTeOra, i tag dei file: letti, scritti e cancellati con mutagen.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/10/2026: nasce con la tappa 10, punto d. Nella 1.70.0 il blocco INFO dei WAV.
+# 03/10/2026: nasce con la tappa 10, punto d. Nella 1.70.0 il blocco INFO dei WAV. Nella 1.83.3 TAK, DSF e DFF, e l'AUTHOR dei Speex.
 
 """I tag dei file audio e video, con mutagen (tappa 10, 1.69.0).
 
@@ -54,10 +54,10 @@ CHIAVI = {
 
 # Le estensioni dei file di cui MeTeOra sa scrivere i tag.
 ESTENSIONI = frozenset({".mp3", ".wav", ".aif", ".aiff", ".tta", ".flac", ".ogg", ".oga", ".opus", ".spx", ".m4a", ".m4b", ".mp4", ".m4v",
-    ".alac", ".ape", ".wv", ".mpc", ".wma", ".wmv", ".asf"})
+    ".alac", ".ape", ".wv", ".mpc", ".wma", ".wmv", ".asf", ".tak", ".dsf", ".dff"})
 _FAMIGLIE = {"MP3": "id3", "EasyMP3": "id3", "WAVE": "id3", "AIFF": "id3", "TrueAudio": "id3", "FLAC": "vorbis", "OggVorbis": "vorbis",
     "OggOpus": "vorbis", "OggSpeex": "vorbis", "OggFLAC": "vorbis", "MP4": "mp4", "MonkeysAudio": "ape", "WavPack": "ape",
-    "Musepack": "ape", "OptimFROG": "ape", "ASF": "asf", "APEv2File": "ape"}
+    "Musepack": "ape", "OptimFROG": "ape", "ASF": "asf", "APEv2File": "ape", "TAK": "ape", "DSF": "id3", "DSDIFF": "id3"}
 
 # I nomi da leggere di qualche tag non comune, per famiglia.
 NOMI_NOTI = {
@@ -205,6 +205,9 @@ def comuni_del_file(file):
         if famiglia == "vorbis" and "anno" not in risultato and file.tags.get("year"):
             # Qualche programma scrive l'anno in YEAR invece che in DATE.
             risultato["anno"] = SEPARATORE.join(_pulito(v) for v in file.tags["year"])
+        if famiglia == "vorbis" and "artista" not in risultato and file.tags.get("author"):
+            # speexenc scrive l'artista in AUTHOR (1.83.3).
+            risultato["artista"] = SEPARATORE.join(_pulito(v) for v in file.tags["author"])
     except Exception:  # noqa: BLE001 - un file rovinato non deve fermare lo schedario
         return {}
     return risultato

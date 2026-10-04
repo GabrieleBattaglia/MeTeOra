@@ -1,6 +1,6 @@
 # MeTeOra, la sintesi dei sottotitoli: gli screen reader e la voce di Windows, con accessible_output2.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/10/2026: nasce con la tappa 7, per i sottotitoli letti. Nella 1.82.0 dove vanno i testi, alla voce, al braille o a tutti e due, chiamati uno per uno.
+# 03/10/2026: nasce con la tappa 7, per i sottotitoli letti. Nella 1.82.0 dove vanno i testi, alla voce, al braille o a tutti e due, chiamati uno per uno. Nella 1.83.3 la voce di Windows aperta da MeTeOra quando accessible_output2 non ci riesce.
 
 """Le uscite a cui MeTeOra manda i sottotitoli letti (tappa 7).
 
@@ -36,14 +36,45 @@ DESTINAZIONI = {"entrambi": "alla sintesi e al braille", "sintesi": "solo alla s
 CON_IL_BRAILLE = frozenset({"nvda", "jaws", "system_access"})
 
 
+class _VoceDiWindows:
+    """La voce di Windows, SAPI5, aperta da MeTeOra senza leggere l'elenco
+    delle voci installate: accessible_output2 lo legge all'apertura, e su
+    certi Windows, con una voce registrata male, l'elenco fallisce e
+    l'uscita non si apriva, lasciando chi non ha uno screen reader senza la
+    voce di ripiego (1.83.3, sul PC di Gabriele)."""
+
+    def __init__(self):
+        import win32com.client
+
+        self._voce = win32com.client.Dispatch("SAPI.SpVoice")
+
+    def speak(self, testo, interrupt=False):
+        # SVSFlagsAsync, e con interrupt SVSFPurgeBeforeSpeak.
+        self._voce.Speak(testo, 1 | (2 if interrupt else 0))
+
+    def braille(self, _testo):
+        return False
+
+    def is_active(self):
+        return True
+
+
 def _crea(chiave):
     """L'uscita, o None se non si apre: accessible_output2 solleva errori
-    suoi e di COM, e una libreria che manca non deve fermare MeTeOra."""
+    suoi e di COM, e una libreria che manca non deve fermare MeTeOra. La
+    voce di Windows che accessible_output2 non apre la apre MeTeOra."""
     modulo, classe, _nome = USCITE[chiave]
     try:
         return getattr(importlib.import_module(f"accessible_output2.outputs.{modulo}"), classe)()
     except Exception:  # noqa: BLE001 - qualunque errore vuol dire che quell'uscita non c'e'
-        return None
+        if chiave != VOCE_DI_SISTEMA:
+            return None
+    if chiave == VOCE_DI_SISTEMA:
+        try:
+            return _VoceDiWindows()
+        except Exception:  # noqa: BLE001 - nemmeno SAPI risponde
+            return None
+    return None
 
 
 def _attiva(chiave, uscita):

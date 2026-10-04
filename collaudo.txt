@@ -1,4 +1,4 @@
-Collaudo di MeTeOra 1.83.2, con NVDA: il manuale in HTML, F1 e F12, la ricerca anche in rete, B e Z con la riproduzione casuale, l'invito a offrire un caffè, la cartella vuota nel cestino, i dettagli dei contenitori, i conti in rete, Maiuscolo con F9 e F10, i sottotitoli fatti di immagini, il filtro delle impostazioni, il karaoke, la barra braille a blocchi. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.83.2. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Collaudo di MeTeOra 1.83.3, con NVDA: il manuale in HTML, F1 e F12, la ricerca anche in rete, B e Z con la riproduzione casuale, l'invito a offrire un caffè, la cartella vuota nel cestino, i dettagli dei contenitori, i conti in rete, Maiuscolo con F9 e F10, i sottotitoli fatti di immagini, il filtro delle impostazioni, il karaoke, la barra braille a blocchi. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.83.3. Scrivi le note sulla riga della voce; le voci superate si cancellano.
 Maiuscolo con F10: se è istantaneo senti solo il suono di fine, con quanti rami ha aperto; Questo PC e Questa rete restano chiusi, e niente cacofonia.
 F10 su un'unità, per esempio E:: dopo un attimo il suono d'inizio, poi quello di fine, mai sovrapposti; intanto la finestra risponde alle frecce, che fermano l'apertura; alla fine la console dice anche quante cartelle vuote o illeggibili ha trovato.
 F10 su una cartella piccola: solo il suono di fine.
@@ -29,3 +29,6 @@ Tempo minimo di lettura in braille: prova 1000 e 4000, e senti quale ritmo ti va
 Mentre la fila ha ancora blocchi, premi Q: la fila si svuota, e la riga del punto d'arrivo arriva subito.
 Con un kar per strofa e 20 celle: i blocchi della strofa arrivano uno dopo l'altro, e se la fila resta indietro una pausa la smaltisce.
 Spegni i sottotitoli letti con Maiuscolo con F2 mentre la fila ha ancora blocchi: la barra smette subito.
+In E:\git\tmp\campioni_audio suona i campioni di APE, TAK, Musepack, Speex e il DSF ricavato: si sentono, e F11 ne legge i tag.
+sv8_Choral.mpc: la durata detta è 1:25, non 1:23; con la dissolvenza accesa la fine non si taglia.
+Chiudi NVDA e suona un video con i sottotitoli accesi: li dice la voce di Windows.

@@ -5148,3 +5148,24 @@ def test_f10_lungo_dice_l_inizio_e_la_fine_dopo(finestra, monkeypatch, suoni_ann
     assert rimandati[0][1] == ("apri_tutto",)
     uno = next(v for v in finestra._figli(disco) if finestra.albero.GetItemText(v).startswith("Uno"))
     assert finestra.albero.IsExpanded(uno)
+
+
+def test_la_durata_vera_di_musepack_e_dsf(finestra, monkeypatch, tmp_path):
+    # 1.83.3: libmpv stima male la durata dei Musepack SV8 e dei DSF; quella
+    # vera la sa mutagen, e il motore la usa anche per la dissolvenza.
+    import motore
+
+    monkeypatch.setattr(motore, "_durata_da_mutagen", lambda percorso: 84.976)
+    brano = tmp_path / "Choral.mpc"
+    brano.write_bytes(b"")
+    lettore = _LettoreDelKaraoke(str(brano))
+    lettore.durata_vera = None
+    finestra.motore._aggiungi_le_tracce(lettore, str(brano), 1)
+    assert lettore.durata_vera == 84.976
+    lettore.mpv = types.SimpleNamespace(time_pos=10.0, duration=83.592)
+    assert motore._Lettore.leggi(lettore) == (10.0, 84.976)
+    # Gli altri formati tengono la durata di libmpv.
+    altro = _LettoreDelKaraoke(str(tmp_path / "a.mp3"))
+    altro.durata_vera = None
+    finestra.motore._aggiungi_le_tracce(altro, str(tmp_path / "a.mp3"), 1)
+    assert altro.durata_vera is None
