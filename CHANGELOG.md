@@ -2,6 +2,12 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.86.0] - 2026-10-04
+
+- Maiuscolo con F12 spegne e riaccende i tasti rapidi a carattere, chiesto da Gabriele: spenti, lettere, cifre e segni, anche con il Maiuscolo, vanno alla plancia, che come ogni albero di Windows salta alla voce che comincia con ciò che scrivi, utile in un ramo grande. Restano i tasti funzione, Esc, Ctrl con la barra rovesciata, e nella plancia Backspace, Spazio, Invio e Canc.
+- Due suoni nuovi per MeTeOra, presi dalla collezione di GBUtils (V197): due note che scendono quando i tasti si spengono, tre che salgono quando si riaccendono; la console lo dice, e il cruscotto, F7, dice per primo quando sono spenti. A ogni avvio sono accesi.
+- Dalla revisione prima della pubblicazione: dopo la ricerca per iniziale la selezione segue il fuoco, come con le frecce, così Invio, Canc, X e gli altri agiscono sulla voce trovata e non su quella di prima; fuori dalla plancia, nella console, nel cruscotto o nel video, un carattere non fa suonare l'avviso di Windows ma dice, sempre sulla stessa riga, che i tasti rapidi sono spenti.
+
 ## [1.85.5] - 2026-10-04
 
 - Collaudo di Gabriele: ogni cartella dell'Iliadbox diceva la rete non risponde, e Roma non si apriva, mentre Esplora risorse la leggeva. Bastava una sola cartella che non rispondesse, per esempio fra i backup, dove il Samba del router lascia appesa una lettura per una ventina di minuti ma risponde a tutte le altre, e i conti abbandonavano la condivisione intera fino ad Aggiorna, Video compreso. Ora la cartella che non risponde si salta da sola, senza rileggerla, e la condivisione si lascia perdere solo alla terza, come fa già la ricerca.

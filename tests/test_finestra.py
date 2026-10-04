@@ -5424,3 +5424,75 @@ def test_f11_in_rete_aspetta_come_la_plancia(finestra, monkeypatch, tmp_path):
     monkeypatch.setattr(dettagli, "in_rete", lambda percorso: True)
     assert dettagli.censisci_brani([str(tmp_path / "a.mp3")])["lontani"] == 1
     assert attese == [modulo.questa_rete.ATTESA_IN_SOTTOFONDO] * 2 and modulo.questa_rete.ATTESA_IN_SOTTOFONDO == 8.0
+
+
+def test_maiuscolo_f12_spegne_e_riaccende_i_tasti_rapidi(finestra, suoni_annotati):
+    # 1.86.0 (Gabriele): spenti, lettere, cifre e segni vanno ai controlli; i
+    # tasti funzione restano; a ogni avvio sono accesi.
+    assert finestra._tasti_rapidi is True
+    _tasto(finestra, codice=wx.WXK_F12, maiuscolo=True)
+    assert finestra._tasti_rapidi is False and suoni_annotati[-1] == "tasti_spenti"
+    assert _ultima(finestra) == "Tasti rapidi spenti: le lettere cercano nella plancia per iniziale. Maiuscolo con F12 li riaccende."
+    righe, suonati = len(finestra._righe), len(suoni_annotati)
+    finestra._fuoco_nella_plancia = lambda: True
+    for carattere, maiuscolo in (("x", False), ("b", True), ("1", False), ("\\", False), ("[", False)):
+        evento = wx.KeyEvent(wx.wxEVT_CHAR_HOOK)
+        evento.SetUnicodeKey(ord(carattere.upper()))
+        evento.SetKeyCode(ord(carattere.upper()))
+        evento.SetShiftDown(maiuscolo)
+        assert finestra._esegui_il_tasto(evento) is False and evento.GetSkipped(), carattere
+    assert len(finestra._righe) == righe and len(suoni_annotati) == suonati
+    # Fuori dalla plancia il carattere non arriva al controllo, che suonerebbe
+    # l'avviso di Windows: lo dice la console, sempre sulla stessa riga.
+    finestra._fuoco_nella_plancia = lambda: False
+    for carattere in ("x", "y"):
+        evento = wx.KeyEvent(wx.wxEVT_CHAR_HOOK)
+        evento.SetUnicodeKey(ord(carattere.upper()))
+        evento.SetKeyCode(ord(carattere.upper()))
+        assert finestra._esegui_il_tasto(evento) is True and not evento.GetSkipped()
+    assert len(finestra._righe) == righe + 1 and suoni_annotati[-1] == "non_disponibile"
+    assert _ultima(finestra) == "Tasti rapidi spenti: le lettere cercano solo nella plancia, F5. Maiuscolo con F12 li riaccende."
+    # Nella plancia il carattere arriva all'albero, per la ricerca per iniziale.
+    evento = wx.KeyEvent(wx.wxEVT_CHAR)
+    evento.SetUnicodeKey(ord("p"))
+    finestra._carattere_nell_albero(evento)
+    assert evento.GetSkipped()
+    # Il cruscotto lo dice per primo.
+    assert finestra.righe_del_cruscotto()[0] == "Tasti rapidi spenti: lettere, cifre e segni vanno alla plancia, che cerca per iniziale; Maiuscolo con F12 li riaccende."
+    # I tasti funzione restano: F7 porta al cruscotto.
+    _tasto(finestra, codice=wx.WXK_F7)
+    assert suoni_annotati[-1] == "cruscotto"
+    _tasto(finestra, codice=wx.WXK_F12, maiuscolo=True)
+    assert finestra._tasti_rapidi is True and suoni_annotati[-1] == "tasti_accesi" and _ultima(finestra) == "Tasti rapidi accesi."
+    assert not finestra.righe_del_cruscotto()[0].startswith("Tasti rapidi spenti")
+    evento = wx.KeyEvent(wx.wxEVT_CHAR)
+    evento.SetUnicodeKey(ord("p"))
+    finestra._carattere_nell_albero(evento)
+    assert not evento.GetSkipped()
+    _tasto(finestra, "z", maiuscolo=True)
+    assert _ultima(finestra) == "Maiuscolo+Z non ha un comando."
+
+
+def test_con_i_tasti_spenti_l_albero_cerca_per_iniziale(finestra):
+    # 1.86.0: la prova vera della ricerca per iniziale dell'albero di Windows,
+    # con un carattere mandato al controllo come lo manda la tastiera.
+    import ctypes
+
+    wm_char = 0x0102
+    radice = finestra.albero.AppendItem(finestra.albero.GetRootItem(), "Prova delle iniziali", data={"tipo": "comando", "comando": "impostazioni"})
+    voci = {nome: finestra.albero.AppendItem(radice, nome, data={"tipo": "comando", "comando": "impostazioni"}) for nome in ("Alfa", "Beta", "Gamma")}
+    finestra.albero.Expand(radice)
+    finestra._seleziona(voci["Alfa"])
+
+    def scrivi(lettera):
+        ctypes.windll.user32.SendMessageW(finestra.albero.GetHandle(), wm_char, ord(lettera), 0)
+        wx.Yield()
+
+    scrivi("g")
+    assert finestra.albero.GetItemText(finestra.albero.GetFocusedItem()) == "Alfa"
+    finestra._tasti_rapidi = False
+    scrivi("g")
+    assert finestra.albero.GetItemText(finestra.albero.GetFocusedItem()) == "Gamma"
+    # La selezione segue il fuoco: i comandi agiscono su Gamma, non su Alfa.
+    assert finestra.albero.GetItemText(finestra._voce_di_lavoro()) == "Gamma"
+    assert [finestra.albero.GetItemText(v) for v in finestra._voci_selezionate()] == ["Gamma"]

@@ -1,0 +1,12 @@
+Collaudo di MeTeOra 1.86.0, con NVDA: Maiuscolo con F12, i tasti rapidi spenti e accesi. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.86.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Apri un ramo grande, per esempio una cartella di E:\Music, e premi Maiuscolo con F12: due note che scendono, e la console dice Tasti rapidi spenti.
+Scrivi l'iniziale di una voce, per esempio a: il fuoco salta alla prima voce che comincia con a, e NVDA la legge.
+Trovata una voce, premi Invio: il menu è proprio di quella voce, non di quella da cui sei partito.
+Scrivi una lettera con cui non comincia niente: Windows suona il suo avviso.
+F6 e scrivi una lettera nella console: nessun avviso di Windows, la console dice che le lettere cercano solo nella plancia.
+Scrivi in fretta più lettere, come al: salta alla voce che comincia così; premi la stessa lettera più volte: passa da una voce all'altra con quell'iniziale.
+Con i tasti spenti premi X, C, il più e le cifre: niente suona e niente cambia, cercano nella plancia.
+F7 con i tasti spenti: il cruscotto dice per primo Tasti rapidi spenti.
+F5, F8, F12, Backspace e Spazio funzionano anche con i tasti spenti.
+Maiuscolo con F12 di nuovo: tre note che salgono, la console dice Tasti rapidi accesi, e X suona.
+Spegni i tasti, esci con Esc e riapri MeTeOra: i tasti rapidi sono accesi.

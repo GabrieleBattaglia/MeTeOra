@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura. Nella 1.83.1 Maiuscolo con F10 lascia chiuso Questo PC, e la plancia molto aperta non ferma piu' la finestra. Nella 1.83.2 F10 a fette, e i suoni delle aperture che non si sovrappongono. Nella 1.84.0 la proposta dell'aggiornamento, il suo avanzamento e la chiusura per aggiornarsi. Nella 1.85.0 i crediti con la licenza e le licenze dei componenti. Nella 1.85.5 i rami di rete che si riprovano sempre.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura. Nella 1.83.1 Maiuscolo con F10 lascia chiuso Questo PC, e la plancia molto aperta non ferma piu' la finestra. Nella 1.83.2 F10 a fette, e i suoni delle aperture che non si sovrappongono. Nella 1.84.0 la proposta dell'aggiornamento, il suo avanzamento e la chiusura per aggiornarsi. Nella 1.85.0 i crediti con la licenza e le licenze dei componenti. Nella 1.85.5 i rami di rete che si riprovano sempre. Nella 1.86.0 Maiuscolo con F12 spegne e riaccende i tasti rapidi a carattere.
 
 """La finestra di MeTeOra.
 
@@ -26,6 +26,8 @@ la console (F6), dove scorrono i riscontri di ogni azione; il cruscotto
 I tasti a lettera valgono in tutta la finestra e li intercetta EVT_CHAR_HOOK,
 prima dei controlli: per questo l'albero non ha la ricerca per iniziale. Un
 carattere senza comando lo dice, con il suo suono, e all'albero non arriva.
+Maiuscolo con F12 li spegne e li riaccende (1.86.0): spenti, lettere, cifre e
+segni vanno ai controlli, e l'albero cerca la voce per iniziale.
 Il brano in riproduzione e la voce selezionata sono due cose distinte: la
 riproduzione non sposta mai la selezione; lo fa F8, su richiesta.
 """
@@ -212,6 +214,8 @@ TASTI_COMUNI = [
     "Barra rovesciata: nella console cerca nella console, altrove nel ramo della plancia in cui sei, e da Apri file o Impostazioni in tutto MeTeOra; Ctrl con la barra rovesciata cerca in tutto MeTeOra, anche dalla console. "
     "Barra verticale: il filtro della playlist o dei Preferiti in cui sta la plancia, anche dalla console.",
     "F1 apre il manuale nel browser; F12 scrive nella console la guida rapida dei tasti, F2 le novità e F3 i crediti, sempre nella console. Esc esce salvando tutto.",
+    "Maiuscolo con F12 spegne e riaccende i tasti rapidi a carattere: spenti, lettere, cifre e segni vanno alla plancia, che salta alla voce che comincia con ciò che scrivi; "
+    "i tasti funzione, Esc e Ctrl con la barra rovesciata restano.",
 ]
 # Le righe del cruscotto proprie di ogni tipo di voce della plancia.
 TASTI_DEL_CONTESTO = {
@@ -840,6 +844,9 @@ class Finestra(wx.Frame):
             self._salva_impostazioni()
         # Chiudendo per farsi aggiornare non si invita alla donazione.
         self._per_aggiornare = False
+        # I tasti rapidi a carattere, che Maiuscolo con F12 spegne e riaccende:
+        # a ogni avvio sono accesi (Gabriele, 1.86.0).
+        self._tasti_rapidi = True
         fuori_dal_normale = self._riproduzione_fuori_dal_normale()
         if fuori_dal_normale:
             self.scrivi(fuori_dal_normale)
@@ -1214,6 +1221,8 @@ class Finestra(wx.Frame):
             if voce != self._voce_corrente():
                 righe.append("Il fuoco è su un'altra voce: le frecce, F9, F10, J, K e la barra verticale partono da lì; Canc, Maiuscolo con Canc, X, Maiuscolo con X, F4, F11, "
                     "Maiuscolo con F11, Maiuscolo con le cifre, la barra rovesciata e il menu agiscono sulla voce selezionata.")
+        if not self._tasti_rapidi:
+            righe = ["Tasti rapidi spenti: lettere, cifre e segni vanno alla plancia, che cerca per iniziale; Maiuscolo con F12 li riaccende.", *righe]
         return righe + TASTI_COMUNI
 
     def _vai(self, controllo, evento):
@@ -1266,6 +1275,9 @@ class Finestra(wx.Frame):
         if modificatori == wx.MOD_SHIFT and codice == wx.WXK_F11:
             self._comando_modifica_i_tag()
             return True
+        if modificatori == wx.MOD_SHIFT and codice == wx.WXK_F12:
+            self._alterna_i_tasti_rapidi()
+            return True
         tasti_del_video = {wx.WXK_F1: self._comando_video, wx.WXK_F2: self._comando_sottotitoli, wx.WXK_F3: self._comando_traccia_audio,
             wx.WXK_F5: self._comando_schermo_intero, wx.WXK_F6: self._comando_rapporto}
         if modificatori == wx.MOD_SHIFT and codice in tasti_del_video:
@@ -1285,6 +1297,18 @@ class Finestra(wx.Frame):
         if unicode == wx.WXK_NONE or unicode <= 32 or not chr(unicode).isprintable():
             evento.Skip()
             return False
+        if not self._tasti_rapidi:
+            # Tasti rapidi spenti (1.86.0): nella plancia il carattere va
+            # all'albero, che cerca la voce per iniziale. Altrove, nella
+            # console, nel cruscotto o nel video, un controllo in sola lettura
+            # suonerebbe l'avviso di Windows: lo si dice invece, sempre sulla
+            # stessa riga (revisione della 1.86.0).
+            if self._fuoco_nella_plancia():
+                evento.Skip()
+                return False
+            self._riscontro("non_disponibile", "Tasti rapidi spenti: le lettere cercano solo nella plancia, F5. Maiuscolo con F12 li riaccende.",
+                "tasti_spenti")
+            return True
         carattere = chr(unicode).lower()
         maiuscolo = modificatori == wx.MOD_SHIFT
         if carattere.isdigit() and not maiuscolo:
@@ -1306,13 +1330,46 @@ class Finestra(wx.Frame):
         self._riscontro("non_disponibile", f"{'Maiuscolo+' if maiuscolo else 'Il tasto '}{nome} non ha un comando.")
         return True
 
+    def _alterna_i_tasti_rapidi(self):
+        """Maiuscolo con F12 (Gabriele, 4 ottobre 2026, 1.86.0): spegne e
+        riaccende i tasti rapidi a carattere, lettere, cifre e segni, anche con
+        il Maiuscolo. Spenti, vanno ai controlli: nella plancia l'albero di
+        Windows salta alla voce che comincia con cio' che si scrive, utile in un
+        ramo grande. I tasti funzione, Esc e Ctrl con la barra rovesciata
+        restano; a ogni avvio i tasti rapidi sono accesi."""
+        self._tasti_rapidi = not self._tasti_rapidi
+        if self._tasti_rapidi:
+            self._riscontro("tasti_accesi", "Tasti rapidi accesi.")
+        else:
+            self._riscontro("tasti_spenti", "Tasti rapidi spenti: le lettere cercano nella plancia per iniziale. Maiuscolo con F12 li riaccende.")
+        # Il cruscotto in cui si e' gia' dice subito lo stato nuovo.
+        if self.cruscotto.HasFocus():
+            self._rinfresca_cruscotto()
+
+    def _fuoco_nella_plancia(self):
+        return wx.Window.FindFocus() is self.albero
+
+    def _dopo_l_iniziale(self, prima):
+        """La ricerca per iniziale di Windows, nell'albero a selezione
+        multipla, sposta solo il fuoco: la selezione lo segue, come con le
+        frecce, o Invio, Canc, X e gli altri agirebbero sulla voce di prima
+        (revisione della 1.86.0)."""
+        if self._chiusa:
+            return
+        voce = self.albero.GetFocusedItem()
+        if voce.IsOk() and voce != prima:
+            self._seleziona(voce)
+
     def _carattere_nell_albero(self, evento):
         """I caratteri che arrivano fino all'albero, per esempio con AltGr o
         dal tastierino, si fermano qui: la ricerca per iniziale del controllo
-        sposterebbe il fuoco senza un comando (tappa 9)."""
+        sposterebbe il fuoco senza un comando (tappa 9). Con i tasti rapidi
+        spenti passano, e la ricerca per iniziale e' proprio quella voluta."""
         codice = evento.GetUnicodeKey()
         if codice > 32 and chr(codice).isprintable():
-            return
+            if self._tasti_rapidi:
+                return
+            wx.CallAfter(self._dopo_l_iniziale, self.albero.GetFocusedItem())
         evento.Skip()
 
     def _tasto_nell_albero(self, evento):
