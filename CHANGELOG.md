@@ -2,6 +2,12 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.91.0] - 2026-10-04
+
+- Aprire i file da Windows, tappa 12 d del piano: MeTeOra suona i file e le cartelle passati sulla riga di comando, aperti da Esplora risorse o trascinati sulla finestra; più file insieme suonano come una lista che non entra fra le playlist, una cartella sola con tutte le sue sottocartelle.
+- MeTeOra resta uno solo: se è già aperto, la copia nuova gli passa i file, attraverso una pipe di Windows per l'utente, e si chiude; quello aperto torna in primo piano. I file aperti insieme da Esplora risorse arrivano tutti e fanno una lista sola.
+- La voce Associazioni dei formati delle impostazioni, dal programma compilato: registra MeTeOra in Apri con per tutti i formati che suona e apre la pagina delle app predefinite di Windows, dove lo si sceglie come predefinito; oppure lo toglie, cancellando solo ciò che aveva scritto. Solo per l'utente, senza diritti di amministratore.
+
 ## [1.90.0] - 2026-10-04
 
 - Le copie dei dati, tappa 12 c del piano: a ogni avvio, prima di leggerli, MeTeOra mette nella cartella copie, accanto ai dati, la versione di adesso delle playlist, dei marker e delle impostazioni, se è cambiata; restano le ultime tre, e il manuale spiega come tornare a una di loro. Una per sessione e non per salvataggio: le playlist si salvano a ogni modifica, e tre copie a pochi secondi l'una dall'altra non servirebbero.

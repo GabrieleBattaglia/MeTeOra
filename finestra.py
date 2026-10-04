@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura. Nella 1.83.1 Maiuscolo con F10 lascia chiuso Questo PC, e la plancia molto aperta non ferma piu' la finestra. Nella 1.83.2 F10 a fette, e i suoni delle aperture che non si sovrappongono. Nella 1.84.0 la proposta dell'aggiornamento, il suo avanzamento e la chiusura per aggiornarsi. Nella 1.85.0 i crediti con la licenza e le licenze dei componenti. Nella 1.85.5 i rami di rete che si riprovano sempre. Nella 1.86.0 Maiuscolo con F12 spegne e riaccende i tasti rapidi a carattere. Nella 1.87.0 la barra dei comandi per il mouse. Nella 1.88.0 anche sopra il video, con la linea del tempo. Nella 1.88.1 F2 scrive solo le versioni recenti. Nella 1.89.0 i problemi interni anche nel registro degli errori. Nella 1.90.0 le copie dei dati che non riescono.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura. Nella 1.83.1 Maiuscolo con F10 lascia chiuso Questo PC, e la plancia molto aperta non ferma piu' la finestra. Nella 1.83.2 F10 a fette, e i suoni delle aperture che non si sovrappongono. Nella 1.84.0 la proposta dell'aggiornamento, il suo avanzamento e la chiusura per aggiornarsi. Nella 1.85.0 i crediti con la licenza e le licenze dei componenti. Nella 1.85.5 i rami di rete che si riprovano sempre. Nella 1.86.0 Maiuscolo con F12 spegne e riaccende i tasti rapidi a carattere. Nella 1.87.0 la barra dei comandi per il mouse. Nella 1.88.0 anche sopra il video, con la linea del tempo. Nella 1.88.1 F2 scrive solo le versioni recenti. Nella 1.89.0 i problemi interni anche nel registro degli errori. Nella 1.90.0 le copie dei dati che non riescono. Nella 1.91.0 i file aperti da Windows, il trascinamento e le associazioni dei formati.
 
 """La finestra di MeTeOra.
 
@@ -49,6 +49,7 @@ from html.parser import HTMLParser
 
 import wx
 
+import associazioni
 import braille
 import dettagli
 import formati
@@ -345,6 +346,7 @@ VOCI_DELLE_IMPOSTAZIONI = {
     "salva_console": ("Salva console", None),
     "marcatori": ("Marcatori", None),
     "importa_marcatori": ("Importa marcatori", None),
+    "associazioni": ("Associazioni dei formati", None),
     "impressi": ("Sottotitoli impressi", "cambiati"),
     "dona": ("Dona per questo progetto", None),
 }
@@ -457,6 +459,24 @@ def guida_rapida(testo):
     lettore.feed(testo)
     lettore.close()
     return lettore.righe
+
+
+# Per quanti millisecondi si raccolgono i file aperti da Windows prima di
+# suonarli: Esplora risorse apre piu' file selezionati lanciando una copia per
+# file, e insieme fanno una lista sola (1.91.0).
+ATTESA_DEI_FILE_DA_WINDOWS = 400
+
+
+class _Trascinamento(wx.FileDropTarget):
+    """I file e le cartelle trascinati sulla finestra (1.91.0)."""
+
+    def __init__(self, finestra):
+        super().__init__()
+        self._finestra = finestra
+
+    def OnDropFiles(self, _x, _y, nomi):
+        wx.CallAfter(self._finestra.apri_dall_esterno, list(nomi))
+        return True
 
 
 # Quante righe del changelog scrive F2, a versioni intere (Gabriele, 1.88.1).
@@ -852,6 +872,13 @@ class Finestra(wx.Frame):
         self.Bind(wx.EVT_CHAR_HOOK, self._tasto)
         self.Bind(wx.EVT_CLOSE, self._alla_chiusura)
         self.Bind(wx.EVT_ACTIVATE, self._all_attivazione)
+        # I file aperti da Windows, raccolti per un attimo (1.91.0), e
+        # l'ascolto delle altre copie di MeTeOra, che meteora.py collega.
+        self._da_aprire = []
+        self._apertura_esterna_pianificata = False
+        self.ascolto_delle_copie = None
+        for controllo in (self.albero, self.console, self.cruscotto):
+            controllo.SetDropTarget(_Trascinamento(self))
         # La barra dei comandi per il mouse, per chi vede (Gabriele, 1.87.0):
         # non prende mai il fuoco e non e' nell'ordine di tabulazione.
         self.barra = BarraDeiComandi(self, acceso=self.impostazioni["barra_dei_comandi"])
@@ -1156,6 +1183,50 @@ class Finestra(wx.Frame):
         sys.excepthook = nel_filo_della_finestra
         threading.excepthook = negli_altri_fili
         warnings.showwarning = negli_avvisi
+
+    def apri_dall_esterno(self, percorsi):
+        """I file e le cartelle che arrivano da Windows (1.91.0): dalla riga di
+        comando, da un'altra copia di MeTeOra o trascinati sulla finestra.
+        Quelli che arrivano insieme, come quando si aprono piu' file da Esplora
+        risorse, si raccolgono per un attimo e suonano come una lista sola.
+        MeTeOra torna in primo piano."""
+        if not self or self._chiusa:
+            return
+        self._da_aprire.extend(percorsi)
+        if self.IsIconized():
+            self.Iconize(False)
+        self.Raise()
+        if not self._apertura_esterna_pianificata:
+            self._apertura_esterna_pianificata = True
+            wx.CallLater(ATTESA_DEI_FILE_DA_WINDOWS, self._apri_i_percorsi)
+
+    def _apri_i_percorsi(self):
+        self._apertura_esterna_pianificata = False
+        percorsi, self._da_aprire = list(dict.fromkeys(self._da_aprire)), []
+        if self._chiusa or not percorsi:
+            return
+        cartelle = [p for p in percorsi if os.path.isdir(p)]
+        if len(cartelle) == len(percorsi) == 1:
+            # Una cartella sola suona come X su di lei nella plancia.
+            self._riproduci_cartella(cartelle[0])
+            return
+        brani, scartati = [], []
+        for percorso in percorsi:
+            if os.path.isdir(percorso):
+                brani += [Brano(f) for _sotto, files in questo_pc.contenuti_ricorsivi(percorso) for f in files]
+            elif os.path.isfile(percorso) and formati.supportato(percorso):
+                brani.append(Brano(percorso))
+            else:
+                scartati.append(os.path.basename(percorso.rstrip("\\")) or percorso)
+        if scartati:
+            self.scrivi(f"MeTeOra non suona {', '.join(scartati)}: non è un formato che conosce, o non c'è.")
+        if not brani:
+            self._riscontro("niente_da_suonare", "Niente da suonare in quello che arriva da Windows.")
+            return
+        # Come Apri file: la lista non entra fra le playlist, e la sua
+        # cartella vuota la tiene fuori da Questo PC.
+        pl = Playlist("file aperti" if len(brani) > 1 else "file aperto", brani, cartella="")
+        self._suona(pl, pl.brani[0], "file_aperto")
 
     def copie_mancate(self, nomi):
         """All'avvio, se una copia dei dati non e' riuscita (1.90.0)."""
@@ -4969,6 +5040,7 @@ class Finestra(wx.Frame):
             "salva_console": lambda: "scrive la console in un file di testo",
             "marcatori": self._marcatori_da_leggere,
             "importa_marcatori": lambda: "da un file esportato da MeTeOra",
+            "associazioni": lambda: "Apri con MeTeOra e app predefinite di Windows" if getattr(sys, "frozen", False) else "solo dal programma compilato",
             "impressi": lambda: MODI_DEGLI_IMPRESSI[imp["impressi"]],
             "dona": lambda: "offri un caffè all'autore, con PayPal",
         }[chiave]()
@@ -5010,6 +5082,7 @@ class Finestra(wx.Frame):
             "marcatori": self._finestra_dei_marcatori,
             "importa_marcatori": self._importa_i_marcatori,
             "dona": self._dona,
+            "associazioni": self._associa_i_formati,
             "impressi": self._scegli_come_leggere_gli_impressi,
             "destinazione": self._scegli_la_destinazione,
             "karaoke": self._scegli_il_modo_del_karaoke,
@@ -6108,6 +6181,38 @@ class Finestra(wx.Frame):
         with DialogoDonazione(genitore, testo) as dialogo:
             return dialogo.ShowModal()
 
+    def _associa_i_formati(self, genitore):
+        """La voce Associazioni dei formati (1.91.0): MeTeOra in Apri con per
+        tutti i suoi formati e fra le app predefinite di Windows, dove chi usa
+        il PC lo puo' scegliere come predefinito; oppure lo toglie. Solo dal
+        programma compilato: da sorgente Windows aprirebbe Python."""
+        if not getattr(sys, "frozen", False):
+            self._riscontro("non_disponibile", "Le associazioni dei formati si fanno solo dal programma compilato: da sorgente, Windows aprirebbe Python.")
+            return
+        scelte = ["Associa: MeTeOra in Apri con per tutti i suoi formati, poi la pagina delle app predefinite di Windows",
+            "Togli MeTeOra dalle associazioni"]
+        self._domanda()
+        with FinestraScelta(genitore, "Associazioni dei formati", scelte, 0) as dialogo:
+            if dialogo.ShowModal() != wx.ID_OK:
+                self._annullato("Associazioni dei formati: niente di cambiato.")
+                return
+            indice = dialogo.GetSelection()
+        try:
+            if indice == 0:
+                quante = associazioni.registra(sys.executable)
+            else:
+                associazioni.togli()
+        except OSError as e:
+            self._riscontro("errore", f"Non riesco a cambiare le associazioni dei formati: {e.strerror or e}.")
+            return
+        if indice:
+            self._riscontro("impostazione_cambiata", "MeTeOra non è più nelle associazioni dei formati.")
+            return
+        self._riscontro("impostazione_cambiata", f"MeTeOra ora compare in Apri con per {quante} formati. Si apre la pagina delle app predefinite "
+            "di Windows: lì, se vuoi, lo scegli come predefinito.")
+        with contextlib.suppress(OSError):
+            associazioni.apri_le_app_predefinite()
+
     def _dona(self, genitore):
         """La voce Dona per questo progetto delle impostazioni: l'invito
         compare sempre."""
@@ -7032,6 +7137,8 @@ class Finestra(wx.Frame):
             evento.Skip()
             return
         self._chiusa = True
+        if self.ascolto_delle_copie is not None:
+            self.ascolto_delle_copie.ferma()
         self.barra.ferma()
         self._braille.svuota()
         if self._ricerca is not None:

@@ -26,3 +26,7 @@ F2 scrive solo le novità recenti, una cinquantina di righe; in fondo la riga di
 Dopo qualche uso, nella cartella di MeTeOra c'è MeTeOra - Errori.log; se ci sono stati problemi interni, ciascuno ha il suo resoconto con la pila.
 Chiudi MeTeOra con Esc: nella cartella non resta MeTeOra - Crash.log.
 Avvia MeTeOra due volte, cambiando una playlist in mezzo: nella cartella copie ci sono MeTeOra - Playlist.json.1 e .2, la più recente con il numero 1.
+Con MeTeOra aperto dai sorgenti, in un altro terminale scrivi python meteora.py seguito dal percorso di un mp3: suona nel MeTeOra aperto, che torna davanti, e non si apre una seconda finestra.
+Seleziona tre brani in Esplora risorse e premi Invio con MeTeOra predefinito (dal compilato): suonano come una lista sola, file aperti.
+Trascina una cartella sulla plancia, se qualcuno ti aiuta: suona con le sottocartelle.
+Dal programma compilato, Impostazioni, Associazioni dei formati, Associa: si apre la pagina delle app predefinite di Windows, e MeTeOra compare in Apri con per gli mp3; poi Togli, e sparisce.

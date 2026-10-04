@@ -2733,6 +2733,7 @@ def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_an
         ("salva_console", "Salva console: scrive la console in un file di testo"),
         ("marcatori", "Marcatori: nessuno"),
         ("importa_marcatori", "Importa marcatori: da un file esportato da MeTeOra"),
+        ("associazioni", "Associazioni dei formati: solo dal programma compilato"),
         ("impressi", "Sottotitoli impressi: letti al volo, mentre il video suona, con circa mezzo secondo di ritardo"),
         ("dona", "Dona per questo progetto: offri un caffè all'autore, con PayPal"),
     ]
@@ -5623,3 +5624,80 @@ def test_con_i_tasti_spenti_l_albero_cerca_per_iniziale(finestra):
     # La selezione segue il fuoco: i comandi agiscono su Gamma, non su Alfa.
     assert finestra.albero.GetItemText(finestra._voce_di_lavoro()) == "Gamma"
     assert [finestra.albero.GetItemText(v) for v in finestra._voci_selezionate()] == ["Gamma"]
+
+
+def test_i_file_aperti_da_windows(finestra, monkeypatch, suoni_annotati, tmp_path):
+    # 1.91.0: dalla riga di comando, da un'altra copia o trascinati, i file
+    # arrivati insieme suonano come una lista sola, che non entra fra le playlist.
+    suonati = _finto_motore(finestra, monkeypatch)
+    for nome in ("b.mp3", "a.flac", "testo.txt"):
+        (tmp_path / nome).write_bytes(b"")
+    (tmp_path / "album").mkdir()
+    (tmp_path / "album" / "c.ogg").write_bytes(b"")
+    finestra.apri_dall_esterno([str(tmp_path / "b.mp3"), str(tmp_path / "testo.txt")])
+    finestra.apri_dall_esterno([str(tmp_path / "a.flac"), str(tmp_path / "album"), str(tmp_path / "b.mp3")])
+    assert finestra._apertura_esterna_pianificata
+    finestra._apri_i_percorsi()
+    assert suonati == [("b.mp3", None)]
+    pl = finestra.coda.playlist
+    assert pl.nome == "file aperti" and [os.path.basename(b.percorso) for b in pl.brani] == ["b.mp3", "a.flac", "c.ogg"]
+    assert pl not in finestra.archivio.playlist
+    assert any(_senza_ora(r) == "MeTeOra non suona testo.txt: non è un formato che conosce, o non c'è." for r in finestra._righe)
+    # Una cartella sola suona come X su di lei.
+    cartelle = []
+    monkeypatch.setattr(finestra, "_riproduci_cartella", cartelle.append)
+    finestra.apri_dall_esterno([str(tmp_path / "album")])
+    finestra._apri_i_percorsi()
+    assert cartelle == [str(tmp_path / "album")]
+    # Niente da suonare: lo si dice.
+    finestra.apri_dall_esterno([str(tmp_path / "testo.txt")])
+    finestra._apri_i_percorsi()
+    assert suoni_annotati[-1] == "niente_da_suonare" and _ultima(finestra) == "Niente da suonare in quello che arriva da Windows."
+
+
+def test_il_trascinamento_sulla_finestra(finestra, monkeypatch):
+    arrivati = []
+    monkeypatch.setattr(finestra, "apri_dall_esterno", arrivati.append)
+    for controllo in (finestra.albero, finestra.console, finestra.cruscotto):
+        bersaglio = controllo.GetDropTarget()
+        assert isinstance(bersaglio, modulo._Trascinamento)
+        assert bersaglio.OnDropFiles(0, 0, ["C:\\m\\a.mp3"]) is True
+    wx.Yield()
+    assert arrivati == [["C:\\m\\a.mp3"]] * 3
+
+
+def test_le_associazioni_dalle_impostazioni(finestra, monkeypatch, suoni_annotati):
+    # 1.91.0: solo dal programma compilato; registra, poi la pagina delle app
+    # predefinite; oppure toglie.
+    import sys as modulo_sys
+
+    finestra._associa_i_formati(None)
+    assert suoni_annotati[-1] == "non_disponibile" and "solo dal programma compilato" in _ultima(finestra)
+    monkeypatch.setattr(modulo_sys, "frozen", True, raising=False)
+    fatti, scelte = [], [0, 1]
+
+    class Scelta:
+        def __init__(self, _genitore, titolo, righe, selezione):
+            fatti.append(("scelta", titolo, len(righe), selezione))
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_argomenti):
+            return False
+
+        def ShowModal(self):
+            return wx.ID_OK
+
+        def GetSelection(self):
+            return scelte.pop(0)
+
+    monkeypatch.setattr(modulo, "FinestraScelta", Scelta)
+    monkeypatch.setattr(modulo.associazioni, "registra", lambda eseguibile: fatti.append(("registra", eseguibile)) or 150)
+    monkeypatch.setattr(modulo.associazioni, "togli", lambda: fatti.append(("togli",)))
+    monkeypatch.setattr(modulo.associazioni, "apri_le_app_predefinite", lambda: fatti.append(("pagina",)))
+    finestra._associa_i_formati(None)
+    assert fatti == [("scelta", "Associazioni dei formati", 2, 0), ("registra", modulo_sys.executable), ("pagina",)]
+    assert _ultima(finestra).startswith("MeTeOra ora compare in Apri con per 150 formati.")
+    finestra._associa_i_formati(None)
+    assert fatti[-1] == ("togli",) and _ultima(finestra) == "MeTeOra non è più nelle associazioni dei formati."
