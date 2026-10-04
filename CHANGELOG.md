@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.89.0] - 2026-10-04
+
+- Il registro degli errori, tappa 12 b del piano: ogni problema interno lascia il resoconto completo, con il punto del codice, nel file MeTeOra - Errori.log accanto ai dati; il file gira con una copia e i due insieme non superano i 10 MB (Gabriele). Dal programma compilato ci finisce anche quello che prima si perdeva, perché lì non c'è un terminale.
+- I crash che Python non vede, come quelli dentro le librerie di Windows, lasciano la pila di tutti i fili in MeTeOra - Crash.log, con faulthandler. All'avvio dopo un crash la console lo dice, e il file diventa MeTeOra - Crash precedente.log, da mandare a chi sviluppa; un'uscita normale non lascia niente.
+
 ## [1.88.1] - 2026-10-04
 
 - F2 scrive solo le novità delle versioni più recenti, a versioni intere, una cinquantina di righe: tutte erano troppe da scorrere (Gabriele). In fondo una riga dice dove leggere il changelog intero: il file CHANGELOG.md nella cartella di MeTeOra, e la sua pagina su GitHub.

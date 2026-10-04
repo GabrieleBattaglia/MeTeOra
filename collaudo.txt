@@ -23,3 +23,5 @@ Trascinando il pallino della linea e lasciandolo, il video salta dove lo si lasc
 Con la barra del video visibile, la barra della finestra principale non c'è; tornati nella finestra principale con F5, compare solo la sua.
 Con NVDA, la finestra del video davanti: Tab e i tasti funzionano come prima, e muovendo il mouse NVDA non dice niente.
 F2 scrive solo le novità recenti, una cinquantina di righe; in fondo la riga dice dove sono il file CHANGELOG.md e la pagina su GitHub.
+Dopo qualche uso, nella cartella di MeTeOra c'è MeTeOra - Errori.log; se ci sono stati problemi interni, ciascuno ha il suo resoconto con la pila.
+Chiudi MeTeOra con Esc: nella cartella non resta MeTeOra - Crash.log.
