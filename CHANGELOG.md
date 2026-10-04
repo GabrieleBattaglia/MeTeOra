@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.85.1] - 2026-10-04
+
+- Se libmpv non si carica, MeTeOra non si ferma più su un errore di Python: la finestra MeTeOra non può partire dice il motivo. Il caso tipico è vulkan-1.dll, che libmpv chiede per il video e che installano i driver della scheda video: su una macchina virtuale o con driver vecchi può mancare, e la finestra dice di aggiornare i driver o di installare il Vulkan Runtime (Gabriele).
+
 ## [1.85.0] - 2026-10-04
 
 - Licenze e crediti, per la prima release: MeTeOra è GPL-3.0-or-later, la GNU General Public License versione 3 o, a scelta, successiva, come la libmpv che porta con sé (Gabriele). F3 ora dice il copyright, la licenza, la garanzia assente e dove sono i testi delle licenze e i sorgenti, e nomina la licenza di ogni componente.
