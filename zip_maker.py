@@ -21,6 +21,8 @@ FUORI = [
     "MeTeOra-V*.txt",
     "fluidsynth/",
     "banchi/",
+    # Le copie dei dati che nascono provando l'eseguibile (1.90.0).
+    "copie/",
 ]
 
 

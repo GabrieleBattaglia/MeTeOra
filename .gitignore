@@ -16,3 +16,5 @@ banchi/
 # Il registro degli errori e dei crash (1.89.0), che nasce accanto ai dati provando MeTeOra dai sorgenti.
 MeTeOra - *.log
 MeTeOra - *.log.*
+# Le copie dei dati (1.90.0), che nascono accanto ai dati provando MeTeOra dai sorgenti.
+copie/

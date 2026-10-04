@@ -25,3 +25,4 @@ Con NVDA, la finestra del video davanti: Tab e i tasti funzionano come prima, e 
 F2 scrive solo le novità recenti, una cinquantina di righe; in fondo la riga dice dove sono il file CHANGELOG.md e la pagina su GitHub.
 Dopo qualche uso, nella cartella di MeTeOra c'è MeTeOra - Errori.log; se ci sono stati problemi interni, ciascuno ha il suo resoconto con la pila.
 Chiudi MeTeOra con Esc: nella cartella non resta MeTeOra - Crash.log.
+Avvia MeTeOra due volte, cambiando una playlist in mezzo: nella cartella copie ci sono MeTeOra - Playlist.json.1 e .2, la più recente con il numero 1.

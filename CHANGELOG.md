@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.90.0] - 2026-10-04
+
+- Le copie dei dati, tappa 12 c del piano: a ogni avvio, prima di leggerli, MeTeOra mette nella cartella copie, accanto ai dati, la versione di adesso delle playlist, dei marker e delle impostazioni, se è cambiata; restano le ultime tre, e il manuale spiega come tornare a una di loro. Una per sessione e non per salvataggio: le playlist si salvano a ogni modifica, e tre copie a pochi secondi l'una dall'altra non servirebbero.
+
 ## [1.89.0] - 2026-10-04
 
 - Il registro degli errori, tappa 12 b del piano: ogni problema interno lascia il resoconto completo, con il punto del codice, nel file MeTeOra - Errori.log accanto ai dati; il file gira con una copia e i due insieme non superano i 10 MB (Gabriele). Dal programma compilato ci finisce anche quello che prima si perdeva, perché lì non c'è un terminale.
