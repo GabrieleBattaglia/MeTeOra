@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura. Nella 1.83.1 Maiuscolo con F10 lascia chiuso Questo PC, e la plancia molto aperta non ferma piu' la finestra. Nella 1.83.2 F10 a fette, e i suoni delle aperture che non si sovrappongono. Nella 1.84.0 la proposta dell'aggiornamento, il suo avanzamento e la chiusura per aggiornarsi. Nella 1.85.0 i crediti con la licenza e le licenze dei componenti.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura. Nella 1.83.1 Maiuscolo con F10 lascia chiuso Questo PC, e la plancia molto aperta non ferma piu' la finestra. Nella 1.83.2 F10 a fette, e i suoni delle aperture che non si sovrappongono. Nella 1.84.0 la proposta dell'aggiornamento, il suo avanzamento e la chiusura per aggiornarsi. Nella 1.85.0 i crediti con la licenza e le licenze dei componenti. Nella 1.85.5 i rami di rete che si riprovano sempre.
 
 """La finestra di MeTeOra.
 
@@ -80,7 +80,7 @@ from impostazioni import Impostazioni
 from marcatori import Marcatori
 from motore import VOLUME_MASSIMO, durata_del_sottobrano, sottobrano_risolto
 from playlist import Archivio, Brano, Coda, Playlist
-from ricerca import AlberoDeiRisultati, NonRisponde, Ricerca, in_rete, leggi_in_rete, senza_annidati
+from ricerca import AlberoDeiRisultati, NonRisponde, Ricerca, errore_di_rete, in_rete, leggi_in_rete, senza_annidati
 from schedario import Schedario
 from valori import AREE, ErroreValore, leggi_tempo, leggi_tempo_nel_brano, secondi_da_leggere
 from video import FinestraVideo
@@ -1771,10 +1771,11 @@ class Finestra(wx.Frame):
         nome = nome or os.path.basename(cartella.rstrip("\\")) or cartella
         files = self.contatore.files(cartella)
         if cartella in self.contatore.parziali:
-            # Il conto ha saltato una parte che in rete non rispondeva.
+            # Il conto ha saltato una cartella di rete che non rispondeva: non
+            # e' la rete intera a tacere (collaudo della 1.85.2).
             if not files:
-                return f"{nome} (la rete non risponde)"
-            return f"{nome}, almeno {len(files)} file: la rete non risponde del tutto"
+                return f"{nome} (conto incompleto: una cartella di rete non risponde)"
+            return f"{nome}, almeno {len(files)} file: una cartella di rete non risponde"
         if files == []:
             if vuota is None:
                 vuota = self._e_vuota(cartella)
@@ -1875,13 +1876,17 @@ class Finestra(wx.Frame):
                 yield voce, dati, bool(dati.get("caricato")) and ha_file
             pila.extend(reversed(dentro))
 
-    def _ramo_di_rete_muto(self, voce, dati):
-        """Un ramo di rete che non risponde resta chiuso, da riaprire."""
+    def _ramo_di_rete_muto(self, voce, dati, errore=None):
+        """Un ramo di rete che non risponde resta chiuso, da riaprire. Con un
+        errore di Windows si dice il suo testo."""
         dati["caricato"] = False
         self.albero.SetItemHasChildren(voce, True)
         wx.CallAfter(self.albero.Collapse, voce)
-        self._riscontro("errore", f"{dati['percorso']} non risponde: il computer o il disco di rete sono spenti, la rete non c'è, "
-            "o la condivisione si è fermata. Aggiorna, sul ramo o su Questa rete, la riprova.")
+        if errore is not None:
+            motivo = f"{str(errore.strerror or errore).rstrip('.')}."
+        else:
+            motivo = "il computer o il disco di rete sono spenti, la rete non c'è, o la condivisione si è fermata."
+        self._riscontro("errore", f"{dati['percorso']} non risponde: {motivo} Riaprendo il ramo si riprova.")
 
     def _riconta(self, *cartelle):
         """Dopo un file o una cartella mandati nel cestino (Gabriele, 4
@@ -2164,13 +2169,13 @@ class Finestra(wx.Frame):
         if tipo in ("computer_della_rete", "computer"):
             self._cerca_nella_rete(voce, dati)
             return
+        # Un ramo di rete si legge sempre, anche se il contatore ha lasciato
+        # perdere la sua radice: aprirlo e' una richiesta di chi ascolta, e la
+        # lettura protetta non aspetta piu' di ATTESA_NELLA_PLANCIA fra una voce
+        # e l'altra. Prima un ramo di una radice muta non si apriva per tutta
+        # la sessione, e una prova di tre secondi lo dava per spento: la prima
+        # lettura dell'Iliadbox ne chiede quasi tre (collaudo della 1.85.2).
         di_rete = tipo in ("cartella", "unita") and in_rete(dati["percorso"])
-        if di_rete and (os.path.splitdrive(dati["percorso"])[0].lower() in self.contatore.mute or not questa_rete.raggiungibile(dati["percorso"])):
-            # Una cartella di rete spenta farebbe aspettare Windows anche mezzo
-            # minuto, e una condivisione che si e' gia' fermata non risponde
-            # piu': si lascia perdere, e il ramo resta da riaprire.
-            self._ramo_di_rete_muto(voce, dati)
-            return
         if tipo in ("risultati", "gruppo_risultati"):
             self._riempi_gruppo(voce)
             return
@@ -2201,23 +2206,37 @@ class Finestra(wx.Frame):
         try:
             cartelle, files = leggi_in_rete(dati["percorso"], attesa=ATTESA_NELLA_PLANCIA) if di_rete else questo_pc.contenuto(dati["percorso"])
         except NonRisponde:
-            self.contatore.mute.add(os.path.splitdrive(dati["percorso"])[0].lower())
+            self.contatore.non_risponde(dati["percorso"])
             self._ramo_di_rete_muto(voce, dati)
             return
         except OSError as e:
+            if di_rete and errore_di_rete(e):
+                # La rete che manca del tutto, come il router che si riavvia o
+                # un nome che non si trova, risponde subito con un errore: il
+                # ramo resta da riaprire, come uno che tace (revisione della
+                # 1.85.5; prima ci pensava la prova dei tre secondi).
+                self._ramo_di_rete_muto(voce, dati, e)
+                return
             if self._taciuti is not None:
                 self._taciuti["illeggibili"] += 1
             else:
                 self._riscontro("errore", f"Non riesco a leggere {dati['percorso']}: {e.strerror or e}")
             self.albero.SetItemHasChildren(voce, False)
             return
+        # Una cartella di rete letta: la sua radice risponde, e i conti che
+        # aveva lasciato a meta' si rifanno.
+        if di_rete:
+            self.contatore.chiedi(self.contatore.risponde(dati["percorso"]))
         # La lettura appena fatta vale piu' di quella che il contatore tiene
         # per la sessione: se sono diverse, i conti di questa cartella e di
         # chi la contiene si rifanno.
         self.contatore.chiedi(self.contatore.rinfresca(dati["percorso"], (cartelle, files)))
         # Le cartelle che il contatore sa gia' senza niente da suonare, nemmeno
         # sotto, non si mostrano; le altre spariscono quando arriva il conto.
-        cartelle = [c for c in cartelle if self.contatore.files(c) != []]
+        # Restano quelle con un conto parziale, come fa _aggiorna_cartelle: una
+        # cartella di rete muta si deve poter riaprire, per riprovarla
+        # (revisione della 1.85.5).
+        cartelle = [c for c in cartelle if self.contatore.files(c) != [] or c in self.contatore.parziali]
         for cartella in cartelle:
             figlio = self.albero.AppendItem(voce, self._etichetta_della_cartella(cartella), data={"tipo": "cartella", "percorso": cartella, "caricato": False})
             self.albero.SetItemHasChildren(figlio, True)
@@ -2363,8 +2382,18 @@ class Finestra(wx.Frame):
         dati = self._dati(voce)
         if dati.get("tipo") == "pc":
             self.contatore.dimentica_tutto()
+        elif dati.get("tipo") == "rete":
+            # Aggiorna su Questa rete riprova davvero le cartelle di rete che
+            # non rispondevano (revisione della 1.85.5); le cartelle di rete
+            # mostrate altrove, come le unita' di rete in Questo PC, si
+            # ricontano, perche' nessun'altra le richiede.
+            dimenticate = set(self.contatore.dimentica_la_rete())
+            if dimenticate:
+                self.contatore.chiedi([d["percorso"] for _v, d, _m in self._cartelle_della_plancia() if d.get("percorso") in dimenticate])
         elif dati.get("percorso"):
-            self.contatore.dimentica(dati["percorso"])
+            # Se la radice di rete torna viva, si rifanno anche i conti delle
+            # altre sue cartelle.
+            self.contatore.chiedi(self.contatore.dimentica(dati["percorso"]))
         aperto = self.albero.IsExpanded(voce)
         self.albero.Collapse(voce)
         self.albero.DeleteChildren(voce)
@@ -2814,7 +2843,7 @@ class Finestra(wx.Frame):
             righe = dettagli.righe_dell_unita(unita)
             if not unita["pronta"]:
                 return righe
-        if in_rete(percorso) and not questa_rete.raggiungibile(percorso):
+        if in_rete(percorso) and not questa_rete.raggiungibile(percorso, attesa=questa_rete.ATTESA_IN_SOTTOFONDO):
             return [*righe, f"{percorso} non risponde: la rete o il disco sono spenti, o lontani."]
         censimento = dettagli.censisci(percorso, fermo)
         sconosciuti = [p for p in censimento["suonabili"] if self._durata_del_percorso(p) is None]
@@ -3052,7 +3081,9 @@ class Finestra(wx.Frame):
             vicina = self.albero.GetPrevSibling(voce)
         self._seleziona(vicina if vicina.IsOk() else genitore)
         self.albero.Delete(voce)
-        self.contatore.dimentica(percorso, anche_sopra=False)
+        # Se la radice di rete torna viva, si rifanno i conti delle altre sue
+        # cartelle (revisione della 1.85.5).
+        self.contatore.chiedi(self.contatore.dimentica(percorso, anche_sopra=False))
         self._riconta(os.path.dirname(percorso.rstrip("\\")))
         self._riscontro("cestino", f"La cartella {nome} è nel cestino di Windows." if cestino else f"La cartella {nome} è cancellata per sempre.")
 

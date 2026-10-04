@@ -128,7 +128,7 @@ def censisci_brani(percorsi, fermo=None):
         if in_rete(percorso):
             radice = os.path.splitdrive(percorso)[0] + "\\"
             if radice not in raggiungibili:
-                raggiungibili[radice] = questa_rete.raggiungibile(radice)
+                raggiungibili[radice] = questa_rete.raggiungibile(radice, attesa=questa_rete.ATTESA_IN_SOTTOFONDO)
             if not raggiungibili[radice]:
                 esito["lontani"] += 1
                 continue

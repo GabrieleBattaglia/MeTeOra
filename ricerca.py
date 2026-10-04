@@ -139,6 +139,19 @@ class NonRisponde(OSError):
 
 _NonRisponde = NonRisponde
 
+# Gli errori di Windows che vengono dalla rete, e non dalla cartella: il
+# percorso o il nome di rete che non si trova, la connessione caduta, rifiutata
+# o irraggiungibile, il server che non c'e'. Una cartella di rete che ne da' uno
+# si tratta come una che tace: si riprova (revisione della 1.85.5).
+ERRORI_DI_RETE = frozenset({51, 53, 54, 59, 64, 67, 121, 1222, 1231, 1232, 1236})
+
+
+def errore_di_rete(errore):
+    """Vero per un errore che dice che manca la rete, non la cartella: uno di
+    ERRORI_DI_RETE, o una lettura interrotta senza un errore di Windows."""
+    codice = getattr(errore, "winerror", None)
+    return codice is None or codice in ERRORI_DI_RETE
+
 
 def leggi_in_rete(cartella, fermo=None, attesa=None):
     """Il contenuto di una cartella di rete, come questo_pc.contenuto, letto

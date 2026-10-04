@@ -4109,6 +4109,14 @@ def _rete_finta(finestra, monkeypatch, tmp_path):
     musica.mkdir()
     (musica / "canzone.mp3").write_bytes(b"")
     stato = {"raggiungibile": True, "ricerche": []}
+
+    def leggi_in_rete(cartella, attesa=None, fermo=None):
+        # 1.85.5: i rami di rete si leggono sempre, con la lettura protetta.
+        if not stato["raggiungibile"]:
+            raise modulo.NonRisponde(cartella)
+        return modulo.questo_pc.contenuto(cartella)
+
+    monkeypatch.setattr(modulo, "leggi_in_rete", leggi_in_rete)
     monkeypatch.setattr(questa_rete, "percorsi_salvati", lambda cartella=None: [("nas (server)", str(musica))])
     monkeypatch.setattr(questa_rete, "computer", lambda: [("NAS", r"\\NAS")])
     monkeypatch.setattr(questa_rete, "condivisioni", lambda server: [("film", str(musica))])
@@ -4132,7 +4140,8 @@ def test_questa_rete_mostra_i_percorsi_i_computer_e_il_comando(finestra, monkeyp
     stato["raggiungibile"] = False
     a_mano = list(finestra._figli(finestra.nodo_rete))[1]
     finestra.albero.Expand(a_mano)
-    assert _ultima(finestra).startswith(r"\\server\video non risponde") and suoni_annotati[-1] == "errore"
+    assert _ultima(finestra).startswith(r"\\server\video non risponde") and _ultima(finestra).endswith("Riaprendo il ramo si riprova.")
+    assert suoni_annotati[-1] == "errore"
     assert finestra._dati(a_mano)["caricato"] is False
     # I computer si cercano in disparte, con una voce d'attesa.
     computer = list(finestra._figli(finestra.nodo_rete))[2]
@@ -4560,24 +4569,48 @@ def test_i_dettagli_del_menu_e_quelli_in_ritardo(finestra, monkeypatch, suoni_an
 
 def test_le_cartelle_di_rete_che_non_rispondono(finestra, monkeypatch, suoni_annotati, tmp_path):
     # 1.77.1: un conto parziale lo dice l'etichetta, e la cartella non
-    # sparisce; un ramo di una radice muta non si apre, e lo dice.
+    # sparisce. 1.85.5: l'etichetta dice che e' una cartella a non rispondere,
+    # non la rete; un ramo di una radice lasciata perdere si apre lo stesso, e
+    # la radice torna viva, con i conti parziali da rifare (collaudo della
+    # 1.85.2: l'Iliadbox rispondeva, e MeTeOra diceva il contrario).
     (tmp_path / "Rete" / "Muta").mkdir(parents=True)
+    (tmp_path / "Rete" / "canzone.mp3").write_bytes(b"")
     finestra.albero.Expand(finestra.nodo_pc)
     nodo = finestra.albero.AppendItem(finestra.nodo_pc, "Muta", data={"tipo": "cartella", "percorso": str(tmp_path / "Rete" / "Muta"), "caricato": False})
     finestra.contatore.conti[str(tmp_path / "Rete" / "Muta")] = []
     finestra.contatore.parziali.add(str(tmp_path / "Rete" / "Muta"))
     finestra._aggiorna_cartelle()
-    assert finestra.albero.GetItemText(nodo) == "Muta (la rete non risponde)"
+    assert finestra.albero.GetItemText(nodo) == "Muta (conto incompleto: una cartella di rete non risponde)"
     finestra.contatore.conti[str(tmp_path / "Rete" / "Muta")] = [str(tmp_path / "a.mp3")]
     finestra._aggiorna_cartelle()
-    assert finestra.albero.GetItemText(nodo) == "Muta, almeno 1 file: la rete non risponde del tutto"
+    assert finestra.albero.GetItemText(nodo) == "Muta, almeno 1 file: una cartella di rete non risponde"
     monkeypatch.setattr(modulo, "in_rete", lambda percorso: True)
-    finestra.contatore.mute.add(os.path.splitdrive(str(tmp_path))[0].lower())
+    richiesti = []
+    vero_chiedi = finestra.contatore.chiedi
+    monkeypatch.setattr(finestra.contatore, "chiedi", lambda cartelle: (richiesti.extend(cartelle), vero_chiedi([]))[1])
+    radice = os.path.splitdrive(str(tmp_path))[0].lower()
+    finestra.contatore.mute.add(radice)
+    # Il conto parziale di chi contiene il ramo: lo rifa' solo la radice tornata viva.
+    finestra.contatore.conti[str(tmp_path)] = []
+    finestra.contatore.parziali.add(str(tmp_path))
+    # La prova dei tre secondi non si fa piu': la prima lettura dell'Iliadbox ne chiede quasi tre.
+    sondate = []
+    monkeypatch.setattr(modulo.questa_rete, "raggiungibile", lambda percorso, attesa=3.0: sondate.append(percorso) or False)
     figlio = finestra.albero.AppendItem(finestra.nodo_pc, "Altra", data={"tipo": "cartella", "percorso": str(tmp_path / "Rete"), "caricato": False})
     finestra.albero.SetItemHasChildren(figlio, True)
     finestra.albero.Expand(figlio)
-    assert suoni_annotati[-1] == "errore" and _ultima(finestra).startswith(f"{tmp_path / 'Rete'} non risponde: ")
-    assert not list(finestra._figli(figlio))
+    assert "canzone.mp3" in _etichette(finestra, figlio) and radice not in finestra.contatore.mute and sondate == []
+    assert str(tmp_path) in richiesti and str(tmp_path) not in finestra.contatore.parziali
+    assert str(tmp_path / "Rete" / "Muta") in richiesti and str(tmp_path / "Rete" / "Muta") not in finestra.contatore.parziali
+    # Un ramo che tace lo dice, si riapre per riprovare, e il contatore non lo rilegge.
+    monkeypatch.setattr(modulo, "leggi_in_rete", lambda cartella, attesa=None, fermo=None: (_ for _ in ()).throw(modulo.NonRisponde(cartella)))
+    altro = finestra.albero.AppendItem(finestra.nodo_pc, "Spenta", data={"tipo": "cartella", "percorso": str(tmp_path / "Spenta"), "caricato": False})
+    finestra.albero.SetItemHasChildren(altro, True)
+    finestra.albero.Expand(altro)
+    assert suoni_annotati[-1] == "errore" and _ultima(finestra) == (f"{tmp_path / 'Spenta'} non risponde: il computer o il disco di rete sono "
+        "spenti, la rete non c'è, o la condivisione si è fermata. Riaprendo il ramo si riprova.")
+    assert not list(finestra._figli(altro)) and finestra._dati(altro)["caricato"] is False
+    assert str(tmp_path / "Spenta").lower() in finestra.contatore.cartelle_mute and radice not in finestra.contatore.mute
 
 
 def _plancia_di_prova(finestra, monkeypatch, tmp_path):
@@ -5240,3 +5273,154 @@ def test_restano_le_uscite_libere():
 
     assert list(sintesi.USCITE) == ["nvda", "jaws", "sapi5"]
     assert {"nvda", "jaws"} == sintesi.CON_IL_BRAILLE
+
+
+def test_una_cartella_di_rete_parziale_resta_da_riaprire(finestra, monkeypatch, tmp_path):
+    # Revisione della 1.85.5: una cartella con il conto parziale e vuoto resta
+    # nella plancia quando si rilegge chi la contiene, per poterla riaprire.
+    (tmp_path / "Rete" / "Backup").mkdir(parents=True)
+    (tmp_path / "Rete" / "Vuota").mkdir()
+    monkeypatch.setattr(modulo, "in_rete", lambda percorso: True)
+    finestra.contatore.conti[str(tmp_path / "Rete" / "Backup")] = []
+    finestra.contatore.parziali.add(str(tmp_path / "Rete" / "Backup"))
+    finestra.contatore.conti[str(tmp_path / "Rete" / "Vuota")] = []
+    finestra.albero.Expand(finestra.nodo_pc)
+    voce = finestra.albero.AppendItem(finestra.nodo_pc, "Rete", data={"tipo": "cartella", "percorso": str(tmp_path / "Rete"), "caricato": False})
+    finestra.albero.SetItemHasChildren(voce, True)
+    finestra.albero.Expand(voce)
+    assert _etichette(finestra, voce) == ["Backup (conto incompleto: una cartella di rete non risponde)"]
+
+
+def test_un_ramo_di_rete_che_sbaglia_subito_resta_da_riaprire(finestra, monkeypatch, suoni_annotati, tmp_path):
+    # Revisione della 1.85.5: la rete che manca del tutto risponde subito con
+    # un errore, come il percorso di rete non trovato (53): il ramo resta da
+    # riaprire; l'accesso negato (5) resta un errore della cartella.
+    monkeypatch.setattr(modulo, "in_rete", lambda percorso: True)
+    errore = [53]
+
+    def leggi_in_rete(cartella, attesa=None, fermo=None):
+        raise OSError(None, "Impossibile trovare il percorso di rete", None, errore[0])
+
+    monkeypatch.setattr(modulo, "leggi_in_rete", leggi_in_rete)
+    finestra.albero.Expand(finestra.nodo_pc)
+    voce = finestra.albero.AppendItem(finestra.nodo_pc, "Box", data={"tipo": "cartella", "percorso": str(tmp_path / "Box"), "caricato": False})
+    finestra.albero.SetItemHasChildren(voce, True)
+    finestra.albero.Expand(voce)
+    assert suoni_annotati[-1] == "errore" and _ultima(finestra).endswith("Riaprendo il ramo si riprova.")
+    assert finestra._dati(voce)["caricato"] is False and finestra.albero.ItemHasChildren(voce)
+    assert str(tmp_path / "Box").lower() not in finestra.contatore.cartelle_mute
+    errore[0] = 5
+    altra = finestra.albero.AppendItem(finestra.nodo_pc, "Chiusa", data={"tipo": "cartella", "percorso": str(tmp_path / "Chiusa"), "caricato": False})
+    finestra.albero.SetItemHasChildren(altra, True)
+    finestra.albero.Expand(altra)
+    assert _ultima(finestra).startswith(f"Non riesco a leggere {tmp_path / 'Chiusa'}") and not finestra.albero.ItemHasChildren(altra)
+
+
+def test_aggiorna_su_questa_rete_riprova_le_cartelle_di_rete(finestra, monkeypatch):
+    # Revisione della 1.85.5: Aggiorna su Questa rete dimentica i conti di
+    # rete e le mute, come promette il manuale; i conti dei dischi restano.
+    import contatore as modulo_contatore
+
+    monkeypatch.setattr(modulo_contatore, "in_rete", lambda percorso: percorso.startswith("\\\\"))
+    conta = finestra.contatore
+    rete, disco = "\\\\box\\dati\\Video", "C:\\Musica"
+    conta.conti.update({rete: [], disco: ["C:\\Musica\\a.mp3"]})
+    conta.parziali.add(rete)
+    conta.non_risponde("\\\\box\\dati\\Backup")
+    conta.mute.add("\\\\box\\dati")
+    finestra._aggiorna_ramo(finestra.nodo_rete)
+    assert rete not in conta.conti and not conta.parziali and not conta.mute and not conta.cartelle_mute
+    assert conta.conti[disco] == ["C:\\Musica\\a.mp3"]
+
+
+def test_il_ramo_di_rete_dice_l_errore_di_windows(finestra, monkeypatch, suoni_annotati, tmp_path):
+    # Revisione della 1.85.5: un errore di rete lascia il ramo da riaprire e ne
+    # dice il testo; un errore che non e' della rete, come 1117, e' della
+    # cartella.
+    monkeypatch.setattr(modulo, "in_rete", lambda percorso: True)
+    errore = [OSError(None, "Impossibile trovare il percorso di rete", None, 53)]
+
+    def leggi_in_rete(cartella, attesa=None, fermo=None):
+        raise errore[0]
+
+    monkeypatch.setattr(modulo, "leggi_in_rete", leggi_in_rete)
+    finestra.albero.Expand(finestra.nodo_pc)
+    voce = finestra.albero.AppendItem(finestra.nodo_pc, "Box", data={"tipo": "cartella", "percorso": str(tmp_path / "Box"), "caricato": False})
+    finestra.albero.SetItemHasChildren(voce, True)
+    finestra.albero.Expand(voce)
+    assert _ultima(finestra) == f"{tmp_path / 'Box'} non risponde: Impossibile trovare il percorso di rete. Riaprendo il ramo si riprova."
+    errore[0] = OSError(None, "Errore di I/O sul dispositivo", None, 1117)
+    altra = finestra.albero.AppendItem(finestra.nodo_pc, "Guasta", data={"tipo": "cartella", "percorso": str(tmp_path / "Guasta"), "caricato": False})
+    finestra.albero.SetItemHasChildren(altra, True)
+    finestra.albero.Expand(altra)
+    assert _ultima(finestra) == f"Non riesco a leggere {tmp_path / 'Guasta'}: Errore di I/O sul dispositivo" and not finestra.albero.ItemHasChildren(altra)
+
+
+def test_aggiorna_su_un_ramo_di_rete_rifa_i_conti_delle_sorelle(finestra, monkeypatch, tmp_path):
+    # Revisione della 1.85.5: Aggiorna su un ramo di una radice lasciata
+    # perdere la fa tornare viva, e i conti parziali delle altre sue cartelle
+    # si rifanno.
+    (tmp_path / "Rete" / "Video").mkdir(parents=True)
+    monkeypatch.setattr(modulo, "in_rete", lambda percorso: True)
+    richiesti = []
+    vero_chiedi = finestra.contatore.chiedi
+    monkeypatch.setattr(finestra.contatore, "chiedi", lambda cartelle: (richiesti.extend(cartelle), vero_chiedi([]))[1])
+    radice = os.path.splitdrive(str(tmp_path))[0].lower()
+    sorella = str(tmp_path / "Rete" / "Musica")
+    finestra.contatore.mute.add(radice)
+    finestra.contatore.conti[sorella] = []
+    finestra.contatore.parziali.add(sorella)
+    finestra.albero.Expand(finestra.nodo_pc)
+    voce = finestra.albero.AppendItem(finestra.nodo_pc, "Video", data={"tipo": "cartella", "percorso": str(tmp_path / "Rete" / "Video"), "caricato": False})
+    finestra.albero.SetItemHasChildren(voce, True)
+    finestra._aggiorna_ramo(voce)
+    assert sorella in richiesti and radice not in finestra.contatore.mute and sorella not in finestra.contatore.parziali
+
+
+def test_il_cestino_rifa_i_conti_che_dimentica_restituisce(finestra, suoni_annotati, tmp_path, monkeypatch):
+    # Revisione della 1.85.5: le cartelle che dimentica torna da ricontare,
+    # quando la radice di rete torna viva, si chiedono al contatore.
+    import questo_pc
+
+    monkeypatch.setattr(questo_pc, "nel_cestino", lambda p: True)
+    monkeypatch.setattr(finestra, "_conferma", lambda domanda, titolo: True)
+    monkeypatch.setattr(finestra.contatore, "dimentica", lambda percorso, anche_sopra=True: ["\\\\box\\dati\\Musica"])
+    richiesti = []
+    monkeypatch.setattr(finestra.contatore, "chiedi", richiesti.extend)
+    (tmp_path / "Vuota").mkdir()
+    finestra.albero.Expand(finestra.nodo_pc)
+    vuota = finestra.albero.AppendItem(finestra.nodo_pc, "Vuota", data={"tipo": "cartella", "percorso": str(tmp_path / "Vuota"), "caricato": False})
+    finestra._seleziona(vuota)
+    finestra._al_cestino(vuota)
+    assert suoni_annotati[-1] == "cestino" and "\\\\box\\dati\\Musica" in richiesti
+
+
+def test_aggiorna_su_questa_rete_riconta_le_unita_di_rete_di_questo_pc(finestra, monkeypatch):
+    # Revisione della 1.85.5: le cartelle di rete aperte sotto Questo PC, come
+    # un'unita' di rete con la lettera, si ricontano dopo Aggiorna su Questa rete.
+    import contatore as modulo_contatore
+
+    monkeypatch.setattr(modulo_contatore, "in_rete", lambda percorso: percorso.startswith("Z:"))
+    richiesti = []
+    monkeypatch.setattr(finestra.contatore, "chiedi", richiesti.extend)
+    finestra.albero.Expand(finestra.nodo_pc)
+    voce = finestra.albero.AppendItem(finestra.nodo_pc, "Video", data={"tipo": "cartella", "percorso": "Z:\\Video", "caricato": True})
+    finestra.albero.AppendItem(voce, "film.mkv", data={"tipo": "attesa"})
+    finestra.contatore.conti.update({"Z:\\Video": ["Z:\\Video\\film.mkv"], "Z:\\Altro": []})
+    finestra._aggiorna_ramo(finestra.nodo_rete)
+    assert richiesti == ["Z:\\Video"] and "Z:\\Video" not in finestra.contatore.conti
+
+
+def test_f11_in_rete_aspetta_come_la_plancia(finestra, monkeypatch, tmp_path):
+    # Revisione della 1.85.5: F11 su una cartella di rete aspetta otto secondi,
+    # non tre; anche il censimento dei brani.
+    import dettagli
+
+    attese = []
+    monkeypatch.setattr(modulo.questa_rete, "raggiungibile", lambda percorso, attesa=3.0: attese.append(attesa) or False)
+    monkeypatch.setattr(modulo, "in_rete", lambda percorso: True)
+    righe = finestra._dettagli_della_cartella(str(tmp_path), False, lambda: False)
+    assert righe[-1].endswith("non risponde: la rete o il disco sono spenti, o lontani.")
+    monkeypatch.setattr(dettagli, "in_rete", lambda percorso: True)
+    assert dettagli.censisci_brani([str(tmp_path / "a.mp3")])["lontani"] == 1
+    assert attese == [modulo.questa_rete.ATTESA_IN_SOTTOFONDO] * 2 and modulo.questa_rete.ATTESA_IN_SOTTOFONDO == 8.0

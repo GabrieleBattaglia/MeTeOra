@@ -23,6 +23,9 @@ import threading
 
 # Quanto si aspetta una cartella di rete prima di dirla irraggiungibile.
 ATTESA_DELLA_RETE = 3.0
+# Quanto aspetta chi prova la rete in sottofondo, come F11: la prima lettura
+# dell'Iliadbox ne chiede quasi tre (revisione della 1.85.5).
+ATTESA_IN_SOTTOFONDO = 8.0
 
 
 def cartella_dei_percorsi():
