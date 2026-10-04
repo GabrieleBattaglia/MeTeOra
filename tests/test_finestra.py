@@ -4074,30 +4074,138 @@ def test_impostazioni_video_sottotitoli_e_sintesi(finestra, monkeypatch, suoni_a
     assert scelta.aperture[0][1][-1] == "JAWS, che adesso non risponde" and scelta.aperture[0][2] == 3
     assert _ultima(finestra) == "Sintesi di sottotitoli e karaoke non cambiata."
 
-def test_la_barra_del_tempo_della_finestra_del_video(finestra, monkeypatch):
+def _mouse_finto(barra_, posizione):
+    """Il mouse, l'orologio, la finestra attiva e i menu di una barra, finti:
+    posizione e' una lista con il punto di adesso."""
+    barra_._posizione_del_mouse = lambda: posizione[0]
+    barra_._finestra_attiva = lambda: True
+    barra_._occupata = lambda: False
+
+
+def _messaggio(barra_, messaggio, punto):
+    import ctypes
+    from ctypes import wintypes
+
+    user32 = ctypes.WinDLL("user32")
+    user32.SendMessageW.argtypes = [wintypes.HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM]
+    user32.SendMessageW(barra_.GetHandle(), messaggio, 1 if messaggio == 0x0201 else 0, (punto.y << 16) | (punto.x & 0xFFFF))
+
+
+def test_la_barra_del_tempo_della_finestra_del_video(finestra, monkeypatch, suoni_annotati):
+    # 1.88.0 (Gabriele): sopra il video la barra dei comandi, con la linea del
+    # tempo larga quasi quanto il video; un clic salta in quel punto, con il
+    # riscontro di W, e trascinando si salta dove si lascia. Il cursore di
+    # Windows di prima non c'e' piu'.
+    import barra as modulo_barra
+
     _video_finto(finestra, monkeypatch, _tracce())
     salti = []
+    durata = [120.0]
     monkeypatch.setattr(type(finestra.motore), "posizione", property(lambda _self: 30.0))
-    monkeypatch.setattr(type(finestra.motore), "durata", property(lambda _self: 120.0))
+    monkeypatch.setattr(type(finestra.motore), "durata", property(lambda _self: durata[0]))
     monkeypatch.setattr(finestra.motore, "vai_a", salti.append)
     finestra.impostazioni["video"] = True
     finestra._aggiorna_il_video()
     video = finestra._video
-    # Il mouse lontano dal bordo: la barra resta nascosta; sul bordo compare
-    # e segue il tempo.
-    monkeypatch.setattr(modulo.wx, "GetMousePosition", lambda: wx.Point(-10000, -10000))
-    video._controllo(None)
-    assert not video.barra.IsShown()
-    rettangolo = video.GetScreenRect()
-    import video as modulo_video
+    b = video.barra
+    assert isinstance(b, modulo_barra.BarraDeiComandi) and b._sopra is video and b._linea is not None
+    assert not any(isinstance(c, wx.Slider) for c in video.GetChildren())
+    assert not b.CanAcceptFocus() and b.comandi()[:7] == ["precedente", "indietro", "play", "pausa", "stop", "avanti", "successivo"]
+    video.SetClientSize(1200, 700)
+    area = b._area_della_finestra()
+    posizione = [wx.Point(area.x + area.width // 2, area.y + area.height // 3)]
+    _mouse_finto(b, posizione)
+    for passo in range(3):
+        posizione[0] = wx.Point(posizione[0].x + 4 * passo, posizione[0].y)
+        b.guarda()
+    assert b.IsShown() and b.GetClientSize().width == round(area.width * modulo_barra.LARGHEZZA_CON_IL_TEMPO)
+    linea = b._linea
+    meta = wx.Point(linea.x + linea.width // 2, linea.y + linea.height // 2)
+    # Un clic a meta' della linea, arrivato muovendosi: salta a meta' del brano.
+    _messaggio(b, 0x0200, meta - wx.Point(3, 0))
+    _messaggio(b, 0x0200, meta)
+    assert b._sul_tempo is not None
+    _messaggio(b, 0x0201, meta)
+    _messaggio(b, 0x0202, meta)
+    assert len(salti) == 1 and abs(salti[0] - 60.0) < 0.5
+    assert _ultima(finestra).startswith("Vado a 1:00 di 2:00") and suoni_annotati[-1] == "vai_a_tempo"
+    # Trascinando da un quarto a tre quarti si salta dove si lascia; intanto
+    # la barra resta, anche con il tempo che passa.
+    quarto = wx.Point(linea.x + linea.width // 4, meta.y)
+    tre_quarti = wx.Point(linea.x + linea.width * 3 // 4, meta.y)
+    _messaggio(b, 0x0201, quarto)
+    _messaggio(b, 0x0200, tre_quarti)
+    b._orologio = lambda: 10 ** 6
+    b.guarda()
+    assert b.IsShown() and b._trascinando is not None
+    _messaggio(b, 0x0202, tre_quarti)
+    assert len(salti) == 2 and abs(salti[1] - 90.0) < 0.5 and b._trascinando is None
+    # Dopo il rilascio la barra scrive il punto lasciato.
+    assert abs(b._sul_tempo - 0.75) < 0.01
+    # Un doppio clic sulla linea salta una volta sola.
+    _messaggio(b, 0x0200, meta)
+    _messaggio(b, 0x0201, meta)
+    _messaggio(b, 0x0202, meta)
+    _messaggio(b, 0x0203, meta)
+    _messaggio(b, 0x0202, meta)
+    assert len(salti) == 3
+    # Il brano che cambia durante il trascinamento: il salto non si fa.
+    _messaggio(b, 0x0201, quarto)
+    durata[0] = 300.0
+    _messaggio(b, 0x0202, tre_quarti)
+    assert len(salti) == 3
+    durata[0] = 120.0
+    # La barra nascosta a meta' trascinamento lascia il mouse, e non salta.
+    _messaggio(b, 0x0201, quarto)
+    assert b.HasCapture()
+    b.nascondi()
+    assert not b.HasCapture() and b._trascinando is None and len(salti) == 3
+    # Senza la durata, la linea non salta.
+    b._mostra()
+    durata[0] = None
+    _messaggio(b, 0x0200, meta - wx.Point(2, 0))
+    _messaggio(b, 0x0200, meta)
+    _messaggio(b, 0x0201, meta)
+    _messaggio(b, 0x0202, meta)
+    assert len(salti) == 3
+    # Chiudere MeTeOra con il mouse preso dalla linea non fa cadere wx.
+    durata[0] = 120.0
+    _messaggio(b, 0x0200, meta - wx.Point(2, 0))
+    _messaggio(b, 0x0200, meta)
+    _messaggio(b, 0x0201, meta)
+    assert b.HasCapture()
+    finestra.Close(force=True)
+    assert not b.HasCapture()
 
-    monkeypatch.setattr(modulo_video.wx, "GetMousePosition", lambda: wx.Point(rettangolo.x + 5, rettangolo.GetBottom() - 1))
-    video._controllo(None)
-    assert video.barra.IsShown() and video.barra.GetValue() == 250
-    # Lasciata a meta', salta a meta' del brano.
-    video.barra.SetValue(500)
-    video._lascia(wx.ScrollEvent())
-    assert salti == [60.0]
+
+def test_la_barra_del_video_e_quella_principale_non_si_incontrano(finestra, monkeypatch):
+    # 1.88.0: ognuna compare solo quando la sua finestra e' attiva.
+    _video_finto(finestra, monkeypatch, _tracce())
+    finestra.impostazioni["video"] = True
+    finestra._aggiorna_il_video()
+    principale, video = finestra.barra, finestra._video.barra
+    area = principale._area_della_finestra()
+    posizione = [wx.Point(area.x + area.width // 2, area.y + area.height // 3)]
+    attiva = ["video"]
+    for b, nome in ((principale, "principale"), (video, "video")):
+        _mouse_finto(b, posizione)
+        b._finestra_attiva = lambda nome=nome: attiva[0] == nome
+
+    def muovi():
+        for passo in range(3):
+            posizione[0] = wx.Point(posizione[0].x + 3 + passo, posizione[0].y)
+            principale.guarda()
+            video.guarda()
+
+    muovi()
+    assert video.IsShown() and not principale.IsShown()
+    attiva[0] = "principale"
+    muovi()
+    assert principale.IsShown() and not video.IsShown()
+    # La voce delle impostazioni le spegne tutte e due.
+    finestra._applica_l_impostazione("barra_dei_comandi", False)
+    assert not principale._timer.IsRunning() and not video._timer.IsRunning()
+    assert not principale.IsShown() and not video.IsShown()
 
 
 def _rete_finta(finestra, monkeypatch, tmp_path):

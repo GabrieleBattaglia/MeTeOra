@@ -1,4 +1,4 @@
-Collaudo di MeTeOra 1.87.0, con NVDA: Maiuscolo con F12, i tasti rapidi spenti e accesi; la barra dei comandi per il mouse. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.87.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Collaudo di MeTeOra 1.88.0, con NVDA: Maiuscolo con F12, i tasti rapidi spenti e accesi; la barra dei comandi per il mouse, anche sopra il video con la linea del tempo. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.88.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
 Apri un ramo grande, per esempio una cartella di E:\Music, e premi Maiuscolo con F12: due note che scendono, e la console dice Tasti rapidi spenti.
 Scrivi l'iniziale di una voce, per esempio a: il fuoco salta alla prima voce che comincia con a, e NVDA la legge.
 Trovata una voce, premi Invio: il menu è proprio di quella voce, non di quella da cui sei partito.
@@ -17,3 +17,8 @@ Con la navigazione a oggetti di NVDA nella finestra, a barra nascosta, non trovi
 Se qualcuno che vede può aiutarti: muovendo il mouse compare la barra in basso al centro, e sparisce dopo tre secondi di mouse fermo.
 Un clic su Pausa: senti il suono della pausa, la console lo dice, e NVDA non annuncia nessun cambio di fuoco.
 Nelle impostazioni, Barra dei comandi per il mouse, scrivi no: la barra non compare più; poi rimetti sì.
+Video, con qualcuno che vede: muovendo il mouse sopra il video compare la barra, con la linea del tempo sopra i pulsanti, in finestra e a schermo intero (Maiuscolo con F5).
+Un clic a metà della linea: il video salta a metà, e la console dice Vado a, come W.
+Trascinando il pallino della linea e lasciandolo, il video salta dove lo si lascia.
+Con la barra del video visibile, la barra della finestra principale non c'è; tornati nella finestra principale con F5, compare solo la sua.
+Con NVDA, la finestra del video davanti: Tab e i tasti funzionano come prima, e muovendo il mouse NVDA non dice niente.

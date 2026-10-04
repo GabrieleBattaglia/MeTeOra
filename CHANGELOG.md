@@ -2,6 +2,13 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.88.0] - 2026-10-04
+
+- La barra dei comandi per il mouse anche sopra il video, in finestra e a schermo intero, chiesta da Gabriele, con in più la linea del tempo, larga quasi quanto il video: un clic salta in quel punto, trascinando si salta dove si lascia, e la console lo dice come per W. Sotto, con il puntatore sulla linea, la barra scrive il tempo a cui si salterebbe.
+- Prende il posto del cursore del tempo di prima, un cursore di Windows: al clic avanzava a passi invece di saltare, toglieva spazio al video quando compariva, e prendeva il fuoco quando lo si cliccava.
+- Le due barre non si incontrano mai: ciascuna compare solo quando la sua finestra è attiva. La voce Barra dei comandi per il mouse delle impostazioni le spegne tutte e due.
+- Dalla revisione prima della pubblicazione: un doppio clic sulla linea salta una volta sola; se il brano cambia mentre si trascina, il salto non si fa; dopo il rilascio la barra scrive il punto lasciato; chiudere MeTeOra mentre si trascina non fa più cadere wx; la barra del video guarda il mouse solo a video aperto.
+
 ## [1.87.0] - 2026-10-04
 
 - La barra dei comandi per il mouse, chiesta da Gabriele per chi vede: compare in basso al centro quando il mouse si muove sopra MeTeOra, come nei lettori più diffusi, e sparisce dopo tre secondi di mouse fermo o quando il puntatore esce. Ha i pulsanti della riproduzione, del volume, della velocità e del tono, con i simboli dei font di Windows, e sotto scrive il nome e il tasto del pulsante indicato; ogni pulsante fa quello che fa il suo tasto.

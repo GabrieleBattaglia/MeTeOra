@@ -1,6 +1,6 @@
 # MeTeOra, i valori scritti nei campi delle impostazioni: dal testo al valore, con le correzioni dette a chi scrive.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); leggi_tempo e secondi_da_leggere arrivano da finestra.py. Nella 1.51.2 leggi_tempo accetta solo le cifre: prima passavano inf e 1e5. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza, con i loro limiti e le loro forme da leggere (tappa 4, issue 15). Nella 1.59.2 velocita' e dissolvenza si scrivono con il punto, come il resto di MeTeOra. Nella 1.60.0 leggi_tempo_nel_brano, per W, anche dalla fine. Nella 1.61.0 i modelli della riproduzione casuale. Nella 1.82.0 l'anticipo del karaoke. Nella 1.83.0 le celle della barra braille e il tempo minimo di lettura.
+# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); leggi_tempo e secondi_da_leggere arrivano da finestra.py. Nella 1.51.2 leggi_tempo accetta solo le cifre: prima passavano inf e 1e5. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza, con i loro limiti e le loro forme da leggere (tappa 4, issue 15). Nella 1.59.2 velocita' e dissolvenza si scrivono con il punto, come il resto di MeTeOra. Nella 1.60.0 leggi_tempo_nel_brano, per W, anche dalla fine. Nella 1.61.0 i modelli della riproduzione casuale. Nella 1.82.0 l'anticipo del karaoke. Nella 1.83.0 le celle della barra braille e il tempo minimo di lettura. Nella 1.88.0 tempo() arriva da finestra.py, per la linea del tempo della barra.
 
 """I valori delle impostazioni, letti dal testo scritto nei campi.
 
@@ -140,6 +140,16 @@ def leggi_tempo_nel_brano(testo, durata):
     if secondi is None or secondi < 0 or (durata is not None and secondi > durata):
         return None
     return secondi
+
+
+def tempo(secondi):
+    """m:ss, oppure h:mm:ss oltre l'ora; ? se non si sa."""
+    if secondi is None:
+        return "?"
+    secondi = max(0, int(secondi))
+    ore, resto = divmod(secondi, 3600)
+    minuti, secondi = divmod(resto, 60)
+    return f"{ore}:{minuti:02d}:{secondi:02d}" if ore else f"{minuti}:{secondi:02d}"
 
 
 def secondi_da_leggere(secondi):
