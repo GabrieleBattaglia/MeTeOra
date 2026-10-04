@@ -1,4 +1,4 @@
-Collaudo di MeTeOra 1.86.0, con NVDA: Maiuscolo con F12, i tasti rapidi spenti e accesi. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.86.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Collaudo di MeTeOra 1.87.0, con NVDA: Maiuscolo con F12, i tasti rapidi spenti e accesi; la barra dei comandi per il mouse. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.87.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
 Apri un ramo grande, per esempio una cartella di E:\Music, e premi Maiuscolo con F12: due note che scendono, e la console dice Tasti rapidi spenti.
 Scrivi l'iniziale di una voce, per esempio a: il fuoco salta alla prima voce che comincia con a, e NVDA la legge.
 Trovata una voce, premi Invio: il menu è proprio di quella voce, non di quella da cui sei partito.
@@ -10,3 +10,10 @@ F7 con i tasti spenti: il cruscotto dice per primo Tasti rapidi spenti.
 F5, F8, F12, Backspace e Spazio funzionano anche con i tasti spenti.
 Maiuscolo con F12 di nuovo: tre note che salgono, la console dice Tasti rapidi accesi, e X suona.
 Spegni i tasti, esci con Esc e riapri MeTeOra: i tasti rapidi sono accesi.
+Barra per il mouse, con NVDA: muovi il mouse, o il touchpad, sopra MeTeOra: NVDA non dice niente, e il fuoco resta dov'era.
+Tab e Maiuscolo con Tab passano ancora solo fra plancia, console e cruscotto.
+F7, poi NVDA con la barra del tastierino porta il mouse sul cruscotto, e il tasto barra del tastierino fa clic: il clic va al cruscotto, niente Muto, niente barra.
+Con la navigazione a oggetti di NVDA nella finestra, a barra nascosta, non trovi niente di nuovo.
+Se qualcuno che vede può aiutarti: muovendo il mouse compare la barra in basso al centro, e sparisce dopo tre secondi di mouse fermo.
+Un clic su Pausa: senti il suono della pausa, la console lo dice, e NVDA non annuncia nessun cambio di fuoco.
+Nelle impostazioni, Barra dei comandi per il mouse, scrivi no: la barra non compare più; poi rimetti sì.

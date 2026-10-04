@@ -56,6 +56,9 @@ PREDEFINITE = {
     "volume_effetti": 0.5,
     # Maiuscolo+F8: la selezione della plancia segue il brano che suona.
     "insegui": False,
+    # La barra dei comandi per il mouse, per chi vede (1.87.0): accesa di
+    # partenza, perche' a chi usa la tastiera non da' niente.
+    "barra_dei_comandi": True,
     # Maiuscolo con N: quando un brano finisce da solo, il seguente si sceglie
     # a caso (issue 17).
     "casuale": False,

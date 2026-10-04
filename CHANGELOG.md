@@ -2,6 +2,12 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.87.0] - 2026-10-04
+
+- La barra dei comandi per il mouse, chiesta da Gabriele per chi vede: compare in basso al centro quando il mouse si muove sopra MeTeOra, come nei lettori più diffusi, e sparisce dopo tre secondi di mouse fermo o quando il puntatore esce. Ha i pulsanti della riproduzione, del volume, della velocità e del tono, con i simboli dei font di Windows, e sotto scrive il nome e il tasto del pulsante indicato; ogni pulsante fa quello che fa il suo tasto.
+- Senza nessun costo per chi usa lo screen reader: la barra è una finestrella che Windows non attiva mai e che non prende il fuoco, nemmeno al clic, non si raggiunge con Tab, non usa i suggerimenti di Windows, e nascosta per Windows non c'è. La voce Barra dei comandi per il mouse delle impostazioni, accesa di partenza, la spegne del tutto.
+- Dalla revisione prima della pubblicazione: la barra compare solo con un movimento vero del mouse e mai sotto il puntatore, e un pulsante risponde solo al puntatore arrivato muovendosi, così il mouse che NVDA porta sul cruscotto non la fa comparire e il clic di NVDA non finisce su Muto; al ritorno in MeTeOra, dopo Alt con Tab o un dialogo, il mouse fermo non la mostra; sparisce con un menu aperto e mentre la finestra si sposta, e segue la finestra ridimensionata; la barra del titolo di MeTeOra non resta disegnata attiva; per NVDA si chiama Barra dei comandi per il mouse.
+
 ## [1.86.0] - 2026-10-04
 
 - Maiuscolo con F12 spegne e riaccende i tasti rapidi a carattere, chiesto da Gabriele: spenti, lettere, cifre e segni, anche con il Maiuscolo, vanno alla plancia, che come ogni albero di Windows salta alla voce che comincia con ciò che scrivi, utile in un ramo grande. Restano i tasti funzione, Esc, Ctrl con la barra rovesciata, e nella plancia Backspace, Spazio, Invio e Canc.

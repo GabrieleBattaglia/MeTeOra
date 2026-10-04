@@ -2710,6 +2710,7 @@ def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_an
         ("caratteri", "Dimensioni dei caratteri: quelle di Windows"),
         ("colori_testo", "Colori dei caratteri: quelli di Windows"),
         ("colori_sfondo", "Colori dello sfondo: quelli di Windows"),
+        ("barra_dei_comandi", "Barra dei comandi per il mouse: sì"),
         ("righe_della_console", "Righe della console: 2000"),
         ("salva_console", "Salva console: scrive la console in un file di testo"),
         ("marcatori", "Marcatori: nessuno"),

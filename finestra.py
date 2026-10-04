@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura. Nella 1.83.1 Maiuscolo con F10 lascia chiuso Questo PC, e la plancia molto aperta non ferma piu' la finestra. Nella 1.83.2 F10 a fette, e i suoni delle aperture che non si sovrappongono. Nella 1.84.0 la proposta dell'aggiornamento, il suo avanzamento e la chiusura per aggiornarsi. Nella 1.85.0 i crediti con la licenza e le licenze dei componenti. Nella 1.85.5 i rami di rete che si riprovano sempre. Nella 1.86.0 Maiuscolo con F12 spegne e riaccende i tasti rapidi a carattere.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura. Nella 1.83.1 Maiuscolo con F10 lascia chiuso Questo PC, e la plancia molto aperta non ferma piu' la finestra. Nella 1.83.2 F10 a fette, e i suoni delle aperture che non si sovrappongono. Nella 1.84.0 la proposta dell'aggiornamento, il suo avanzamento e la chiusura per aggiornarsi. Nella 1.85.0 i crediti con la licenza e le licenze dei componenti. Nella 1.85.5 i rami di rete che si riprovano sempre. Nella 1.86.0 Maiuscolo con F12 spegne e riaccende i tasti rapidi a carattere. Nella 1.87.0 la barra dei comandi per il mouse.
 
 """La finestra di MeTeOra.
 
@@ -67,6 +67,7 @@ import suoni
 import tag
 import valori
 import version
+from barra import BarraDeiComandi
 from contatore import Contatore
 from dialoghi import (
     DialogoConferma,
@@ -338,6 +339,7 @@ VOCI_DELLE_IMPOSTAZIONI = {
     "caratteri": ("Dimensioni dei caratteri", "cambiate"),
     "colori_testo": ("Colori dei caratteri", "cambiati"),
     "colori_sfondo": ("Colori dello sfondo", "cambiati"),
+    "barra_dei_comandi": ("Barra dei comandi per il mouse", "cambiata"),
     "righe_della_console": ("Righe della console", "cambiate"),
     "salva_console": ("Salva console", None),
     "marcatori": ("Marcatori", None),
@@ -834,6 +836,9 @@ class Finestra(wx.Frame):
         self.Bind(wx.EVT_CHAR_HOOK, self._tasto)
         self.Bind(wx.EVT_CLOSE, self._alla_chiusura)
         self.Bind(wx.EVT_ACTIVATE, self._all_attivazione)
+        # La barra dei comandi per il mouse, per chi vede (Gabriele, 1.87.0):
+        # non prende mai il fuoco e non e' nell'ordine di tabulazione.
+        self.barra = BarraDeiComandi(self, acceso=self.impostazioni["barra_dei_comandi"])
         self.scrivi(f"MeTeOra {version.VERSION} del {version.DATE}. Pronto: F1 apre il manuale nel browser, F12 scrive nella console la guida rapida dei tasti, F7 apre il cruscotto con i tasti del punto in cui ti trovi.")
         # Dopo un aggiornamento la versione e' cambiata: lo si dice (1.84.0).
         prima = self.impostazioni["versione"]
@@ -4930,6 +4935,7 @@ class Finestra(wx.Frame):
             "caratteri": self._caratteri_da_leggere,
             "colori_testo": lambda: self._colori_da_leggere("colori_testo"),
             "colori_sfondo": lambda: self._colori_da_leggere("colori_sfondo"),
+            "barra_dei_comandi": lambda: "sì" if imp["barra_dei_comandi"] else "no",
             "righe_della_console": lambda: str(imp["righe_della_console"]),
             "salva_console": lambda: "scrive la console in un file di testo",
             "marcatori": self._marcatori_da_leggere,
@@ -5090,6 +5096,13 @@ class Finestra(wx.Frame):
                 "Con i sottotitoli letti accesi, ogni sottotitolo dei video va alla sintesi scelta qui sotto e si scrive nella console, anche con il video spento.",
                 "Scrivi sì per accenderli, no per spegnerli; valgono anche s, n, 1, 0, acceso e spento. Maiuscolo con F2 li accende e sceglie la traccia, a giro.",
                 f"Adesso sono {'accesi' if imp['sottotitoli'] else 'spenti'}.", REGOLA_DEL_DOLLARO], "sì" if imp["sottotitoli"] else "no"
+        if chiave == "barra_dei_comandi":
+            return valori.leggi_si_no, [
+                "Per chi vede: con la barra accesa, quando il mouse si muove sopra MeTeOra compare in basso una barra con i comandi della riproduzione, "
+                "del volume, della velocità e del tono; sparisce dopo qualche secondo di mouse fermo.",
+                "Non prende mai il fuoco e non si raggiunge con Tab: con la tastiera e lo screen reader non cambia niente.",
+                "Scrivi sì per accenderla, no per spegnerla; valgono anche s, n, 1, 0, acceso e spento.",
+                f"Adesso è {'accesa' if imp['barra_dei_comandi'] else 'spenta'}.", REGOLA_DEL_DOLLARO], "sì" if imp["barra_dei_comandi"] else "no"
         if chiave == "insegui":
             return valori.leggi_si_no, [
                 "Con l'inseguimento agganciato, a ogni cambio di brano la selezione della plancia va da sola su ciò che suona, senza spostare il fuoco.",
@@ -5178,6 +5191,11 @@ class Finestra(wx.Frame):
                 self.motore.scegli_traccia("sid", "no")
             self._aggiorna_il_video()
             return "Sottotitoli letti accesi." if valore else "Sottotitoli letti spenti."
+        if chiave == "barra_dei_comandi":
+            self.barra.accendi(valore)
+            if valore:
+                return "Barra dei comandi per il mouse accesa: compare quando il mouse si muove sopra MeTeOra."
+            return "Barra dei comandi per il mouse spenta."
         if chiave == "insegui":
             if not valore:
                 return "Inseguimento sganciato: la selezione resta dove la lasci."
@@ -6973,6 +6991,7 @@ class Finestra(wx.Frame):
             evento.Skip()
             return
         self._chiusa = True
+        self.barra.ferma()
         self._braille.svuota()
         if self._ricerca is not None:
             self._ricerca.ferma()

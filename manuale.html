@@ -77,6 +77,7 @@ kbd {
 <li><a href="#plancia">La plancia dei comandi</a></li>
 <li><a href="#console">La console</a></li>
 <li><a href="#cruscotto">Il cruscotto</a></li>
+<li><a href="#barra-mouse">La barra dei comandi per il mouse</a></li>
 <li><a href="#tasti-ovunque">I tasti in tutta la finestra</a></li>
 <li><a href="#esempi-finestra">Esempi</a></li>
 </ul></li>
@@ -543,6 +544,9 @@ kbd {
 <h3 id="cruscotto">Il cruscotto</h3>
 <p>Il cruscotto, F7, mostra i tasti del punto da cui sei arrivato. Da una voce della plancia elenca i tasti di quella voce e del suo menu; da più voci selezionate, i tasti della selezione; dalla console, quelli della console. Sotto vengono le righe dei tasti che valgono ovunque. Se torni dallo stesso punto il cursore resta dove l'avevi lasciato; F7 premuto nel cruscotto lo rinfresca.</p>
 <p>Il cruscotto non ha tasti suoi: valgono tutti quelli generali, e la barra rovesciata, da lì, cerca nel ramo della plancia, non nel cruscotto. È alto cinque righe, ma di solito non occupa più di un terzo della finestra: con caratteri molto grandi ne mostra meno e scorre, così plancia e console restano visibili; due righe però le tiene sempre.</p>
+<h3 id="barra-mouse">La barra dei comandi per il mouse</h3>
+<p>Per chi vede, e usa il mouse, MeTeOra ha una barra con i comandi principali. Compare in basso, al centro della finestra, quando il mouse si muove sopra MeTeOra, se MeTeOra è la finestra attiva, come nei lettori più diffusi; sparisce dopo tre secondi di mouse fermo, o quando il puntatore esce dalla finestra, ma resta finché il puntatore ci sta sopra. Ha quattro gruppi di pulsanti, con i simboli di Windows: la riproduzione, cioè brano precedente, indietro, suona, pausa, stop, avanti e brano successivo; il volume, cioè giù, muto e su; la velocità e il tono, ciascuno con giù, normale e su. Sotto i pulsanti, la barra scrive il nome e il tasto di quello su cui sta il puntatore, per esempio Pausa, tasto C. Ogni pulsante fa esattamente quello che fa il suo tasto, con gli stessi suoni e le stesse righe nella console.</p>
+<p>Con la tastiera e lo screen reader la barra non cambia niente: non prende mai il fuoco, nemmeno quando la si clicca, non si raggiunge con Tab, e quando è nascosta per Windows non c'è. Compare solo con un movimento vero del mouse, mai sotto il puntatore, e un suo pulsante risponde solo al puntatore arrivato lì muovendosi: il mouse che NVDA porta su un oggetto fa un salto solo, quindi la barra non compare e il clic di NVDA va dove deve. Con un menu aperto, o mentre la finestra si sposta, sparisce. La voce Barra dei comandi per il mouse delle impostazioni la spegne del tutto.</p>
 <h3 id="tasti-ovunque">I tasti in tutta la finestra</h3>
 <p>Tutti i tasti funzionano in tutta la finestra, qualunque area abbia il fuoco: dalla console si può mettere in pausa, cambiare il volume o aprire il filtro. Fanno eccezione i tasti propri della plancia, come Invio, Canc, Backspace, le frecce e la barra spaziatrice, e Invio della console. Le lettere valgono anche nella plancia, dove per questo non si salta alle voci digitandone l'iniziale.</p>
 <p>Un tasto a lettera o un segno senza comando, premuto da solo o con Maiuscolo, lo dice con un suono, per esempio Il tasto apostrofo non ha un comando, o Maiuscolo+A non ha un comando, e il fuoco resta dov'è. Altri tasti passano a Windows in silenzio: Ctrl e Alt con le lettere e le cifre, tranne Ctrl con la barra rovesciata; Maiuscolo con F4, F7, F9 e F12; i caratteri scritti con AltGr, che nella plancia si fermano senza nessun riscontro. Il tastierino numerico resta a NVDA: nemmeno il più e il meno del tastierino cambiano il volume.</p>
@@ -1333,6 +1337,8 @@ kbd {
 <li>Il campo parte con i colori di adesso, scritti nello stesso modo.</li>
 </ul>
 <p>Le etichette delle tre aree, Plancia dei comandi, Console e Cruscotto, non cambiano.</p>
+<h4>Barra dei comandi per il mouse</h4>
+<p>Sì o no: la barra che compare quando il mouse si muove sopra MeTeOra, descritta nel capitolo La finestra. Di partenza è accesa; spenta, non compare più.</p>
 <h4>Righe della console</h4>
 <p>Quante righe tiene la console, da 100 in su, duemila se non lo cambi; un numero sotto 100 diventa 100, e la console lo dice. Un numero più basso di prima toglie subito le righe più vecchie.</p>
 <h4>Salva console</h4>
