@@ -13,12 +13,12 @@
  "percorsi_di_rete": [],
  "banco_midi": "E:\\VstPlugins\\SF2 Instruments\\FluidR3 GM.sf2",
  "ripresa": {
-  "percorso": "E:\\Audio\\Belgio 2004\\DM-10032.mp3",
+  "percorso": "E:\\13 ilbarzellettiere\\F\\002 favole\\007 bianca neve e i sette nani.mp3",
   "sottobrano": null,
-  "numero": 14,
+  "numero": null,
   "posizione": 0,
   "tipo": "cartella",
-  "cartella": "E:\\Audio\\Belgio 2004"
+  "cartella": "E:\\13 ilbarzellettiere\\F\\002 favole"
  },
  "righe_della_console": 2000,
  "caratteri": {},
@@ -57,7 +57,7 @@
   ]
  },
  "scheda_audio": {},
- "velocita": 1.0,
+ "velocita": 1.15,
  "tono": 0,
  "bande": [
   0,
@@ -69,7 +69,7 @@
   0
  ],
  "dissolvenza": {
-  "accesa": false,
-  "secondi": 7.0
+  "accesa": true,
+  "secondi": 3.0
  }
 }
