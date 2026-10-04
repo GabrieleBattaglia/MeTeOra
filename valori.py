@@ -88,6 +88,13 @@ RIPETIZIONI = {
     "brano": "del brano",
     "lista": "della lista",
 }
+# Il volume uniforme con ReplayGain (1.96.0): il nome salvato nelle
+# impostazioni e la forma da leggere.
+VOLUMI_UNIFORMI = {
+    "spento": "spento",
+    "brano": "per brano",
+    "album": "per album",
+}
 # Le parole che accendono e spengono la dissolvenza: quelle del si' e del no,
 # senza le cifre, che li' sono secondi, e anche al femminile.
 _ACCESA = frozenset(parola for parola in SI if not parola.isdigit()) | {"accesa"}

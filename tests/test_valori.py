@@ -643,7 +643,7 @@ def test_predefinite_della_tappa_4():
 
 
 def test_carica_i_valori_buoni(tmp_path):
-    buoni = {"volume": 300, "passo_volume": 50, "passo_indietro": 0.1, "passo_avanti": 0.23, "volume_effetti": 1, "insegui": True, "casuale": True, "modello_casuale": "totale", "ripetizione": "lista", "video": True, "sottotitoli": True, "sintesi": "nvda", "impressi": "passata", "impressi_scelti": True, "destinazione": "braille", "karaoke": "strofa", "anticipo_karaoke": 10000, "celle_braille": 160, "lettura_minima": 100, "versione": "1.83.3", "barra_dei_comandi": False, "ripresa_oltre": 30, "banco_midi": "C:\\banchi\\FluidR3_GM.sf2", "percorsi_di_rete": ["\\\\server\\musica"],
+    buoni = {"volume": 300, "passo_volume": 50, "passo_indietro": 0.1, "passo_avanti": 0.23, "volume_effetti": 1, "insegui": True, "casuale": True, "modello_casuale": "totale", "ripetizione": "lista", "replaygain": "album", "video": True, "sottotitoli": True, "sintesi": "nvda", "impressi": "passata", "impressi_scelti": True, "destinazione": "braille", "karaoke": "strofa", "anticipo_karaoke": 10000, "celle_braille": 160, "lettura_minima": 100, "versione": "1.83.3", "barra_dei_comandi": False, "ripresa_oltre": 30, "banco_midi": "C:\\banchi\\FluidR3_GM.sf2", "percorsi_di_rete": ["\\\\server\\musica"],
         "ripresa": {"percorso": "x"}, "righe_della_console": 100, "caratteri": {"p": 6, "t": 72}, "colori_testo": {"c": [0, 100, 50]},
         "colori_sfondo": {"p": [31, 31, 31], "c": [100, 100, 100], "t": [0, 0, 0]},
         "scheda_audio": {"dispositivo": "Altoparlanti (Realtek(R) Audio)", "interfaccia": "Windows WASAPI"},

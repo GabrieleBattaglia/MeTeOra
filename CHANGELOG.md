@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.96.0] - 2026-10-04
+
+- Il volume uniforme, tappa 12 e del piano: la voce Volume uniforme (ReplayGain) delle impostazioni, spenta di partenza come deciso da Gabriele, porta allo stesso volume i file con i tag ReplayGain, per brano o per album. La legge libmpv, e vale subito, anche per il brano in corso.
+
 ## [1.95.0] - 2026-10-04
 
 - Il timer di spegnimento, tappa 12 e del piano: Maiuscolo con S, il tasto scelto da Gabriele, chiede fra quanti minuti fermare la riproduzione, da 1 a 600, oppure f per la fine del brano, o 0 per togliere il timer. Allo scadere la musica sfuma per venti secondi, sempre, anche con la dissolvenza spenta, e si ferma; alla fine del brano il seguente non parte. Tre suoni nuovi dalla collezione di GBUtils (V198).

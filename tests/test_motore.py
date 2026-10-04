@@ -1202,3 +1202,30 @@ def test_l_attenuazione_abbassa_senza_toccare_il_volume(crea, tmp_path):
     m.attenuazione = 2
     assert m.attenuazione == 1.0
     assert _aspetta(lambda: abs(m._attivo.mpv.volume - 60) < 0.5)
+
+
+def _con_il_replaygain(percorso):
+    """I tag ReplayGain in un WAV, come ID3: -12 dB il brano, -6 l'album."""
+    from mutagen.id3 import TXXX
+    from mutagen.wave import WAVE
+
+    wav = WAVE(str(percorso))
+    wav.add_tags()
+    wav.tags.add(TXXX(encoding=3, desc="REPLAYGAIN_TRACK_GAIN", text=["-12.00 dB"]))
+    wav.tags.add(TXXX(encoding=3, desc="REPLAYGAIN_ALBUM_GAIN", text=["-6.00 dB"]))
+    wav.save()
+    return percorso
+
+
+@pytest.mark.parametrize(("scelta", "picco"), [("spento", 0.25), ("brano", 0.25 * 10 ** (-12 / 20)), ("album", 0.25 * 10 ** (-6 / 20)), ("tutto", 0.25)])
+def test_il_volume_uniforme_legge_i_tag(crea, tmp_path, scelta, picco):
+    # 1.96.0: il ReplayGain dei tag, per brano o per album; una scelta che
+    # non c'e' vale spento.
+    seno = _con_il_replaygain(_seno(tmp_path / "seno.wav", 1))
+    uscita, opzioni = _su_file(tmp_path)
+    m = crea(ao="pcm", volume=100, opzioni_mpv=opzioni)
+    m.replaygain = scelta
+    assert m.replaygain == (scelta if scelta in modulo.REPLAYGAIN_DI_MPV else "spento")
+    m.suona(seno)
+    x = _uscito_alla_fine(m, uscita)
+    assert abs(np.abs(x).max() - picco) < 0.01

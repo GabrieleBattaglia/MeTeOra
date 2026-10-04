@@ -47,3 +47,5 @@ Maiuscolo con S di nuovo prima che scada: la domanda dice fra quanto scade e a c
 Mentre sfuma, premi X su un brano: suona al volume pieno, e il timer non c'è più.
 Maiuscolo con S, scrivi f: il brano arriva in fondo e il seguente non parte, anche con la dissolvenza accesa.
 Maiuscolo con S, scrivi 0: il timer si toglie.
+Impostazioni, Volume uniforme (ReplayGain), per brano, con un brano che ha i tag ReplayGain mentre suona: il volume cambia subito.
+Riproduzione casuale fra dischi diversi, con i tag e il volume uniforme per brano: i salti di volume spariscono.

@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura. Nella 1.83.1 Maiuscolo con F10 lascia chiuso Questo PC, e la plancia molto aperta non ferma piu' la finestra. Nella 1.83.2 F10 a fette, e i suoni delle aperture che non si sovrappongono. Nella 1.84.0 la proposta dell'aggiornamento, il suo avanzamento e la chiusura per aggiornarsi. Nella 1.85.0 i crediti con la licenza e le licenze dei componenti. Nella 1.85.5 i rami di rete che si riprovano sempre. Nella 1.86.0 Maiuscolo con F12 spegne e riaccende i tasti rapidi a carattere. Nella 1.87.0 la barra dei comandi per il mouse. Nella 1.88.0 anche sopra il video, con la linea del tempo. Nella 1.88.1 F2 scrive solo le versioni recenti. Nella 1.89.0 i problemi interni anche nel registro degli errori. Nella 1.90.0 le copie dei dati che non riescono. Nella 1.91.0 i file aperti da Windows, il trascinamento e le associazioni dei formati. Nella 1.92.0 i file lunghi riprendono dal punto lasciato. Nella 1.93.0 i capitoli, con virgola e punto e nella plancia. Nella 1.94.0 la ripetizione del brano e della lista, con Maiuscolo con V. Nella 1.95.0 il timer di spegnimento, con Maiuscolo con S.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura. Nella 1.83.1 Maiuscolo con F10 lascia chiuso Questo PC, e la plancia molto aperta non ferma piu' la finestra. Nella 1.83.2 F10 a fette, e i suoni delle aperture che non si sovrappongono. Nella 1.84.0 la proposta dell'aggiornamento, il suo avanzamento e la chiusura per aggiornarsi. Nella 1.85.0 i crediti con la licenza e le licenze dei componenti. Nella 1.85.5 i rami di rete che si riprovano sempre. Nella 1.86.0 Maiuscolo con F12 spegne e riaccende i tasti rapidi a carattere. Nella 1.87.0 la barra dei comandi per il mouse. Nella 1.88.0 anche sopra il video, con la linea del tempo. Nella 1.88.1 F2 scrive solo le versioni recenti. Nella 1.89.0 i problemi interni anche nel registro degli errori. Nella 1.90.0 le copie dei dati che non riescono. Nella 1.91.0 i file aperti da Windows, il trascinamento e le associazioni dei formati. Nella 1.92.0 i file lunghi riprendono dal punto lasciato. Nella 1.93.0 i capitoli, con virgola e punto e nella plancia. Nella 1.94.0 la ripetizione del brano e della lista, con Maiuscolo con V. Nella 1.95.0 il timer di spegnimento, con Maiuscolo con S. Nella 1.96.0 il volume uniforme con ReplayGain.
 
 """La finestra di MeTeOra.
 
@@ -291,6 +291,11 @@ def _frase_della_casuale(accesa, modello):
 TIMER_PROPOSTO = 30
 SFUMATURA_DEL_TIMER = 20.0
 PASSO_DELLA_SFUMATURA = 100
+FRASI_DEL_VOLUME_UNIFORME = {
+    "spento": "Volume uniforme spento: ogni file suona con il volume con cui è registrato.",
+    "brano": "Volume uniforme per brano: i file con i tag ReplayGain suonano tutti allo stesso volume.",
+    "album": "Volume uniforme per album: ogni disco con i tag ReplayGain suona allo stesso volume, e dentro il disco restano le differenze volute.",
+}
 FRASI_DELLA_RIPETIZIONE = {
     "spenta": "Ripetizione spenta.",
     "brano": "Ripetizione del brano: quando finisce, ricomincia.",
@@ -355,6 +360,7 @@ VOCI_DELLE_IMPOSTAZIONI = {
     "volume": ("Volume della musica", "cambiato"),
     "passo_volume": ("Passo del volume", "cambiato"),
     "volume_effetti": ("Volume degli effetti", "cambiato"),
+    "replaygain": ("Volume uniforme (ReplayGain)", "cambiato"),
     "scheda_audio": ("Scheda audio", "cambiata"),
     "passo_indietro": ("Salto indietro di Q", "cambiato"),
     "passo_avanti": ("Salto avanti di E", "cambiato"),
@@ -5154,6 +5160,7 @@ class Finestra(wx.Frame):
         self.motore.velocita = imp["velocita"]
         self.motore.tono = imp["tono"]
         self.motore.bande = imp["bande"]
+        self.motore.replaygain = imp["replaygain"]
         self._applica_la_dissolvenza()
         self._applica_il_banco()
         self._applica_il_karaoke()
@@ -5385,6 +5392,7 @@ class Finestra(wx.Frame):
             "volume": lambda: str(imp["volume"]),
             "passo_volume": lambda: str(imp["passo_volume"]),
             "volume_effetti": lambda: f"{round(imp['volume_effetti'] * 100)}%",
+            "replaygain": lambda: valori.VOLUMI_UNIFORMI[imp["replaygain"]],
             "scheda_audio": self._scheda_da_leggere,
             "passo_indietro": lambda: valori.scrivi_durata(imp["passo_indietro"]),
             "passo_avanti": lambda: valori.scrivi_durata(imp["passo_avanti"]),
@@ -5451,6 +5459,7 @@ class Finestra(wx.Frame):
             "scheda_audio": self._scegli_la_scheda_audio,
             "modello_casuale": self._scegli_il_modello_casuale,
             "ripetizione": lambda genitore: self._scegli_da_una_lista(genitore, "ripetizione", valori.RIPETIZIONI, _frase_della_ripetizione),
+            "replaygain": self._scegli_il_volume_uniforme,
             "sintesi": self._scegli_la_sintesi,
             "banco_midi": self._scegli_il_banco,
             "salva_console": lambda _genitore: self._salva_console(),
@@ -6404,6 +6413,12 @@ class Finestra(wx.Frame):
         if chiave != "sintesi" and effettiva is not None and effettiva not in sintesi.CON_IL_BRAILLE:
             frase += f" Con {sintesi.nome(effettiva)}, il braille non arriva: ce l'hanno NVDA e JAWS."
         return frase
+
+    def _scegli_il_volume_uniforme(self, genitore):
+        """Il volume uniforme con ReplayGain (1.96.0): vale subito, anche per
+        il brano in corso."""
+        if self._scegli_da_una_lista(genitore, "replaygain", valori.VOLUMI_UNIFORMI, FRASI_DEL_VOLUME_UNIFORME.get):
+            self.motore.replaygain = self.impostazioni["replaygain"]
 
     def _scegli_il_modo_del_karaoke(self, genitore):
         """Il testo del karaoke per riga o per strofa (Gabriele, 4 ottobre

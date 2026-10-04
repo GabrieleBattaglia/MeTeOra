@@ -48,6 +48,7 @@ from valori import (
     VELOCITA_MASSIMA,
     VELOCITA_MINIMA,
     VOLUME_MASSIMO,
+    VOLUMI_UNIFORMI,
 )
 
 PREDEFINITE = {
@@ -74,6 +75,9 @@ PREDEFINITE = {
     # La ripetizione, una chiave di valori.RIPETIZIONI: a giro con Maiuscolo
     # con V, spenta di partenza (1.94.0).
     "ripetizione": "spenta",
+    # Il volume uniforme con ReplayGain, una chiave di valori.VOLUMI_UNIFORMI:
+    # spento di partenza (1.96.0).
+    "replaygain": "spento",
     # Il video (tappa 7): Maiuscolo con F1 lo accende e lo spegne, Maiuscolo
     # con F2 i sottotitoli letti; la sintesi a cui vanno, una chiave di
     # sintesi.USCITE o l'automatica.
@@ -201,6 +205,7 @@ CONTROLLI = {
     "dissolvenza": _dissolvenza_valida,
     "modello_casuale": lambda valore: valore in MODELLI_CASUALI,
     "ripetizione": lambda valore: valore in RIPETIZIONI,
+    "replaygain": lambda valore: valore in VOLUMI_UNIFORMI,
     "impressi": lambda valore: valore in ("al_volo", "passata"),
     "sintesi": lambda valore: valore == "automatica" or valore in USCITE_DELLA_SINTESI,
     "destinazione": lambda valore: valore in DESTINAZIONI,

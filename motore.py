@@ -1,6 +1,6 @@
 # MeTeOra, il motore di riproduzione: libmpv, e i SID in tempo reale.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7). Nella 1.65.0 i MIDI resi da FluidSynth (tappa 8). Nella 1.66.0 la musica delle console con libgme. Nella 1.67.0 il file lasciato o rinominato per Rinomina file. Nella 1.82.0 il testo del karaoke come traccia in memoria, senza i .lrc caricati da mpv, e due sottotitoli uguali di fila detti tutti e due. Nella 1.83.0 il tempo che resta al sottotitolo, per la barra braille a blocchi. Nella 1.83.3 la durata vera di Musepack e DSF, da mutagen. Nella 1.93.0 i capitoli che libmpv vede. Nella 1.95.0 l'attenuazione, per la sfumatura del timer di spegnimento.
+# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7). Nella 1.65.0 i MIDI resi da FluidSynth (tappa 8). Nella 1.66.0 la musica delle console con libgme. Nella 1.67.0 il file lasciato o rinominato per Rinomina file. Nella 1.82.0 il testo del karaoke come traccia in memoria, senza i .lrc caricati da mpv, e due sottotitoli uguali di fila detti tutti e due. Nella 1.83.0 il tempo che resta al sottotitolo, per la barra braille a blocchi. Nella 1.83.3 la durata vera di Musepack e DSF, da mutagen. Nella 1.93.0 i capitoli che libmpv vede. Nella 1.95.0 l'attenuazione, per la sfumatura del timer di spegnimento. Nella 1.96.0 il volume uniforme con ReplayGain.
 
 """Due lettori libmpv per tutti i formati.
 
@@ -103,6 +103,10 @@ FILTRO_DEL_NERO = "lavfi=[drawbox=x=0:y=0:w=iw:h=ih:color=black:t=fill]"
 # di un film si', i cartelli ASS animati fotogramma per fotogramma no
 # (revisione della 1.82.0: uno di tre secondi si diceva 44 volte).
 RIPETIZIONE_MINIMA = 0.5
+# Il volume uniforme (1.96.0): la scelta delle impostazioni e l'opzione di
+# mpv, che legge i tag ReplayGain dei file e vale subito, anche per il brano
+# in corso.
+REPLAYGAIN_DI_MPV = {"spento": "no", "brano": "track", "album": "album"}
 _EVENTI_UTILI = frozenset({mpv.MpvEventID.START_FILE, mpv.MpvEventID.FILE_LOADED, mpv.MpvEventID.END_FILE, mpv.MpvEventID.AUDIO_RECONFIG})
 
 
@@ -468,6 +472,7 @@ class Motore:
         # L'attenuazione (1.95.0), un'ampiezza da 1 a 0 sopra il volume e le
         # sfumature, per tutti i lettori: la usa il timer di spegnimento.
         self._attenuazione = 1.0
+        self._replaygain = "spento"
         # Il banco di suoni dei MIDI, None finche' la finestra non lo sceglie.
         self._banco_midi = None
         # Il testo del karaoke: per riga o per strofa, e l'anticipo in secondi.
@@ -1221,6 +1226,19 @@ class Motore:
     def _volume_attenuato(self):
         # La legge del volume di mpv e' cubica: vedi _applica_i_volumi.
         return self._volume * self._attenuazione ** (1 / 3)
+
+    @property
+    def replaygain(self):
+        """Il volume uniforme, una chiave di REPLAYGAIN_DI_MPV: spento, per
+        brano o per album, dai tag ReplayGain; i file senza restano come sono."""
+        return self._replaygain
+
+    @replaygain.setter
+    def replaygain(self, valore):
+        with self._blocco:
+            self._replaygain = valore if valore in REPLAYGAIN_DI_MPV else "spento"
+            for lettore in self._lettori:
+                lettore.imposta("replaygain", REPLAYGAIN_DI_MPV[self._replaygain])
 
     @property
     def muto(self):

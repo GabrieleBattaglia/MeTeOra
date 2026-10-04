@@ -2707,6 +2707,7 @@ def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_an
         ("volume", "Volume della musica: 80"),
         ("passo_volume", "Passo del volume: 5"),
         ("volume_effetti", "Volume degli effetti: 50%"),
+        ("replaygain", "Volume uniforme (ReplayGain): spento"),
         ("scheda_audio", "Scheda audio: Automatica (Altoparlanti (Realtek(R) Audio), WASAPI)"),
         ("passo_indietro", "Salto indietro di Q: 10 secondi"),
         ("passo_avanti", "Salto avanti di E: 10 secondi"),
@@ -2747,7 +2748,8 @@ def test_impostazioni_nella_finestra_vera(finestra, monkeypatch):
     monkeypatch.setattr(modulo.schede_audio, "in_uso", lambda elenco=None: None)
     dialogo = modulo.FinestraImpostazioni(finestra, finestra._voci_delle_impostazioni(), finestra._cambia_impostazione)
     try:
-        assert dialogo.lista.GetString(3) == "Scheda audio: Automatica"
+        assert dialogo.lista.GetString(3) == "Volume uniforme (ReplayGain): spento"
+        assert dialogo.lista.GetString(4) == "Scheda audio: Automatica"
         campo = _CampoFinto("7")
         monkeypatch.setattr(modulo, "FinestraFiltro", campo)
         dialogo.lista.SetSelection(1)
@@ -5997,3 +5999,19 @@ def test_il_timer_alla_fine_del_brano(finestra, monkeypatch, suoni_annotati):
     finestra._brano_finito()
     assert suonati == [("a.mp3", None)] and suoni_annotati[-1] == "timer_scaduto"
     assert _ultima(finestra) == "Timer scaduto: il brano è finito, e la riproduzione si ferma." and not finestra._timer_a_fine_brano
+
+
+def test_il_volume_uniforme_si_sceglie_da_una_lista(finestra, monkeypatch, suoni_annotati):
+    # 1.96.0: la voce delle impostazioni, che vale subito per il motore.
+    assert finestra.motore.replaygain == "spento"
+    scelta = _SceltaFinta(2)
+    monkeypatch.setattr(modulo, "FinestraScelta", scelta)
+    lista = _ListaFinta()
+    finestra._cambia_impostazione("replaygain", lista)
+    assert scelta.aperture == [("Volume uniforme (ReplayGain)", ["Spento", "Per brano", "Per album"], 0)]
+    assert finestra.motore.replaygain == "album" and _salvate(finestra)["replaygain"] == "album"
+    assert lista.righe == {"replaygain": "Volume uniforme (ReplayGain): per album"}
+    assert _ultima(finestra).startswith("Volume uniforme per album: ")
+    monkeypatch.setattr(modulo, "FinestraScelta", _SceltaFinta(None))
+    finestra._cambia_impostazione("replaygain", lista)
+    assert finestra.motore.replaygain == "album" and _ultima(finestra) == "Volume uniforme (ReplayGain): non cambiato."
