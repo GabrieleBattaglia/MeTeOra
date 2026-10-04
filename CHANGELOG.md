@@ -2,6 +2,13 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.79.0] - 2026-10-04
+
+- Maiuscolo con F9 chiude tutta la plancia, e il fuoco va sulla voce di primo livello che conteneva quella su cui eri. Chiesto da Gabriele.
+- Maiuscolo con F10 apre tutta la plancia, fino a duemila rami: i Preferiti, i Risultati, le playlist e Questo PC; Questa rete e le unità di rete restano chiuse. Lavora a pezzi, così la finestra risponde, con un suono all'inizio e uno alla fine, come la ricerca; un tasto qualsiasi la ferma. Maiuscolo con F10 non apre più il menu della voce, che si apre con Invio, il tasto Applicazioni e la barra spaziatrice. Chiesto da Gabriele.
+- Tre suoni originali, nella collezione di GBUtils V194: la tripletta di F9 che continua a scendere, quella di F10 che continua a salire, e due note staccate per l'inizio dell'apertura.
+- Il manuale spiega le differenze fra Backspace, Maiuscolo con Backspace, F9 e Maiuscolo con F9.
+
 ## [1.77.1] - 2026-10-04
 
 - Il contatore delle cartelle legge la rete con la protezione della ricerca: quindici secondi al massimo senza che arrivi niente, poi la lettura si annulla in un filo a parte e il percorso si salta fino ad Aggiorna. Prima, aprendo la radice dell'Iliadbox in Questa rete, il contatore entrava nei backup, si piantava dopo circa 17 mila cartelle e restava fermo fino alla chiusura, e nessuna cartella, nemmeno dei dischi del PC, mostrava più i suoi conti. Un conto che ha saltato qualcosa lo dice l'etichetta, e la cartella non sparisce.

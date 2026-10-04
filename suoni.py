@@ -22,6 +22,12 @@ EVENTI = {
     # meditimer, due note di onda triangolare, firmate anche da MeTeOra
     # nella collezione (GBUtils V193).
     "dettagli": "meditimer_statistiche",
+    # Maiuscolo con F9 e F10, tutta la plancia (1.79.0): suoni originali,
+    # nella collezione di GBUtils V194. La chiusura e la fine dell'apertura
+    # continuano le triplette di F9 e F10; l'inizio annuncia l'attesa.
+    "chiudi_la_plancia": "meteora_plancia_chiusa",
+    "apri_la_plancia": "meteora_plancia_in_apertura",
+    "plancia_aperta": "meteora_plancia_aperta",
     "plancia": "spostamento_f5",
     "console": "spostamento_f6",
     "cruscotto": "spostamento_f7",

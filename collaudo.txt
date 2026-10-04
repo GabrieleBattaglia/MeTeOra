@@ -1,4 +1,4 @@
-Collaudo di MeTeOra 1.77.1, con NVDA: il manuale in HTML, F1 e F12, la ricerca anche in rete, B e Z con la riproduzione casuale, l'invito a offrire un caffè, la cartella vuota nel cestino, i dettagli dei contenitori, i conti in rete. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.77.1. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Collaudo di MeTeOra 1.79.0, con NVDA: il manuale in HTML, F1 e F12, la ricerca anche in rete, B e Z con la riproduzione casuale, l'invito a offrire un caffè, la cartella vuota nel cestino, i dettagli dei contenitori, i conti in rete, Maiuscolo con F9 e F10. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.79.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
 Impostazioni, ultima voce Dona per questo progetto, Invio: il suono dell'invito, e il fuoco sul testo, che NVDA legge.
 Invio nel testo, o Esc, chiudono l'invito e si torna alle impostazioni; Tab passa a Dona con PayPal e a Chiudi.
 Dona con PayPal apre la pagina di PayPal nel browser, e la console ringrazia.
@@ -15,3 +15,7 @@ Manda nel cestino anche gli altri: la cartella resta, e dice (vuota); Maiuscolo 
 In Questa rete apri la radice dell'Iliadbox: le sue cartelle compaiono; dopo un po' backups e CronologiePC dicono almeno tanti file, la rete non risponde del tutto, o la rete non risponde.
 Intanto apri una cartella dei dischi del PC: i suoi conti arrivano lo stesso.
 Poi apri una sottocartella dei backup: la console dice subito che non risponde. Aggiorna su Questa rete la riprova.
+Maiuscolo con F10: un suono di inizio, la console dice che apre tutta la plancia, poi un suono di fine con quanti rami ha aperto; Questa rete resta chiusa. Ascolta i due suoni nuovi.
+Durante l'apertura premi una freccia: si ferma, e la console lo dice.
+Scendi in fondo a una cartella aperta e premi Maiuscolo con F9: si chiude tutto, con un suono nuovo, e il fuoco va sulla voce di primo livello, per esempio Questo PC.
+Maiuscolo con F10 non apre più il menu: Invio, il tasto Applicazioni e la barra spaziatrice sì.

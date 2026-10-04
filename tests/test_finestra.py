@@ -4569,3 +4569,50 @@ def test_le_cartelle_di_rete_che_non_rispondono(finestra, monkeypatch, suoni_ann
     finestra.albero.Expand(figlio)
     assert suoni_annotati[-1] == "errore" and _ultima(finestra).startswith(f"{tmp_path / 'Rete'} non risponde: ")
     assert not list(finestra._figli(figlio))
+
+
+def _plancia_di_prova(finestra, monkeypatch, tmp_path):
+    """Una playlist con tre brani e un'unita' finta in Questo PC, con due
+    cartelle; il lavoro a pezzi dell'apertura si fa tutto subito."""
+    for cartella in ("Uno/Dentro", "Due"):
+        (tmp_path / "Disco" / cartella).mkdir(parents=True)
+    for nome in ("Uno/a.mp3", "Uno/Dentro/b.mp3", "Due/c.mp3"):
+        (tmp_path / "Disco" / nome).write_bytes(b"")
+    monkeypatch.setattr(modulo.questo_pc, "unita", lambda: [(str(tmp_path / "Disco"), "Prova")])
+    monkeypatch.setattr(modulo.wx, "CallAfter", lambda funzione, *argomenti: funzione(*argomenti))
+    monkeypatch.setattr(modulo.wx, "CallLater", lambda _ms, funzione, *argomenti: funzione(*argomenti))
+    finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n in ("a.mp3", "b.mp3", "c.mp3")])
+
+
+def test_maiuscolo_f10_apre_tutta_la_plancia_e_maiuscolo_f9_la_chiude(finestra, monkeypatch, suoni_annotati, tmp_path):
+    # 1.79.0, Gabriele: Maiuscolo con F10 apre tutto tranne Questa rete, con
+    # un suono all'inizio e uno alla fine; Maiuscolo con F9 chiude tutto.
+    _plancia_di_prova(finestra, monkeypatch, tmp_path)
+    _tasto(finestra, codice=wx.WXK_F10, maiuscolo=True)
+    assert "apri_la_plancia" in suoni_annotati and suoni_annotati[-1] == "plancia_aperta"
+    assert _ultima(finestra).startswith("Aperta tutta la plancia, tranne Questa rete: ")
+    playlist = next(finestra._figli(finestra.nodo_playlist))
+    assert finestra.albero.IsExpanded(finestra.nodo_playlist) and finestra.albero.IsExpanded(playlist)
+    assert finestra.albero.IsExpanded(finestra.nodo_pc) and not finestra.albero.IsExpanded(finestra.nodo_rete)
+    disco = next(finestra._figli(finestra.nodo_pc))
+    uno = next(v for v in finestra._figli(disco) if (finestra._dati(v) or {}).get("nome") == "Uno" or finestra.albero.GetItemText(v).startswith("Uno"))
+    assert finestra.albero.IsExpanded(uno)
+    dentro = next(v for v in finestra._figli(uno) if (finestra._dati(v) or {}).get("tipo") == "cartella")
+    finestra._seleziona(next(finestra._figli(dentro)))
+    _tasto(finestra, codice=wx.WXK_F9, maiuscolo=True)
+    assert suoni_annotati[-1] == "chiudi_la_plancia" and _ultima(finestra) == "Chiusa tutta la plancia."
+    assert not any(finestra.albero.IsExpanded(v) for v in finestra._figli(finestra.albero.GetRootItem()))
+    # Il fuoco sulla voce di primo livello che conteneva quella di prima.
+    assert finestra._voce_corrente() == finestra.nodo_pc
+
+
+def test_maiuscolo_f10_si_ferma_al_massimo_e_con_un_tasto(finestra, monkeypatch, suoni_annotati, tmp_path):
+    _plancia_di_prova(finestra, monkeypatch, tmp_path)
+    monkeypatch.setattr(modulo, "MASSIMO_DI_RAMI", 2)
+    _tasto(finestra, codice=wx.WXK_F10, maiuscolo=True)
+    assert _ultima(finestra) == "Aperti 2 rami; mi fermo qui, gli altri restano chiusi."
+    # Un tasto qualsiasi, mentre l'apertura lavora, la ferma.
+    finestra._apertura_della_plancia = object()
+    _tasto(finestra, codice=wx.WXK_DOWN)
+    assert finestra._apertura_della_plancia is None and "annullamento" in suoni_annotati
+    assert any("Apertura della plancia fermata" in r for r in finestra._righe[-3:])

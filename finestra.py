@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta.
 
 """La finestra di MeTeOra.
 
@@ -183,7 +183,8 @@ TASTI_COMUNI = [
     "Nella plancia Backspace chiude il ramo in cui sei e risale di un livello, Maiuscolo con Backspace risale di colpo all'unità o alla playlist, Preferiti compresi, e chiude i rami al suo interno.",
     "T mette un marker dove sei, o rinomina quello su cui sei; R e Y vanno al marker precedente e successivo; Maiuscolo con R, Y e T tolgono i marker prima, dopo e tutti; Maiuscolo con le cifre da 1 a 0 va ai primi dieci marker del brano della plancia.",
     "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione e il fuoco della plancia sul brano in riproduzione e Maiuscolo con F8 ce la tiene agganciata, "
-    "F9 chiude e F10 apre tutto il ramo col fuoco, F11 legge i tag del brano selezionato, o i dettagli di una cartella, di un'unità o di una playlist, e Maiuscolo con F11 apre il menu dei tag.",
+    "F9 chiude e F10 apre tutto il ramo col fuoco, Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta, tranne Questa rete; "
+    "F11 legge i tag del brano selezionato, o i dettagli di una cartella, di un'unità o di una playlist, e Maiuscolo con F11 apre il menu dei tag.",
     "Barra rovesciata: nella console cerca nella console, altrove nel ramo della plancia in cui sei, e da Apri file o Impostazioni in tutto MeTeOra; Ctrl con la barra rovesciata cerca in tutto MeTeOra, anche dalla console. "
     "Barra verticale: il filtro della playlist o dei Preferiti in cui sta la plancia, anche dalla console.",
     "F1 apre il manuale nel browser; F12 scrive nella console la guida rapida dei tasti, F2 le novità e F3 i crediti, sempre nella console. Esc esce salvando tutto.",
@@ -641,6 +642,9 @@ class Finestra(wx.Frame):
         self._casuale_ricordato = None
         # Il segno dei dettagli che F11 sta raccogliendo: un altro F11 lo cambia (1.77.0).
         self._dettagli_attesi = None
+        # Il segno dell'apertura di tutta la plancia in corso, Maiuscolo con
+        # F10: un tasto qualsiasi lo toglie, e l'apertura si ferma (1.79.0).
+        self._apertura_della_plancia = None
         # Il mazzo della riproduzione casuale (1.61.0): i brani gia' usciti,
         # come (id della playlist, id del brano, sottobrano), con le
         # playlist e i brani tenuti in vita, perche' un id non torni a un
@@ -1139,6 +1143,10 @@ class Finestra(wx.Frame):
         lavoro, dialoghi compresi, il beep dice se ha portato il fuoco della
         plancia a un altro livello."""
         prima = self._profondita(self._voce_corrente())
+        if self._apertura_della_plancia is not None and evento.GetKeyCode() not in _SOLO_MODIFICATORI:
+            # Un tasto qualsiasi ferma l'apertura di tutta la plancia, prima
+            # di fare il suo lavoro: niente rami tolti sotto di lei.
+            self._ferma_l_apertura()
         if self._esegui_il_tasto(evento):
             self._controlla_il_livello(prima)
 
@@ -1158,6 +1166,14 @@ class Finestra(wx.Frame):
             return True
         if modificatori == wx.MOD_SHIFT and codice == wx.WXK_F8:
             self._aggancia()
+            return True
+        if modificatori == wx.MOD_SHIFT and codice == wx.WXK_F9:
+            self._chiudi_la_plancia()
+            return True
+        if modificatori == wx.MOD_SHIFT and codice == wx.WXK_F10:
+            # Non apre piu' il menu della voce, come in Windows: quello resta
+            # a Invio, al tasto Applicazioni e alla barra spaziatrice (Gabriele, 1.79.0).
+            self._apri_la_plancia()
             return True
         if modificatori == wx.MOD_SHIFT and codice == wx.WXK_F11:
             self._comando_modifica_i_tag()
@@ -1719,7 +1735,9 @@ class Finestra(wx.Frame):
             nuova = self._etichetta_della_cartella(dati["percorso"], dati.get("nome"), dati.get("vuota"))
             if self.albero.GetItemText(voce) != nuova:
                 self.albero.SetItemText(voce, nuova)
-        if vuote:
+        if vuote and self._apertura_della_plancia is None:
+            # Mentre si apre tutta la plancia i rami non si tolgono: la fine
+            # dell'apertura li ricontrolla.
             self._togli_dalla_plancia(vuote)
 
     def _ramo_di_rete_muto(self, voce, dati):
@@ -5948,6 +5966,67 @@ class Finestra(wx.Frame):
         self.albero.CollapseAllChildren(voce)
         self._seleziona(voce)
         self._riscontro("chiudi_tutto", f"Chiuso tutto dentro {self._nome_della_voce(voce)}.")
+
+    def _chiudi_la_plancia(self):
+        """Maiuscolo con F9 (Gabriele, 4 ottobre 2026): chiude tutti i rami
+        della plancia, con tutto quello che hanno dentro; il fuoco va sulla
+        voce di primo livello che conteneva quella su cui si era."""
+        radice = self.albero.GetRootItem()
+        primo = self._voce_corrente()
+        while primo.IsOk() and primo != radice and self.albero.GetItemParent(primo) != radice:
+            primo = self.albero.GetItemParent(primo)
+        for voce in list(self._figli(radice)):
+            self.albero.CollapseAllChildren(voce)
+        if primo.IsOk() and primo != radice:
+            self._seleziona(primo)
+        self._riscontro("chiudi_la_plancia", "Chiusa tutta la plancia.")
+
+    def _apri_la_plancia(self):
+        """Maiuscolo con F10 (Gabriele, 4 ottobre 2026): apre i Preferiti, i
+        Risultati, le playlist e Questo PC con tutto quello che hanno dentro,
+        fino a MASSIMO_DI_RAMI rami. Questa rete e le unita' di rete restano
+        chiuse: un router che si pianta fermerebbe la finestra. Lavora un
+        decimo di secondo alla volta, cosi' la finestra risponde, con un
+        suono all'inizio e uno alla fine, come la ricerca; intanto le
+        cartelle senza niente da suonare non spariscono, e un tasto
+        qualsiasi la ferma."""
+        segno = self._apertura_della_plancia = object()
+        radice = self.albero.GetRootItem()
+        da_aprire = [v for v in self._figli(radice) if v != self.nodo_rete and self.albero.ItemHasChildren(v)]
+        aperti = [0]
+        self._riscontro("apri_la_plancia", "Apro tutta la plancia, tranne Questa rete: ci vuole un po', e un tasto qualsiasi mi ferma.")
+
+        def passo():
+            if segno is not self._apertura_della_plancia or self._chiusa:
+                return
+            fine = time.monotonic() + 0.1
+            while da_aprire and aperti[0] < MASSIMO_DI_RAMI and time.monotonic() < fine:
+                ramo = da_aprire.pop(0)
+                if not self.albero.ItemHasChildren(ramo):
+                    continue
+                dati = self._dati(ramo) or {}
+                if dati.get("tipo") == "unita" and in_rete(dati["percorso"]):
+                    continue
+                self.albero.Expand(ramo)
+                aperti[0] += 1
+                da_aprire.extend(self._figli(ramo))
+            if da_aprire and aperti[0] < MASSIMO_DI_RAMI:
+                wx.CallLater(1, passo)
+                return
+            self._apertura_della_plancia = None
+            # Le cartelle rimaste senza niente da suonare spariscono adesso.
+            self._aggiorna_cartelle()
+            if da_aprire:
+                self._riscontro("plancia_aperta", f"Aperti {aperti[0]} rami; mi fermo qui, gli altri restano chiusi.")
+            else:
+                self._riscontro("plancia_aperta", f"Aperta tutta la plancia, tranne Questa rete: {al_plurale(aperti[0], 'ramo', 'rami')}.")
+
+        wx.CallAfter(passo)
+
+    def _ferma_l_apertura(self):
+        self._apertura_della_plancia = None
+        self._riscontro("annullamento", "Apertura della plancia fermata: i rami aperti fin qui restano aperti.")
+        self._aggiorna_cartelle()
 
     def _apri_ramo(self, voce, con_i_marker=True):
         """Apre la voce e tutti i rami che ha dentro, caricandoli, fino a
