@@ -22,3 +22,4 @@ Un clic a metà della linea: il video salta a metà, e la console dice Vado a, c
 Trascinando il pallino della linea e lasciandolo, il video salta dove lo si lascia.
 Con la barra del video visibile, la barra della finestra principale non c'è; tornati nella finestra principale con F5, compare solo la sua.
 Con NVDA, la finestra del video davanti: Tab e i tasti funzionano come prima, e muovendo il mouse NVDA non dice niente.
+F2 scrive solo le novità recenti, una cinquantina di righe; in fondo la riga dice dove sono il file CHANGELOG.md e la pagina su GitHub.

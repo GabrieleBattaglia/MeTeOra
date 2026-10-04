@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.88.1] - 2026-10-04
+
+- F2 scrive solo le novità delle versioni più recenti, a versioni intere, una cinquantina di righe: tutte erano troppe da scorrere (Gabriele). In fondo una riga dice dove leggere il changelog intero: il file CHANGELOG.md nella cartella di MeTeOra, e la sua pagina su GitHub.
+
 ## [1.88.0] - 2026-10-04
 
 - La barra dei comandi per il mouse anche sopra il video, in finestra e a schermo intero, chiesta da Gabriele, con in più la linea del tempo, larga quasi quanto il video: un clic salta in quel punto, trascinando si salta dove si lascia, e la console lo dice come per W. Sotto, con il puntatore sulla linea, la barra scrive il tempo a cui si salterebbe.

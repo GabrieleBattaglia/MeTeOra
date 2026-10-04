@@ -1588,6 +1588,24 @@ def test_f2_f3_scrivono_nella_console(finestra):
     assert novita[0] == "Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra."
     assert any(r.startswith("Versione 1.17.4 del 2026-09-30") for r in novita)
     assert not any(r.startswith(("#", "- ")) for r in novita)
+    # 1.88.1: F2 scrive le versioni recenti, a versioni intere, e in fondo
+    # dove leggere il changelog intero.
+    scritte = [_senza_ora(r) for r in finestra._righe]
+    inizio = len(scritte) - 1 - scritte[::-1].index("Novità di MeTeOra")
+    righe_f2 = [r for r in scritte[inizio:] if not r.startswith("Crediti")]
+    righe_f2 = righe_f2[:next(i for i, r in enumerate(righe_f2) if r.startswith("Le versioni precedenti"))  + 1]
+    assert righe_f2[-1].startswith("Le versioni precedenti sono nel changelog intero: il file CHANGELOG.md, nella cartella ")
+    assert righe_f2[-1].endswith("https://github.com/GabrieleBattaglia/MeTeOra/blob/main/CHANGELOG.md")
+    assert len(righe_f2) <= modulo.RIGHE_DEL_CHANGELOG + 2 and righe_f2[2].startswith("Versione ")
+
+
+def test_novita_recenti_a_versioni_intere():
+    righe = ["Intro.", "Versione 3 del c", "a", "b", "Versione 2 del b", "c", "d", "e", "Versione 1 del a", "f"]
+    assert modulo.novita_recenti(righe, 6) == (["Intro.", "Versione 3 del c", "a", "b"], True)
+    assert modulo.novita_recenti(righe, 8) == (righe[:8], True)
+    assert modulo.novita_recenti(righe, 100) == (righe, False)
+    # La versione piu' recente c'e' sempre, anche lunga.
+    assert modulo.novita_recenti(righe, 2) == (["Intro.", "Versione 3 del c", "a", "b"], True)
 
 
 def test_ricerca_nella_console(finestra, suoni_annotati, monkeypatch):
