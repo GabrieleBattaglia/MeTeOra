@@ -275,9 +275,15 @@ def leggi_timer(testo):
     if _pulito(testo).lower() in ("f", "fine"):
         return FINE_DEL_BRANO, []
     try:
-        return leggi_intero(testo, 0, TIMER_MASSIMO, "Timer di spegnimento")
+        minuti, correzioni = leggi_intero(testo, 0, TIMER_MASSIMO, "Timer di spegnimento")
     except ErroreValore as e:
         raise ErroreValore(f"{e} Oppure f, per fermarla alla fine del brano.") from None
+    if minuti == 0 and correzioni:
+        # Un numero sotto zero non toglie il timer: sarebbe un errore di
+        # battitura che cancella qualcosa (1.96.11).
+        raise ErroreValore(f"Timer di spegnimento: {_pulito(testo)} è sotto zero; scrivi un numero intero da 0 a {TIMER_MASSIMO}. "
+            "Oppure f, per fermarla alla fine del brano.")
+    return minuti, correzioni
 
 
 def leggi_celle_braille(testo):

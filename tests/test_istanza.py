@@ -128,3 +128,27 @@ def test_le_associazioni_si_scrivono_e_si_tolgono(monkeypatch):
     assert "MeTeOra" not in reg.chiavi.get(r"software\registeredapplications", {})
     # Togliere di nuovo non rompe niente.
     associazioni.togli(reg)
+
+
+def test_ferma_non_si_appende():
+    # 1.96.11: se fermando l'ascolto resta una pipe che nessuno serve, come
+    # quando il filo dell'ascolto ne ha appena preparata una nuova, la sveglia
+    # non ci resta appesa: Client vi aspettava la sfida per sempre.
+    import _winapi
+    from multiprocessing.connection import BUFSIZE, Listener
+
+    nome = _nome_di_prova()
+    ascolto = istanza.Ascolto.__new__(istanza.Ascolto)
+    ascolto._nome = nome
+    ascolto._fermo = False
+    ascolto._ascoltatore = Listener(nome, family="AF_PIPE", authkey=istanza._chiave(nome))
+    in_piu = _winapi.CreateNamedPipe(nome, _winapi.PIPE_ACCESS_DUPLEX | _winapi.FILE_FLAG_OVERLAPPED,
+        _winapi.PIPE_TYPE_MESSAGE | _winapi.PIPE_READMODE_MESSAGE | _winapi.PIPE_WAIT, _winapi.PIPE_UNLIMITED_INSTANCES,
+        BUFSIZE, BUFSIZE, _winapi.NMPWAIT_WAIT_FOREVER, _winapi.NULL)
+    try:
+        filo = threading.Thread(target=ascolto.ferma, daemon=True)
+        filo.start()
+        filo.join(5)
+        assert not filo.is_alive()
+    finally:
+        _winapi.CloseHandle(in_piu)

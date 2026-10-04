@@ -1,6 +1,6 @@
 # MeTeOra, l'istanza unica: la seconda copia passa i file alla prima e si chiude.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.91.0, tappa 12 d del piano.
+# 04/10/2026: nasce con la 1.91.0, tappa 12 d del piano. Nella 1.96.11 la sveglia dell'ascolto senza stretta di mano.
 
 """L'istanza unica di MeTeOra (1.91.0).
 
@@ -97,6 +97,9 @@ class Ascolto:
         if self._ascoltatore is not None:
             with contextlib.suppress(Exception):
                 self._ascoltatore.close()
-            # Sblocca accept con una connessione a vuoto.
-            with contextlib.suppress(Exception):
-                Client(self._nome, family="AF_PIPE", authkey=_chiave(self._nome)).close()
+            # Sblocca accept aprendo e chiudendo la pipe, senza la stretta di
+            # mano di Client: se intanto l'ascolto aveva gia' preparato una
+            # pipe nuova che nessuno serve piu', Client ci aspetterebbe la
+            # sfida per sempre, e MeTeOra non si chiuderebbe (1.96.11).
+            with contextlib.suppress(OSError), open(self._nome, "rb", buffering=0):
+                pass

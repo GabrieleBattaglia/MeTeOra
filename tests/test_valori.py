@@ -789,5 +789,8 @@ def test_leggi_timer():
     assert valori.leggi_timer(" F ") == (valori.FINE_DEL_BRANO, []) and valori.leggi_timer("Fine") == (valori.FINE_DEL_BRANO, [])
     assert valori.leggi_timer("0") == (0, [])
     assert valori.leggi_timer("700") == (600, ["Timer di spegnimento: 700 è oltre il massimo, ho messo 600."])
+    # 1.96.11: sotto zero non toglie il timer.
+    with pytest.raises(valori.ErroreValore, match=r"^Timer di spegnimento: -30 è sotto zero"):
+        valori.leggi_timer("-30")
     with pytest.raises(valori.ErroreValore, match=re.escape("non è un numero; scrivi un numero intero da 0 a 600. Oppure f, per fermarla alla fine del brano.") + "$"):
         valori.leggi_timer("mezz'ora")

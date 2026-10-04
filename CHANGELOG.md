@@ -2,13 +2,28 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.96.11] - 2026-10-05
+
+Le correzioni della revisione a più agenti delle versioni da 1.94.0 a 1.96.0, chiesta da Gabriele, dieci in tutto, e una trovata dalla suite.
+- All'uscita MeTeOra poteva restare appeso, di rado: l'ascolto delle altre copie, chiudendosi, si svegliava con una connessione che a volte aspettava per sempre una risposta. Ora apre e chiude la pipe e basta, e una prova ricrea apposta il caso.
+- Fra file che non si suonano, per esempio su una cartella di rete staccata, MeTeOra si ferma quando nessuno dei brani che l'avanzamento può suonare è partito, e lo dice: vale con la ripetizione della lista e anche con la riproduzione casuale, dove prima il giro poteva non finire.
+- Con la riproduzione casuale una volta per brano e la ripetizione della lista, il mazzo rimescolato non fa tornare subito l'ultimo brano suonato, come nel modello a giro.
+- Se la ripetizione della lista si spegne negli ultimi secondi di un mazzo, quando la dissolvenza ha già preparato il giro nuovo, il giro nuovo si annulla.
+- La sfumatura del timer non si chiude più fra un brano e l'altro: il brano seguente parte già attenuato, e quello che stava per partire quando il timer ferma tutto non parte.
+- Un brano scelto mentre il timer sfuma, con la dissolvenza accesa: quello vecchio esce dal volume a cui era arrivato, senza tornare di colpo forte.
+- Un numero sotto zero nella domanda del timer non toglie più il timer: è un errore, e il timer resta com'era.
+- Mentre la domanda di Maiuscolo con S è aperta, la sfumatura e il tempo del timer aspettano, e Esc dice il timer di adesso.
+- Il manuale e la console dicono che il ReplayGain fa salire un file registrato piano solo fin dove il suo picco lo permette.
+- Il manuale: con vol, il filtro delle impostazioni mostra anche Volume uniforme (ReplayGain).
+- Il changelog: la 1.95.0 e la 1.96.0 sono i punti f e g della tappa 12.
+
 ## [1.96.0] - 2026-10-04
 
-- Il volume uniforme, tappa 12 e del piano: la voce Volume uniforme (ReplayGain) delle impostazioni, spenta di partenza come deciso da Gabriele, porta allo stesso volume i file con i tag ReplayGain, per brano o per album. La legge libmpv, e vale subito, anche per il brano in corso.
+- Il volume uniforme, tappa 12 g del piano: la voce Volume uniforme (ReplayGain) delle impostazioni, spenta di partenza come deciso da Gabriele, porta allo stesso volume i file con i tag ReplayGain, per brano o per album. La legge libmpv, e vale subito, anche per il brano in corso.
 
 ## [1.95.0] - 2026-10-04
 
-- Il timer di spegnimento, tappa 12 e del piano: Maiuscolo con S, il tasto scelto da Gabriele, chiede fra quanti minuti fermare la riproduzione, da 1 a 600, oppure f per la fine del brano, o 0 per togliere il timer. Allo scadere la musica sfuma per venti secondi, sempre, anche con la dissolvenza spenta, e si ferma; alla fine del brano il seguente non parte. Tre suoni nuovi dalla collezione di GBUtils (V198).
+- Il timer di spegnimento, tappa 12 f del piano: Maiuscolo con S, il tasto scelto da Gabriele, chiede fra quanti minuti fermare la riproduzione, da 1 a 600, oppure f per la fine del brano, o 0 per togliere il timer. Allo scadere la musica sfuma per venti secondi, sempre, anche con la dissolvenza spenta, e si ferma; alla fine del brano il seguente non parte. Tre suoni nuovi dalla collezione di GBUtils (V198).
 - Mentre sfuma, V ferma subito, un brano scelto da chi ascolta torna al volume pieno, e Maiuscolo con S con 0 toglie la sfumatura. Il motore ha un'attenuazione sopra il volume e le dissolvenze, che non tocca il volume scelto.
 
 ## [1.94.0] - 2026-10-04

@@ -1229,3 +1229,21 @@ def test_il_volume_uniforme_legge_i_tag(crea, tmp_path, scelta, picco):
     m.suona(seno)
     x = _uscito_alla_fine(m, uscita)
     assert abs(np.abs(x).max() - picco) < 0.01
+
+
+def test_a_volume_pieno_toglie_l_attenuazione(crea, tmp_path):
+    # 1.96.11: il brano scelto mentre il timer sfuma entra pieno; con la
+    # dissolvenza, chi esce parte dal punto in cui l'attenuazione l'aveva portato.
+    primo = _seno(tmp_path / "primo.wav", 5)
+    secondo = _seno(tmp_path / "secondo.wav", 5)
+    m = crea(volume=80)
+    m.suona(primo)
+    m.attenuazione = 0.125
+    m.suona(secondo, a_volume_pieno=True)
+    assert m.attenuazione == 1.0
+    assert _aspetta(lambda: m._attivo.percorso == secondo and abs(m._attivo.mpv.volume - 80) < 0.5)
+    m.dissolvenza = 2
+    assert _aspetta(lambda: m._attivo.pronto)
+    m.attenuazione = 0.125
+    m.suona(primo, a_volume_pieno=True)
+    assert m.attenuazione == 1.0 and m._sfumatura is not None and m._sfumatura.ampiezza == pytest.approx(0.125)

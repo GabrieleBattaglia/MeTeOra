@@ -420,7 +420,7 @@ def test_cartella_suona_con_le_sottocartelle_e_f8_la_ritrova(finestra, monkeypat
 
     suonati = []
 
-    def suona(percorso, sottobrano=None, inizio=None, sfuma_lo_stesso=False):
+    def suona(percorso, sottobrano=None, inizio=None, sfuma_lo_stesso=False, **_altro):
         suonati.append(percorso)
         finestra.motore._in_corso = percorso
 
@@ -586,7 +586,7 @@ def test_durate_nella_plancia(finestra):
 def _finto_motore(finestra, monkeypatch):
     suonati = []
 
-    def suona(percorso, sottobrano=None, inizio=None, sfuma_lo_stesso=False):
+    def suona(percorso, sottobrano=None, inizio=None, sfuma_lo_stesso=False, **_altro):
         suonati.append((os.path.basename(percorso), sottobrano))
         finestra.motore._in_corso = percorso
         finestra.motore.sottobrano = sottobrano
@@ -5875,18 +5875,60 @@ def test_ripetizione_della_lista_nella_plancia(finestra, monkeypatch):
 
 
 def test_ripetizione_della_lista_con_il_mazzo_finito(finestra, monkeypatch, suoni_annotati):
-    # 1.94.0: con la casuale una volta per brano, il mazzo finito si rimescola.
+    # 1.94.0: con la casuale una volta per brano, il mazzo finito si rimescola;
+    # 1.96.11: come nel modello a giro, l'ultimo suonato conta gia' nel giro
+    # nuovo, anche se il motore, a brano finito, non lo ha piu'.
     pl, suonati, scelte = _mazzo_di_quattro(finestra, monkeypatch, "una_volta")
     finestra.impostazioni["ripetizione"] = "lista"
     finestra._suona(pl, pl.brani[0])
-    for _ in range(4):
+    for _ in range(3):
         finestra._brano_finito()
+    finestra.motore._in_corso = None
+    finestra._brano_finito()
     assert scelte[-1] == ["a.mp3", "b.mp3", "c.mp3"] and suonati[-1] == ("a.mp3", None) and len(suonati) == 5
+    finestra.motore._in_corso = None
+    finestra._brano_finito()
+    assert scelte[-1] == ["b.mp3", "c.mp3"]
+
+
+def test_la_ripetizione_spenta_prima_del_passaggio_annulla_il_giro_nuovo(finestra, monkeypatch, suoni_annotati):
+    # 1.96.11: il giro nuovo aperto preparando la dissolvenza si annulla se
+    # la ripetizione della lista si spegne prima del passaggio.
+    pl, suonati, _scelte = _mazzo_di_quattro(finestra, monkeypatch, "una_volta")
+    finestra.impostazioni["ripetizione"] = "lista"
+    monkeypatch.setattr(finestra.motore, "prepara", lambda *_a: True)
+    monkeypatch.setattr(finestra.motore, "annulla_il_passaggio", lambda: True)
+    finestra._suona(pl, pl.brani[0])
+    for _ in range(3):
+        finestra._brano_finito()
+    finestra._prepara_il_seguente()
+    assert finestra._preparato[1] is pl.brani[0]
+    _tasto(finestra, "v", maiuscolo=True)
+    assert finestra.impostazioni["ripetizione"] == "spenta"
+    finestra.motore._in_corso = pl.brani[0].percorso
+    finestra._passaggio(pl.brani[0].percorso, None)
+    assert finestra.coda.corrente is pl.brani[3] and finestra._mazzo_finito
+    finestra.motore._in_corso = None
+    finestra._brano_finito()
+    assert _ultima(finestra) == "Fine: ogni brano del mazzo ha suonato una volta." and len(suonati) == 4
+
+
+def test_la_casuale_fra_file_che_non_si_suonano_si_ferma(finestra, monkeypatch, suoni_annotati):
+    # 1.96.11: con la ripetizione della lista o il modello a giro, quando
+    # nessun brano si e' suonato ci si ferma.
+    pl, suonati, _scelte = _mazzo_di_quattro(finestra, monkeypatch, "una_volta")
+    monkeypatch.setattr(modulo.suoni, "attesa", lambda: 0.0)
+    finestra.impostazioni["ripetizione"] = "lista"
+    finestra._suona(pl, pl.brani[0])
+    for _ in range(4):
+        finestra.motore._in_corso = None
+        finestra._brano_in_errore(finestra.coda.corrente.percorso)
+    assert len(suonati) == 4 and _ultima(finestra) == "Fine: nessun brano si riesce a suonare." and suoni_annotati[-1] == "fine_playlist"
 
 
 def test_ripetizione_dopo_un_errore(finestra, monkeypatch, suoni_annotati):
-    # 1.94.0: il brano che non si suona non si ripete; e fra file che non si
-    # suonano dal primo si riparte una volta sola, finche' uno non parte.
+    # 1.94.0: il brano che non si suona non si ripete; 1.96.11: quando non se
+    # n'e' suonato nessuno ci si ferma, finche' chi ascolta non sceglie.
     suonati = _finto_motore(finestra, monkeypatch)
     monkeypatch.setattr(modulo.suoni, "attesa", lambda: 0.0)
     finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n in ("a.mp3", "b.mp3")])
@@ -5902,11 +5944,7 @@ def test_ripetizione_dopo_un_errore(finestra, monkeypatch, suoni_annotati):
     assert suonati[-1] == ("b.mp3", None)
     finestra.impostazioni["ripetizione"] = "lista"
     errore()
-    assert suonati[-1] == ("a.mp3", None)
-    errore()
-    assert suonati[-1] == ("b.mp3", None)
-    errore()
-    assert len(suonati) == 4
+    assert len(suonati) == 2 and _ultima(finestra) == "Fine: nessun brano si riesce a suonare."
     # Un brano scelto da chi ascolta chiude la catena: si riparte di nuovo.
     finestra._suona(pl, pl.brani[1])
     errore()
@@ -5978,12 +6016,17 @@ def test_il_timer_scaduto_sfuma_e_ferma(finestra, monkeypatch, suoni_annotati):
 def test_la_sfumatura_del_timer_la_fermano_x_e_v(finestra, monkeypatch, suoni_annotati):
     # 1.95.0: un brano scelto da chi ascolta torna al volume pieno; V ferma
     # senza la dissolvenza, perche' la musica sta gia' sfumando.
-    pl, suonati, adesso, attenuazioni = _timer_che_sfuma(finestra, monkeypatch)
+    pl, _suonati, adesso, attenuazioni = _timer_che_sfuma(finestra, monkeypatch)
     finestra._scade_il_timer()
     adesso[0] += 5
     finestra._passo_della_sfumatura()
+    # Il volume pieno lo riporta il motore, con il brano nuovo (1.96.11).
+    chiamate = []
+    monkeypatch.setattr(finestra.motore, "suona", lambda percorso, *_a, **k: chiamate.append((os.path.basename(percorso), k.get("a_volume_pieno"))))
     finestra._suona(pl, pl.brani[1])
-    assert attenuazioni[-1] == 1.0 and finestra._inizio_della_sfumatura is None and suonati[-1] == ("b.mp3", None)
+    assert chiamate == [("b.mp3", True)] and finestra._inizio_della_sfumatura is None and attenuazioni[-1] < 1.0
+    finestra._suona(pl, pl.brani[0])
+    assert chiamate[-1] == ("a.mp3", False)
     fermi = []
     monkeypatch.setattr(finestra.motore, "stop", lambda sfumando=False: fermi.append(sfumando))
     finestra._scade_il_timer()
@@ -6015,3 +6058,54 @@ def test_il_volume_uniforme_si_sceglie_da_una_lista(finestra, monkeypatch, suoni
     monkeypatch.setattr(modulo, "FinestraScelta", _SceltaFinta(None))
     finestra._cambia_impostazione("replaygain", lista)
     assert finestra.motore.replaygain == "album" and _ultima(finestra) == "Volume uniforme (ReplayGain): non cambiato."
+
+
+def test_la_sfumatura_del_timer_passa_fra_due_brani(finestra, monkeypatch, suoni_annotati):
+    # 1.96.11: il motore fermo fra un brano e l'altro non chiude la
+    # sfumatura; in fondo, il brano che sta per partire non parte.
+    _pl, suonati, adesso, attenuazioni = _timer_che_sfuma(finestra, monkeypatch)
+    monkeypatch.setattr(modulo.suoni, "attesa", lambda: 1.0)
+    rimandati = []
+    monkeypatch.setattr(modulo.wx, "CallLater", lambda millesimi, funzione, *argomenti: rimandati.append((funzione, argomenti)))
+    finestra._scade_il_timer()
+    finestra.motore._in_corso = None
+    finestra._brano_in_errore(finestra.coda.corrente.percorso)
+    adesso[0] += 10
+    finestra._passo_della_sfumatura()
+    assert finestra._inizio_della_sfumatura is not None and attenuazioni[-1] < 1.0
+    adesso[0] += 10
+    finestra._passo_della_sfumatura()
+    assert _ultima(finestra) == "Timer scaduto: riproduzione fermata." and attenuazioni[-1] == 1.0
+    # Il seguente dopo l'errore, e una fine di brano gia' in coda, non partono.
+    avanzamenti = [a for _f, a in rimandati if a and getattr(a[0], "__name__", "") == "_avanza_dopo_l_errore"]
+    assert avanzamenti
+    finestra._avanza_dopo_l_errore(avanzamenti[-1][1])
+    finestra._brano_finito()
+    assert suonati == [("a.mp3", None)]
+
+
+def test_la_domanda_del_timer_ferma_la_sfumatura_finche_e_aperta(finestra, monkeypatch, suoni_annotati):
+    # 1.96.11: mentre la domanda e' aperta il tempo della sfumatura e della
+    # sveglia non corre, e Esc dice il timer di dopo.
+    _pl, _suonati, adesso, _attenuazioni = _timer_che_sfuma(finestra, monkeypatch)
+
+    class Lenta(_DialogoAnnullato):
+        def ShowModal(self):
+            adesso[0] += 60
+            return wx.ID_CANCEL
+
+    finestra._scade_il_timer()
+    adesso[0] += 5
+    monkeypatch.setattr(modulo, "DialogoTesto", Lenta())
+    _tasto(finestra, "s", maiuscolo=True)
+    assert adesso[0] - finestra._inizio_della_sfumatura == 5 and finestra._orologio_della_sfumatura.IsRunning()
+    assert _ultima(finestra) == "Timer non cambiato. Adesso il timer è scaduto, e la musica sta sfumando."
+    finestra._togli_il_timer()
+    # La sveglia dei minuti riparte dalla sua scadenza; passata, scade subito.
+    finestra._timer_scade = adesso[0] + 90
+    _tasto(finestra, "s", maiuscolo=True)
+    assert finestra._sveglia_del_timer.IsRunning() and finestra._timer_scade == adesso[0] + 30
+    finestra._sveglia_del_timer.Stop()
+    finestra._timer_scade = adesso[0] + 30
+    _tasto(finestra, "s", maiuscolo=True)
+    assert finestra._inizio_della_sfumatura is not None

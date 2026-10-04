@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura. Nella 1.83.1 Maiuscolo con F10 lascia chiuso Questo PC, e la plancia molto aperta non ferma piu' la finestra. Nella 1.83.2 F10 a fette, e i suoni delle aperture che non si sovrappongono. Nella 1.84.0 la proposta dell'aggiornamento, il suo avanzamento e la chiusura per aggiornarsi. Nella 1.85.0 i crediti con la licenza e le licenze dei componenti. Nella 1.85.5 i rami di rete che si riprovano sempre. Nella 1.86.0 Maiuscolo con F12 spegne e riaccende i tasti rapidi a carattere. Nella 1.87.0 la barra dei comandi per il mouse. Nella 1.88.0 anche sopra il video, con la linea del tempo. Nella 1.88.1 F2 scrive solo le versioni recenti. Nella 1.89.0 i problemi interni anche nel registro degli errori. Nella 1.90.0 le copie dei dati che non riescono. Nella 1.91.0 i file aperti da Windows, il trascinamento e le associazioni dei formati. Nella 1.92.0 i file lunghi riprendono dal punto lasciato. Nella 1.93.0 i capitoli, con virgola e punto e nella plancia. Nella 1.94.0 la ripetizione del brano e della lista, con Maiuscolo con V. Nella 1.95.0 il timer di spegnimento, con Maiuscolo con S. Nella 1.96.0 il volume uniforme con ReplayGain.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura. Nella 1.83.1 Maiuscolo con F10 lascia chiuso Questo PC, e la plancia molto aperta non ferma piu' la finestra. Nella 1.83.2 F10 a fette, e i suoni delle aperture che non si sovrappongono. Nella 1.84.0 la proposta dell'aggiornamento, il suo avanzamento e la chiusura per aggiornarsi. Nella 1.85.0 i crediti con la licenza e le licenze dei componenti. Nella 1.85.5 i rami di rete che si riprovano sempre. Nella 1.86.0 Maiuscolo con F12 spegne e riaccende i tasti rapidi a carattere. Nella 1.87.0 la barra dei comandi per il mouse. Nella 1.88.0 anche sopra il video, con la linea del tempo. Nella 1.88.1 F2 scrive solo le versioni recenti. Nella 1.89.0 i problemi interni anche nel registro degli errori. Nella 1.90.0 le copie dei dati che non riescono. Nella 1.91.0 i file aperti da Windows, il trascinamento e le associazioni dei formati. Nella 1.92.0 i file lunghi riprendono dal punto lasciato. Nella 1.93.0 i capitoli, con virgola e punto e nella plancia. Nella 1.94.0 la ripetizione del brano e della lista, con Maiuscolo con V. Nella 1.95.0 il timer di spegnimento, con Maiuscolo con S. Nella 1.96.0 il volume uniforme con ReplayGain. Nella 1.96.11 le correzioni della revisione: la catena degli errori, il mazzo della ripetizione, la sfumatura del timer fra due brani e durante la domanda.
 
 """La finestra di MeTeOra.
 
@@ -293,7 +293,7 @@ SFUMATURA_DEL_TIMER = 20.0
 PASSO_DELLA_SFUMATURA = 100
 FRASI_DEL_VOLUME_UNIFORME = {
     "spento": "Volume uniforme spento: ogni file suona con il volume con cui è registrato.",
-    "brano": "Volume uniforme per brano: i file con i tag ReplayGain suonano tutti allo stesso volume.",
+    "brano": "Volume uniforme per brano: i file con i tag ReplayGain si avvicinano allo stesso volume; quelli forti scendono, e quelli piani salgono fin dove i loro picchi lo permettono.",
     "album": "Volume uniforme per album: ogni disco con i tag ReplayGain suona allo stesso volume, e dentro il disco restano le differenze volute.",
 }
 FRASI_DELLA_RIPETIZIONE = {
@@ -786,6 +786,10 @@ class Finestra(wx.Frame):
         # La scelta della riproduzione casuale, come (cio' che suona, il
         # seguente scelto): vedi _seguente_casuale.
         self._casuale_ricordato = None
+        # Il mazzo com'era prima del giro nuovo che la ripetizione della lista
+        # ha aperto preparando la dissolvenza, con il posto che suonava: se al
+        # passaggio la ripetizione e' spenta, torna finito (1.96.11).
+        self._mazzo_prima_del_giro = None
         # Il segno dei dettagli che F11 sta raccogliendo: un altro F11 lo cambia (1.77.0).
         self._dettagli_attesi = None
         # La lettura dei sottotitoli fatti di immagini in corso, una di
@@ -839,13 +843,16 @@ class Finestra(wx.Frame):
         # brano seguente che aspetta la fine del suono di un errore.
         self._domanda_viva = None
         self._avanzamento_dopo_errore = None
-        # Con la ripetizione della lista, vero se dopo un errore si e' gia'
-        # ripartiti dal primo senza che niente si sia potuto suonare: un
-        # secondo giro fra file che non si suonano non finirebbe mai (1.94.0).
-        # Lo rimettono a falso la fine vera di un brano e i brani fatti
+        # I brani che di fila non si sono potuti suonare, per identita': quando
+        # ci sono tutti quelli che l'avanzamento puo' suonare, un altro giro
+        # non servirebbe, con la ripetizione della lista o con la casuale
+        # (1.96.11). Li dimenticano la fine vera di un brano e i brani fatti
         # partire da chi ascolta; non il caricamento, perche' un file rovinato
         # puo' caricarsi e poi non suonare.
-        self._da_capo_dopo_errore = False
+        self._errori_di_fila = {}
+        # Vero dopo che il timer ha fermato tutto, fino al brano seguente: una
+        # fine di brano gia' in coda non fa partire altro (1.96.11).
+        self._fermo_del_timer = False
         # Il timer di spegnimento (1.95.0): la sveglia dei minuti e quando
         # suona, in secondi di _adesso, oppure la fine del brano; scaduto, la
         # sfumatura, con il suo inizio. I minuti si ripropongono la volta dopo.
@@ -4141,11 +4148,15 @@ class Finestra(wx.Frame):
             self._prepara_i_midi(lambda: self._suona(pl, brano, evento, sottobrano, inizio, sfuma_lo_stesso))
             return
         self._uscente = self._preparato = self._avanzamento_dopo_errore = None
+        self._fermo_del_timer = False
+        sveglio = False
         if evento not in ("brano_seguente_da_solo", "ritorno_al_punto_a"):
             # Un brano scelto da chi ascolta chiude la catena degli errori, e
-            # dice che e' sveglio: la sfumatura del timer scaduto si ferma.
-            self._da_capo_dopo_errore = False
-            self._ferma_la_sfumatura()
+            # dice che e' sveglio: la sfumatura del timer scaduto si ferma, e
+            # il motore porta il brano nuovo a volume pieno.
+            self._errori_di_fila.clear()
+            sveglio = self._inizio_della_sfumatura is not None
+            self._ferma_la_sfumatura(riporta=False)
         # Il punto del file lungo che si lascia, e quello a cui riprendere il
         # nuovo, se nessuno ne chiede un altro (1.92.0).
         self._ricorda_la_posizione()
@@ -4154,7 +4165,7 @@ class Finestra(wx.Frame):
             ripresa = inizio = self.posizioni.dove(brano.percorso)
         self.coda.imposta(pl, brano)
         self._segna_nel_mazzo(pl, brano, sottobrano)
-        self.motore.suona(brano.percorso, sottobrano or brano.sottobrano, inizio=inizio, sfuma_lo_stesso=sfuma_lo_stesso)
+        self.motore.suona(brano.percorso, sottobrano or brano.sottobrano, inizio=inizio, sfuma_lo_stesso=sfuma_lo_stesso, a_volume_pieno=sveglio)
         self._annuncia(pl, brano, evento)
         if ripresa:
             self.scrivi(f"Riprendo da {tempo(ripresa)}, dove l'avevi lasciato: X lo fa ripartire da capo.")
@@ -4383,10 +4394,6 @@ class Finestra(wx.Frame):
                 self._atteso_dalla_storia = avanti
                 return avanti
             seguente = self._seguente_casuale(voce, sottobrano)
-            if seguente is FINE_DEL_MAZZO and ripetizione == "lista":
-                # Il mazzo finito si rimescola, come nel modello a giro.
-                self._ricomincia_il_mazzo()
-                seguente = self._seguente_casuale(voce, sottobrano)
             if seguente is FINE_DEL_MAZZO:
                 self._mazzo_finito = True
                 return None
@@ -4398,19 +4405,14 @@ class Finestra(wx.Frame):
             dopo = self.coda.successivo()
             seguente = (self.coda.playlist, dopo, None) if dopo else None
         if seguente is None and ripetizione == "lista":
-            seguente = self._da_capo(voce, dopo_errore)
+            seguente = self._da_capo(voce)
         return seguente
 
-    def _da_capo(self, voce, dopo_errore):
+    def _da_capo(self, voce):
         """Con la ripetizione della lista, il primo di cio' che l'avanzamento
         suonerebbe: se decide la plancia, la prima voce suonabile che vi si
         vede; altrimenti il primo della lista, del loop o della selezione.
-        None se non c'e', o se dopo un errore si e' gia' ripartiti una volta
-        senza che niente si suonasse."""
-        if dopo_errore:
-            if self._da_capo_dopo_errore:
-                return None
-            self._da_capo_dopo_errore = True
+        None se non c'e'."""
         if voce is not None:
             prima, _cookie = self.albero.GetFirstChild(self.albero.GetRootItem())
             prima = prima if prima.IsOk() else None
@@ -4460,7 +4462,13 @@ class Finestra(wx.Frame):
             nel_mazzo = [c for c in candidati if (id(c[0]), id(c[1]), c[2]) not in self._mazzo]
             if not nel_mazzo:
                 if modello == "una_volta":
-                    return FINE_DEL_MAZZO
+                    if self.impostazioni["ripetizione"] != "lista":
+                        return FINE_DEL_MAZZO
+                    # Con la ripetizione della lista il mazzo finito si
+                    # rimescola, come nel modello a giro (1.94.0); se la
+                    # ripetizione si spegne prima del passaggio della
+                    # dissolvenza, il giro nuovo si annulla (1.96.11).
+                    self._mazzo_prima_del_giro = (suona, set(self._mazzo), list(self._mazzo_tenuti))
                 self._mazzo.clear()
                 self._mazzo_tenuti.clear()
                 self._segna_nel_mazzo(*suona)
@@ -4536,6 +4544,7 @@ class Finestra(wx.Frame):
         self._mazzo.clear()
         self._mazzo_tenuti.clear()
         self._casuale_ricordato = None
+        self._mazzo_prima_del_giro = None
         if self.motore.in_corso and self.coda.corrente is not None:
             self._segna_nel_mazzo(self.coda.playlist, self.coda.corrente, self.motore.sottobrano if self.motore.sottobrani else None)
 
@@ -4558,13 +4567,14 @@ class Finestra(wx.Frame):
     def _brano_finito(self):
         """Il brano e' finito da solo, senza un seguente preparato che
         entrasse con la dissolvenza: si suona il seguente, se c'e'."""
-        if self._chiusa:
+        if self._chiusa or self._fermo_del_timer:
+            # Il timer ha fermato tutto mentre questa fine era gia' in coda.
             return
         # Il file lungo arrivato alla fine non ha piu' un punto da riprendere.
         if self.coda.corrente is not None:
             self.posizioni.dimentica(self.coda.corrente.percorso)
         self._uscente = self._preparato = None
-        self._da_capo_dopo_errore = False
+        self._errori_di_fila.clear()
         seguente = self._seguente_automatico()
         if seguente:
             nuova, brano, sottobrano = seguente
@@ -4634,7 +4644,13 @@ class Finestra(wx.Frame):
         pl, corrente, sottobrano_uscente = uscente
         if self.coda.playlist is not pl or self.coda.corrente is not corrente:
             return
-        self._da_capo_dopo_errore = False
+        self._errori_di_fila.clear()
+        prima, self._mazzo_prima_del_giro = self._mazzo_prima_del_giro, None
+        if prima is not None and self.impostazioni["ripetizione"] != "lista" and _stesso_posto(prima[0], uscente):
+            # Il giro nuovo era della ripetizione della lista, che intanto si
+            # e' spenta: il mazzo torna finito.
+            self._mazzo, self._mazzo_tenuti = prima[1], prima[2]
+            self._casuale_ricordato = None
         seguente = self._seguente_automatico(sottobrano_uscente)
         if seguente is None:
             # La plancia non ha piu' niente dopo: come a fine lista, il brano
@@ -4661,6 +4677,8 @@ class Finestra(wx.Frame):
         if self._chiusa:
             return
         self._uscente = self._preparato = None
+        if self.coda.corrente is not None:
+            self._errori_di_fila[id(self.coda.corrente)] = self.coda.corrente
         self._riscontro("errore", f"Non riesco a suonare {os.path.basename(percorso or '')}.")
         segno = self._avanzamento_dopo_errore = object()
         self._dopo_il_suono(self._avanza_dopo_l_errore, segno)
@@ -4671,6 +4689,13 @@ class Finestra(wx.Frame):
             return
         self._avanzamento_dopo_errore = None
         seguente = self._seguente_automatico(dopo_errore=True)
+        if seguente and len(self._errori_di_fila) >= self._brani_da_suonare():
+            # Nessuno dei brani che l'avanzamento puo' suonare si e' suonato:
+            # un altro giro non servirebbe (1.96.11).
+            self._errori_di_fila.clear()
+            self._aggiorna_etichette()
+            self._riscontro("fine_playlist", "Fine: nessun brano si riesce a suonare.")
+            return
         if seguente:
             nuova, brano, sottobrano = seguente
             self._suona(nuova, brano, "brano_seguente_da_solo", sottobrano)
@@ -4678,6 +4703,22 @@ class Finestra(wx.Frame):
             self._fine_della_lista()
         else:
             self._aggiorna_etichette()
+
+    def _brani_da_suonare(self):
+        """Quanti brani diversi l'avanzamento automatico puo' suonare: le
+        voci suonabili che si vedono nella plancia, se decide lei; altrimenti
+        quelli della lista, o del loop."""
+        voce = self._voce_da_seguire()
+        if voce is not None:
+            return len({id(self._dati(v)["brano"]) for v in self._candidati_in_plancia(None)})
+        pl = self.coda.playlist
+        if pl is None:
+            return 0
+        brani = pl.brani
+        limiti = self.coda.intervallo()
+        if limiti is not None:
+            brani = brani[limiti[0]:limiti[1] + 1]
+        return sum(1 for b in brani if not b.saltato and self.coda.ammesso(pl, b))
 
     def _niente_in_corso(self):
         if self.motore.in_corso:
@@ -4867,17 +4908,23 @@ class Finestra(wx.Frame):
         tanti minuti o alla fine del brano. Scaduto, la musica sfuma e si
         ferma. Un timer nuovo prende il posto di quello che c'era."""
         self._domanda()
-        adesso = self._frase_del_timer()
+        # Mentre la domanda e' aperta, la sfumatura e la sveglia aspettano: lo
+        # 0 deve arrivare in tempo (1.96.11).
+        self._sveglia_del_timer.Stop()
+        self._orologio_della_sfumatura.Stop()
+        sfumato = None if self._inizio_della_sfumatura is None else self._adesso() - self._inizio_della_sfumatura
         proposta = valori.FINE_DEL_BRANO if self._timer_a_fine_brano else str(self._minuti_del_timer)
         with DialogoTesto(self, f"Fra quanti minuti si ferma la riproduzione? Da 1 a {valori.TIMER_MASSIMO}; "
-                f"f la ferma alla fine del brano, 0 toglie il timer. {adesso}", "Timer di spegnimento", proposta) as dialogo:
+                f"f la ferma alla fine del brano, 0 toglie il timer. {self._frase_del_timer()}", "Timer di spegnimento", proposta) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
-                self._annullato(f"Timer non cambiato. {adesso}")
+                self._riprendi_il_timer(sfumato)
+                self._annullato(f"Timer non cambiato. {self._frase_del_timer()}")
                 return
             testo = dialogo.GetValue()
         try:
             scelta, correzioni = valori.leggi_timer(testo)
         except ErroreValore as e:
+            self._riprendi_il_timer(sfumato)
             self._riscontro("errore", f"{e} Timer non cambiato.")
             return
         c_era = self._timer_scade is not None or self._timer_a_fine_brano or self._inizio_della_sfumatura is not None
@@ -4894,6 +4941,20 @@ class Finestra(wx.Frame):
             self._sveglia_del_timer.StartOnce(scelta * 60 * 1000)
             frase = f"Timer impostato: la riproduzione si ferma fra {_minuti(scelta)}, alle {self._ora_del_timer()}."
         self._riscontro("timer_impostato", " ".join([frase, *correzioni]))
+
+    def _riprendi_il_timer(self, sfumato):
+        """Dopo la domanda lasciata com'era: la sfumatura riprende dal punto
+        in cui era, sfumato secondi, e la sveglia dalla sua scadenza, anche
+        subito se e' passata."""
+        if sfumato is not None:
+            self._inizio_della_sfumatura = self._adesso() - sfumato
+            self._orologio_della_sfumatura.Start(PASSO_DELLA_SFUMATURA)
+        elif self._timer_scade is not None:
+            resto = self._timer_scade - self._adesso()
+            if resto <= 0:
+                self._scade_il_timer()
+            else:
+                self._sveglia_del_timer.StartOnce(max(1, round(resto * 1000)))
 
     def _ora_del_timer(self):
         resto = max(0.0, self._timer_scade - self._adesso())
@@ -4931,29 +4992,33 @@ class Finestra(wx.Frame):
 
     def _passo_della_sfumatura(self, _evento=None):
         """La voce scende come nelle dissolvenze, con il coseno, e in fondo
-        ci si ferma; anche prima, se intanto la musica e' finita."""
+        ci si ferma. Il motore fermo fra un brano e l'altro non vuol dire
+        musica finita: il seguente parte gia' attenuato (1.96.11)."""
         if self._chiusa or self._inizio_della_sfumatura is None:
             return
         avanzamento = min(1.0, (self._adesso() - self._inizio_della_sfumatura) / SFUMATURA_DEL_TIMER)
         self.motore.attenuazione = math.cos(avanzamento * math.pi / 2)
-        if avanzamento >= 1.0 or not self.motore.in_corso:
+        if avanzamento >= 1.0:
             self._fermato_dal_timer()
 
     def _fermato_dal_timer(self):
-        fermato = bool(self.motore.in_corso)
-        if fermato:
-            self._ferma(sfumando=False)
-        else:
-            self._ferma_la_sfumatura()
+        """Lo stop del timer: anche il brano che sta per partire, dopo un
+        errore o alla fine di quello di prima gia' in coda, non parte."""
+        fermato = bool(self.motore.in_corso) or self._avanzamento_dopo_errore is not None
+        self._avanzamento_dopo_errore = None
+        self._ferma(sfumando=False)
+        self._fermo_del_timer = True
         self._riscontro("timer_scaduto", "Timer scaduto: riproduzione fermata." if fermato else "Timer scaduto.")
 
-    def _ferma_la_sfumatura(self):
-        """La sfumatura del timer, se c'e', finisce, e il volume torna pieno."""
+    def _ferma_la_sfumatura(self, riporta=True):
+        """La sfumatura del timer, se c'e', finisce, e il volume torna pieno;
+        senza riporta lo fa il motore, con il brano nuovo."""
         if self._inizio_della_sfumatura is None:
             return
         self._orologio_della_sfumatura.Stop()
         self._inizio_della_sfumatura = None
-        self.motore.attenuazione = 1.0
+        if riporta:
+            self.motore.attenuazione = 1.0
 
     def _vicino(self, verso, evento, limite):
         """Z e B: il brano prima o dopo, dalla plancia se cio' che suona si

@@ -48,4 +48,7 @@ Mentre sfuma, premi X su un brano: suona al volume pieno, e il timer non c'è pi
 Maiuscolo con S, scrivi f: il brano arriva in fondo e il seguente non parte, anche con la dissolvenza accesa.
 Maiuscolo con S, scrivi 0: il timer si toglie.
 Impostazioni, Volume uniforme (ReplayGain), per brano, con un brano che ha i tag ReplayGain mentre suona: il volume cambia subito.
-Riproduzione casuale fra dischi diversi, con i tag e il volume uniforme per brano: i salti di volume spariscono.
+Riproduzione casuale fra dischi diversi, con i tag e il volume uniforme per brano: i salti di volume si riducono.
+Riproduzione casuale una volta per brano e ripetizione della lista: finito il mazzo si ricomincia, e l'ultimo brano non torna subito.
+Una playlist su una cartella di rete staccata, con la ripetizione della lista: dopo un giro di errori la console dice Fine: nessun brano si riesce a suonare.
+Timer di 1 minuto con la dissolvenza accesa: mentre sfuma premi B, il brano vecchio esce piano e il nuovo suona pieno.
