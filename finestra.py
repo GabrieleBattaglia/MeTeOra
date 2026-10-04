@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino.
 
 """La finestra di MeTeOra.
 
@@ -47,6 +47,7 @@ from html.parser import HTMLParser
 
 import wx
 
+import dettagli
 import formati
 import marcatori
 import midi
@@ -67,7 +68,7 @@ from impostazioni import Impostazioni
 from marcatori import Marcatori
 from motore import VOLUME_MASSIMO, durata_del_sottobrano, sottobrano_risolto
 from playlist import Archivio, Brano, Coda, Playlist
-from ricerca import AlberoDeiRisultati, Ricerca, senza_annidati
+from ricerca import AlberoDeiRisultati, Ricerca, in_rete, senza_annidati
 from schedario import Schedario
 from valori import AREE, ErroreValore, leggi_tempo, leggi_tempo_nel_brano, secondi_da_leggere
 from video import FinestraVideo
@@ -182,7 +183,7 @@ TASTI_COMUNI = [
     "Nella plancia Backspace chiude il ramo in cui sei e risale di un livello, Maiuscolo con Backspace risale di colpo all'unità o alla playlist, Preferiti compresi, e chiude i rami al suo interno.",
     "T mette un marker dove sei, o rinomina quello su cui sei; R e Y vanno al marker precedente e successivo; Maiuscolo con R, Y e T tolgono i marker prima, dopo e tutti; Maiuscolo con le cifre da 1 a 0 va ai primi dieci marker del brano della plancia.",
     "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione e il fuoco della plancia sul brano in riproduzione e Maiuscolo con F8 ce la tiene agganciata, "
-    "F9 chiude e F10 apre tutto il ramo col fuoco, F11 legge i tag del brano selezionato e Maiuscolo con F11 apre il menu per modificarli.",
+    "F9 chiude e F10 apre tutto il ramo col fuoco, F11 legge i tag del brano selezionato, o i dettagli di una cartella, di un'unità o di una playlist, e Maiuscolo con F11 apre il menu dei tag.",
     "Barra rovesciata: nella console cerca nella console, altrove nel ramo della plancia in cui sei, e da Apri file o Impostazioni in tutto MeTeOra; Ctrl con la barra rovesciata cerca in tutto MeTeOra, anche dalla console. "
     "Barra verticale: il filtro della playlist o dei Preferiti in cui sta la plancia, anche dalla console.",
     "F1 apre il manuale nel browser; F12 scrive nella console la guida rapida dei tasti, F2 le novità e F3 i crediti, sempre nella console. Esc esce salvando tutto.",
@@ -232,6 +233,8 @@ SPIEGAZIONI_DEI_MODELLI = {
     "una_volta": "ogni brano suona una volta, poi la riproduzione finisce",
     "a_giro": "ogni brano suona una volta, poi si rimescola e si ricomincia",
 }
+# I contenitori di cui F11 scrive i dettagli, invece dei tag (1.77.0).
+TIPI_CON_I_DETTAGLI = ("cartella", "unita", "pc", "playlist", "radice_playlist", "risultati", "gruppo_risultati")
 # Quanti brani ricorda la storia della riproduzione casuale, che Z ripercorre.
 MASSIMO_DELLA_STORIA = 1000
 # Il segno che il mazzo della riproduzione casuale e' finito, e che la
@@ -633,6 +636,8 @@ class Finestra(wx.Frame):
         # La scelta della riproduzione casuale, come (cio' che suona, il
         # seguente scelto): vedi _seguente_casuale.
         self._casuale_ricordato = None
+        # Il segno dei dettagli che F11 sta raccogliendo: un altro F11 lo cambia (1.77.0).
+        self._dettagli_attesi = None
         # Il mazzo della riproduzione casuale (1.61.0): i brani gia' usciti,
         # come (id della playlist, id del brano, sottobrano), con le
         # playlist e i brani tenuti in vita, perche' un id non torni a un
@@ -1645,13 +1650,19 @@ class Finestra(wx.Frame):
         ignote = len(durate) - len(note)
         return f"{len(brani)} ({durata_lunga(sum(note))}{f', {ignote} senza durata' if ignote else ''})"
 
-    def _etichetta_della_cartella(self, cartella, nome=None):
+    def _etichetta_della_cartella(self, cartella, nome=None, vuota=None):
         """Il nome della cartella con quanti file suonabili ha, sottocartelle
         comprese, e quanto durano in tutto, appena il contatore e lo schedario
         lo sanno. nome, se c'e', e' quello da mostrare al posto del suo, come
-        per i percorsi di rete."""
+        per i percorsi di rete. Contata senza niente da suonare, dice
+        (vuota), o (niente da suonare) se ha file d'altro tipo: succede alle
+        cartelle svuotate con il cestino, che non spariscono (1.77.0)."""
         nome = nome or os.path.basename(cartella.rstrip("\\")) or cartella
         files = self.contatore.files(cartella)
+        if files == []:
+            if vuota is None:
+                vuota = self._e_vuota(cartella)
+            return f"{nome} (vuota)" if vuota else f"{nome} (niente da suonare)"
         if not files:
             return nome
         durate = [(self.schedario.scheda(f) or {}).get("durata") for f in files]
@@ -1662,6 +1673,17 @@ class Finestra(wx.Frame):
             if len(note) < len(files):
                 testo += f", {len(files) - len(note)} senza durata"
         return testo
+
+    def _e_vuota(self, cartella):
+        """Vero se la cartella non ha file, a parte quelli di servizio; in
+        rete, anche su un'unita' con la lettera, non si guarda, perche' un
+        disco spento terrebbe ferma la finestra."""
+        if in_rete(cartella):
+            return False
+        try:
+            return questo_pc.cartella_vuota(cartella)
+        except OSError:
+            return False
 
     def _aggiorna_cartelle(self):
         """Rinfresca le etichette delle cartelle caricate nella plancia, e
@@ -1675,17 +1697,42 @@ class Finestra(wx.Frame):
             # Una cartella aperta che mostra dei file non e' vuota, qualunque
             # cosa dica un conto fatto su una lettura vecchia.
             mostra_file = dati.get("caricato") and any((self._dati(f) or {}).get("tipo") == "file" for f in self._figli(voce))
-            if self.contatore.files(dati["percorso"]) == [] and not mostra_file:
+            # Una cartella toccata dal cestino resta, e dice (vuota).
+            if self.contatore.files(dati["percorso"]) == [] and not mostra_file and not dati.get("toccata"):
                 # Le voci arrivano prima dei loro figli: basta togliere il
                 # ramo piu' in alto.
                 if not self._dentro_una_di(voce, vuote):
                     vuote.add(voce)
                 continue
-            nuova = self._etichetta_della_cartella(dati["percorso"], dati.get("nome"))
+            if dati.get("toccata") and self.contatore.files(dati["percorso"]) == [] and "vuota" not in dati:
+                # Si guarda una volta sola, non a ogni avviso del contatore.
+                dati["vuota"] = self._e_vuota(dati["percorso"])
+            nuova = self._etichetta_della_cartella(dati["percorso"], dati.get("nome"), dati.get("vuota"))
             if self.albero.GetItemText(voce) != nuova:
                 self.albero.SetItemText(voce, nuova)
         if vuote:
             self._togli_dalla_plancia(vuote)
+
+    def _riconta(self, *cartelle):
+        """Dopo un file o una cartella mandati nel cestino (Gabriele, 4
+        ottobre 2026, 1.77.0): le cartelle che li contenevano si rileggono, e
+        i conti loro e di chi le contiene si rifanno, cosi' risalendo le
+        etichette dicono il vero. Le loro voci nella plancia non spariscono
+        piu', nemmeno senza niente da suonare: dicono (vuota)."""
+        da_rifare = set()
+        for cartella in cartelle:
+            da_rifare.update(self.contatore.cambiata(cartella))
+        cambiate = {os.path.normcase(c.rstrip("\\")) for c in cartelle}
+        for voce in [*self._tutte_le_voci(self.nodo_pc), *self._tutte_le_voci(self.nodo_rete)]:
+            dati = self._dati(voce) or {}
+            if dati.get("tipo") != "cartella":
+                continue
+            percorso = os.path.normcase(dati["percorso"].rstrip("\\"))
+            if any(c == percorso or c.startswith(percorso + "\\") for c in cambiate):
+                dati["toccata"] = True
+                dati.pop("vuota", None)
+        self.contatore.chiedi(sorted(da_rifare))
+        self._aggiorna_cartelle()
 
     def _togli_dalla_plancia(self, voci):
         """Toglie dalla plancia dei rami interi. Se il fuoco stava su uno di
@@ -2197,16 +2244,18 @@ class Finestra(wx.Frame):
 
     def _voci_del_menu(self, dati):
         tipo = dati["tipo"]
+        # I dettagli della voce del menu, anche se intanto il fuoco si sposta.
+        dettagli_della_voce = ("Leggi i dettagli", lambda: self._leggi_i_dettagli(dati))
         if tipo == "radice_playlist":
-            return [("Nuova playlist", self._comando_nuova_playlist)]
+            return [("Nuova playlist", self._comando_nuova_playlist), dettagli_della_voce]
         if tipo == "risultati":
             return [("Riproduci", lambda: self._riproduci_playlist(self.risultati)), ("Salva come playlist", self._salva_risultati),
-                ("Nuova ricerca", self._ricerca_globale), ("Ferma la ricerca", self._ferma_ricerca)]
+                ("Nuova ricerca", self._ricerca_globale), ("Ferma la ricerca", self._ferma_ricerca), dettagli_della_voce]
         if tipo == "altri":
             return [("Mostra altri risultati", lambda: self._altri_risultati(dati))]
         if tipo == "gruppo_risultati":
             gruppo = dati["gruppo"]
-            return [("Salva come playlist", lambda: self._salva_risultati(gruppo))]
+            return [("Salva come playlist", lambda: self._salva_risultati(gruppo)), dettagli_della_voce]
         if tipo == "playlist":
             pl = dati["playlist"]
             voci = [("Riproduci", lambda: self._riproduci_playlist(pl)), ("Filtro", lambda: self._modifica_filtro(pl))]
@@ -2214,7 +2263,7 @@ class Finestra(wx.Frame):
                 voci.append(("Togli il filtro", lambda: self._imposta_filtro(pl, "")))
             if pl is not self.archivio.preferiti:
                 voci += [("Rinomina", lambda: self._rinomina(pl)), ("Elimina", lambda: self._elimina_playlist(pl))]
-            return voci
+            return [*voci, dettagli_della_voce]
         if tipo == "brano":
             pl, brano = dati["playlist"], dati["brano"]
             return [("Riproduci", lambda: self._riproduci(pl, brano)),
@@ -2224,7 +2273,7 @@ class Finestra(wx.Frame):
                 ("Aggiungi ai preferiti", lambda: self._ai_preferiti(brano)), ("Rinomina file", lambda: self._rinomina_file(brano)),
                 *self._voci_dei_tag([brano.percorso]), ("Manda nel cestino", lambda: self._al_cestino(self._voce_di_lavoro()))]
         if tipo == "pc":
-            return [("Aggiorna", lambda: self._aggiorna_ramo(self.nodo_pc))]
+            return [("Aggiorna", lambda: self._aggiorna_ramo(self.nodo_pc)), dettagli_della_voce]
         if tipo == "rete":
             return [("Aggiungi un percorso di rete", self._comando_aggiungi_percorso_di_rete), ("Aggiorna", lambda: self._aggiorna_ramo(self.nodo_rete))]
         if tipo in ("computer_della_rete", "computer"):
@@ -2238,7 +2287,7 @@ class Finestra(wx.Frame):
                 ("Aggiorna", lambda: self._aggiorna_cartella(cartella))]
             if dati.get("a_mano"):
                 voci.append(("Togli il percorso", lambda: self._togli_percorso_di_rete(cartella)))
-            return voci
+            return [*voci, dettagli_della_voce]
         if tipo == "file":
             pl, brano = dati["playlist"], dati["brano"]
             return [("Riproduci", lambda: self._riproduci(pl, brano)), ("Aggiungi alla playlist", self._menu_aggiungi(lambda: [Brano(brano.percorso)])),
@@ -2434,15 +2483,200 @@ class Finestra(wx.Frame):
         return voci
 
     def _comando_leggi_i_tag(self):
-        """F11: i tag del brano selezionato, o dei file selezionati, nella console."""
+        """F11: i tag del brano selezionato, o dei file selezionati, nella
+        console; su un contenitore, i suoi dettagli (1.77.0)."""
+        if len(self._voci_selezionate()) <= 1:
+            dati = self._dati(self._voce_di_lavoro()) or {}
+            if dati.get("tipo") in TIPI_CON_I_DETTAGLI:
+                self._leggi_i_dettagli(dati)
+                return
+        # I dettagli chiesti prima, se arrivano, non portano via il fuoco ai tag.
+        self._dettagli_attesi = None
         with wx.BusyCursor():
             percorsi = self._file_dei_tag()
         if not percorsi:
-            self._riscontro("non_disponibile", "F11 legge i tag di un brano o di un file audio o video: scegline uno nella plancia. I SID, i MIDI, i tracker e MKV non hanno tag che MeTeOra sappia leggere.")
+            self._riscontro("non_disponibile", "F11 legge i tag di un brano o di un file audio o video, e i dettagli di una cartella, di un'unità o di una playlist: scegline uno nella plancia. "
+                "I SID, i MIDI, i tracker e MKV non hanno tag che MeTeOra sappia leggere.")
             return
         if self._troppi_per_i_tag(percorsi):
             return
         self._leggi_i_tag(percorsi)
+
+    # I dettagli dei contenitori (Gabriele, 4 ottobre 2026, 1.77.0).
+
+    def _in_disparte(self, lavoro, al_termine):
+        """lavoro() in un filo a parte, e al_termine(esito) nel filo della
+        finestra; le prove lo sostituiscono per fare tutto subito. Un guasto
+        del lavoro arriva ad al_termine come riga della console, e poi risale
+        come problema interno, invece di lasciare chi aspetta nel silenzio."""
+
+        def fai():
+            try:
+                esito = lavoro()
+            except Exception as errore:
+                wx.CallAfter(al_termine, [f"Non riesco a raccogliere i dettagli: {errore}"])
+                raise
+            wx.CallAfter(al_termine, esito)
+
+        threading.Thread(target=fai, name="MeTeOra, dettagli", daemon=True).start()
+
+    def _durata_del_percorso(self, percorso):
+        return (self.schedario.scheda(percorso) or {}).get("durata")
+
+    def _nome_del_contenitore(self, dati):
+        """Il nome di un contenitore per le frasi della console, dai suoi dati."""
+        tipo = dati.get("tipo")
+        if tipo == "cartella":
+            return dati.get("nome") or os.path.basename(dati["percorso"].rstrip("\\")) or dati["percorso"]
+        if tipo == "unita":
+            return dati.get("etichetta") or dati["percorso"]
+        if tipo == "playlist":
+            return "i Preferiti" if dati["playlist"] is self.archivio.preferiti else f"la playlist {dati['playlist'].nome}"
+        if tipo == "risultati":
+            return "i Risultati"
+        if tipo == "gruppo_risultati":
+            return dati["gruppo"].nome
+        return "Questo PC" if tipo == "pc" else "le playlist"
+
+    def _leggi_i_dettagli(self, dati):
+        """F11 su un contenitore, o Leggi i dettagli nel suo menu: tutti i
+        dati che MeTeOra sa dare, nella console. Si raccolgono in un filo a
+        parte, perche' una cartella grande o un'unita' si percorrono tutte; se
+        ci vuole tempo, la console lo dice. Un altro F11 interrompe il conto
+        di prima. dati sono quelli della voce, presi quando si e' chiesto: il
+        fuoco, intanto, puo' spostarsi."""
+        tipo = (dati or {}).get("tipo")
+        if tipo not in TIPI_CON_I_DETTAGLI:
+            self._riscontro("non_disponibile", "I dettagli ci sono per le cartelle, le unità, Questo PC e le playlist.")
+            return
+        segno = self._dettagli_attesi = object()
+
+        def fermo():
+            return segno is not self._dettagli_attesi or self._chiusa
+
+        if tipo in ("cartella", "unita"):
+            lavoro = lambda: self._dettagli_della_cartella(dati["percorso"], tipo == "unita", fermo)  # noqa: E731
+        elif tipo == "pc":
+            lavoro = self._dettagli_di_questo_pc
+        elif tipo == "radice_playlist":
+            elenco = [(pl, list(pl.brani)) for pl in self.archivio.playlist]
+            lavoro = lambda: self._dettagli_delle_playlist(elenco, fermo)  # noqa: E731
+        else:
+            titolo, brani, pl = self._contenuto_da_descrivere(dati)
+            lavoro = lambda: self._dettagli_dei_brani(titolo, brani, pl, fermo)  # noqa: E731
+        nome = self._nome_del_contenitore(dati)
+
+        def se_tarda():
+            if segno is self._dettagli_attesi and not self._chiusa:
+                self.scrivi(f"Raccolgo i dettagli di {nome}: ci vuole qualche secondo.")
+
+        wx.CallLater(800, se_tarda)
+        self._in_disparte(lavoro, lambda righe: self._dettagli_pronti(segno, dati, righe))
+
+    def _dettagli_pronti(self, segno, dati, righe):
+        """Le righe arrivate: se chi le ha chieste e' ancora li', sulla stessa
+        voce della plancia, il fuoco va sulla prima riga come per i tag;
+        altrimenti le righe si scrivono senza portare via il fuoco."""
+        if segno is not self._dettagli_attesi or self._chiusa:
+            return
+        self._dettagli_attesi = None
+        sul_posto = wx.Window.FindFocus() is self.albero and self._dati(self._voce_di_lavoro()) is dati
+        self._stampa("dettagli", righe, porta_il_fuoco=sul_posto)
+
+    def _contenuto_da_descrivere(self, dati):
+        """(titolo, brani, playlist o None) di una playlist, dei Preferiti, dei Risultati o di un loro ramo."""
+        tipo = dati["tipo"]
+        if tipo == "playlist":
+            pl = dati["playlist"]
+            return ("Preferiti" if pl is self.archivio.preferiti else f"Playlist {pl.nome}"), list(pl.brani), pl
+        if tipo == "risultati":
+            return f"Risultati di {self._testo_della_ricerca}", list(self.risultati.brani), None
+        gruppo = dati["gruppo"]
+        return f"Ramo {gruppo.nome} dei Risultati", self._brani_del_gruppo(gruppo), None
+
+    def _dettagli_della_cartella(self, percorso, e_un_unita, fermo):
+        righe = []
+        if e_un_unita:
+            unita = dettagli.dati_dell_unita(percorso)
+            righe = dettagli.righe_dell_unita(unita)
+            if not unita["pronta"]:
+                return righe
+        if in_rete(percorso) and not questa_rete.raggiungibile(percorso):
+            return [*righe, f"{percorso} non risponde: la rete o il disco sono spenti, o lontani."]
+        censimento = dettagli.censisci(percorso, fermo)
+        sconosciuti = [p for p in censimento["suonabili"] if self._durata_del_percorso(p) is None]
+        if sconosciuti:
+            # Le durate che mancano si leggono in sottofondo, per il prossimo F11.
+            self.schedario.chiedi(sconosciuti)
+        cartella = dettagli.righe_della_cartella(percorso, censimento, self._durata_del_percorso, durata_lunga)
+        if e_un_unita:
+            # La riga col percorso, le date e gli attributi della radice, che
+            # e' sempre nascosta e di sistema, per un'unita' non servono.
+            cartella = [r for r in cartella[1:] if not r.startswith(("Creata il ", "Attributi: "))]
+        return righe + cartella
+
+    def _dettagli_di_questo_pc(self):
+        """Lo spazio di ogni unita', e in tutto quello dei dischi del PC:
+        senza le unita' di rete, e contando una volta sola un volume che ha
+        due lettere."""
+        righe = []
+        totale = libero = 0
+        visti = set()
+        unita = questo_pc.unita()
+        for radice, nome in unita:
+            d = dettagli.dati_dell_unita(radice)
+            if not d["pronta"]:
+                righe.append(f"{nome}: {d['tipo']}, non risponde o non ha un disco.")
+                continue
+            if d["tipo"] != dettagli.TIPI_DI_UNITA[4] and d["volume"] not in visti:
+                visti.add(d["volume"])
+                totale, libero = totale + d["totale"], libero + d["libero"]
+            righe.append(f"{nome}: {d['tipo']}, liberi {dettagli.dimensione(d['libero'])} di {dettagli.dimensione(d['totale'])}, {dettagli.percentuale(d['libero'], d['totale'])} del totale.")
+        testa = [f"Questo PC: {len(unita)} unità."]
+        if totale:
+            testa.append(f"Dischi del PC, in tutto: liberi {dettagli.dimensione(libero)} di {dettagli.dimensione(totale)}, {dettagli.percentuale(libero, totale)} del totale.")
+        return testa + righe
+
+    def _nome_del_brano(self, brano):
+        return f"{brano.nome_del_file}, sottobrano {brano.sottobrano}" if brano.sottobrano else brano.nome_del_file
+
+    def _dettagli_dei_brani(self, titolo, brani, pl=None, fermo=None):
+        """Le righe di una playlist, dei Preferiti, dei Risultati o di un loro ramo."""
+        righe = [f"{titolo}: {al_plurale(len(brani), 'brano', 'brani')}."]
+        if not brani:
+            return righe
+        censimento = dettagli.censisci_brani([b.percorso for b in brani], fermo)
+        righe.append(f"Sul disco: {dettagli.dimensione(censimento['byte'])}.")
+        self.schedario.chiedi([b.percorso for b in brani if self.schedario.durata(b) is None])
+        righe += dettagli.righe_dei_brani(brani, self.schedario.durata, durata_lunga, nome_di=self._nome_del_brano, percorso_di=lambda b: b.percorso)
+        saltati = sum(1 for b in brani if b.saltato)
+        if saltati:
+            righe.append(f"Saltati: {saltati}.")
+        mancanti = censimento["mancanti"]
+        if mancanti:
+            righe.append(f"Mancanti sul disco: {len(mancanti)}; il primo è {mancanti[0]}.")
+        if censimento["lontani"]:
+            righe.append(f"In rete, senza risposta: {censimento['lontani']} file, che i conti non comprendono.")
+        if censimento["interrotto"]:
+            righe.append("Conto interrotto: i numeri valgono per la parte letta.")
+        if pl is not None and pl.filtro:
+            passano = sum(1 for b in brani if self._ammesso(pl, b))
+            righe.append(f"Filtro: {pl.filtro}; lo {'passa' if passano == 1 else 'passano'} {al_plurale(passano, 'brano', 'brani')}.")
+        return righe
+
+    def _dettagli_delle_playlist(self, elenco, fermo=None):
+        """Il ramo Playlist: quante, quanti brani in tutto, e una riga per playlist."""
+        tutti = [b for _pl, brani in elenco for b in brani]
+        righe = [f"Playlist: {len(elenco)}, con {al_plurale(len(tutti), 'brano', 'brani')} in tutto."]
+        if tutti:
+            censimento = dettagli.censisci_brani([b.percorso for b in tutti], fermo)
+            righe.append(f"Sul disco: {dettagli.dimensione(censimento['byte'])}.")
+        for pl, brani in elenco:
+            durate = [self.schedario.durata(b) for b in brani]
+            note = [d for d in durate if d is not None]
+            durata = f", {durata_lunga(sum(note))}" if note else ""
+            righe.append(f"{pl.nome}: {al_plurale(len(brani), 'brano', 'brani')}{durata}.")
+        return righe
 
     def _troppi_per_i_tag(self, percorsi):
         if len(percorsi) <= MASSIMO_DI_FILE_PER_I_TAG:
@@ -2569,6 +2803,7 @@ class Finestra(wx.Frame):
                 self._aggiorna_risultati()
         else:
             self._togli(pl, brano, annuncia=False)
+        self._riconta(os.path.dirname(brano.percorso))
         self._riscontro("cestino", f"{brano.nome_del_file} è nel cestino di Windows." if cestino else f"{brano.nome_del_file} è cancellato per sempre.")
 
     def _cartella_al_cestino(self, voce, dati):
@@ -2578,7 +2813,7 @@ class Finestra(wx.Frame):
         file dentro, anche che MeTeOra non suona, resta. Le cartelle prime di
         Questa rete e di un computer sono condivisioni, e non si toccano."""
         percorso = dati["percorso"]
-        nome = self.albero.GetItemText(voce)
+        nome = self._nome_della_voce(voce)
         genitore = self.albero.GetItemParent(voce)
         if dati.get("a_mano") or (self._dati(genitore) or {}).get("tipo") in ("rete", "computer"):
             self._riscontro("non_disponibile", f"{nome} è un percorso di rete, non una cartella da cestinare.")
@@ -2604,6 +2839,8 @@ class Finestra(wx.Frame):
             vicina = self.albero.GetPrevSibling(voce)
         self._seleziona(vicina if vicina.IsOk() else genitore)
         self.albero.Delete(voce)
+        self.contatore.dimentica(percorso, anche_sopra=False)
+        self._riconta(os.path.dirname(percorso.rstrip("\\")))
         self._riscontro("cestino", f"La cartella {nome} è nel cestino di Windows." if cestino else f"La cartella {nome} è cancellata per sempre.")
 
     def _cancella(self, voce):
@@ -2862,6 +3099,7 @@ class Finestra(wx.Frame):
         approdo = self._approdo(cestinate)
         self._salva_archivio()
         self._ricostruisci_dopo_la_cancellazione(approdo, cancellate)
+        self._riconta(*{os.path.dirname(brano.percorso) for _v, _pl, brano in bersagli if not os.path.exists(brano.percorso)})
         if any(pl is self.risultati for _v, pl, _b in bersagli):
             self._aggiorna_risultati()
         testo = f"Nel cestino di Windows {riusciti} file." if not senza_cestino else f"Tolti {riusciti} file: quelli dove il cestino non c'è sono cancellati per sempre."
@@ -5729,9 +5967,10 @@ class Finestra(wx.Frame):
 
     # F1, F2, F3.
 
-    def _stampa(self, evento, righe):
+    def _stampa(self, evento, righe, porta_il_fuoco=True):
         """Scrive nella console un testo lungo, riga per riga, con l'ora solo
-        in fondo, e ci porta il fuoco con il cursore sulla prima riga."""
+        in fondo, e ci porta il fuoco con il cursore sulla prima riga; con
+        porta_il_fuoco falso il fuoco resta dov'e'."""
         righe = [r for r in righe if r.strip()]
         if not righe:
             return
@@ -5744,7 +5983,12 @@ class Finestra(wx.Frame):
                 self.scrivi(riga, ora=i == len(righe) - 1)
         finally:
             self._da_tenere = 0
-        self._porta_il_cursore(len("".join(r + "\n" for r in self._righe[:-len(righe)])))
+        inizio = len("".join(r + "\n" for r in self._righe[:-len(righe)]))
+        if porta_il_fuoco:
+            self._porta_il_cursore(inizio)
+        else:
+            # Il fuoco resta dov'e'; tornando nella console si arriva qui.
+            self._posizione_della_console = self._nella_console(inizio)
 
     @staticmethod
     def _unita(testo):

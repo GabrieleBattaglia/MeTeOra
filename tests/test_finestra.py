@@ -515,11 +515,11 @@ def test_filtro_nella_plancia_e_nella_riproduzione(finestra, suoni_annotati, mon
     assert finestra.coda.successivo() is None
     # Il menu della playlist ha il filtro, e Togli il filtro quando c'è.
     voci = dict(finestra._voci_del_menu(finestra._dati(nodo)))
-    assert list(voci) == ["Riproduci", "Filtro", "Togli il filtro", "Rinomina", "Elimina"]
+    assert list(voci) == ["Riproduci", "Filtro", "Togli il filtro", "Rinomina", "Elimina", "Leggi i dettagli"]
     voci["Togli il filtro"]()
     assert _ultima(finestra).startswith("Filtro di Playlist svuotato")
     assert pl.filtro == ""
-    assert [n for n, _a in finestra._voci_del_menu(finestra._dati(finestra.nodo_preferiti))] == ["Riproduci", "Filtro"]
+    assert [n for n, _a in finestra._voci_del_menu(finestra._dati(finestra.nodo_preferiti))] == ["Riproduci", "Filtro", "Leggi i dettagli"]
     from playlist import Archivio
 
     finestra._imposta_filtro(pl, "jazz")
@@ -4394,6 +4394,156 @@ def test_maiuscolo_canc_dove_il_cestino_non_c_e(finestra, suoni_annotati, tmp_pa
     assert _ultima(finestra) == "a.mp3 è cancellato per sempre."
     # Un percorso di Questa rete non e' una cartella da cestinare.
     finestra.albero.Expand(finestra.nodo_rete)
-    radice = finestra.albero.AppendItem(finestra.nodo_rete, "nas", data={"tipo": "cartella", "percorso": "\\\\nas\\musica", "caricato": False})
+    radice = finestra.albero.AppendItem(finestra.nodo_rete, "nas", data={"tipo": "cartella", "percorso": "\\\\nas\\musica", "nome": "nas", "caricato": False})
     finestra._al_cestino(radice)
     assert _ultima(finestra) == "nas è un percorso di rete, non una cartella da cestinare." and len(domande) == 1
+
+
+def _dettagli_subito(finestra, monkeypatch):
+    """I dettagli raccolti subito, nel filo della prova."""
+    monkeypatch.setattr(finestra, "_in_disparte", lambda lavoro, al_termine: al_termine(lavoro()))
+
+
+def test_f11_su_una_cartella_scrive_i_dettagli(finestra, monkeypatch, suoni_annotati, tmp_path):
+    # 1.77.0, Gabriele: su un contenitore F11 scrive i dettagli nella console.
+    _dettagli_subito(finestra, monkeypatch)
+    (tmp_path / "Disco" / "Dentro").mkdir(parents=True)
+    (tmp_path / "Disco" / "a.mp3").write_bytes(b"x" * 2048)
+    (tmp_path / "Disco" / "Dentro" / "note.txt").write_bytes(b"x")
+    finestra.albero.Expand(finestra.nodo_pc)
+    nodo = finestra.albero.AppendItem(finestra.nodo_pc, "Disco", data={"tipo": "cartella", "percorso": str(tmp_path / "Disco"), "caricato": False})
+    finestra._seleziona(nodo)
+    _tasto(finestra, codice=wx.WXK_F11)
+    assert suoni_annotati[-1] == "dettagli"
+    righe = [r.split(" - ")[0] for r in finestra._righe[-8:]]
+    assert f"Cartella Disco: {tmp_path / 'Disco'}." in "\n".join(finestra._righe[-10:])
+    assert any("Da suonare: 1 file, sottocartelle comprese, 2.0 KB." in r for r in finestra._righe[-10:])
+    assert any("Tutti i file: 2, 2.0 KB, nascosti e di ogni tipo compresi." in r for r in finestra._righe[-10:]), righe
+    # Il menu della cartella ha la voce che fa lo stesso.
+    assert "Leggi i dettagli" in [nome for nome, _azione in finestra._voci_del_menu(finestra._dati(nodo))]
+
+
+def test_f11_su_una_playlist_e_sul_ramo_playlist(finestra, monkeypatch, suoni_annotati, tmp_path):
+    _dettagli_subito(finestra, monkeypatch)
+    for nome in ("a.mp3", "b.sid"):
+        (tmp_path / nome).write_bytes(b"x" * 1024)
+    finestra._aggiungi(None, [str(tmp_path / "a.mp3"), str(tmp_path / "b.sid"), os.path.join(r"C:\sparito", "c.mp3")])
+    pl = finestra.archivio.playlist[0]
+    pl.brani[1].saltato = True
+    nodo = next(finestra._figli(finestra.nodo_playlist))
+    finestra._seleziona(nodo)
+    _tasto(finestra, codice=wx.WXK_F11)
+    testo = "\n".join(finestra._righe[-8:])
+    assert f"Playlist {pl.nome}: 3 brani." in testo and "Sul disco: 2.0 KB." in testo and "Tipi: mp3 2, sid 1." in testo
+    assert "Saltati: 1." in testo and f"Mancanti sul disco: 1; il primo è {os.path.join(r'C:\sparito', 'c.mp3')}." in testo
+    finestra._seleziona(finestra.nodo_playlist)
+    _tasto(finestra, codice=wx.WXK_F11)
+    assert any(f"{pl.nome}: 3 brani" in r for r in finestra._righe[-3:]) and any("Playlist: 1, con 3 brani in tutto." in r for r in finestra._righe[-5:])
+
+
+def test_il_cestino_rifa_i_conti_e_la_cartella_dice_vuota(finestra, monkeypatch, suoni_annotati, tmp_path):
+    # 1.77.0, Gabriele: dopo il cestino i conti delle cartelle si rifanno, e
+    # una cartella rimasta senza niente da suonare resta, e dice (vuota).
+    import questo_pc
+
+    monkeypatch.setattr(finestra, "_conferma", lambda domanda, titolo: True)
+
+    def nel_cestino(percorso):
+        os.remove(percorso)
+        return True
+
+    monkeypatch.setattr(questo_pc, "nel_cestino", nel_cestino)
+    base = tmp_path / "Disco"
+    (base / "Musica").mkdir(parents=True)
+    for nome in ("uno.mp3", "due.mp3"):
+        (base / "Musica" / nome).write_bytes(b"")
+    finestra.albero.Expand(finestra.nodo_pc)
+    nodo = finestra.albero.AppendItem(finestra.nodo_pc, "Disco", data={"tipo": "cartella", "percorso": str(base), "caricato": False})
+    finestra.albero.SetItemHasChildren(nodo, True)
+    finestra.albero.Expand(nodo)
+    finestra.contatore.aspetta()
+    finestra._conti_arrivati()
+    musica = next(finestra._figli(nodo))
+    assert finestra.albero.GetItemText(musica) == "Musica, 2 file"
+    finestra.albero.Expand(musica)
+    for _ in range(2):
+        finestra._al_cestino(next(finestra._figli(musica)))
+        finestra.contatore.aspetta()
+        finestra._conti_arrivati()
+    # La cartella resta, e dice (vuota).
+    assert finestra.albero.GetItemText(musica) == "Musica (vuota)"
+
+
+def test_il_cestino_di_una_cartella_non_perde_i_conti_di_sopra(finestra, monkeypatch, suoni_annotati, tmp_path):
+    # Revisione 1.77.0: svuotata e poi cestinata una cartella, la cartella che
+    # la conteneva dice ancora i suoi conti.
+    import shutil
+
+    import questo_pc
+
+    monkeypatch.setattr(finestra, "_conferma", lambda domanda, titolo: True)
+
+    def nel_cestino(percorso):
+        if os.path.isdir(percorso):
+            shutil.rmtree(percorso)
+        else:
+            os.remove(percorso)
+        return True
+
+    monkeypatch.setattr(questo_pc, "nel_cestino", nel_cestino)
+    base = tmp_path / "Disco"
+    (base / "Musica" / "X").mkdir(parents=True)
+    (base / "Musica" / "X" / "a.mp3").write_bytes(b"")
+    (base / "Musica" / "b.mp3").write_bytes(b"")
+    finestra.albero.Expand(finestra.nodo_pc)
+    nodo = finestra.albero.AppendItem(finestra.nodo_pc, "Disco", data={"tipo": "cartella", "percorso": str(base), "caricato": False})
+    finestra.albero.SetItemHasChildren(nodo, True)
+    finestra.albero.Expand(nodo)
+    finestra.contatore.aspetta()
+    finestra._conti_arrivati()
+    musica = next(finestra._figli(nodo))
+    finestra.albero.Expand(musica)
+    finestra.contatore.aspetta()
+    finestra._conti_arrivati()
+    x = next(v for v in finestra._figli(musica) if (finestra._dati(v) or {}).get("tipo") == "cartella")
+    finestra.albero.Expand(x)
+    finestra._al_cestino(next(finestra._figli(x)))
+    finestra.contatore.aspetta()
+    finestra._conti_arrivati()
+    assert finestra.albero.GetItemText(x) == "X (vuota)" and finestra.albero.GetItemText(musica) == "Musica, 1 file"
+    # Il nome nella frase e' quello della cartella, senza l'etichetta.
+    finestra._al_cestino(x)
+    assert _ultima(finestra) == "La cartella X è nel cestino di Windows."
+    finestra.contatore.aspetta()
+    finestra._conti_arrivati()
+    assert finestra.albero.GetItemText(musica) == "Musica, 1 file"
+
+
+def test_i_dettagli_del_menu_e_quelli_in_ritardo(finestra, monkeypatch, suoni_annotati, tmp_path):
+    # Revisione 1.77.0: la voce del menu vale per la voce del menu, anche se
+    # il fuoco si sposta; i dettagli che arrivano quando il fuoco e' altrove
+    # si scrivono senza portarlo via.
+    rimandati = []
+    monkeypatch.setattr(finestra, "_in_disparte", lambda lavoro, al_termine: rimandati.append((lavoro, al_termine)))
+    portati = []
+    monkeypatch.setattr(finestra, "_porta_il_cursore", portati.append)
+    (tmp_path / "Disco").mkdir()
+    finestra.albero.Expand(finestra.nodo_pc)
+    nodo = finestra.albero.AppendItem(finestra.nodo_pc, "Disco", data={"tipo": "cartella", "percorso": str(tmp_path / "Disco"), "caricato": False})
+    voci = dict(finestra._voci_del_menu(finestra._dati(nodo)))
+    finestra._seleziona(finestra.nodo_playlist)
+    voci["Leggi i dettagli"]()
+    lavoro, al_termine = rimandati[-1]
+    righe = lavoro()
+    assert righe[0] == f"Cartella Disco: {tmp_path / 'Disco'}."
+    al_termine(righe)
+    assert not portati and suoni_annotati[-1] == "dettagli"
+    assert any(r.startswith(f"Cartella Disco: {tmp_path / 'Disco'}.") for r in finestra._righe[-3:])
+    # Un F11 sui tag interrompe i dettagli chiesti prima: quando arrivano, tacciono.
+    finestra._seleziona(nodo)
+    _tasto(finestra, codice=wx.WXK_F11)
+    lavoro, al_termine = rimandati[-1]
+    righe_prima = len(finestra._righe)
+    finestra._dettagli_attesi = None
+    al_termine(lavoro())
+    assert len(finestra._righe) == righe_prima

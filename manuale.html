@@ -107,6 +107,7 @@ kbd {
 <ul>
 <li><a href="#unita-cartelle-file">Unità, cartelle e file</a></li>
 <li><a href="#conti-cartelle">I conti delle cartelle</a></li>
+<li><a href="#dettagli-cartelle">I dettagli di una cartella e di un'unità</a></li>
 <li><a href="#menu-pc">I menu di Questo PC</a></li>
 <li><a href="#cartella-temporanea">Una cartella come playlist temporanea</a></li>
 <li><a href="#esempi-pc">Esempi</a></li>
@@ -330,7 +331,7 @@ kbd {
 </ul>
 <h4>I tag</h4>
 <ul>
-<li><kbd>F11</kbd>: scrive nella console i tag del brano o del file selezionato, o dei file selezionati, e ci porta il fuoco.</li>
+<li><kbd>F11</kbd>: scrive nella console i tag del brano o del file selezionato, o dei file selezionati, e ci porta il fuoco; su una cartella, un'unità, Questo PC o una playlist ne scrive i dettagli.</li>
 <li><kbd>Maiuscolo con F11</kbd>: apre subito il menu dei tag, per modificarli.</li>
 </ul>
 <h4>Il video</h4>
@@ -575,7 +576,7 @@ kbd {
 <li>X sui Preferiti li suona dal primo brano; se sono vuoti, la console ricorda che F4 ci mette il brano selezionato.</li>
 <li>Canc su un brano dei Preferiti lo toglie; Canc sui Preferiti dice che non si eliminano.</li>
 <li>La barra verticale, sui Preferiti o su un loro brano, apre il loro filtro.</li>
-<li>Il menu dei Preferiti, con Invio, il tasto Applicazioni o la barra spaziatrice, ha Riproduci, Filtro e Togli il filtro, se un filtro c'è.</li>
+<li>Il menu dei Preferiti, con Invio, il tasto Applicazioni o la barra spaziatrice, ha Riproduci, Filtro, Togli il filtro, se un filtro c'è, e Leggi i dettagli.</li>
 <li>Il menu di un brano dei Preferiti è quello dei brani delle playlist, descritto nel capitolo Le playlist.</li>
 </ul>
 <h3 id="esempi-preferiti">Esempi</h3>
@@ -607,6 +608,7 @@ kbd {
 <li>Togli il filtro, che c'è solo quando un filtro c'è: lo svuota, e tornano tutti i brani.</li>
 <li>Rinomina: chiede il nuovo nome, con quello di adesso già selezionato. Un nome che un'altra playlist ha già, senza badare alle maiuscole, non si accetta, e la console lo dice; un campo vuoto, o lo stesso nome, lasciano tutto com'è.</li>
 <li>Elimina: chiede conferma, con No come risposta predefinita, e ricorda che i file restano sul disco; il fuoco va sulla playlist vicina. Lo stesso fa Canc sulla playlist.</li>
+<li>Leggi i dettagli, come F11 sulla playlist: quanti brani, quanto occupano sul disco, i tipi, la durata, il più lungo e il più corto, quanti sono saltati, quanti mancano sul disco, con il primo che manca, e se c'è un filtro quanti brani lo passano. Lo stesso vale per i Preferiti, per i Risultati e per i loro rami; sul ramo Playlist, F11 dice quante playlist ci sono, quanti brani in tutto, e una riga per playlist con i brani e la durata.</li>
 </ul>
 <h3 id="brani-playlist">I brani di una playlist</h3>
 <p>Aperta con freccia destra, una playlist mostra i suoi brani: il nome del file con l'estensione, poi la durata quando si conosce, e dopo, quando servono, le indicazioni: quanti marker ha, saltato, punto A del loop, punto B del loop, in riproduzione. Un sottobrano messo in una playlist come brano a sé ha il nome del file e il numero del sottobrano, per esempio Commando.sid, sottobrano 3 di 5. Un SID o un file delle console con più sottobrani dice quanti sono e quanto durano in tutto, ed è un ramo, come un brano con dei marker: freccia destra mostra i sottobrani, o i marker.</p>
@@ -673,10 +675,28 @@ kbd {
 <h3 id="conti-cartelle">I conti delle cartelle</h3>
 <p>Ogni cartella, dopo il nome, dice quanti file suonabili contiene, sottocartelle comprese, e quanto durano in tutto, per esempio Amiga, 240 file, 8:12:30 in tutto, 3 senza durata. MeTeOra li conta in sottofondo quando apri la cartella che le contiene, e le durate arrivano mentre le legge. I conti valgono finché MeTeOra resta aperto; le durate invece MeTeOra se le ricorda.</p>
 <p>Le cartelle in cui non c'è niente da suonare, nemmeno nelle sottocartelle, spariscono appena contate, anche se il fuoco è su di loro: in quel caso passa alla cartella vicina. Una cartella che hai aperto e che mostra dei file non sparisce mai. Se una cartella non compare perché era vuota quando è stata contata, Aggiorna sulla cartella che la contiene, o su Questo PC, rifà i conti.</p>
+<p>Quando mandi nel cestino un file o una cartella, con Maiuscolo con Canc, MeTeOra rilegge la cartella che li conteneva e rifà i conti suoi e di tutte le cartelle che la contengono: risalendo, le etichette dicono già il numero di file e la durata nuovi. Una cartella toccata così non sparisce, nemmeno se non le resta niente da suonare: dice Musica (vuota) se è vuota davvero, e allora Maiuscolo con Canc la manda nel cestino, oppure Musica (niente da suonare) se ha ancora dei file che MeTeOra non suona.</p>
+<h3 id="dettagli-cartelle">I dettagli di una cartella e di un'unità</h3>
+<p>F11 su una cartella, o la voce Leggi i dettagli del suo menu, scrive nella console tutto quello che MeTeOra ne sa, una informazione per riga, e ci porta il fuoco sulla prima, come per i tag. Per contare, MeTeOra percorre la cartella con tutte le sottocartelle: di solito ci vuole un attimo, un disco intero di centinaia di migliaia di file chiede qualche secondo, e se tarda la console lo dice. Un altro F11 interrompe il conto di prima, e se i dettagli arrivano quando il fuoco è già altrove si scrivono nella console senza spostarlo: F6 ci porta sulla loro prima riga. Una cartella che non si legge lo dice, con il motivo. Le righe sono queste, e quelle che non servono non compaiono:</p>
+<ul>
+<li>Cartella: il nome e il percorso completo; se è vuota, lo dice.</li>
+<li>Da suonare: quanti file, sottocartelle comprese, e quanto occupano.</li>
+<li>Tipi: quanti file per estensione, dal tipo più frequente, per esempio mp3 120, flac 30, sid 4.</li>
+<li>Durata: di tutti i file da suonare, e di quanti la durata non si conosce; quelle che mancano MeTeOra le legge in sottofondo, e spesso un altro F11 le comprende.</li>
+<li>Il più lungo e Il più corto: i file da suonare con la durata più lunga e più corta.</li>
+<li>Sottocartelle: quante ce ne sono dentro direttamente, e quante in tutto.</li>
+<li>Tutti i file: quanti sono e quanto occupano, compresi quelli nascosti e quelli che MeTeOra non suona, come li conta Esplora risorse.</li>
+<li>Creata il e modificata il: le date della cartella.</li>
+<li>Il file cambiato per ultimo: il file visibile modificato più di recente, con il percorso dentro la cartella e la data.</li>
+<li>Attributi: se la cartella è nascosta, di sistema, a sola lettura o compressa.</li>
+<li>Non si leggono: le sottocartelle che Windows non lascia leggere, che i conti non comprendono.</li>
+</ul>
+<p>Su un'unità le prime righe dicono il nome del volume, il tipo, come disco locale o unità rimovibile, il file system, la capacità, lo spazio libero e lo spazio occupato, con la percentuale; poi vengono le righe della cartella, senza date e attributi della radice. Su Questo PC F11 dice, per ogni unità, lo spazio libero su quello totale con la percentuale, e in testa il totale di tutte. In rete i conti possono essere lenti, o non arrivare se la condivisione non risponde: lì un altro F11 riparte da capo.</p>
+
 <h3 id="menu-pc">I menu di Questo PC</h3>
 <ul>
-<li>Il menu di Questo PC ha una voce, Aggiorna, che dimentica i conti di tutte le cartelle e ricarica le unità, per esempio dopo aver inserito una chiavetta.</li>
-<li>Il menu di un'unità o di una cartella ha Riproduci, Crea playlist da qui, Aggiungi alla playlist, con il sottomenu delle playlist, e Aggiorna, che rilegge la cartella e rifà i suoi conti.</li>
+<li>Il menu di Questo PC ha Aggiorna, che dimentica i conti di tutte le cartelle e ricarica le unità, per esempio dopo aver inserito una chiavetta, e Leggi i dettagli, come F11.</li>
+<li>Il menu di un'unità o di una cartella ha Riproduci, Crea playlist da qui, Aggiungi alla playlist, con il sottomenu delle playlist, Aggiorna, che rilegge la cartella e rifà i suoi conti, e Leggi i dettagli, come F11.</li>
 <li>Il menu di un file ha Riproduci, Aggiungi alla playlist, Aggiungi ai preferiti, Rinomina file, Leggi i tag e Tag per i formati di cui MeTeOra scrive i tag, e Manda nel cestino.</li>
 <li>Il menu di un sottobrano ha Riproduci, Aggiungi alla playlist e Aggiungi ai preferiti.</li>
 </ul>

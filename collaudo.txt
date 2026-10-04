@@ -1,4 +1,4 @@
-Collaudo di MeTeOra 1.76.0, con NVDA: il manuale in HTML, F1 e F12, la ricerca anche in rete, B e Z con la riproduzione casuale, l'invito a offrire un caffè, la cartella vuota nel cestino. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.76.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Collaudo di MeTeOra 1.77.0, con NVDA: il manuale in HTML, F1 e F12, la ricerca anche in rete, B e Z con la riproduzione casuale, l'invito a offrire un caffè, la cartella vuota nel cestino, i dettagli dei contenitori. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.77.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
 F1: si apre il browser con il manuale, e la console dice che il manuale si apre nel browser.
 Nel browser H e Maiuscolo con H passano da un titolo all'altro, e 2 salta da un capitolo all'altro.
 L'indice in cima al manuale porta ai capitoli: Invio su un collegamento salta lì.
@@ -20,3 +20,9 @@ Esci da MeTeOra con Esc più volte, riaprendolo: circa una volta su cinque l'inv
 In Questo PC, Maiuscolo con Canc su una cartella vuota: la domanda, con No predefinito; Sì la manda nel cestino, la voce sparisce e il fuoco va sulla vicina.
 Maiuscolo con Canc su una cartella con dentro file che MeTeOra non suona, per esempio solo immagini: la console dice che non è vuota, e la cartella resta.
 Se hai una chiavetta, Maiuscolo con Canc su un file di prova: la domanda dice Cancellare per sempre.
+F11 su E:\audio\Amiga giochi: la console scrive i dettagli, con un suono nuovo, e il fuoco va sulla prima riga; controlla che i numeri tornino.
+F11 sull'unità E:: prima lo spazio, capacità, libero e occupato con la percentuale, poi i conti; ci vuole qualche secondo, e la console dice che sta raccogliendo.
+F11 su Questo PC, su una playlist, sui Preferiti e sul ramo Playlist: i dettagli di ciascuno.
+Il menu di una cartella e di una playlist ha Leggi i dettagli, che fa come F11.
+Apri una cartella con pochi file di prova, mandane uno nel cestino con Maiuscolo con Canc e risali con freccia sinistra: l'etichetta dice già un file in meno.
+Manda nel cestino anche gli altri: la cartella resta, e dice (vuota); Maiuscolo con Canc su di lei la manda nel cestino.

@@ -2,6 +2,13 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.77.0] - 2026-10-04
+
+- F11 su un contenitore ne scrive i dettagli nella console, una informazione per riga, con un suono nuovo. Su una cartella: i file da suonare e quanto occupano, i tipi, la durata, il più lungo e il più corto, le sottocartelle dirette e in tutto, tutti i file con la dimensione, le date, il file cambiato per ultimo, gli attributi. Su un'unità prima lo spazio: capacità, libero e occupato con la percentuale, nome del volume, tipo e file system. Su Questo PC lo spazio di ogni unità e in tutto. Su una playlist, i Preferiti, i Risultati e i loro rami: brani, spazio sul disco, tipi, durata, saltati, mancanti sul disco, il filtro; sul ramo Playlist una riga per playlist. I conti si fanno in sottofondo, e un altro F11 interrompe quello di prima. Nei menu dei contenitori c'è anche la voce Leggi i dettagli. Chiesto da Gabriele.
+- Dopo un file o una cartella mandati nel cestino, i conti delle cartelle che li contenevano, e di quelle che le contengono, si rifanno: risalendo, le etichette dicono il vero. Una cartella toccata così non sparisce più quando resta senza niente da suonare: dice (vuota), o (niente da suonare) se ha file d'altro tipo. Chiesto da Gabriele.
+- Il suono dei dettagli è quello delle statistiche di meditimer, firmato anche da MeTeOra nella collezione di GBUtils V193.
+- La revisione prima della pubblicazione ha trovato undici difetti, corretti: fra gli altri, la cartella cestinata faceva perdere i conti a quella che la conteneva; la voce del menu lavorava sulla voce col fuoco invece che su quella del menu; una cartella illeggibile si diceva vuota; i dettagli in ritardo portavano via il fuoco; un conto del contatore fatto mentre una cartella cambiava restava vecchio.
+
 ## [1.76.0] - 2026-10-04
 
 - Maiuscolo con Canc su una cartella vuota la manda nel cestino, dopo la domanda con No predefinito. Vuota vuol dire senza file nemmeno nelle sottocartelle, a parte quelli di servizio come desktop.ini e Thumbs.db; una cartella con dei file, anche che MeTeOra non suona, resta, e la console lo dice. Le unità e i percorsi di Questa rete non si toccano. Chiesto da Gabriele.

@@ -18,6 +18,10 @@ EVENTI = {
     # L'invito a offrire un caffe' (1.75.0): lo stesso di Tornello e Terminal
     # Beast, firmato anche da MeTeOra nella collezione (GBUtils V192).
     "donazione": "donazione",
+    # I dettagli dei contenitori con F11 (1.77.0): le statistiche di
+    # meditimer, due note di onda triangolare, firmate anche da MeTeOra
+    # nella collezione (GBUtils V193).
+    "dettagli": "meditimer_statistiche",
     "plancia": "spostamento_f5",
     "console": "spostamento_f6",
     "cruscotto": "spostamento_f7",
