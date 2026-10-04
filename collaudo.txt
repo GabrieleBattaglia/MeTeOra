@@ -32,3 +32,11 @@ Spegni i sottotitoli letti con Maiuscolo con F2 mentre la fila ha ancora blocchi
 In E:\git\tmp\campioni_audio suona i campioni di APE, TAK, Musepack, Speex e il DSF ricavato: si sentono, e F11 ne legge i tag.
 sv8_Choral.mpc: la durata detta è 1:25, non 1:23; con la dissolvenza accesa la fine non si taglia.
 Chiudi NVDA e suona un video con i sottotitoli accesi: li dice la voce di Windows.
+Aggiornamento, dopo la prima release, con il pacchetto di una versione precedente: all'avvio si apre la finestra Aggiornamento di MeTeOra, con il fuoco sul testo.
+Il testo dice la versione nuova, la tua, e le novità di tutte le versioni dalla tua alla nuova.
+Esc: la console dice Aggiornamento rimandato; riavvia, e la finestra torna.
+Invio nel testo: lo stesso di Non adesso.
+Lascia la finestra aperta due minuti senza rispondere: si chiude da sola, come con Non adesso.
+Aggiorna adesso: la console dice a che punto è lo scaricamento, poi una finestra dice che MeTeOra si chiude.
+Dopo l'OK MeTeOra si chiude senza l'invito al caffè e si riapre aggiornato.
+Al riavvio la console dice MeTeOra è stato aggiornato, dalla versione vecchia alla nuova; playlist, impostazioni e marker ci sono tutti.

@@ -2,6 +2,14 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.84.0] - 2026-10-04
+
+- L'aggiornamento automatico, condizione di Gabriele per il primo rilascio: a ogni avvio del programma compilato MeTeOra controlla in sottofondo su GitHub se c'è una versione nuova, con l'auto updater di GBUtils, come Dadillo, Tornello e Terminal Beast. Dai sorgenti non controlla.
+- Se c'è, si apre la finestra Aggiornamento di MeTeOra, con il fuoco sul testo: la versione nuova, quella che hai e le novità di tutte le versioni dalla tua alla nuova, prese da questo changelog, così chi ne salta qualcuna le legge tutte; senza il changelog valgono le note della release.
+- Aggiorna adesso scarica la versione nuova, con l'avanzamento nella console, poi chiude MeTeOra salvando tutto, senza l'invito a offrire un caffè, e lo riapre aggiornato. Non adesso, Esc, Invio nel testo o due minuti senza risposta lo rimandano al prossimo avvio.
+- Al primo avvio dopo un aggiornamento la console dice da quale versione a quale, e che F2 scrive le novità.
+- zip_maker.py prepara l'archivio della release che l'aggiornamento scarica, senza i file dei dati, le console salvate, FluidSynth e i banchi dei MIDI.
+
 ## [1.83.3] - 2026-10-04
 
 - Prova con file veri, scaricati dall'archivio dei campioni di FFmpeg: APE, TAK, Musepack SV7 e SV8, Speex, DSF e DFF si suonano, saltano e arrivano in fondo senza errori.

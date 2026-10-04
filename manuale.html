@@ -233,6 +233,7 @@ kbd {
 <li><a href="#liste">Le liste di scelta</a></li>
 <li><a href="#dialoghi-e-tasti">I tasti dentro i dialoghi</a></li>
 </ul></li>
+<li><a href="#aggiornamenti">Gli aggiornamenti</a></li>
 <li><a href="#file-di-meteora">I file di MeTeOra</a>
 <ul>
 <li><a href="#file-dati">I file dei dati</a></li>
@@ -1373,6 +1374,11 @@ kbd {
 <p>Scheda audio, Modello della riproduzione casuale, Sintesi di sottotitoli e karaoke, Dove vanno sottotitoli e karaoke, Testo del karaoke, Banco dei suoni MIDI e la lista dei banchi trovati aprono una lista, con una riga già selezionata: quella della scelta di adesso, quando c'è, altrimenti la prima. Invio, o il doppio clic, confermano la riga; Esc, o il pulsante Annulla, annullano, e la console lo dice.</p>
 <h3 id="dialoghi-e-tasti">I tasti dentro i dialoghi</h3>
 <p>Dentro un campo, una domanda, una lista o una finestra come le impostazioni e i marcatori, valgono solo i tasti di quel dialogo: le lettere che scrivi non diventano comandi del lettore, e nemmeno i tasti funzione o Esc per uscire da MeTeOra. Nelle liste le lettere portano alla riga seguente che comincia così, come in Windows. Se intanto parte un video, la sua finestra aspetta che il dialogo si chiuda.</p>
+<h2 id="aggiornamenti">Gli aggiornamenti</h2>
+<p>A ogni avvio MeTeOra controlla in sottofondo se su GitHub c'è una versione più nuova, e intanto puoi già usarlo. Se non c'è, o se manca la rete, non dice niente. Il controllo si fa solo con il programma compilato, non avviandolo dai sorgenti.</p>
+<p>Se c'è una versione nuova, con il suono della domanda si apre la finestra Aggiornamento di MeTeOra. Il fuoco è sul testo, da leggere con le frecce: la versione nuova, quella che hai, e le novità di tutte le versioni dalla tua alla nuova, così se ne hai saltata qualcuna le leggi tutte. Ci sono due pulsanti: Aggiorna adesso, Alt con A, e Non adesso, Alt con N. Esc, e Invio nel testo, valgono Non adesso: aggiornare si sceglie solo con il suo pulsante. Se non rispondi entro due minuti, la finestra si chiude da sola come con Non adesso.</p>
+<p>Con Non adesso la console dice Aggiornamento rimandato, e la proposta torna al prossimo avvio. Con Aggiorna adesso MeTeOra scarica la versione nuova, e la console dice a che punto è; poi una finestra avvisa che MeTeOra si chiude per aggiornarsi. Dopo l'OK MeTeOra si chiude salvando tutto, i suoi file vengono sostituiti e la versione nuova si riapre da sola. Playlist, impostazioni, marker e schedario restano come sono: l'aggiornamento non li tocca. Se lo scaricamento non riesce, una finestra lo dice e MeTeOra resta com'è.</p>
+<p>Al primo avvio dopo l'aggiornamento la console dice da quale versione a quale sei passato, e F2 scrive le novità.</p>
 <h2 id="file-di-meteora">I file di MeTeOra</h2>
 <h3 id="file-dati">I file dei dati</h3>
 <p>MeTeOra tiene i suoi dati nella cartella del programma: quella dell'eseguibile, o quella dei sorgenti se lo avvii da lì. Sono file di testo in formato JSON, che MeTeOra scrive da solo.</p>

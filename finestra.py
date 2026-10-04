@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura. Nella 1.83.1 Maiuscolo con F10 lascia chiuso Questo PC, e la plancia molto aperta non ferma piu' la finestra. Nella 1.83.2 F10 a fette, e i suoni delle aperture che non si sovrappongono.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura. Nella 1.83.1 Maiuscolo con F10 lascia chiuso Questo PC, e la plancia molto aperta non ferma piu' la finestra. Nella 1.83.2 F10 a fette, e i suoni delle aperture che non si sovrappongono. Nella 1.84.0 la proposta dell'aggiornamento, il suo avanzamento e la chiusura per aggiornarsi.
 
 """La finestra di MeTeOra.
 
@@ -66,7 +66,15 @@ import tag
 import valori
 import version
 from contatore import Contatore
-from dialoghi import DialogoConferma, DialogoDonazione, DialogoTesto, FinestraImpostazioni, FinestraMarcatori, FinestraScelta
+from dialoghi import (
+    DialogoConferma,
+    DialogoDonazione,
+    DialogoTesto,
+    FinestraAggiornamento,
+    FinestraImpostazioni,
+    FinestraMarcatori,
+    FinestraScelta,
+)
 from filtro import COMMENTO, ErroreFiltro, Filtro, modello_della_console
 from impostazioni import Impostazioni
 from marcatori import Marcatori
@@ -823,6 +831,15 @@ class Finestra(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self._alla_chiusura)
         self.Bind(wx.EVT_ACTIVATE, self._all_attivazione)
         self.scrivi(f"MeTeOra {version.VERSION} del {version.DATE}. Pronto: F1 apre il manuale nel browser, F12 scrive nella console la guida rapida dei tasti, F7 apre il cruscotto con i tasti del punto in cui ti trovi.")
+        # Dopo un aggiornamento la versione e' cambiata: lo si dice (1.84.0).
+        prima = self.impostazioni["versione"]
+        if prima and prima != version.VERSION:
+            self.scrivi(f"MeTeOra è stato aggiornato dalla {prima} alla {version.VERSION}: F2 scrive nella console le novità.")
+        if prima != version.VERSION:
+            self.impostazioni["versione"] = version.VERSION
+            self._salva_impostazioni()
+        # Chiudendo per farsi aggiornare non si invita alla donazione.
+        self._per_aggiornare = False
         fuori_dal_normale = self._riproduzione_fuori_dal_normale()
         if fuori_dal_normale:
             self.scrivi(fuori_dal_normale)
@@ -5899,6 +5916,44 @@ class Finestra(wx.Frame):
         quante = len(self._righe)
         self._riscontro("console_salvata", f"Console salvata in {nome}, nella cartella del programma: {'1 riga' if quante == 1 else f'{quante} righe'}.")
 
+    # L'aggiornamento automatico (Gabriele, 4 ottobre 2026, 1.84.0): lo
+    # conduce aggiornamento.py, dal suo filo; qui la finestra e le frasi.
+
+    @property
+    def chiusa(self):
+        return self._chiusa
+
+    def proponi_l_aggiornamento(self, attuale, nuova, novita, attesa=None):
+        """La proposta, con le novita': vero se si sceglie di aggiornare."""
+        self._domanda()
+        self.scrivi(f"È disponibile MeTeOra {nuova}: la finestra dell'aggiornamento dice le novità.")
+        with FinestraAggiornamento(self, attuale, nuova, novita, attesa) as dialogo:
+            scelta = dialogo.ShowModal()
+        if scelta == wx.ID_YES:
+            self._riscontro("aggiornamento", f"Scarico MeTeOra {nuova}: la console dice a che punto sono.")
+            return True
+        self._annullato("Aggiornamento rimandato: te lo ripropongo al prossimo avvio.")
+        return False
+
+    def avanzamento_dell_aggiornamento(self, presi, totale):
+        """A che punto e' lo scaricamento, in una riga che si riscrive."""
+        if self._chiusa:
+            return
+        testo = f"Aggiornamento: {presi * 100 // totale}%." if totale else f"Aggiornamento: {presi // 1048576} MB."
+        self.scrivi(testo, "aggiornamento")
+
+    def avvisa_dell_aggiornamento(self, testo):
+        """Un esito dell'aggiornamento: nella console e in una finestra, che
+        aspetta l'OK."""
+        self.scrivi(testo)
+        wx.MessageBox(testo, "Aggiornamento di MeTeOra", wx.OK | wx.ICON_INFORMATION, self)
+
+    def chiudi_per_aggiornare(self):
+        """GBUtils sta per sostituire MeTeOra: si chiude salvando tutto, senza
+        l'invito alla donazione."""
+        self._per_aggiornare = True
+        self.Close(force=True)
+
     # L'invito a offrire un caffe' (Gabriele, 4 ottobre 2026, 1.75.0).
 
     def _invito_alla_donazione(self, genitore, probabilita=20):
@@ -6844,9 +6899,12 @@ class Finestra(wx.Frame):
             wx.MessageBox(f"MeTeOra non è riuscito a salvare {'; '.join(non_salvati)}.", "MeTeOra, uscita", wx.OK | wx.ICON_ERROR, self)
         # L'invito a offrire un caffe', una volta su cinque, per ultimo:
         # tutto e' gia' salvato e la musica e' ferma. Un guasto dell'invito
-        # non deve impedire l'uscita (1.75.0).
+        # non deve impedire l'uscita (1.75.0). Non quando ci si chiude per
+        # farsi aggiornare: lo script che sostituisce MeTeOra aspetta la sua
+        # chiusura al massimo trenta secondi (1.84.0).
         try:
-            self._invito_alla_donazione(self)
+            if not self._per_aggiornare:
+                self._invito_alla_donazione(self)
         except Exception:  # noqa: BLE001 - l'uscita viene prima dell'invito
             traceback.print_exc()
         # Il suono dell'uscita si ascolta intero prima che il processo finisca.

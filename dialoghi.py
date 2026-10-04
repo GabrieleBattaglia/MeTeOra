@@ -1,6 +1,6 @@
 # MeTeOra, i dialoghi: il campo da una riga, la domanda con Si' e No, la finestra delle impostazioni, la scelta da una lista, la finestra dei marcatori e l'invito a offrire un caffe'.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); DialogoTesto arriva da finestra.py. Nella 1.66.36 la domanda con Sì e No, che si chiude con Esc. Nella 1.75.0 l'invito a offrire un caffe', come in Tornello. Nella 1.81.0 il filtro delle impostazioni.
+# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); DialogoTesto arriva da finestra.py. Nella 1.66.36 la domanda con Sì e No, che si chiude con Esc. Nella 1.75.0 l'invito a offrire un caffe', come in Tornello. Nella 1.81.0 il filtro delle impostazioni. Nella 1.84.0 la proposta dell'aggiornamento.
 
 """I dialoghi di MeTeOra, fuori dalla finestra principale.
 
@@ -136,6 +136,69 @@ class DialogoDonazione(wx.Dialog):
         with contextlib.suppress(Exception):
             webbrowser.open(INDIRIZZO_PAYPAL)
         self.EndModal(wx.ID_YES)
+
+
+class FinestraAggiornamento(wx.Dialog):
+    """La proposta dell'aggiornamento (1.84.0): in un campo di sola lettura,
+    che ha il fuoco all'apertura, la versione nuova, quella che si ha, e le
+    novita' dalla propria versione alla nuova; i pulsanti Aggiorna adesso e
+    Non adesso. Esc, e Invio nel testo, valgono Non adesso: aggiornare si
+    sceglie solo con il suo pulsante. Con attesa, in secondi, la finestra si
+    chiude da sola come Non adesso allo scadere, e l'aggiornamento torna al
+    prossimo avvio. ShowModal da' wx.ID_YES per aggiornare, wx.ID_NO
+    altrimenti."""
+
+    def __init__(self, genitore, attuale, nuova, novita, attesa=None):
+        from GBwx import STILE_ADATTABILE, adatta_finestra, pannello_scorrevole
+
+        super().__init__(genitore, title="Aggiornamento di MeTeOra", style=STILE_ADATTABILE)
+        pannello = pannello_scorrevole(self)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        righe = [f"È disponibile MeTeOra {nuova}; tu hai la {attuale}.",
+            "Aggiorna adesso scarica la versione nuova, chiude MeTeOra e lo riapre aggiornato; playlist, impostazioni e marker restano."]
+        if attesa:
+            righe.append(f"Se non rispondi entro {durata_dell_attesa(attesa)}, la finestra si chiude da sola e te lo ripropongo al prossimo avvio.")
+        righe += ["Le novità:", (novita or "").strip() or "Nessuna novità scritta per questa versione."]
+        self.testo = wx.TextCtrl(pannello, value="\n".join(righe), style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2)
+        self.testo.SetName("Aggiornamento di MeTeOra")
+        self.aggiorna = wx.Button(pannello, wx.ID_YES, "&Aggiorna adesso")
+        self.non_adesso = wx.Button(pannello, wx.ID_NO, "&Non adesso")
+        pulsanti = wx.BoxSizer(wx.HORIZONTAL)
+        for pulsante in (self.aggiorna, self.non_adesso):
+            pulsanti.Add(pulsante, 0, wx.LEFT, 5)
+        sizer.Add(self.testo, 1, wx.EXPAND | wx.ALL, 5)
+        sizer.Add(pulsanti, 0, wx.ALL | wx.ALIGN_RIGHT, 5)
+        pannello.SetSizer(sizer)
+        adatta_finestra(self, pannello, (560, 420))
+        self.SetEscapeId(wx.ID_NO)
+        self.non_adesso.SetDefault()
+        self.aggiorna.Bind(wx.EVT_BUTTON, lambda _evento: self.EndModal(wx.ID_YES))
+        self.non_adesso.Bind(wx.EVT_BUTTON, lambda _evento: self.EndModal(wx.ID_NO))
+        self.Bind(wx.EVT_CHAR_HOOK, self._tasto)
+        self.testo.SetFocus()
+        if attesa:
+            wx.CallLater(round(attesa * 1000), self._scaduta)
+
+    def _tasto(self, evento):
+        """Invio nel testo vale Non adesso, come nelle finestre di messaggio;
+        sui pulsanti Invio resta loro."""
+        if evento.GetEventObject() is self.testo and _premuto_invio(evento) and not evento.IsAutoRepeat():
+            self.EndModal(wx.ID_NO)
+            return
+        evento.Skip()
+
+    def _scaduta(self):
+        # La finestra puo' essere gia' chiusa, o distrutta.
+        if self and self.IsModal():
+            self.EndModal(wx.ID_NO)
+
+
+def durata_dell_attesa(secondi):
+    """Il tempo dell'attesa a parole: 2 minuti, 1 minuto, 90 secondi."""
+    if secondi % 60:
+        return f"{int(secondi)} secondi"
+    minuti = int(secondi // 60)
+    return "1 minuto" if minuti == 1 else f"{minuti} minuti"
 
 
 class FinestraImpostazioni(wx.Dialog):

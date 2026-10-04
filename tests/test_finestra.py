@@ -5169,3 +5169,56 @@ def test_la_durata_vera_di_musepack_e_dsf(finestra, monkeypatch, tmp_path):
     altro.durata_vera = None
     finestra.motore._aggiungi_le_tracce(altro, str(tmp_path / "a.mp3"), 1)
     assert altro.durata_vera is None
+
+
+def test_l_aggiornamento_nella_finestra(finestra, monkeypatch, suoni_annotati):
+    # 1.84.0: la proposta, l'avanzamento e la chiusura senza l'invito alla donazione.
+    risposte = [wx.ID_NO, wx.ID_YES]
+    aperte = []
+
+    class Finta:
+        def __init__(self, genitore, attuale, nuova, novita, attesa=None):
+            aperte.append((attuale, nuova, novita, attesa))
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_argomenti):
+            return False
+
+        def ShowModal(self):
+            return risposte.pop(0)
+
+    monkeypatch.setattr(modulo, "FinestraAggiornamento", Finta)
+    assert finestra.proponi_l_aggiornamento("1.83.3", "1.84.0", "novita'", 120) is False
+    assert suoni_annotati[-1] == "annullamento" and _ultima(finestra) == "Aggiornamento rimandato: te lo ripropongo al prossimo avvio."
+    assert finestra.proponi_l_aggiornamento("1.83.3", "1.84.0", "novita'", 120) is True
+    assert suoni_annotati[-1] == "aggiornamento" and aperte[0] == ("1.83.3", "1.84.0", "novita'", 120)
+    finestra.avanzamento_dell_aggiornamento(30, 100)
+    finestra.avanzamento_dell_aggiornamento(60, 100)
+    assert _ultima(finestra) == "Aggiornamento: 60%." and not any(r.startswith("Aggiornamento: 30%") for r in finestra._righe)
+    inviti = []
+    monkeypatch.setattr(finestra, "_invito_alla_donazione", lambda genitore, probabilita=20: inviti.append(probabilita))
+    finestra.chiudi_per_aggiornare()
+    assert finestra.chiusa and inviti == []
+
+
+def test_dopo_l_aggiornamento_la_console_lo_dice(app, tmp_path):
+    import json
+
+    from finestra import Finestra
+
+    (tmp_path / "MeTeOra - Impostazioni.json").write_text(json.dumps({"versione": "1.0.0"}), encoding="utf-8")
+    f = Finestra(ao="null", cartella_dati=str(tmp_path))
+    try:
+        assert any(r.startswith(f"MeTeOra è stato aggiornato dalla 1.0.0 alla {modulo.version.VERSION}: F2") for r in f._righe)
+        assert f.impostazioni["versione"] == modulo.version.VERSION
+    finally:
+        f.Close(force=True)
+        f.Destroy()
+    g = Finestra(ao="null", cartella_dati=str(tmp_path))
+    try:
+        assert not any("è stato aggiornato" in r for r in g._righe)
+    finally:
+        g.Close(force=True)
+        g.Destroy()
