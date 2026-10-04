@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows.
 
 """La finestra di MeTeOra.
 
@@ -51,12 +51,14 @@ import dettagli
 import formati
 import marcatori
 import midi
+import ocr
 import percorsi
 import questa_rete
 import questo_pc
 import schede_audio
 import sintesi
 import sottobrani
+import sottotitoli_ocr
 import suoni
 import tag
 import valori
@@ -309,8 +311,23 @@ VOCI_DELLE_IMPOSTAZIONI = {
     "salva_console": ("Salva console", None),
     "marcatori": ("Marcatori", None),
     "importa_marcatori": ("Importa marcatori", None),
+    "impressi": ("Sottotitoli impressi", "cambiati"),
     "dona": ("Dona per questo progetto", None),
 }
+# Come si leggono i sottotitoli impressi nel video, 1.80.0: le righe della scelta.
+MODI_DEGLI_IMPRESSI = {
+    "al_volo": "letti al volo, mentre il video suona, con circa mezzo secondo di ritardo",
+    "passata": "letti prima, con una passata che salva accanto al video un file usato le volte dopo",
+}
+# Il titolo della traccia che fa un file scritto dalla passata.
+TITOLO_DELLA_PASSATA = "Sottotitoli impressi"
+# Per _aggiorna_la_lettura: la traccia scelta la dicono le tracce.
+_DALLE_TRACCE = object()
+
+
+def _traccia_della_passata(tracce):
+    """La traccia del file di una passata dei sottotitoli impressi, o None."""
+    return next((t for t in tracce["sub"] if t.get("title") == TITOLO_DELLA_PASSATA), None) if tracce else None
 # L'ultima riga delle istruzioni di ogni campo.
 REGOLA_DEL_DOLLARO = "Le righe che cominciano con il dollaro non contano: scrivi nell'ultima riga."
 # La prova della scheda audio degli effetti: un centesimo di secondo di
@@ -627,7 +644,7 @@ class Finestra(wx.Frame):
             chiedi_il_seguente=lambda: wx.CallAfter(self._prepara_il_seguente),
             al_passaggio=lambda percorso, sottobrano: wx.CallAfter(self._passaggio, percorso, sottobrano),
             al_caricamento=lambda: wx.CallAfter(self._aggiorna_il_video),
-            ai_sottotitoli=lambda testo: wx.CallAfter(self._sottotitolo, testo))
+            ai_sottotitoli=lambda testo: wx.CallAfter(self._sottotitolo, testo), ai_sottotitoli_a_immagini=self._sottotitolo_a_immagini)
         # Velocita', tono, equalizzatore e dissolvenza salvati valgono per tutti
         # i brani, dal primo.
         self._applica_la_riproduzione()
@@ -642,6 +659,14 @@ class Finestra(wx.Frame):
         self._casuale_ricordato = None
         # Il segno dei dettagli che F11 sta raccogliendo: un altro F11 lo cambia (1.77.0).
         self._dettagli_attesi = None
+        # La lettura dei sottotitoli fatti di immagini in corso, una di
+        # sottotitoli_ocr, o None; la passata in anticipo in corso, o None
+        # (1.80.0). La scelta degli impressi sta nelle impostazioni.
+        self._lettura = None
+        self._passata = None
+        # I video su cui la passata non ha trovato niente: in questa sessione
+        # non si rifa'.
+        self._passate_vuote = set()
         # Il segno dell'apertura di tutta la plancia in corso, Maiuscolo con
         # F10: un tasto qualsiasi lo toglie, e l'apertura si ferma (1.79.0).
         self._apertura_della_plancia = None
@@ -4659,6 +4684,7 @@ class Finestra(wx.Frame):
             "salva_console": lambda: "scrive la console in un file di testo",
             "marcatori": self._marcatori_da_leggere,
             "importa_marcatori": lambda: "da un file esportato da MeTeOra",
+            "impressi": lambda: MODI_DEGLI_IMPRESSI[imp["impressi"]],
             "dona": lambda: "offri un caffè all'autore, con PayPal",
         }[chiave]()
         return f"{VOCI_DELLE_IMPOSTAZIONI[chiave][0]}: {valore}"
@@ -4699,6 +4725,7 @@ class Finestra(wx.Frame):
             "marcatori": self._finestra_dei_marcatori,
             "importa_marcatori": self._importa_i_marcatori,
             "dona": self._dona,
+            "impressi": self._scegli_come_leggere_gli_impressi,
         }
         if chiave in azioni:
             azioni[chiave](genitore)
@@ -5002,13 +5029,14 @@ class Finestra(wx.Frame):
             return
         if not self.motore.in_corso:
             self._nascondi_il_video()
+            self._aggiorna_la_lettura(None)
             return
         tracce = self.motore.tracce()
         if tracce is None:
             # Il brano si sta aprendo: decide l'avviso del caricamento, senza
             # chiudere e riaprire la finestra nel frattempo.
             return
-        self._sottotitoli_del_brano(tracce)
+        self._aggiorna_la_lettura(tracce, scelta=self._sottotitoli_del_brano(tracce))
         in_attesa = self.motore.in_pausa and self.motore.in_corso == self._video_in_attesa
         if self.impostazioni["video"] and tracce["video"] and self.motore.in_corso != self._video_nascosto_per and not in_attesa:
             self._mostra_il_video()
@@ -5016,13 +5044,27 @@ class Finestra(wx.Frame):
             self._nascondi_il_video()
 
     def _sottotitoli_del_brano(self, tracce):
-        """Accesi, se il brano non ne ha gia' scelti si prende la prima traccia;
-        spenti, nessuna."""
+        """Accesi, se il brano non ne ha gia' scelti si prende la prima traccia,
+        o, con gli impressi scelti, il file della loro passata, se c'e', e
+        altrimenti nessuna, perche' si leggono al volo; spenti, nessuna. Torna
+        la traccia appena scelta, None se li ha spenti, _DALLE_TRACCE se non
+        ha cambiato niente: la lettura dei sottotitoli fatti di immagini deve
+        sapere la scelta prima che le tracce la dicano."""
         scelta = next((t for t in tracce["sub"] if t.get("selected")), None)
         if self.impostazioni["sottotitoli"] and scelta is None and tracce["sub"]:
-            self.motore.scegli_traccia("sid", str(tracce["sub"][0]["id"]))
-        elif not self.impostazioni["sottotitoli"] and scelta is not None:
+            passata = _traccia_della_passata(tracce)
+            if self.impostazioni["impressi_scelti"]:
+                if passata is None:
+                    return _DALLE_TRACCE
+                nuova = passata
+            else:
+                nuova = next((t for t in tracce["sub"] if t is not passata), passata)
+            self.motore.scegli_traccia("sid", str(nuova["id"]))
+            return nuova
+        if not self.impostazioni["sottotitoli"] and scelta is not None:
             self.motore.scegli_traccia("sid", "no")
+            return None
+        return _DALLE_TRACCE
 
     def _mostra_il_video(self):
         if self._video is None:
@@ -5123,24 +5165,157 @@ class Finestra(wx.Frame):
 
     def _comando_sottotitoli(self):
         """Maiuscolo con F2: i sottotitoli letti a giro, spenti, la prima
-        traccia, la seconda e cosi' via. Su un brano senza sottotitoli li
-        accende o li spegne per i brani dopo."""
+        traccia, la seconda e cosi' via, e sui video in fondo i sottotitoli
+        impressi (1.80.0): la traccia del file di una passata non e' un passo
+        a se', e' quello degli impressi. Su un brano senza sottotitoli, e
+        senza impressi da leggere, li accende o li spegne per i brani dopo."""
         tracce = self.motore.tracce() if self.motore.in_corso else None
-        sottotitoli = tracce["sub"] if tracce else []
-        if not sottotitoli:
+        passata = _traccia_della_passata(tracce)
+        sottotitoli = [t for t in (tracce["sub"] if tracce else []) if t is not passata]
+        # Gli impressi ci sono se c'e' il file della passata, o se si possono leggere.
+        con_gli_impressi = bool(tracce and tracce["video"] and (passata is not None or ocr.disponibile()))
+        if not sottotitoli and not con_gli_impressi:
             acceso = not self.impostazioni["sottotitoli"]
-            seguente = None
+            self.impostazioni["impressi_scelti"] = False
             frase = ("Sottotitoli letti accesi; questo brano non ne ha." if tracce else "Sottotitoli letti accesi.") if acceso else "Sottotitoli letti spenti."
         else:
-            scelta = next((i for i, t in enumerate(sottotitoli) if t.get("selected")), None)
-            indice = 0 if scelta is None else scelta + 1
-            seguente = sottotitoli[indice] if indice < len(sottotitoli) else None
-            acceso = seguente is not None
-            self.motore.scegli_traccia("sid", str(seguente["id"]) if acceso else "no")
-            frase = f"Sottotitoli letti, traccia {_descrivi_traccia(seguente, indice, len(sottotitoli))}." if acceso else "Sottotitoli letti spenti."
+            if (passata is not None and passata.get("selected")) or (self.impostazioni["impressi_scelti"] and self.impostazioni["sottotitoli"]
+                    and not any(t.get("selected") for t in sottotitoli)):
+                attuale = len(sottotitoli)
+            else:
+                attuale = next((i for i, t in enumerate(sottotitoli) if t.get("selected")), None)
+            indice = 0 if attuale is None else attuale + 1
+            if indice < len(sottotitoli):
+                acceso, frase = True, self._scegli_i_sottotitoli(tracce, sottotitoli[indice], indice, len(sottotitoli))
+            elif indice == len(sottotitoli) and con_gli_impressi:
+                acceso, frase = True, self._scegli_gli_impressi(tracce, passata)
+            else:
+                acceso, frase = False, "Sottotitoli letti spenti."
+                self.impostazioni["impressi_scelti"] = False
+                self.motore.scegli_traccia("sid", "no")
         self.impostazioni["sottotitoli"] = acceso
         self._salva_impostazioni()
         self._riscontro("sottotitoli_accesi" if acceso else "sottotitoli_spenti", frase)
+        if not acceso:
+            self._aggiorna_la_lettura(tracce, scelta=None)
+
+    def _scegli_i_sottotitoli(self, tracce, traccia, indice, quante):
+        """Una traccia di sottotitoli, scelta con Maiuscolo con F2; se e' fatta
+        di immagini, la legge il riconoscimento dei caratteri."""
+        self.impostazioni["impressi_scelti"] = False
+        self.impostazioni["sottotitoli"] = True
+        self.motore.scegli_traccia("sid", str(traccia["id"]))
+        frase = f"Sottotitoli letti, traccia {_descrivi_traccia(traccia, indice, quante)}."
+        if traccia.get("codec") in sottotitoli_ocr.CODEC_A_IMMAGINI:
+            if ocr.disponibile():
+                frase += " È fatta di immagini: la legge il riconoscimento dei caratteri di Windows."
+            else:
+                frase += " È fatta di immagini, e il riconoscimento dei caratteri di Windows non c'è: non si può leggere."
+        self._aggiorna_la_lettura(tracce, scelta=traccia)
+        return frase
+
+    def _scegli_gli_impressi(self, tracce, passata):
+        """I sottotitoli impressi nel video, in fondo al giro di Maiuscolo
+        con F2 (Gabriele, 4 ottobre 2026): il file della passata, se c'e',
+        in ogni modo, perche' e' a tempo e senza ritardo; altrimenti letti al
+        volo, e con la passata scelta nelle impostazioni la passata parte."""
+        self.impostazioni["impressi_scelti"] = True
+        self.impostazioni["sottotitoli"] = True
+        if passata is not None:
+            self.motore.scegli_traccia("sid", str(passata["id"]))
+            self._aggiorna_la_lettura(tracce, scelta=passata)
+            return "Sottotitoli impressi, dal file della passata fatta prima."
+        self.motore.scegli_traccia("sid", "no")
+        self._aggiorna_la_lettura(tracce, scelta=None)
+        video = self.motore.in_corso
+        if self.impostazioni["impressi"] != "passata":
+            return "Sottotitoli impressi, letti al volo."
+        if self._passata is not None and self._passata.video == video:
+            return "Sottotitoli impressi, letti al volo: la passata è già in corso."
+        if video in self._passate_vuote:
+            return "Sottotitoli impressi, letti al volo: la passata di prima non ne ha trovati in questo video."
+        self._avvia_la_passata(video)
+        return "Sottotitoli impressi, letti al volo mentre la passata li prepara per le volte dopo."
+
+    def _sottotitolo_a_immagini(self):
+        """Dal filo del motore: comincia un sottotitolo. La lettura delle
+        tracce a immagini, se c'e', lo fotografa e lo legge."""
+        lettura = getattr(self, "_lettura", None)
+        if lettura is not None and lettura.tipo == "immagini":
+            lettura.nuovo_sottotitolo()
+
+    def _aggiorna_la_lettura(self, tracce, scelta=_DALLE_TRACCE):
+        """La lettura dei sottotitoli fatti di immagini che serve adesso: le
+        tracce a immagini, se ne e' scelta una; quelli impressi, se li ha
+        scelti Maiuscolo con F2 e non c'e' una traccia; nessuna altrimenti, o
+        se il riconoscimento non c'e'. scelta e' la traccia appena scelta, o
+        None per nessuna; senza, la si legge dalle tracce."""
+        voluta = None
+        if self.impostazioni["sottotitoli"] and tracce and tracce["video"] and not self._chiusa:
+            if scelta is _DALLE_TRACCE:
+                scelta = next((t for t in tracce["sub"] if t.get("selected")), None)
+            if scelta is not None and scelta.get("codec") in sottotitoli_ocr.CODEC_A_IMMAGINI:
+                voluta = ("immagini", ocr.lingua_per(scelta.get("lang")))
+            elif scelta is None and self.impostazioni["impressi_scelti"]:
+                voluta = ("impressi", ocr.lingua_per(None))
+        if voluta is not None and (voluta[1] is None or not ocr.disponibile()):
+            voluta = None
+        attuale = (self._lettura.tipo, self._lettura.lingua) if self._lettura is not None else None
+        if voluta == attuale:
+            return
+        if self._lettura is not None:
+            self._lettura.ferma()
+            self._lettura = None
+        self.motore.leggi_il_video(voluta is not None, oscura=voluta is not None and voluta[0] == "immagini")
+        if voluta is not None:
+            classe = sottotitoli_ocr.LetturaDelleImmagini if voluta[0] == "immagini" else sottotitoli_ocr.LetturaDegliImpressi
+            self._lettura = classe(self.motore, lambda testo: wx.CallAfter(self._sottotitolo, testo), voluta[1],
+                guasto=lambda frase: wx.CallAfter(self._riscontro, "errore", frase)).avvia()
+
+    def _avvia_la_passata(self, video):
+        """La passata in anticipo dei sottotitoli impressi di un video, in
+        sottofondo: la console dice a che punto e', ogni dieci per cento. Una
+        passata su un altro video si ferma, e la console lo dice."""
+        if self._passata is not None:
+            self._passata.ferma()
+            self.scrivi(f"La passata dei sottotitoli impressi di {os.path.basename(self._passata.video)} si ferma: ne parte una per {os.path.basename(video)}.")
+        self._passata = sottotitoli_ocr.PassataDegliImpressi(video, ocr.lingua_per(None),
+            lambda percentuale: wx.CallAfter(self._passata_avanza, video, percentuale),
+            lambda esito: wx.CallAfter(self._passata_finita, video, esito)).avvia()
+        durata = self.motore.durata or 0
+        minuti = max(1, round(durata / sottotitoli_ocr.VELOCITA_DELLA_PASSATA / 60))
+        quanto = f": ci vogliono circa {al_plurale(minuti, 'minuto', 'minuti')}" if durata else ""
+        self._riscontro("passata_avviata", f"Comincia la passata dei sottotitoli impressi di {os.path.basename(video)}{quanto}; intanto li leggo al volo.")
+
+    def _passata_avanza(self, video, percentuale):
+        if self._chiusa or self._passata is None or self._passata.video != video or not 0 < percentuale < 100:
+            return
+        self.scrivi(f"Passata dei sottotitoli impressi di {os.path.basename(video)}: {percentuale}%.", categoria="passata")
+
+    def _passata_finita(self, video, esito):
+        """La passata e' finita. Il file scritto diventa una traccia del video,
+        se suona ancora, e si sceglie solo se si aspettavano gli impressi: chi
+        nel frattempo ha scelto un'altra traccia, o li ha spenti, la tiene."""
+        if self._chiusa or self._passata is None or self._passata.video != video:
+            return
+        lingua = self._passata.lingua
+        self._passata = None
+        nome = os.path.basename(video)
+        if esito is None:
+            self._passate_vuote.add(video)
+            self._riscontro("passata_finita", f"La passata non ha trovato sottotitoli impressi in {nome}.")
+            return
+        if not os.path.isfile(esito):
+            self._riscontro("errore", esito)
+            return
+        sceglierla = self.motore.in_corso == video and self.impostazioni["sottotitoli"] and self.impostazioni["impressi_scelti"]
+        if self.motore.in_corso == video:
+            self.motore.aggiungi_sottotitoli(esito, TITOLO_DELLA_PASSATA, lingua.split("-")[0], scegli=sceglierla)
+        if sceglierla:
+            self._aggiorna_la_lettura(self.motore.tracce(), scelta={"codec": "subrip", "title": TITOLO_DELLA_PASSATA})
+            self._riscontro("passata_finita", f"Sottotitoli impressi pronti nel file {os.path.basename(esito)}, accanto al video: da ora si leggono da lì.")
+        else:
+            self._riscontro("passata_finita", f"Sottotitoli impressi pronti nel file {os.path.basename(esito)}, accanto al video: Maiuscolo con F2 li sceglie, anche le volte dopo.")
 
     def _comando_traccia_audio(self):
         """Maiuscolo con F3: la traccia audio del brano, a giro."""
@@ -5361,6 +5536,22 @@ class Finestra(wx.Frame):
         self._usa_il_banco(percorso, genitore=genitore)
         if not midi.general_midi(percorso):
             self.scrivi("Non è un banco General MIDI completo: alcuni strumenti dei MIDI potrebbero mancare o suonare con un altro timbro.")
+
+    def _scegli_come_leggere_gli_impressi(self, genitore):
+        """Come si leggono i sottotitoli impressi, da una lista: al volo o con
+        la passata in anticipo (Gabriele, 4 ottobre 2026)."""
+        chiavi = list(MODI_DEGLI_IMPRESSI)
+        righe = [f"{MODI_DEGLI_IMPRESSI[c][0].upper()}{MODI_DEGLI_IMPRESSI[c][1:]}" for c in chiavi]
+        self._domanda()
+        with FinestraScelta(genitore, "Sottotitoli impressi", righe, chiavi.index(self.impostazioni["impressi"])) as dialogo:
+            if dialogo.ShowModal() != wx.ID_OK:
+                self._annullato("Sottotitoli impressi non cambiati.")
+                return
+            indice = dialogo.GetSelection()
+        self.impostazioni["impressi"] = chiavi[indice]
+        self._salva_impostazioni()
+        genitore.aggiorna("impressi", self._riga_dell_impostazione("impressi"))
+        self._riscontro("impostazione_cambiata", f"I sottotitoli impressi ora sono {MODI_DEGLI_IMPRESSI[chiavi[indice]]}.")
 
     def _scegli_il_modello_casuale(self, genitore):
         """Il modello della riproduzione casuale, da una lista (Gabriele,
@@ -6335,6 +6526,9 @@ class Finestra(wx.Frame):
             self._salva_all_uscita(self.marcatori.salva, "i marker", non_salvati)
         self.contatore.ferma()
         self.schedario.ferma()
+        for lavoro in (self._lettura, self._passata):
+            if lavoro is not None:
+                lavoro.ferma()
         if self._video is not None:
             self._video.Destroy()
             self._video = None

@@ -174,6 +174,7 @@ kbd {
 <li><a href="#video-finestra">La finestra del video</a></li>
 <li><a href="#video-tasti">I tasti con la finestra del video</a></li>
 <li><a href="#sottotitoli">I sottotitoli letti</a></li>
+<li><a href="#sottotitoli-immagini">I sottotitoli fatti di immagini</a></li>
 <li><a href="#tracce-rapporto">Le tracce audio e il rapporto dell'immagine</a></li>
 <li><a href="#esempi-video">Esempi</a></li>
 </ul></li>
@@ -337,7 +338,7 @@ kbd {
 <h4>Il video</h4>
 <ul>
 <li><kbd>Maiuscolo con F1</kbd>: accende e spegne il video.</li>
-<li><kbd>Maiuscolo con F2</kbd>: sceglie a giro i sottotitoli letti: spenti, la prima traccia, la seconda e così via.</li>
+<li><kbd>Maiuscolo con F2</kbd>: sceglie a giro i sottotitoli letti: spenti, la prima traccia, la seconda e così via, e sui video in fondo i sottotitoli impressi; le tracce fatte di immagini le legge il riconoscimento dei caratteri.</li>
 <li><kbd>Maiuscolo con F3</kbd>: sceglie a giro la traccia audio del brano.</li>
 <li><kbd>Maiuscolo con F5</kbd>: mette la finestra del video a schermo intero, e di nuovo in finestra.</li>
 <li><kbd>Maiuscolo con F6</kbd>: cambia a giro il rapporto dell'immagine.</li>
@@ -1089,6 +1090,15 @@ kbd {
 </ul>
 <h3 id="sottotitoli">I sottotitoli letti</h3>
 <p>I sottotitoli letti, Maiuscolo con F2, vanno alla sintesi scelta nelle impostazioni, uno screen reader o la voce di Windows, e si scrivono nella console; funzionano anche con il video spento. Maiuscolo con F2 va a giro: spenti, la prima traccia, la seconda, e di nuovo spenti, e la console dice la traccia con il numero, la lingua, il titolo e il formato, quando il file li dice. Su un brano senza sottotitoli, o senza niente in corso, li accende o li spegne per i brani dopo. Accesi, ogni video che parte usa la sua prima traccia di sottotitoli. MeTeOra prende anche i sottotitoli che stanno accanto al video, con lo stesso nome, per esempio un file .srt, e ricorda alla riapertura se sono accesi.</p>
+<h3 id="sottotitoli-immagini">I sottotitoli fatti di immagini</h3>
+<p>Alcuni sottotitoli non sono testo ma immagini: le tracce dei DVD e dei Blu-ray, VobSub e PGS, e i sottotitoli impressi nel video, che fanno parte dell'immagine. MeTeOra li legge con il riconoscimento dei caratteri di Windows, nella lingua della traccia, se Windows la sa leggere, altrimenti in italiano; le lingue sono quelle installate in Windows, di solito italiano e inglese. Per leggere, MeTeOra guarda il fotogramma anche con il video spento, senza aprire nessuna finestra. Se il riconoscimento di Windows non c'è, la console lo dice e questi sottotitoli non si leggono.</p>
+<p>Una traccia a immagini si sceglie con Maiuscolo con F2, come le altre, e la console dice che è fatta di immagini. A ogni sottotitolo nuovo MeTeOra lo fotografa, isola le lettere e le legge: arrivano alla sintesi e nella console come quelli di testo, quasi subito. Con il video spento il fotogramma diventa nero e nella foto restano solo le lettere; con il video acceso MeTeOra fotografa il fotogramma con il sottotitolo e senza, e legge la differenza.</p>
+<p>Sui video, in fondo al giro di Maiuscolo con F2, dopo l'ultima traccia, c'è Sottotitoli impressi; la scelta resta anche alla riapertura di MeTeOra, come i sottotitoli accesi. Come si leggono lo decide la voce Sottotitoli impressi delle impostazioni:</p>
+<ul>
+<li>Letti al volo, il modo di partenza: mentre il video suona, MeTeOra guarda un paio di volte al secondo la fascia in basso del fotogramma, e quando c'è un testo nuovo, letto uguale due volte di fila, lo manda alla sintesi, con circa mezzo secondo di ritardo. Una scritta che resta ferma, come il logo di un canale, si sente una volta sola.</li>
+<li>Letti prima, con la passata: la prima volta MeTeOra percorre tutto il video in sottofondo, a cinque volte la velocità normale, un film di un'ora e mezza in circa venti minuti, e intanto li legge al volo; la console dice a che punto è. Alla fine salva accanto al video un file di sottotitoli con un nome riconoscibile, per esempio Film.impressi.it.srt, che diventa subito la traccia dei sottotitoli impressi; se intanto hai scelto un'altra traccia o un altro brano, la tua scelta resta, e la console dice che Maiuscolo con F2 sceglie il file. Le volte dopo il file c'è già, e Sottotitoli impressi nel giro sceglie lui, a tempo e senza ritardo, anche con il modo al volo. Le scritte ferme per più di quindici secondi, come i loghi, nel file non vanno. Una passata che non trova sottotitoli non si rifà su quel video fino alla chiusura di MeTeOra; e se accanto al video non si può scrivere, per esempio in una cartella protetta, la passata non parte e la console lo dice.</li>
+</ul>
+<p>Il riconoscimento sbaglia qualche lettera, come II al posto di Il; sui sottotitoli di prova ha letto esatte nove frasi su dieci, e le altre con una lettera storta. I titoli di testa e le scritte nell'immagine, come i nomi degli attori, si leggono anche loro, perché sono testo nell'immagine.</p>
 <h3 id="tracce-rapporto">Le tracce audio e il rapporto dell'immagine</h3>
 <p>Maiuscolo con F3 sceglie a giro la traccia audio, per i video che ne hanno più di una, e dice il numero, la lingua, il titolo e il formato, quando il file li dice; con una traccia sola lo dice, e così senza niente in corso. Maiuscolo con F6 cambia a giro il rapporto dell'immagine: quello del video, 16:9, 4:3 e 21:9; alla riapertura di MeTeOra torna quello del video.</p>
 <h3 id="esempi-video">Esempi</h3>
@@ -1239,6 +1249,8 @@ kbd {
 <p>Sì o no, come Maiuscolo con F1. Di partenza è spento.</p>
 <h4>Sottotitoli letti</h4>
 <p>Sì o no; spegnendoli qui si spengono anche nel brano in corso. Maiuscolo con F2 li accende e sceglie anche la traccia. Di partenza sono spenti.</p>
+<h4>Sottotitoli impressi</h4>
+<p>Invio apre una lista con i due modi: letti al volo, mentre il video suona, con circa mezzo secondo di ritardo, il modo di partenza; oppure letti prima, con una passata che salva accanto al video un file usato le volte dopo. Il capitolo Il video, alla sezione I sottotitoli fatti di immagini, li spiega.</p>
 <h4>Sintesi dei sottotitoli</h4>
 <p>Invio apre una lista con l'automatica, che usa lo screen reader attivo e altrimenti la voce di Windows, e le sintesi che si possono usare adesso, fra NVDA, JAWS, ZDSR, Dolphin, System Access, PC-Talker e la voce di Windows, SAPI5. Una sintesi scelta prima che adesso non risponde resta in fondo alla lista, e lo dice. La riga dice quale usa adesso l'automatica.</p>
 <h4>Banco dei suoni MIDI</h4>

@@ -2706,6 +2706,7 @@ def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_an
         ("salva_console", "Salva console: scrive la console in un file di testo"),
         ("marcatori", "Marcatori: nessuno"),
         ("importa_marcatori", "Importa marcatori: da un file esportato da MeTeOra"),
+        ("impressi", "Sottotitoli impressi: letti al volo, mentre il video suona, con circa mezzo secondo di ritardo"),
         ("dona", "Dona per questo progetto: offri un caffè all'autore, con PayPal"),
     ]
 
@@ -3968,20 +3969,20 @@ def test_esc_nella_finestra_del_video_la_nasconde_per_quel_brano(finestra, monke
 
 
 def test_maiuscolo_f2_sottotitoli_a_giro(finestra, monkeypatch, suoni_annotati):
-    stato, chiamate = _video_finto(finestra, monkeypatch, _tracce(sottotitoli=2))
+    stato, chiamate = _video_finto(finestra, monkeypatch, _tracce(video=False, sottotitoli=2))
     _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
     assert chiamate[-1] == ("sid", "1") and finestra.impostazioni["sottotitoli"] is True
     assert _ultima(finestra) == "Sottotitoli letti, traccia 1 di 2, italiano, Traccia 1, subrip." and suoni_annotati[-1] == "sottotitoli_accesi"
-    stato["tracce"] = _tracce(sottotitoli=2, scelto_sub=0)
+    stato["tracce"] = _tracce(video=False, sottotitoli=2, scelto_sub=0)
     _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
     assert chiamate[-1] == ("sid", "2")
-    stato["tracce"] = _tracce(sottotitoli=2, scelto_sub=1)
+    stato["tracce"] = _tracce(video=False, sottotitoli=2, scelto_sub=1)
     _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
     assert chiamate[-1] == ("sid", "no") and finestra.impostazioni["sottotitoli"] is False
     assert _ultima(finestra) == "Sottotitoli letti spenti." and suoni_annotati[-1] == "sottotitoli_spenti"
     assert _salvate(finestra)["sottotitoli"] is False
     # Su un brano senza sottotitoli si accendono per i brani dopo.
-    stato["tracce"] = _tracce()
+    stato["tracce"] = _tracce(video=False)
     _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
     assert _ultima(finestra) == "Sottotitoli letti accesi; questo brano non ne ha." and finestra.impostazioni["sottotitoli"] is True
     # Accesi, un brano con i sottotitoli prende la prima traccia da solo.
@@ -4616,3 +4617,193 @@ def test_maiuscolo_f10_si_ferma_al_massimo_e_con_un_tasto(finestra, monkeypatch,
     _tasto(finestra, codice=wx.WXK_DOWN)
     assert finestra._apertura_della_plancia is None and "annullamento" in suoni_annotati
     assert any("Apertura della plancia fermata" in r for r in finestra._righe[-3:])
+
+
+class _LetturaFinta:
+    """Una lettura di sottotitoli_ocr finta: annota chi la crea e la ferma."""
+
+    create = None
+
+    def __init__(self, motore, dici, lingua, guasto=None):
+        self.lingua, self.dici, self.guasto, self.fermata = lingua, dici, guasto, False
+        _LetturaFinta.create.append(self)
+
+    def avvia(self):
+        return self
+
+    def ferma(self):
+        self.fermata = True
+
+    def nuovo_sottotitolo(self):
+        self.dici("letto")
+
+
+def _ocr_finto(finestra, monkeypatch):
+    import ocr
+    import sottotitoli_ocr
+
+    _LetturaFinta.create = []
+    immagini = type("LetturaDelleImmaginiFinta", (_LetturaFinta,), {"tipo": "immagini"})
+    impressi = type("LetturaDegliImpressiFinta", (_LetturaFinta,), {"tipo": "impressi"})
+    monkeypatch.setattr(sottotitoli_ocr, "LetturaDelleImmagini", immagini)
+    monkeypatch.setattr(sottotitoli_ocr, "LetturaDegliImpressi", impressi)
+    monkeypatch.setattr(ocr, "disponibile", lambda: True)
+    monkeypatch.setattr(ocr, "lingua_per", lambda etichetta: "en-US" if etichetta == "eng" else "it-IT")
+    video_letto = []
+    monkeypatch.setattr(finestra.motore, "leggi_il_video", lambda serve, oscura=False: video_letto.append(serve))
+    return video_letto
+
+
+def test_maiuscolo_f2_con_le_immagini_e_gli_impressi(finestra, monkeypatch, suoni_annotati):
+    # 1.80.0, Gabriele: una traccia a immagini la legge il riconoscimento; in
+    # fondo al giro, sui video, i sottotitoli impressi, letti al volo.
+    tracce = _tracce(sottotitoli=2)
+    tracce["sub"][1].update(codec="dvd_subtitle", lang="eng", title="")
+    stato, chiamate = _video_finto(finestra, monkeypatch, tracce)
+    video_letto = _ocr_finto(finestra, monkeypatch)
+    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    assert chiamate[-1] == ("sid", "1") and finestra._lettura is None
+    stato["tracce"] = _tracce(sottotitoli=2, scelto_sub=0)
+    stato["tracce"]["sub"][1].update(codec="dvd_subtitle", lang="eng", title="")
+    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    assert chiamate[-1] == ("sid", "2") and finestra._lettura.tipo == "immagini" and finestra._lettura.lingua == "en-US"
+    assert _ultima(finestra).endswith("È fatta di immagini: la legge il riconoscimento dei caratteri di Windows.") and video_letto[-1] is True
+    # Il sottotitolo che comincia arriva alla lettura, che lo legge.
+    finestra._sottotitolo_a_immagini()
+    stato["tracce"] = _tracce(sottotitoli=2, scelto_sub=1)
+    stato["tracce"]["sub"][1].update(codec="dvd_subtitle", lang="eng", title="")
+    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    assert chiamate[-1] == ("sid", "no") and finestra.impostazioni["impressi_scelti"] and finestra._lettura.tipo == "impressi"
+    assert _ultima(finestra) == "Sottotitoli impressi, letti al volo." and finestra.impostazioni["sottotitoli"] is True
+    assert _LetturaFinta.create[0].fermata
+    stato["tracce"] = _tracce(sottotitoli=2)
+    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    assert _ultima(finestra) == "Sottotitoli letti spenti." and finestra._lettura is None and not finestra.impostazioni["impressi_scelti"]
+    assert video_letto[-1] is False and finestra.impostazioni["sottotitoli"] is False
+
+
+def test_gli_impressi_con_la_passata(finestra, monkeypatch, suoni_annotati, tmp_path):
+    # Con la passata scelta nelle impostazioni: senza file la passata parte e
+    # intanto si legge al volo; finita, il file diventa la traccia del video.
+    import sottotitoli_ocr
+
+    stato, chiamate = _video_finto(finestra, monkeypatch, _tracce())
+    _ocr_finto(finestra, monkeypatch)
+    finestra.impostazioni["impressi"] = "passata"
+    passate = []
+
+    class PassataFinta:
+        def __init__(self, video, lingua, avanza, finita):
+            self.video, self.lingua, self.avanza, self.finita = video, lingua, avanza, finita
+            passate.append(self)
+
+        def avvia(self):
+            return self
+
+        def ferma(self):
+            pass
+
+    monkeypatch.setattr(sottotitoli_ocr, "PassataDegliImpressi", PassataFinta)
+    aggiunti = []
+    monkeypatch.setattr(finestra.motore, "aggiungi_sottotitoli", lambda percorso, titolo, lingua, scegli=True: aggiunti.append((percorso, titolo, lingua, scegli)))
+    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    assert len(passate) == 1 and passate[0].video == stato["in_corso"] and finestra._lettura.tipo == "impressi"
+    assert "passata_avviata" in suoni_annotati
+    assert _ultima(finestra) == "Sottotitoli impressi, letti al volo mentre la passata li prepara per le volte dopo."
+    file_scritto = tmp_path / "film.impressi.it.srt"
+    file_scritto.write_text("1\n00:00:01,000 --> 00:00:02,000\nCiao\n", encoding="utf-8")
+    finestra._passata_avanza(stato["in_corso"], 50)
+    assert _ultima(finestra) == "Passata dei sottotitoli impressi di film.mkv: 50%."
+    finestra._passata_finita(stato["in_corso"], str(file_scritto))
+    assert aggiunti == [(str(file_scritto), "Sottotitoli impressi", "it", True)] and finestra._lettura is None and suoni_annotati[-1] == "passata_finita"
+    # Con il file gia' fatto, che il motore ha aggiunto come traccia, il passo
+    # degli impressi sceglie quello; e il giro dopo arriva a spenti.
+    stato["tracce"] = _tracce(sottotitoli=1)
+    stato["tracce"]["sub"][0]["title"] = "Sottotitoli impressi"
+    finestra.impostazioni["sottotitoli"] = False
+    finestra.impostazioni["impressi_scelti"] = False
+    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    assert chiamate[-1] == ("sid", "1") and _ultima(finestra) == "Sottotitoli impressi, dal file della passata fatta prima." and len(passate) == 1
+    stato["tracce"] = _tracce(sottotitoli=1, scelto_sub=0)
+    stato["tracce"]["sub"][0]["title"] = "Sottotitoli impressi"
+    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    assert _ultima(finestra) == "Sottotitoli letti spenti." and chiamate[-1] == ("sid", "no")
+
+
+def test_l_impostazione_degli_impressi(finestra, monkeypatch, suoni_annotati):
+    lista = _ListaFinta()
+    monkeypatch.setattr(modulo, "FinestraScelta", _SceltaFinta(1))
+    finestra._cambia_impostazione("impressi", lista)
+    assert finestra.impostazioni["impressi"] == "passata" and _salvate(finestra)["impressi"] == "passata"
+    assert finestra._riga_dell_impostazione("impressi") == "Sottotitoli impressi: letti prima, con una passata che salva accanto al video un file usato le volte dopo"
+
+
+def test_il_motore_aggiunge_i_file_delle_passate(finestra, tmp_path):
+    # Un video appena aperto: i file delle passate fatte prima diventano tracce.
+    (tmp_path / "Film.impressi.it.srt").write_text("")
+    comandi, avvisi = [], []
+
+    def comando(*argomenti, risposta=None):
+        comandi.append(argomenti)
+        if risposta is not None:
+            risposta(None, None)
+
+    lettore = types.SimpleNamespace(percorso=str(tmp_path / "Film.mkv"), comando=comando)
+    # L'avviso del caricamento arriva quando mpv ha aggiunto il file: chi
+    # legge le tracce lo trova.
+    finestra.motore._aggiungi_le_passate(lettore, lambda: avvisi.append(len(comandi)))
+    assert comandi == [("sub-add", str(tmp_path / "Film.impressi.it.srt"), "auto", "Sottotitoli impressi", "it")] and avvisi == [1]
+    lettore.percorso = str(tmp_path / "Film.mp3")
+    finestra.motore._aggiungi_le_passate(lettore, lambda: avvisi.append(len(comandi)))
+    assert len(comandi) == 1 and avvisi == [1, 1]
+
+
+def test_senza_riconoscimento_il_giro_arriva_a_spenti(finestra, monkeypatch, suoni_annotati):
+    # Revisione 1.80.0: senza il riconoscimento, sui video il passo degli
+    # impressi non c'e', e Maiuscolo con F2 spegne come prima.
+    import ocr
+
+    stato, _chiamate = _video_finto(finestra, monkeypatch, _tracce(sottotitoli=1))
+    monkeypatch.setattr(ocr, "disponibile", lambda: False)
+    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    stato["tracce"] = _tracce(sottotitoli=1, scelto_sub=0)
+    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    assert _ultima(finestra) == "Sottotitoli letti spenti." and finestra.impostazioni["sottotitoli"] is False
+    stato["tracce"] = _tracce()
+    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    assert _ultima(finestra) == "Sottotitoli letti accesi; questo brano non ne ha."
+
+
+def test_la_traccia_a_immagini_scelta_all_apertura_si_legge(finestra, monkeypatch, suoni_annotati):
+    # Revisione 1.80.0: la prima traccia scelta da MeTeOra all'apertura del
+    # brano, se e' a immagini, fa partire la lettura.
+    tracce = _tracce(sottotitoli=1)
+    tracce["sub"][0].update(codec="hdmv_pgs_subtitle", lang="eng")
+    _stato, chiamate = _video_finto(finestra, monkeypatch, tracce)
+    video_letto = _ocr_finto(finestra, monkeypatch)
+    finestra.impostazioni["sottotitoli"] = True
+    finestra._aggiorna_il_video()
+    assert ("sid", "1") in chiamate and finestra._lettura.tipo == "immagini" and finestra._lettura.lingua == "en-US" and video_letto[-1] is True
+
+
+def test_la_passata_finita_non_toglie_la_traccia_scelta(finestra, monkeypatch, suoni_annotati, tmp_path):
+    # Revisione 1.80.0: chi durante la passata ha scelto un'altra traccia la
+    # tiene; il file si aggiunge per le volte dopo.
+    import sottotitoli_ocr
+
+    stato, _chiamate = _video_finto(finestra, monkeypatch, _tracce(sottotitoli=1))
+    _ocr_finto(finestra, monkeypatch)
+    aggiunti = []
+    monkeypatch.setattr(finestra.motore, "aggiungi_sottotitoli", lambda percorso, titolo, lingua, scegli=True: aggiunti.append(scegli))
+    finestra._passata = types.SimpleNamespace(video=stato["in_corso"], lingua="it-IT", ferma=lambda: None)
+    finestra.impostazioni["sottotitoli"] = True
+    finestra.impostazioni["impressi_scelti"] = False
+    file_scritto = tmp_path / "film.impressi.it.srt"
+    file_scritto.write_text("1\n00:00:01,000 --> 00:00:02,000\nCiao\n", encoding="utf-8")
+    finestra._passata_finita(stato["in_corso"], str(file_scritto))
+    assert aggiunti == [False] and "Maiuscolo con F2 li sceglie" in _ultima(finestra)
+    # Una passata che non trova niente non si rifa' nella stessa sessione.
+    finestra._passata = types.SimpleNamespace(video=stato["in_corso"], lingua="it-IT", ferma=lambda: None)
+    finestra._passata_finita(stato["in_corso"], None)
+    assert stato["in_corso"] in finestra._passate_vuote
+    assert sottotitoli_ocr.VELOCITA_DELLA_PASSATA == 5

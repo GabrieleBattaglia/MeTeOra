@@ -28,6 +28,10 @@ EVENTI = {
     "chiudi_la_plancia": "meteora_plancia_chiusa",
     "apri_la_plancia": "meteora_plancia_in_apertura",
     "plancia_aperta": "meteora_plancia_aperta",
+    # La passata in anticipo dei sottotitoli impressi (1.80.0): suoni
+    # originali, nella collezione di GBUtils V195.
+    "passata_avviata": "meteora_passata_avviata",
+    "passata_finita": "meteora_passata_finita",
     "plancia": "spostamento_f5",
     "console": "spostamento_f6",
     "cruscotto": "spostamento_f7",

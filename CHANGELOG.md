@@ -2,6 +2,14 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.80.0] - 2026-10-04
+
+- I sottotitoli fatti di immagini si leggono, con il riconoscimento dei caratteri di Windows, nella lingua della traccia o in italiano. Le tracce dei DVD e dei Blu-ray, VobSub e PGS, scelte con Maiuscolo con F2: a ogni sottotitolo nuovo MeTeOra lo fotografa e lo legge: a video spento il fotogramma si annerisce e basta una foto, a video acceso ne servono due, con e senza sottotitolo, e si legge la differenza; sul banco, 20 sottotitoli su 20 letti esatti, in 14 millesimi l'uno. Tappa 10, punto b.
+- I sottotitoli impressi nel video, in fondo al giro di Maiuscolo con F2: letti al volo, guardando la fascia in basso un paio di volte al secondo, con circa mezzo secondo di ritardo; oppure, con la voce nuova Sottotitoli impressi delle impostazioni, letti prima con una passata a cinque volte la velocità normale, che salva accanto al video un file come Film.impressi.it.srt, usato come traccia le volte dopo, in tutti e due i modi. La scelta resta alla riapertura. Le scritte ferme, come i loghi, si scartano. Una passata che non trova niente non si rifà fino alla chiusura; se accanto al video non si può scrivere, non parte e lo dice; a passata finita, chi intanto ha scelto altro tiene la sua scelta. Sul banco, sottotitoli simulati letti esatti nove volte su dieci, gli altri con una lettera storta. Tappa 10, punto a, con le decisioni di Gabriele.
+- Per leggere il fotogramma il video si decodifica anche spento, senza finestre, solo mentre serve.
+- Due suoni originali per la passata, nella collezione di GBUtils V195. Servono i pacchetti winrt e Pillow, ora in requirements.txt; senza, la console dice che il riconoscimento non c'è.
+- Prima della pubblicazione la revisione ha trovato e corretto 14 difetti. Fra gli altri: due letture insieme sullo stesso motore di Windows, che lo rifiuta, ora ogni filo ha il suo; il giro di Maiuscolo con F2 che si fermava sulla traccia della passata; la traccia a immagini scelta all'apertura che non si leggeva; le lingue di tre lettere come rum, il rumeno, prese per altre; un errore in una lettura, che ora si dice una volta sola e non la ferma.
+
 ## [1.79.0] - 2026-10-04
 
 - Maiuscolo con F9 chiude tutta la plancia, e il fuoco va sulla voce di primo livello che conteneva quella su cui eri. Chiesto da Gabriele.

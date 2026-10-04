@@ -56,6 +56,10 @@ def e_chip(percorso):
     return estensione(percorso) in CHIP
 
 
+def e_video(percorso):
+    return estensione(percorso) in VIDEO
+
+
 def ha_sottobrani(percorso):
     """Vero per i file che possono avere piu' brani dentro: SID e console."""
     return estensione(percorso) in SID | CHIP

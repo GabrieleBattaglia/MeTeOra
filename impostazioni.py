@@ -63,6 +63,12 @@ PREDEFINITE = {
     "video": False,
     "sottotitoli": False,
     "sintesi": "automatica",
+    # I sottotitoli impressi nel video (1.80.0): al_volo, letti mentre il
+    # video suona, o passata, letti prima con una passata che salva un file.
+    "impressi": "al_volo",
+    # Se Maiuscolo con F2 ha scelto i sottotitoli impressi: si ricorda, come
+    # i sottotitoli accesi, anche alla riapertura (revisione della 1.80.0).
+    "impressi_scelti": False,
     # I percorsi di rete scritti a mano in Questa rete, come \\server\cartella.
     "percorsi_di_rete": [],
     # Il banco di suoni dei MIDI, il percorso di un file sf2 o sf3; vuoto,
@@ -164,6 +170,7 @@ CONTROLLI = {
     "bande": _bande_valide,
     "dissolvenza": _dissolvenza_valida,
     "modello_casuale": lambda valore: valore in MODELLI_CASUALI,
+    "impressi": lambda valore: valore in ("al_volo", "passata"),
     "sintesi": lambda valore: valore == "automatica" or valore in USCITE_DELLA_SINTESI,
     "percorsi_di_rete": lambda valore: all(isinstance(p, str) and p.startswith("\\\\") and len(p) > 2 for p in valore),
 }

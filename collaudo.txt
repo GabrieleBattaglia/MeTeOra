@@ -1,4 +1,4 @@
-Collaudo di MeTeOra 1.79.0, con NVDA: il manuale in HTML, F1 e F12, la ricerca anche in rete, B e Z con la riproduzione casuale, l'invito a offrire un caffè, la cartella vuota nel cestino, i dettagli dei contenitori, i conti in rete, Maiuscolo con F9 e F10. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.79.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Collaudo di MeTeOra 1.80.0, con NVDA: il manuale in HTML, F1 e F12, la ricerca anche in rete, B e Z con la riproduzione casuale, l'invito a offrire un caffè, la cartella vuota nel cestino, i dettagli dei contenitori, i conti in rete, Maiuscolo con F9 e F10, i sottotitoli fatti di immagini. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.80.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
 Impostazioni, ultima voce Dona per questo progetto, Invio: il suono dell'invito, e il fuoco sul testo, che NVDA legge.
 Invio nel testo, o Esc, chiudono l'invito e si torna alle impostazioni; Tab passa a Dona con PayPal e a Chiudi.
 Dona con PayPal apre la pagina di PayPal nel browser, e la console ringrazia.
@@ -19,3 +19,8 @@ Maiuscolo con F10: un suono di inizio, la console dice che apre tutta la plancia
 Durante l'apertura premi una freccia: si ferma, e la console lo dice.
 Scendi in fondo a una cartella aperta e premi Maiuscolo con F9: si chiude tutto, con un suono nuovo, e il fuoco va sulla voce di primo livello, per esempio Questo PC.
 Maiuscolo con F10 non apre più il menu: Invio, il tasto Applicazioni e la barra spaziatrice sì.
+Suona Roma 2x01 dalla cartella Video dell'Iliadbox, anche con il video spento, e con Maiuscolo con F2 arriva alla terza traccia, inglese a immagini: la console dice che è fatta di immagini, e i sottotitoli inglesi arrivano alla sintesi.
+Maiuscolo con F2 ancora, dopo l'ultima traccia: Sottotitoli impressi, letti al volo. Su Roma non ci sono impressi veri: deve restare in silenzio, a parte i titoli di testa; un video con sottotitoli impressi, se ne trovi uno, è la prova vera.
+Maiuscolo con F2 ancora: spenti, e la lettura si ferma.
+Nelle impostazioni, Sottotitoli impressi, scegli letti prima, con una passata; poi su un video corto, Maiuscolo con F2 fino a Sottotitoli impressi: suono di inizio, la console dice quanti minuti, poi l'avanzamento; alla fine il suono di fine e il file accanto al video, se ha trovato del testo.
+Chiudi e riapri MeTeOra con gli impressi scelti e lo stesso video: la lettura riparte da sola, e se la passata ha scritto il file legge da lì, a tempo, anche con il modo al volo.

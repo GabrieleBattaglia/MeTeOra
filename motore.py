@@ -88,6 +88,9 @@ _FINE_PER_ERRORE = mpv.MpvEventEndFile.ERROR
 OPZIONI_DI_BASE = {"vo": "null", "video": "no", "config": False, "ytdl": False, "input_default_bindings": False, "osc": False,
     "load_stats_overlay": False, "load_console": False, "load_auto_profiles": False, "load_select": False, "load_commands": False,
     "load_positioning": False, "load_context_menu": False, "input_vo_keyboard": False, "input_cursor": False}
+# Il filtro che annerisce il fotogramma per leggere le tracce a immagini a
+# video spento: una foto con i sottotitoli ha solo le loro lettere (1.80.0).
+FILTRO_DEL_NERO = "lavfi=[drawbox=x=0:y=0:w=iw:h=ih:color=black:t=fill]"
 _EVENTI_UTILI = frozenset({mpv.MpvEventID.START_FILE, mpv.MpvEventID.FILE_LOADED, mpv.MpvEventID.END_FILE, mpv.MpvEventID.AUDIO_RECONFIG})
 
 
@@ -351,7 +354,7 @@ class _Calo:
 
 class Motore:
     def __init__(self, alla_fine=None, all_errore=None, ao="wasapi", volume=80, chiedi_il_seguente=None, al_passaggio=None, opzioni_mpv=None,
-            al_caricamento=None, ai_sottotitoli=None):
+            al_caricamento=None, ai_sottotitoli=None, ai_sottotitoli_a_immagini=None):
         """alla_fine() quando un brano finisce da solo e non c'e' un seguente
         preparato, o quando arriva in fondo in pausa, con un salto oltre la
         fine, e allora il preparato si scarta; all_errore(percorso) quando un brano non si puo' aprire o
@@ -366,13 +369,22 @@ class Motore:
         alle prove (ao_pcm_file e simili).
         Dalla tappa 7: al_caricamento() quando un lettore ha aperto il suo
         brano, e se ne possono leggere le tracce; ai_sottotitoli(testo) a
-        ogni sottotitolo nuovo del brano in corso."""
+        ogni sottotitolo nuovo del brano in corso. Dalla 1.80.0
+        ai_sottotitoli_a_immagini() quando comincia un sottotitolo del brano in
+        corso, anche di una traccia a immagini, che testo non ne ha."""
         self._alla_fine = alla_fine
         self._all_errore = all_errore
         self._chiedi_il_seguente = chiedi_il_seguente
         self._al_passaggio = al_passaggio
         self._al_caricamento = al_caricamento
         self._ai_sottotitoli = ai_sottotitoli
+        self._ai_sottotitoli_a_immagini = ai_sottotitoli_a_immagini
+        # Le finestre del video, o None a video spento; e se il video va
+        # decodificato anche spento, perche' si leggono i suoi sottotitoli
+        # fatti di immagini (1.80.0).
+        self._finestre = None
+        self._video_da_leggere = False
+        self._oscura = False
         self._blocco = threading.RLock()
         self._sveglia = threading.Condition(self._blocco)
         self._riposo = threading.Event()
@@ -413,6 +425,7 @@ class Motore:
         self._attivo = self._lettori[0]
         for lettore in self._lettori:
             lettore.mpv.observe_property("sub-text", functools.partial(self._sottotitolo, lettore))
+            lettore.mpv.observe_property("sub-start", functools.partial(self._sottotitolo_a_immagini, lettore))
         self._sorvegliante = threading.Thread(target=self._sorveglia, name="MeTeOra, dissolvenza", daemon=True)
         self._sorvegliante.start()
         sid.riscalda()
@@ -447,6 +460,11 @@ class Motore:
                     lettore.pronto = True
                     self._cambiato()
                     avviso = self._al_caricamento
+                    # I file delle passate prima dell'avviso, che legge le
+                    # tracce; e fuori dal blocco, perche' elencare una
+                    # cartella di rete puo' far aspettare.
+                    if avviso is not None and formati.e_video(lettore.percorso or ""):
+                        avviso = functools.partial(self._aggiungi_le_passate, lettore, avviso)
             elif identita == mpv.MpvEventID.END_FILE:
                 # Un brano sostituito o fermato finisce con il motivo STOP; e la
                 # fine di un brano gia' sostituito da un altro non conta.
@@ -784,19 +802,92 @@ class Motore:
         if testo and self._ai_sottotitoli is not None:
             self._ai_sottotitoli(testo)
 
+    def _sottotitolo_a_immagini(self, lettore, _nome, inizio):
+        """sub-start di un lettore: un sottotitolo comincia. Conta solo per il
+        brano in corso; serve alle tracce a immagini, che sub-text non hanno."""
+        with self._blocco:
+            if self._chiuso or lettore is not self._attivo:
+                return
+        if inizio is not None and self._ai_sottotitoli_a_immagini is not None:
+            self._ai_sottotitoli_a_immagini()
+
+    def _aggiungi_le_passate(self, lettore, poi=None):
+        """Un video appena aperto: i file .srt delle passate dei sottotitoli
+        impressi fatte prima, accanto a lui, diventano tracce, senza
+        sceglierle; poi(), se c'e', arriva quando mpv le ha aggiunte, cosi'
+        chi legge le tracce le trova. Nel filo degli eventi del lettore, fuori
+        dal blocco."""
+        import sottotitoli_ocr
+
+        passate = sottotitoli_ocr.passate_esistenti(lettore.percorso) if formati.e_video(lettore.percorso or "") else []
+        if not passate:
+            if poi is not None:
+                poi()
+            return
+        for numero, percorso in enumerate(passate, 1):
+            lingua = os.path.splitext(percorso)[0].rsplit(".", 1)[-1]
+            risposta = (lambda _errore, _esito: poi()) if poi is not None and numero == len(passate) else None
+            lettore.comando("sub-add", percorso, "auto", "Sottotitoli impressi", lingua, risposta=risposta)
+
+    def aggiungi_sottotitoli(self, percorso, titolo, lingua, scegli=True):
+        """Un file di sottotitoli aggiunto al brano in corso come traccia, e
+        scelto se scegli: e' il file appena scritto dalla passata."""
+        with self._blocco:
+            self._attivo.comando("sub-add", percorso, "select" if scegli else "auto", titolo, lingua)
+
     def imposta_il_video(self, finestre):
         """finestre: le maniglie delle due finestre, una per lettore, in cui
         libmpv disegna; None spegne il video, e dei brani si sente solo
         l'audio. Le uscite si scelgono qui, a brano anche gia' partito:
         finche' il video resta spento libmpv non apre niente."""
         with self._blocco:
-            for indice, lettore in enumerate(self._lettori):
-                if finestre is None:
-                    lettore.imposta("vid", "no")
-                else:
-                    lettore.imposta("vo", "gpu")
-                    lettore.imposta("wid", str(finestre[indice]))
-                    lettore.imposta("vid", "auto")
+            self._finestre = finestre
+            self._applica_il_video()
+
+    def leggi_il_video(self, serve, oscura=False):
+        """Vero quando si leggono i sottotitoli fatti di immagini: allora il
+        video si decodifica anche spento, senza finestra, per le foto
+        (1.80.0). Con oscura, per le tracce a immagini, il fotogramma a video
+        spento diventa nero, e una foto con i sottotitoli ha solo le loro
+        lettere: due foto, con e senza, non erano mai dello stesso fotogramma."""
+        with self._blocco:
+            self._video_da_leggere = serve
+            self._oscura = serve and oscura
+            self._applica_il_video()
+
+    @property
+    def video_oscurato(self):
+        with self._blocco:
+            return self._finestre is None and self._video_da_leggere and self._oscura
+
+    def _applica_il_video(self):
+        for indice, lettore in enumerate(self._lettori):
+            if self._finestre is not None:
+                # La finestra prima dell'uscita: con l'uscita prima, mpv ne
+                # aprirebbe una sua.
+                lettore.imposta("vf", "")
+                lettore.imposta("wid", str(self._finestre[indice]))
+                lettore.imposta("vo", "gpu")
+                lettore.imposta("vid", "auto")
+            elif self._video_da_leggere:
+                lettore.imposta("vf", FILTRO_DEL_NERO if self._oscura else "")
+                lettore.imposta("vo", "null")
+                lettore.imposta("vid", "auto")
+            else:
+                lettore.imposta("vf", "")
+                lettore.imposta("vid", "no")
+
+    def foto(self, con_i_sottotitoli):
+        """Il fotogramma del brano in corso come immagine di Pillow, con i
+        sottotitoli disegnati o senza; None se non c'e'. Da un filo a parte."""
+        with self._blocco:
+            lettore = self._attivo
+            if self._chiuso or lettore.percorso is None or not lettore.pronto:
+                return None
+        try:
+            return lettore.mpv.screenshot_raw(includes="subtitles" if con_i_sottotitoli else "video")
+        except Exception:  # noqa: BLE001 - un video che non ha ancora un fotogramma, o un lettore che si chiude
+            return None
 
     def indice_attivo(self):
         """0 o 1: il lettore del brano in corso, quello da mostrare."""
