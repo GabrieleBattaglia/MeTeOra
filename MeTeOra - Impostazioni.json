@@ -12,10 +12,10 @@
  "sintesi": "automatica",
  "destinazione": "entrambi",
  "karaoke": "riga",
- "anticipo_karaoke": 0,
- "celle_braille": 0,
+ "anticipo_karaoke": 200,
+ "celle_braille": 40,
  "lettura_minima": 2000,
- "versione": "1.85.2",
+ "versione": "1.85.5",
  "impressi": "al_volo",
  "impressi_scelti": false,
  "percorsi_di_rete": [
@@ -23,12 +23,12 @@
  ],
  "banco_midi": "E:\\VstPlugins\\SF2 Instruments\\FluidR3 GM.sf2",
  "ripresa": {
-  "percorso": "\\\\iliadbox_Server\\iliadbox\\Video\\53 In.Linea.Con.L'assassino.2002.BDRe.x264.a1080.Italian.AC3.mkv",
+  "percorso": "E:\\git\\tmp\\campioni_audio\\ticket5447_33107_3.tak",
   "sottobrano": null,
-  "numero": 0,
+  "numero": 11,
   "posizione": 0,
   "tipo": "cartella",
-  "cartella": "\\\\iliadbox_Server\\iliadbox\\Video"
+  "cartella": "E:\\git\\tmp\\campioni_audio"
  },
  "righe_della_console": 2000,
  "caratteri": {},
