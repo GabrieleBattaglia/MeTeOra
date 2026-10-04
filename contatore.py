@@ -1,6 +1,6 @@
 # MeTeOra, il contatore delle cartelle: quanti file suonabili ha una cartella, sottocartelle comprese.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la 1.22.0, dal collaudo della 1.20.0. Nella 1.34.6 le letture rinfrescate e Aggiorna su Questo PC. Nella 1.77.0 la cartella cambiata, dopo il cestino. Nella 1.77.1 la rete letta con la protezione della ricerca.
+# 30/09/2026: nasce con la 1.22.0, dal collaudo della 1.20.0. Nella 1.34.6 le letture rinfrescate e Aggiorna su Questo PC. Nella 1.77.0 la cartella cambiata, dopo il cestino. Nella 1.77.1 la rete letta con la protezione della ricerca. Nella 1.83.1 il filo cede il passo alla finestra mentre rinfresca la plancia.
 
 """Il conto dei file di una cartella, con tutto cio' che ha sotto.
 
@@ -27,6 +27,8 @@ import questo_pc
 from ricerca import NonRisponde, in_rete, leggi_in_rete
 
 INTERVALLO_DEGLI_AVVISI = 1.0
+# Quanto aspetta il filo, a ogni giro, mentre deve cedere il passo.
+PAUSA_PER_CEDERE = 0.005
 
 
 class Contatore:
@@ -51,6 +53,14 @@ class Contatore:
         self.mute = set()
         self.parziali = set()
         self._parziale = False
+        # Quando e' alzato, il filo aspetta prima della cartella seguente: la
+        # finestra lo alza mentre rinfresca la plancia, che altrimenti, con il
+        # lucchetto di Python conteso, andava venti volte piu' piano (1.83.1).
+        self.cedi = threading.Event()
+
+    def _cedi_il_passo(self):
+        while self.cedi.is_set() and not self._fermo:
+            time.sleep(PAUSA_PER_CEDERE)
 
     def files(self, cartella):
         """I file suonabili della cartella e delle sue sottocartelle, o None
@@ -152,6 +162,7 @@ class Contatore:
         files = []
         pila = [cartella]
         while pila and not self._fermo:
+            self._cedi_il_passo()
             attuale = pila.pop()
             # Un conto gia' fatto si riusa; .get, perche' un'altra mano puo'
             # dimenticarlo nel frattempo.
@@ -167,6 +178,7 @@ class Contatore:
     def _lavora(self):
         ultimo = time.monotonic()
         while not self._fermo:
+            self._cedi_il_passo()
             try:
                 cartella = self._coda.get(timeout=0.5)
             except queue.Empty:

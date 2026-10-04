@@ -300,3 +300,34 @@ def test_nomi_dei_file_e_file_compagni(tmp_path):
     assert [os.path.basename(p) for p, _coda in compagni] == ["film.ass", "film.it.srt", "film.srt"]
     assert [coda for _p, coda in compagni] == [".ass", ".it.srt", ".srt"]
     assert "film.m3u" in [os.path.basename(p) for p, _c in questo_pc.file_compagni(str(tmp_path / "film.mkv"), m3u=True)]
+
+
+def test_schedario_variazioni_e_totali(tmp_path):
+    from schedario import Schedario
+
+    s = Schedario(str(tmp_path / "schede.json"))
+    with s._lucchetto:
+        s._metti("a", {"durata": 10.0})
+        s._metti("b", {"durata": None})
+        s._metti("a", {"durata": 12.5})
+    assert s.totale_delle_durate(["a", "b", "c"]) == (1, 12.5, 3)
+    assert s.variazioni() == [(1, "a", None, 10.0), (2, "b", None, None), (3, "a", 10.0, 12.5)]
+    assert s.variazioni() == []
+    s.rinomina("a", "z")
+    assert s.variazioni() == [(4, "a", 12.5, None), (5, "z", None, 12.5)] and s.scheda("z") == {"durata": 12.5}
+
+
+def test_contatore_e_schedario_cedono_il_passo(tmp_path):
+    import time
+
+    from contatore import Contatore
+
+    (tmp_path / "a.mp3").write_bytes(b"")
+    contatore = Contatore()
+    contatore.cedi.set()
+    contatore.chiedi([str(tmp_path)])
+    time.sleep(0.3)
+    assert contatore.files(str(tmp_path)) is None
+    contatore.cedi.clear()
+    contatore.aspetta()
+    assert contatore.files(str(tmp_path)) == [str(tmp_path / "a.mp3")]

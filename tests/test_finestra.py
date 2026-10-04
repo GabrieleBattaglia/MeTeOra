@@ -5,6 +5,7 @@
 import datetime
 import os
 import re
+import threading
 import time
 import types
 
@@ -1656,7 +1657,9 @@ def test_conti_delle_cartelle(finestra, tmp_path):
     finestra.albero.Expand(nodo)
     assert _etichette(finestra, nodo) == ["Barzellette, 3 file", "Profonda, 1 file"]
     una = str(base / "Barzellette" / "una.mp3")
-    finestra.schedario.schede[una] = {"dim": 1, "mod": 0, "durata": 61.5, "tag": {}, "sottobrani": None, "durate_sid": None}
+    # Le schede arrivano dal filo dello schedario, con la loro variazione.
+    with finestra.schedario._lucchetto:
+        finestra.schedario._metti(una, {"dim": 1, "mod": 0, "durata": 61.5, "tag": {}, "sottobrani": None, "durate_sid": None})
     finestra._schede_arrivate()
     assert _etichette(finestra, nodo)[0] == "Barzellette, 3 file, 1:01.500 in tutto, 2 senza durata"
 
@@ -4585,25 +4588,50 @@ def _plancia_di_prova(finestra, monkeypatch, tmp_path):
     for nome in ("Uno/a.mp3", "Uno/Dentro/b.mp3", "Due/c.mp3"):
         (tmp_path / "Disco" / nome).write_bytes(b"")
     monkeypatch.setattr(modulo.questo_pc, "unita", lambda: [(str(tmp_path / "Disco"), "Prova")])
-    monkeypatch.setattr(modulo.wx, "CallAfter", lambda funzione, *argomenti: funzione(*argomenti))
-    monkeypatch.setattr(modulo.wx, "CallLater", lambda _ms, funzione, *argomenti: funzione(*argomenti))
+    # Gli avvisi dei fili del contatore e dello schedario si mettono in fila,
+    # e li esegue il filo della finestra; l'apertura aspetta i conti delle
+    # cartelle, qui con l'attesa del contatore, mai mentre il contatore le
+    # cede il passo.
+    rimandate = []
+
+    def subito(funzione, *argomenti):
+        if threading.current_thread() is threading.main_thread():
+            funzione(*argomenti)
+        else:
+            rimandate.append((funzione, argomenti))
+
+    def piu_tardi(_ms, funzione, *argomenti):
+        if threading.current_thread() is threading.main_thread() and not finestra._cedi.is_set():
+            finestra.contatore.aspetta()
+            while rimandate:
+                rimandata, suoi = rimandate.pop(0)
+                rimandata(*suoi)
+        funzione(*argomenti)
+
+    monkeypatch.setattr(modulo.wx, "CallAfter", subito)
+    monkeypatch.setattr(modulo.wx, "CallLater", piu_tardi)
     finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n in ("a.mp3", "b.mp3", "c.mp3")])
 
 
 def test_maiuscolo_f10_apre_tutta_la_plancia_e_maiuscolo_f9_la_chiude(finestra, monkeypatch, suoni_annotati, tmp_path):
-    # 1.79.0, Gabriele: Maiuscolo con F10 apre tutto tranne Questa rete, con
-    # un suono all'inizio e uno alla fine; Maiuscolo con F9 chiude tutto.
+    # 1.79.0, Gabriele: Maiuscolo con F10 apre tutto, con un suono all'inizio
+    # e uno alla fine; Maiuscolo con F9 chiude tutto. Dalla 1.83.1 Questo PC
+    # resta chiuso, come Questa rete: i dischi interi fermavano la finestra.
     _plancia_di_prova(finestra, monkeypatch, tmp_path)
     _tasto(finestra, codice=wx.WXK_F10, maiuscolo=True)
     assert "apri_la_plancia" in suoni_annotati and suoni_annotati[-1] == "plancia_aperta"
-    assert _ultima(finestra).startswith("Aperta tutta la plancia, tranne Questa rete: ")
+    assert _ultima(finestra).startswith("Aperta tutta la plancia, tranne Questo PC e Questa rete: ")
     playlist = next(finestra._figli(finestra.nodo_playlist))
     assert finestra.albero.IsExpanded(finestra.nodo_playlist) and finestra.albero.IsExpanded(playlist)
-    assert finestra.albero.IsExpanded(finestra.nodo_pc) and not finestra.albero.IsExpanded(finestra.nodo_rete)
+    assert not finestra.albero.IsExpanded(finestra.nodo_pc) and not finestra.albero.IsExpanded(finestra.nodo_rete)
+    # Aperto a mano fino in fondo, Maiuscolo con F9 chiude anche lui.
+    finestra.albero.Expand(finestra.nodo_pc)
     disco = next(finestra._figli(finestra.nodo_pc))
-    uno = next(v for v in finestra._figli(disco) if (finestra._dati(v) or {}).get("nome") == "Uno" or finestra.albero.GetItemText(v).startswith("Uno"))
-    assert finestra.albero.IsExpanded(uno)
+    finestra.albero.Expand(disco)
+    uno = next(v for v in finestra._figli(disco) if finestra.albero.GetItemText(v).startswith("Uno"))
+    finestra.albero.Expand(uno)
     dentro = next(v for v in finestra._figli(uno) if (finestra._dati(v) or {}).get("tipo") == "cartella")
+    finestra.albero.Expand(dentro)
     finestra._seleziona(next(finestra._figli(dentro)))
     _tasto(finestra, codice=wx.WXK_F9, maiuscolo=True)
     assert suoni_annotati[-1] == "chiudi_la_plancia" and _ultima(finestra) == "Chiusa tutta la plancia."
@@ -4616,7 +4644,7 @@ def test_maiuscolo_f10_si_ferma_al_massimo_e_con_un_tasto(finestra, monkeypatch,
     _plancia_di_prova(finestra, monkeypatch, tmp_path)
     monkeypatch.setattr(modulo, "MASSIMO_DI_RAMI", 2)
     _tasto(finestra, codice=wx.WXK_F10, maiuscolo=True)
-    assert _ultima(finestra) == "Aperti 2 rami; mi fermo qui, gli altri restano chiusi."
+    assert _ultima(finestra).startswith("Aperti 2 rami, ") and _ultima(finestra).endswith(" voci; mi fermo qui, gli altri restano chiusi.")
     # Un tasto qualsiasi, mentre l'apertura lavora, la ferma.
     finestra._apertura_della_plancia = object()
     _tasto(finestra, codice=wx.WXK_DOWN)
@@ -5020,3 +5048,84 @@ def test_la_barra_braille_a_blocchi(finestra, monkeypatch, suoni_annotati, sinte
     finestra._braille.svuota()
     finestra._sottotitolo("Terza riga")
     assert sintesi_finta.braille[-1] == ("nvda", "Seconda riga") and sintesi_finta.detti[-1] == ("nvda", "Terza riga")
+
+
+def test_f10_su_un_disco_tace_le_cartelle_vuote(finestra, monkeypatch, suoni_annotati, tmp_path):
+    # 1.83.1: aprendo un ramo intero le cartelle vuote non suonano una per
+    # una, la cacofonia del collaudo della 1.83.0: la fine le conta.
+    base = tmp_path / "Disco"
+    for cartella in ("Musica", "Vuota", "Anche questa"):
+        (base / cartella).mkdir(parents=True)
+    (base / "Musica" / "a.mp3").write_bytes(b"")
+    finestra.albero.Expand(finestra.nodo_pc)
+    nodo = finestra.albero.AppendItem(finestra.nodo_pc, "Disco", data={"tipo": "cartella", "percorso": str(base), "caricato": False})
+    finestra.albero.SetItemHasChildren(nodo, True)
+    finestra._seleziona(nodo)
+    _tasto(finestra, codice=wx.WXK_F10)
+    assert "niente_da_suonare" not in suoni_annotati and suoni_annotati[-1] == "apri_tutto"
+    assert _ultima(finestra).startswith("Aperto tutto dentro ") and "Trovate 2 cartelle senza niente da suonare." in _ultima(finestra)
+    assert finestra._taciuti is None
+    # Aperta a mano, una cartella vuota suona come prima.
+    vuota = next(v for v in finestra._figli(nodo) if finestra.albero.GetItemText(v).startswith("Vuota"))
+    finestra.albero.Collapse(vuota)
+    finestra._dati(vuota)["caricato"] = False
+    finestra.albero.SetItemHasChildren(vuota, True)
+    finestra.albero.Expand(vuota)
+    assert suoni_annotati[-1] == "niente_da_suonare"
+
+
+def test_i_totali_delle_cartelle_si_ricordano(finestra, monkeypatch, tmp_path):
+    # 1.83.1: il totale si somma una volta, e lo aggiornano le variazioni
+    # dello schedario; risommare tutto a ogni rinfresco fermava la finestra.
+    base = tmp_path / "Disco"
+    (base / "Musica").mkdir(parents=True)
+    for nome in ("a.mp3", "b.mp3"):
+        (base / "Musica" / nome).write_bytes(b"")
+    finestra.albero.Expand(finestra.nodo_pc)
+    nodo = finestra.albero.AppendItem(finestra.nodo_pc, "Disco", data={"tipo": "cartella", "percorso": str(base), "caricato": False})
+    finestra.albero.SetItemHasChildren(nodo, True)
+    finestra.albero.Expand(nodo)
+    # Il conto del disco lo chiederebbe chi lo contiene, aprendosi.
+    finestra.contatore.chiedi([str(base)])
+    finestra.contatore.aspetta()
+    finestra.schedario.aspetta()
+    finestra._aggiorna_cartelle()
+    somme = []
+    vera = finestra.schedario.totale_delle_durate
+    monkeypatch.setattr(finestra.schedario, "totale_delle_durate", lambda percorsi: somme.append(len(percorsi)) or vera(percorsi))
+    finestra._aggiorna_cartelle()
+    assert somme == []
+    with finestra.schedario._lucchetto:
+        finestra.schedario._metti(str(base / "Musica" / "a.mp3"), {"dim": 1, "mod": 0, "durata": 30.0, "tag": {}, "sottobrani": None, "durate_sid": None})
+        finestra.schedario._metti(str(base / "Musica" / "b.mp3"), {"dim": 1, "mod": 0, "durata": 90.0, "tag": {}, "sottobrani": None, "durate_sid": None})
+    finestra._aggiorna_cartelle()
+    assert somme == [] and finestra.albero.GetItemText(nodo) == "Disco, 2 file, 2:00 in tutto"
+    musica = next(finestra._figli(nodo))
+    assert finestra.albero.GetItemText(musica) == "Musica, 2 file, 2:00 in tutto"
+    # Una durata che cambia, o che sparisce, si toglie dal totale.
+    with finestra.schedario._lucchetto:
+        finestra.schedario._metti(str(base / "Musica" / "b.mp3"), {"dim": 2, "mod": 0, "durata": 60.0, "tag": {}, "sottobrani": None, "durate_sid": None})
+        finestra.schedario._metti(str(base / "Musica" / "a.mp3"), None)
+    finestra._aggiorna_cartelle()
+    assert finestra.albero.GetItemText(nodo) == "Disco, 2 file, 1:00 in tutto, 1 senza durata"
+
+
+def test_i_rinfreschi_si_accorpano_e_i_fili_cedono_il_passo(finestra, monkeypatch):
+    # 1.83.1: piu' avvisi ravvicinati fanno un rinfresco solo, a distanza dal
+    # precedente, e mentre rinfresca la finestra i fili aspettano.
+    pianificati, visti = [], []
+    monkeypatch.setattr(modulo.wx, "CallLater", lambda ms, funzione, *argomenti: pianificati.append((ms, funzione)))
+    monkeypatch.setattr(finestra, "_schede_arrivate", lambda: visti.append(("schede", finestra.schedario.cedi.is_set(), finestra.contatore.cedi.is_set())))
+    monkeypatch.setattr(finestra, "_conti_arrivati", lambda: visti.append(("conti", finestra._cedi.is_set())))
+    finestra._rinfresco_chiesto("conti")
+    finestra._rinfresco_chiesto("schede")
+    finestra._rinfresco_chiesto("conti")
+    assert len(pianificati) == 1
+    pianificati.pop()[1]()
+    assert visti == [("schede", True, True)] and not finestra._cedi.is_set()
+    # Il prossimo aspetta tre volte la durata dell'ultimo.
+    finestra._prossimo_rinfresco = time.monotonic() + 2
+    finestra._rinfresco_chiesto("conti")
+    assert pianificati[-1][0] > 1500
+    pianificati.pop()[1]()
+    assert visti[-1] == ("conti", True)

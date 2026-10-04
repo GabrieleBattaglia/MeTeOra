@@ -1,6 +1,6 @@
 # MeTeOra, lo schedario: durata, dimensione e tag dei file, ricordati fra un avvio e l'altro.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la 1.7.0, per le durate delle playlist (issue 4) e poi per il filtro (issue 2). Nella 1.62.4 le durate da libmpv per i formati che mutagen non conosce, e quella esatta dell'AAC grezzo. Nella 1.66.0 le schede della musica delle console, con i sottobrani. Nella 1.67.0 la scheda segue un file rinominato. Nella 1.69.0 i tag letti con tag.py, anche di WAV, AIFF, WMA e TTA.
+# 30/09/2026: nasce con la 1.7.0, per le durate delle playlist (issue 4) e poi per il filtro (issue 2). Nella 1.62.4 le durate da libmpv per i formati che mutagen non conosce, e quella esatta dell'AAC grezzo. Nella 1.66.0 le schede della musica delle console, con i sottobrani. Nella 1.67.0 la scheda segue un file rinominato. Nella 1.69.0 i tag letti con tag.py, anche di WAV, AIFF, WMA e TTA. Nella 1.83.1 le variazioni delle schede, per i totali delle cartelle, e il filo che cede il passo alla finestra.
 
 """Lo schedario dei file.
 
@@ -38,6 +38,8 @@ VERSIONE_DEL_FILE = 1
 TAG = ("titolo", "autore", "album", "genere", "anno")
 # Si avvisa chi aspetta al massimo una volta ogni tanti secondi, e alla fine.
 INTERVALLO_DEGLI_AVVISI = 1.0
+# Quanto aspetta il filo, a ogni giro, mentre deve cedere il passo.
+PAUSA_PER_CEDERE = 0.005
 
 
 def _anno(testo):
@@ -216,6 +218,41 @@ class Schedario:
         self._modificato = False
         self._fermo = False
         self._filo = None
+        # Le durate cambiate, (numero, percorso, vecchia, nuova), per chi tiene
+        # dei totali: la finestra, per le etichette delle cartelle (1.83.1).
+        self._variazioni = []
+        self._generazione = 0
+        # Quando e' alzato, il filo aspetta prima del file seguente: la
+        # finestra lo alza mentre rinfresca la plancia, che altrimenti, con
+        # il lucchetto di Python conteso, andava venti volte piu' piano (1.83.1).
+        self.cedi = threading.Event()
+
+    def _metti(self, percorso, scheda):
+        """Con il lucchetto: la scheda nuova del file, o None per toglierla;
+        la variazione si annota, con la durata di prima e quella nuova, anche
+        se e' la stessa: la scheda puo' avere tag nuovi."""
+        vecchia = (self.schede.get(percorso) or {}).get("durata")
+        if scheda is None:
+            self.schede.pop(percorso, None)
+        else:
+            self.schede[percorso] = scheda
+        self._generazione += 1
+        self._variazioni.append((self._generazione, percorso, vecchia, (scheda or {}).get("durata")))
+
+    def variazioni(self):
+        """Le schede cambiate dall'ultima volta, (numero, percorso, durata di
+        prima, durata nuova), in ordine; chi le prende le toglie."""
+        with self._lucchetto:
+            variazioni, self._variazioni = self._variazioni, []
+        return variazioni
+
+    def totale_delle_durate(self, percorsi):
+        """(quanti file hanno la durata, la loro somma, il numero dell'ultima
+        variazione), letti insieme sotto il lucchetto: le variazioni con un
+        numero piu' alto non sono comprese."""
+        with self._lucchetto:
+            note = [d for d in ((self.schede.get(p) or {}).get("durata") for p in percorsi) if d is not None]
+            return len(note), sum(note), self._generazione
 
     def carica(self):
         if not os.path.isfile(self.percorso):
@@ -265,9 +302,10 @@ class Schedario:
     def rinomina(self, vecchio, nuovo):
         """Un file rinominato sul disco: la sua scheda passa al nome nuovo."""
         with self._lucchetto:
-            scheda = self.schede.pop(vecchio, None)
+            scheda = self.schede.get(vecchio)
             if scheda is not None:
-                self.schede[nuovo] = scheda
+                self._metti(vecchio, None)
+                self._metti(nuovo, scheda)
                 self._modificato = True
 
     def leggi_subito(self, percorso):
@@ -278,7 +316,7 @@ class Schedario:
         except OSError:
             return None
         with self._lucchetto:
-            self.schede[percorso] = scheda
+            self._metti(percorso, scheda)
             self._modificato = True
         return scheda
 
@@ -316,6 +354,8 @@ class Schedario:
         fatti = 0
         ultimo_avviso = time.monotonic()
         while not self._fermo:
+            while self.cedi.is_set() and not self._fermo:
+                time.sleep(PAUSA_PER_CEDERE)
             try:
                 percorso = self._coda.get(timeout=0.5)
             except queue.Empty:
@@ -326,10 +366,7 @@ class Schedario:
                 except OSError:
                     scheda = None
                 with self._lucchetto:
-                    if scheda is None:
-                        self.schede.pop(percorso, None)
-                    else:
-                        self.schede[percorso] = scheda
+                    self._metti(percorso, scheda)
                     self._modificato = True
                 fatti += 1
             with self._lucchetto:

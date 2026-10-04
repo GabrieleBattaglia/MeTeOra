@@ -2,6 +2,14 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.83.1] - 2026-10-04
+
+- Collaudo di Gabriele: Maiuscolo con F10 faceva partire una cacofonia di suoni e fermava MeTeOra, che andava chiuso a forza. Riprodotto con una copia dei suoi dati: ogni cartella vuota o illeggibile aperta suonava il suo suono, decine in pochi secondi; e i dischi interi caricavano decine di migliaia di cartelle, mentre ogni rinfresco della plancia risommava le durate di tutti i file di un disco per ogni cartella aperta, e la finestra restava ferma oltre un minuto.
+- Maiuscolo con F10 ora lascia chiuso Questo PC, come Questa rete: Gabriele ci rinuncia. Apre i Preferiti, i Risultati e le playlist, fino a duemila rami e diecimila voci.
+- Le aperture in blocco, anche F10 su una cartella, non suonano piu' una per una le cartelle vuote e quelle che non si leggono: alla fine la console dice quante erano.
+- La plancia molto aperta non ferma piu' la finestra: i totali delle cartelle si sommano una volta e poi li aggiornano solo le durate nuove; i rinfreschi chiesti dal contatore e dallo schedario si accorpano, e fra uno e l'altro passa tre volte la durata dell'ultimo; si rifanno solo le etichette dei file con una scheda nuova; e mentre la finestra rinfresca, il contatore e lo schedario aspettano, perche' con il lucchetto di Python conteso lo stesso lavoro andava venti volte piu' piano. Sul banco, con i dati di Gabriele, la pausa piu' lunga e' scesa da oltre sessanta secondi a meno di uno e mezzo.
+- I messaggi load_mid e load_pat che si vedevano nel prompt vengono dalla sonda che legge con libmpv le durate dei MIDI che FluidSynth non misura: sono innocui.
+
 ## [1.83.0] - 2026-10-04
 
 - La barra braille a blocchi, tappa 10 punto g, chiesta da Gabriele per chi ha una barra corta: la voce Celle della barra braille divide sottotitoli e karaoke in blocchi lunghi al più quanto la barra, spezzati fra le parole, e i blocchi si mostrano uno dopo l'altro. Ognuno resta per la sua parte del tempo che resta al testo, in proporzione alla lunghezza, e mai meno della voce Tempo minimo di lettura in braille, di partenza 2000 millesimi; i testi che arrivano prima aspettano in fila, che si smaltisce nei silenzi o in pausa. Alla sintesi il testo arriva subito e intero. Con 0 celle, il valore di partenza, il testo resta intero, ma il tempo minimo vale anche per lui.
