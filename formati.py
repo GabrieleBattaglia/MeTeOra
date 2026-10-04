@@ -1,6 +1,6 @@
 # MeTeOra, i formati: quali file il programma sa suonare.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.65.0 i MIDI e i tracker a parte, nella 1.66.0 la musica delle console.
+# 30/09/2026: nasce con la tappa 1. Nella 1.65.0 i MIDI e i tracker a parte, nella 1.66.0 la musica delle console. Nella 1.82.0 testo_srt, da sottotitoli_ocr.py, per la passata e il karaoke.
 
 """Le estensioni dei file supportati.
 
@@ -54,6 +54,21 @@ def e_midi(percorso):
 
 def e_chip(percorso):
     return estensione(percorso) in CHIP
+
+
+def _tempo_srt(secondi):
+    millesimi = round(secondi * 1000)
+    ore, millesimi = divmod(millesimi, 3600000)
+    minuti, millesimi = divmod(millesimi, 60000)
+    secondi, millesimi = divmod(millesimi, 1000)
+    return f"{ore:02d}:{minuti:02d}:{secondi:02d},{millesimi:03d}"
+
+
+def testo_srt(sottotitoli):
+    """Il contenuto di un file .srt da [(inizio, fine, testo)], in secondi:
+    lo scrivono la passata degli impressi (1.80.0) e il karaoke (1.82.0)."""
+    blocchi = [f"{numero}\n{_tempo_srt(inizio)} --> {_tempo_srt(fine)}\n{testo}\n" for numero, (inizio, fine, testo) in enumerate(sottotitoli, 1)]
+    return "\n".join(blocchi)
 
 
 def e_video(percorso):

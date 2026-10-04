@@ -2696,7 +2696,10 @@ def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_an
         ("modello_casuale", "Modello della riproduzione casuale: una volta per brano, poi ricomincia"),
         ("video", "Video (Maiuscolo+F1): no"),
         ("sottotitoli", "Sottotitoli letti (Maiuscolo+F2): no"),
-        ("sintesi", "Sintesi dei sottotitoli: automatica, adesso NVDA"),
+        ("sintesi", "Sintesi di sottotitoli e karaoke: automatica, adesso NVDA"),
+        ("destinazione", "Dove vanno sottotitoli e karaoke: alla sintesi e al braille"),
+        ("karaoke", "Testo del karaoke: per riga"),
+        ("anticipo_karaoke", "Anticipo del karaoke: 0 ms"),
         ("banco_midi", "Banco dei suoni MIDI: nessuno, si sceglie al primo MIDI"),
         ("insegui", "Inseguimento della plancia (Maiuscolo+F8): no"),
         ("caratteri", "Dimensioni dei caratteri: quelle di Windows"),
@@ -4053,17 +4056,17 @@ def test_impostazioni_video_sottotitoli_e_sintesi(finestra, monkeypatch, suoni_a
     lista = _ListaFinta()
     finestra._cambia_impostazione("sintesi", lista)
     titolo, righe, partenza = scelta.aperture[0]
-    assert titolo == "Sintesi dei sottotitoli" and partenza == 0
+    assert titolo == "Sintesi di sottotitoli e karaoke" and partenza == 0
     assert righe == ["Automatica: lo screen reader attivo, altrimenti la voce di Windows", "NVDA", "La voce di Windows, SAPI5"]
     assert finestra.impostazioni["sintesi"] == "sapi5" and _salvate(finestra)["sintesi"] == "sapi5"
-    assert lista.righe["sintesi"] == "Sintesi dei sottotitoli: la voce di Windows, SAPI5"
+    assert lista.righe["sintesi"] == "Sintesi di sottotitoli e karaoke: la voce di Windows, SAPI5"
     # Una scelta che non risponde piu' resta in fondo alla lista, e lo dice.
     finestra.impostazioni["sintesi"] = "jaws"
     scelta = _SceltaFinta(None)
     monkeypatch.setattr(modulo, "FinestraScelta", scelta)
     finestra._cambia_impostazione("sintesi", _ListaFinta())
     assert scelta.aperture[0][1][-1] == "JAWS, che adesso non risponde" and scelta.aperture[0][2] == 3
-    assert _ultima(finestra) == "Sintesi dei sottotitoli non cambiata."
+    assert _ultima(finestra) == "Sintesi di sottotitoli e karaoke non cambiata."
 
 def test_la_barra_del_tempo_della_finestra_del_video(finestra, monkeypatch):
     _video_finto(finestra, monkeypatch, _tracce())
@@ -4807,3 +4810,169 @@ def test_la_passata_finita_non_toglie_la_traccia_scelta(finestra, monkeypatch, s
     finestra._passata_finita(stato["in_corso"], None)
     assert stato["in_corso"] in finestra._passate_vuote
     assert sottotitoli_ocr.VELOCITA_DELLA_PASSATA == 5
+
+
+def test_le_impostazioni_del_karaoke(finestra, monkeypatch, suoni_annotati, sintesi_finta):
+    impostati = []
+    monkeypatch.setattr(finestra.motore, "imposta_il_karaoke", lambda modo, anticipo: impostati.append((modo, anticipo)))
+    # Dove vanno sottotitoli e karaoke: solo al braille.
+    scelta = _SceltaFinta(2)
+    monkeypatch.setattr(modulo, "FinestraScelta", scelta)
+    lista = _ListaFinta()
+    finestra._cambia_impostazione("destinazione", lista)
+    assert scelta.aperture[0] == ("Dove vanno sottotitoli e karaoke", ["Alla sintesi e al braille", "Solo alla sintesi", "Solo al braille"], 0)
+    assert finestra.impostazioni["destinazione"] == "braille" and _salvate(finestra)["destinazione"] == "braille"
+    assert lista.righe["destinazione"] == "Dove vanno sottotitoli e karaoke: solo al braille"
+    assert _ultima(finestra) == "Sottotitoli e karaoke ora vanno solo al braille."
+    finestra.impostazioni["sottotitoli"] = True
+    finestra._sottotitolo("Prima riga")
+    assert sintesi_finta.braille == [("nvda", "Prima riga")] and not sintesi_finta.detti and _ultima(finestra) == "Prima riga"
+    # Il testo del karaoke per strofa: il motore rifa' la traccia.
+    monkeypatch.setattr(modulo, "FinestraScelta", _SceltaFinta(1))
+    finestra._cambia_impostazione("karaoke", lista)
+    assert finestra.impostazioni["karaoke"] == "strofa" and impostati[-1] == ("strofa", 0)
+    assert lista.righe["karaoke"] == "Testo del karaoke: per strofa, dove il file le segna; altrimenti per riga"
+    # Annullata, la scelta resta.
+    monkeypatch.setattr(modulo, "FinestraScelta", _SceltaFinta(None))
+    finestra._cambia_impostazione("karaoke", lista)
+    assert finestra.impostazioni["karaoke"] == "strofa" and len(impostati) == 1 and _ultima(finestra) == "Testo del karaoke: non cambiato."
+    # L'anticipo, in millesimi, con il limite.
+    _campo, lista = _cambia(finestra, monkeypatch, "anticipo_karaoke", "500")
+    assert finestra.impostazioni["anticipo_karaoke"] == 500 and impostati[-1] == ("strofa", 500)
+    assert lista.righe["anticipo_karaoke"] == "Anticipo del karaoke: 500 ms"
+    assert _ultima(finestra) == "Il testo del karaoke ora arriva 500 millesimi prima del canto."
+    _cambia(finestra, monkeypatch, "anticipo_karaoke", "20000")
+    assert finestra.impostazioni["anticipo_karaoke"] == 10000
+    _cambia(finestra, monkeypatch, "anticipo_karaoke", "0")
+    assert _ultima(finestra) == "Il testo del karaoke ora arriva quando comincia il canto."
+
+
+def test_maiuscolo_f2_sul_testo_del_karaoke(finestra, monkeypatch, suoni_annotati):
+    tracce = _tracce(video=False, sottotitoli=1)
+    tracce["sub"][0].update(title="Testo del karaoke, dal MIDI", lang=None)
+    stato, chiamate = _video_finto(finestra, monkeypatch, tracce)
+    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    assert chiamate[-1] == ("sid", "1") and _ultima(finestra) == "Testo del karaoke letto, dal MIDI."
+    stato["tracce"] = _tracce(video=False, sottotitoli=1, scelto_sub=0)
+    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    assert _ultima(finestra) == "Sottotitoli letti spenti."
+    # Accesi, il prossimo brano con il testo lo prende da solo.
+    stato["tracce"] = tracce
+    finestra.impostazioni["sottotitoli"] = True
+    finestra._aggiorna_il_video()
+    assert chiamate[-1] == ("sid", "1")
+
+
+class _LettoreDelKaraoke:
+    """Un lettore del motore finto: annota i comandi, tiene la lista delle
+    tracce come farebbe mpv, e con trattieni tiene in sospeso le risposte."""
+
+    def __init__(self, percorso):
+        import motore
+
+        self.percorso, self._richieste, self.pronto = percorso, 1, True
+        self.karaoke = self.formato_imposto = None
+        self.karaoke_in_volo = self.karaoke_da_rifare = False
+        self.comandi, self.in_sospeso, self.trattieni = [], [], False
+        self.mpv = types.SimpleNamespace(track_list=[])
+        self.aggiungi_testo = types.MethodType(motore._Lettore.aggiungi_testo, self)
+
+    def comando(self, *argomenti, risposta=None):
+        self.comandi.append(argomenti)
+        tracce = self.mpv.track_list
+        if argomenti[0] == "sub-add":
+            tracce.append({"type": "sub", "id": max((t["id"] for t in tracce), default=0) + 1, "title": argomenti[3], "selected": argomenti[2] == "select"})
+        elif argomenti[0] == "sub-remove":
+            tracce[:] = [t for t in tracce if str(t["id"]) != argomenti[1]]
+        elif argomenti[:2] == ("set", "sid"):
+            for traccia in tracce:
+                traccia["selected"] = str(traccia["id"]) == argomenti[2]
+        if risposta is not None:
+            if self.trattieni:
+                self.in_sospeso.append(risposta)
+            else:
+                risposta(None, None)
+
+
+def test_il_motore_aggiunge_il_testo_del_karaoke(finestra, tmp_path, monkeypatch):
+    brano = tmp_path / "Canzone.mp3"
+    brano.write_bytes(b"")
+    (tmp_path / "Canzone.lrc").write_text("[00:01.00]Prima\n[00:02.00]Seconda\n", encoding="utf-8")
+    avvisi = []
+    lettore = _LettoreDelKaraoke(str(brano))
+    finestra.motore._aggiungi_le_tracce(lettore, str(brano), 1, lambda: avvisi.append(len(lettore.comandi)))
+    comandi = lettore.comandi
+    assert comandi[0][0] == "sub-add" and comandi[0][2:] == ("auto", "Testo del karaoke, dal file LRC") and avvisi == [1]
+    assert comandi[0][1].startswith("memory://1\n00:00:01,000 --> 00:00:02,000\nPrima\n") and lettore.karaoke[0] == "lrc"
+    assert not lettore.karaoke_in_volo
+    # Un brano ricaricato intanto, anche lo stesso, non prende il testo del
+    # caricamento di prima: lo mette il suo.
+    lettore._richieste = 2
+    finestra.motore._aggiungi_le_tracce(lettore, str(brano), 1, lambda: avvisi.append(len(lettore.comandi)))
+    assert len(comandi) == 1 and avvisi == [1, 1]
+    # Un brano reso in RAM ha il formato WAV imposto: per l'aggiunta diventa
+    # quello dei sottotitoli, fino al brano dopo.
+    lettore = _LettoreDelKaraoke(str(brano))
+    lettore.formato_imposto = "wav"
+    finestra.motore._aggiungi_le_tracce(lettore, str(brano), 1)
+    assert [c[:3] for c in lettore.comandi] == [("set", "file-local-options/demuxer-lavf-format", "srt"), ("sub-add", lettore.comandi[1][1], "auto")]
+    # Un video, anche musicale, con il suo .lrc: le passate, poi il testo.
+    video = tmp_path / "Clip.mkv"
+    video.write_bytes(b"")
+    (tmp_path / "Clip.lrc").write_text("[00:01.00]Dal video\n", encoding="utf-8")
+    lettore = _LettoreDelKaraoke(str(video))
+    finestra.motore._aggiungi_le_tracce(lettore, str(video), 1, lambda: avvisi.append("video"))
+    assert [t["title"] for t in lettore.mpv.track_list] == ["Testo del karaoke, dal file LRC"] and avvisi[-1] == "video"
+
+
+def test_il_karaoke_si_rifa_una_traccia_alla_volta(finestra, tmp_path, monkeypatch):
+    # Revisione 1.82.0: due aggiunte insieme lasciavano due tracce, una con
+    # l'anticipo vecchio; ora la seconda aspetta la prima, e resta l'ultima.
+    brano = tmp_path / "Canzone.mp3"
+    brano.write_bytes(b"")
+    (tmp_path / "Canzone.lrc").write_text("[00:01.00]Prima\n[00:02.00]Seconda\n", encoding="utf-8")
+    lettore = _LettoreDelKaraoke(str(brano))
+    monkeypatch.setattr(finestra.motore, "_lettori", (lettore,))
+    lettore.trattieni = True
+    finestra.motore._aggiungi_le_tracce(lettore, str(brano), 1)
+    assert lettore.karaoke_in_volo and len(lettore.mpv.track_list) == 1
+    finestra.motore.imposta_il_karaoke("riga", 500)
+    assert lettore.karaoke_da_rifare and len(lettore.mpv.track_list) == 1
+    # Arriva la prima: la traccia si sceglie, e parte la seconda, con l'anticipo.
+    lettore.mpv.track_list[0]["selected"] = True
+    lettore.in_sospeso.pop(0)(None, None)
+    assert len(lettore.mpv.track_list) == 2 and lettore.comandi[-1][1].startswith("memory://1\n00:00:00,500 --> ")
+    # Arriva la seconda: la vecchia se ne va, e la scelta passa alla nuova.
+    lettore.in_sospeso.pop(0)(None, None)
+    assert [(t["id"], t["selected"]) for t in lettore.mpv.track_list] == [(2, True)]
+    assert not lettore.karaoke_in_volo and not lettore.karaoke_da_rifare
+    # Senza niente in volo si rifa' subito.
+    lettore.trattieni = False
+    finestra.motore.imposta_il_karaoke("strofa", 500)
+    assert [(t["id"], t["selected"]) for t in lettore.mpv.track_list] == [(3, True)]
+
+
+def test_gli_impressi_scelti_non_fermano_il_karaoke(finestra, monkeypatch, suoni_annotati):
+    # Revisione 1.82.0: gli impressi scelti su un video valgono solo sui video.
+    tracce = _tracce(video=False, sottotitoli=1)
+    tracce["sub"][0].update(title="Testo del karaoke, dal MIDI", lang=None)
+    stato, chiamate = _video_finto(finestra, monkeypatch, tracce)
+    finestra.impostazioni["impressi_scelti"] = True
+    finestra.impostazioni["sottotitoli"] = True
+    finestra._aggiorna_il_video()
+    assert chiamate[-1] == ("sid", "1")
+    stato["tracce"] = _tracce(video=False, sottotitoli=1)
+    stato["tracce"]["sub"][0].update(title="Testo del karaoke, dal MIDI", lang=None)
+    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    assert _ultima(finestra) == "Testo del karaoke letto, dal MIDI."
+
+
+def test_la_destinazione_dice_se_il_braille_non_arriva(finestra, monkeypatch, suoni_annotati, sintesi_finta):
+    sintesi_finta.attive["nvda"] = False
+    monkeypatch.setattr(modulo, "FinestraScelta", _SceltaFinta(2))
+    finestra._cambia_impostazione("destinazione", _ListaFinta())
+    assert _ultima(finestra) == ("Sottotitoli e karaoke ora vanno solo al braille. Con la voce di Windows, SAPI5, il braille non arriva: "
+        "ce l'hanno NVDA, JAWS e System Access.")
+    monkeypatch.setattr(modulo, "FinestraScelta", _SceltaFinta(1))
+    finestra._cambia_impostazione("destinazione", _ListaFinta())
+    assert _ultima(finestra) == "Sottotitoli e karaoke ora vanno solo alla sintesi."

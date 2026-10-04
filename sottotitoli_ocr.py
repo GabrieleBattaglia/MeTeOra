@@ -28,6 +28,7 @@ import traceback
 # Prima di mpv: rende visibili le DLL di libmpv.
 import librerie  # noqa: F401
 import ocr
+from formati import testo_srt
 
 # Le tracce di sottotitoli fatte di immagini, come le chiama mpv.
 CODEC_A_IMMAGINI = frozenset({"dvd_subtitle", "hdmv_pgs_subtitle", "dvb_subtitle", "xsub", "dvb_teletext"})
@@ -228,20 +229,6 @@ def segmenti(campioni, fine, somiglianza=0.75):
             continue
         tratti.append({"inizio": istante, "fine": dopo, "letture": [testo]})
     return [(t["inizio"], t["fine"], Counter(t["letture"]).most_common(1)[0][0]) for t in tratti]
-
-
-def _tempo_srt(secondi):
-    millesimi = round(secondi * 1000)
-    ore, millesimi = divmod(millesimi, 3600000)
-    minuti, millesimi = divmod(millesimi, 60000)
-    secondi, millesimi = divmod(millesimi, 1000)
-    return f"{ore:02d}:{minuti:02d}:{secondi:02d},{millesimi:03d}"
-
-
-def testo_srt(sottotitoli):
-    """Il contenuto di un file .srt."""
-    blocchi = [f"{numero}\n{_tempo_srt(inizio)} --> {_tempo_srt(fine)}\n{testo}\n" for numero, (inizio, fine, testo) in enumerate(sottotitoli, 1)]
-    return "\n".join(blocchi)
 
 
 class PassataDegliImpressi(_Lavoro):

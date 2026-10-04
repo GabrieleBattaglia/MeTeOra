@@ -1,6 +1,6 @@
 # MeTeOra, la sintesi dei sottotitoli: gli screen reader e la voce di Windows, con accessible_output2.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/10/2026: nasce con la tappa 7, per i sottotitoli letti.
+# 03/10/2026: nasce con la tappa 7, per i sottotitoli letti. Nella 1.82.0 dove vanno i testi, alla voce, al braille o a tutti e due, chiamati uno per uno.
 
 """Le uscite a cui MeTeOra manda i sottotitoli letti (tappa 7).
 
@@ -28,6 +28,12 @@ USCITE = {
     "sapi5": ("sapi5", "SAPI5", "la voce di Windows, SAPI5"),
 }
 VOCE_DI_SISTEMA = "sapi5"
+# Dove vanno i testi letti, sottotitoli e karaoke (1.82.0): le chiavi delle
+# impostazioni e le loro righe.
+DESTINAZIONI = {"entrambi": "alla sintesi e al braille", "sintesi": "solo alla sintesi", "braille": "solo al braille"}
+# Le uscite che hanno il braille, in accessible_output2: con le altre il
+# braille non arriva.
+CON_IL_BRAILLE = frozenset({"nvda", "jaws", "system_access"})
 
 
 def _crea(chiave):
@@ -83,14 +89,24 @@ class Sintesi:
             return chiave if chiave in USCITE and _attiva(chiave, self._uscita(chiave)) else None
         return next((c for c in USCITE if _attiva(c, self._uscita(c))), None)
 
-    def dici(self, testo, chiave=AUTOMATICA):
+    def dici(self, testo, chiave=AUTOMATICA, dove="entrambi"):
         """Dice il testo con l'uscita scelta, senza interrompere quello che
-        sta dicendo. Falso se nessuna uscita risponde."""
+        sta dicendo: alla voce, al braille o a tutti e due, come dice dove,
+        una chiave di DESTINAZIONI. Il braille ce l'hanno solo le uscite di
+        CON_IL_BRAILLE. Falso se nessuna uscita risponde. Voce e braille si chiamano
+        uno per uno: output di accessible_output2, con NVDA, dopo averli
+        fatti tutti e due solleva un errore, perche' le funzioni di NVDA non
+        restituiscono niente, e l'uscita si buttava e si riapriva a ogni
+        sottotitolo (1.82.0)."""
         effettiva = self.scelta(chiave)
         if effettiva is None:
             return False
+        uscita = self._uscita(effettiva)
         try:
-            self._uscita(effettiva).output(testo, interrupt=False)
+            if dove in ("entrambi", "sintesi"):
+                uscita.speak(testo, interrupt=False)
+            if dove in ("entrambi", "braille"):
+                uscita.braille(testo)
         except Exception:  # noqa: BLE001 - uno screen reader chiuso nel frattempo
             self._aperte.pop(effettiva, None)
             return False

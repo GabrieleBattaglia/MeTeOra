@@ -1,6 +1,6 @@
 # MeTeOra, le impostazioni: i valori che il programma ricorda fra un avvio e l'altro.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 le righe della console. Nella 1.51.0 caratteri, colori e scheda audio, e i limiti controllati alla lettura del file. Nella 1.51.2 un file con un JSON che non e' un dizionario non ferma l'avvio. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza (tappa 4, issue 15). Nella 1.59.0 la riproduzione casuale (issue 17). Nella 1.61.0 il modello della riproduzione casuale. Nella 1.63.0 video, sottotitoli letti e sintesi (tappa 7). Nella 1.64.0 i percorsi di rete scritti a mano. Nella 1.65.0 il banco dei suoni MIDI. Nella 1.66.36 un file illeggibile non si sovrascrive: si salva accanto, con .nuovo.
+# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 le righe della console. Nella 1.51.0 caratteri, colori e scheda audio, e i limiti controllati alla lettura del file. Nella 1.51.2 un file con un JSON che non e' un dizionario non ferma l'avvio. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza (tappa 4, issue 15). Nella 1.59.0 la riproduzione casuale (issue 17). Nella 1.61.0 il modello della riproduzione casuale. Nella 1.63.0 video, sottotitoli letti e sintesi (tappa 7). Nella 1.64.0 i percorsi di rete scritti a mano. Nella 1.65.0 il banco dei suoni MIDI. Nella 1.66.36 un file illeggibile non si sovrascrive: si salva accanto, con .nuovo. Nella 1.82.0 destinazione, karaoke e anticipo del karaoke.
 
 """Le impostazioni, in un file JSON accanto al programma.
 
@@ -20,8 +20,11 @@ import json
 import math
 import os
 
+from karaoke import MODI as MODI_DEL_KARAOKE
+from sintesi import DESTINAZIONI
 from sintesi import USCITE as USCITE_DELLA_SINTESI
 from valori import (
+    ANTICIPO_MASSIMO_DEL_KARAOKE,
     AREE,
     CARATTERI_MASSIMI,
     CARATTERI_MINIMI,
@@ -63,6 +66,12 @@ PREDEFINITE = {
     "video": False,
     "sottotitoli": False,
     "sintesi": "automatica",
+    # Dove vanno sottotitoli e karaoke, una chiave di sintesi.DESTINAZIONI; il
+    # testo del karaoke per riga o per strofa; e quanti millesimi prima del
+    # canto arriva (1.82.0).
+    "destinazione": "entrambi",
+    "karaoke": "riga",
+    "anticipo_karaoke": 0,
     # I sottotitoli impressi nel video (1.80.0): al_volo, letti mentre il
     # video suona, o passata, letti prima con una passata che salva un file.
     "impressi": "al_volo",
@@ -172,6 +181,9 @@ CONTROLLI = {
     "modello_casuale": lambda valore: valore in MODELLI_CASUALI,
     "impressi": lambda valore: valore in ("al_volo", "passata"),
     "sintesi": lambda valore: valore == "automatica" or valore in USCITE_DELLA_SINTESI,
+    "destinazione": lambda valore: valore in DESTINAZIONI,
+    "karaoke": lambda valore: valore in MODI_DEL_KARAOKE,
+    "anticipo_karaoke": _intero_fra(0, ANTICIPO_MASSIMO_DEL_KARAOKE),
     "percorsi_di_rete": lambda valore: all(isinstance(p, str) and p.startswith("\\\\") and len(p) > 2 for p in valore),
 }
 

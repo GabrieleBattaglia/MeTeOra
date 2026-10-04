@@ -1091,3 +1091,91 @@ def test_tracce_e_sottotitoli_con_il_video_spento(avvisi, tmp_path):
         assert _aspetta(lambda: m._attivo.mpv.vid is False, 2)
     finally:
         m.chiudi()
+
+
+def test_due_sottotitoli_uguali_di_fila_si_dicono_due_volte(avvisi):
+    # 1.82.0: sub-text non cambia, sub-start si'; dopo un salto niente doppioni.
+    detti, immagini = [], []
+    m = Motore(ao="null", ai_sottotitoli=detti.append, ai_sottotitoli_a_immagini=lambda: immagini.append(True))
+    try:
+        lettore = m._attivo
+        m._sottotitolo(lettore, "sub-text", "Ritornello")
+        m._sottotitolo_a_immagini(lettore, "sub-start", 3.0)
+        m._sottotitolo_a_immagini(lettore, "sub-start", 5.0)
+        assert detti == ["Ritornello", "Ritornello"] and len(immagini) == 2
+        m._sottotitolo(lettore, "sub-text", None)
+        m._sottotitolo_a_immagini(lettore, "sub-start", None)
+        m._sottotitolo(lettore, "sub-text", "Ritornello")
+        m._sottotitolo_a_immagini(lettore, "sub-start", 5.0)
+        assert detti == ["Ritornello"] * 3
+        # Un inizio senza testo, come nelle tracce a immagini, non dice niente.
+        m._sottotitolo(lettore, "sub-text", "")
+        m._sottotitolo_a_immagini(lettore, "sub-start", 9.0)
+        m._sottotitolo_a_immagini(lettore, "sub-start", 11.0)
+        assert len(detti) == 3
+        # Un cartello ASS animato, un evento per fotogramma con lo stesso
+        # testo, si dice una volta sola.
+        m._sottotitolo(lettore, "sub-text", "Stazione di Tokyo")
+        for fotogramma in range(72):
+            m._sottotitolo_a_immagini(lettore, "sub-start", 20.0 + fotogramma / 24)
+        assert detti.count("Stazione di Tokyo") == 1
+        # Il lettore che non e' attivo non conta.
+        m._sottotitolo(m._lettori[1], "sub-text", "Altro")
+        assert "Altro" not in detti
+    finally:
+        m.chiudi()
+
+
+def test_il_karaoke_di_un_lrc_accanto_al_brano(avvisi, tmp_path):
+    import wave
+
+    brano = tmp_path / "canzone.wav"
+    with wave.open(str(brano), "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(8000)
+        w.writeframes(b"\0\0" * 8000 * 6)
+    (tmp_path / "canzone.lrc").write_text("[00:01.00]Prima riga\n[00:02.00]Ritornello\n[00:03.00]Ritornello\n", encoding="utf-8")
+    detti, caricati = [], []
+    m = Motore(ao="null", ai_sottotitoli=detti.append, al_caricamento=lambda: caricati.append(True))
+    try:
+        m.suona(str(brano))
+        assert _aspetta(lambda: caricati, 5)
+        # La traccia c'e', una volta sola: mpv non carica piu' il .lrc da se'.
+        sottotitoli = m.tracce()["sub"]
+        assert [t.get("title") for t in sottotitoli] == ["Testo del karaoke, dal file LRC"]
+        m.scegli_traccia("sid", str(sottotitoli[0]["id"]))
+        assert _aspetta(lambda: detti == ["Prima riga", "Ritornello", "Ritornello"], 6)
+        # L'anticipo rifa' la traccia, che resta scelta e sola, anche con due
+        # cambi di fila.
+        m.imposta_il_karaoke("strofa", 500)
+        m.imposta_il_karaoke("riga", 300)
+        assert _aspetta(lambda: [t.get("selected") for t in (m.tracce() or {"sub": []})["sub"]] == [True], 3)
+        time.sleep(0.5)
+        assert len(m.tracce()["sub"]) == 1
+    finally:
+        m.chiudi()
+
+
+@pytest.mark.skipif(not os.path.isfile(TURBO_OUTRUN), reason="serve la collezione HVSC")
+def test_il_karaoke_di_un_brano_reso_in_ram(avvisi, tmp_path):
+    # Un SID si apre con il formato WAV imposto, che rifiutava la traccia del
+    # testo: il banco del 4 ottobre 2026 sui .kar, resi da FluidSynth allo
+    # stesso modo, l'ha trovato.
+    import shutil
+
+    copia = tmp_path / "Turbo_Outrun.sid"
+    shutil.copy(TURBO_OUTRUN, copia)
+    (tmp_path / "Turbo_Outrun.lrc").write_text("[00:00.50]Prima riga\n[00:01.50]Seconda riga\n", encoding="utf-8")
+    detti, caricati = [], []
+    m = Motore(ao="null", ai_sottotitoli=detti.append, al_caricamento=lambda: caricati.append(True))
+    try:
+        m.suona(str(copia), 1)
+        assert _aspetta(lambda: caricati, 10)
+        sottotitoli = m.tracce()["sub"]
+        assert [t.get("title") for t in sottotitoli] == ["Testo del karaoke, dal file LRC"]
+        m.scegli_traccia("sid", str(sottotitoli[0]["id"]))
+        assert _aspetta(lambda: detti[:2] == ["Prima riga", "Seconda riga"], 6)
+        assert (m.posizione or 0) > 1.4
+    finally:
+        m.chiudi()

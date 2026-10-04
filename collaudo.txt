@@ -1,4 +1,4 @@
-Collaudo di MeTeOra 1.81.0, con NVDA: il manuale in HTML, F1 e F12, la ricerca anche in rete, B e Z con la riproduzione casuale, l'invito a offrire un caffè, la cartella vuota nel cestino, i dettagli dei contenitori, i conti in rete, Maiuscolo con F9 e F10, i sottotitoli fatti di immagini, il filtro delle impostazioni. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.81.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Collaudo di MeTeOra 1.82.0, con NVDA: il manuale in HTML, F1 e F12, la ricerca anche in rete, B e Z con la riproduzione casuale, l'invito a offrire un caffè, la cartella vuota nel cestino, i dettagli dei contenitori, i conti in rete, Maiuscolo con F9 e F10, i sottotitoli fatti di immagini, il filtro delle impostazioni, il karaoke. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta, e controlla che il titolo della finestra dica 1.82.0. Scrivi le note sulla riga della voce; le voci superate si cancellano.
 Impostazioni, ultima voce Dona per questo progetto, Invio: il suono dell'invito, e il fuoco sul testo, che NVDA legge.
 Invio nel testo, o Esc, chiudono l'invito e si torna alle impostazioni; Tab passa a Dona con PayPal e a Chiudi.
 Dona con PayPal apre la pagina di PayPal nel browser, e la console ringrazia.
@@ -29,3 +29,12 @@ Nelle impostazioni, Maiuscolo con Tab dalla lista: NVDA dice Filtro delle voci, 
 Scrivi vol: Tab torna alla lista, che ha solo Volume della musica, Passo del volume e Volume degli effetti.
 Scrivi xyz nel filtro: la lista ha una riga sola, Nessuna voce contiene xyz; Invio nel filtro porta lì.
 Cancella il filtro: tornano tutte le voci, con la selezione sull'ultima voce scelta nella lista, anche se un filtro intermedio l'aveva nascosta.
+Suona E:\Sounds\midi\883\883-Aeroplano.kar: con i sottotitoli letti accesi il testo arriva da solo, a tempo; se sono spenti, Maiuscolo con F2 dice Testo del karaoke letto, dal MIDI.
+Maiuscolo con F2 finché dice Sottotitoli letti spenti: il testo tace; ancora, e torna.
+Durante una riga, premi Q: arriva subito la riga che si canta in quel punto.
+Nelle impostazioni, Testo del karaoke per strofa: il testo di Aeroplano si rifà, e ogni strofa arriva intera; poi rimetti per riga.
+Anticipo del karaoke 1000: le righe arrivano un secondo prima del canto; poi riportalo a 0.
+Dove vanno sottotitoli e karaoke, solo al braille: il testo arriva sul display e la sintesi tace; solo alla sintesi, il contrario; poi rimetti alla sintesi e al braille.
+E:\Sounds\midi\antonacci\BiagioAntonacci_NonParliMai.kar: arriva il testo, non i nomi degli accordi.
+Un kar francese, per esempio Daniel Balavoine - Sauver l'Amour in E:\Audio\MIDI\Covers\Songs: le a accentate si leggono giuste.
+Un video con due sottotitoli uguali di fila, se ne trovi uno: si sentono tutti e due.

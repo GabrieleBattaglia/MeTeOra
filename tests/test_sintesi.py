@@ -36,7 +36,7 @@ def test_un_uscita_che_si_rompe_non_ferma_niente(sintesi_finta, monkeypatch):
     def errore(_testo, interrupt=False):
         raise OSError("NVDA chiuso")
 
-    monkeypatch.setattr(rotta, "output", errore)
+    monkeypatch.setattr(rotta, "speak", errore)
     assert voce.dici("uno", "nvda") is False
     # L'uscita si riapre alla richiesta dopo.
     assert voce.dici("due", "nvda") is True and sintesi_finta.detti == [("nvda", "due")]
@@ -45,3 +45,12 @@ def test_un_uscita_che_si_rompe_non_ferma_niente(sintesi_finta, monkeypatch):
 def test_i_nomi_da_leggere():
     assert sintesi.nome(sintesi.AUTOMATICA) == "automatica"
     assert sintesi.nome("nvda") == "NVDA" and sintesi.nome("sapi5") == "la voce di Windows, SAPI5"
+
+
+def test_dove_vanno_i_testi(sintesi_finta):
+    # 1.82.0: voce e braille, uno per uno; la voce di Windows il braille non ce l'ha.
+    voce = sintesi.Sintesi()
+    assert voce.dici("uno") and voce.dici("due", dove="sintesi") and voce.dici("tre", dove="braille")
+    assert sintesi_finta.detti == [("nvda", "uno"), ("nvda", "due")] and sintesi_finta.braille == [("nvda", "uno"), ("nvda", "tre")]
+    assert voce.dici("quattro", "sapi5", "braille") and sintesi_finta.braille[-1] == ("nvda", "tre")
+    assert set(sintesi.DESTINAZIONI) == {"entrambi", "sintesi", "braille"}

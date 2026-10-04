@@ -1,6 +1,6 @@
 # MeTeOra, i valori scritti nei campi delle impostazioni: dal testo al valore, con le correzioni dette a chi scrive.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); leggi_tempo e secondi_da_leggere arrivano da finestra.py. Nella 1.51.2 leggi_tempo accetta solo le cifre: prima passavano inf e 1e5. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza, con i loro limiti e le loro forme da leggere (tappa 4, issue 15). Nella 1.59.2 velocita' e dissolvenza si scrivono con il punto, come il resto di MeTeOra. Nella 1.60.0 leggi_tempo_nel_brano, per W, anche dalla fine. Nella 1.61.0 i modelli della riproduzione casuale.
+# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); leggi_tempo e secondi_da_leggere arrivano da finestra.py. Nella 1.51.2 leggi_tempo accetta solo le cifre: prima passavano inf e 1e5. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza, con i loro limiti e le loro forme da leggere (tappa 4, issue 15). Nella 1.59.2 velocita' e dissolvenza si scrivono con il punto, come il resto di MeTeOra. Nella 1.60.0 leggi_tempo_nel_brano, per W, anche dalla fine. Nella 1.61.0 i modelli della riproduzione casuale. Nella 1.82.0 l'anticipo del karaoke.
 
 """I valori delle impostazioni, letti dal testo scritto nei campi.
 
@@ -37,6 +37,8 @@ PASSO_VOLUME_MINIMO, PASSO_VOLUME_MASSIMO = 1, 50
 # I salti di Q ed E, in secondi.
 SECONDI_MINIMI = 0.1
 RIGHE_MINIME = 100
+# L'anticipo del testo del karaoke, in millesimi di secondo (1.82.0).
+ANTICIPO_MASSIMO_DEL_KARAOKE = 10000
 # Le dimensioni dei caratteri, in punti.
 CARATTERI_MINIMI, CARATTERI_MASSIMI = 6, 72
 # I colori si scrivono in percentuali intere di rosso, verde e blu.
@@ -221,6 +223,11 @@ def leggi_si_no(testo, nome="Inseguimento della plancia"):
     if not testo:
         raise ErroreValore(f"{nome}: manca la risposta; scrivi sì o no.")
     raise ErroreValore(f"{nome}: {testo} non è né sì né no; scrivi sì o no.")
+
+
+def leggi_anticipo_del_karaoke(testo):
+    """Quanti millesimi prima del canto arriva il testo del karaoke."""
+    return leggi_intero(testo, 0, ANTICIPO_MASSIMO_DEL_KARAOKE, "Anticipo del karaoke")
 
 
 def leggi_righe_della_console(testo):

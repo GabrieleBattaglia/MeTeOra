@@ -2,6 +2,17 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.82.0] - 2026-10-04
+
+- Il testo del karaoke, tappa 10 punto e: i MIDI, con i kar, anche quelli che si chiamano mid, e il testo cantato, i file LRC accanto al brano o al video, anche con i tempi per parola, e i testi sincronizzati SYLT nei tag. Maiuscolo con F2 lo accende e lo spegne come i sottotitoli, e con i sottotitoli letti accesi arriva da solo; dopo un salto arriva subito la riga in corso.
+- Tre voci nuove nelle impostazioni, con le decisioni di Gabriele: Testo del karaoke, per riga o per strofa dove il file le segna; Anticipo del karaoke, in millesimi, di partenza 0; Dove vanno sottotitoli e karaoke, alla sintesi e al braille, solo alla sintesi o solo al braille, che vale anche per i sottotitoli dei video. La voce Sintesi dei sottotitoli ora si chiama Sintesi di sottotitoli e karaoke.
+- Sul banco dei 127 kar e dei 946 mid e midi di Gabriele: tutti i kar e 333 fra mid e midi hanno il testo, 26428 righe in tutto. Nei kar italiani vince il testo con le barre, perché il testo cantato degli stessi file spesso non va mai a capo o porta gli accordi; dove invece gli eventi di testo hanno solo gli accordi, vince il testo cantato. Il testo di 67 kar è nella codifica di Windows, di 59 senza accenti, e di uno, Sauver l'Amour di Balavoine, in quella di DOS, dove la a accentata diventava i puntini.
+- Due sottotitoli uguali di fila, come un ritornello ripetuto o due No di seguito in un film, ora si dicono tutti e due: libmpv non li segnalava.
+- Con NVDA, la sintesi dei sottotitoli buttava via l'uscita e la riapriva a ogni sottotitolo, perché accessible_output2 solleva un errore dopo aver detto il testo: ora voce e braille si chiamano uno per uno.
+- libmpv non carica più da sé i file LRC accanto ai brani: li legge MeTeOra, con le strofe e senza i tempi per parola. Il testo arriva anche sui MIDI resi da FluidSynth, sui SID e sulla musica delle console, che libmpv apre come WAV: anche il testo veniva letto come WAV, e rifiutato.
+- Il braille arriva con NVDA, JAWS e System Access; scegliendo il braille con un'altra sintesi, la console lo dice.
+- La revisione prima della pubblicazione ha trovato 19 difetti, corretti. Fra gli altri: tre kar con gli accordi al posto del testo; dodici karaoke chiamati mid senza testo; gli apostrofi curvi che facevano scegliere la codifica di DOS; le righe lunghe tagliate a metà parola; la ripetizione dei sottotitoli uguali, che faceva dire 44 volte un cartello animato dei sottotitoli ASS, ora vale solo fra sottotitoli distanti almeno mezzo secondo; i LRC accanto ai video non più letti; le tracce del karaoke doppie ricaricando un brano o cambiando due volte un'impostazione; gli impressi scelti su un video che fermavano il karaoke.
+
 ## [1.81.0] - 2026-10-04
 
 - Il filtro delle voci nella finestra delle impostazioni, chiesto da Gabriele: un campo da una riga subito prima della lista, che si raggiunge con Maiuscolo con Tab. Mentre si scrive restano solo le voci il cui nome contiene il testo, senza badare a maiuscole e accenti, come il filtro della plancia; Invio nel filtro torna alla lista, con la selezione sull'ultima voce scelta se è fra quelle mostrate, anche dopo un errore di battitura che l'aveva nascosta. Senza voci, una riga dice che nessuna contiene quel testo.

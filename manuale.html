@@ -211,6 +211,12 @@ kbd {
 <li><a href="#midi-banco">Cambiare il banco</a></li>
 <li><a href="#esempi-midi">Esempi</a></li>
 </ul></li>
+<li><a href="#karaoke">Il karaoke</a>
+<ul>
+<li><a href="#karaoke-testi">I testi a tempo</a></li>
+<li><a href="#karaoke-lettura">Come arriva il testo</a></li>
+<li><a href="#esempi-karaoke">Esempi</a></li>
+</ul></li>
 <li><a href="#impostazioni">Le impostazioni</a>
 <ul>
 <li><a href="#impostazioni-finestra">La finestra delle impostazioni</a></li>
@@ -338,7 +344,7 @@ kbd {
 <h4>Il video</h4>
 <ul>
 <li><kbd>Maiuscolo con F1</kbd>: accende e spegne il video.</li>
-<li><kbd>Maiuscolo con F2</kbd>: sceglie a giro i sottotitoli letti: spenti, la prima traccia, la seconda e così via, e sui video in fondo i sottotitoli impressi; le tracce fatte di immagini le legge il riconoscimento dei caratteri.</li>
+<li><kbd>Maiuscolo con F2</kbd>: sceglie a giro i sottotitoli letti: spenti, la prima traccia, la seconda e così via, e sui video in fondo i sottotitoli impressi; le tracce fatte di immagini le legge il riconoscimento dei caratteri. Sui brani con il testo del karaoke, accende e spegne il testo.</li>
 <li><kbd>Maiuscolo con F3</kbd>: sceglie a giro la traccia audio del brano.</li>
 <li><kbd>Maiuscolo con F5</kbd>: mette la finestra del video a schermo intero, e di nuovo in finestra.</li>
 <li><kbd>Maiuscolo con F6</kbd>: cambia a giro il rapporto dell'immagine.</li>
@@ -1091,7 +1097,7 @@ kbd {
 <li>Maiuscolo con F5 mette la finestra del video a schermo intero, e di nuovo in finestra; se la finestra non è aperta, la console lo dice.</li>
 </ul>
 <h3 id="sottotitoli">I sottotitoli letti</h3>
-<p>I sottotitoli letti, Maiuscolo con F2, vanno alla sintesi scelta nelle impostazioni, uno screen reader o la voce di Windows, e si scrivono nella console; funzionano anche con il video spento. Maiuscolo con F2 va a giro: spenti, la prima traccia, la seconda, e di nuovo spenti, e la console dice la traccia con il numero, la lingua, il titolo e il formato, quando il file li dice. Su un brano senza sottotitoli, o senza niente in corso, li accende o li spegne per i brani dopo. Accesi, ogni video che parte usa la sua prima traccia di sottotitoli. MeTeOra prende anche i sottotitoli che stanno accanto al video, con lo stesso nome, per esempio un file .srt, e ricorda alla riapertura se sono accesi.</p>
+<p>I sottotitoli letti, Maiuscolo con F2, vanno alla sintesi scelta nelle impostazioni, uno screen reader o la voce di Windows, e si scrivono nella console; funzionano anche con il video spento. Maiuscolo con F2 va a giro: spenti, la prima traccia, la seconda, e di nuovo spenti, e la console dice la traccia con il numero, la lingua, il titolo e il formato, quando il file li dice. Su un brano senza sottotitoli, o senza niente in corso, li accende o li spegne per i brani dopo. Accesi, ogni video che parte usa la sua prima traccia di sottotitoli. MeTeOra prende anche i sottotitoli che stanno accanto al video, con lo stesso nome, per esempio un file .srt, e ricorda alla riapertura se sono accesi. Dove vanno, alla sintesi, al braille o a tutti e due, lo dice la voce Dove vanno sottotitoli e karaoke delle impostazioni; due sottotitoli uguali di fila si sentono tutti e due.</p>
 <h3 id="sottotitoli-immagini">I sottotitoli fatti di immagini</h3>
 <p>Alcuni sottotitoli non sono testo ma immagini: le tracce dei DVD e dei Blu-ray, VobSub e PGS, e i sottotitoli impressi nel video, che fanno parte dell'immagine. MeTeOra li legge con il riconoscimento dei caratteri di Windows, nella lingua della traccia, se Windows la sa leggere, altrimenti in italiano; le lingue sono quelle installate in Windows, di solito italiano e inglese. Per leggere, MeTeOra guarda il fotogramma anche con il video spento, senza aprire nessuna finestra. Se il riconoscimento di Windows non c'è, la console lo dice e questi sottotitoli non si leggono.</p>
 <p>Una traccia a immagini si sceglie con Maiuscolo con F2, come le altre, e la console dice che è fatta di immagini. A ogni sottotitolo nuovo MeTeOra lo fotografa, isola le lettere e le legge: arrivano alla sintesi e nella console come quelli di testo, quasi subito. Con il video spento il fotogramma diventa nero e nella foto restano solo le lettere; con il video acceso MeTeOra fotografa il fotogramma con il sottotitolo e senza, e legge la differenza.</p>
@@ -1214,6 +1220,37 @@ kbd {
 <li>Finita la ricerca, si apre la lista dei banchi trovati: scegline uno con le frecce e premi Invio, oppure scegli l'ultima riga, Scarica FluidR3 GM.</li>
 <li>La console dice con quale banco suonano i MIDI, e il MIDI parte.</li>
 </ol>
+<h2 id="karaoke">Il karaoke</h2>
+<h3 id="karaoke-testi">I testi a tempo</h3>
+<p>Molti brani portano con sé il testo, con il tempo di ogni riga o di ogni sillaba, come nei karaoke. MeTeOra lo legge da tre fonti, nell'ordine:</p>
+<ul>
+<li>dentro i MIDI: i file kar, con il testo diviso in sillabe e le barre che vanno a capo e cambiano strofa, anche quando si chiamano mid, e i file mid con il testo cantato; i tempi si contano dal file, anche quando la musica cambia velocità;</li>
+<li>da un file LRC accanto al brano, con il suo stesso nome, per esempio Canzone.lrc accanto a Canzone.mp3, anche nella forma con i tempi di ogni parola; vale anche accanto a un video, come un video musicale;</li>
+<li>dai tag del brano, per esempio di un MP3, quando portano il testo sincronizzato, SYLT.</li>
+</ul>
+<p>Gli accordi scritti in mezzo al testo, i titoli e gli avvisi del copyright all'inizio del file si saltano, e un MIDI con meno di tre righe di testo non è un karaoke; se un kar ha solo accordi al posto delle sillabe, vale il suo testo cantato. Le lettere accentate arrivano giuste anche dai file fatti con i vecchi programmi per DOS. Una riga lunghissima, di un file che non va mai a capo, si spezza alle pause del canto, sempre fra due parole.</p>
+<h3 id="karaoke-lettura">Come arriva il testo</h3>
+<p>Il testo del karaoke si accende e si spegne come i sottotitoli dei video, con Maiuscolo con F2: su un brano con il testo il giro è il testo e spenti, e la console dice da dove viene, per esempio Testo del karaoke letto, dal MIDI. Con i sottotitoli letti accesi, ogni brano con il testo lo legge da solo. Ogni riga arriva quando comincia il suo canto, come dice la voce Dove vanno sottotitoli e karaoke, e si scrive nella console. Dopo un salto, per esempio con Q o E, arriva subito la riga che si canta in quel punto; due righe uguali di fila, come un ritornello ripetuto, si sentono tutte e due.</p>
+<p>Tre voci delle impostazioni decidono come arriva:</p>
+<ul>
+<li>Testo del karaoke: per riga, il modo di partenza, o per strofa, dove il file le segna, come nei kar e nei LRC con le righe vuote fra le strofe; dove non le segna si va per riga. Mai per parola o per sillaba.</li>
+<li>Anticipo del karaoke: quanti millesimi di secondo prima del canto arriva il testo, da 0 a 10000, per avere il tempo di leggerlo; di partenza 0.</li>
+<li>Dove vanno sottotitoli e karaoke: alla sintesi e al braille, solo alla sintesi o solo al braille. Vale anche per i sottotitoli dei video. Il braille arriva con NVDA, JAWS e System Access; con le altre sintesi, voce di Windows compresa, solo al braille vuol dire solo nella console.</li>
+</ul>
+<p>Cambiando il modo o l'anticipo, il testo del brano in corso si rifà subito, e la riga in corso arriva di nuovo.</p>
+<h3 id="esempi-karaoke">Esempi</h3>
+<h4>Un kar con un secondo di anticipo</h4>
+<ol>
+<li>Nelle impostazioni, su Anticipo del karaoke premi Invio, scrivi 1000 e premi Invio.</li>
+<li>Porta il fuoco su un file kar e premi X.</li>
+<li>Se i sottotitoli letti sono accesi, il testo arriva da solo; se sono spenti, premi Maiuscolo con F2, e la console dice Testo del karaoke letto, dal MIDI.</li>
+<li>Ogni riga arriva un secondo prima del suo canto; Maiuscolo con F2 spegne il testo, e premuto di nuovo lo riaccende.</li>
+</ol>
+<h4>Un MP3 con il suo testo</h4>
+<ol>
+<li>Metti accanto a Canzone.mp3 il file Canzone.lrc con il testo a tempo.</li>
+<li>Con i sottotitoli letti accesi, suona Canzone.mp3: le righe arrivano da sole, e la console le scrive.</li>
+</ol>
 <h2 id="impostazioni">Le impostazioni</h2>
 <h3 id="impostazioni-finestra">La finestra delle impostazioni</h3>
 <p>La voce Impostazioni, l'ultima del primo livello della plancia, apre la finestra delle impostazioni: una lista con una riga per voce, il nome e il valore di adesso, per esempio Volume della musica: 80. Quattro voci dicono fra parentesi il tasto che le cambia: Riproduzione casuale (Maiuscolo+N), Video (Maiuscolo+F1), Sottotitoli letti (Maiuscolo+F2) e Inseguimento della plancia (Maiuscolo+F8). Anche altre voci, come Volume della musica o Dissolvenza, hanno un tasto, che la guida rapida elenca, ma la loro riga non lo dice. Invio su una voce, o il doppio clic, la cambia, o fa la sua azione; Esc, o il pulsante Chiudi, torna alla plancia. Dentro la finestra le lettere non sono comandi del lettore: come in ogni lista di Windows portano alla voce seguente che comincia così, e ripremute alla successiva, e i tasti della finestra principale, compresi i tasti funzione, qui non valgono.</p>
@@ -1254,8 +1291,14 @@ kbd {
 <p>Sì o no; spegnendoli qui si spengono anche nel brano in corso. Maiuscolo con F2 li accende e sceglie anche la traccia. Di partenza sono spenti.</p>
 <h4>Sottotitoli impressi</h4>
 <p>Invio apre una lista con i due modi: letti al volo, mentre il video suona, con circa mezzo secondo di ritardo, il modo di partenza; oppure letti prima, con una passata che salva accanto al video un file usato le volte dopo. Il capitolo Il video, alla sezione I sottotitoli fatti di immagini, li spiega.</p>
-<h4>Sintesi dei sottotitoli</h4>
+<h4>Sintesi di sottotitoli e karaoke</h4>
 <p>Invio apre una lista con l'automatica, che usa lo screen reader attivo e altrimenti la voce di Windows, e le sintesi che si possono usare adesso, fra NVDA, JAWS, ZDSR, Dolphin, System Access, PC-Talker e la voce di Windows, SAPI5. Una sintesi scelta prima che adesso non risponde resta in fondo alla lista, e lo dice. La riga dice quale usa adesso l'automatica.</p>
+<h4>Dove vanno sottotitoli e karaoke</h4>
+<p>Invio apre una lista: alla sintesi e al braille, il modo di partenza, solo alla sintesi, o solo al braille. Vale per i sottotitoli dei video, per quelli letti con il riconoscimento dei caratteri e per il testo del karaoke. Il braille arriva con NVDA, JAWS e System Access; con le altre sintesi, voce di Windows compresa, solo al braille vuol dire solo nella console, e la console lo dice quando scegli.</p>
+<h4>Testo del karaoke</h4>
+<p>Invio apre una lista: per riga, il modo di partenza, o per strofa, dove il file le segna; altrimenti per riga. Il capitolo Il karaoke spiega tutto.</p>
+<h4>Anticipo del karaoke</h4>
+<p>Quanti millesimi di secondo prima del canto arriva il testo del karaoke, da 0 a 10000; di partenza 0. Non vale per i sottotitoli dei video.</p>
 <h4>Banco dei suoni MIDI</h4>
 <p>Invio apre una lista con Cerca i banchi nel PC, Scrivi il percorso di un banco e Scarica FluidR3 GM. Un banco scritto a mano può avere anche pochi strumenti: la console lo dice. La riga dice il banco in uso, o che si sceglierà al primo MIDI. Il capitolo I MIDI spiega tutto.</p>
 <h4>Inseguimento della plancia</h4>
@@ -1318,7 +1361,7 @@ kbd {
 <h3 id="domande">Le domande con Sì e No</h3>
 <p>Nelle domande con Sì e No, come Elimina playlist, Manda nel cestino o Cancella tutto, No è la risposta predefinita, e all'apertura ha il fuoco. Esc vale No, e le lettere S e N rispondono subito; Invio preme il pulsante che ha il fuoco, e Tab passa da Sì a No.</p>
 <h3 id="liste">Le liste di scelta</h3>
-<p>Scheda audio, Modello della riproduzione casuale, Sintesi dei sottotitoli, Banco dei suoni MIDI e la lista dei banchi trovati aprono una lista, con una riga già selezionata: quella della scelta di adesso, quando c'è, altrimenti la prima. Invio, o il doppio clic, confermano la riga; Esc, o il pulsante Annulla, annullano, e la console lo dice.</p>
+<p>Scheda audio, Modello della riproduzione casuale, Sintesi di sottotitoli e karaoke, Dove vanno sottotitoli e karaoke, Testo del karaoke, Banco dei suoni MIDI e la lista dei banchi trovati aprono una lista, con una riga già selezionata: quella della scelta di adesso, quando c'è, altrimenti la prima. Invio, o il doppio clic, confermano la riga; Esc, o il pulsante Annulla, annullano, e la console lo dice.</p>
 <h3 id="dialoghi-e-tasti">I tasti dentro i dialoghi</h3>
 <p>Dentro un campo, una domanda, una lista o una finestra come le impostazioni e i marcatori, valgono solo i tasti di quel dialogo: le lettere che scrivi non diventano comandi del lettore, e nemmeno i tasti funzione o Esc per uscire da MeTeOra. Nelle liste le lettere portano alla riga seguente che comincia così, come in Windows. Se intanto parte un video, la sua finestra aspetta che il dialogo si chiuda.</p>
 <h2 id="file-di-meteora">I file di MeTeOra</h2>
@@ -1368,7 +1411,7 @@ kbd {
 <li>Non riesco a rinominare, con il motivo, o C'è già, con il nome: Rinomina file lascia il nome com'era.</li>
 <li>Non riesco a leggere i tag, o MeTeOra non sa scrivere i tag, con il nome del file: il file è rovinato, o il suo formato non ha tag che MeTeOra conosca.</li>
 <li>FluidSynth non si scarica, o FluidR3 GM non si scarica, con il motivo: di solito la rete; si riprova dalle impostazioni, con Banco dei suoni MIDI.</li>
-<li>Che adesso non risponde, nella lista Sintesi dei sottotitoli: la sintesi scelta non c'è più, per esempio perché lo screen reader è chiuso.</li>
+<li>Che adesso non risponde, nella lista Sintesi di sottotitoli e karaoke: la sintesi scelta non c'è più, per esempio perché lo screen reader è chiuso.</li>
 </ul>
 <h3 id="esempi-problemi">Esempi</h3>
 <h4>Riferire un problema interno</h4>

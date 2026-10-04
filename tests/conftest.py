@@ -131,12 +131,13 @@ def sintesi_finta(monkeypatch):
     """La sintesi dei sottotitoli non parla mai: le uscite sono finte. Si
     aprono quelle in presenti, sono attive quelle vere in attive (la voce di
     Windows, aperta, lo e' sempre), e i testi detti finiscono in detti, come
-    (chiave, testo). Le prove cambiano presenti e attive a piacere."""
+    (chiave, testo), quelli mandati al braille in braille. Le prove cambiano
+    presenti e attive a piacere."""
     import types
 
     import sintesi
 
-    stato = types.SimpleNamespace(detti=[], presenti={"nvda", "jaws", "sapi5"}, attive={"nvda": True, "jaws": False})
+    stato = types.SimpleNamespace(detti=[], braille=[], presenti={"nvda", "jaws", "sapi5"}, attive={"nvda": True, "jaws": False})
 
     class Finta:
         def __init__(self, chiave):
@@ -145,8 +146,13 @@ def sintesi_finta(monkeypatch):
         def is_active(self):
             return stato.attive.get(self.chiave, False)
 
-        def output(self, testo, interrupt=False):
+        def speak(self, testo, interrupt=False):
             stato.detti.append((self.chiave, testo))
+
+        def braille(self, testo):
+            # Come in accessible_output2: la voce di Windows il braille non ce l'ha.
+            if self.chiave != "sapi5":
+                stato.braille.append((self.chiave, testo))
 
     monkeypatch.setattr(sintesi, "_crea", lambda chiave: Finta(chiave) if chiave in stato.presenti else None)
     return stato
