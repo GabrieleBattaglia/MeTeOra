@@ -1,5 +1,5 @@
 {
- "volume": 164,
+ "volume": 100,
  "passo_volume": 3,
  "passo_indietro": 3.0,
  "passo_avanti": 30.0,
@@ -10,6 +10,13 @@
  "video": false,
  "sottotitoli": true,
  "sintesi": "automatica",
+ "destinazione": "entrambi",
+ "karaoke": "riga",
+ "anticipo_karaoke": 0,
+ "celle_braille": 0,
+ "lettura_minima": 2000,
+ "impressi": "al_volo",
+ "impressi_scelti": false,
  "percorsi_di_rete": [
   "\\\\iliadbox_Server\\iliadbox\\Video"
  ],
