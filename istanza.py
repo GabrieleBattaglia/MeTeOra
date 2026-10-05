@@ -1,6 +1,6 @@
 # MeTeOra, l'istanza unica: la seconda copia passa i file alla prima e si chiude.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.91.0, tappa 12 d del piano. Nella 1.96.11 la sveglia dell'ascolto senza stretta di mano.
+# 04/10/2026: nasce con la 1.91.0, tappa 12 d del piano. Nella 1.96.11 la sveglia dell'ascolto senza stretta di mano. Nella 1.97.0 il mutex che l'installatore riconosce.
 
 """L'istanza unica di MeTeOra (1.91.0).
 
@@ -15,6 +15,9 @@ Sul filo passano solo byte JSON, non oggetti di Python: niente pickle, che
 eseguirebbe codice di chi scrive. La variabile d'ambiente METEORA_ISTANZA
 cambia il nome della pipe, per le prove e i banchi: cosi' non parlano con
 il MeTeOra che magari e' aperto.
+La prima copia tiene anche un mutex con nome (1.97.0): l'installatore e il
+disinstallatore di Inno Setup lo cercano, con AppMutex di MeTeOra.iss, e
+chiedono di chiudere MeTeOra prima di toccarne i file.
 """
 
 import contextlib
@@ -23,6 +26,7 @@ import hashlib
 import json
 import os
 import threading
+from ctypes import wintypes
 from multiprocessing.connection import Client, Listener
 
 # AllowSetForegroundWindow: qualunque processo, cioe' la prima copia.
@@ -36,6 +40,26 @@ def nome():
         return rf"\\.\pipe\{proprio}"
     utente = os.environ.get("USERNAME", "utente")
     return rf"\\.\pipe\MeTeOra-{utente}"
+
+
+def nome_del_mutex():
+    """Il mutex di MeTeOra aperto: lo stesso nome di AppMutex in
+    MeTeOra.iss; con METEORA_ISTANZA, uno di prova."""
+    proprio = os.environ.get("METEORA_ISTANZA")
+    return f"MeTeOra-{proprio}" if proprio else "MeTeOra"
+
+
+def _crea_il_mutex(nome_del_mutex):
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel32.CreateMutexW.restype = wintypes.HANDLE
+    kernel32.CreateMutexW.argtypes = [ctypes.c_void_p, wintypes.BOOL, wintypes.LPCWSTR]
+    return kernel32.CreateMutexW(None, False, nome_del_mutex) or None
+
+
+def _chiudi_il_mutex(maniglia):
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
+    kernel32.CloseHandle(maniglia)
 
 
 def _chiave(nome_della_pipe):
@@ -69,12 +93,17 @@ class Ascolto:
         self._ricevi = ricevi
         self._nome = nome_della_pipe or nome()
         self._fermo = False
+        self._mutex = None
         try:
             self._ascoltatore = Listener(self._nome, family="AF_PIPE", authkey=_chiave(self._nome))
         except OSError:
             self._ascoltatore = None
         self.attiva = self._ascoltatore is not None
         if self.attiva:
+            if nome_della_pipe is None:
+                # Il MeTeOra vero, o quello di un banco con METEORA_ISTANZA;
+                # le prove che danno il nome della pipe non lo tengono.
+                self._mutex = _crea_il_mutex(nome_del_mutex())
             threading.Thread(target=self._ascolta, name="MeTeOra, istanza unica", daemon=True).start()
 
     def _ascolta(self):
@@ -92,8 +121,11 @@ class Ascolto:
                     self._ricevi(percorsi)
 
     def ferma(self):
-        """All'uscita: l'ascolto finisce."""
+        """All'uscita: l'ascolto finisce, e il mutex si lascia."""
         self._fermo = True
+        if self._mutex is not None:
+            _chiudi_il_mutex(self._mutex)
+            self._mutex = None
         if self._ascoltatore is not None:
             with contextlib.suppress(Exception):
                 self._ascoltatore.close()

@@ -7509,7 +7509,7 @@ class Finestra(wx.Frame):
             "Durate, lettura e scrittura dei tag dei file audio: mutagen, GPL 2 o successiva. Collegamento con libmpv: python-mpv, "
             "GPL 2 o successiva.",
             "Effetti sonori: Acusticator, della libreria GBUtils di Gabriele, GPL 3, con numpy, scipy e sounddevice su PortAudio.",
-            "Python, della Python Software Foundation; pacchetto creato con PyInstaller.",
+            "Python, della Python Software Foundation; pacchetto creato con PyInstaller, programma di installazione con Inno Setup.",
             "Questo software si basa in parte sul lavoro dell'Independent JPEG Group.",
             "Parti di questo software sono copyright The FreeType Project (www.freetype.org). Tutti i diritti riservati.",
         ]

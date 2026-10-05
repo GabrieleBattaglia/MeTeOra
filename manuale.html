@@ -62,7 +62,7 @@ kbd {
 <body>
 <h1>Manuale di MeTeOra</h1>
 <p>MeTeOra è un lettore audio e video pensato per chi usa uno screen reader e un display braille. Suona quasi tutti i formati audio e video, compresa la musica del Commodore 64 in formato SID, i moduli dei tracker dell'Amiga, la musica delle console di gioco e i MIDI, e si comanda tutto da tastiera. Ogni azione ha un suono suo e scrive una riga nella console.</p>
-<p>Questo manuale descrive ciò che c'è adesso, e cresce insieme al programma. Il primo capitolo, la guida rapida, elenca tutti i tasti, i comandi della ricerca e del filtro e i codici dei colori, per la consultazione al volo: F12 la scrive nella console. Gli altri capitoli spiegano un argomento alla volta, con i suoi tasti e degli esempi. F1 apre questo manuale nel browser: con NVDA, H e Maiuscolo con H passano da un titolo all'altro, e le cifre da 1 a 4 vanno ai titoli di quel livello.</p>
+<p>Questo manuale descrive ciò che c'è adesso, e cresce insieme al programma. Il primo capitolo, la guida rapida, elenca tutti i tasti, i comandi della ricerca e del filtro e i codici dei colori, per la consultazione al volo: F12 la scrive nella console. Gli altri capitoli spiegano un argomento alla volta, con i suoi tasti e degli esempi. F1 apre questo manuale nel browser: con NVDA, H e Maiuscolo con H passano da un titolo all'altro, e le cifre da 1 a 4 vanno ai titoli di quel livello. Il secondo capitolo, Installare MeTeOra, dice come si installa, che cosa serve e che cosa succede al primo avvio.</p>
 <nav aria-label="Indice">
 <ul>
 <li><a href="#guida-rapida">Guida rapida</a>
@@ -70,6 +70,13 @@ kbd {
 <li><a href="#tasti">I tasti</a></li>
 <li><a href="#comandi-ricerca-filtro">I comandi della ricerca e del filtro</a></li>
 <li><a href="#colori">I colori</a></li>
+</ul></li>
+<li><a href="#installazione">Installare MeTeOra</a>
+<ul>
+<li><a href="#scaricare">Scaricare e installare</a></li>
+<li><a href="#primo-avvio">Il primo avvio e l'avviso di SmartScreen</a></li>
+<li><a href="#requisiti">Che cosa serve</a></li>
+<li><a href="#disinstallare">Disinstallare, spostare o togliere MeTeOra</a></li>
 </ul></li>
 <li><a href="#la-finestra">La finestra</a>
 <ul>
@@ -270,7 +277,7 @@ kbd {
 <li><kbd>F1</kbd>: apre il manuale nel browser.</li>
 <li><kbd>F12</kbd>: scrive nella console questa guida rapida e ci porta il fuoco, sulla prima riga.</li>
 <li><kbd>Maiuscolo con F12</kbd>: spegne e riaccende i tasti rapidi a carattere. Spenti, lettere, cifre e segni vanno alla plancia, che salta alla voce che comincia con ciò che scrivi; i tasti funzione, Esc e Ctrl con la barra rovesciata restano.</li>
-<li><kbd>F2</kbd>: scrive nella console le novità di ogni versione e ci porta il fuoco.</li>
+<li><kbd>F2</kbd>: scrive nella console le novità delle versioni più recenti, con in fondo dove leggere il changelog intero, e ci porta il fuoco.</li>
 <li><kbd>F3</kbd>: scrive nella console i crediti e ci porta il fuoco.</li>
 <li><kbd>Esc</kbd>: esce da MeTeOra salvando tutto, e alla riapertura ritrovi in pausa il brano e il punto a cui eri.</li>
 <li><kbd>Alt con F4</kbd>: esce da MeTeOra come Esc, con lo stesso salvataggio.</li>
@@ -288,6 +295,7 @@ kbd {
 <li><kbd>X</kbd>: suona la voce selezionata, cioè un brano, un file, un sottobrano, una playlist, i Preferiti, una cartella o un'unità con tutte le sottocartelle.</li>
 <li><kbd>X</kbd>: sul brano che sta già suonando lo fa ripartire da capo, e se è in pausa lo riprende dal punto in cui era.</li>
 <li><kbd>X</kbd>: su un marker fa come sul suo brano.</li>
+<li><kbd>X</kbd>: su un capitolo suona il file da quel capitolo.</li>
 <li><kbd>X</kbd>: sulla playlist o sulla cartella da cui stai già suonando, e sulle voci che non si suonano, come Questo PC o i Risultati, riprende dalla pausa o fa ripartire da capo il brano in corso.</li>
 <li><kbd>C</kbd>: mette in pausa, e di nuovo C riprende.</li>
 <li><kbd>V</kbd>: ferma la riproduzione, e poi X riparte dall'inizio del brano.</li>
@@ -386,7 +394,7 @@ kbd {
 <li><kbd>Maiuscolo con Backspace</kbd>: risale di colpo al ramo di secondo livello in cui sei, come l'unità, la playlist o i Preferiti, e chiude i rami al suo interno.</li>
 <li><kbd>F9</kbd>: chiude la voce col fuoco e tutto ciò che ha dentro, o il ramo che la contiene se non ha niente dentro.</li>
 <li><kbd>F10</kbd>: apre e carica la voce col fuoco e tutti i rami che ha dentro, fino a duemila rami e diecimila voci; un tasto qualsiasi lo ferma.</li>
-<li><kbd>Invio</kbd>: apre il menu della voce, ma esegue i comandi, mostra gli altri risultati e rinomina i marker.</li>
+<li><kbd>Invio</kbd>: apre il menu della voce, ma esegue i comandi, mostra gli altri risultati, rinomina i marker e suona il file da un capitolo.</li>
 <li><kbd>Tasto Applicazioni</kbd>: apre il menu della voce.</li>
 <li><kbd>Barra spaziatrice</kbd>: apre il menu della voce, come il tasto Applicazioni.</li>
 <li><kbd>Maiuscolo con F9</kbd>: chiude tutta la plancia, e il fuoco va sulla voce di primo livello che conteneva quella su cui eri.</li>
@@ -513,6 +521,25 @@ kbd {
 <li><kbd>P 31.31.31</kbd>: la lettera può essere maiuscola o staccata dai numeri, e un'area scritta due volte prende il valore scritto per ultimo.</li>
 <li><kbd>Campo vuoto</kbd>: non cambia niente; per tornare ai colori di Windows si scrivono le lettere da sole.</li>
 </ul>
+<h2 id="installazione">Installare MeTeOra</h2>
+<h3 id="scaricare">Scaricare e installare</h3>
+<p>MeTeOra si scarica dalla pagina delle release su GitHub, all'indirizzo https://github.com/GabrieleBattaglia/MeTeOra/releases/latest. Ci sono due file: MeTeOra-Setup seguito dal numero della versione, il programma di installazione, che va bene quasi per tutti, e MeTeOra.zip, la versione portatile, senza installazione. Il browser può dire che il file non viene scaricato spesso: in quel caso scegli di mantenerlo.</p>
+<p>Il programma di installazione non chiede i diritti di amministratore: installa MeTeOra per il tuo utente, nella cartella AppData\Local\Programs\MeTeOra, dove MeTeOra può scrivere i suoi dati e aggiornarsi da solo. Le sue finestre sono quelle di ogni installazione di Windows: Avanti, la cartella, che conviene lasciare com'è, una casella per l'icona sul desktop, spenta di partenza, poi Installa, e alla fine la casella Avvia MeTeOra e Fine. MeTeOra compare nel menu Start, e in Impostazioni di Windows, App installate, da dove si disinstalla.</p>
+<p>La versione portatile si estrae in una cartella dove puoi scrivere, per esempio dentro Documenti o su una chiavetta: in Esplora risorse, sul file MeTeOra.zip, il tasto Applicazioni apre il menu con Estrai tutto. Non metterla in C:\Programmi: MeTeOra tiene i suoi dati accanto al programma e lì si aggiorna, e in quella cartella senza i diritti di amministratore non si può scrivere. Nella cartella estratta ci sono MeTeOra.exe, da avviare, il file LICENSE, la cartella licenze e la cartella _internal, che contiene il programma con le sue librerie e non va toccata. L'estrazione non crea collegamenti: per averne uno sul desktop, sul file MeTeOra.exe Maiuscolo con F10 apre il menu, con Invia a, poi Desktop (crea collegamento).</p>
+<h3 id="primo-avvio">Il primo avvio e l'avviso di SmartScreen</h3>
+<p>MeTeOra non è firmato digitalmente, come molti programmi liberi scritti da una persona sola. Per questo, la prima volta che avvii il programma di installazione, o MeTeOra.exe della versione portatile, Windows può mostrare la finestra Windows ha protetto il PC, che dice che Microsoft Defender SmartScreen ha impedito l'avvio di un'app non riconosciuta. Non vuol dire che il programma sia pericoloso, ma solo che Windows non lo conosce ancora. Attiva il collegamento Ulteriori informazioni: compaiono il nome del file, l'autore, che risulta sconosciuto, e il pulsante Esegui comunque, che lo avvia. Le volte dopo l'avviso non torna.</p>
+<p>Al primo avvio MeTeOra si apre a tutta finestra, con il fuoco nella plancia, sui Preferiti, ancora vuoti. La prima riga della console dice la versione e ricorda F1, il manuale, F12, la guida rapida, e F7, il cruscotto. Nella cartella di MeTeOra nascono i file dei dati, descritti nel capitolo I file di MeTeOra.</p>
+<h3 id="requisiti">Che cosa serve</h3>
+<ul>
+<li>Windows 10 o 11 a 64 bit.</li>
+<li>La libreria di Vulkan, vulkan-1.dll, che libmpv chiede anche solo per partire. La installano i driver della scheda video, e di solito c'è già. Se manca, MeTeOra non parte e una finestra lo dice: il capitolo Quando qualcosa va storto spiega come rimediare.</li>
+<li>Per guardare i video, una scheda video con i suoi driver. Con il video spento, dei video si sente solo l'audio.</li>
+<li>Uno screen reader, NVDA o JAWS, per avere i sottotitoli e il karaoke anche in braille. Senza screen reader, li legge la voce di Windows.</li>
+<li>La rete serve solo per gli aggiornamenti e, la prima volta che suoni un MIDI, per scaricare FluidSynth e, se lo chiedi, il banco di suoni FluidR3 GM.</li>
+</ul>
+<h3 id="disinstallare">Disinstallare, spostare o togliere MeTeOra</h3>
+<p>Installato con il programma di installazione, MeTeOra si disinstalla da Impostazioni di Windows, App installate. Se MeTeOra è aperto, la disinstallazione, come l'installazione, chiede di chiuderlo prima. Toglie anche le associazioni dei formati, se le avevi fatte con la voce delle impostazioni. Alla fine chiede se cancellare anche i dati: playlist, Preferiti, impostazioni, marker e le loro copie. Con No, la risposta proposta, restano nella cartella, e reinstallando MeTeOra li ritrovi.</p>
+<p>La versione portatile, programma e dati, sta tutta nella sua cartella: per salvarla, o portarla su un altro computer, basta copiarla intera, e per toglierla si cancella la cartella. Se la sposti e avevi usato Associazioni dei formati, scegli di nuovo Associa nelle impostazioni, perché Windows ricorda il percorso di prima; prima di cancellarla, scegli Togli.</p>
 <h2 id="la-finestra">La finestra</h2>
 <h3 id="tre-aree">Le tre aree</h3>
 <p>La finestra di MeTeOra ha tre aree, nell'ordine in cui le raggiunge il tasto Tab: la plancia dei comandi, la console e il cruscotto. F5, F6 e F7 portano il fuoco direttamente in ciascuna, con un suono suo; Tab e Maiuscolo con Tab passano dall'una all'altra.</p>
@@ -533,7 +560,7 @@ kbd {
 <p>F9 chiude la voce che ha il fuoco e tutto ciò che ha dentro, e ci porta la selezione; se la voce non ha niente dentro, chiude il ramo che la contiene. F10 apre la voce e tutti i rami che ha dentro, caricandoli, marker compresi, e come F9 su una voce senza niente dentro lavora sul ramo che la contiene. F10 si ferma dopo duemila rami, in qualsiasi punto della plancia: sotto Questo PC ci sono dischi interi. La console dice quanti rami ha aperto, e se si è fermato prima.</p>
 <p>Le lettere nella plancia sono comandi, come in tutta la finestra: per questo non si salta a una voce digitandone l'iniziale. Per cercare per iniziale in un ramo grande, Maiuscolo con F12 spegne i tasti rapidi a carattere, con due note che scendono, e la console lo dice: lettere, cifre e segni, anche con il Maiuscolo, vanno alla plancia, che come ogni albero di Windows salta alla voce che comincia con ciò che scrivi, se scrivi in fretta anche con più lettere; la selezione la segue, così Invio, Canc e gli altri tasti agiscono su di lei. Se nessuna voce comincia così, Windows suona il suo avviso. Fuori dalla plancia, nella console, nel cruscotto o nella finestra del video, un carattere dice soltanto che i tasti rapidi sono spenti. Restano i tasti funzione, come F5, F8 e F12, Esc, Ctrl con la barra rovesciata, e nella plancia Backspace, Spazio, Invio e Canc. Trovato quello che cerchi, Maiuscolo con F12 li riaccende, con tre note che salgono. Il cruscotto, F7, dice quando sono spenti; a ogni avvio di MeTeOra sono accesi.</p>
 <h4>Il menu della voce</h4>
-<p>Su ogni voce Invio, il tasto Applicazioni e la barra spaziatrice aprono il menu della voce, con il suono del menu. Maiuscolo con F10 invece, dalla 1.79.0, non apre il menu come nel resto di Windows: apre tutta la plancia. Ci sono tre eccezioni per Invio: sui comandi, come Nuova playlist, Apri file, Impostazioni o Aggiungi un percorso di rete, Invio li esegue; sulla voce Mostra altri risultati mostra i risultati seguenti; su un marker chiede il suo nuovo nome.</p>
+<p>Su ogni voce Invio, il tasto Applicazioni e la barra spaziatrice aprono il menu della voce, con il suono del menu. Maiuscolo con F10 invece non apre il menu come nel resto di Windows: apre tutta la plancia. Ci sono quattro eccezioni per Invio: sui comandi, come Nuova playlist, Apri file, Impostazioni o Aggiungi un percorso di rete, Invio li esegue; sulla voce Mostra altri risultati mostra i risultati seguenti; su un marker chiede il suo nuovo nome; su un capitolo suona il file da lì.</p>
 <p>Su una voce senza menu, come un comando, il tasto Applicazioni e la barra spaziatrice lo dicono, e su un comando ricordano che Invio lo esegue. Sulla voce d'attesa di una ricerca nella rete dicono Ricerca in corso: la voce sparisce quando la ricerca finisce. I menu di ogni voce sono descritti nei capitoli che seguono.</p>
 <h4>Canc e Maiuscolo con Canc</h4>
 <p>Canc nella plancia elimina una playlist, dopo una domanda con No come risposta predefinita; toglie un brano da una playlist o dai Preferiti; elimina un marker; toglie da Questa rete un percorso di rete aggiunto a mano, e i suoi file restano dove sono. Il fuoco resta lì dove lavoravi: sul brano che seguiva, o su quello prima, o sulla playlist se è rimasta vuota; dopo una playlist eliminata, sulla playlist vicina; dopo un marker, sul marker vicino o sul suo brano. Sui Preferiti Canc dice che non si eliminano, e che Canc su un loro brano lo toglie. Sulle altre voci, come una cartella, un'unità, un file di una cartella o un sottobrano, dice Qui Canc non cancella niente.</p>
@@ -557,7 +584,7 @@ kbd {
 <p>Per chi vede, e usa il mouse, MeTeOra ha una barra con i comandi principali. Compare in basso, al centro della finestra, quando il mouse si muove sopra MeTeOra, se MeTeOra è la finestra attiva, come nei lettori più diffusi; sparisce dopo tre secondi di mouse fermo, o quando il puntatore esce dalla finestra, ma resta finché il puntatore ci sta sopra. Ha quattro gruppi di pulsanti, con i simboli di Windows: la riproduzione, cioè brano precedente, indietro, suona, pausa, stop, avanti e brano successivo; il volume, cioè giù, muto e su; la velocità e il tono, ciascuno con giù, normale e su. Sotto i pulsanti, la barra scrive il nome e il tasto di quello su cui sta il puntatore, per esempio Pausa, tasto C. Ogni pulsante fa esattamente quello che fa il suo tasto, con gli stessi suoni e le stesse righe nella console. Sopra il video la barra ha anche la linea del tempo, descritta nel capitolo Il video.</p>
 <p>Con la tastiera e lo screen reader la barra non cambia niente: non prende mai il fuoco, nemmeno quando la si clicca, non si raggiunge con Tab, e quando è nascosta per Windows non c'è. Compare solo con un movimento vero del mouse, mai sotto il puntatore, e un suo pulsante risponde solo al puntatore arrivato lì muovendosi: il mouse che NVDA porta su un oggetto fa un salto solo, quindi la barra non compare e il clic di NVDA va dove deve. Con un menu aperto, o mentre la finestra si sposta, sparisce. La voce Barra dei comandi per il mouse delle impostazioni la spegne del tutto.</p>
 <h3 id="tasti-ovunque">I tasti in tutta la finestra</h3>
-<p>Tutti i tasti funzionano in tutta la finestra, qualunque area abbia il fuoco: dalla console si può mettere in pausa, cambiare il volume o aprire il filtro. Fanno eccezione i tasti propri della plancia, come Invio, Canc, Backspace, le frecce e la barra spaziatrice, e Invio della console. Le lettere valgono anche nella plancia, dove per questo non si salta alle voci digitandone l'iniziale.</p>
+<p>Tutti i tasti funzionano in tutta la finestra, qualunque area abbia il fuoco: dalla console si può mettere in pausa, cambiare il volume o aprire il filtro. Fanno eccezione i tasti propri della plancia, come Invio, Canc, Backspace, le frecce e la barra spaziatrice, e Invio della console. Le lettere valgono anche nella plancia, dove per questo non si salta alle voci digitandone l'iniziale, a meno di spegnere i tasti rapidi a carattere con Maiuscolo con F12, come spiega la sezione Muoversi nella plancia.</p>
 <p>Un tasto a lettera o un segno senza comando, premuto da solo o con Maiuscolo, lo dice con un suono, per esempio Il tasto apostrofo non ha un comando, o Maiuscolo+A non ha un comando, e il fuoco resta dov'è. Altri tasti passano a Windows in silenzio: Ctrl e Alt con le lettere e le cifre, tranne Ctrl con la barra rovesciata; Maiuscolo con F4, F7, F9 e F12; i caratteri scritti con AltGr, che nella plancia si fermano senza nessun riscontro. Il tastierino numerico resta a NVDA: nemmeno il più e il meno del tastierino cambiano il volume.</p>
 <h3 id="esempi-finestra">Esempi</h3>
 <h4>Sapere quali tasti valgono su una voce</h4>
@@ -577,7 +604,7 @@ kbd {
 <h3 id="manuale-e-guida">Il manuale, la guida rapida, le novità e i crediti</h3>
 <p>F1 apre questo manuale nel browser predefinito di Windows. È fatto per la lettura con i titoli: con NVDA, in modalità navigazione, H porta al titolo seguente e Maiuscolo con H al precedente, il 2 ai capitoli, il 3 alle loro sezioni e il 4 alle sottosezioni; in cima c'è l'indice, con un collegamento per ogni capitolo e sezione.</p>
 <p>F12 scrive nella console la guida rapida, il primo capitolo di questo manuale: tutti i tasti, divisi per aree, i comandi della ricerca e del filtro e i codici dei colori, una riga per tasto. Porta il fuoco nella console con il cursore sulla prima riga, così non ti ricordi un tasto, premi F12, scorri e lo trovi. La guida resta intera anche se è più lunga delle righe che la console tiene.</p>
-<p>F2 scrive nella console le novità delle versioni più recenti, una cinquantina di righe a versioni intere, dalla più recente, ciascuna introdotta da una riga come Versione 1.71.0 del 2026-10-03; in fondo, una riga dice dove leggere il changelog intero: il file CHANGELOG.md nella cartella di MeTeOra, e la sua pagina su GitHub. F3 scrive i crediti: la versione, gli autori, la licenza di MeTeOra, dove sono i testi delle licenze e i sorgenti, e le librerie su cui MeTeOra si regge, con le loro licenze; il capitolo Licenze e crediti dice di più. Come F12, ci portano il fuoco con il cursore sulla prima riga. Se il file del manuale o delle novità non si legge, la console lo dice con il suono dell'errore.</p>
+<p>F2 scrive nella console le novità delle versioni più recenti, una cinquantina di righe a versioni intere, dalla più recente, ciascuna introdotta da una riga come Versione 1.71.0 del 2026-10-03; in fondo, una riga dice dove leggere il changelog intero: il file CHANGELOG.md, con la cartella in cui si trova, e la sua pagina su GitHub. F3 scrive i crediti: la versione, gli autori, la licenza di MeTeOra, dove sono i testi delle licenze e i sorgenti, e le librerie su cui MeTeOra si regge, con le loro licenze; il capitolo Licenze e crediti dice di più. Come F12, ci portano il fuoco con il cursore sulla prima riga. Se il file del manuale o delle novità non si legge, la console lo dice con il suono dell'errore.</p>
 <h3 id="avvio">L'avvio</h3>
 <p>MeTeOra si apre a tutta finestra, con il fuoco nella plancia, sui Preferiti, e un suono. La prima riga della console dice la versione e la data, e ricorda F1, F12 e F7. Se la velocità o il tono non sono quelli normali, la riga dopo lo dice, con il tasto che li riporta al normale. Se il file delle playlist, delle impostazioni o dei marker non si legge, o la scheda audio scelta non c'è, la console lo dice con il suono dell'errore: il capitolo Quando qualcosa va storto spiega cosa succede.</p>
 <p>Alla riapertura ritrovi, in pausa, il brano e il punto a cui eri all'uscita, con la selezione della plancia su di lui, e la console dice Riprendo da dove eri, con il percorso e il tempo. MeTeOra ritrova anche la lista da cui suonava: la playlist, i Preferiti, la cartella, o la cartella suonata con tutte le sottocartelle, così Z, B e l'avanzamento continuano lì; se la lista non c'è più, il brano resta da solo, come un file aperto con Apri file. X riparte dal punto, e se è un video apre anche la sua finestra; fino ad allora il fuoco resta nella plancia. Se il file non c'è più, la console dice Non trovo più, con il suo percorso, che suonava l'ultima volta.</p>
@@ -1426,10 +1453,10 @@ kbd {
 <p>A ogni avvio MeTeOra controlla in sottofondo se su GitHub c'è una versione più nuova, e intanto puoi già usarlo. Se non c'è, o se manca la rete, non dice niente. Il controllo si fa solo con il programma compilato, non avviandolo dai sorgenti.</p>
 <p>Se c'è una versione nuova, con il suono della domanda si apre la finestra Aggiornamento di MeTeOra. Il fuoco è sul testo, da leggere con le frecce: la versione nuova, quella che hai, e le novità di tutte le versioni dalla tua alla nuova, così se ne hai saltata qualcuna le leggi tutte. Ci sono due pulsanti: Aggiorna adesso, Alt con A, e Non adesso, Alt con N. Esc, e Invio nel testo, valgono Non adesso: aggiornare si sceglie solo con il suo pulsante. Se non rispondi entro due minuti, la finestra si chiude da sola come con Non adesso.</p>
 <p>Con Non adesso la console dice Aggiornamento rimandato, e la proposta torna al prossimo avvio. Con Aggiorna adesso MeTeOra scarica la versione nuova, e la console dice a che punto è; poi una finestra avvisa che MeTeOra si chiude per aggiornarsi. Dopo l'OK MeTeOra si chiude salvando tutto, i suoi file vengono sostituiti e la versione nuova si riapre da sola. Playlist, impostazioni, marker e schedario restano come sono: l'aggiornamento non li tocca. Se lo scaricamento non riesce, una finestra lo dice e MeTeOra resta com'è.</p>
-<p>Al primo avvio dopo l'aggiornamento la console dice da quale versione a quale sei passato, e F2 scrive le novità.</p>
+<p>Al primo avvio dopo l'aggiornamento la console dice da quale versione a quale sei passato, e F2 scrive le novità. Se MeTeOra è installato con il programma di installazione, anche App installate, nelle impostazioni di Windows, dice la versione nuova.</p>
 <h2 id="file-di-meteora">I file di MeTeOra</h2>
 <h3 id="file-dati">I file dei dati</h3>
-<p>MeTeOra tiene i suoi dati nella cartella del programma: quella dell'eseguibile, o quella dei sorgenti se lo avvii da lì. Sono file di testo in formato JSON, che MeTeOra scrive da solo.</p>
+<p>MeTeOra tiene i suoi dati nella cartella del programma: quella dell'eseguibile, cioè AppData\Local\Programs\MeTeOra se lo hai installato con il programma di installazione, o quella dei sorgenti se lo avvii da lì. Sono file di testo in formato JSON, che MeTeOra scrive da solo.</p>
 <ul>
 <li>MeTeOra - Playlist.json: le playlist, con i loro brani e i loro filtri, e i Preferiti. Si salva a ogni modifica, scrivendo prima un file accanto e poi sostituendo quello vero, così un'uscita a metà scrittura non lo lascia troncato.</li>
 <li>MeTeOra - Impostazioni.json: tutte le impostazioni, compresi i percorsi di rete aggiunti a mano, il banco dei MIDI, la scheda audio e il punto di ripresa, cioè il brano e il tempo a cui eri all'uscita.</li>
@@ -1451,7 +1478,7 @@ kbd {
 </ul>
 <h3 id="cartelle-programma">Le cartelle accanto al programma</h3>
 <ul>
-<li>lib: le librerie che suonano, fra cui libmpv-2.dll per quasi tutti i formati e sidshim.dll per i SID. Senza queste due MeTeOra non parte.</li>
+<li>_internal: il programma, con Python, le sue librerie, il manuale e il changelog; non va toccata. Dentro c'è la cartella lib, con le librerie che suonano, fra cui libmpv-2.dll per quasi tutti i formati e sidshim.dll per i SID: senza queste due MeTeOra non parte. Avviando MeTeOra dai sorgenti, lib sta invece accanto a meteora.py.</li>
 <li>fluidsynth: FluidSynth, scaricato al primo MIDI.</li>
 <li>banchi: i banchi di suoni scaricati, come FluidR3 GM.</li>
 <li>licenze: i testi delle licenze dei componenti, con LEGGIMI.txt e SORGENTI.txt; accanto c'è il file LICENSE, la licenza di MeTeOra. Il capitolo Licenze e crediti spiega.</li>
@@ -1507,7 +1534,7 @@ kbd {
 <li>I pacchetti winrt, licenza MIT, e Pillow: il riconoscimento dei caratteri di Windows.</li>
 <li>numpy, scipy e sounddevice su PortAudio: i calcoli e gli effetti sonori di Acusticator, della libreria GBUtils di Gabriele, GPL 3.</li>
 <li>requests, con i suoi pacchetti: gli scaricamenti e l'aggiornamento automatico. Apache 2.0.</li>
-<li>Python, della Python Software Foundation, e PyInstaller, che crea il pacchetto.</li>
+<li>Python, della Python Software Foundation; PyInstaller, che crea il pacchetto; Inno Setup, di Jordan Russell e Martijn Laan, che crea il programma di installazione.</li>
 </ul>
 <p>Questo software si basa in parte sul lavoro dell'Independent JPEG Group. Parti di questo software sono copyright The FreeType Project (www.freetype.org). Tutti i diritti riservati.</p>
 <p>Fra le sintesi non ci sono ZDSR, Dolphin, System Access e PC-Talker: le loro librerie non sono libere e non danno il permesso di ridistribuirle, quindi MeTeOra non le porta con sé.</p>

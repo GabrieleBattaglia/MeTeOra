@@ -5,12 +5,15 @@
 """La pipe ha un nome solo per la prova, mai quello del MeTeOra che magari e'
 aperto; il registro di Windows e' finto, in memoria: niente di vero si tocca."""
 
+import ctypes
 import os
 import threading
 import uuid
+from ctypes import wintypes
 
 import associazioni
 import formati
+import installazione
 import istanza
 
 
@@ -87,6 +90,11 @@ class _RegistroFinto:
     def SetValueEx(self, chiave, nome, _riservato, _tipo, valore):
         self.chiavi[chiave.percorso][nome] = valore
 
+    def QueryValueEx(self, chiave, nome):
+        if nome not in self.chiavi[chiave.percorso]:
+            raise FileNotFoundError(nome)
+        return self.chiavi[chiave.percorso][nome], self.REG_SZ
+
     def DeleteValue(self, chiave, nome):
         if nome not in self.chiavi[chiave.percorso]:
             raise FileNotFoundError(nome)
@@ -141,6 +149,7 @@ def test_ferma_non_si_appende():
     ascolto = istanza.Ascolto.__new__(istanza.Ascolto)
     ascolto._nome = nome
     ascolto._fermo = False
+    ascolto._mutex = None
     ascolto._ascoltatore = Listener(nome, family="AF_PIPE", authkey=istanza._chiave(nome))
     in_piu = _winapi.CreateNamedPipe(nome, _winapi.PIPE_ACCESS_DUPLEX | _winapi.FILE_FLAG_OVERLAPPED,
         _winapi.PIPE_TYPE_MESSAGE | _winapi.PIPE_READMODE_MESSAGE | _winapi.PIPE_WAIT, _winapi.PIPE_UNLIMITED_INSTANCES,
@@ -152,3 +161,55 @@ def test_ferma_non_si_appende():
         assert not filo.is_alive()
     finally:
         _winapi.CloseHandle(in_piu)
+
+
+def _mutex_aperto(nome_del_mutex):
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel32.OpenMutexW.restype = wintypes.HANDLE
+    kernel32.OpenMutexW.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.LPCWSTR]
+    maniglia = kernel32.OpenMutexW(0x00100000, False, nome_del_mutex)  # SYNCHRONIZE
+    if maniglia:
+        kernel32.CloseHandle(wintypes.HANDLE(maniglia))
+    return bool(maniglia)
+
+
+def test_il_mutex_per_l_installatore(monkeypatch):
+    # 1.97.0: la prima copia tiene il mutex che AppMutex di MeTeOra.iss
+    # cerca; con METEORA_ISTANZA, uno di prova, e mai quello vero.
+    monkeypatch.setenv("METEORA_ISTANZA", f"prova-mutex-{uuid.uuid4().hex}")
+    mutex = istanza.nome_del_mutex()
+    assert mutex.startswith("MeTeOra-prova-mutex-")
+    ascolto = istanza.Ascolto(lambda _percorsi: None)
+    try:
+        assert ascolto.attiva and _mutex_aperto(mutex)
+    finally:
+        ascolto.ferma()
+    assert not _mutex_aperto(mutex)
+    # Le prove che danno il nome della pipe non lo tengono.
+    ascolto = istanza.Ascolto(lambda _percorsi: None, _nome_di_prova())
+    try:
+        assert ascolto._mutex is None
+    finally:
+        ascolto.ferma()
+    monkeypatch.delenv("METEORA_ISTANZA")
+    assert istanza.nome_del_mutex() == "MeTeOra"
+    with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "MeTeOra.iss"), encoding="utf-8") as f:
+        assert "AppMutex=MeTeOra\n" in f.read()
+
+
+def test_la_versione_in_app_installate():
+    # 1.97.0: dopo un aggiornamento automatico la voce del setup dice la
+    # versione vera, ma solo se e' quella di questa cartella.
+    reg = _RegistroFinto()
+    cartella = r"C:\Users\prova\AppData\Local\Programs\MeTeOra"
+    assert installazione.aggiorna_la_versione("1.97.0", cartella, reg) is False
+    with reg.CreateKeyEx(reg.HKEY_CURRENT_USER, installazione.CHIAVE) as chiave:
+        reg.SetValueEx(chiave, "InstallLocation", 0, reg.REG_SZ, cartella + "\\")
+        reg.SetValueEx(chiave, "DisplayVersion", 0, reg.REG_SZ, "1.96.0")
+    assert installazione.aggiorna_la_versione("1.97.0", r"D:\MeTeOra portatile", reg) is False
+    assert installazione.aggiorna_la_versione("1.97.0", cartella.upper(), reg) is True
+    assert reg.chiavi[installazione.CHIAVE.lower()]["DisplayVersion"] == "1.97.0"
+    assert installazione.aggiorna_la_versione("1.97.0", cartella, reg) is False
+    with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "MeTeOra.iss"), encoding="utf-8") as f:
+        app_id = next(r for r in f.read().splitlines() if r.startswith("AppId="))
+    assert installazione.CHIAVE.endswith("\\" + app_id[len("AppId={"):] + "_is1")

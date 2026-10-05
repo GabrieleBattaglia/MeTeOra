@@ -1,6 +1,6 @@
 # MeTeOra, utilita': raccoglie nella cartella licenze i testi delle licenze dei componenti e i loro sorgenti esatti.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.85.0, per la prima release. Nella 1.85.2 i testi scaricati da scarica_licenze.py.
+# 04/10/2026: nasce con la 1.85.0, per la prima release. Nella 1.85.2 i testi scaricati da scarica_licenze.py. Nella 1.97.9 PortAudio, e la cartella da rifare a ogni release.
 
 """Prepara la cartella licenze, che il pacchetto porta accanto all'eseguibile.
 
@@ -8,7 +8,9 @@ MeTeOra e' GPL-3.0-or-later, e la libmpv che suona quasi tutto e' una build
 GPL 3. Chi distribuisce il programma compilato deve dare, con lui, i testi
 delle licenze dei componenti e l'accesso al loro codice sorgente esatto
 (GPL 3, sezioni 4 e 6). La cartella si fa con questo script e si committa;
-va rifatta quando cambia una libreria, prima di compilare.
+va rifatta prima di ogni release, perche' LEGGIMI.txt e SORGENTI.txt portano
+il numero della versione e il commit di GBUtils, e ogni volta che cambia una
+libreria, prima di compilare.
 
 I testi vengono da dove sono gia' sul disco: i dist-info dei pacchetti
 Python, il LICENSE.txt di Python, le licenze dei pacchetti MSYS2 da cui
@@ -17,7 +19,7 @@ database di pacman e da prepara_ambiente.py per libmpv; e lo script controlla
 che le DLL di lib siano proprio quelle dei pacchetti MSYS2 che nomina.
 MSYS2 si cerca come in prepara_ambiente.py, nella cartella di METEORA_MSYS2
 o in strumenti/msys64, ma qui non si scarica. I testi che sul disco non ci
-sono, quelli delle librerie dentro libmpv, dei pacchetti winrt e di FluidR3 GM,
+sono, quelli delle librerie dentro libmpv, dei pacchetti winrt, di PortAudio e di FluidR3 GM,
 li scarica prima scarica_licenze.py, con il loro elenco in
 strumenti/licenze_scaricate.json: qui si leggono e si nominano.
 
@@ -306,6 +308,12 @@ def main():
         sorgenti.append(f"{nome} {versione}: https://pypi.org/project/{nome}/{versione}/#files")
         if nome == "winrt-runtime":
             sorgenti.append(f"I moduli winrt: {altri['winrt']['repository']}")
+        if nome == "sounddevice":
+            # La DLL di PortAudio, che sounddevice porta con se' (1.97.9).
+            leggimi.append(f"PortAudio, la libreria del suono degli effetti, dentro sounddevice {versione}: MIT, "
+                + " e ".join(f"portaudio\\{file}" for file in altri["portaudio"]["file"]) + ".")
+            sorgenti.append("PortAudio, la DLL che sounddevice porta con se': https://github.com/spatialaudio/portaudio-binaries, "
+                f"compilata dal codice di {altri['portaudio']['repository']}")
 
     # I componenti che MeTeOra non porta con se'.
     leggimi.append("Non sono nel pacchetto, e MeTeOra li scarica solo quando servono: FluidSynth 2.6.1 con libsndfile, per i MIDI, "

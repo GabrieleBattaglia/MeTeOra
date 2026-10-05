@@ -1,6 +1,6 @@
 # MeTeOra, le librerie native: rende visibili libmpv e la DLL dei SID.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1, da prototipi/ambiente.py. Nella 1.85.1 libmpv caricata qui, per dire perche' non si carica.
+# 30/09/2026: nasce con la tappa 1, da prototipi/ambiente.py. Nella 1.85.1 libmpv caricata qui, per dire perche' non si carica. Nella 1.97.9 python-mpv importato con il PATH ridotto a lib.
 
 """Da importare prima di mpv e di sid.
 
@@ -18,6 +18,7 @@ un messaggio chiaro, senza portarla nel pacchetto).
 
 import ctypes
 import os
+import sys
 
 import percorsi
 
@@ -47,6 +48,9 @@ def prepara():
     cartella = percorsi.cartella_librerie()
     mancanti = [f for f in ("libmpv-2.dll", "sidshim.dll") if not os.path.isfile(os.path.join(cartella, f))]
     if mancanti:
+        if getattr(sys, "frozen", False):
+            raise LibrerieMancanti(f"Nella cartella {cartella} mancano {', '.join(mancanti)}: reinstalla MeTeOra. Se le ha tolte "
+                "l'antivirus, rimettile dalla sua quarantena.")
         raise LibrerieMancanti(f"Nella cartella {cartella} mancano {', '.join(mancanti)}: eseguire strumenti/prepara_ambiente.py")
     if cartella not in os.environ["PATH"].split(os.pathsep):
         os.environ["PATH"] = cartella + os.pathsep + os.environ["PATH"]
@@ -59,7 +63,22 @@ def prepara():
                 "Di solito la installano i driver della scheda video: aggiornali dal sito di chi ha fatto la scheda, oppure installa "
                 "il Vulkan Runtime da https://vulkan.lunarg.com.") from errore
         raise LibrerieMancanti(f"libmpv-2.dll, nella cartella {cartella}, non si carica: {errore}") from errore
+    _importa_mpv(cartella)
     return cartella
+
+
+def _importa_mpv(cartella):
+    """python-mpv cerca prima mpv-2.dll in tutto il PATH, e solo dopo
+    libmpv-2.dll: un mpv-2.dll di un altro programma vincerebbe sulla nostra.
+    Lo si importa con il PATH ridotto alla cartella lib (1.97.9)."""
+    path = os.environ["PATH"]
+    os.environ["PATH"] = cartella
+    try:
+        import mpv  # noqa: F401
+    except OSError as errore:
+        raise LibrerieMancanti(f"python-mpv non trova libmpv-2.dll nella cartella {cartella}: {errore}") from errore
+    finally:
+        os.environ["PATH"] = path
 
 
 LIB = prepara()

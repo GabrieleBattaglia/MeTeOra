@@ -1,6 +1,6 @@
 # MeTeOra, la ricetta di PyInstaller: il pacchetto a cartella (prontuario, premessa).
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la prova del pacchetto, prima della tappa 11. Nella 1.85.0 le DLL e i pacchetti lasciati fuori, e la licenza e la cartella licenze accanto all'eseguibile.
+# 04/10/2026: nasce con la prova del pacchetto, prima della tappa 11. Nella 1.85.0 le DLL e i pacchetti lasciati fuori, e la licenza e la cartella licenze accanto all'eseguibile. Nella 1.97.9 senza i doppioni delle DLL di lib.
 #
 # Si compila dalla cartella del progetto con: python -m PyInstaller --noconfirm MeTeOra.spec
 # Dentro il pacchetto vanno le sole cose che MeTeOra legge: il manuale, le
@@ -73,6 +73,13 @@ a = Analysis(
     optimize=0,
 )
 a.binaries = [voce for voce in a.binaries if _dentro(voce)]
+# Le DLL di lib viaggiano gia' nella loro cartella, con i datas; PyInstaller ne
+# raccoglie le dipendenze anche alla radice di _internal, doppie, per circa
+# 5,6 MB. sidshim.dll e libgme.dll si caricano con il percorso intero, e
+# Windows cerca le loro dipendenze nella loro cartella (1.97.9).
+_LIB = os.path.normcase(os.path.abspath("lib"))
+a.binaries = [voce for voce in a.binaries
+    if not (os.path.dirname(voce[0]) == "" and os.path.normcase(os.path.dirname(os.path.abspath(voce[1]))) == _LIB)]
 a.datas = [voce for voce in a.datas if _dentro(voce)]
 pyz = PYZ(a.pure)
 

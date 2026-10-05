@@ -1,6 +1,6 @@
 # MeTeOra, il lettore multimediale accessibile: il programma da avviare.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 i problemi interni arrivano nella console. Nella 1.84.0 il controllo degli aggiornamenti. Nella 1.89.0 il registro degli errori e dei crash. Nella 1.90.0 le copie dei dati. Nella 1.91.0 i file passati da Windows e l'istanza unica.
+# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 i problemi interni arrivano nella console. Nella 1.84.0 il controllo degli aggiornamenti. Nella 1.89.0 il registro degli errori e dei crash. Nella 1.90.0 le copie dei dati. Nella 1.91.0 i file passati da Windows e l'istanza unica. Nella 1.97.0 la versione giusta in App installate.
 
 """Avvia MeTeOra: controlla le librerie native e apre la finestra massimizzata.
 
@@ -64,6 +64,11 @@ def main():
     import aggiornamento
 
     aggiornamento.controlla(finestra)
+    if getattr(sys, "frozen", False):
+        # Installato con il setup e poi aggiornato da se': App installate
+        # deve dire la versione vera (1.97.0).
+        import installazione
+        installazione.aggiorna_la_versione(version.VERSION, percorsi.cartella_programma())
     app.MainLoop()
     # L'uscita pulita: il file del crash si toglie.
     registro.scrivi("MeTeOra si chiude.")

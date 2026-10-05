@@ -657,6 +657,14 @@
    "file": [
     "COPYING"
    ]
+  },
+  {
+   "nome": "portaudio",
+   "repository": "https://github.com/PortAudio/portaudio",
+   "ruolo": "PortAudio, la libreria del suono degli effetti, dentro sounddevice",
+   "file": [
+    "LICENSE.txt"
+   ]
   }
  ]
 }

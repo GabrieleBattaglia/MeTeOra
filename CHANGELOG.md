@@ -2,6 +2,27 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.97.10] - 2026-10-05
+
+La preparazione della prima release, dalla verifica a più agenti delle risorse del pacchetto e dei documenti: dieci correzioni.
+- La cartella licenze dice la versione della release e GBUtils V198, con il commit esatto; si rifà prima di ogni release.
+- La licenza di PortAudio, la libreria del suono degli effetti che sounddevice porta con sé, è nella cartella licenze, scaricata con il permesso di Gabriele.
+- Il pacchetto non porta più due volte le librerie dei SID e della musica delle console: circa 5,6 MB in meno.
+- Nel programma compilato, se mancano le librerie, il messaggio dice di reinstallare MeTeOra, e non di eseguire uno script che nel pacchetto non c'è.
+- Un mpv-2.dll di un altro programma, nel PATH di Windows, non prende più il posto della libmpv di MeTeOra.
+- Il manuale: la cartella _internal, con lib dentro, e dove sta il changelog nel programma compilato.
+- Il manuale: X e Invio su un capitolo nella guida rapida, e le quattro eccezioni di Invio nella plancia.
+- Il manuale: F2, nella guida rapida, scrive le novità delle versioni recenti.
+- Il manuale: le lettere nella plancia e Maiuscolo con F12.
+- Il README per chi scarica MeTeOra: installazione, requisiti, aggiornamenti e dati, il manuale online, e GBUtils per avviarlo dai sorgenti.
+
+## [1.97.0] - 2026-10-05
+
+- L'installatore, chiesto da Gabriele per la prima release: MeTeOra-Setup seguito dalla versione, fatto con Inno Setup 6 da setup_maker.py, accanto a MeTeOra.zip, che resta per l'aggiornamento automatico e come versione portatile. Installa per utente, senza amministratore, in AppData\Local\Programs\MeTeOra, perché MeTeOra scrive i dati accanto al programma e lì si aggiorna; mette MeTeOra nel menu Start, e sul desktop se lo chiedi.
+- La disinstallazione toglie anche le associazioni dei formati di quell'installazione, e alla fine chiede se cancellare i dati: playlist, Preferiti, impostazioni, marker e copie, scelta di Gabriele; con No restano.
+- MeTeOra aperto tiene un mutex che installazione e disinstallazione riconoscono, e chiedono di chiuderlo. Dopo un aggiornamento automatico MeTeOra corregge da sé la versione che App installate mostra.
+- Il manuale ha il capitolo Installare MeTeOra, con i due file della release, l'avviso di SmartScreen al primo avvio, che cosa serve e come si disinstalla.
+
 ## [1.96.11] - 2026-10-05
 
 Le correzioni della revisione a più agenti delle versioni da 1.94.0 a 1.96.0, chiesta da Gabriele, dieci in tutto, e una trovata dalla suite.

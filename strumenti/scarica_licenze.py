@@ -1,4 +1,4 @@
-# MeTeOra, utilita': scarica i testi delle licenze che sul disco non ci sono: le librerie dentro libmpv, winrt e FluidR3.
+# MeTeOra, utilita': scarica i testi delle licenze che sul disco non ci sono: le librerie dentro libmpv, winrt, FluidR3 e PortAudio.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 # 04/10/2026: nasce con la 1.85.2, con il permesso di Gabriele per gli scaricamenti.
 
@@ -70,6 +70,9 @@ REPOSITORY_UFFICIALI = {"libopenmpt": "https://github.com/OpenMPT/openmpt"}
 ALTRI = [
     ("winrt", "https://github.com/pywinrt/pywinrt", "i pacchetti winrt del riconoscimento dei caratteri"),
     ("fluidr3", "https://github.com/pianobooster/fluid-soundfont", "il banco di suoni FluidR3 GM, scaricato per i MIDI"),
+    # La DLL di PortAudio viaggia dentro sounddevice, che porta solo la sua
+    # licenza (1.97.9, permesso di Gabriele del 5 ottobre 2026).
+    ("portaudio", "https://github.com/PortAudio/portaudio", "PortAudio, la libreria del suono degli effetti, dentro sounddevice"),
 ]
 SENZA_FILE = {
     "avisynth-headers": "solo le intestazioni di AviSynth+, per usarlo se è installato; la licenza è scritta in testa ai file",

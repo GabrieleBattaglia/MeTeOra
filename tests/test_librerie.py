@@ -35,3 +35,37 @@ def test_con_libmpv_che_si_carica_va_tutto_bene(monkeypatch):
     monkeypatch.setattr(librerie, "_carica", caricate.append)
     assert librerie.prepara() == librerie.LIB
     assert caricate and caricate[0].endswith("libmpv-2.dll")
+
+
+def test_mpv_si_importa_con_il_path_ridotto_a_lib(monkeypatch):
+    # 1.97.9: un mpv-2.dll di un altro programma, nel PATH, non vince sulla
+    # libmpv-2.dll di lib; dopo, il PATH torna com'era.
+    import builtins
+    import os
+    import sys
+
+    visti = []
+    vero_import = builtins.__import__
+
+    def importa(nome, *argomenti, **opzioni):
+        if nome == "mpv":
+            visti.append(os.environ["PATH"])
+            return object()
+        return vero_import(nome, *argomenti, **opzioni)
+
+    monkeypatch.delitem(sys.modules, "mpv", raising=False)
+    monkeypatch.setattr(builtins, "__import__", importa)
+    prima = os.environ["PATH"]
+    librerie._importa_mpv(r"C:\cartella\lib")
+    assert visti == [r"C:\cartella\lib"] and os.environ["PATH"] == prima
+
+
+def test_da_compilato_le_librerie_mancanti_dicono_di_reinstallare(monkeypatch, tmp_path):
+    # 1.97.9: nel pacchetto non c'e' prepara_ambiente.py.
+    import sys
+
+    monkeypatch.setattr(librerie.percorsi, "cartella_librerie", lambda: str(tmp_path))
+    monkeypatch.setattr(sys, "frozen", True, raising=False)
+    with pytest.raises(librerie.LibrerieMancanti, match="reinstalla MeTeOra") as errore:
+        librerie.prepara()
+    assert "prepara_ambiente" not in str(errore.value)
