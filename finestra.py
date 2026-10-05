@@ -16,7 +16,7 @@
 # nella 1.36.2 dopo Ctrl con le frecce i comandi agiscono sulla voce selezionata; nella 1.39.0 i marker, issue 12; nella 1.39.1 il singolare nelle righe della console; nella 1.40.0 Maiuscolo con le cifre; nella 1.40.2 Maiuscolo con R e Y risparmiano il marker su cui si e';
 # nella 1.41.0 i suoni dei rami aperti e chiusi con le frecce; nella 1.42.0 il beep dei livelli; nella 1.43.0 Maiuscolo con Backspace che risale all'antenato;
 # nella 1.51.0 la finestra delle impostazioni, con caratteri e colori delle tre aree, la scheda audio, la console salvata e la finestra dei marcatori;
-# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura. Nella 1.83.1 Maiuscolo con F10 lascia chiuso Questo PC, e la plancia molto aperta non ferma piu' la finestra. Nella 1.83.2 F10 a fette, e i suoni delle aperture che non si sovrappongono. Nella 1.84.0 la proposta dell'aggiornamento, il suo avanzamento e la chiusura per aggiornarsi. Nella 1.85.0 i crediti con la licenza e le licenze dei componenti. Nella 1.85.5 i rami di rete che si riprovano sempre. Nella 1.86.0 Maiuscolo con F12 spegne e riaccende i tasti rapidi a carattere. Nella 1.87.0 la barra dei comandi per il mouse. Nella 1.88.0 anche sopra il video, con la linea del tempo. Nella 1.88.1 F2 scrive solo le versioni recenti. Nella 1.89.0 i problemi interni anche nel registro degli errori. Nella 1.90.0 le copie dei dati che non riescono. Nella 1.91.0 i file aperti da Windows, il trascinamento e le associazioni dei formati. Nella 1.92.0 i file lunghi riprendono dal punto lasciato. Nella 1.93.0 i capitoli, con virgola e punto e nella plancia. Nella 1.94.0 la ripetizione del brano e della lista, con Maiuscolo con V. Nella 1.95.0 il timer di spegnimento, con Maiuscolo con S. Nella 1.96.0 il volume uniforme con ReplayGain. Nella 1.96.11 le correzioni della revisione: la catena degli errori, il mazzo della ripetizione, la sfumatura del timer fra due brani e durante la domanda.
+# nella 1.55.0 velocita', tono, equalizzatore e dissolvenza incrociata, con i tasti, le voci delle impostazioni e il passaggio fra due brani (tappa 4, issue 15). Nella 1.58.0 la dissolvenza anche su stop, pausa, X da capo e marker, i suoni al volo dell'equalizzatore e il loop a giro su Maiuscolo+X; nella 1.58.1 F e H scambiati. Nella 1.59.0 la riproduzione casuale con Maiuscolo+N (issue 17). Nella 1.60.0 W anche dalla fine, con il meno. Nella 1.60.1 O abbassa e P alza. Nella 1.61.0 i modelli della riproduzione casuale, con il mazzo. Nella 1.62.0 l'attesa del SID dopo un salto. Nella 1.63.0 il video: Maiuscolo con F1, F2, F3, F5 e F6, la finestra del video e i sottotitoli letti (tappa 7). Nella 1.64.0 il ramo Questa rete. Nella 1.65.0 i MIDI con FluidSynth e il banco dei suoni (tappa 8). Nella 1.66.0 la musica delle console, con i sottobrani come i SID. Nella 1.66.36 le rifiniture della tappa 9: riscontro per ogni tasto e annullamento, domande con Esc, fuoco che non si sposta da solo. Nella 1.67.0 Rinomina file; nella 1.67.4 solo i banchi General MIDI. Nella 1.69.0 i tag: F11, Maiuscolo+F11 e il sottomenu Tag. Nella 1.71.0 la barra rovesciata cerca nel ramo, Ctrl con la barra rovesciata ovunque. Nella 1.72.0 F1 apre manuale.html nel browser e F12 scrive la sua guida rapida. Nella 1.73.0 Ctrl con la barra rovesciata cerca anche in rete, dopo i dischi. Nella 1.74.0, con la riproduzione casuale, B sceglie a caso e Z torna ai brani suonati prima. Nella 1.75.0 l'invito a offrire un caffe', alla chiusura e dalle impostazioni. Nella 1.76.0 Maiuscolo con Canc manda nel cestino una cartella vuota, e dove il cestino non c'e' lo dice. Nella 1.77.0 F11 scrive i dettagli dei contenitori, e i conti delle cartelle si rifanno dopo il cestino. Nella 1.77.1 il contatore e l'apertura dei rami di rete con la lettura protetta. Nella 1.79.0 Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta. Nella 1.80.0 i sottotitoli a immagini e quelli impressi, letti con il riconoscimento dei caratteri di Windows. Nella 1.82.0 il testo del karaoke, con Maiuscolo con F2, e le voci Dove vanno sottotitoli e karaoke, Testo del karaoke e Anticipo del karaoke. Nella 1.83.0 la barra braille a blocchi, con le celle e il tempo minimo di lettura. Nella 1.83.1 Maiuscolo con F10 lascia chiuso Questo PC, e la plancia molto aperta non ferma piu' la finestra. Nella 1.83.2 F10 a fette, e i suoni delle aperture che non si sovrappongono. Nella 1.84.0 la proposta dell'aggiornamento, il suo avanzamento e la chiusura per aggiornarsi. Nella 1.85.0 i crediti con la licenza e le licenze dei componenti. Nella 1.85.5 i rami di rete che si riprovano sempre. Nella 1.86.0 Maiuscolo con F12 spegne e riaccende i tasti rapidi a carattere. Nella 1.87.0 la barra dei comandi per il mouse. Nella 1.88.0 anche sopra il video, con la linea del tempo. Nella 1.88.1 F2 scrive solo le versioni recenti. Nella 1.89.0 i problemi interni anche nel registro degli errori. Nella 1.90.0 le copie dei dati che non riescono. Nella 1.91.0 i file aperti da Windows, il trascinamento e le associazioni dei formati. Nella 1.92.0 i file lunghi riprendono dal punto lasciato. Nella 1.93.0 i capitoli, con virgola e punto e nella plancia. Nella 1.94.0 la ripetizione del brano e della lista, con Maiuscolo con V. Nella 1.95.0 il timer di spegnimento, con Maiuscolo con S. Nella 1.96.0 il volume uniforme con ReplayGain. Nella 1.96.11 le correzioni della revisione: la catena degli errori, il mazzo della ripetizione, la sfumatura del timer fra due brani e durante la domanda. Nella 1.98.0 la plancia nativa a selezione singola, con la selezione multipla tenuta da MeTeOra: NVDA non legge piu' la voce di prima.
 
 """La finestra di MeTeOra.
 
@@ -945,6 +945,11 @@ class Finestra(wx.Frame):
         # con le frecce, o Ctrl+Spazio.
         self._ancora = None
         self._fuoco_atteso = None
+        # La selezione multipla della plancia (1.98.0): None quando la
+        # selezionata e' solo la voce col fuoco, come dopo una freccia;
+        # altrimenti le voci scelte con Maiuscolo, Ctrl o i clic, per numero
+        # di voce.
+        self._selezione = None
         self._righe = []
         self._chiusa = False
         # Il turno dell'ultimo beep dei livelli: un beep rimandato che nel
@@ -1007,10 +1012,15 @@ class Finestra(wx.Frame):
         sopra = wx.BoxSizer(wx.HORIZONTAL)
         colonna_sinistra = wx.BoxSizer(wx.VERTICAL)
         colonna_sinistra.Add(wx.StaticText(pannello, label="Plancia dei comandi"), 0, wx.ALL, 2)
-        # A selezione multipla, come in Esplora risorse: Maiuscolo con le
-        # frecce allarga la selezione, Ctrl con le frecce muove il fuoco
-        # senza selezionare, Ctrl+Spazio accende e spegne la voce col fuoco.
-        self.albero = wx.TreeCtrl(pannello, style=wx.TR_DEFAULT_STYLE | wx.TR_HIDE_ROOT | wx.TR_MULTIPLE)
+        # A selezione singola, nativa, come l'albero di Esplora risorse. Con
+        # wx.TR_MULTIPLE wx simula la selezione multipla, e a ogni freccia
+        # manda a NVDA anche fuochi sulla voce di prima, che NVDA a volte
+        # legge (Andrea, 5 ottobre 2026; 1.98.0). La selezione multipla la
+        # tiene MeTeOra: Maiuscolo con le frecce la allarga, Ctrl con le
+        # frecce muove il fuoco senza selezionare, Ctrl+Spazio accende e
+        # spegne la voce col fuoco, e i clic con Ctrl e Maiuscolo fanno lo
+        # stesso con il mouse.
+        self.albero = wx.TreeCtrl(pannello, style=wx.TR_DEFAULT_STYLE | wx.TR_HIDE_ROOT)
         self.albero.SetName("Plancia dei comandi")
         colonna_sinistra.Add(self.albero, 1, wx.EXPAND)
         colonna_destra = wx.BoxSizer(wx.VERTICAL)
@@ -1039,6 +1049,8 @@ class Finestra(wx.Frame):
         self.albero.Bind(wx.EVT_KEY_DOWN, self._tasto_nell_albero)
         self.albero.Bind(wx.EVT_CHAR, self._carattere_nell_albero)
         self.albero.Bind(wx.EVT_SET_FOCUS, self._fuoco_all_albero)
+        self.albero.Bind(wx.EVT_LEFT_DOWN, self._clic_nell_albero)
+        self.albero.Bind(wx.EVT_TREE_DELETE_ITEM, self._voce_tolta)
         self.console.Bind(wx.EVT_SET_FOCUS, self._fuoco_alla_console)
         self.console.Bind(wx.EVT_KILL_FOCUS, self._console_lasciata)
         self.console.Bind(wx.EVT_KEY_DOWN, self._tasto_nella_console)
@@ -1631,15 +1643,13 @@ class Finestra(wx.Frame):
         return wx.Window.FindFocus() is self.albero
 
     def _dopo_l_iniziale(self, prima):
-        """La ricerca per iniziale di Windows, nell'albero a selezione
-        multipla, sposta solo il fuoco: la selezione lo segue, come con le
-        frecce, o Invio, Canc, X e gli altri agirebbero sulla voce di prima
-        (revisione della 1.86.0)."""
+        """La ricerca per iniziale di Windows sposta la voce col fuoco, come
+        una freccia: la selezione multipla, se c'era, finisce (1.98.0)."""
         if self._chiusa:
             return
         voce = self.albero.GetFocusedItem()
         if voce.IsOk() and voce != prima:
-            self._seleziona(voce)
+            self._azzera_la_selezione()
 
     def _carattere_nell_albero(self, evento):
         """I caratteri che arrivano fino all'albero, per esempio con AltGr o
@@ -1655,13 +1665,18 @@ class Finestra(wx.Frame):
 
     def _tasto_nell_albero(self, evento):
         codice = evento.GetKeyCode()
-        prima = self._profondita(self._voce_corrente())
+        voce = self._voce_corrente()
+        prima = self._profondita(voce)
         if self._esegui_nell_albero(evento):
             self._controlla_il_livello(prima)
         elif codice not in _SOLO_MODIFICATORI:
             # Le frecce e gli altri tasti del controllo spostano il fuoco dopo
             # questo gestore: si guarda quando hanno finito.
             wx.CallAfter(self._controlla_il_livello, prima)
+            if codice in (wx.WXK_LEFT, wx.WXK_RIGHT) and evento.GetModifiers() == wx.MOD_NONE:
+                # Sinistra e destra aprono e chiudono i rami, oppure spostano
+                # il fuoco: solo se lo spostano la selezione multipla finisce.
+                wx.CallAfter(self._dopo_la_freccia, voce)
 
     def _esegui_nell_albero(self, evento):
         """I tasti propri della plancia: torna vero se ne ha eseguito uno,
@@ -1670,6 +1685,11 @@ class Finestra(wx.Frame):
         modificatori = evento.GetModifiers()
         spostamento = codice in (wx.WXK_UP, wx.WXK_DOWN, wx.WXK_HOME, wx.WXK_END, wx.WXK_PAGEUP, wx.WXK_PAGEDOWN)
         con_ancora = spostamento and modificatori in (wx.MOD_SHIFT, wx.MOD_CONTROL)
+        if spostamento and modificatori == wx.MOD_NONE:
+            # Le frecce senza modificatori le muove Windows, che manda a NVDA
+            # solo il fuoco sulla voce d'arrivo; la selezione multipla, come
+            # in Esplora risorse, finisce (1.98.0).
+            self._azzera_la_selezione()
         if codice in (wx.WXK_LEFT, wx.WXK_RIGHT) and modificatori == wx.MOD_NONE:
             # Le frecce aprono e chiudono i rami dopo questo gestore, nel
             # controllo: i suoni li danno gli eventi dell'albero, finche'
@@ -1687,6 +1707,9 @@ class Finestra(wx.Frame):
             self._ancora = None
         if con_ancora:
             self._muovi_il_fuoco(codice, allarga=modificatori == wx.MOD_SHIFT)
+        elif codice == wx.WXK_SPACE and modificatori == wx.MOD_CONTROL:
+            self._alterna_nella_selezione(self._voce_corrente())
+            self._di_la_selezione()
         elif codice == wx.WXK_BACK and modificatori == wx.MOD_NONE:
             self._risali()
         elif codice == wx.WXK_BACK and modificatori == wx.MOD_SHIFT:
@@ -1791,7 +1814,7 @@ class Finestra(wx.Frame):
         e' lei, come in Esplora risorse."""
         voce = self._voce_corrente()
         selezionate = self._voci_selezionate()
-        if len(selezionate) == 1 and voce.IsOk() and not self.albero.IsSelected(voce):
+        if len(selezionate) == 1 and voce.IsOk() and not self._e_selezionata(voce):
             return selezionate[0]
         return voce
 
@@ -1854,18 +1877,12 @@ class Finestra(wx.Frame):
         if self._ancora is None or self._fuoco_atteso != voce or self._cammino(voce, self._ancora) is None:
             self._ancora = voce
         # Con Maiuscolo la selezione e' l'intervallo dall'ancora; con Ctrl
-        # restano le selezioni di prima.
-        da_selezionare = set(self._cammino(self._ancora, arrivo) or [arrivo]) if allarga else set(self._voci_selezionate())
+        # restano le selezioni di prima, anche la sola voce col fuoco.
+        nuova = self._intervallo(self._ancora, arrivo) if allarga else self._voci_selezionate()
         self._sposta_il_cursore(arrivo)
         self._fuoco_atteso = arrivo
-        if allarga:
-            for altra in self._voci_selezionate():
-                if altra not in da_selezionare:
-                    self.albero.SelectItem(altra, False)
-        elif arrivo not in da_selezionare:
-            self.albero.SelectItem(arrivo, False)
-        for scelta in da_selezionare:
-            self.albero.SelectItem(scelta)
+        self._imposta_la_selezione(nuova)
+        self._di_la_selezione()
 
     def _risali(self):
         """Backspace: chiude il ramo in cui sta la voce col fuoco e ci porta il
@@ -1914,10 +1931,162 @@ class Finestra(wx.Frame):
         self._riscontro("risali_all_antenato", f"Risalito a {nome}.", "risali")
 
     def _seleziona(self, voce):
-        """Seleziona soltanto questa voce e le da' il fuoco, come una freccia."""
-        self.albero.UnselectAll()
+        """Seleziona soltanto questa voce e le da' il fuoco, come una freccia:
+        nell'albero nativo, a NVDA arriva solo il fuoco sulla voce."""
+        self._azzera_la_selezione()
         self.albero.SelectItem(voce)
-        self.albero.SetFocusedItem(voce)
+
+    # La selezione multipla, tenuta da MeTeOra (1.98.0).
+
+    def _voci_selezionate(self):
+        """Le voci selezionate, nell'ordine della plancia: quelle della
+        selezione multipla, oppure la voce col fuoco, che senza selezione
+        multipla e' la selezionata."""
+        if self._selezione is None:
+            voce = self._voce_corrente()
+            return [voce] if voce.IsOk() else []
+        return self._in_ordine([voce for voce in self._selezione.values() if voce.IsOk()])
+
+    def _e_selezionata(self, voce):
+        if self._selezione is None:
+            return voce.IsOk() and voce == self._voce_corrente()
+        return voce.IsOk() and int(voce.GetID()) in self._selezione
+
+    def _in_ordine(self, voci):
+        """Le voci nell'ordine della plancia. L'ordine si calcola a ogni
+        lettura, perche' intanto la plancia puo' inserire o togliere voci, con
+        una passata sola sui figli di ogni ramo che ne contiene: anche migliaia
+        di voci selezionate costano una passata."""
+        if len(voci) < 2:
+            return voci
+        radice = self.albero.GetRootItem()
+        indici = {}
+        posti = {}
+
+        def posto(voce):
+            numero = int(voce.GetID())
+            if numero not in posti:
+                ramo = self.albero.GetItemParent(voce)
+                chiave = int(ramo.GetID())
+                if chiave not in indici:
+                    indici[chiave] = {int(figlio.GetID()): i for i, figlio in enumerate(self._figli(ramo))}
+                sopra = posto(ramo) if ramo.IsOk() and ramo != radice else ()
+                posti[numero] = (*sopra, indici[chiave].get(numero, 0))
+            return posti[numero]
+
+        return sorted(voci, key=posto)
+
+    def _colore_della_selezione(self):
+        """Lo sfondo delle voci della selezione multipla: il colore della
+        selezione di Windows schiarito verso lo sfondo della plancia, cosi'
+        il testo resta leggibile con il suo colore."""
+        selezione = wx.SystemSettings.GetColour(wx.SYS_COLOUR_HIGHLIGHT)
+        sfondo = self.albero.GetBackgroundColour()
+        return wx.Colour(*(round(0.35 * a + 0.65 * b) for a, b in zip(selezione.Get(False), sfondo.Get(False), strict=True)))
+
+    def _colora(self, voce, selezionata):
+        """Chi vede riconosce le voci della selezione multipla dal loro
+        sfondo. Solo lo sfondo: la voce col fuoco Windows la disegna sempre
+        evidenziata, e un colore del testo suo diventerebbe illeggibile a
+        plancia senza fuoco. Cambiare lo sfondo non manda eventi a NVDA."""
+        self.albero.SetItemBackgroundColour(voce, self._colore_della_selezione() if selezionata else wx.NullColour)
+
+    def _imposta_la_selezione(self, voci):
+        """La selezione multipla diventa queste voci."""
+        vecchia = self._selezione or {}
+        nuova = {int(voce.GetID()): voce for voce in voci if voce.IsOk()}
+        for numero, voce in vecchia.items():
+            if numero not in nuova and voce.IsOk():
+                self._colora(voce, False)
+        for numero, voce in nuova.items():
+            if numero not in vecchia:
+                self._colora(voce, True)
+        self._selezione = nuova
+
+    def _azzera_la_selezione(self):
+        """Resta selezionata la sola voce col fuoco, come dopo una freccia."""
+        if self._selezione is None:
+            return
+        for voce in self._selezione.values():
+            if voce.IsOk():
+                self._colora(voce, False)
+        self._selezione = None
+
+    def _aggiungi_alla_selezione(self, voce):
+        """Aggiunge la voce alla selezione; senza selezione multipla ci entra
+        anche la voce col fuoco, come con Ctrl e un clic."""
+        attuali = self._voci_selezionate()
+        if voce.IsOk() and voce not in attuali:
+            self._imposta_la_selezione([*attuali, voce])
+
+    def _alterna_nella_selezione(self, voce):
+        """Ctrl+Spazio e Ctrl con il clic: la voce entra nella selezione, o
+        ne esce."""
+        attuali = self._voci_selezionate()
+        if voce in attuali:
+            self._imposta_la_selezione([v for v in attuali if v != voce])
+        else:
+            self._aggiungi_alla_selezione(voce)
+
+    def _intervallo(self, da, a):
+        """Le voci fra da e a, estremi compresi, nell'ordine della plancia."""
+        voci = self._cammino(da, a) or [a]
+        if len(voci) > 1 and self._dopo(voci[0]) != voci[1]:
+            voci.reverse()
+        return voci
+
+    def _di_la_selezione(self):
+        """La riga della console, riscritta a ogni tasto: se la voce col
+        fuoco e' selezionata e quante voci lo sono. NVDA non lo dice da se',
+        perche' la selezione multipla e' di MeTeOra."""
+        voce = self._voce_corrente()
+        if not voce.IsOk():
+            return
+        quante = len(self._voci_selezionate())
+        totale = "nessuna voce selezionata" if quante == 0 else "1 voce selezionata" if quante == 1 else f"{quante} voci selezionate"
+        stato = "Selezionata" if self._e_selezionata(voce) else "Non selezionata"
+        self.scrivi(f"{stato}: {self._nome_della_voce(voce)}. {totale.capitalize()}.", "selezione")
+
+    def _dopo_la_freccia(self, prima):
+        """Sinistra o destra hanno spostato il fuoco: come le altre frecce,
+        la selezione multipla finisce."""
+        if self._chiusa:
+            return
+        voce = self._voce_corrente()
+        if voce.IsOk() and voce != prima:
+            self._azzera_la_selezione()
+
+    def _clic_nell_albero(self, evento):
+        """Il clic del mouse nella plancia, per chi vede: con Ctrl la voce
+        entra o esce dalla selezione, con Maiuscolo la selezione va
+        dall'ancora fino a lei; senza, come le frecce, la selezione multipla
+        finisce e il clic lo gestisce Windows."""
+        voce, dove = self.albero.HitTest(evento.GetPosition())
+        sulla_voce = voce.IsOk() and dove & (wx.TREE_HITTEST_ONITEMLABEL | wx.TREE_HITTEST_ONITEMICON)
+        if not sulla_voce or not (evento.ControlDown() or evento.ShiftDown()):
+            if sulla_voce:
+                self._azzera_la_selezione()
+            evento.Skip()
+            return
+        corrente = self._voce_corrente()
+        if evento.ControlDown():
+            self._alterna_nella_selezione(voce)
+            self._ancora = voce
+        else:
+            if self._ancora is None or self._fuoco_atteso != corrente or self._cammino(corrente, self._ancora) is None:
+                self._ancora = corrente if corrente.IsOk() else voce
+            self._imposta_la_selezione(self._intervallo(self._ancora, voce))
+        self.albero.SetFocus()
+        self._sposta_il_cursore(voce)
+        self._fuoco_atteso = voce
+        self._di_la_selezione()
+
+    def _voce_tolta(self, evento):
+        """Una voce tolta dalla plancia esce anche dalla selezione: il suo
+        numero Windows puo' darlo a una voce nuova."""
+        if self._selezione:
+            self._selezione.pop(int(evento.GetItem().GetID()), None)
+        evento.Skip()
 
     def _dati(self, voce):
         return self.albero.GetItemData(voce) if voce and voce.IsOk() else None
@@ -2389,14 +2558,22 @@ class Finestra(wx.Frame):
         voce_selezionata = self._voce_corrente()
         dentro = False
         # Le altre voci selezionate delle playlist e dei Preferiti, per
-        # riselezionarle dopo: una selezione multipla non va persa.
+        # riselezionarle dopo, e quelle di fuori, che restano: una selezione
+        # multipla non va persa, e la voce col fuoco ci rientra solo se c'era.
+        esplicita = self._selezione is not None
+        fuoco_selezionato = esplicita and self._e_selezionata(voce_selezionata)
         altre_selezionate = set()
-        for voce in self._voci_selezionate():
-            if voce != voce_selezionata and (self._sotto(voce, self.nodo_playlist) or self._sotto(voce, self.nodo_preferiti)):
+        fuori = []
+        for voce in self._voci_selezionate() if esplicita else ():
+            if voce == voce_selezionata:
+                continue
+            if self._sotto(voce, self.nodo_playlist) or self._sotto(voce, self.nodo_preferiti):
                 dati = self._dati(voce) or {}
                 oggetto = dati.get("brano") if dati.get("tipo") == "brano" else dati.get("playlist") if dati.get("tipo") == "playlist" else None
                 if oggetto is not None:
                     altre_selezionate.add(id(oggetto))
+            else:
+                fuori.append(voce)
         for voce in self._figli(self.nodo_playlist):
             dati = self._dati(voce)
             if dati.get("tipo") == "playlist" and self.albero.IsExpanded(voce):
@@ -2454,13 +2631,19 @@ class Finestra(wx.Frame):
             self._seleziona(da_selezionare or self.nodo_playlist)
             if interno is not None:
                 self._ritrova_dentro(interno)
-        if altre_selezionate:
-            for radice in (self.nodo_preferiti, self.nodo_playlist):
-                for voce in self._tutte_le_voci(radice):
-                    dati = self._dati(voce) or {}
-                    oggetto = dati.get("brano") if dati.get("tipo") == "brano" else dati.get("playlist") if dati.get("tipo") == "playlist" else None
-                    if oggetto is not None and id(oggetto) in altre_selezionate:
-                        self.albero.SelectItem(voce)
+        if esplicita:
+            ritrovate = []
+            if altre_selezionate:
+                for radice in (self.nodo_preferiti, self.nodo_playlist):
+                    for voce in self._tutte_le_voci(radice):
+                        dati = self._dati(voce) or {}
+                        oggetto = dati.get("brano") if dati.get("tipo") == "brano" else dati.get("playlist") if dati.get("tipo") == "playlist" else None
+                        if oggetto is not None and id(oggetto) in altre_selezionate:
+                            ritrovate.append(voce)
+            corrente = self._voce_corrente()
+            fuoco = [corrente] if fuoco_selezionato and corrente.IsOk() else []
+            # In una volta sola: anche migliaia di voci costano una passata.
+            self._imposta_la_selezione([*fuori, *ritrovate, *fuoco])
 
     def _in_espansione(self, evento):
         voce = evento.GetItem()
@@ -2776,9 +2959,18 @@ class Finestra(wx.Frame):
 
     def _menu_da_evento(self, evento):
         # Dalla tastiera la voce dell'evento e' quella col fuoco; col mouse e'
-        # quella su cui si e' cliccato.
+        # quella su cui si e' cliccato. Il clic destro, come in Esplora
+        # risorse, porta il fuoco sulla voce: se non e' selezionata diventa la
+        # sola selezionata, se lo e' la selezione resta (1.98.0: prima lo
+        # faceva wx, con TR_MULTIPLE).
         prima = self._profondita(self._voce_corrente())
-        self._menu(self._voce_di_lavoro() if evento.GetItem() == self._voce_corrente() else evento.GetItem())
+        voce = evento.GetItem()
+        if voce.IsOk() and voce != self._voce_corrente():
+            if self._e_selezionata(voce):
+                self._sposta_il_cursore(voce)
+            else:
+                self._seleziona(voce)
+        self._menu(self._voce_di_lavoro())
         self._controlla_il_livello(prima)
 
     def _menu(self, voce):
@@ -3456,9 +3648,6 @@ class Finestra(wx.Frame):
 
     # La selezione multipla.
 
-    def _voci_selezionate(self):
-        return [v for v in self.albero.GetSelections() if v.IsOk()]
-
     def _brani_della_voce(self, voce):
         """Cosa contiene una voce, come terne (playlist, brano, sottobrano):
         un ramo vale per tutto cio' che ha dentro, anche se e' chiuso."""
@@ -3588,7 +3777,6 @@ class Finestra(wx.Frame):
         elif approdo is not None:
             # Solo marker: le playlist restano come sono, il fuoco va sulla
             # voce vicina, e se e' un marker lo ritrova il rinfresco.
-            self.albero.UnselectAll()
             self._seleziona(approdo)
         if marker:
             self._salva_i_marker(*{k for _v, k, _m in marker})
@@ -3615,7 +3803,7 @@ class Finestra(wx.Frame):
             dati = self._dati(approdo) or {}
             oggetto = "nuova_playlist" if dati.get("comando") == "nuova_playlist" else (dati.get("brano") or dati.get("playlist"))
             interno = dict(dati)
-        self.albero.UnselectAll()
+        self._azzera_la_selezione()
         if approdo is not None and not rinasce:
             self._seleziona(approdo)
         for voce in voci_da_togliere:

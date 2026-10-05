@@ -2,6 +2,7 @@
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 # 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15).
 
+import ctypes
 import datetime
 import math
 import os
@@ -1316,7 +1317,7 @@ def test_i_tag_con_f11_e_il_sottomenu(finestra, monkeypatch, suoni_annotati, tmp
     # Piu' file insieme: dove i valori sono diversi la voce lo dice, e il
     # valore nuovo va in tutti.
     tag.scrivi(canzone, "album", "Uno")
-    finestra.albero.SelectItem(seconda)
+    finestra._aggiungi_alla_selezione(seconda)
     # Il menu della selezione non legge i tag mentre si apre: li legge la voce scelta.
     voci = dict(finestra._voci_del_menu_della_selezione())
     assert voci["Leggi i tag"] == finestra._comando_leggi_i_tag and voci["Modifica i tag"] == finestra._comando_modifica_i_tag
@@ -1335,7 +1336,7 @@ def test_i_tag_con_f11_e_il_sottomenu(finestra, monkeypatch, suoni_annotati, tmp
     # Maiuscolo+F11 apre subito il menu dei tag.
     aperti = []
     monkeypatch.setattr(finestra.albero, "PopupMenu", lambda menu, posizione: aperti.append([v.GetItemLabelText() for v in menu.GetMenuItems()]))
-    finestra.albero.UnselectAll()
+    finestra._azzera_la_selezione()
     finestra._seleziona(prima)
     _tasto(finestra, codice=wx.WXK_F11, maiuscolo=True)
     assert aperti and aperti[0][:3] == ["Titolo: vuoto", "Artista: vuoto", "Album: Raccolta"]
@@ -1343,7 +1344,7 @@ def test_i_tag_con_f11_e_il_sottomenu(finestra, monkeypatch, suoni_annotati, tmp
     finestra._aggiungi(None, [os.path.join(r"C:\m", "canzone.mid")])
     nodo_midi = list(finestra._figli(finestra.nodo_playlist))[1]
     finestra.albero.Expand(nodo_midi)
-    finestra.albero.UnselectAll()
+    finestra._azzera_la_selezione()
     finestra._seleziona(next(finestra._figli(nodo_midi)))
     _tasto(finestra, codice=wx.WXK_F11)
     assert _ultima(finestra).startswith("F11 legge i tag di un brano o di un file audio o video") and suoni_annotati[-1] == "non_disponibile"
@@ -1773,7 +1774,7 @@ def test_selezione_multipla_suona_come_playlist_invisibile(finestra, monkeypatch
     rock, jazz = _playlist_di_prova(finestra, ("a.mp3", "b.mp3", "c.mp3"), ("x.mp3", "y.mp3"))
     finestra._seleziona(_voce_di(finestra, rock, "c.mp3"))
     # Un ramo selezionato vale per tutto cio' che contiene.
-    finestra.albero.SelectItem(jazz)
+    finestra._aggiungi_alla_selezione(jazz)
     _tasto(finestra, "x")
     assert suonati[-1] == ("c.mp3", None)
     assert "1 di 3 della selezione" in _ultima(finestra)
@@ -1811,8 +1812,8 @@ def test_canc_maiuscolo_canc_f4_e_crea_sulla_selezione(finestra, monkeypatch):
     rock, jazz, _terza = _playlist_di_prova(finestra, ("a.mp3", "b.mp3", "c.mp3"), ("x.mp3",), ("z.mp3",))
     pl_rock = finestra.archivio.playlist[0]
     finestra._seleziona(_voce_di(finestra, rock, "a.mp3"))
-    finestra.albero.SelectItem(_voce_di(finestra, rock, "c.mp3"))
-    finestra.albero.SelectItem(jazz)
+    finestra._aggiungi_alla_selezione(_voce_di(finestra, rock, "c.mp3"))
+    finestra._aggiungi_alla_selezione(jazz)
     _tasto(finestra, codice=wx.WXK_F4)
     assert _ultima(finestra) == "Aggiunti ai Preferiti 3 brani."
     monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("mix"))
@@ -1823,8 +1824,8 @@ def test_canc_maiuscolo_canc_f4_e_crea_sulla_selezione(finestra, monkeypatch):
     rock = finestra._nodo_della_playlist(pl_rock)
     finestra.albero.Expand(rock)
     finestra._seleziona(_voce_di(finestra, rock, "a.mp3"))
-    finestra.albero.SelectItem(_voce_di(finestra, rock, "b.mp3"))
-    finestra.albero.SelectItem(finestra._nodo_della_playlist(finestra.archivio.playlist[2]))
+    finestra._aggiungi_alla_selezione(_voce_di(finestra, rock, "b.mp3"))
+    finestra._aggiungi_alla_selezione(finestra._nodo_della_playlist(finestra.archivio.playlist[2]))
     finestra._cancella_selezione()
     assert _ultima(finestra) == "Tolti 2 brani, eliminata 1 playlist."
     assert [b.nome_del_file for b in pl_rock.brani] == ["c.mp3"]
@@ -1838,7 +1839,7 @@ def test_canc_maiuscolo_canc_f4_e_crea_sulla_selezione(finestra, monkeypatch):
     rock = finestra._nodo_della_playlist(pl_rock)
     finestra.albero.Expand(rock)
     finestra._seleziona(_voce_di(finestra, rock, "c.mp3"))
-    finestra.albero.SelectItem(_voce_di(finestra, finestra._nodo_della_playlist(finestra.archivio.playlist[1]), "x.mp3"))
+    finestra._aggiungi_alla_selezione(_voce_di(finestra, finestra._nodo_della_playlist(finestra.archivio.playlist[1]), "x.mp3"))
     finestra._cestina_selezione()
     assert sorted(cestinati) == ["c.mp3", "x.mp3"]
     assert _ultima(finestra) == "Nel cestino di Windows 2 file."
@@ -2033,7 +2034,7 @@ def test_cestino_nei_risultati_senza_doppioni(finestra, monkeypatch, tmp_path):
     voce = finestra._apri_fino_al_risultato(gruppo.brani[0])
     ramo = finestra.albero.GetItemParent(voce)
     finestra._seleziona(voce)
-    finestra.albero.SelectItem(finestra.albero.GetNextSibling(voce))
+    finestra._aggiungi_alla_selezione(finestra.albero.GetNextSibling(voce))
     monkeypatch.setattr(questo_pc, "nel_cestino", lambda _p: True)
     monkeypatch.setattr(finestra, "_conferma", lambda *_a: True)
     finestra._cestina_selezione()
@@ -2073,9 +2074,9 @@ def test_dopo_canc_il_fuoco_resta_sul_sottobrano(finestra, monkeypatch):
     sid = _voce_di(finestra, nodo, "Turbo_Outrun.sid")
     finestra.albero.Expand(sid)
     finestra._seleziona(_voce_di(finestra, nodo, "a.mp3"))
-    finestra.albero.SelectItem(_voce_di(finestra, nodo, "b.mp3"))
+    finestra._aggiungi_alla_selezione(_voce_di(finestra, nodo, "b.mp3"))
     # Con Ctrl e le frecce il fuoco va su un sottobrano, fuori dalla selezione.
-    finestra.albero.SetFocusedItem(list(finestra._figli(sid))[3])
+    finestra._sposta_il_cursore(list(finestra._figli(sid))[3])
     finestra._cancella_selezione()
     assert [b.nome_del_file for b in pl.brani] == ["Turbo_Outrun.sid"]
     assert finestra.albero.GetItemText(finestra._voce_corrente()).startswith("Sottobrano 4 di 12")
@@ -2343,7 +2344,7 @@ def test_marker_correzioni_della_revisione(finestra, tmp_path, suoni_annotati):
     # Canc sui due marker rimasti: l'altra playlist resta aperta, il fuoco va sul brano.
     rimasti = list(finestra._figli(voce))
     finestra._seleziona(rimasti[0])
-    finestra.albero.SelectItem(rimasti[1])
+    finestra._aggiungi_alla_selezione(rimasti[1])
     finestra._cancella_selezione()
     assert _ultima(finestra) == "Eliminati 2 marker."
     assert finestra.albero.IsExpanded(altro)
@@ -6109,3 +6110,181 @@ def test_la_domanda_del_timer_ferma_la_sfumatura_finche_e_aperta(finestra, monke
     finestra._timer_scade = adesso[0] + 30
     _tasto(finestra, "s", maiuscolo=True)
     assert finestra._inizio_della_sfumatura is not None
+
+
+class _TVITEMW(ctypes.Structure):
+    _fields_ = [("mask", ctypes.c_uint), ("hItem", ctypes.c_void_p), ("state", ctypes.c_uint), ("stateMask", ctypes.c_uint),
+                ("pszText", ctypes.c_wchar_p), ("cchTextMax", ctypes.c_int), ("iImage", ctypes.c_int), ("iSelectedImage", ctypes.c_int),
+                ("cChildren", ctypes.c_int), ("lParam", ctypes.c_void_p)]
+
+
+def test_la_plancia_non_manda_fuochi_sulla_voce_di_prima(finestra):
+    # 1.98.0, il problema di Andrea: con wx.TR_MULTIPLE ogni freccia mandava
+    # a NVDA un fuoco anche sulla voce di prima, e NVDA a volte leggeva quella.
+    # Qui ci si aggancia agli stessi eventi che riceve NVDA.
+    from ctypes import wintypes
+
+    user32 = ctypes.WinDLL("user32", use_last_error=True)
+    user32.SendMessageW.restype = ctypes.c_ssize_t
+    user32.SendMessageW.argtypes = [wintypes.HWND, wintypes.UINT, ctypes.c_size_t, ctypes.c_ssize_t]
+    procedura = ctypes.WINFUNCTYPE(None, wintypes.HANDLE, wintypes.DWORD, wintypes.HWND, wintypes.LONG, wintypes.LONG, wintypes.DWORD, wintypes.DWORD)
+    user32.SetWinEventHook.restype = wintypes.HANDLE
+    user32.SetWinEventHook.argtypes = [wintypes.DWORD, wintypes.DWORD, wintypes.HMODULE, procedura, wintypes.DWORD, wintypes.DWORD, wintypes.DWORD]
+    user32.UnhookWinEvent.argtypes = [wintypes.HANDLE]
+    rock, = _playlist_di_prova(finestra, ("a.mp3", "b.mp3", "c.mp3", "d.mp3"))
+    finestra.Show()
+    finestra.albero.SetFocus()
+    finestra._seleziona(_voce_di(finestra, rock, "a.mp3"))
+    hwnd = finestra.albero.GetHandle()
+    fuochi = []
+
+    def ricevi(_aggancio, evento, finestra_evento, _oggetto, figlio, _filo, _tempo):
+        if finestra_evento == hwnd and evento == 0x8005 and figlio > 0:  # EVENT_OBJECT_FOCUS
+            voce = user32.SendMessageW(hwnd, 0x1100 + 42, figlio, 0)  # TVM_MAPACCIDTOHTREEITEM
+            spazio = ctypes.create_unicode_buffer(200)
+            dati = _TVITEMW(mask=1, hItem=voce, pszText=ctypes.cast(spazio, ctypes.c_wchar_p), cchTextMax=200)
+            user32.SendMessageW(hwnd, 0x1100 + 62, 0, ctypes.addressof(dati))  # TVM_GETITEMW
+            fuochi.append(spazio.value)
+
+    def pompa():
+        # Gli eventi agganciati arrivano quando il filo guarda la sua coda:
+        # la si guarda con un filtro che non prende niente, cosi' non si
+        # smista nessun messaggio delle finestre delle altre prove.
+        messaggio = wintypes.MSG()
+        fine = time.monotonic() + 0.3
+        while time.monotonic() < fine:
+            user32.PeekMessageW(ctypes.byref(messaggio), None, 0x7FFF, 0x7FFF, 0)  # PM_NOREMOVE
+            time.sleep(0.01)
+
+    richiamo = procedura(ricevi)
+    aggancio = user32.SetWinEventHook(0x8005, 0x8005, None, richiamo, os.getpid(), 0, 0)
+    try:
+        pompa()
+        fuochi.clear()
+        # La freccia giu' vera, con il bit dei tasti estesi: la muove Windows.
+        user32.SendMessageW(hwnd, 0x0100, 0x28, 0x01500001)
+        user32.SendMessageW(hwnd, 0x0101, 0x28, 0xC1500001)
+        pompa()
+        assert fuochi and set(fuochi) == {"b.mp3"}
+        fuochi.clear()
+        _nell_albero(finestra, wx.WXK_DOWN, maiuscolo=True)
+        pompa()
+        assert fuochi and set(fuochi) == {"c.mp3"}
+        fuochi.clear()
+        _nell_albero(finestra, wx.WXK_DOWN, ctrl=True)
+        pompa()
+        assert fuochi and set(fuochi) == {"d.mp3"}
+        fuochi.clear()
+        finestra._seleziona(_voce_di(finestra, rock, "a.mp3"))
+        pompa()
+        assert fuochi and set(fuochi) == {"a.mp3"}
+    finally:
+        user32.UnhookWinEvent(aggancio)
+
+
+def _clic(finestra, voce, ctrl=False, maiuscolo=False):
+    finestra.albero.EnsureVisible(voce)
+    rettangolo = finestra.albero.GetBoundingRect(voce, textOnly=True)
+    evento = wx.MouseEvent(wx.wxEVT_LEFT_DOWN)
+    evento.SetPosition(wx.Point(rettangolo.x + 2, rettangolo.y + rettangolo.height // 2))
+    evento.SetControlDown(ctrl)
+    evento.SetShiftDown(maiuscolo)
+    finestra._clic_nell_albero(evento)
+
+
+def test_la_selezione_multipla_e_di_meteora(finestra):
+    # 1.98.0: Ctrl+Spazio, Maiuscolo con le frecce, i colori, i clic con Ctrl
+    # e Maiuscolo, la freccia che la chiude e la voce tolta dalla plancia.
+    rock, = _playlist_di_prova(finestra, ("a.mp3", "b.mp3", "c.mp3", "d.mp3"))
+    finestra.Show()
+    finestra.albero.SetFocus()
+    a, b, c, d = (_voce_di(finestra, rock, n) for n in ("a.mp3", "b.mp3", "c.mp3", "d.mp3"))
+    finestra._seleziona(a)
+    assert finestra._voci_selezionate() == [a] and finestra._selezione is None
+    _nell_albero(finestra, wx.WXK_SPACE, ctrl=True)
+    assert finestra._voci_selezionate() == [] and _ultima(finestra) == "Non selezionata: a.mp3. Nessuna voce selezionata."
+    _nell_albero(finestra, wx.WXK_SPACE, ctrl=True)
+    assert finestra._voci_selezionate() == [a]
+    _nell_albero(finestra, wx.WXK_DOWN, maiuscolo=True)
+    assert finestra._voci_selezionate() == [a, b] and _ultima(finestra) == "Selezionata: b.mp3. 2 voci selezionate."
+    assert finestra.albero.GetItemBackgroundColour(a) == finestra._colore_della_selezione()
+    assert not finestra.albero.GetItemTextColour(a).IsOk()
+    # Il clic con Ctrl aggiunge una voce lontana, nell'ordine della plancia.
+    _clic(finestra, d, ctrl=True)
+    assert finestra._voci_selezionate() == [a, b, d] and finestra._voce_corrente() == d
+    # Il clic con Maiuscolo seleziona dall'ancora, d, fino alla voce cliccata.
+    _clic(finestra, b, maiuscolo=True)
+    assert finestra._voci_selezionate() == [b, c, d] and finestra._voce_corrente() == b
+    assert not finestra.albero.GetItemBackgroundColour(a).IsOk()
+    # Una freccia senza modificatori chiude la selezione multipla, e i colori tornano.
+    _nell_albero(finestra, wx.WXK_UP)
+    assert finestra._selezione is None and not finestra.albero.GetItemBackgroundColour(c).IsOk()
+    # Il clic semplice fa lo stesso.
+    finestra._aggiungi_alla_selezione(c)
+    _clic(finestra, a)
+    assert finestra._selezione is None
+    # Una voce tolta dalla plancia esce dalla selezione.
+    finestra._seleziona(a)
+    finestra._aggiungi_alla_selezione(b)
+    finestra.albero.Delete(b)
+    assert finestra._voci_selezionate() == [a]
+
+
+def test_il_clic_destro_porta_il_fuoco_sulla_voce(finestra, monkeypatch):
+    # 1.98.0, dalla revisione: con TR_MULTIPLE lo faceva wx. Su una voce non
+    # selezionata il menu e' il suo, e lei la sola selezionata; su una voce
+    # della selezione il menu e' quello della selezione.
+    rock, = _playlist_di_prova(finestra, ("a.mp3", "b.mp3", "c.mp3", "d.mp3"))
+    a, b, c, d = (_voce_di(finestra, rock, n) for n in ("a.mp3", "b.mp3", "c.mp3", "d.mp3"))
+    aperti = []
+    monkeypatch.setattr(finestra, "_menu", lambda voce: aperti.append((voce, finestra._voci_selezionate())))
+    finestra._seleziona(a)
+    finestra._menu_da_evento(wx.TreeEvent(wx.wxEVT_TREE_ITEM_MENU, finestra.albero, c))
+    assert aperti[-1] == (c, [c]) and finestra._voce_corrente() == c
+    finestra._seleziona(a)
+    finestra._aggiungi_alla_selezione(b)
+    finestra._menu_da_evento(wx.TreeEvent(wx.wxEVT_TREE_ITEM_MENU, finestra.albero, b))
+    assert aperti[-1] == (b, [a, b]) and finestra._voce_corrente() == b
+    finestra._menu_da_evento(wx.TreeEvent(wx.wxEVT_TREE_ITEM_MENU, finestra.albero, d))
+    assert aperti[-1] == (d, [d]) and finestra._selezione is None
+
+
+def test_la_selezione_resta_in_ordine_e_al_rinfresco(finestra, tmp_path):
+    # 1.98.0, dalla revisione: l'ordine e' quello della plancia anche dopo un
+    # inserimento; il rinfresco del ramo Playlist rimette la selezione intera,
+    # anche le voci di fuori, e la voce col fuoco solo se c'era.
+    rock, = _playlist_di_prova(finestra, ("a.mp3", "b.mp3", "c.mp3"))
+    a, b, c = (_voce_di(finestra, rock, n) for n in ("a.mp3", "b.mp3", "c.mp3"))
+    finestra._seleziona(c)
+    finestra._aggiungi_alla_selezione(a)
+    nuova = finestra.albero.InsertItem(rock, 0, "z.mp3")
+    finestra._aggiungi_alla_selezione(nuova)
+    assert [finestra.albero.GetItemText(v) for v in finestra._voci_selezionate()] == ["z.mp3", "a.mp3", "c.mp3"]
+    finestra.albero.Delete(nuova)
+    # Una voce di Questo PC nella selezione, e il fuoco su b, fuori dalla selezione.
+    (tmp_path / "f.mp3").write_bytes(b"")
+    finestra.albero.Expand(finestra.nodo_pc)
+    cartella = finestra.albero.AppendItem(finestra.nodo_pc, "cartella", data={"tipo": "cartella", "percorso": str(tmp_path), "caricato": False})
+    finestra.albero.SetItemHasChildren(cartella, True)
+    finestra.albero.Expand(cartella)
+    f = next(finestra._figli(cartella))
+    finestra._aggiungi_alla_selezione(f)
+    finestra._sposta_il_cursore(b)
+    prima = sorted(finestra.albero.GetItemText(v) for v in finestra._voci_selezionate())
+    finestra._popola_playlist()
+    dopo = sorted(finestra.albero.GetItemText(v) for v in finestra._voci_selezionate())
+    assert dopo == prima == ["a.mp3", "c.mp3", "f.mp3"]
+    assert finestra.albero.GetItemText(finestra._voce_corrente()) == "b.mp3"
+
+
+def test_una_selezione_grande_non_ferma_la_finestra(finestra):
+    # 1.98.0, dalla revisione: Maiuscolo con Fine su migliaia di brani
+    # costa una passata, non una per voce.
+    nomi = [f"brano {i:04}.mp3" for i in range(3000)]
+    rock, = _playlist_di_prova(finestra, nomi)
+    finestra._seleziona(_voce_di(finestra, rock, nomi[0]))
+    inizio = time.perf_counter()
+    for _ in range(3):
+        finestra._muovi_il_fuoco(wx.WXK_END, allarga=True)
+        selezionate = finestra._voci_selezionate()
+    assert len(selezionate) > 3000 and time.perf_counter() - inizio < 5

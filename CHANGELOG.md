@@ -2,6 +2,13 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.98.0] - 2026-10-06
+
+- La plancia è un albero di Windows a selezione singola, come quello di Esplora risorse: con le frecce NVDA legge sempre la voce d'arrivo. Con la selezione multipla che wxWidgets simulava, ogni freccia mandava a NVDA anche un fuoco sulla voce di prima, e a volte NVDA leggeva quella; l'ha segnalato Andrea, il primo utente, e agganciando gli eventi di accessibilità succedeva in 8 pressioni su 9 (issue 19).
+- La selezione multipla la tiene MeTeOra: Maiuscolo e Ctrl con le frecce, Ctrl con la barra spaziatrice e, per chi usa il mouse, il clic con Ctrl e con Maiuscolo. Le voci selezionate hanno lo sfondo del colore della selezione di Windows, più chiaro, e la console dice, in una riga che si riscrive, se la voce col fuoco è selezionata e quante lo sono, perché NVDA non lo dice da sé. Le frecce senza modificatori, il clic semplice e la ricerca per iniziale riportano la selezione alla sola voce col fuoco; il clic destro porta il fuoco sulla voce, come in Esplora risorse.
+- Dalla revisione a più agenti, prima della pubblicazione: il clic destro, che nell'albero nativo non spostava più il fuoco e faceva agire il menu sulla voce sbagliata; l'ordine della selezione, calcolato a ogni lettura in una passata sola, anche su migliaia di voci; il rinfresco del ramo Playlist, che rimette la selezione intera; i colori leggibili a plancia senza fuoco; il nome della voce, senza conti e durate, nella riga della console.
+- Una prova nuova si aggancia agli stessi eventi che riceve NVDA e controlla che le frecce, Maiuscolo e Ctrl con le frecce e gli spostamenti fatti da MeTeOra mandino il fuoco soltanto sulla voce d'arrivo.
+
 ## [1.97.10] - 2026-10-05
 
 Pubblicata il 5 ottobre 2026: la prima release di MeTeOra, con l'installatore e lo zip. VirusTotal ha analizzato l'installatore, scaricandolo dalla release: nessun antivirus lo segnala.
