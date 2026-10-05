@@ -4,6 +4,8 @@ Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
 ## [1.99.0] - 2026-10-06
 
+Pubblicata il 6 ottobre 2026, con l'installatore e lo zip: la seconda release, la prima che arriva agli utenti con l'aggiornamento automatico. VirusTotal ha analizzato l'installatore, scaricandolo dalla release: nessuno dei 68 antivirus lo segnala.
+
 - vulkan-1.dll di scorta: libmpv la chiede per partire, e due dei primi tre utenti, con driver della scheda video che non la portano, si fermavano al messaggio dell'avvio. Ora MeTeOra ha con sé il caricatore ufficiale di Vulkan, dal runtime 1.4.363.0 di LunarG, e lo usa solo se Windows non ne ha uno suo: chi ha i driver giusti non cambia niente. Scelta di Gabriele, che il 4 ottobre aveva preferito il messaggio; licenza Apache 2.0 con parti MIT, nella cartella licenze.
 
 ## [1.98.1] - 2026-10-06
