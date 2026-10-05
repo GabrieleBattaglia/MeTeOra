@@ -5,8 +5,12 @@
  "passo_avanti": 30.0,
  "volume_effetti": 0.45,
  "insegui": true,
+ "ripresa_oltre": 10,
+ "barra_dei_comandi": true,
  "casuale": false,
  "modello_casuale": "una_volta",
+ "ripetizione": "spenta",
+ "replaygain": "spento",
  "video": false,
  "sottotitoli": true,
  "sintesi": "automatica",
@@ -15,7 +19,7 @@
  "anticipo_karaoke": 200,
  "celle_braille": 40,
  "lettura_minima": 2000,
- "versione": "1.85.5",
+ "versione": "1.96.11",
  "impressi": "al_volo",
  "impressi_scelti": false,
  "percorsi_di_rete": [
@@ -23,12 +27,12 @@
  ],
  "banco_midi": "E:\\VstPlugins\\SF2 Instruments\\FluidR3 GM.sf2",
  "ripresa": {
-  "percorso": "E:\\git\\tmp\\campioni_audio\\ticket5447_33107_3.tak",
+  "percorso": "G:\\Interessante 030_03.mp3",
   "sottobrano": null,
   "numero": 11,
   "posizione": 0,
   "tipo": "cartella",
-  "cartella": "E:\\git\\tmp\\campioni_audio"
+  "cartella": "G:\\"
  },
  "righe_della_console": 2000,
  "caratteri": {},
@@ -79,7 +83,7 @@
   0
  ],
  "dissolvenza": {
-  "accesa": true,
+  "accesa": false,
   "secondi": 3.0
  }
 }
