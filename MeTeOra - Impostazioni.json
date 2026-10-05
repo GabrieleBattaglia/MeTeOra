@@ -1,5 +1,5 @@
 {
- "volume": 100,
+ "volume": 127,
  "passo_volume": 3,
  "passo_indietro": 3.0,
  "passo_avanti": 30.0,
@@ -19,20 +19,20 @@
  "anticipo_karaoke": 200,
  "celle_braille": 40,
  "lettura_minima": 2000,
- "versione": "1.98.1",
+ "versione": "1.99.0",
  "impressi": "al_volo",
  "impressi_scelti": false,
  "percorsi_di_rete": [
   "\\\\iliadbox_Server\\iliadbox\\Video"
  ],
- "banco_midi": "E:\\VstPlugins\\SF2 Instruments\\FluidR3 GM.sf2",
+ "banco_midi": "E:\\VstPlugins\\SF2 Instruments\\SGM-V2.01.sf2",
  "ripresa": {
-  "percorso": "G:\\Interessante 030_03.mp3",
+  "percorso": "E:\\13 ilbarzellettiere\\P\\001 party\\002 l'uomo raffreddato.mp3",
   "sottobrano": null,
-  "numero": 11,
+  "numero": null,
   "posizione": 0,
   "tipo": "cartella",
-  "cartella": "G:\\"
+  "cartella": "E:\\13 ilbarzellettiere\\P\\001 party"
  },
  "righe_della_console": 2000,
  "caratteri": {},
