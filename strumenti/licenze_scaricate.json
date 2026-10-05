@@ -665,6 +665,14 @@
    "file": [
     "LICENSE.txt"
    ]
+  },
+  {
+   "nome": "vulkan",
+   "repository": "https://github.com/KhronosGroup/Vulkan-Loader",
+   "ruolo": "il caricatore di Vulkan di scorta, per libmpv",
+   "file": [
+    "LICENSE.txt"
+   ]
   }
  ]
 }

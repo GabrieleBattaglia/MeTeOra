@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.99.0] - 2026-10-06
+
+- vulkan-1.dll di scorta: libmpv la chiede per partire, e due dei primi tre utenti, con driver della scheda video che non la portano, si fermavano al messaggio dell'avvio. Ora MeTeOra ha con sé il caricatore ufficiale di Vulkan, dal runtime 1.4.363.0 di LunarG, e lo usa solo se Windows non ne ha uno suo: chi ha i driver giusti non cambia niente. Scelta di Gabriele, che il 4 ottobre aveva preferito il messaggio; licenza Apache 2.0 con parti MIT, nella cartella licenze.
+
 ## [1.98.1] - 2026-10-06
 
 - Con il fuoco su un capitolo nella plancia, T, che mette un marker, faceva perdere il posto: rinfrescando i marker il ramo dei capitoli rinasceva e il fuoco finiva sul brano. Ora ritorna sul capitolo, come succede già per i marker. Lo ha trovato la revisione della 1.98.0; c'era dalla 1.93.0.

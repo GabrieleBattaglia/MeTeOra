@@ -73,6 +73,9 @@ ALTRI = [
     # La DLL di PortAudio viaggia dentro sounddevice, che porta solo la sua
     # licenza (1.97.9, permesso di Gabriele del 5 ottobre 2026).
     ("portaudio", "https://github.com/PortAudio/portaudio", "PortAudio, la libreria del suono degli effetti, dentro sounddevice"),
+    # Il caricatore di Vulkan di scorta (1.99.0, permesso di Gabriele del 6
+    # ottobre 2026): il testo intero della licenza Apache 2.0.
+    ("vulkan", "https://github.com/KhronosGroup/Vulkan-Loader", "il caricatore di Vulkan di scorta, per libmpv"),
 ]
 SENZA_FILE = {
     "avisynth-headers": "solo le intestazioni di AviSynth+, per usarlo se è installato; la licenza è scritta in testa ai file",

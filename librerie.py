@@ -1,6 +1,6 @@
 # MeTeOra, le librerie native: rende visibili libmpv e la DLL dei SID.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1, da prototipi/ambiente.py. Nella 1.85.1 libmpv caricata qui, per dire perche' non si carica. Nella 1.97.9 python-mpv importato con il PATH ridotto a lib.
+# 30/09/2026: nasce con la tappa 1, da prototipi/ambiente.py. Nella 1.85.1 libmpv caricata qui, per dire perche' non si carica. Nella 1.97.9 python-mpv importato con il PATH ridotto a lib. Nella 1.99.0 vulkan-1.dll di scorta.
 
 """Da importare prima di mpv e di sid.
 
@@ -12,8 +12,12 @@ Dalla 1.85.1 libmpv si carica qui, per la prima volta: se non si carica,
 l'avvio lo dice con il motivo, invece di fermarsi su un errore di Python.
 Il motivo tipico e' vulkan-1.dll, la libreria di Vulkan che libmpv chiede
 per il video: la installano i driver della scheda video, e puo' mancare su
-macchine virtuali o con driver vecchi (decisione di Gabriele, 4 ottobre 2026:
-un messaggio chiaro, senza portarla nel pacchetto).
+macchine virtuali o con driver vecchi. Il 4 ottobre 2026 Gabriele aveva
+scelto un messaggio chiaro; dopo che due dei primi tre utenti ci sono
+inciampati, dalla 1.99.0 il caricatore ufficiale di Vulkan viaggia di scorta
+in lib/vulkan, e si usa solo se Windows non ne ha uno suo: chi ha i driver
+giusti continua a usare il suo. Il messaggio resta per quando manca anche
+la scorta, per esempio dai sorgenti senza prepara_ambiente.py.
 """
 
 import ctypes
@@ -23,6 +27,8 @@ import sys
 import percorsi
 
 VULKAN = "vulkan-1.dll"
+# Le cartelle aggiunte alla ricerca delle DLL, da tenere vive.
+_CARTELLE = []
 
 
 class LibrerieMancanti(RuntimeError):
@@ -54,7 +60,11 @@ def prepara():
         raise LibrerieMancanti(f"Nella cartella {cartella} mancano {', '.join(mancanti)}: eseguire strumenti/prepara_ambiente.py")
     if cartella not in os.environ["PATH"].split(os.pathsep):
         os.environ["PATH"] = cartella + os.pathsep + os.environ["PATH"]
-        os.add_dll_directory(cartella)
+        _CARTELLE.append(os.add_dll_directory(cartella))
+    scorta = os.path.join(cartella, "vulkan")
+    if not _vulkan_presente() and os.path.isfile(os.path.join(scorta, VULKAN)):
+        # Windows non ha Vulkan: libmpv trova la scorta (1.99.0).
+        _CARTELLE.append(os.add_dll_directory(scorta))
     try:
         _carica(os.path.join(cartella, "libmpv-2.dll"))
     except OSError as errore:

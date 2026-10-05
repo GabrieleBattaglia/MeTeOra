@@ -532,7 +532,7 @@ kbd {
 <h3 id="requisiti">Che cosa serve</h3>
 <ul>
 <li>Windows 10 o 11 a 64 bit.</li>
-<li>La libreria di Vulkan, vulkan-1.dll, che libmpv chiede anche solo per partire. La installano i driver della scheda video, e di solito c'è già. Se manca, MeTeOra non parte e una finestra lo dice: il capitolo Quando qualcosa va storto spiega come rimediare.</li>
+<li>Niente da installare per Vulkan: libmpv chiede la sua libreria, vulkan-1.dll, anche solo per partire. Di solito la portano i driver della scheda video; se Windows non l'ha, MeTeOra usa una copia di scorta che ha con sé.</li>
 <li>Per guardare i video, una scheda video con i suoi driver. Con il video spento, dei video si sente solo l'audio.</li>
 <li>Uno screen reader, NVDA o JAWS, per avere i sottotitoli e il karaoke anche in braille. Senza screen reader, li legge la voce di Windows.</li>
 <li>La rete serve solo per gli aggiornamenti e, la prima volta che suoni un MIDI, per scaricare FluidSynth e, se lo chiedi, il banco di suoni FluidR3 GM.</li>
@@ -1496,7 +1496,7 @@ kbd {
 <h3 id="errori-avvio">Gli errori all'avvio</h3>
 <ul>
 <li>Se nella cartella lib mancano le librerie che suonano, MeTeOra non parte: una finestra, MeTeOra non può partire, dice quali file mancano e in quale cartella.</li>
-<li>Se manca vulkan-1.dll, la libreria di Vulkan che libmpv usa per il video, MeTeOra non parte, e la stessa finestra lo dice. Di solito la installano i driver della scheda video, e può mancare su una macchina virtuale o con driver vecchi: si aggiornano i driver, oppure si installa il Vulkan Runtime da https://vulkan.lunarg.com.</li>
+<li>vulkan-1.dll, la libreria di Vulkan che libmpv chiede per partire, di solito la portano i driver della scheda video. Dove manca, per esempio su una macchina virtuale o con driver vecchi, MeTeOra usa la copia di scorta che ha nella cartella _internal, in lib\vulkan; chi ha i driver giusti continua a usare la sua. Se mancasse anche quella, MeTeOra non parte e la stessa finestra lo dice: si aggiornano i driver, oppure si installa il Vulkan Runtime da https://vulkan.lunarg.com.</li>
 <li>Se il file delle playlist, delle impostazioni o dei marker non si legge, la console lo dice: il capitolo I file di MeTeOra spiega cosa succede.</li>
 <li>Se la scheda audio scelta non c'è, o non si apre, MeTeOra usa quella automatica e lo dice; se la musica non ritrova la scheda, suona su quella di Windows.</li>
 <li>Se il brano da riprendere non c'è più, la console dice Non trovo più, con il suo percorso.</li>
@@ -1526,6 +1526,7 @@ kbd {
 <p>MeTeOra si regge su librerie libere di altri autori. Ognuna ha la sua licenza, il cui testo sta nella cartella licenze accanto al programma; il file LEGGIMI.txt di quella cartella le elenca tutte, con la versione esatta.</p>
 <ul>
 <li>libmpv, del progetto mpv, con FFmpeg, libopenmpt e le altre librerie della build di shinchiro: la riproduzione. GPL 3 o successiva.</li>
+<li>Il caricatore di Vulkan, di Khronos Group, LunarG e Valve, dal runtime di LunarG: la copia di scorta di vulkan-1.dll per libmpv. Apache 2.0, con parti MIT.</li>
 <li>libsidplayfp, con l'emulazione reSIDfp: i SID del Commodore 64. GPL 2 o successiva. Le durate dei SID vengono dal database Songlengths della High Voltage SID Collection.</li>
 <li>libgme, Game Music Emu: la musica delle console. LGPL 2.1 o successiva.</li>
 <li>FluidSynth e libsndfile: i MIDI. LGPL 2.1 o successiva. Non sono nel pacchetto: MeTeOra li scarica dal sito di FluidSynth al primo MIDI. Il banco di suoni FluidR3 GM, di Frank Wen, ha licenza MIT e si scarica solo se lo chiedi.</li>

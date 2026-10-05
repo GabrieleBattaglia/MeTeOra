@@ -1,6 +1,6 @@
 # MeTeOra, utilita': raccoglie nella cartella licenze i testi delle licenze dei componenti e i loro sorgenti esatti.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.85.0, per la prima release. Nella 1.85.2 i testi scaricati da scarica_licenze.py. Nella 1.97.9 PortAudio, e la cartella da rifare a ogni release.
+# 04/10/2026: nasce con la 1.85.0, per la prima release. Nella 1.85.2 i testi scaricati da scarica_licenze.py. Nella 1.97.9 PortAudio, e la cartella da rifare a ogni release. Nella 1.99.0 il caricatore di Vulkan di scorta.
 
 """Prepara la cartella licenze, che il pacchetto porta accanto all'eseguibile.
 
@@ -263,6 +263,14 @@ def main():
     for voce in scaricate["libmpv"]:
         if voce["nome"] not in ("mpv", "ffmpeg"):
             sorgenti.append(f"{voce['nome']}: {voce['repository']}")
+
+    # Il caricatore di Vulkan di scorta (1.99.0), dal runtime di LunarG.
+    raccolta.copia(os.path.join(LIB, "vulkan", "VulkanRT-License.txt"), os.path.join("vulkan", "VulkanRT-License.txt"))
+    licenza_vulkan = " e ".join(f"vulkan\\{file}" for file in ["VulkanRT-License.txt", *altri["vulkan"]["file"]])
+    leggimi.append(f"vulkan-1.dll, il caricatore di Vulkan {prepara_ambiente.VULKAN_VERSIONE}, di scorta per libmpv quando Windows non ne "
+        f"ha uno: Apache-2.0 con parti MIT, {licenza_vulkan}.")
+    sorgenti.append(f"vulkan-1.dll, dal runtime {prepara_ambiente.VULKAN_VERSIONE} di LunarG, impronta SHA-256 "
+        f"{impronta(os.path.join(LIB, 'vulkan', 'vulkan-1.dll'))}: {altri['vulkan']['repository']}/tree/{prepara_ambiente.VULKAN_TAG}")
 
     # Le DLL di MSYS2, controllate una per una.
     for nome, dll, ruolo, licenza in MSYS2:

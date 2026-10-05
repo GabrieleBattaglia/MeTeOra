@@ -93,6 +93,7 @@ xxhash: https://github.com/Cyan4973/xxHash
 xz: https://github.com/tukaani-project/xz
 zlib: https://github.com/zlib-ng/zlib-ng
 zstd: https://github.com/facebook/zstd
+vulkan-1.dll, dal runtime 1.4.363.0 di LunarG, impronta SHA-256 e1fcfc9489beefa6a6d9d11d6c7517f6a2b7f16e0d3fb8f4103bee0210f314a3: https://github.com/KhronosGroup/Vulkan-Loader/tree/vulkan-sdk-1.4.363.0
 libsidplayfp 2.16.1-1: https://repo.msys2.org/mingw/sources/mingw-w64-libsidplayfp-2.16.1-1.src.tar.zst
 libgcrypt 1.12.4-1: https://repo.msys2.org/mingw/sources/mingw-w64-libgcrypt-1.12.4-1.src.tar.zst
 libgpg-error 1.61-1: https://repo.msys2.org/mingw/sources/mingw-w64-libgpg-error-1.61-1.src.tar.zst

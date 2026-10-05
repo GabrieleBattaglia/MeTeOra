@@ -20,7 +20,7 @@ MeTeOra non è firmato digitalmente, come molti programmi liberi scritti da una 
 ## Che cosa serve
 
 - Windows 10 o 11 a 64 bit.
-- La libreria di Vulkan, vulkan-1.dll, che la riproduzione chiede già per partire, anche senza video. La installano i driver della scheda video, quindi di solito c'è. Se manca, per esempio su una macchina virtuale, MeTeOra lo dice all'avvio: si aggiornano i driver, oppure si installa il Vulkan Runtime da https://vulkan.lunarg.com.
+- Niente da installare per Vulkan: la riproduzione chiede la sua libreria, vulkan-1.dll, anche senza video. Di solito la portano i driver della scheda video; dove manca, per esempio su una macchina virtuale, MeTeOra usa una copia di scorta che ha con sé.
 - Per guardare i video, una scheda video con i suoi driver. Con il video spento, dei video si sente solo l'audio.
 - Uno screen reader, NVDA o JAWS, che ricevono anche i sottotitoli e il karaoke, in voce e in braille. Senza screen reader, li legge la voce di Windows.
 - La rete serve solo per l'aggiornamento automatico, e la prima volta che suoni un MIDI, per scaricare FluidSynth e, se lo chiedi, il banco di suoni FluidR3 GM, di circa 148 MB.

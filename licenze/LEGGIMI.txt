@@ -91,6 +91,7 @@ xxhash, dentro libmpv-2.dll: libmpv\xxhash\LICENSE.
 xz, dentro libmpv-2.dll: libmpv\xz\COPYING e libmpv\xz\COPYING.0BSD e libmpv\xz\COPYING.GPLv2 e libmpv\xz\COPYING.GPLv3 e libmpv\xz\COPYING.LGPLv2.1.
 zlib, dentro libmpv-2.dll: libmpv\zlib\LICENSE.md.
 zstd, dentro libmpv-2.dll: libmpv\zstd\COPYING e libmpv\zstd\LICENSE.
+vulkan-1.dll, il caricatore di Vulkan 1.4.363.0, di scorta per libmpv quando Windows non ne ha uno: Apache-2.0 con parti MIT, vulkan\VulkanRT-License.txt e vulkan\LICENSE.txt.
 libsidplayfp-6.dll, i SID del Commodore 64, con l'emulazione reSIDfp: libsidplayfp 2.16.1-1, GPL-2.0-or-later, libsidplayfp\COPYING.
 libgcrypt-20.dll, per libsidplayfp: libgcrypt 1.12.4-1, LGPL-2.1-or-later, libgcrypt\COPYING e libgcrypt\COPYING.LIB.
 libgpg-error-0.dll, per libgcrypt: libgpg-error 1.61-1, LGPL-2.1-or-later, libgpg-error\COPYING e libgpg-error\COPYING.LIB.

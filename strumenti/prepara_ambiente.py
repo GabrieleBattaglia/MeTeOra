@@ -1,6 +1,6 @@
 # MeTeOra, preparazione dell'ambiente di sviluppo: scarica e compila le librerie native.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 29/09/2026: nasce con il repository. Nella 1.66.0 anche libgme, per la musica delle console. Nella 1.85.0 la build di libmpv fissata.
+# 29/09/2026: nasce con il repository. Nella 1.66.0 anche libgme, per la musica delle console. Nella 1.85.0 la build di libmpv fissata. Nella 1.99.0 il caricatore di Vulkan di scorta.
 
 """Mette in lib/ le DLL che il repository non contiene.
 
@@ -15,11 +15,17 @@
    a libsidplayfp e alle altre DLL di cui ha bisogno.
 3. libgme.dll, per la musica delle console (tappa 8): dal pacchetto MSYS2
    di libgme, con le DLL di cui ha bisogno.
+4. vulkan-1.dll di scorta, in lib/vulkan (1.99.0): libmpv-2.dll la chiede per
+   partire, e su alcune macchine Windows non c'e', con driver della scheda
+   video vecchi o generici e nelle macchine virtuali. Viene dal runtime
+   ufficiale di LunarG a 64 bit, VULKAN_VERSIONE, con l'impronta controllata,
+   insieme a VulkanRT-License.txt; MeTeOra la usa solo se Windows non ne ha
+   una sua (librerie.py).
 
 MSYS2 si cerca nella cartella indicata dalla variabile METEORA_MSYS2, poi in
 strumenti/msys64; se non c'e' si scarica la versione portatile in
 strumenti/msys64, che git ignora. Serve 7-Zip installato.
-Uso: python strumenti/prepara_ambiente.py [--solo-mpv | --solo-sid | --solo-gme]
+Uso: python strumenti/prepara_ambiente.py [--solo-mpv | --solo-sid | --solo-gme | --solo-vulkan]
 """
 
 import hashlib
@@ -48,6 +54,12 @@ MPV_IMPRONTA = "81795d759e01016f1550fd71651a1a5d59ab5c28ef31c0b6793224e9cff39459
 MPV_COMMIT = "e470f8986e"
 FFMPEG_COMMIT = "939c2c733"
 WINBUILD_COMMIT = "05a60b3cfd04e3e3b89918f4a27f3dde2935dff2"
+# Il caricatore di Vulkan di scorta (1.99.0): il runtime di LunarG, il suo
+# archivio con l'impronta, e il tag dei sorgenti del caricatore.
+VULKAN_VERSIONE = "1.4.363.0"
+VULKAN_ARCHIVIO = f"VulkanRT-X64-{VULKAN_VERSIONE}-Components.zip"
+VULKAN_IMPRONTA = "a25a927aa8b9f0371048f1861cf88ac3b9bc9b1fb332c42d897c8ab32695769a"
+VULKAN_TAG = f"vulkan-sdk-{VULKAN_VERSIONE}"
 
 
 def scarica(url, destinazione):
@@ -73,6 +85,28 @@ def prepara_mpv():
                 sys.exit(f"L'archivio {MPV_ARCHIVIO} non ha l'impronta attesa: non lo uso.")
         subprocess.run([SETTEZIP, "e", "-y", f"-o{LIB}", archivio, "libmpv-2.dll"], check=True, stdout=subprocess.DEVNULL)
     print(f"libmpv-2.dll pronta, build {MPV_BUILD}", flush=True)
+
+
+def prepara_vulkan(archivio=None):
+    """Mette in lib/vulkan vulkan-1.dll a 64 bit e la licenza del runtime,
+    dall'archivio di LunarG; archivio e' un file gia' scaricato, se c'e'."""
+    import zipfile
+
+    with tempfile.TemporaryDirectory() as cartella:
+        if archivio is None:
+            archivio = os.path.join(cartella, VULKAN_ARCHIVIO)
+            scarica(f"https://sdk.lunarg.com/sdk/download/{VULKAN_VERSIONE}/windows/{VULKAN_ARCHIVIO}", archivio)
+        with open(archivio, "rb") as f:
+            if hashlib.sha256(f.read()).hexdigest() != VULKAN_IMPRONTA:
+                sys.exit(f"L'archivio {VULKAN_ARCHIVIO} non ha l'impronta attesa: non lo uso.")
+        destinazione = os.path.join(LIB, "vulkan")
+        os.makedirs(destinazione, exist_ok=True)
+        base = VULKAN_ARCHIVIO.removesuffix(".zip")
+        with zipfile.ZipFile(archivio) as zip_:
+            for dentro, nome in ((f"{base}/x64/vulkan-1.dll", "vulkan-1.dll"), (f"{base}/VulkanRT-License.txt", "VulkanRT-License.txt")):
+                with zip_.open(dentro) as sorgente, open(os.path.join(destinazione, nome), "wb") as f:
+                    shutil.copyfileobj(sorgente, f)
+    print(f"vulkan-1.dll di scorta pronta, runtime {VULKAN_VERSIONE}", flush=True)
 
 
 def trova_msys2():
@@ -128,3 +162,5 @@ if __name__ == "__main__":
         prepara_sid()
     if solo in (None, "--solo-gme"):
         prepara_gme()
+    if solo in (None, "--solo-vulkan"):
+        prepara_vulkan()
