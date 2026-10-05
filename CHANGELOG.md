@@ -4,6 +4,8 @@ Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
 ## [1.97.10] - 2026-10-05
 
+Pubblicata il 5 ottobre 2026: la prima release di MeTeOra, con l'installatore e lo zip. VirusTotal ha analizzato l'installatore, scaricandolo dalla release: nessun antivirus lo segnala.
+
 La preparazione della prima release, dalla verifica a più agenti delle risorse del pacchetto e dei documenti: dieci correzioni.
 - La cartella licenze dice la versione della release e GBUtils V198, con il commit esatto; si rifà prima di ogni release.
 - La licenza di PortAudio, la libreria del suono degli effetti che sounddevice porta con sé, è nella cartella licenze, scaricata con il permesso di Gabriele.
