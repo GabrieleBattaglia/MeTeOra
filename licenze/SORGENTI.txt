@@ -1,6 +1,6 @@
-Il codice sorgente dei componenti di MeTeOra 1.97.10.
+Il codice sorgente dei componenti di MeTeOra 1.99.0.
 Il codice sorgente corrispondente di ogni componente incluso nel pacchetto si trova agli indirizzi qui sotto, alla versione esatta. Se uno non fosse più raggiungibile, chiedilo con una segnalazione su https://github.com/GabrieleBattaglia/MeTeOra/issues e lo riceverai.
-MeTeOra 1.97.10, con sidshim.dll e lo script che prepara le librerie (strumenti\prepara_ambiente.py): https://github.com/GabrieleBattaglia/MeTeOra, alla release della versione 1.97.10.
+MeTeOra 1.99.0, con sidshim.dll e lo script che prepara le librerie (strumenti\prepara_ambiente.py): https://github.com/GabrieleBattaglia/MeTeOra, alla release della versione 1.99.0.
 GBUtils V198: https://github.com/GabrieleBattaglia/GBUtils/tree/c17bb1a328a9c119663d7fe10af11fbfc90007f9.
 libmpv-2.dll, build 20260928 di shinchiro, impronta SHA-256 0d5b9dbecb73e179ef39dc94314ff8905fab926a80f8d60a2367d824b7254e2e:
 mpv: https://github.com/mpv-player/mpv/tree/e470f8986e

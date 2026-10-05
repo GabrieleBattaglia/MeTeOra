@@ -1,7 +1,7 @@
-Le licenze dei componenti di MeTeOra 1.97.10.
+Le licenze dei componenti di MeTeOra 1.99.0.
 MeTeOra è copyright 2026 di Gabriele Battaglia (IZ4APU), software libero sotto la GNU General Public License, versione 3 o, a tua scelta, qualunque versione successiva (GPL-3.0-or-later), senza alcuna garanzia. Il testo è nel file LICENSE accanto al programma, e una copia in testi\GPL-3.0.txt.
 Qui sotto, un componente per riga: a che cosa serve, la versione, la licenza e dove sono i suoi testi in questa cartella. Il file SORGENTI.txt dice dove trovare il codice sorgente esatto di ognuno.
-MeTeOra 1.97.10, con sidshim.dll, il suo ponte verso libsidplayfp: GPL-3.0-or-later, testi\GPL-3.0.txt.
+MeTeOra 1.99.0, con sidshim.dll, il suo ponte verso libsidplayfp: GPL-3.0-or-later, testi\GPL-3.0.txt.
 GBUtils V198, la libreria di Gabriele, con gli effetti sonori di Acusticator: GPL-3.0, testi\GPL-3.0.txt.
 libmpv-2.dll, la riproduzione: mpv e470f8986e con FFmpeg 939c2c733, libopenmpt e le altre librerie della build 20260928 di shinchiro/mpv-winbuild-cmake: GPL-3.0-or-later nel suo insieme, testi\GPL-3.0.txt; mpv è GPL-2.0-or-later con parti LGPL-2.1-or-later, testi\GPL-2.0.txt e testi\LGPL-2.1.txt. Le librerie che contiene sono nelle righe seguenti, ciascuna con i file di licenza del suo progetto, nella cartella libmpv.
 amf-headers, dentro libmpv-2.dll: libmpv\amf-headers\LICENSE.txt.
