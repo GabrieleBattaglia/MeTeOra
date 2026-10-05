@@ -1,9 +1,7 @@
 Collaudo di MeTeOra 1.98.0, con NVDA: la plancia nativa e la selezione multipla di MeTeOra. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta. Scrivi le note sulla riga della voce; le voci superate si cancellano.
-Scorri la plancia su e giù con le frecce, anche in fretta e tenendole premute: NVDA legge sempre la voce d'arrivo. Da far provare anche ad Andrea, che vedeva il difetto.
-Maiuscolo con freccia giù due volte su una playlist: la console dice Selezionata e 3 voci selezionate; X suona la selezione.
-Ctrl con freccia giù: la console dice Non selezionata; Ctrl con la barra spaziatrice la aggiunge, e ripremuta la toglie.
-Dopo una selezione multipla, una freccia semplice: la selezione torna alla sola voce col fuoco, e Canc agisce su quella.
-F8, Backspace e Maiuscolo con Backspace: NVDA legge la voce su cui arrivano.
-Se qualcuno che vede può aiutarti: le voci selezionate hanno uno sfondo azzurro chiaro; il clic con Ctrl aggiunge una voce, il clic con Maiuscolo seleziona fino a lei.
-Il clic destro su una voce non selezionata: il menu è il suo; su una voce della selezione: il menu è quello della selezione.
-Una selezione con Maiuscolo e Fine su una playlist molto lunga: la finestra non si ferma.
+
+Claudia, tutto quanto descrivi funziona perfettamente.
+Il tutto mi sembra anche molto più reattivo. Peccato non abbiamo scelto subito questa strada.
+C'è un piccolo dettaglio: in esplora risorse, NVDA è in grado di dirmi se un elemento è selezionato o meno. O meglio: non dice nulla quando è selezionato e mi dice non selezionato se non lo è, ad esempio perché mi sto muovendo con ctrl premuto.
+é possibile però che nvda riconosca esplora risorse ed applichi del suo codice interno che non scatta in meteora. Non è molto importante anche perché la console riporta tutto correttamente.
+Vedi se capisci come fa NVDA e se noi possiamo ottenerlo ma non sprecarci troppo tempo, è una questione a bassa priorità.
