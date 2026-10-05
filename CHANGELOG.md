@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.98.1] - 2026-10-06
+
+- Con il fuoco su un capitolo nella plancia, T, che mette un marker, faceva perdere il posto: rinfrescando i marker il ramo dei capitoli rinasceva e il fuoco finiva sul brano. Ora ritorna sul capitolo, come succede già per i marker. Lo ha trovato la revisione della 1.98.0; c'era dalla 1.93.0.
+
 ## [1.98.0] - 2026-10-06
 
 - La plancia è un albero di Windows a selezione singola, come quello di Esplora risorse: con le frecce NVDA legge sempre la voce d'arrivo. Con la selezione multipla che wxWidgets simulava, ogni freccia mandava a NVDA anche un fuoco sulla voce di prima, e a volte NVDA leggeva quella; l'ha segnalato Andrea, il primo utente, e agganciando gli eventi di accessibilità succedeva in 8 pressioni su 9 (issue 19).

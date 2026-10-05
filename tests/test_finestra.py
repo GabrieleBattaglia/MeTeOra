@@ -6288,3 +6288,21 @@ def test_una_selezione_grande_non_ferma_la_finestra(finestra):
         finestra._muovi_il_fuoco(wx.WXK_END, allarga=True)
         selezionate = finestra._voci_selezionate()
     assert len(selezionate) > 3000 and time.perf_counter() - inizio < 5
+
+
+def test_t_su_un_capitolo_non_fa_perdere_il_posto(finestra):
+    # 1.98.1, dalla revisione della 1.98.0: rinfrescando i marker il fuoco su
+    # un capitolo si ritrova, come quello su un marker.
+    libro = r"C:\m\libro.m4b"
+    finestra.schedario.schede[libro] = {"dim": 1, "mod": 0, "durata": 1800.0, "tag": {}, "capitoli": [[0, "Inizio"], [900, "Meta'"]]}
+    finestra._aggiungi(None, [libro])
+    nodo = next(finestra._figli(finestra.nodo_playlist))
+    finestra.albero.Expand(nodo)
+    voce_libro = next(finestra._figli(nodo))
+    finestra.albero.Expand(voce_libro)
+    secondo = list(finestra._figli(voce_libro))[1]
+    numero = finestra._dati(secondo)["numero"]
+    finestra._seleziona(secondo)
+    finestra._rinfresca_i_marker(finestra._chiave_della_voce(finestra._dati(voce_libro)))
+    dati = finestra._dati(finestra._voce_corrente())
+    assert dati.get("tipo") == "capitolo" and dati.get("numero") == numero
