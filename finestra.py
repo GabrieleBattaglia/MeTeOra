@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti.
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -7693,7 +7693,7 @@ class Finestra(wx.Frame):
             "Il testo della licenza è nel file LICENSE accanto al programma; le licenze dei componenti sono nella cartella licenze, e il file "
             "licenze\\SORGENTI.txt dice dove trovarne il codice sorgente. Quello di MeTeOra è su https://github.com/GabrieleBattaglia/MeTeOra.",
             "MeTeOra è formato da tre parole italiane, una dedica di Gabriele alla sua ragazza Ginevra.",
-            "Riproduzione: libmpv, del progetto mpv, con FFmpeg, libopenmpt e le altre librerie della build di shinchiro, GPL 3 o successiva.",
+            "Riproduzione: libmpv, del progetto mpv, con FFmpeg, libopenmpt, rubberband e le altre librerie della build di shinchiro, GPL 3 o successiva.",
             "SID del Commodore 64: libsidplayfp, con l'emulazione reSIDfp, GPL 2 o successiva.",
             "Durate dei SID: il database Songlengths della High Voltage SID Collection.",
             "MIDI: FluidSynth e libsndfile, LGPL 2.1 o successiva, scaricati al primo MIDI; il banco di suoni FluidR3 GM di Frank Wen, "

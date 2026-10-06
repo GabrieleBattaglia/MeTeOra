@@ -1026,6 +1026,7 @@ kbd {
 </ol>
 <h2 id="velocita-tono-equalizzatore-dissolvenza">Velocità, tono, equalizzatore e dissolvenza</h2>
 <p>Velocità, tono, equalizzatore e dissolvenza valgono per tutti i brani, SID compresi, e MeTeOra se li ricorda fra un avvio e l'altro: ogni cambio si salva subito. Se all'avvio la velocità o il tono non sono quelli normali, la console lo dice, con il tasto che li riporta al normale. Ogni tasto ha il suo suono, e uno suo anche quando arriva a un limite; la console lo scrive in una riga breve, che si riscrive a ogni pressione, come quella del volume. Si cambiano anche dalla finestra delle impostazioni.</p>
+<p>Velocità e tono li cambia rubberband, una libreria pensata per la musica, che tiene il passo regolare e cambia il tono senza toccare la durata. A velocità e tono normali rubberband si toglie, e il suono passa intatto. Per questo, quando lasci la velocità e il tono normali o ci torni, si può sentire un piccolo buco, di qualche centesimo di secondo; fra una velocità e l'altra, o fra un tono e l'altro, niente. Finché velocità o tono sono cambiati, ogni brano comincia con qualche centesimo di secondo più morbido e finisce con qualche centesimo di silenzio in più. Il tono sposta tutto il suono, timbro compreso, come un nastro che gira più veloce o più lento senza cambiare durata.</p>
 <h3 id="velocita">La velocità</h3>
 <p>La velocità va da 0.5, cioè la metà, a 2, il doppio, a passi di 0.05: A rallenta, D accelera, S torna a 1, la velocità normale. Il tono resta quello del brano. La console dice la velocità nuova, per esempio Velocità 0.85, e ai limiti che è già al minimo o al massimo.</p>
 <h3 id="tono">Il tono</h3>
@@ -1528,7 +1529,7 @@ kbd {
 <h3 id="componenti">I componenti di altri autori</h3>
 <p>MeTeOra si regge su librerie libere di altri autori. Ognuna ha la sua licenza, il cui testo sta nella cartella licenze accanto al programma; il file LEGGIMI.txt di quella cartella le elenca tutte, con la versione esatta.</p>
 <ul>
-<li>libmpv, del progetto mpv, con FFmpeg, libopenmpt e le altre librerie della build di shinchiro: la riproduzione. GPL 3 o successiva.</li>
+<li>libmpv, del progetto mpv, con FFmpeg, libopenmpt, rubberband e le altre librerie della build di shinchiro: la riproduzione, e con rubberband velocità e tono. GPL 3 o successiva.</li>
 <li>Il caricatore di Vulkan, di Khronos Group, LunarG e Valve, dal runtime di LunarG: la copia di scorta di vulkan-1.dll per libmpv. Apache 2.0, con parti MIT.</li>
 <li>libsidplayfp, con l'emulazione reSIDfp: i SID del Commodore 64. GPL 2 o successiva. Le durate dei SID vengono dal database Songlengths della High Voltage SID Collection.</li>
 <li>libgme, Game Music Emu: la musica delle console. LGPL 2.1 o successiva.</li>

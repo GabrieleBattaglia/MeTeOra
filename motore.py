@@ -1,6 +1,6 @@
 # MeTeOra, il motore di riproduzione: libmpv, e i SID in tempo reale.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7). Nella 1.65.0 i MIDI resi da FluidSynth (tappa 8). Nella 1.66.0 la musica delle console con libgme. Nella 1.67.0 il file lasciato o rinominato per Rinomina file. Nella 1.82.0 il testo del karaoke come traccia in memoria, senza i .lrc caricati da mpv, e due sottotitoli uguali di fila detti tutti e due. Nella 1.83.0 il tempo che resta al sottotitolo, per la barra braille a blocchi. Nella 1.83.3 la durata vera di Musepack e DSF, da mutagen. Nella 1.93.0 i capitoli che libmpv vede. Nella 1.95.0 l'attenuazione, per la sfumatura del timer di spegnimento. Nella 1.96.0 il volume uniforme con ReplayGain. Nella 1.96.11 suona con a_volume_pieno. Nella 1.102.2 (issue 22) il ricampionamento con soxr, le bande compensate, il preamplificatore nella catena e il volume oltre 100 con il limitatore.
+# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7). Nella 1.65.0 i MIDI resi da FluidSynth (tappa 8). Nella 1.66.0 la musica delle console con libgme. Nella 1.67.0 il file lasciato o rinominato per Rinomina file. Nella 1.82.0 il testo del karaoke come traccia in memoria, senza i .lrc caricati da mpv, e due sottotitoli uguali di fila detti tutti e due. Nella 1.83.0 il tempo che resta al sottotitolo, per la barra braille a blocchi. Nella 1.83.3 la durata vera di Musepack e DSF, da mutagen. Nella 1.93.0 i capitoli che libmpv vede. Nella 1.95.0 l'attenuazione, per la sfumatura del timer di spegnimento. Nella 1.96.0 il volume uniforme con ReplayGain. Nella 1.96.11 suona con a_volume_pieno. Nella 1.102.2 (issue 22) il ricampionamento con soxr, le bande compensate, il preamplificatore nella catena e il volume oltre 100 con il limitatore. Nella 1.102.3 rubberband quando velocita' o tono sono cambiati, con il tono fatto da lui (issue 20).
 
 """Due lettori libmpv per tutti i formati.
 
@@ -24,12 +24,16 @@ se', e non li rilegge da mpv. Si leggono da mpv solo posizione e durata,
 e mai da un lettore che sta finendo.
 
 Velocita', tono ed equalizzatore valgono per tutti e due i lettori e per
-tutti i brani. La catena dei filtri e' fissa: il preamplificatore,
-l'equalizzatore a sette bande, sopra il volume 100 il guadagno in piu' con il
-limitatore, e poi scaletempo2, che tiene fermo il tono quando cambia la
-velocita' e non lascia buchi tornando al normale. Con le bande a zero, la
-velocita' normale e il volume fino a 100 la catena lascia l'audio identico,
-campione per campione. Il guadagno di una banda cambiato al
+tutti i brani. La catena dei filtri: il preamplificatore, l'equalizzatore
+a sette bande, sopra il volume 100 il guadagno in piu' con il limitatore, e
+in fondo il filtro del tempo. A velocita' e tono normali e' scaletempo2, che
+li' lascia passare l'audio intatto; quando uno dei due cambia e' rubberband,
+che tiene fermo il tono quando cambia la velocita' e fa da se' il tono.
+Lasciando il normale o tornandoci la catena si riscrive, con un buco di
+qualche centesimo di secondo; fra due velocita' o due toni diversi dal
+normale niente si riscrive. Con le bande a zero, velocita' e tono normali e
+il volume fino a 100 la catena lascia l'audio identico, campione per
+campione. Il guadagno di una banda cambiato al
 volo (af-command) mpv lo perde a ogni seek, a ogni brano nuovo e al cambio
 di scheda: per questo la catena si riscrive, con i guadagni di adesso,
 prima di ognuno di questi passi. Lo perde anche quando riapre l'uscita da
@@ -77,6 +81,23 @@ VOLUME_PIENO = 100
 # brani gia' forti, per esempio a -9 LUFS, +12 dB di volume diventano +2,5 dB
 # veri senza saturare, dove tosando sarebbero stati il 16% dei campioni.
 LIMITATORE = "alimiter@limite=limit=0.891:level=disabled:latency=1"
+# Il filtro del tempo quando velocita' o tono sono cambiati (1.102.3, issue
+# 20): rubberband con il motore R3, che fa anche il tono, senza il
+# ricampionamento di mpv. scaletempo2 e' l'algoritmo WSOLA di Chromium,
+# pensato per il parlato: tiene il seguito naturale del suono finche' resta
+# entro 20 ms dal punto giusto, poi salta, e con la musica il passo ondeggia
+# (a 1,05 suona a velocita' normale per 0,7 secondi, poi salta di 35 ms).
+# Negli ascolti alla cieca di Gabriele del 6 ottobre 2026 scaletempo2 non ha
+# mai vinto: 0 a 3 contro rubberband e 0 a 2 contro atempo di FFmpeg, che
+# pero' sotto il tempo 0,5 (velocita' bassa e tono alto) sbaglia; ridurne
+# l'intervallo di ricerca era peggio. A velocita' e tono normali resta
+# scaletempo2, che li' non tocca l'audio: rubberband lo rielaborerebbe, e
+# costa l'11-15% di un nucleo in stereo, contro lo 0,5%. Con formant=shifted
+# il timbro si sposta con il tono, come faceva il ricampionamento: mpv parte
+# con le formanti conservate, e un la puro alzato di un'ottava usciva quasi
+# muto, come la musica dei SID e dei chip. rubberband aggiunge circa 40 ms di
+# attacco morbido all'inizio del brano e 50 di silenzio alla fine.
+FILTRO_DEL_TEMPO = "@tempo:rubberband"
 # La larghezza delle bande dell'equalizzatore, come Q: circa un'ottava e un
 # quarto, la distanza fra una banda e l'altra. Le bande vicine si sommano:
 # senza compenso tutte a +6 davano fino a +8,5 dB, tutte a +12 fino a +17,6
@@ -222,10 +243,12 @@ def guadagno_oltre_il_pieno(volume):
     return round(60 * math.log10(volume / VOLUME_PIENO), 3) if volume > VOLUME_PIENO else 0.0
 
 
-def catena_dei_filtri(bande, oltre=0.0):
+def catena_dei_filtri(bande, oltre=0.0, tono=None):
     """La stringa af per mpv: il preamplificatore, le sette bande
     dell'equalizzatore con i guadagni compensati delle bande date, in dB, i dB
-    oltre il volume 100 con il limitatore, se ce ne sono, e poi scaletempo2.
+    oltre il volume 100 con il limitatore, se ce ne sono, e poi il filtro del
+    tempo: scaletempo2 con tono None, a velocita' e tono normali; altrimenti
+    rubberband, con il tono dato in semitoni.
     L'equalizzatore viene prima: con scaletempo2 davanti mpv segnala un errore
     al primo cambio di velocita'. Le bande hanno la larghezza in Q (t=q): con
     le ottave (t=o) l'uscita e' tutta NaN sui file a 8000, 16000 e 32000 Hz.
@@ -237,7 +260,8 @@ def catena_dei_filtri(bande, oltre=0.0):
     filtri += [f"equalizer@b{i}=f={f}:t=q:w={Q_DELLE_BANDE}:g={g:g}:precision=f64" for i, (f, g) in enumerate(zip(valori.FREQUENZE_DELLE_BANDE, guadagni, strict=True))]
     if oltre > 0:
         filtri += [f"volume@oltre=volume={oltre:g}dB:precision=double", LIMITATORE]
-    return f"@eq:lavfi=[{','.join(filtri)}],scaletempo2"
+    tempo = "scaletempo2" if tono is None else f"{FILTRO_DEL_TEMPO}=formant=shifted:pitch-scale={2 ** (tono / 12):.12g}"
+    return f"@eq:lavfi=[{','.join(filtri)}],{tempo}"
 
 
 def _durata_da_mutagen(percorso):
@@ -1321,7 +1345,7 @@ class Motore:
             if dopo != prima:
                 # Oltre 100 al volo; passando il 100, in su o in giu', il
                 # limitatore entra o esce, e la catena si riscrive.
-                self._ritocca([("volume", f"{dopo:g}dB", "volume@oltre")] if prima and dopo else None)
+                self._ritocca([("eq", "volume", f"{dopo:g}dB", "volume@oltre")] if prima and dopo else None)
             self._applica_i_volumi()
 
     @property
@@ -1412,9 +1436,13 @@ class Motore:
     @velocita.setter
     def velocita(self, valore):
         with self._blocco:
+            prima = self._al_normale()
             self._velocita = float(_fra(valore, valori.VELOCITA_MINIMA, valori.VELOCITA_MASSIMA))
             for lettore in self._lettori:
                 lettore.imposta("speed", self._velocita)
+            if self._al_normale() != prima:
+                # Il filtro del tempo cambia: la catena si riscrive.
+                self._ritocca(None)
 
     @property
     def tono(self):
@@ -1426,9 +1454,16 @@ class Motore:
     @tono.setter
     def tono(self, valore):
         with self._blocco:
+            prima = self._al_normale()
             self._tono = int(_fra(round(valore), -valori.TONO_MASSIMO, valori.TONO_MASSIMO))
-            for lettore in self._lettori:
-                lettore.imposta("pitch", 2 ** (self._tono / 12))
+            if self._al_normale() != prima:
+                # Il filtro del tempo cambia: la catena si riscrive.
+                self._ritocca(None)
+            elif not prima:
+                # rubberband c'e' gia': il tono gli arriva al volo. La
+                # proprieta' pitch di mpv resta 1: il tono non passa piu' dal
+                # ricampionamento (1.102.3).
+                self._ritocca([("tempo", "set-pitch", f"{2 ** (self._tono / 12):.12g}", None)])
 
     @property
     def bande(self):
@@ -1467,14 +1502,15 @@ class Motore:
         # Con le bande compensate una banda cambiata sposta anche le altre, e
         # il preamplificatore: si riscrivono tutti i filtri.
         guadagni, preamplificatore = _filtri_dell_equalizzatore(tuple(self._bande))
-        comandi = [("g", f"{g:g}", f"equalizer@b{indice}") for indice, g in enumerate(guadagni)]
-        comandi.append(("volume", f"{preamplificatore:g}dB", "volume@pre"))
+        comandi = [("eq", "g", f"{g:g}", f"equalizer@b{indice}") for indice, g in enumerate(guadagni)]
+        comandi.append(("eq", "volume", f"{preamplificatore:g}dB", "volume@pre"))
         self._ritocca(comandi)
 
     def _ritocca(self, comandi):
         """Porta ai lettori i filtri cambiati: al volo con af-command, una
-        terna (comando, valore, filtro) per volta, oppure, con comandi None,
-        riscrivendo la catena."""
+        quaterna (etichetta, comando, valore, filtro) per volta, con il filtro
+        None per i filtri di mpv come rubberband, che non stanno dentro un
+        grafo lavfi; oppure, con comandi None, riscrivendo la catena."""
         for lettore in self._lettori:
             if lettore.percorso is None:
                 # Nessun brano: la catena si scrive prima del prossimo.
@@ -1482,8 +1518,9 @@ class Motore:
             if comandi is not None and lettore.pronto and lettore is not self._preparato:
                 # Al volo, senza scatti. Se il filtro non c'e' ancora, mpv
                 # risponde con un errore, e allora si riscrive la catena.
-                for comando, valore, filtro in comandi:
-                    lettore.comando("af-command", "eq", comando, valore, filtro, risposta=functools.partial(self._comando_fallito, lettore))
+                for etichetta, comando, valore, filtro in comandi:
+                    argomenti = ("af-command", etichetta, comando, valore) + ((filtro,) if filtro else ())
+                    lettore.comando(*argomenti, risposta=functools.partial(self._comando_fallito, lettore))
             else:
                 # Un brano che si sta aprendo, o il preparato in pausa con il
                 # suono gia' filtrato in anticipo: la catena intera.
@@ -1534,8 +1571,13 @@ class Motore:
 
     # Le parti interne, da chiamare con il lucchetto.
 
+    def _al_normale(self):
+        """Vero con velocita' e tono normali: li' il filtro del tempo e'
+        scaletempo2, altrimenti rubberband."""
+        return self._velocita == 1.0 and self._tono == 0
+
     def _catena(self):
-        return catena_dei_filtri(self._bande, guadagno_oltre_il_pieno(self._volume))
+        return catena_dei_filtri(self._bande, guadagno_oltre_il_pieno(self._volume), None if self._al_normale() else self._tono)
 
     def _altro(self, lettore):
         return self._lettori[1] if lettore is self._lettori[0] else self._lettori[0]

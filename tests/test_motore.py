@@ -185,6 +185,9 @@ def test_catena_dei_filtri():
     # Oltre il volume 100: il guadagno in piu' e il limitatore, in fondo.
     oltre = modulo.catena_dei_filtri([0] * 7, 6.229)
     assert oltre.endswith(f",volume@oltre=volume=6.229dB:precision=double,{modulo.LIMITATORE}],scaletempo2")
+    # Con velocita' o tono cambiati, in fondo rubberband con il tono suo.
+    assert modulo.catena_dei_filtri([0] * 7, tono=1).endswith("],@tempo:rubberband=formant=shifted:pitch-scale=1.05946309436")
+    assert modulo.catena_dei_filtri([0] * 7, tono=0).endswith("],@tempo:rubberband=formant=shifted:pitch-scale=1")
     with pytest.raises(ValueError):
         modulo.catena_dei_filtri([0] * 6)
 
@@ -240,9 +243,12 @@ def test_valori_nei_limiti_e_su_tutti_e_due_i_lettori(crea):
     m.dissolvenza = 0
     assert m.dissolvenza == 0.0
     # Le proprieta' arrivano a mpv in modo asincrono, su tutti e due i lettori.
-    attese = {"speed": 1.25, "pitch": 2 ** (2 / 12)}
     for lettore in m._lettori:
-        assert _aspetta(lambda lettore=lettore: all(abs(getattr(lettore.mpv, nome) - valore) < 1e-6 for nome, valore in attese.items()))
+        assert _aspetta(lambda lettore=lettore: abs(lettore.mpv.speed - 1.25) < 1e-6)
+    # Il tono lo fa rubberband, nella catena: la proprieta' pitch di mpv
+    # resta 1 (1.102.3).
+    assert all(lettore.mpv.pitch == 1 for lettore in m._lettori)
+    assert m._catena().endswith(f"],@tempo:rubberband=formant=shifted:pitch-scale={2 ** (2 / 12):.12g}")
     # Il preamplificatore sta nella catena, prima delle bande: il volume di
     # mpv non si tocca (1.102.2).
     assert m._catena().startswith(f"@eq:lavfi=[volume@pre=volume={modulo.preamplificazione(modulo.guadagni_compensati([12, 0, 0, 4, 0, 0, -12])):g}dB")
@@ -282,7 +288,8 @@ def test_velocita_cambia_la_durata_e_non_il_tono(crea, tmp_path):
     m.velocita = 1.5
     m.suona(seno)
     x = _uscito_alla_fine(m, uscita)
-    assert abs(len(x) / FREQUENZA - 2.0) < 0.05
+    # rubberband aggiunge circa 40 ms di attacco e 50 di silenzio in fondo.
+    assert 2.0 <= len(x) / FREQUENZA < 2.15
     assert abs(_frequenza_dominante(x) - 440) < 3
 
 
@@ -443,6 +450,84 @@ def test_il_limitatore_entra_e_esce_passando_il_cento(crea, tmp_path):
     assert m._catena().endswith(f"volume@oltre=volume={modulo.guadagno_oltre_il_pieno(150):g}dB:precision=double,{modulo.LIMITATORE}],scaletempo2")
     m.volume = 90
     assert _aspetta(lambda: "alimiter" not in str(lettore.mpv.af) and abs(lettore.mpv.volume - 90) < 1e-6)
+
+
+def test_il_filtro_del_tempo_cambia_lasciando_il_normale(crea, tmp_path):
+    rumore = _rumore(tmp_path / "rumore.wav", 3)
+    m = crea()
+    m.suona(rumore, in_pausa=True)
+    lettore = m._attivo
+    assert _aspetta(lambda: lettore.pronto)
+    assert "scaletempo2" in str(lettore.mpv.af) and "rubberband" not in str(lettore.mpv.af)
+    m.velocita = 1.05
+    assert _aspetta(lambda: "rubberband" in str(lettore.mpv.af) and "scaletempo2" not in str(lettore.mpv.af))
+    # Fra due velocita' diverse dal normale la catena non si riscrive.
+    scritta = lettore.af_scritto
+    m.velocita = 1.1
+    m.tono = 3
+    time.sleep(0.2)
+    assert lettore.af_scritto == scritta
+    m.tono = 0
+    m.velocita = 1.0
+    assert _aspetta(lambda: "scaletempo2" in str(lettore.mpv.af) and "rubberband" not in str(lettore.mpv.af))
+    m.tono = -2
+    # mpv elenca i parametri di rubberband come dizionario, non come testo.
+    assert _aspetta(lambda: f"{2 ** (-2 / 12):.12g}" in str(lettore.mpv.af))
+    m.tono = 0
+    assert _aspetta(lambda: "scaletempo2" in str(lettore.mpv.af) and "rubberband" not in str(lettore.mpv.af))
+
+
+def test_il_tono_lo_fa_rubberband(crea, tmp_path):
+    # Un'ottava su: il seno a 440 esce a 880, lungo uguale, e la proprieta'
+    # pitch di mpv resta 1.
+    seno = _seno(tmp_path / "la.wav", 2)
+    uscita, opzioni = _su_file(tmp_path)
+    m = crea(ao="pcm", opzioni_mpv=opzioni)
+    m.tono = 12
+    m.suona(seno)
+    x = _uscito_alla_fine(m, uscita)
+    assert abs(_frequenza_dominante(x[FREQUENZA // 2:-FREQUENZA // 2]) - 880) < 3
+    assert abs(len(x) / FREQUENZA - 2) < 0.2
+
+
+def test_velocita_bassa_e_tono_alto(crea, tmp_path):
+    # Meta' velocita' e un'ottava su: tempo 0,25 per chi fa il tono con il
+    # ricampionamento; rubberband li tiene separati. Due secondi ne durano
+    # quattro, e il la suona a 880.
+    seno = _seno(tmp_path / "la.wav", 2)
+    uscita, opzioni = _su_file(tmp_path)
+    m = crea(ao="pcm", opzioni_mpv=opzioni)
+    m.velocita = 0.5
+    m.tono = 12
+    m.suona(seno)
+    x = _uscito_alla_fine(m, uscita)
+    assert abs(len(x) / FREQUENZA - 4) < 0.3
+    assert abs(_frequenza_dominante(x[FREQUENZA // 2:-FREQUENZA // 2]) - 880) < 3
+
+
+def test_il_tono_cambia_al_volo(crea, tmp_path):
+    # Da +1 a +12 il tono arriva a rubberband con af-command, senza
+    # riscrivere la catena: il la esce a 880. Il suono gia' filtrato in pausa
+    # resta a +1: su ao=pcm circa un secondo e mezzo, sulla scheda il buffer
+    # d'uscita; si guardano gli ultimi due secondi.
+    seno = _seno(tmp_path / "la.wav", 6)
+    uscita, opzioni = _su_file(tmp_path)
+    m = crea(ao="pcm", opzioni_mpv=opzioni)
+    m.tono = 1
+    m.suona(seno, in_pausa=True)
+    lettore = m._attivo
+    assert _aspetta(lambda: lettore.pronto and "rubberband" in str(lettore.mpv.af))
+    # Appena aperto il brano mpv riapre l'uscita ancora un paio di volte, e a
+    # ogni riapertura il motore riscrive la catena se e' cambiata al volo: si
+    # aspetta che si assesti.
+    time.sleep(0.3)
+    scritta = lettore.af_scritto
+    m.tono = 12
+    time.sleep(0.2)
+    assert lettore.af_scritto == scritta
+    m.pausa(False)
+    x = _uscito_alla_fine(m, uscita)
+    assert abs(_frequenza_dominante(x[-3 * FREQUENZA:-FREQUENZA // 2]) - 880) < 3
 
 
 def test_oltre_cento_il_volume_cambia_al_volo(crea, tmp_path):
@@ -1204,7 +1289,8 @@ def test_tracce_e_sottotitoli_con_il_video_spento(avvisi, tmp_path):
     try:
         assert m.tracce() is None
         m.suona(str(video))
-        assert _aspetta(lambda: m.tracce() is not None) and caricati
+        # L'avviso del caricamento puo' arrivare un attimo dopo le tracce.
+        assert _aspetta(lambda: m.tracce() is not None and caricati)
         tracce = m.tracce()
         assert tracce["video"] is True and len(tracce["audio"]) == 1 and len(tracce["sub"]) == 1
         assert tracce["sub"][0].get("external") and m.indice_attivo() == 0
