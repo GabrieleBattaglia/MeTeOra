@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni.
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -981,8 +981,6 @@ class Finestra(wx.Frame):
         if prima != version.VERSION:
             self.impostazioni["versione"] = version.VERSION
             self._salva_impostazioni()
-        # Chiudendo per farsi aggiornare non si invita alla donazione.
-        self._per_aggiornare = False
         # I tasti rapidi a carattere, che Maiuscolo con F12 spegne e riaccende:
         # a ogni avvio sono accesi (Gabriele, 1.86.0).
         self._tasti_rapidi = True
@@ -6810,21 +6808,21 @@ class Finestra(wx.Frame):
         wx.MessageBox(testo, "Aggiornamento di MeTeOra", wx.OK | wx.ICON_INFORMATION, self)
 
     def chiudi_per_aggiornare(self):
-        """GBUtils sta per sostituire MeTeOra: si chiude salvando tutto, senza
-        l'invito alla donazione."""
-        self._per_aggiornare = True
+        """GBUtils sta per sostituire MeTeOra: si chiude salvando tutto."""
         self.Close(force=True)
 
-    # L'invito a offrire un caffe' (Gabriele, 4 ottobre 2026, 1.75.0).
+    # L'invito a offrire un caffe' (Gabriele, 4 ottobre 2026, 1.75.0): dalla
+    # 1.102.4 solo dalla voce delle impostazioni, non piu' alla chiusura
+    # (Gabriele, 6 ottobre 2026).
 
-    def _invito_alla_donazione(self, genitore, probabilita=20):
-        """Il testo lo da' Donazione di GBUtils, o None se il sorteggio non
-        passa: una volta su cinque, se non si chiede altro. La finestra e'
+    def _invito_alla_donazione(self, genitore):
+        """Il testo lo da' Donazione di GBUtils, che con la probabilita' piena
+        lo da' sempre; None resta per un testo che non arriva. La finestra e'
         come quella di Tornello, con il suo suono. Restituisce come si e'
         chiusa, wx.ID_YES se si e' aperto PayPal, o None se non si e' aperta."""
         from GBUtils import Donazione
 
-        testo = Donazione(lang="it", probabilita=probabilita, stampa=False)
+        testo = Donazione(lang="it", probabilita=100, stampa=False)
         if testo is None:
             return None
         self._suono("donazione")
@@ -6864,9 +6862,9 @@ class Finestra(wx.Frame):
             associazioni.apri_le_app_predefinite()
 
     def _dona(self, genitore):
-        """La voce Dona per questo progetto delle impostazioni: l'invito
-        compare sempre."""
-        if self._invito_alla_donazione(genitore, probabilita=100) == wx.ID_YES:
+        """La voce Dona per questo progetto delle impostazioni, l'unica strada
+        per l'invito: compare sempre."""
+        if self._invito_alla_donazione(genitore) == wx.ID_YES:
             self.scrivi("PayPal si apre nel browser: grazie di cuore!")
 
     # La finestra dei marcatori e l'importazione, piano 5.8.5 e 5.8.7.
@@ -7835,16 +7833,6 @@ class Finestra(wx.Frame):
             # chiudere (tappa 9).
             suoni.suona("errore", self.impostazioni["volume_effetti"])
             wx.MessageBox(f"MeTeOra non è riuscito a salvare {'; '.join(non_salvati)}.", "MeTeOra, uscita", wx.OK | wx.ICON_ERROR, self)
-        # L'invito a offrire un caffe', una volta su cinque, per ultimo:
-        # tutto e' gia' salvato e la musica e' ferma. Un guasto dell'invito
-        # non deve impedire l'uscita (1.75.0). Non quando ci si chiude per
-        # farsi aggiornare: lo script che sostituisce MeTeOra aspetta la sua
-        # chiusura al massimo trenta secondi (1.84.0).
-        try:
-            if not self._per_aggiornare:
-                self._invito_alla_donazione(self)
-        except Exception:  # noqa: BLE001 - l'uscita viene prima dell'invito
-            traceback.print_exc()
         # Il suono dell'uscita si ascolta intero prima che il processo finisca.
         suoni.suona("uscita", self.impostazioni["volume_effetti"], sync=True)
         evento.Skip()

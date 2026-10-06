@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.102.4] - 2026-10-06
+
+- L'invito a offrire un caffè non compare più alla chiusura, dove usciva una volta su cinque: resta soltanto la voce Dona per questo progetto, nelle impostazioni, che lo apre sempre (Gabriele, 6 ottobre 2026, per tutti i suoi programmi con una finestra).
+
 ## [1.102.3] - 2026-10-06
 
 - Correzione, con velocità o tono cambiati il passo ondeggiava (issue 20, segnalata da Andrea). Velocità e tono passavano per scaletempo2, l'algoritmo WSOLA di Chromium pensato per il parlato: tiene il seguito naturale del suono finché resta entro 20 ms dal punto giusto, poi salta, e a 1,05 la musica andava a velocità normale per circa 0,7 secondi e poi saltava di 35 ms; il tono, fatto da mpv con il ricampionamento e scaletempo2 alla velocità inversa, ondeggiava allo stesso modo. Due ascolti alla cieca di Gabriele, con le coppie di controllo sempre giudicate uguali: accorciare l'intervallo di ricerca di scaletempo2 suonava peggio, e contro filtri di natura diversa scaletempo2 non ha mai vinto, 0 a 3 contro rubberband e 0 a 2 contro atempo di FFmpeg, che però sotto il tempo 0,5, con velocità bassa e tono alto, sbaglia. Ora, quando velocità o tono sono cambiati, il filtro del tempo è rubberband con il motore R3, che fa anche il tono, senza il ricampionamento; a velocità e tono normali resta scaletempo2, che lì lascia l'audio identico all'originale. Lasciando il normale o tornandoci la catena dei filtri si riscrive, con un buco di qualche centesimo di secondo; fra due velocità o due toni diversi dal normale niente si riscrive, e il tono arriva a rubberband al volo. rubberband costa l'11-15% di un nucleo in stereo, solo mentre velocità o tono sono cambiati; aggiunge circa 40 ms di attacco morbido all'inizio di ogni brano e 50 di silenzio alla fine. Il timbro si sposta con il tono, come faceva il ricampionamento (formant=shifted): con le formanti conservate, come mpv lo avvia, un la puro alzato di un'ottava usciva quasi muto, e così la musica dei SID e dei chip.

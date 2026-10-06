@@ -4448,24 +4448,15 @@ def _donazione(monkeypatch, esito):
     return chiamate
 
 
-def test_alla_chiusura_l_invito_a_offrire_un_caffe(finestra, monkeypatch, suoni_annotati):
-    # 1.75.0, Gabriele: alla chiusura una volta su cinque, per ultimo, con
-    # il suo suono, prima di quello dell'uscita.
+def test_alla_chiusura_nessun_invito_a_offrire_un_caffe(finestra, monkeypatch, suoni_annotati):
+    # 1.102.4, Gabriele: l'invito resta solo come voce delle impostazioni;
+    # alla chiusura non si sorteggia nemmeno.
     chiamate = _donazione(monkeypatch, "Offrimi un caffè.")
     invito = _InvitoFinto()
     monkeypatch.setattr(modulo, "DialogoDonazione", invito)
     finestra._alla_chiusura(types.SimpleNamespace(Skip=lambda: None))
-    assert chiamate == [{"lang": "it", "probabilita": 20, "stampa": False}]
-    assert invito.testi == ["Offrimi un caffè."] and suoni_annotati[-2:] == ["donazione", "uscita"]
-
-
-def test_alla_chiusura_senza_invito_o_con_un_guasto(finestra, monkeypatch, suoni_annotati):
-    invito = _InvitoFinto()
-    monkeypatch.setattr(modulo, "DialogoDonazione", invito)
-    _donazione(monkeypatch, RuntimeError("guasto finto"))
-    finestra._alla_chiusura(types.SimpleNamespace(Skip=lambda: None))
-    # Il guasto non ferma l'uscita, e senza testo la finestra non si apre.
-    assert invito.testi == [] and suoni_annotati[-1] == "uscita" and "donazione" not in suoni_annotati
+    assert chiamate == [] and invito.testi == []
+    assert suoni_annotati[-1] == "uscita" and "donazione" not in suoni_annotati
 
 
 def test_la_voce_dona_per_questo_progetto(finestra, monkeypatch, suoni_annotati):
@@ -5339,7 +5330,7 @@ def test_la_durata_vera_di_musepack_e_dsf(finestra, monkeypatch, tmp_path):
 
 
 def test_l_aggiornamento_nella_finestra(finestra, monkeypatch, suoni_annotati):
-    # 1.84.0: la proposta, l'avanzamento e la chiusura senza l'invito alla donazione.
+    # 1.84.0: la proposta, l'avanzamento e la chiusura, senza l'invito alla donazione.
     risposte = [wx.ID_NO, wx.ID_YES]
     aperte = []
 
@@ -5365,7 +5356,7 @@ def test_l_aggiornamento_nella_finestra(finestra, monkeypatch, suoni_annotati):
     finestra.avanzamento_dell_aggiornamento(60, 100)
     assert _ultima(finestra) == "Aggiornamento: 60%." and not any(r.startswith("Aggiornamento: 30%") for r in finestra._righe)
     inviti = []
-    monkeypatch.setattr(finestra, "_invito_alla_donazione", lambda genitore, probabilita=20: inviti.append(probabilita))
+    monkeypatch.setattr(finestra, "_invito_alla_donazione", lambda genitore: inviti.append(genitore))
     finestra.chiudi_per_aggiornare()
     assert finestra.chiusa and inviti == []
 

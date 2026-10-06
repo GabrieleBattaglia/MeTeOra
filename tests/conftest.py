@@ -94,9 +94,10 @@ def browser_vietato(monkeypatch):
 
 @pytest.fixture(autouse=True)
 def donazione_muta(monkeypatch):
-    """Donazione di GBUtils non sorteggia mai: alla chiusura della finestra
-    l'invito comparirebbe una volta su cinque, con una finestra modale che
-    fermerebbe la suite. Le prove dell'invito la sostituiscono a loro volta."""
+    """Donazione di GBUtils non da' mai il testo: l'invito aprirebbe una
+    finestra modale che fermerebbe la suite. Dalla 1.102.4 lo apre solo la
+    voce delle impostazioni; le prove dell'invito la sostituiscono a loro
+    volta."""
     import GBUtils
 
     monkeypatch.setattr(GBUtils, "Donazione", lambda *argomenti, **opzioni: None)
