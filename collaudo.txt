@@ -1,1 +1,0 @@
-Collaudo di MeTeOra 1.102.3, con NVDA: velocità e tono cambiati con rubberband (issue 20). Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta. Scrivi le note sulla riga della voce; le voci superate si cancellano.
