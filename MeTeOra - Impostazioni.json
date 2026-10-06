@@ -1,5 +1,5 @@
 {
- "volume": 127,
+ "volume": 166,
  "passo_volume": 3,
  "passo_indietro": 3.0,
  "passo_avanti": 30.0,
@@ -19,7 +19,7 @@
  "anticipo_karaoke": 200,
  "celle_braille": 40,
  "lettura_minima": 2000,
- "versione": "1.99.0",
+ "versione": "1.102.2",
  "impressi": "al_volo",
  "impressi_scelti": false,
  "percorsi_di_rete": [
@@ -27,12 +27,12 @@
  ],
  "banco_midi": "E:\\VstPlugins\\SF2 Instruments\\SGM-V2.01.sf2",
  "ripresa": {
-  "percorso": "E:\\13 ilbarzellettiere\\P\\001 party\\002 l'uomo raffreddato.mp3",
+  "percorso": "E:\\Audio\\MIDI\\cartoni\\L_uomo_tigre.kar",
   "sottobrano": null,
-  "numero": null,
+  "numero": 1,
   "posizione": 0,
   "tipo": "cartella",
-  "cartella": "E:\\13 ilbarzellettiere\\P\\001 party"
+  "cartella": "E:\\Audio\\MIDI\\cartoni"
  },
  "righe_della_console": 2000,
  "caratteri": {},
