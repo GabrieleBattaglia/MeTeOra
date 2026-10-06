@@ -1,10 +1,1 @@
 Collaudo di MeTeOra 1.102.3, con NVDA: velocità e tono cambiati con rubberband (issue 20). Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta. Scrivi le note sulla riga della voce; le voci superate si cancellano.
-Con un brano ritmato, come Happy Nation, premi D una volta: a 1,05 il passo deve essere regolare, senza l'ondeggiamento di prima.
-Nel momento in cui premi D dalla velocità normale si può sentire un piccolo buco: dimmi se disturba.
-Premi ancora D, poi A: fra una velocità e l'altra nessun buco.
-S riporta alla velocità normale, con un piccolo buco, e da lì il suono è di nuovo identico all'originale.
-H alza il tono di un semitono: stesso passo regolare, e la voce si sposta con il timbro, come prima.
-Con il tono cambiato, H e F di seguito: nessun buco fra un tono e l'altro; G torna al normale, con il piccolo buco.
-Velocità al minimo con A e tono al massimo con H: il brano rallenta della metà e sale di un'ottava, senza stranezze.
-Un SID o un MIDI con il tono a +12: il volume resta quello di sempre.
-Con la velocità cambiata, il passaggio da un brano al seguente, con e senza dissolvenza: ogni brano comincia con qualche centesimo di secondo più morbido, dimmi se si sente.
