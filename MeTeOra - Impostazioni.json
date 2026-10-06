@@ -19,7 +19,7 @@
  "anticipo_karaoke": 200,
  "celle_braille": 40,
  "lettura_minima": 2000,
- "versione": "1.102.2",
+ "versione": "1.102.3",
  "impressi": "al_volo",
  "impressi_scelti": false,
  "percorsi_di_rete": [
@@ -27,12 +27,11 @@
  ],
  "banco_midi": "E:\\VstPlugins\\SF2 Instruments\\SGM-V2.01.sf2",
  "ripresa": {
-  "percorso": "E:\\Audio\\MIDI\\cartoni\\L_uomo_tigre.kar",
+  "percorso": "E:\\Music\\Ace Of Base\\The Sign\\04 Happy Nation.m4a",
   "sottobrano": null,
-  "numero": 1,
+  "numero": 13,
   "posizione": 0,
-  "tipo": "cartella",
-  "cartella": "E:\\Audio\\MIDI\\cartoni"
+  "tipo": "file"
  },
  "righe_della_console": 2000,
  "caratteri": {},
