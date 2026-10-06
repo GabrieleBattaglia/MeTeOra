@@ -1,1 +1,0 @@
-Collaudo di MeTeOra 1.102.2, con NVDA: volume oltre 100 con il limitatore, bande compensate, preamplificatore, volume di partenza 100, ricampionamento con soxr. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta. Scrivi le note sulla riga della voce; le voci superate si cancellano.
