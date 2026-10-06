@@ -1,6 +1,6 @@
 # MeTeOra, il motore di riproduzione: libmpv, e i SID in tempo reale.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7). Nella 1.65.0 i MIDI resi da FluidSynth (tappa 8). Nella 1.66.0 la musica delle console con libgme. Nella 1.67.0 il file lasciato o rinominato per Rinomina file. Nella 1.82.0 il testo del karaoke come traccia in memoria, senza i .lrc caricati da mpv, e due sottotitoli uguali di fila detti tutti e due. Nella 1.83.0 il tempo che resta al sottotitolo, per la barra braille a blocchi. Nella 1.83.3 la durata vera di Musepack e DSF, da mutagen. Nella 1.93.0 i capitoli che libmpv vede. Nella 1.95.0 l'attenuazione, per la sfumatura del timer di spegnimento. Nella 1.96.0 il volume uniforme con ReplayGain. Nella 1.96.11 suona con a_volume_pieno.
+# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7). Nella 1.65.0 i MIDI resi da FluidSynth (tappa 8). Nella 1.66.0 la musica delle console con libgme. Nella 1.67.0 il file lasciato o rinominato per Rinomina file. Nella 1.82.0 il testo del karaoke come traccia in memoria, senza i .lrc caricati da mpv, e due sottotitoli uguali di fila detti tutti e due. Nella 1.83.0 il tempo che resta al sottotitolo, per la barra braille a blocchi. Nella 1.83.3 la durata vera di Musepack e DSF, da mutagen. Nella 1.93.0 i capitoli che libmpv vede. Nella 1.95.0 l'attenuazione, per la sfumatura del timer di spegnimento. Nella 1.96.0 il volume uniforme con ReplayGain. Nella 1.96.11 suona con a_volume_pieno. Nella 1.102.2 (issue 22) il ricampionamento con soxr, le bande compensate, il preamplificatore nella catena e il volume oltre 100 con il limitatore.
 
 """Due lettori libmpv per tutti i formati.
 
@@ -24,9 +24,12 @@ se', e non li rilegge da mpv. Si leggono da mpv solo posizione e durata,
 e mai da un lettore che sta finendo.
 
 Velocita', tono ed equalizzatore valgono per tutti e due i lettori e per
-tutti i brani. La catena dei filtri e' fissa: l'equalizzatore a sette bande
-e poi scaletempo2, che tiene fermo il tono quando cambia la velocita' e
-non lascia buchi tornando al normale. Il guadagno di una banda cambiato al
+tutti i brani. La catena dei filtri e' fissa: il preamplificatore,
+l'equalizzatore a sette bande, sopra il volume 100 il guadagno in piu' con il
+limitatore, e poi scaletempo2, che tiene fermo il tono quando cambia la
+velocita' e non lascia buchi tornando al normale. Con le bande a zero, la
+velocita' normale e il volume fino a 100 la catena lascia l'audio identico,
+campione per campione. Il guadagno di una banda cambiato al
 volo (af-command) mpv lo perde a ogni seek, a ogni brano nuovo e al cambio
 di scheda: per questo la catena si riscrive, con i guadagni di adesso,
 prima di ognuno di questi passi. Lo perde anche quando riapre l'uscita da
@@ -64,12 +67,32 @@ import valori
 # i lettori di SID.
 DURATA_SID_PREDEFINITA = 180.0
 # Oltre il 100 il volume amplifica, per gli audio registrati troppo bassi.
+# mpv riceve al massimo 100; il di piu' lo da' la catena dei filtri, con il
+# limitatore dopo (1.102.2).
 VOLUME_MASSIMO = 300
+VOLUME_PIENO = 100
+# Il limitatore del volume oltre 100: tiene i picchi a -1 dBFS, lasciando
+# spazio a quelli fra un campione e l'altro che il ricampionamento fa
+# nascere; latency=1 ne toglie il ritardo. Misurato il 6 ottobre 2026: sui
+# brani gia' forti, per esempio a -9 LUFS, +12 dB di volume diventano +2,5 dB
+# veri senza saturare, dove tosando sarebbero stati il 16% dei campioni.
+LIMITATORE = "alimiter@limite=limit=0.891:level=disabled:latency=1"
 # La larghezza delle bande dell'equalizzatore, come Q: circa un'ottava e un
-# quarto, la distanza fra una banda e l'altra. Misurato su rumore bianco:
-# con tutte le bande a +6 la risposta fra 60 e 12000 Hz sta fra +6,3 e +8,5,
-# con tutte a +12 fra +12,7 e +17,5; nessun buco fra una banda e l'altra.
+# quarto, la distanza fra una banda e l'altra. Le bande vicine si sommano:
+# senza compenso tutte a +6 davano fino a +8,5 dB, tutte a +12 fino a +17,6
+# (impulso nella catena vera, 6 ottobre 2026); per questo i guadagni dei
+# filtri sono compensati, vedi guadagni_compensati.
 Q_DELLE_BANDE = 1.07
+# La frequenza su cui si calcolano i guadagni compensati e il
+# preamplificatore: a 44,1 kHz la curva differisce di centesimi di dB, e solo
+# vicino alla banda dei 12000 Hz.
+FREQUENZA_DEL_CALCOLO = 48000
+# I giri di correzione dei guadagni compensati: ogni banda pesa sulle vicine
+# per meno di un quinto, e una decina di giri bastano al decimillesimo.
+GIRI_DEL_COMPENSO = 40
+# Dove si cerca il punto piu' alto della curva: 200 frequenze da 20 Hz a
+# 20 kHz, a passi uguali sulla scala logaritmica, e i centri delle bande.
+_GRIGLIA_DELLA_CURVA = tuple(sorted({20 * 1000 ** (i / 199) for i in range(200)} | set(valori.FREQUENZE_DELLE_BANDE)))
 # Quanto prima della fine del brano, oltre alla durata della dissolvenza, si
 # chiede alla finestra il brano seguente: un SID impiega fino a mezzo secondo
 # per partire. Secondi veri, non del brano: con la velocita' cambiano.
@@ -87,9 +110,18 @@ _FINE_PER_ERRORE = mpv.MpvEventEndFile.ERROR
 # statistiche...) a MeTeOra non servono, e caricandoli LuaJIT solleva
 # all'avvio eccezioni di Windows che gestisce da se', ma che il faulthandler
 # di Python stampa come errori fatali.
+# Il ricampionamento (1.102.2, issue 22): in WASAPI condiviso Windows accetta
+# solo la frequenza del suo mixer, di solito 48 kHz, e mpv ricampiona da se'.
+# Il suo predefinito, swresample a 16 punti con il taglio a 0,80, toglieva
+# gli acuti (-2,9 dB a 18 kHz, -9 a 20); soxr con questo taglio e' piatto
+# fino a 21 kHz in tutte e due le direzioni, con distorsione e rumore a
+# -148 dB e i ripiegamenti a -151, e costa un quarto in piu' di un calcolo
+# gia' trascurabile. Il taglio va scritto: senza, mpv passa a soxr il suo.
+RICAMPIONAMENTO = "resampler=soxr,precision=28,cutoff=0.95"
 OPZIONI_DI_BASE = {"vo": "null", "video": "no", "config": False, "ytdl": False, "input_default_bindings": False, "osc": False,
     "load_stats_overlay": False, "load_console": False, "load_auto_profiles": False, "load_select": False, "load_commands": False,
-    "load_positioning": False, "load_context_menu": False, "input_vo_keyboard": False, "input_cursor": False}
+    "load_positioning": False, "load_context_menu": False, "input_vo_keyboard": False, "input_cursor": False,
+    "audio_swresample_o": RICAMPIONAMENTO}
 # I formati di cui libmpv stima la durata, dai pacchetti o dalla dimensione
 # del file: quella vera la sa mutagen. Prova del 4 ottobre 2026 sui campioni
 # di FFmpeg: i Musepack SV8 piu' corti fino a un secondo e mezzo, che con la
@@ -129,15 +161,83 @@ def sottobrano_risolto(percorso, sottobrano=None):
     return min(sottobrano or info["iniziale"] or 1, max(1, info["sottobrani"]))
 
 
-def catena_dei_filtri(bande):
-    """La stringa af per mpv: le sette bande dell'equalizzatore con i guadagni
-    dati, in dB, e poi scaletempo2. L'equalizzatore viene prima: con
-    scaletempo2 davanti mpv segnala un errore al primo cambio di velocita'.
-    Le bande hanno la larghezza in Q (t=q): con le ottave (t=o) l'uscita e'
-    tutta NaN sui file a 8000, 16000 e 32000 Hz. precision=f64 evita la
-    saturazione dentro il filtro sui file a 16 bit."""
-    filtri = ",".join(f"equalizer@b{i}=f={f}:t=q:w={Q_DELLE_BANDE}:g={g:g}:precision=f64" for i, (f, g) in enumerate(zip(valori.FREQUENZE_DELLE_BANDE, bande, strict=True)))
-    return f"@eq:lavfi=[{filtri}],scaletempo2"
+def _risposta_della_banda(frequenza, centro, guadagno):
+    """Il guadagno in dB a frequenza di una banda a campana, con le formule
+    dell'equalizer di FFmpeg con la larghezza in Q (quelle di RBJ). Il
+    modello coincide con la catena vera al centesimo di dB."""
+    if not guadagno:
+        return 0.0
+    a = 10 ** (guadagno / 40)
+    w0 = 2 * math.pi * centro / FREQUENZA_DEL_CALCOLO
+    alfa = math.sin(w0) / (2 * Q_DELLE_BANDE)
+    coseno = math.cos(w0)
+    z1 = complex(math.cos(2 * math.pi * frequenza / FREQUENZA_DEL_CALCOLO), -math.sin(2 * math.pi * frequenza / FREQUENZA_DEL_CALCOLO))
+    z2 = z1 * z1
+    sopra = (1 + alfa * a) - 2 * coseno * z1 + (1 - alfa * a) * z2
+    sotto = (1 + alfa / a) - 2 * coseno * z1 + (1 - alfa / a) * z2
+    return 20 * math.log10(abs(sopra) / abs(sotto))
+
+
+def _curva(frequenza, guadagni):
+    """Il guadagno in dB a frequenza di tutte le bande insieme."""
+    return sum(_risposta_della_banda(frequenza, centro, g) for centro, g in zip(valori.FREQUENZE_DELLE_BANDE, guadagni, strict=True))
+
+
+def guadagni_compensati(bande):
+    """I guadagni da dare ai filtri perche' la curva intera, al centro di ogni
+    banda, valga quanto la banda scritta (1.102.2). Le bande si sovrappongono:
+    senza compenso tutte a +6 davano fino a +8,5 dB, e una banda sola alzava le
+    vicine di 1 dB su 6. A ogni giro ogni filtro si corregge di quanto manca al
+    suo centro; ogni banda pesa sulle vicine per meno di un quinto, e il conto
+    converge in pochi giri. Con le bande a zero restano zero."""
+    guadagni = [float(b) for b in bande]
+    for _ in range(GIRI_DEL_COMPENSO):
+        errori = [b - _curva(centro, guadagni) for centro, b in zip(valori.FREQUENZE_DELLE_BANDE, bande, strict=True)]
+        if max(abs(e) for e in errori) < 1e-4:
+            break
+        guadagni = [g + e for g, e in zip(guadagni, errori, strict=True)]
+    return [round(g, 3) + 0.0 for g in guadagni]
+
+
+def preamplificazione(guadagni):
+    """Il guadagno in dB, zero o negativo, che porta il punto piu' alto della
+    curva dei filtri a 0 dB: con le bande alzate il suono non satura. Misurato
+    contro la catena vera al centesimo di dB (1.102.2)."""
+    massimo = max(_curva(f, guadagni) for f in _GRIGLIA_DELLA_CURVA)
+    return -round(massimo, 3) if massimo > 0 else 0.0
+
+
+@functools.lru_cache(maxsize=32)
+def _filtri_dell_equalizzatore(bande):
+    """I guadagni compensati e il preamplificatore delle bande date, in una
+    tupla: il conto costa un paio di millisecondi, e la catena si riscrive a
+    ogni salto e a ogni brano con le stesse bande."""
+    guadagni = guadagni_compensati(bande)
+    return tuple(guadagni), preamplificazione(guadagni)
+
+
+def guadagno_oltre_il_pieno(volume):
+    """I dB in piu' di un volume oltre 100, con la legge cubica di mpv; 0 fino
+    a 100."""
+    return round(60 * math.log10(volume / VOLUME_PIENO), 3) if volume > VOLUME_PIENO else 0.0
+
+
+def catena_dei_filtri(bande, oltre=0.0):
+    """La stringa af per mpv: il preamplificatore, le sette bande
+    dell'equalizzatore con i guadagni compensati delle bande date, in dB, i dB
+    oltre il volume 100 con il limitatore, se ce ne sono, e poi scaletempo2.
+    L'equalizzatore viene prima: con scaletempo2 davanti mpv segnala un errore
+    al primo cambio di velocita'. Le bande hanno la larghezza in Q (t=q): con
+    le ottave (t=o) l'uscita e' tutta NaN sui file a 8000, 16000 e 32000 Hz.
+    precision=f64 evita la saturazione dentro il filtro sui file a 16 bit.
+    Con le bande a zero e niente oltre 100 l'audio esce identico; il
+    limitatore no, e per questo c'e' solo oltre 100."""
+    guadagni, preamplificatore = _filtri_dell_equalizzatore(tuple(bande))
+    filtri = [f"volume@pre=volume={preamplificatore:g}dB:precision=double"]
+    filtri += [f"equalizer@b{i}=f={f}:t=q:w={Q_DELLE_BANDE}:g={g:g}:precision=f64" for i, (f, g) in enumerate(zip(valori.FREQUENZE_DELLE_BANDE, guadagni, strict=True))]
+    if oltre > 0:
+        filtri += [f"volume@oltre=volume={oltre:g}dB:precision=double", LIMITATORE]
+    return f"@eq:lavfi=[{','.join(filtri)}],scaletempo2"
 
 
 def _durata_da_mutagen(percorso):
@@ -492,7 +592,7 @@ class Motore:
         lettori = []
         try:
             for _ in range(2):
-                lettori.append(_Lettore(self, ao, self._volume, catena_dei_filtri(self._bande), opzioni_mpv or {}))
+                lettori.append(_Lettore(self, ao, self._volume_attenuato(), self._catena(), opzioni_mpv or {}))
         except Exception:
             # Un lettore con il protocollo registrato e mai chiuso manda
             # Python in crash all'uscita.
@@ -1215,7 +1315,13 @@ class Motore:
     @volume.setter
     def volume(self, valore):
         with self._blocco:
+            prima = guadagno_oltre_il_pieno(self._volume)
             self._volume = _fra(valore, 0, VOLUME_MASSIMO)
+            dopo = guadagno_oltre_il_pieno(self._volume)
+            if dopo != prima:
+                # Oltre 100 al volo; passando il 100, in su o in giu', il
+                # limitatore entra o esce, e la catena si riscrive.
+                self._ritocca([("volume", f"{dopo:g}dB", "volume@oltre")] if prima and dopo else None)
             self._applica_i_volumi()
 
     @property
@@ -1231,8 +1337,9 @@ class Motore:
             self._applica_i_volumi()
 
     def _volume_attenuato(self):
-        # La legge del volume di mpv e' cubica: vedi _applica_i_volumi.
-        return self._volume * self._attenuazione ** (1 / 3)
+        # La legge del volume di mpv e' cubica: vedi _applica_i_volumi. A mpv
+        # va al massimo 100: il di piu' lo da' la catena, con il limitatore.
+        return min(self._volume, VOLUME_PIENO) * self._attenuazione ** (1 / 3)
 
     @property
     def replaygain(self):
@@ -1336,31 +1443,47 @@ class Motore:
         if len(guadagni) != len(valori.FREQUENZE_DELLE_BANDE):
             raise ValueError(f"servono {len(valori.FREQUENZE_DELLE_BANDE)} bande, non {len(guadagni)}")
         with self._blocco:
-            for indice, valore in enumerate(guadagni):
-                self._metti_la_banda(indice, valore)
-            self._applica_il_guadagno()
+            cambiate = [self._metti_la_banda(indice, valore) for indice, valore in enumerate(guadagni)]
+            if any(cambiate):
+                self._ritocca_le_bande()
 
     def imposta_banda(self, indice, db):
         """Il guadagno di una banda, da 0 (60 Hz) a 6 (12000 Hz), in dB."""
         if not 0 <= indice < len(valori.FREQUENZE_DELLE_BANDE):
             raise IndexError(f"la banda {indice} non c'e'")
         with self._blocco:
-            self._metti_la_banda(indice, db)
-            self._applica_il_guadagno()
+            if self._metti_la_banda(indice, db):
+                self._ritocca_le_bande()
 
     def _metti_la_banda(self, indice, db):
+        """Vero se la banda cambia."""
         db = _fra(db, -valori.GUADAGNO_MASSIMO, valori.GUADAGNO_MASSIMO)
         if db == self._bande[indice]:
-            return
+            return False
         self._bande[indice] = db
+        return True
+
+    def _ritocca_le_bande(self):
+        # Con le bande compensate una banda cambiata sposta anche le altre, e
+        # il preamplificatore: si riscrivono tutti i filtri.
+        guadagni, preamplificatore = _filtri_dell_equalizzatore(tuple(self._bande))
+        comandi = [("g", f"{g:g}", f"equalizer@b{indice}") for indice, g in enumerate(guadagni)]
+        comandi.append(("volume", f"{preamplificatore:g}dB", "volume@pre"))
+        self._ritocca(comandi)
+
+    def _ritocca(self, comandi):
+        """Porta ai lettori i filtri cambiati: al volo con af-command, una
+        terna (comando, valore, filtro) per volta, oppure, con comandi None,
+        riscrivendo la catena."""
         for lettore in self._lettori:
             if lettore.percorso is None:
                 # Nessun brano: la catena si scrive prima del prossimo.
                 continue
-            if lettore.pronto and lettore is not self._preparato:
+            if comandi is not None and lettore.pronto and lettore is not self._preparato:
                 # Al volo, senza scatti. Se il filtro non c'e' ancora, mpv
                 # risponde con un errore, e allora si riscrive la catena.
-                lettore.comando("af-command", "eq", "g", f"{db:g}", f"equalizer@b{indice}", risposta=functools.partial(self._comando_fallito, lettore))
+                for comando, valore, filtro in comandi:
+                    lettore.comando("af-command", "eq", comando, valore, filtro, risposta=functools.partial(self._comando_fallito, lettore))
             else:
                 # Un brano che si sta aprendo, o il preparato in pausa con il
                 # suono gia' filtrato in anticipo: la catena intera.
@@ -1372,17 +1495,6 @@ class Motore:
         with self._blocco:
             if not self._chiuso and lettore.percorso is not None:
                 lettore.imposta("af", self._catena())
-
-    def _applica_il_guadagno(self):
-        # Contro la saturazione: il volume scende quanto la banda piu' alzata.
-        # Con una banda sola alzata il suono non satura; le bande pero' si
-        # sovrappongono, e con piu' bande vicine alzate, o tutte, la risposta
-        # sale fino a circa 5,6 dB oltre: dal volume 80 o 90 in su conviene
-        # abbassare il volume (decisione di Gabriele, 1 ottobre 2026: il
-        # calcolo resta questo).
-        guadagno = -max(0, *self._bande)
-        for lettore in self._lettori:
-            lettore.imposta("volume-gain", guadagno)
 
     @property
     def dissolvenza(self):
@@ -1423,7 +1535,7 @@ class Motore:
     # Le parti interne, da chiamare con il lucchetto.
 
     def _catena(self):
-        return catena_dei_filtri(self._bande)
+        return catena_dei_filtri(self._bande, guadagno_oltre_il_pieno(self._volume))
 
     def _altro(self, lettore):
         return self._lettori[1] if lettore is self._lettori[0] else self._lettori[0]

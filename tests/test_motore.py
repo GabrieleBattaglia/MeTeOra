@@ -166,15 +166,50 @@ def _campiona(m, secondi):
 # La catena dei filtri e i limiti.
 
 def test_catena_dei_filtri():
+    # A zero: il preamplificatore a 0 dB e le bande a 0, niente limitatore.
+    piatta = modulo.catena_dei_filtri([0] * 7)
+    filtri = piatta[len("@eq:lavfi=["):-len("],scaletempo2")].split(",")
+    assert filtri[0] == "volume@pre=volume=0dB:precision=double"
+    assert filtri[1] == f"equalizer@b0=f=60:t=q:w={modulo.Q_DELLE_BANDE}:g=0:precision=f64"
+    assert filtri[7] == f"equalizer@b6=f=12000:t=q:w={modulo.Q_DELLE_BANDE}:g=0:precision=f64"
+    assert len(filtri) == 8 and "alimiter" not in piatta and "t=o" not in piatta
     catena = modulo.catena_dei_filtri([0, 1, -2, 3, 0, 12, -12])
     assert catena.startswith("@eq:lavfi=[") and catena.endswith("],scaletempo2")
-    bande = catena[len("@eq:lavfi=["):-len("],scaletempo2")].split(",")
-    assert [b.split("=")[0] for b in bande] == [f"equalizer@b{i}" for i in range(7)]
-    assert bande[0] == f"equalizer@b0=f=60:t=q:w={modulo.Q_DELLE_BANDE}:g=0:precision=f64"
-    assert bande[6] == f"equalizer@b6=f=12000:t=q:w={modulo.Q_DELLE_BANDE}:g=-12:precision=f64"
-    assert "g=-2:" in bande[2] and "t=o" not in catena
+    filtri = catena[len("@eq:lavfi=["):-len("],scaletempo2")].split(",")
+    assert [f.split("=")[0] for f in filtri] == ["volume@pre"] + [f"equalizer@b{i}" for i in range(7)]
+    # I guadagni dei filtri sono quelli compensati, e il preamplificatore
+    # porta a 0 dB il punto piu' alto della curva.
+    guadagni = modulo.guadagni_compensati([0, 1, -2, 3, 0, 12, -12])
+    assert all(f"g={g:g}:" in filtri[i + 1] for i, g in enumerate(guadagni))
+    assert filtri[0] == f"volume@pre=volume={modulo.preamplificazione(guadagni):g}dB:precision=double"
+    # Oltre il volume 100: il guadagno in piu' e il limitatore, in fondo.
+    oltre = modulo.catena_dei_filtri([0] * 7, 6.229)
+    assert oltre.endswith(f",volume@oltre=volume=6.229dB:precision=double,{modulo.LIMITATORE}],scaletempo2")
     with pytest.raises(ValueError):
         modulo.catena_dei_filtri([0] * 6)
+
+
+def test_bande_compensate_e_preamplificatore():
+    centri = modulo.valori.FREQUENZE_DELLE_BANDE
+    assert modulo.guadagni_compensati([0] * 7) == [0.0] * 7
+    assert modulo.preamplificazione([0.0] * 7) == 0.0
+    # Senza compenso tutte a +6 davano fino a +8,5 dB: compensate, ogni
+    # centro vale quanto la banda scritta.
+    assert modulo._curva(1000, [6] * 7) > 8.4
+    for bande in ([6] * 7, [12] * 7, [12, -12, 12, -12, 12, -12, 12], [8, 4, 0, -3, 0, 4, 8], [0, 0, 0, 12, 0, 0, 0]):
+        guadagni = modulo.guadagni_compensati(bande)
+        assert all(abs(modulo._curva(c, guadagni) - b) < 0.01 for c, b in zip(centri, bande, strict=True)), bande
+        # Il preamplificatore e' il punto piu' alto della curva, non la
+        # banda piu' alzata: fra un centro e l'altro la curva sale appena.
+        assert -max(bande) - 0.1 < modulo.preamplificazione(guadagni) <= -max(bande) + 0.01
+    assert modulo.preamplificazione(modulo.guadagni_compensati([-6] * 7)) == 0.0
+
+
+def test_guadagno_oltre_il_pieno():
+    assert modulo.guadagno_oltre_il_pieno(0) == modulo.guadagno_oltre_il_pieno(100) == 0.0
+    # La legge cubica di mpv: 127 e' 1,27 al cubo, +6,2 dB; 200 e' +18,1.
+    assert abs(modulo.guadagno_oltre_il_pieno(127) - 6.228) < 0.001
+    assert abs(modulo.guadagno_oltre_il_pieno(200) - 18.062) < 0.001
 
 
 def test_valori_nei_limiti_e_su_tutti_e_due_i_lettori(crea):
@@ -205,12 +240,19 @@ def test_valori_nei_limiti_e_su_tutti_e_due_i_lettori(crea):
     m.dissolvenza = 0
     assert m.dissolvenza == 0.0
     # Le proprieta' arrivano a mpv in modo asincrono, su tutti e due i lettori.
-    attese = {"speed": 1.25, "pitch": 2 ** (2 / 12), "volume_gain": -12.0}
+    attese = {"speed": 1.25, "pitch": 2 ** (2 / 12)}
     for lettore in m._lettori:
         assert _aspetta(lambda lettore=lettore: all(abs(getattr(lettore.mpv, nome) - valore) < 1e-6 for nome, valore in attese.items()))
+    # Il preamplificatore sta nella catena, prima delle bande: il volume di
+    # mpv non si tocca (1.102.2).
+    assert m._catena().startswith(f"@eq:lavfi=[volume@pre=volume={modulo.preamplificazione(modulo.guadagni_compensati([12, 0, 0, 4, 0, 0, -12])):g}dB")
+    assert all(lettore.mpv.volume_gain == 0 for lettore in m._lettori)
     m.bande = [0, 0, 0, -3, 0, 0, 0]
     assert m.bande == [0, 0, 0, -3, 0, 0, 0]
-    assert _aspetta(lambda: all(lettore.mpv.volume_gain == 0 for lettore in m._lettori))
+    # Una banda solo abbassata: compensata, le vicine salgono appena, e la
+    # curva supera lo 0 di poco piu' di un decimo di dB fra un centro e
+    # l'altro; il preamplificatore lo toglie.
+    assert -0.2 < modulo.preamplificazione(modulo.guadagni_compensati(m.bande)) < 0
 
 
 def test_volume_muto_e_scheda_li_ricorda_il_motore(crea):
@@ -333,8 +375,96 @@ def test_il_volume_scende_quanto_la_banda_piu_alzata(crea, tmp_path):
     m.imposta_banda(0, -6)
     m.suona(seno)
     x = _uscito_alla_fine(m, uscita)
-    # Senza volume-gain il picco sarebbe 2: 0,5 alzato di 12 dB.
+    # Senza preamplificatore il picco sarebbe 2: 0,5 alzato di 12 dB.
     assert abs(np.abs(x[FREQUENZA // 2:]).max() - 0.5) < 0.05
+
+
+def test_tutte_le_bande_a_piu_sei_alzano_di_sei(crea, tmp_path):
+    # Compensate, tutte a +6 danno +6 anche a 1000 Hz, dove senza compenso
+    # erano +8,5; il preamplificatore toglie il punto piu' alto della curva,
+    # 6,04 dB: il seno esce quasi uguale, invece che 2,4 dB piu' forte.
+    seno = _seno(tmp_path / "mille.wav", 2, hz=1000, ampiezza=0.25)
+    uscita, opzioni = _su_file(tmp_path)
+    m = crea(ao="pcm", volume=100, opzioni_mpv=opzioni)
+    m.bande = [6] * 7
+    m.suona(seno)
+    x = _uscito_alla_fine(m, uscita)
+    attesa = 0.25 * 10 ** ((6 + modulo.preamplificazione(modulo.guadagni_compensati([6] * 7))) / 20)
+    assert abs(np.abs(x[FREQUENZA // 2:]).max() - attesa) < 0.005
+
+
+def test_il_ricampionamento_non_toglie_gli_acuti(crea, tmp_path):
+    # Un seno a 19 kHz da 44,1 a 48 kHz: con il ricampionatore predefinito di
+    # mpv usciva a -5,4 dB; con soxr resta pieno (1.102.2, issue 22).
+    seno = _seno(tmp_path / "acuto.wav", 2, hz=19000, ampiezza=0.25)
+    uscita, opzioni = _su_file(tmp_path)
+    m = crea(ao="pcm", volume=100, opzioni_mpv={**opzioni, "audio_samplerate": 48000})
+    m.suona(seno)
+    x = _uscito_alla_fine(m, uscita)
+    picco = np.abs(x[48000 // 2:-48000 // 4]).max()
+    assert 20 * np.log10(picco / 0.25) > -0.5
+
+
+def test_oltre_cento_amplifica_con_il_limitatore(crea, tmp_path):
+    # Un seno piano oltre 100 cresce di tutto il guadagno: 160 e' 1,6 al cubo.
+    piano = _seno(tmp_path / "piano.wav", 2, hz=1000, ampiezza=0.05)
+    uscita, opzioni = _su_file(tmp_path)
+    m = crea(ao="pcm", volume=160, opzioni_mpv=opzioni)
+    m.suona(piano)
+    x = _uscito_alla_fine(m, uscita)
+    assert abs(np.abs(x[FREQUENZA // 2:]).max() - 0.05 * 1.6 ** 3) < 0.005
+    # Uno forte non satura: il limitatore lo tiene sotto -1 dBFS, dove prima
+    # sarebbe stato tosato a 1. A mpv va al massimo 100.
+    forte = _seno(tmp_path / "forte.wav", 2, hz=1000, ampiezza=0.9)
+    uscita, opzioni = _su_file(tmp_path, "forte.raw")
+    m = crea(ao="pcm", volume=160, opzioni_mpv=opzioni)
+    assert all(lettore.mpv.volume == 100 for lettore in m._lettori)
+    m.suona(forte)
+    assert _aspetta(lambda: "alimiter" in str(m._attivo.mpv.af))
+    x = _uscito_alla_fine(m, uscita)
+    assert np.abs(x[FREQUENZA // 2:]).max() < 0.9
+
+
+def test_il_limitatore_entra_e_esce_passando_il_cento(crea, tmp_path):
+    rumore = _rumore(tmp_path / "rumore.wav", 3)
+    m = crea(volume=100)
+    m.suona(rumore, in_pausa=True)
+    assert _aspetta(lambda: m.durata is not None)
+    lettore = m._attivo
+    assert _aspetta(lambda: lettore.pronto)
+    assert "alimiter" not in str(lettore.mpv.af)
+    m.volume = 130
+    oltre = f"volume@oltre=volume={modulo.guadagno_oltre_il_pieno(130):g}dB"
+    assert _aspetta(lambda: "alimiter" in str(lettore.mpv.af) and oltre in str(lettore.mpv.af))
+    assert _aspetta(lambda: lettore.mpv.volume == 100)
+    # Oltre 100 al volo: la catena scritta resta, il comando va al filtro.
+    m.volume = 150
+    assert oltre in lettore.af_scritto
+    assert m._catena().endswith(f"volume@oltre=volume={modulo.guadagno_oltre_il_pieno(150):g}dB:precision=double,{modulo.LIMITATORE}],scaletempo2")
+    m.volume = 90
+    assert _aspetta(lambda: "alimiter" not in str(lettore.mpv.af) and abs(lettore.mpv.volume - 90) < 1e-6)
+
+
+def test_oltre_cento_il_volume_cambia_al_volo(crea, tmp_path):
+    # Da 130 a 160 il guadagno in piu' arriva al filtro con af-command, senza
+    # riscrivere la catena: il seno piano esce con il livello di 160.
+    piano = _seno(tmp_path / "piano.wav", 2, hz=1000, ampiezza=0.05)
+    uscita, opzioni = _su_file(tmp_path)
+    m = crea(ao="pcm", volume=130, opzioni_mpv=opzioni)
+    m.suona(piano, in_pausa=True)
+    lettore = m._attivo
+    assert _aspetta(lambda: lettore.pronto and "alimiter" in str(lettore.mpv.af))
+    scritta = lettore.af_scritto
+    risposte = []
+    lettore.mpv.command_async("af-command", "eq", "volume", f"{modulo.guadagno_oltre_il_pieno(160):g}dB", "volume@oltre",
+                              callback=lambda errore, _esito: risposte.append(errore))
+    assert _aspetta(lambda: risposte) and risposte == [None]
+    m.volume = 160
+    time.sleep(0.2)
+    assert lettore.af_scritto == scritta
+    m.pausa(False)
+    x = _uscito_alla_fine(m, uscita)
+    assert abs(np.abs(x[FREQUENZA // 2:]).max() - 0.05 * 1.6 ** 3) < 0.005
 
 
 # La fine del brano: niente attese.

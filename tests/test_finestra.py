@@ -2705,7 +2705,7 @@ def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_an
     genitore, voci, al_cambio = aperte[0]
     assert genitore is finestra and al_cambio == finestra._cambia_impostazione
     assert voci == [
-        ("volume", "Volume della musica: 80"),
+        ("volume", "Volume della musica: 100"),
         ("passo_volume", "Passo del volume: 5"),
         ("volume_effetti", "Volume degli effetti: 50%"),
         ("replaygain", "Volume uniforme (ReplayGain): spento"),

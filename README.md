@@ -37,7 +37,7 @@ Il manuale si legge online, https://gabrielebattaglia.github.io/MeTeOra/manuale.
 
 ## Come è fatto
 
-- Riproduzione con libmpv, tramite python-mpv.
+- Riproduzione con libmpv, tramite python-mpv; il ricampionamento verso la frequenza della scheda con soxr.
 - I SID sono emulati in tempo reale da libsidplayfp, con una piccola DLL scritta per MeTeOra (`sidshim/sidshim.cpp`): il brano si rende in memoria mentre suona, e libmpv lo riceve come un normale file WAV. Le durate e i sottobrani vengono dal database Songlengths della High Voltage SID Collection.
 - I MIDI li rende FluidSynth, scaricato al primo MIDI, con un banco di suoni General MIDI; la musica delle console la rende libgme. Anche loro si rendono in memoria e arrivano a libmpv come file WAV.
 - Interfaccia in wxPython con un albero dei comandi, la console e il cruscotto.

@@ -1,0 +1,9 @@
+Collaudo di MeTeOra 1.102.2, con NVDA: volume oltre 100 con il limitatore, bande compensate, preamplificatore, volume di partenza 100, ricampionamento con soxr. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Tu hai il volume a 127, e resta: prova un brano recente e forte a 127 e poi a 160; dovrebbe suonare pulito, senza la sporcizia di prima, anche se cresce poco.
+Lo stesso con un MIDI o un brano registrato piano: oltre 100 deve crescere come prima.
+Passando il 100, in su o in giù, la catena dei filtri si riscrive: dimmi se senti uno scatto, e se disturba.
+Oltre 100, fra 105 e 300, il volume cambia al volo senza riscrivere niente: nessuno scatto.
+Equalizzatore, nella voce Equalizzatore delle impostazioni scrivi 6: tutte le bande a +6 ora suonano quasi come tutte a 0, con appena meno bassi profondi e acuti estremi, perché il preamplificatore toglie i 6 dB.
+Una banda alzata da sola, per esempio la prima a +12 con O e P: i bassi salgono come prima, con una campana un po' più stretta.
+Mentre un brano suona, cambia le bande con O e P: dimmi se senti scatti a ogni pressione.
+Con tutte le bande a 0 e il volume a 100 il suono deve essere identico a prima.

@@ -2,6 +2,17 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.102.2] - 2026-10-06
+
+Dalla segnalazione di Andrea, che sentiva MeTeOra meno bello degli altri lettori (issue 22): tre novità e due correzioni, decise da Gabriele dopo le misure del 6 ottobre, tutte su file e senza suoni.
+
+- Correzione, il ricampionamento: in WASAPI condiviso Windows accetta solo la frequenza del suo mixer, di solito 48 kHz, e mpv convertiva da sé la musica a 44,1 kHz con il suo convertitore predefinito, che toglieva gli acuti: -0,5 dB a 16 kHz, -2,9 a 18, -9 a 20, e da 48 a 44,1 ancora di più. Ora la conversione la fa soxr, già dentro libmpv, piatto fino a 21 kHz in tutte e due le direzioni, con distorsione e rumore a -148 dB e i ripiegamenti a -151, e un costo trascurabile. Chi ha la scheda alla frequenza dei file, come Gabriele a 44,1 kHz, non sentiva differenze, e non ne sente.
+- Correzione, il volume di partenza è 100, il livello originale dei file, come gli altri lettori al cento per cento: 80, con la legge cubica di mpv, era -5,8 dB. Chi ha già un volume salvato lo tiene.
+- Novità, il volume oltre 100 passa per un limitatore: prima amplificava e basta, e sui brani forti tosava i picchi, l'1,9% dei campioni in mediana a 127 e il 16% a 160, con la distorsione che ne viene. Ora mpv riceve al massimo 100, e il di più lo dà la catena dei filtri, seguito dal limitatore di FFmpeg a -1 dBFS; fino a 100 la catena resta identica all'originale. Su un brano già forte, a -9 LUFS, +12 dB di volume danno +2,5 dB veri e nessuna distorsione; un brano piano cresce di tutto il volume chiesto.
+- Novità, le bande compensate: le bande dell'equalizzatore si sovrappongono, e tutte a +6 davano fino a +8,5 dB, tutte a +12 fino a +17,6. Ora i filtri si calcolano in modo che la curva intera, al centro di ogni banda, valga quanto la banda scritta: tutte a +6 danno +6, misurato con un impulso nella catena vera.
+- Novità, il preamplificatore sul punto più alto della curva: prima il volume scendeva quanto la banda più alzata, e con più bande vicine alzate la curva lo superava fino a 5,6 dB. Ora il suono entra nell'equalizzatore abbassato quanto sale davvero la curva, calcolata con le formule di FFmpeg, che coincidono con la catena al centesimo di dB; e il preamplificatore sta nella catena, prima delle bande, invece che nel volume di mpv.
+- Le misure hanno escluso altre cause: con le bande a 0 e la velocità a 1 l'audio esce identico campione per campione; a volume 100 la musica di Gabriele esce in mediana a -11,6 LUFS, più forte delle voci di Windows, a -19 e -20, e nessun filtro le toglie potenza.
+
 ## [1.99.0] - 2026-10-06
 
 Pubblicata il 6 ottobre 2026, con l'installatore e lo zip: la seconda release, la prima che arriva agli utenti con l'aggiornamento automatico. VirusTotal ha analizzato l'installatore, scaricandolo dalla release: nessuno dei 68 antivirus lo segnala.

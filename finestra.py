@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino,
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore.
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -5767,7 +5767,7 @@ class Finestra(wx.Frame):
         imp = self.impostazioni
         if chiave == "volume":
             return valori.leggi_volume_musica, [
-                "Il volume della musica, da 0 a 300: oltre il 100 amplifica, per gli audio registrati troppo bassi.",
+                "Il volume della musica, da 0 a 300: 100 è il livello originale del file; oltre il 100 amplifica, con un limitatore contro la distorsione, per gli audio registrati troppo bassi.",
                 "Per esempio 80 o 150. Anche più e meno lo cambiano, dalla finestra principale.",
                 f"Adesso è {imp['volume']}.", REGOLA_DEL_DOLLARO], str(imp["volume"])
         if chiave == "passo_volume":
