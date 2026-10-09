@@ -1,5 +1,5 @@
 {
- "volume": 139,
+ "volume": 94,
  "passo_volume": 3,
  "passo_indietro": 3.0,
  "passo_avanti": 30.0,
@@ -27,12 +27,12 @@
  ],
  "banco_midi": "E:\\VstPlugins\\SF2 Instruments\\SGM-V2.01.sf2",
  "ripresa": {
-  "percorso": "E:\\C64Music\\DEMOS\\G-L\\I_Am_the_Walrus.sid",
+  "percorso": "E:\\C64Music\\DEMOS\\A-F\\First_Song_BASIC.sid",
   "sottobrano": null,
-  "numero": 113,
+  "numero": 459,
   "posizione": 0,
   "tipo": "cartella",
-  "cartella": "E:\\C64Music\\DEMOS\\G-L"
+  "cartella": "E:\\C64Music\\DEMOS\\A-F"
  },
  "righe_della_console": 2000,
  "caratteri": {},
