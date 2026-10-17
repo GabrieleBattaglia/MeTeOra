@@ -206,6 +206,22 @@ def test_schedario_ricorda_e_rilegge(tmp_path):
     assert di_nuovo.scheda(str(sid))["sottobrani"] == 12
 
 
+def test_schedario_scarta_le_durate_non_credibili(tmp_path):
+    # 1.103.1: i file di prova rovinati dicevano migliaia di anni.
+    from schedario import VERSIONE_DEL_FILE, Schedario, credibile
+
+    assert credibile(19 * 3600.0) == 19 * 3600.0 and credibile(0) == 0
+    assert credibile(1.4e12) is None and credibile(7 * 86400) is None and credibile(-1) is None and credibile(None) is None and credibile(True) is None
+    archivio = tmp_path / "schede.json"
+    vuota = {"dim": 1, "mod": 1.0, "tag": {}, "sottobrani": None, "durate_sid": None}
+    archivio.write_text(json.dumps({"versione": VERSIONE_DEL_FILE, "schede": {
+        r"C:\m\buono.mp3": {**vuota, "durata": 120.0}, r"C:\m\rotto.opus": {**vuota, "durata": 1.4e12}}}), encoding="utf-8")
+    s = Schedario(str(archivio))
+    s.carica()
+    # La scheda rotta non si tiene: il file si rilegge, e resta senza durata.
+    assert s.scheda(r"C:\m\buono.mp3")["durata"] == 120.0 and s.scheda(r"C:\m\rotto.opus") is None
+
+
 def test_contatore_rinfresca_le_letture_vecchie(tmp_path):
     from contatore import Contatore
 

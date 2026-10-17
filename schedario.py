@@ -1,6 +1,6 @@
 # MeTeOra, lo schedario: durata, dimensione e tag dei file, ricordati fra un avvio e l'altro.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la 1.7.0, per le durate delle playlist (issue 4) e poi per il filtro (issue 2). Nella 1.62.4 le durate da libmpv per i formati che mutagen non conosce, e quella esatta dell'AAC grezzo. Nella 1.66.0 le schede della musica delle console, con i sottobrani. Nella 1.67.0 la scheda segue un file rinominato. Nella 1.69.0 i tag letti con tag.py, anche di WAV, AIFF, WMA e TTA. Nella 1.83.1 le variazioni delle schede, per i totali delle cartelle, e il filo che cede il passo alla finestra. Nella 1.103.0 la copia delle schede per le statistiche.
+# 30/09/2026: nasce con la 1.7.0, per le durate delle playlist (issue 4) e poi per il filtro (issue 2). Nella 1.62.4 le durate da libmpv per i formati che mutagen non conosce, e quella esatta dell'AAC grezzo. Nella 1.66.0 le schede della musica delle console, con i sottobrani. Nella 1.67.0 la scheda segue un file rinominato. Nella 1.69.0 i tag letti con tag.py, anche di WAV, AIFF, WMA e TTA. Nella 1.83.1 le variazioni delle schede, per i totali delle cartelle, e il filo che cede il passo alla finestra. Nella 1.103.0 la copia delle schede per le statistiche. Nella 1.103.1 le durate da una settimana in su non si tengono.
 
 """Lo schedario dei file.
 
@@ -38,6 +38,11 @@ TAG_DA_RILEGGERE = {".wav": 2, ".aif": 1, ".aiff": 1, ".wma": 1, ".wmv": 1, ".as
 # con i capitoli; rileggere ogni canzone costerebbe troppo.
 CON_I_CAPITOLI = frozenset({".mp3", ".m4a", ".m4b", ".mp4", ".m4v"})
 DURATA_CON_I_CAPITOLI = 600
+# Una durata da una settimana in su non e' credibile: i file rovinati ne
+# danno di migliaia di anni, come i file di prova trovati nello schedario di
+# Gabriele il 17 ottobre 2026. Non si tiene, e il file resta senza durata
+# (1.103.1).
+DURATA_CREDIBILE = 7 * 86400
 
 VERSIONE_DEL_FILE = 1
 # Le chiavi dei tag, come le usa il filtro.
@@ -142,6 +147,13 @@ def durata_da_mpv(percorso):
         return _SONDA[0].durata(percorso)
 
 
+def credibile(durata):
+    """La durata, se e' un numero fra zero e una settimana; altrimenti None."""
+    if isinstance(durata, int | float) and not isinstance(durata, bool) and 0 <= durata < DURATA_CREDIBILE:
+        return durata
+    return None
+
+
 def _senza_capitoli(percorso, scheda):
     """Vero per la scheda di un file lungo, di un formato con i capitoli,
     letta prima che lo schedario li leggesse (1.93.0)."""
@@ -191,6 +203,7 @@ def leggi_scheda(percorso):
         scheda["durata"] = float(audio.info.length)
     if scheda["durata"] is None:
         scheda["durata"] = durata_da_mpv(percorso)
+    scheda["durata"] = credibile(scheda["durata"])
     if audio is not None and tag.modificabile(percorso):
         comuni = tag.comuni_del_file(audio)
         anno = comuni.get("anno")
@@ -287,8 +300,10 @@ class Schedario:
             # loro schede di prima si rileggono.
             # Dalla 1.93.0 i capitoli: si rileggono le schede vecchie dei file
             # lunghi dei formati che li hanno.
+            # Dalla 1.103.1 si rileggono anche le schede con una durata non
+            # credibile, e il file resta senza durata.
             self.schede = {chiave: scheda for chiave, scheda in dati["schede"].items()
-                if formati.ha_sottobrani(chiave) or (scheda.get("durata") is not None and formati.estensione(chiave) != ".aac"
+                if formati.ha_sottobrani(chiave) or (credibile(scheda.get("durata")) is not None and formati.estensione(chiave) != ".aac"
                     and scheda.get("tag_v", 0) >= TAG_DA_RILEGGERE.get(formati.estensione(chiave), 0) and not _senza_capitoli(chiave, scheda))}
 
     def salva(self):

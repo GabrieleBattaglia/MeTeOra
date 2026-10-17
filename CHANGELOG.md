@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.103.1] - 2026-10-17
+
+- Correzione, lo schedario non tiene più le durate da una settimana in su: nello schedario di Gabriele 1430 schede venivano da file di prova rovinati, in una cartella di backup sull'Iliadbox, e sette dicevano fino a 1.4 milioni di milioni di secondi, circa 44600 anni. Nella plancia quei file restano senza durata, e i totali delle cartelle e delle playlist non ne sono più gonfiati; le schede già salvate si rileggono quando servono. Era la pulizia a parte scelta da Gabriele con le statistiche, che già lasciano fuori quelle durate.
+
 ## [1.103.0] - 2026-10-17
 
 Le statistiche, chieste da Gabriele: più dati ci sono, più è contento. La proposta, discussa il 17 ottobre 2026, ha fissato venti posti per le classifiche, lo storico di 50000 brani, le durate a parole e la ricerca con la barra rovesciata, come nella console.
