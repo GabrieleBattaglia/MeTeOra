@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7.
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -67,6 +67,7 @@ import schede_audio
 import sintesi
 import sottobrani
 import sottotitoli_ocr
+import statistiche
 import suoni
 import tag
 import valori
@@ -81,6 +82,7 @@ from dialoghi import (
     FinestraImpostazioni,
     FinestraMarcatori,
     FinestraScelta,
+    FinestraStatistiche,
 )
 from filtro import COMMENTO, ErroreFiltro, Filtro, modello_della_console
 from impostazioni import Impostazioni
@@ -97,6 +99,11 @@ FILE_IMPOSTAZIONI = "MeTeOra - Impostazioni.json"
 FILE_SCHEDARIO = "MeTeOra - Schedario.json"
 FILE_MARCATORI = "MeTeOra - Marcatori.json"
 FILE_POSIZIONI = "MeTeOra - Posizioni.json"
+FILE_STATISTICHE = "MeTeOra - Statistiche.json"
+# Ogni quanti millisecondi scatta l'orologio delle statistiche, e ogni quanti
+# scatti si scrive il loro file (1.103.0).
+GIRO_DELLE_STATISTICHE = 1000
+GIRI_PER_SALVARE_LE_STATISTICHE = 60
 # Ogni quanti millisecondi si guarda il punto del file lungo che suona, e
 # ogni quanti giri si scrive il file delle posizioni (1.92.0).
 GIRO_DELLE_POSIZIONI = 5000
@@ -213,6 +220,28 @@ NOMI_DEI_SEGNI = {
     "}": "parentesi graffa chiusa", "@": "chiocciola", "#": "cancelletto", "€": "euro", "~": "tilde", "`": "accento grave",
 }
 
+# I nomi dei tasti senza carattere, nelle statistiche (1.103.0).
+NOMI_DEI_TASTI = {
+    wx.WXK_UP: "Freccia su", wx.WXK_DOWN: "Freccia giù", wx.WXK_LEFT: "Freccia sinistra", wx.WXK_RIGHT: "Freccia destra",
+    wx.WXK_PAGEUP: "Pagina su", wx.WXK_PAGEDOWN: "Pagina giù", wx.WXK_HOME: "Inizio", wx.WXK_END: "Fine",
+    wx.WXK_RETURN: "Invio", wx.WXK_NUMPAD_ENTER: "Invio", wx.WXK_ESCAPE: "Esc", wx.WXK_TAB: "Tab", wx.WXK_BACK: "Backspace",
+    wx.WXK_DELETE: "Canc", wx.WXK_INSERT: "Ins", wx.WXK_SPACE: "Barra spaziatrice", wx.WXK_WINDOWS_MENU: "Applicazioni",
+    **{getattr(wx, f"WXK_F{n}"): f"F{n}" for n in range(1, 13)},
+}
+# I segni che nelle statistiche hanno un nome loro, prima di quelli dei
+# tasti senza comando.
+SEGNI_DELLE_STATISTICHE = {"\\": "barra rovesciata", "|": "barra verticale", "-": "meno"}
+
+
+def nome_del_carattere(carattere, maiuscolo):
+    """Il nome di un tasto a carattere nelle statistiche: X, Maiuscolo con N, più."""
+    if carattere.isalpha() and carattere not in NOMI_DEI_SEGNI:
+        nome = carattere.upper()
+    else:
+        nome = SEGNI_DELLE_STATISTICHE.get(carattere) or NOMI_DEI_SEGNI.get(carattere, carattere)
+    return f"Maiuscolo con {nome}" if maiuscolo else nome
+
+
 TASTI_COMUNI = [
     "X suona la voce selezionata, riprende dalla pausa o fa ripartire da capo il brano che suona già; C pausa, V stop, Z e B brano precedente e successivo, N brano a caso, "
     "Maiuscolo con N la riproduzione casuale, con cui B sceglie a caso e Z torna ai brani suonati prima; "
@@ -227,10 +256,10 @@ TASTI_COMUNI = [
     "J e K aprono e suonano la playlist precedente e successiva, le cifre da 1 a 0 le prime dieci playlist.",
     "Nella plancia Backspace chiude il ramo in cui sei e risale di un livello, Maiuscolo con Backspace risale di colpo all'unità o alla playlist, Preferiti compresi, e chiude i rami al suo interno.",
     "T mette un marker dove sei, o rinomina quello su cui sei; R e Y vanno al marker precedente e successivo; Maiuscolo con R, Y e T tolgono i marker prima, dopo e tutti; Maiuscolo con le cifre da 1 a 0 va ai primi dieci marker del brano della plancia.",
-    "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, F8 porta la selezione e il fuoco della plancia sul brano in riproduzione e Maiuscolo con F8 ce la tiene agganciata, "
+    "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, Maiuscolo con F7 le statistiche, F8 porta la selezione e il fuoco della plancia sul brano in riproduzione e Maiuscolo con F8 ce la tiene agganciata, "
     "F9 chiude e F10 apre tutto il ramo col fuoco, Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta, tranne Questo PC e Questa rete; "
     "F11 legge i tag del brano selezionato, o i dettagli di una cartella, di un'unità o di una playlist, e Maiuscolo con F11 apre il menu dei tag.",
-    "Barra rovesciata: nella console cerca nella console, altrove nel ramo della plancia in cui sei, e da Apri file o Impostazioni in tutto MeTeOra; Ctrl con la barra rovesciata cerca in tutto MeTeOra, anche dalla console. "
+    "Barra rovesciata: nella console cerca nella console, altrove nel ramo della plancia in cui sei, e da Apri file, Statistiche o Impostazioni in tutto MeTeOra; Ctrl con la barra rovesciata cerca in tutto MeTeOra, anche dalla console. "
     "Barra verticale: il filtro della playlist o dei Preferiti in cui sta la plancia, anche dalla console.",
     "F1 apre il manuale nel browser; F12 scrive nella console la guida rapida dei tasti, F2 le novità e F3 i crediti, sempre nella console. Esc esce salvando tutto.",
     "Maiuscolo con F12 spegne e riaccende i tasti rapidi a carattere: spenti, lettere, cifre e segni vanno alla plancia, che salta alla voce che comincia con ciò che scrivi; "
@@ -519,7 +548,7 @@ class _Trascinamento(wx.FileDropTarget):
         self._finestra = finestra
 
     def OnDropFiles(self, _x, _y, nomi):
-        wx.CallAfter(self._finestra.apri_dall_esterno, list(nomi))
+        wx.CallAfter(self._finestra.apri_dall_esterno, list(nomi), "trascinamento")
         return True
 
 
@@ -677,6 +706,16 @@ ISTRUZIONI_DELLA_CONSOLE = [
     "Invio, dalla console, passa all'occorrenza seguente.",
     REGOLA_DEL_DOLLARO,
 ]
+ISTRUZIONI_DELLE_STATISTICHE = [
+    "Puoi usare questi segni per comporre la ricerca nelle statistiche.",
+    "Il testo si cerca così com'è, spazi compresi; maiuscole e minuscole non contano. Andare a capo vale come uno spazio.",
+    "Asterisco: qualsiasi testo nella stessa riga, come brani*fine.",
+    "Cancelletto: una o più cifre, come sezione # di.",
+    'Virgolette: la sequenza esatta, maiuscole comprese, come "SID".',
+    "Sezione 12 porta all'inizio della dodicesima sezione; le sezioni le elenca la quarta riga.",
+    "Invio, dal testo delle statistiche, passa all'occorrenza seguente.",
+    REGOLA_DEL_DOLLARO,
+]
 
 
 class FinestraFiltro(wx.Dialog):
@@ -757,6 +796,14 @@ class Finestra(wx.Frame):
         cartella_dati = cartella_dati or percorsi.cartella_programma()
         self.impostazioni = Impostazioni(os.path.join(cartella_dati, FILE_IMPOSTAZIONI))
         self.impostazioni.carica()
+        # Le statistiche (1.103.0): prima di ogni suono e di ogni riga della
+        # console, che contano. L'avvio si conta con la versione di prima,
+        # che le impostazioni ricordano ancora.
+        self._statistiche = statistiche.Statistiche(os.path.join(cartella_dati, FILE_STATISTICHE))
+        self._statistiche.carica()
+        self._statistiche.avvio(version.VERSION, self.impostazioni["versione"])
+        # Vero quando la finestra ha tutto cio' che l'orologio guarda.
+        self._orologio_pronto = False
         self.archivio = Archivio(os.path.join(cartella_dati, FILE_PLAYLIST))
         errore_archivio = None
         try:
@@ -919,6 +966,18 @@ class Finestra(wx.Frame):
         self.Bind(wx.EVT_TIMER, self._giro_delle_posizioni, self._orologio_delle_posizioni)
         self._orologio_delle_posizioni.Start(GIRO_DELLE_POSIZIONI)
         self.marcatori.carica()
+        # L'orologio delle statistiche (1.103.0): ogni secondo da' lo stato
+        # di adesso, e ogni minuto scrive il file, in disparte. La scheda
+        # audio automatica si chiede a Windows una volta al minuto.
+        self._giri_delle_statistiche = 0
+        self._statistiche_non_salvate = False
+        self._scheda_per_le_statistiche = None
+        self._inizio_della_ricerca = None
+        self._ricerca_contata = True
+        # Vero mentre la libreria si conta per la finestra delle statistiche.
+        self._statistiche_in_arrivo = False
+        self._orologio_delle_statistiche = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self._giro_delle_statistiche, self._orologio_delle_statistiche)
         # Le playlist temporanee nate dalle cartelle di Questo PC, per cartella:
         # rigiocando un file della stessa cartella si riusa la stessa.
         self._temporanee = {}
@@ -1000,8 +1059,17 @@ class Finestra(wx.Frame):
             self.archivio.percorso += ".nuovo"
         if self.marcatori.errore:
             self._avviso_all_avvio("errore", f"Il file dei marker non si legge, e resta com'è: {self.marcatori.errore}. I marker nuovi vanno in {os.path.basename(self.marcatori.percorso)}.")
+        if self._statistiche.errore:
+            nuovo = os.path.basename(self._statistiche.percorso)
+            if self._statistiche.da_nuovo:
+                testo = f"Il file delle statistiche non si legge: {self._statistiche.errore}. Riparto da quelle salvate in {nuovo}."
+            else:
+                testo = f"Il file delle statistiche non si legge, e resta com'è: {self._statistiche.errore}. Le statistiche nuove vanno in {nuovo}."
+            self._avviso_all_avvio("errore", testo)
         self._scrivi_la_scheda_all_avvio(esito_della_scheda, errore_della_scheda)
         self._chiedi_schede(*self.archivio.playlist, self.archivio.preferiti)
+        self._orologio_pronto = True
+        self._orologio_delle_statistiche.Start(GIRO_DELLE_STATISTICHE)
 
     # La costruzione.
 
@@ -1134,6 +1202,8 @@ class Finestra(wx.Frame):
         self.nodo_rete = self.albero.AppendItem(radice, "Questa rete", data={"tipo": "rete", "caricato": False})
         self.albero.SetItemHasChildren(self.nodo_rete, True)
         self.albero.AppendItem(radice, "Apri file", data={"tipo": "comando", "comando": "apri_file"})
+        # Le statistiche, prima delle impostazioni (Gabriele, 1.103.0).
+        self.albero.AppendItem(radice, "Statistiche", data={"tipo": "comando", "comando": "statistiche"})
         self.albero.AppendItem(radice, "Impostazioni", data={"tipo": "comando", "comando": "impostazioni"})
         self._popola_playlist()
         self._seleziona(self.nodo_preferiti)
@@ -1157,7 +1227,9 @@ class Finestra(wx.Frame):
             self.console.AppendText(testo)
             self._righe[-1] = testo
             self.console.SetInsertionPoint(min(posizione, self.console.GetLastPosition()))
+            self._statistiche.conta("righe_riscritte")
             return
+        self._statistiche.conta("righe_della_console")
         self._categoria = categoria
         self.console.AppendText(("\n" if self._righe else "") + testo)
         self._righe.append(testo)
@@ -1182,7 +1254,11 @@ class Finestra(wx.Frame):
 
     def _suono(self, evento):
         """Suona l'effetto dell'evento; vero se e' partito, falso se il
-        volume degli effetti e' a zero."""
+        volume degli effetti e' a zero. Le statistiche lo contano anche a
+        volume zero, e l'orologio fa un passo: l'evento puo' aver cambiato
+        lo stato (1.103.0)."""
+        self._statistiche.evento(evento)
+        self._scatto_delle_statistiche()
         return suoni.suona(evento, self.impostazioni["volume_effetti"])
 
     def _riscontro(self, evento, testo, categoria=None):
@@ -1280,14 +1356,17 @@ class Finestra(wx.Frame):
         threading.excepthook = negli_altri_fili
         warnings.showwarning = negli_avvisi
 
-    def apri_dall_esterno(self, percorsi):
+    def apri_dall_esterno(self, percorsi, da=None):
         """I file e le cartelle che arrivano da Windows (1.91.0): dalla riga di
         comando, da un'altra copia di MeTeOra o trascinati sulla finestra.
         Quelli che arrivano insieme, come quando si aprono piu' file da Esplora
         risorse, si raccolgono per un attimo e suonano come una lista sola.
-        MeTeOra torna in primo piano."""
+        MeTeOra torna in primo piano. da dice alle statistiche da dove
+        arrivano: avvio, copia o trascinamento."""
         if not self or self._chiusa:
             return
+        if da in ("avvio", "copia", "trascinamento"):
+            self._statistiche.conta({"avvio": "aperti_all_avvio", "copia": "aperti_da_un_altra_copia", "trascinamento": "aperti_col_trascinamento"}[da])
         self._da_aprire.extend(percorsi)
         if self.IsIconized():
             self.Iconize(False)
@@ -1349,6 +1428,7 @@ class Finestra(wx.Frame):
         try:
             self.posizioni.salva()
         except OSError as e:
+            self._statistiche.conta("salvataggi_non_riusciti")
             if not self._posizioni_non_salvate:
                 self._posizioni_non_salvate = True
                 self._riscontro("errore", f"Non riesco a salvare le posizioni dei file lunghi: {e.strerror or e}.")
@@ -1421,6 +1501,7 @@ class Finestra(wx.Frame):
     def crash_precedente(self, percorso):
         """All'avvio dopo un crash (1.89.0): la console dice dove sta il
         resoconto, da mandare a chi sviluppa."""
+        self._statistiche.conta("crash")
         self._riscontro("problema", f"L'ultima volta MeTeOra si è chiuso per un errore grave. Il resoconto è nel file {os.path.basename(percorso)}, "
             f"nella cartella {os.path.dirname(percorso)}: mandalo a chi sviluppa, insieme a MeTeOra - Errori.log.")
 
@@ -1433,6 +1514,7 @@ class Finestra(wx.Frame):
         un errore che torna a ogni istante non deve riempire la console."""
         if not self or self._chiusa:
             return
+        self._statistiche.conta("problemi_interni")
         categoria = ("problema", riga)
         if self._categoria == categoria:
             self._ripetizioni += 1
@@ -1531,6 +1613,9 @@ class Finestra(wx.Frame):
         lavoro, dialoghi compresi, il beep dice se ha portato il fuoco della
         plancia a un altro livello."""
         prima = self._profondita(self._voce_corrente())
+        nome = self._nome_del_tasto(evento)
+        if nome:
+            self._statistiche.tasto(nome)
         if self._apertura_della_plancia is not None and evento.GetKeyCode() not in _SOLO_MODIFICATORI:
             # Un tasto qualsiasi ferma l'apertura di tutta la plancia, prima
             # di fare il suo lavoro: niente rami tolti sotto di lei.
@@ -1551,6 +1636,10 @@ class Finestra(wx.Frame):
         }
         if modificatori == wx.MOD_NONE and codice in tasti_funzione:
             tasti_funzione[codice]()
+            return True
+        if modificatori == wx.MOD_SHIFT and codice == wx.WXK_F7:
+            # Le statistiche, da tutta la finestra (Gabriele, 1.103.0).
+            self._comando_statistiche()
             return True
         if modificatori == wx.MOD_SHIFT and codice == wx.WXK_F8:
             self._aggancia()
@@ -1618,6 +1707,7 @@ class Finestra(wx.Frame):
         # farebbe la sua ricerca per iniziale spostando il fuoco (tappa 9).
         segno = chr(unicode)
         nome = NOMI_DEI_SEGNI.get(segno.lower(), segno.upper() if segno.isalpha() else segno)
+        self._statistiche.senza_comando(f"{'Maiuscolo con ' if maiuscolo else ''}{nome}")
         self._riscontro("non_disponibile", f"{'Maiuscolo+' if maiuscolo else 'Il tasto '}{nome} non ha un comando.")
         return True
 
@@ -2041,6 +2131,7 @@ class Finestra(wx.Frame):
         if not voce.IsOk():
             return
         quante = len(self._voci_selezionate())
+        self._statistiche.massimo("selezione", quante)
         totale = "nessuna voce selezionata" if quante == 0 else "1 voce selezionata" if quante == 1 else f"{quante} voci selezionate"
         stato = "Selezionata" if self._e_selezionata(voce) else "Non selezionata"
         self.scrivi(f"{stato}: {self._nome_della_voce(voce)}. {totale.capitalize()}.", "selezione")
@@ -2395,6 +2486,7 @@ class Finestra(wx.Frame):
             motivo = f"{str(errore.strerror or errore).rstrip('.')}."
         else:
             motivo = "il computer o il disco di rete sono spenti, la rete non c'è, o la condivisione si è fermata."
+        self._statistiche.conta("rete_muta")
         self._riscontro("errore", f"{dati['percorso']} non risponde: {motivo} Riaprendo il ramo si riprova.")
 
     def _riconta(self, *cartelle):
@@ -2809,6 +2901,7 @@ class Finestra(wx.Frame):
         """I computer della rete, o le cartelle condivise di un computer: la
         ricerca va in disparte, e intanto il ramo mostra una voce d'attesa."""
         computer = dati["tipo"] == "computer_della_rete"
+        self._statistiche.conta("ricerche_della_rete")
         self.albero.AppendItem(voce, "Cerco i computer della rete..." if computer else "Cerco le cartelle condivise...", data={"tipo": "attesa"})
         testo = "Cerco i computer della rete: può volerci qualche secondo." if computer else f"Cerco le cartelle condivise di {dati['nome']}."
         if self._freccia_nell_albero:
@@ -3542,6 +3635,7 @@ class Finestra(wx.Frame):
             self._riscontro("errore", " ".join(errori))
             return
         chi = self._di_chi(percorsi) if scritti == len(percorsi) else f"{scritti} file su {len(percorsi)}"
+        self._statistiche.conta("file_dei_tag_cambiati", scritti)
         testo = f"{nome} di {chi}: {valore}." if valore else f"Tag {nome} cancellato da {chi}."
         self._riscontro("tag_cambiato" if valore else "tag_cancellato", " ".join([testo, *errori]))
         self._aggiorna_etichette()
@@ -3588,6 +3682,7 @@ class Finestra(wx.Frame):
         else:
             self._togli(pl, brano, annuncia=False)
         self._riconta(os.path.dirname(brano.percorso))
+        self._statistiche.conta("file_nel_cestino")
         self._riscontro("cestino", f"{brano.nome_del_file} è nel cestino di Windows." if cestino else f"{brano.nome_del_file} è cancellato per sempre.")
 
     def _cartella_al_cestino(self, voce, dati):
@@ -3627,6 +3722,7 @@ class Finestra(wx.Frame):
         # cartelle (revisione della 1.85.5).
         self.contatore.chiedi(self.contatore.dimentica(percorso, anche_sopra=False))
         self._riconta(os.path.dirname(percorso.rstrip("\\")))
+        self._statistiche.conta("cartelle_nel_cestino")
         self._riscontro("cestino", f"La cartella {nome} è nel cestino di Windows." if cestino else f"La cartella {nome} è cancellata per sempre.")
 
     def _cancella(self, voce):
@@ -3778,6 +3874,8 @@ class Finestra(wx.Frame):
             self._seleziona(approdo)
         if marker:
             self._salva_i_marker(*{k for _v, k, _m in marker})
+        self._statistiche.conta("brani_tolti", len(da_togliere))
+        self._statistiche.conta("marker_tolti_selezione", tolti_marker)
         parti = []
         if da_togliere:
             parti.append(f"{'tolto' if len(da_togliere) == 1 else 'tolti'} {brani_al_plurale(len(da_togliere))}")
@@ -3887,6 +3985,7 @@ class Finestra(wx.Frame):
         testo = f"Nel cestino di Windows {riusciti} file." if not senza_cestino else f"Tolti {riusciti} file: quelli dove il cestino non c'è sono cancellati per sempre."
         if falliti:
             testo += " 1 non c'è andato." if falliti == 1 else f" {falliti} non ci sono andati."
+        self._statistiche.conta("file_nel_cestino", riusciti)
         self._riscontro("cestino", testo)
 
     # Le playlist.
@@ -3895,12 +3994,14 @@ class Finestra(wx.Frame):
         try:
             self.archivio.salva()
         except OSError as e:
+            self._statistiche.conta("salvataggi_non_riusciti")
             self._riscontro("errore", f"Non riesco a salvare le playlist: {e}")
 
     def _salva_impostazioni(self):
         try:
             self.impostazioni.salva()
         except OSError as e:
+            self._statistiche.conta("salvataggi_non_riusciti")
             self._riscontro("errore", f"Non riesco a salvare le impostazioni: {e}")
 
     def _comando_nuova_playlist(self):
@@ -3917,6 +4018,8 @@ class Finestra(wx.Frame):
         if nuova:
             pl = self.archivio.nuova(nome)
         pl.brani.extend(b if isinstance(b, Brano) else Brano(b) for b in percorsi_da_aggiungere)
+        self._statistiche.conta("brani_aggiunti", len(percorsi_da_aggiungere))
+        self._statistiche.conta("aggiunte")
         self._chiedi_schede(pl)
         self._salva_archivio()
         self._popola_playlist()
@@ -4074,6 +4177,9 @@ class Finestra(wx.Frame):
         self.albero.SetItemHasChildren(self.nodo_risultati, True)
         self._aggiorna_risultati()
         self._ricerca.avvia()
+        self._statistiche.conta("ricerche_ovunque" if dove == OVUNQUE else "ricerche_nel_ramo")
+        self._inizio_della_ricerca = time.monotonic()
+        self._ricerca_contata = False
         self._riscontro("ricerca_avviata", f"Cerco {testo} {dove}. I Risultati si riempiono mentre cerco.")
 
     def _etichetta_dei_risultati(self):
@@ -4190,6 +4296,7 @@ class Finestra(wx.Frame):
             saltate = len(self._ricerca.cartelle_mute)
             if saltate:
                 silenzio += f" In rete {'una cartella non ha' if saltate == 1 else f'{saltate} cartelle non hanno'} risposto, e la ricerca è andata avanti senza."
+            self._conta_la_ricerca(dove)
             self._riscontro("ricerca_finita", f"Ricerca di {self._testo_della_ricerca}{dove} finita: {al_plurale(len(self.risultati.brani), 'risultato', 'risultati')}.{silenzio}")
             # Lo schedario legge senza tempo massimo: i file delle radici che
             # non hanno risposto lo terrebbero fermo.
@@ -4225,6 +4332,7 @@ class Finestra(wx.Frame):
             nome = dialogo.GetValue().strip() or "Ricerca"
         self._aggiorna_risultati()
         brani = self.risultati.brani if gruppo is None else self._brani_del_gruppo(gruppo)
+        self._statistiche.conta("playlist_dalla_ricerca")
         self._aggiungi(None, [Brano(b.percorso, sottobrano=b.sottobrano) for b in brani], nome=nome)
 
     def _crea_da_qui(self, cartella, nome):
@@ -4234,6 +4342,7 @@ class Finestra(wx.Frame):
             self._riscontro("niente_da_suonare", f"In {cartella} non c'è niente da suonare.")
             return
         pl = self.archivio.nuova(nome or "Playlist", files)
+        self._statistiche.conta("playlist_da_una_cartella")
         self._chiedi_schede(pl)
         self._salva_archivio()
         self._popola_playlist()
@@ -4303,6 +4412,7 @@ class Finestra(wx.Frame):
         vicino = dopo[0] if dopo else prima[-1] if prima else pl
         self._popola_playlist(seleziona=vicino)
         if annuncia:
+            self._statistiche.conta("brani_tolti")
             self._riscontro("brano_tolto", f"Tolto {brano.nome_del_file}; nella playlist {pl.nome} restano {brani_al_plurale(len(pl.brani))}.")
 
     # La riproduzione.
@@ -4354,12 +4464,17 @@ class Finestra(wx.Frame):
         self.motore.suona(brano.percorso, sottobrano or brano.sottobrano, inizio=inizio, sfuma_lo_stesso=sfuma_lo_stesso, a_volume_pieno=sveglio)
         self._annuncia(pl, brano, evento)
         if ripresa:
+            self._statistiche.conta("ripresi_dal_punto")
             self.scrivi(f"Riprendo da {tempo(ripresa)}, dove l'avevi lasciato: X lo fa ripartire da capo.")
 
     def _annuncia(self, pl, brano, evento):
         """Il riscontro del brano appena partito, con la sua posizione nella
         lista e il sottobrano, le etichette della plancia e l'inseguimento."""
         numero, totale = self.coda.posizione()
+        if evento != "da_capo":
+            # Da capo e' lo stesso brano che riparte, non un avvio (1.103.0).
+            a_caso = evento == "casuale" or (self.impostazioni["casuale"] and evento in ("brano_seguente_da_solo", "successivo"))
+            self._statistiche.brano_avviato(brano.percorso, self.motore.sottobrano if self.motore.sottobrani else None, evento, a_caso)
         if getattr(pl, "selezione", False):
             dove = f"{numero} di {totale} della selezione"
         else:
@@ -4756,6 +4871,7 @@ class Finestra(wx.Frame):
         if self._chiusa or self._fermo_del_timer:
             # Il timer ha fermato tutto mentre questa fine era gia' in coda.
             return
+        self._statistiche.brano_finito()
         # Il file lungo arrivato alla fine non ha piu' un punto da riprendere.
         if self.coda.corrente is not None:
             self.posizioni.dimentica(self.coda.corrente.percorso)
@@ -4830,6 +4946,9 @@ class Finestra(wx.Frame):
         pl, corrente, sottobrano_uscente = uscente
         if self.coda.playlist is not pl or self.coda.corrente is not corrente:
             return
+        # Il brano che esce e' arrivato alla sua fine, sfumando.
+        self._statistiche.brano_finito()
+        self._statistiche.conta("passaggi_sfumati")
         self._errori_di_fila.clear()
         prima, self._mazzo_prima_del_giro = self._mazzo_prima_del_giro, None
         if prima is not None and self.impostazioni["ripetizione"] != "lista" and _stesso_posto(prima[0], uscente):
@@ -4863,6 +4982,7 @@ class Finestra(wx.Frame):
         if self._chiusa:
             return
         self._uscente = self._preparato = None
+        self._statistiche.brano_in_errore(percorso)
         if self.coda.corrente is not None:
             self._errori_di_fila[id(self.coda.corrente)] = self.coda.corrente
         self._riscontro("errore", f"Non riesco a suonare {os.path.basename(percorso or '')}.")
@@ -5074,6 +5194,7 @@ class Finestra(wx.Frame):
         fermo."""
         self._ricorda_la_posizione()
         self.motore.stop(sfumando=sfumando)
+        self._statistiche.brano_fermato()
         self._ferma_la_sfumatura()
         self._uscente = self._preparato = None
         selezione = getattr(self.coda.playlist, "selezione", False)
@@ -5120,6 +5241,7 @@ class Finestra(wx.Frame):
             return
         if scelta == valori.FINE_DEL_BRANO:
             self._timer_a_fine_brano = True
+            self._statistiche.conta("timer_a_fine_brano")
             frase = "Timer impostato: la riproduzione si ferma alla fine del brano."
         else:
             self._minuti_del_timer = scelta
@@ -5293,6 +5415,7 @@ class Finestra(wx.Frame):
         if durata is not None:
             arrivo = min(arrivo, durata)
         self.motore.salta(secondi)
+        self._statistiche.conta("secondi_avanti" if secondi > 0 else "secondi_indietro", round(abs(arrivo - prima), 3))
         di = f" di {tempo(durata)}" if durata is not None else ""
         self._riscontro(evento, f"{'Avanti' if secondi > 0 else 'Indietro'} a {tempo(arrivo)}{di}.", "salto")
         self._avvisa_l_attesa_del_sid(arrivo)
@@ -5304,6 +5427,7 @@ class Finestra(wx.Frame):
         spiegazioni (tappa 5, 1.62.0)."""
         attesa = self.motore.attesa_del_sid(arrivo)
         if attesa >= ATTESA_DA_DIRE:
+            self._statistiche.conta("attese_lunghe")
             in_corso = self.motore.in_corso or ""
             che = "Il MIDI" if formati.e_midi(in_corso) else "Il brano della console" if formati.e_chip(in_corso) else "Il SID"
             self.scrivi(f"{che} si prepara fino a {tempo(arrivo)}: circa {max(2, round(attesa))} secondi.")
@@ -5538,6 +5662,7 @@ class Finestra(wx.Frame):
             return
         bande[self._banda] = nuovo
         self._metti_le_bande(bande)
+        self._statistiche.banda(self._banda)
         suoni.guadagno(nuovo, self.impostazioni["volume_effetti"])
         self.scrivi(self._riga_della_banda(), "banda")
 
@@ -5623,6 +5748,233 @@ class Finestra(wx.Frame):
         # suona altro. La sua cartella vuota lo tiene fuori da Questo PC.
         pl = Playlist("file aperto", [Brano(percorso)], cartella="")
         self._suona(pl, pl.brani[0], "file_aperto")
+
+    # Le statistiche (Gabriele, 17 ottobre 2026, 1.103.0).
+
+    def _stato_per_le_statistiche(self):
+        """Lo stato di adesso, per l'orologio delle statistiche: cosa suona,
+        come e da dove. La durata e' una funzione, perche' la si chiede a mpv
+        solo quando serve."""
+        motore, imp = self.motore, self.impostazioni
+        percorso = motore.in_corso
+        if not percorso:
+            return {"stato": "fermo"}
+        immagine = self._video is not None and self._video.IsShown()
+        return {
+            "stato": "pausa" if motore.in_pausa else "play", "percorso": percorso, "video": formati.e_video(percorso),
+            "immagine": immagine, "schermo_intero": immagine and self._video.IsFullScreen(),
+            "volume": motore.volume, "muto": motore.muto, "velocita": motore.velocita, "tono": motore.tono, "eq": any(imp["bande"]),
+            "dissolvenza": imp["dissolvenza"]["accesa"], "casuale": imp["casuale"], "ripetizione": imp["ripetizione"],
+            "replaygain": imp["replaygain"], "scheda": self._scheda_per_le_statistiche, "sorgente": self._sorgente_per_le_statistiche(),
+            "durata": lambda: self.motore.durata,
+        }
+
+    def _sorgente_per_le_statistiche(self):
+        """Da dove suona il brano in corso, come lo dicono le statistiche."""
+        pl = self.coda.playlist
+        if pl is None:
+            return "altro"
+        if pl is self.archivio.preferiti:
+            return "Preferiti"
+        if pl in self.archivio.playlist:
+            return f"playlist {pl.nome}"
+        if pl is self.risultati:
+            return "Risultati della ricerca"
+        if getattr(pl, "selezione", False):
+            return "selezioni della plancia"
+        return "cartelle di Questo PC e Questa rete" if pl.cartella else "file aperti da soli"
+
+    def _scatto_delle_statistiche(self):
+        """Un passo dell'orologio delle statistiche, appena la finestra ha
+        tutto cio' che guarda."""
+        if self._orologio_pronto and not self._chiusa:
+            self._statistiche.scatta(self._stato_per_le_statistiche())
+
+    def _giro_delle_statistiche(self, _evento):
+        """Ogni GIRO_DELLE_STATISTICHE un passo; ogni GIRI_PER_SALVARE_LE_STATISTICHE
+        la scheda audio di adesso e il file, scritto in disparte. Un
+        salvataggio che non riesce lo si dice una volta sola."""
+        if self._chiusa:
+            return
+        self._scatto_delle_statistiche()
+        self._giri_delle_statistiche += 1
+        if self._giri_delle_statistiche % GIRI_PER_SALVARE_LE_STATISTICHE == 1:
+            self._aggiorna_la_scheda_delle_statistiche()
+        if self._giri_delle_statistiche % GIRI_PER_SALVARE_LE_STATISTICHE == 0:
+            self._statistiche.salva_in_disparte(lambda e: wx.CallAfter(self._statistiche_non_salvate_in_disparte, e))
+
+    def _statistiche_non_salvate_in_disparte(self, errore):
+        self._statistiche.conta("salvataggi_non_riusciti")
+        if self._chiusa or self._statistiche_non_salvate:
+            return
+        self._statistiche_non_salvate = True
+        self._riscontro("errore", f"Non riesco a salvare le statistiche: {errore.strerror or errore}.")
+
+    def _aggiorna_la_scheda_delle_statistiche(self):
+        """Il nome della scheda audio su cui suona la musica, per le
+        statistiche: quella scelta, o quella che Windows usa con la scelta
+        automatica, chiesta senza aprire niente."""
+        scelta = self.impostazioni["scheda_audio"]
+        if scelta:
+            self._scheda_per_le_statistiche = self._nome_della_scheda(scelta["dispositivo"], scelta["interfaccia"])
+            return
+        uscita = None
+        with contextlib.suppress(Exception):
+            uscita = schede_audio.in_uso()
+        self._scheda_per_le_statistiche = f"Automatica ({self._nome_della_scheda(uscita['dispositivo'], uscita['interfaccia'])})" if uscita else "Automatica"
+
+    def conta_un_clic(self):
+        """Un comando dalla barra dei comandi per il mouse."""
+        self._statistiche.conta("clic_sulla_barra")
+
+    def _nome_del_tasto(self, evento):
+        """Il nome di un tasto premuto nella finestra, per le statistiche;
+        None per i modificatori premuti da soli e per la ripetizione di un
+        tasto tenuto giu'."""
+        codice = evento.GetKeyCode()
+        if codice in _SOLO_MODIFICATORI or evento.IsAutoRepeat():
+            return None
+        modificatori = evento.GetModifiers()
+        unicode = evento.GetUnicodeKey()
+        if codice in NOMI_DEI_TASTI:
+            nome = NOMI_DEI_TASTI[codice]
+        elif modificatori in (wx.MOD_NONE, wx.MOD_SHIFT) and unicode not in (wx.WXK_NONE, 0) and unicode > 32 and chr(unicode).isprintable():
+            carattere = chr(unicode).lower()
+            if modificatori == wx.MOD_SHIFT and carattere in CIFRE_COL_MAIUSCOLO:
+                carattere = str(CIFRE_COL_MAIUSCOLO[carattere] % 10)
+            return nome_del_carattere(carattere, modificatori == wx.MOD_SHIFT)
+        elif unicode in (ord("\\"), 0x1C):
+            nome = "barra rovesciata"
+        elif unicode not in (wx.WXK_NONE, 0) and unicode > 32 and chr(unicode).isprintable():
+            nome = chr(unicode).upper()
+        else:
+            nome = "Altro tasto"
+        prefisso = [n for bit, n in ((wx.MOD_CONTROL, "Ctrl"), (wx.MOD_ALT, "Alt"), (wx.MOD_SHIFT, "Maiuscolo")) if modificatori & bit]
+        return f"{' e '.join(prefisso)} con {nome}" if prefisso else nome
+
+    def _comandi_dei_tasti(self):
+        """Il comando di ogni tasto a carattere, per il nome che ha nelle statistiche."""
+        return {nome_del_carattere(carattere, maiuscolo): comando for (carattere, maiuscolo), comando in TASTI.items()}
+
+    def _conta_la_ricerca(self, dove):
+        """La ricerca finita, una volta sola: i risultati, e i record."""
+        if self._ricerca_contata:
+            return
+        self._ricerca_contata = True
+        risultati = len(self.risultati.brani)
+        self._statistiche.conta("risultati", risultati)
+        if not risultati:
+            self._statistiche.conta("ricerche_senza_risultati")
+        cosa = f"{self._testo_della_ricerca}{dove or ' in tutto MeTeOra'}"
+        self._statistiche.massimo("risultati", risultati, cosa)
+        if self._inizio_della_ricerca is not None:
+            self._statistiche.massimo("ricerca_piu_lunga", round(time.monotonic() - self._inizio_della_ricerca, 1), cosa)
+
+    def _comando_statistiche(self):
+        """La voce Statistiche della plancia, e Maiuscolo con F7: la libreria
+        di adesso si conta in disparte, dalla copia delle schede, e poi si
+        apre la finestra. Mentre la libreria si conta, un'altra richiesta non
+        apre una seconda finestra."""
+        if self._statistiche_in_arrivo:
+            return
+        self._statistiche_in_arrivo = True
+        self._scatto_delle_statistiche()
+        schede = self.schedario.istantanea()
+        self._in_disparte(lambda: statistiche.censisci_la_libreria(schede), self._apri_le_statistiche)
+
+    def _apri_le_statistiche(self, censimento):
+        """La finestra delle statistiche, con la libreria contata. Un
+        conteggio non riuscito arriva come righe, e le dice la sua sezione."""
+        self._statistiche_in_arrivo = False
+        if self._chiusa:
+            return
+        if isinstance(censimento, dict):
+            libreria = self._righe_del_patrimonio() + statistiche.righe_della_libreria(censimento, dettagli.dimensione)
+            numeri = statistiche.numeri_della_libreria(censimento)
+        else:
+            libreria, numeri = self._righe_del_patrimonio() + list(censimento), {}
+        self._suono("statistiche")
+        azioni = {"azzera": lambda genitore: self._azzera_le_statistiche(genitore, libreria, numeri), "cerca": self._cerca_nelle_statistiche,
+            "suono": self._suono, "riscontro": self._riscontro}
+        with FinestraStatistiche(self, self._testo_delle_statistiche(libreria, numeri), azioni) as dialogo:
+            dialogo.ShowModal()
+
+    def _testo_delle_statistiche(self, libreria, numeri):
+        self._scatto_delle_statistiche()
+        nomi = {chiave: etichetta for chiave, (etichetta, _participio) in VOCI_DELLE_IMPOSTAZIONI.items()}
+        return "\n".join(self._statistiche.righe(version.VERSION, scheda=self.schedario.scheda, libreria=libreria, numeri_della_libreria=numeri,
+            comandi_dei_tasti=self._comandi_dei_tasti(), nomi_delle_impostazioni=nomi))
+
+    def _righe_del_patrimonio(self):
+        """Le righe della libreria di adesso che non vengono dallo
+        schedario: playlist, Preferiti, marker, punti da riprendere e
+        percorsi di rete."""
+        playlist = self.archivio.playlist
+        brani = [b for pl in playlist for b in pl.brani]
+        righe = [f"Playlist: {len(playlist)}, con {self._brani_e_durata(brani)}." if playlist else "Playlist: nessuna, oltre ai Preferiti.",
+            f"Preferiti: {self._brani_e_durata(self.archivio.preferiti.brani)}."]
+        if playlist:
+            lunga = max(playlist, key=lambda pl: len(pl.brani))
+            righe.append(f"La playlist più lunga: {lunga.nome}, {brani_al_plurale(len(lunga.brani))}.")
+        voci = self.marcatori.voci
+        quanti = sum(len(voce["marker"]) for voce in voci.values())
+        righe.append(f"Marker di adesso: {quanti}, su {al_plurale(len(voci), 'brano', 'brani')}.")
+        if voci:
+            voce = max(voci.values(), key=lambda v: len(v["marker"]))
+            nome = os.path.basename((voce.get("percorsi") or [voce.get("file") or ""])[0])
+            righe.append(f"Il brano con più marker adesso: {nome}, {len(voce['marker'])}.")
+        righe.append(f"File lunghi con un punto da riprendere: {self.posizioni.quante()}.")
+        righe.append(f"Percorsi di rete scritti a mano: {len(self.impostazioni['percorsi_di_rete'])}.")
+        return righe
+
+    def _brani_e_durata(self, brani):
+        """Quanti brani e quanto durano, a parole, per le statistiche."""
+        durate = [self.schedario.durata(b) for b in brani]
+        note = [d for d in durate if d is not None]
+        testo = brani_al_plurale(len(brani))
+        if note:
+            testo += f", {statistiche.durata(sum(note))}"
+        if len(note) < len(durate):
+            testo += f", più {len(durate) - len(note)} di cui la durata non si sa"
+        return testo
+
+    def _azzera_le_statistiche(self, genitore, libreria, numeri):
+        """Azzera le statistiche nella loro finestra, dopo una conferma con No
+        come risposta predefinita: da' il testo nuovo, o None se restano."""
+        if not self._conferma("Azzero tutte le statistiche? I conti ripartono da zero, e non si torna indietro; restano la data della prima raccolta "
+                "e quante volte le hai azzerate. La copia dell'ultimo avvio resta nella cartella copie.", "Azzera le statistiche", genitore):
+            self._annullato("Le statistiche restano come sono.")
+            return None
+        self._statistiche.azzera()
+        self._salva_le_statistiche()
+        self._riscontro("statistiche_azzerate", "Statistiche azzerate: i conti ripartono da adesso.")
+        return self._testo_delle_statistiche(libreria, numeri)
+
+    def _salva_le_statistiche(self):
+        try:
+            self._statistiche.salva()
+        except OSError as e:
+            self._statistiche.conta("salvataggi_non_riusciti")
+            self._riscontro("errore", f"Non riesco a salvare le statistiche: {e.strerror or e}.")
+
+    def _cerca_nelle_statistiche(self, genitore, testo):
+        """La barra rovesciata nelle statistiche, come nella console: il
+        campo con le istruzioni, e se il testo non si capisce lo spiega e lo
+        ripropone. Da' (testo, espressione), o None se la ricerca e' annullata."""
+        while True:
+            self._domanda()
+            with FinestraFiltro(genitore, "Cerca nelle statistiche", testo, ISTRUZIONI_DELLE_STATISTICHE) as dialogo:
+                if dialogo.ShowModal() != wx.ID_OK:
+                    self._annullato("Ricerca nelle statistiche annullata.")
+                    return None
+                testo = " ".join(dialogo.testo.splitlines()).strip()
+            if not testo:
+                self._annullato("Ricerca nelle statistiche annullata: il testo è vuoto.")
+                return None
+            try:
+                return testo, modello_della_console(testo)
+            except ErroreFiltro as e:
+                self._riscontro("errore", f"Nella ricerca non capisco: {e}")
 
     # Le impostazioni, piano 5.8.
 
@@ -5722,6 +6074,7 @@ class Finestra(wx.Frame):
             "destinazione": self._scegli_la_destinazione,
             "karaoke": self._scegli_il_modo_del_karaoke,
         }
+        self._statistiche.impostazione(chiave)
         if chiave in azioni:
             azioni[chiave](genitore)
         else:
@@ -6200,6 +6553,11 @@ class Finestra(wx.Frame):
         if self._chiusa or not testo or not self.impostazioni["sottotitoli"]:
             return
         imp = self.impostazioni
+        self._statistiche.conta("righe_dei_sottotitoli")
+        if self._lettura is not None:
+            self._statistiche.conta("righe_riconosciute")
+        elif formati.e_midi(self.motore.in_corso or ""):
+            self._statistiche.conta("righe_del_karaoke")
         if imp["destinazione"] in ("entrambi", "sintesi"):
             self._sintesi.dici(testo, imp["sintesi"], "sintesi")
         if imp["destinazione"] in ("entrambi", "braille"):
@@ -6566,6 +6924,7 @@ class Finestra(wx.Frame):
 
     def _usa_il_banco(self, percorso, dopo=None, genitore=None):
         """Il banco scelto vale da subito, e si ricorda."""
+        self._statistiche.conta("banchi_scelti")
         self.impostazioni["banco_midi"] = percorso
         self._salva_impostazioni()
         self._applica_il_banco()
@@ -6890,6 +7249,7 @@ class Finestra(wx.Frame):
             return
         tolti = sum(self.marcatori.togli(k, m) for k, m in unici)
         self._salva_i_marker(*dict.fromkeys(k for k, _m in unici))
+        self._statistiche.conta("marker_tolti_finestra", tolti)
         self._riscontro("marker_eliminato", f"Eliminati {tolti} marker.")
 
     def _cancella_tutti_i_marcatori(self, genitore):
@@ -6907,6 +7267,7 @@ class Finestra(wx.Frame):
         chiavi = list(voci)
         tolti = self.marcatori.cancella_tutto()
         self._salva_i_marker(*chiavi)
+        self._statistiche.conta("marker_tolti_finestra", tolti)
         self._riscontro("marcatori_cancellati", f"Cancellati tutti i marcatori: {tolti} marker in {file} file.")
 
     def _esporta_i_marcatori(self, scelti, genitore):
@@ -7026,6 +7387,7 @@ class Finestra(wx.Frame):
         try:
             self.marcatori.salva()
         except OSError as e:
+            self._statistiche.conta("salvataggi_non_riusciti")
             self._riscontro("errore", f"Non riesco a salvare i marker, riprovo all'uscita: {e}")
         for k in chiavi:
             self._rinfresca_i_marker(k)
@@ -7042,6 +7404,7 @@ class Finestra(wx.Frame):
             self._rinomina_il_marker(k, esistente)
             return
         marker = self.marcatori.aggiungi(k, posizione, percorso, durata, numero)
+        self._statistiche.marker_messo(percorso)
         self._salva_i_marker(k)
         self._riscontro("marker_messo", f"Marker {marker['nome']} a {durata_lunga(marker['tempo'])}.")
 
@@ -7118,6 +7481,7 @@ class Finestra(wx.Frame):
             testo = f"{chi[:1].upper()}{chi[1:]} non ha marker." if not elenco else f"Non c'è il marker {numero}: {chi} ne ha {len(elenco)}."
             self._riscontro("nessun_altro_brano", testo)
             return
+        self._statistiche.conta("marker_con_le_cifre")
         self._vai_al_marker({"playlist": dati["playlist"], "brano": brano, "numero": sottobrano, "marker": elenco[numero - 1]})
 
     def _togli_i_marker(self, quali):
@@ -7135,6 +7499,7 @@ class Finestra(wx.Frame):
         if not tolti:
             self._riscontro("non_disponibile", f"Non ci sono marker da togliere {dove}.")
             return
+        self._statistiche.conta(f"marker_tolti_{quali}", tolti)
         self._salva_i_marker(k)
         self._riscontro(evento, f"{'Tolto' if tolti == 1 else 'Tolti'} {tolti} marker {dove}.")
 
@@ -7172,6 +7537,7 @@ class Finestra(wx.Frame):
                 vicina = self.albero.GetPrevSibling(voce)
             self._seleziona(vicina if vicina.IsOk() else self.albero.GetItemParent(voce))
         self.marcatori.togli(k, marker)
+        self._statistiche.conta("marker_tolti_uno")
         self._salva_i_marker(k)
         self._riscontro("marker_eliminato", f"Eliminato il marker {marker['nome']}, a {durata_lunga(marker['tempo'])}.")
 
@@ -7181,6 +7547,7 @@ class Finestra(wx.Frame):
         pausa; il suono dice se il salto va avanti o indietro. Vero se ha
         suonato."""
         brano, numero, marker = dati["brano"], dati.get("numero"), dati["marker"]
+        self._statistiche.conta("vai_al_marker")
         stesso = self.motore.in_corso == brano.percorso and (numero is None or self.motore.sottobrano == numero)
         if stesso:
             avanti = marker["tempo"] >= (self.motore.posizione or 0.0)
@@ -7774,6 +8141,7 @@ class Finestra(wx.Frame):
         # il fuoco resta nella plancia (tappa 9).
         self._video_in_attesa = percorso
         self.motore.suona(percorso, sottobrano, inizio=posizione, in_pausa=True)
+        self._statistiche.brano_avviato(percorso, sottobrano, "ripresa_all_avvio")
         voce = self._trova_voce_che_suona()
         if voce is not None:
             self.albero.EnsureVisible(voce)
@@ -7804,6 +8172,7 @@ class Finestra(wx.Frame):
             self._ricerca.ferma()
         self.impostazioni["ripresa"] = self._stato_da_riprendere()
         self._orologio_delle_posizioni.Stop()
+        self._orologio_delle_statistiche.Stop()
         self._sveglia_del_timer.Stop()
         self._orologio_della_sfumatura.Stop()
         self._ricorda_la_posizione()
@@ -7827,6 +8196,12 @@ class Finestra(wx.Frame):
             self._video = None
         self._salva_all_uscita(self.schedario.salva, "lo schedario delle durate e dei tag", non_salvati)
         self._salva_all_uscita(self.impostazioni.salva, "le impostazioni", non_salvati)
+        # Le statistiche per ultime: contano anche i salvataggi non riusciti.
+        # L'ultimo passo dell'orologio guarda il motore, che e' ancora aperto.
+        self._statistiche.scatta(self._stato_per_le_statistiche())
+        self._statistiche.chiusura()
+        self._statistiche.conta("salvataggi_non_riusciti", len(non_salvati))
+        self._salva_all_uscita(self._statistiche.salva, "le statistiche", non_salvati)
         self.motore.chiudi()
         if non_salvati:
             # La console sta per sparire: lo dice una finestra, prima di

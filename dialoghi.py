@@ -1,6 +1,6 @@
-# MeTeOra, i dialoghi: il campo da una riga, la domanda con Si' e No, la finestra delle impostazioni, la scelta da una lista, la finestra dei marcatori e l'invito a offrire un caffe'.
+# MeTeOra, i dialoghi: il campo da una riga, la domanda con Si' e No, la finestra delle impostazioni, la scelta da una lista, la finestra dei marcatori, l'invito a offrire un caffe' e le statistiche.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); DialogoTesto arriva da finestra.py. Nella 1.66.36 la domanda con Sì e No, che si chiude con Esc. Nella 1.75.0 l'invito a offrire un caffe', come in Tornello. Nella 1.81.0 il filtro delle impostazioni. Nella 1.84.0 la proposta dell'aggiornamento.
+# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); DialogoTesto arriva da finestra.py. Nella 1.66.36 la domanda con Sì e No, che si chiude con Esc. Nella 1.75.0 l'invito a offrire un caffe', come in Tornello. Nella 1.81.0 il filtro delle impostazioni. Nella 1.84.0 la proposta dell'aggiornamento. Nella 1.103.0 la finestra delle statistiche.
 
 """I dialoghi di MeTeOra, fuori dalla finestra principale.
 
@@ -191,6 +191,121 @@ class FinestraAggiornamento(wx.Dialog):
         # La finestra puo' essere gia' chiusa, o distrutta.
         if self and self.IsModal():
             self.EndModal(wx.ID_NO)
+
+
+class FinestraStatistiche(wx.Dialog):
+    """Le statistiche (1.103.0): il testo in un campo di sola lettura, che ha
+    il fuoco all'apertura, con il cursore in cima, e i pulsanti Azzera le
+    statistiche e Chiudi, il predefinito. Nel testo la barra rovesciata
+    cerca, come nella console, e Invio passa all'occorrenza seguente;
+    arrivata in fondo riparte dall'inizio. Senza una ricerca, Invio nel testo
+    chiude, come nelle altre finestre di sola lettura; Esc e Chiudi chiudono
+    sempre. azioni e' un dizionario di funzioni della finestra principale:
+      cerca(genitore, testo di prima): chiede cosa cercare, e da' (testo,
+        espressione) o None;
+      azzera(genitore): chiede la conferma e azzera, e da' il testo nuovo, o
+        None se le statistiche restano;
+      suono(evento) e riscontro(evento, testo), per la ricerca."""
+
+    def __init__(self, genitore, testo, azioni):
+        from GBwx import STILE_ADATTABILE, adatta_finestra, pannello_scorrevole
+
+        super().__init__(genitore, title="Statistiche di MeTeOra", style=STILE_ADATTABILE)
+        self._azioni = azioni
+        self._valore = testo
+        self._cercato = ""
+        self._modello = None
+        # Inizio e fine dell'ultima occorrenza trovata, nel testo.
+        self._occorrenza = None
+        pannello = pannello_scorrevole(self)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        self.testo = wx.TextCtrl(pannello, value=testo, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2)
+        self.testo.SetName("Statistiche")
+        self.azzera = wx.Button(pannello, label="&Azzera le statistiche")
+        self.chiudi = wx.Button(pannello, wx.ID_CANCEL, "&Chiudi")
+        pulsanti = wx.BoxSizer(wx.HORIZONTAL)
+        for pulsante in (self.azzera, self.chiudi):
+            pulsanti.Add(pulsante, 0, wx.LEFT, 5)
+        sizer.Add(self.testo, 1, wx.EXPAND | wx.ALL, 5)
+        sizer.Add(pulsanti, 0, wx.ALL | wx.ALIGN_RIGHT, 5)
+        pannello.SetSizer(sizer)
+        adatta_finestra(self, pannello, (720, 520))
+        self.SetEscapeId(wx.ID_CANCEL)
+        self.chiudi.SetDefault()
+        self.azzera.Bind(wx.EVT_BUTTON, lambda _evento: self._azzera())
+        self.chiudi.Bind(wx.EVT_BUTTON, lambda _evento: self.EndModal(wx.ID_CANCEL))
+        self.Bind(wx.EVT_CHAR_HOOK, self._tasto)
+        self.testo.SetFocus()
+        self.testo.SetInsertionPoint(0)
+
+    def _tasto(self, evento):
+        if evento.GetEventObject() is self.testo:
+            if _premuto_invio(evento) and not evento.IsAutoRepeat():
+                if self._modello is None:
+                    self.EndModal(wx.ID_CANCEL)
+                else:
+                    self._seguente()
+                return
+            if evento.GetUnicodeKey() == ord("\\") and evento.GetModifiers() == wx.MOD_NONE:
+                self._cerca()
+                return
+        evento.Skip()
+
+    # Le posizioni: il controllo conta come Windows, e i caratteri fuori dal
+    # piano base, come le emoji, valgono due, come nella console.
+
+    def _nel_controllo(self, posizione):
+        return len(self._valore[:posizione].encode("utf-16-le")) // 2
+
+    def _dal_controllo(self, nativa):
+        return len(self._valore.encode("utf-16-le")[:2 * nativa].decode("utf-16-le", errors="ignore"))
+
+    def _cerca(self):
+        risposta = self._azioni["cerca"](self, self._cercato)
+        self.testo.SetFocus()
+        if risposta is None:
+            return
+        self._cercato, self._modello = risposta
+        self._occorrenza = None
+        self._trova(0)
+
+    def _seguente(self):
+        """Invio: dall'occorrenza su cui sta il cursore si riparte dalla sua
+        fine, come nella console; da un altro punto, dal carattere dopo."""
+        posizione = self._dal_controllo(self.testo.GetInsertionPoint())
+        if self._occorrenza is not None and posizione == self._occorrenza[0]:
+            self._trova(max(self._occorrenza[1], posizione + 1))
+        else:
+            self._trova(posizione + 1)
+
+    def _trova(self, da):
+        trovato = self._modello.search(self._valore, da)
+        ripartito = trovato is None and da > 0
+        if ripartito:
+            trovato = self._modello.search(self._valore)
+        if trovato is None:
+            self._occorrenza = None
+            self._azioni["riscontro"]("non_trovato_nelle_statistiche", f"Nelle statistiche non c'è {self._cercato}.")
+            return
+        self._occorrenza = trovato.span()
+        self._azioni["suono"]("ripartito_nelle_statistiche" if ripartito else "trovato_nelle_statistiche")
+        posizione = self._nel_controllo(trovato.start())
+        self.testo.SetInsertionPoint(posizione)
+        self.testo.ShowPosition(posizione)
+
+    def _azzera(self):
+        nuovo = self._azioni["azzera"](self)
+        if nuovo is not None:
+            self._valore = nuovo
+            self.testo.SetValue(nuovo)
+            self._occorrenza = None
+            self.testo.SetInsertionPoint(0)
+        self.testo.SetFocus()
+
+    @property
+    def valore(self):
+        """Il testo delle statistiche mostrato."""
+        return self._valore
 
 
 def durata_dell_attesa(secondi):

@@ -230,6 +230,15 @@ kbd {
 <li><a href="#braille-a-blocchi">La barra braille a blocchi</a></li>
 <li><a href="#esempi-karaoke">Esempi</a></li>
 </ul></li>
+<li><a href="#statistiche">Le statistiche</a>
+<ul>
+<li><a href="#statistiche-finestra">La finestra delle statistiche</a></li>
+<li><a href="#statistiche-sezioni">Che cosa contano</a></li>
+<li><a href="#statistiche-ricerca">Cercare nelle statistiche</a></li>
+<li><a href="#statistiche-azzerare">Azzerare le statistiche</a></li>
+<li><a href="#statistiche-file">Il file delle statistiche</a></li>
+<li><a href="#esempi-statistiche">Esempi</a></li>
+</ul></li>
 <li><a href="#impostazioni">Le impostazioni</a>
 <ul>
 <li><a href="#impostazioni-finestra">La finestra delle impostazioni</a></li>
@@ -279,6 +288,7 @@ kbd {
 <li><kbd>Maiuscolo con F12</kbd>: spegne e riaccende i tasti rapidi a carattere. Spenti, lettere, cifre e segni vanno alla plancia, che salta alla voce che comincia con ciò che scrivi; i tasti funzione, Esc e Ctrl con la barra rovesciata restano.</li>
 <li><kbd>F2</kbd>: scrive nella console le novità delle versioni più recenti, con in fondo dove leggere il changelog intero, e ci porta il fuoco.</li>
 <li><kbd>F3</kbd>: scrive nella console i crediti e ci porta il fuoco.</li>
+<li><kbd>Maiuscolo con F7</kbd>: apre le statistiche, come la voce Statistiche della plancia: ogni sorta di conti, dal tempo di ascolto per formato ai tasti più premuti. Nel loro testo la barra rovesciata cerca e Invio passa all'occorrenza seguente.</li>
 <li><kbd>Esc</kbd>: esce da MeTeOra salvando tutto, e alla riapertura ritrovi in pausa il brano e il punto a cui eri.</li>
 <li><kbd>Alt con F4</kbd>: esce da MeTeOra come Esc, con lo stesso salvataggio.</li>
 </ul>
@@ -549,7 +559,7 @@ kbd {
 <li>Il cruscotto, F7: i tasti del punto da cui arrivi.</li>
 </ul>
 <h3 id="plancia">La plancia dei comandi</h3>
-<p>La plancia è un albero. Al primo livello ci sono, nell'ordine: i Preferiti; i Risultati, che compaiono dopo la prima ricerca; il ramo Playlist; Questo PC; Questa rete; il comando Apri file e il comando Impostazioni. Ogni capitolo di questo manuale ne descrive uno.</p>
+<p>La plancia è un albero. Al primo livello ci sono, nell'ordine: i Preferiti; i Risultati, che compaiono dopo la prima ricerca; il ramo Playlist; Questo PC; Questa rete; i comandi Apri file, Statistiche e Impostazioni. Ogni capitolo di questo manuale ne descrive uno.</p>
 <h4>Muoversi nella plancia</h4>
 <p>Le frecce su e giù, Inizio, Fine, Pagina su e Pagina giù muovono il fuoco come in ogni albero di Windows. I rami si aprono con freccia destra e si chiudono con freccia sinistra, ciascuno con il suo suono: un fruscio che sale quando si apre, uno più scuro che scende quando si chiude. Aprendosi, un ramo si carica: le unità, le cartelle, i brani di una playlist, i sottobrani di un SID, i marker di un brano. Freccia destra su un ramo già aperto porta alla prima voce che contiene; freccia sinistra su una voce chiusa porta il fuoco sul ramo che la contiene, senza chiuderlo.</p>
 <p>Quando un tasto porta il fuoco a un livello diverso dell'albero, un beep breve ne dice la profondità: do al primo livello, e tre semitoni più su per ogni livello in più, fino al do 8 del diciassettesimo, oltre il quale resta lì. Vale per le frecce e per ogni comando, anche quando passa da un dialogo, come F9, J, K o Maiuscolo con Canc; scorrendo voci dello stesso livello, o lavorando nella console o nel cruscotto, il beep tace. Se il comando ha un suono suo, il beep aspetta che finisca.</p>
@@ -560,7 +570,7 @@ kbd {
 <p>F9 chiude la voce che ha il fuoco e tutto ciò che ha dentro, e ci porta la selezione; se la voce non ha niente dentro, chiude il ramo che la contiene. F10 apre la voce e tutti i rami che ha dentro, caricandoli, marker compresi, e come F9 su una voce senza niente dentro lavora sul ramo che la contiene. F10 si ferma dopo duemila rami, in qualsiasi punto della plancia: sotto Questo PC ci sono dischi interi. La console dice quanti rami ha aperto, e se si è fermato prima.</p>
 <p>Le lettere nella plancia sono comandi, come in tutta la finestra: per questo non si salta a una voce digitandone l'iniziale. Per cercare per iniziale in un ramo grande, Maiuscolo con F12 spegne i tasti rapidi a carattere, con due note che scendono, e la console lo dice: lettere, cifre e segni, anche con il Maiuscolo, vanno alla plancia, che come ogni albero di Windows salta alla voce che comincia con ciò che scrivi, se scrivi in fretta anche con più lettere; la selezione la segue, così Invio, Canc e gli altri tasti agiscono su di lei. Se nessuna voce comincia così, Windows suona il suo avviso. Fuori dalla plancia, nella console, nel cruscotto o nella finestra del video, un carattere dice soltanto che i tasti rapidi sono spenti. Restano i tasti funzione, come F5, F8 e F12, Esc, Ctrl con la barra rovesciata, e nella plancia Backspace, Spazio, Invio e Canc. Trovato quello che cerchi, Maiuscolo con F12 li riaccende, con tre note che salgono. Il cruscotto, F7, dice quando sono spenti; a ogni avvio di MeTeOra sono accesi.</p>
 <h4>Il menu della voce</h4>
-<p>Su ogni voce Invio, il tasto Applicazioni e la barra spaziatrice aprono il menu della voce, con il suono del menu. Maiuscolo con F10 invece non apre il menu come nel resto di Windows: apre tutta la plancia. Ci sono quattro eccezioni per Invio: sui comandi, come Nuova playlist, Apri file, Impostazioni o Aggiungi un percorso di rete, Invio li esegue; sulla voce Mostra altri risultati mostra i risultati seguenti; su un marker chiede il suo nuovo nome; su un capitolo suona il file da lì.</p>
+<p>Su ogni voce Invio, il tasto Applicazioni e la barra spaziatrice aprono il menu della voce, con il suono del menu. Maiuscolo con F10 invece non apre il menu come nel resto di Windows: apre tutta la plancia. Ci sono quattro eccezioni per Invio: sui comandi, come Nuova playlist, Apri file, Statistiche, Impostazioni o Aggiungi un percorso di rete, Invio li esegue; sulla voce Mostra altri risultati mostra i risultati seguenti; su un marker chiede il suo nuovo nome; su un capitolo suona il file da lì.</p>
 <p>Su una voce senza menu, come un comando, il tasto Applicazioni e la barra spaziatrice lo dicono, e su un comando ricordano che Invio lo esegue. Sulla voce d'attesa di una ricerca nella rete dicono Ricerca in corso: la voce sparisce quando la ricerca finisce. I menu di ogni voce sono descritti nei capitoli che seguono.</p>
 <h4>Canc e Maiuscolo con Canc</h4>
 <p>Canc nella plancia elimina una playlist, dopo una domanda con No come risposta predefinita; toglie un brano da una playlist o dai Preferiti; elimina un marker; toglie da Questa rete un percorso di rete aggiunto a mano, e i suoi file restano dove sono. Il fuoco resta lì dove lavoravi: sul brano che seguiva, o su quello prima, o sulla playlist se è rimasta vuota; dopo una playlist eliminata, sulla playlist vicina; dopo un marker, sul marker vicino o sul suo brano. Sui Preferiti Canc dice che non si eliminano, e che Canc su un loro brano lo toglie. Sulle altre voci, come una cartella, un'unità, un file di una cartella o un sottobrano, dice Qui Canc non cancella niente.</p>
@@ -585,7 +595,7 @@ kbd {
 <p>Con la tastiera e lo screen reader la barra non cambia niente: non prende mai il fuoco, nemmeno quando la si clicca, non si raggiunge con Tab, e quando è nascosta per Windows non c'è. Compare solo con un movimento vero del mouse, mai sotto il puntatore, e un suo pulsante risponde solo al puntatore arrivato lì muovendosi: il mouse che NVDA porta su un oggetto fa un salto solo, quindi la barra non compare e il clic di NVDA va dove deve. Con un menu aperto, o mentre la finestra si sposta, sparisce. La voce Barra dei comandi per il mouse delle impostazioni la spegne del tutto.</p>
 <h3 id="tasti-ovunque">I tasti in tutta la finestra</h3>
 <p>Tutti i tasti funzionano in tutta la finestra, qualunque area abbia il fuoco: dalla console si può mettere in pausa, cambiare il volume o aprire il filtro. Fanno eccezione i tasti propri della plancia, come Invio, Canc, Backspace, le frecce e la barra spaziatrice, e Invio della console. Le lettere valgono anche nella plancia, dove per questo non si salta alle voci digitandone l'iniziale, a meno di spegnere i tasti rapidi a carattere con Maiuscolo con F12, come spiega la sezione Muoversi nella plancia.</p>
-<p>Un tasto a lettera o un segno senza comando, premuto da solo o con Maiuscolo, lo dice con un suono, per esempio Il tasto apostrofo non ha un comando, o Maiuscolo+A non ha un comando, e il fuoco resta dov'è. Altri tasti passano a Windows in silenzio: Ctrl e Alt con le lettere e le cifre, tranne Ctrl con la barra rovesciata; Maiuscolo con F4, F7, F9 e F12; i caratteri scritti con AltGr, che nella plancia si fermano senza nessun riscontro. Il tastierino numerico resta a NVDA: nemmeno il più e il meno del tastierino cambiano il volume.</p>
+<p>Un tasto a lettera o un segno senza comando, premuto da solo o con Maiuscolo, lo dice con un suono, per esempio Il tasto apostrofo non ha un comando, o Maiuscolo+A non ha un comando, e il fuoco resta dov'è. Altri tasti passano a Windows in silenzio: Ctrl e Alt con le lettere e le cifre, tranne Ctrl con la barra rovesciata; Maiuscolo con F4; i caratteri scritti con AltGr, che nella plancia si fermano senza nessun riscontro. Il tastierino numerico resta a NVDA: nemmeno il più e il meno del tastierino cambiano il volume.</p>
 <h3 id="esempi-finestra">Esempi</h3>
 <h4>Sapere quali tasti valgono su una voce</h4>
 <ol>
@@ -606,7 +616,7 @@ kbd {
 <p>F12 scrive nella console la guida rapida, il primo capitolo di questo manuale: tutti i tasti, divisi per aree, i comandi della ricerca e del filtro e i codici dei colori, una riga per tasto. Porta il fuoco nella console con il cursore sulla prima riga, così non ti ricordi un tasto, premi F12, scorri e lo trovi. La guida resta intera anche se è più lunga delle righe che la console tiene.</p>
 <p>F2 scrive nella console le novità delle versioni più recenti, una cinquantina di righe a versioni intere, dalla più recente, ciascuna introdotta da una riga come Versione 1.71.0 del 2026-10-03; in fondo, una riga dice dove leggere il changelog intero: il file CHANGELOG.md, con la cartella in cui si trova, e la sua pagina su GitHub. F3 scrive i crediti: la versione, gli autori, la licenza di MeTeOra, dove sono i testi delle licenze e i sorgenti, e le librerie su cui MeTeOra si regge, con le loro licenze; il capitolo Licenze e crediti dice di più. Come F12, ci portano il fuoco con il cursore sulla prima riga. Se il file del manuale o delle novità non si legge, la console lo dice con il suono dell'errore.</p>
 <h3 id="avvio">L'avvio</h3>
-<p>MeTeOra si apre a tutta finestra, con il fuoco nella plancia, sui Preferiti, e un suono. La prima riga della console dice la versione e la data, e ricorda F1, F12 e F7. Se la velocità o il tono non sono quelli normali, la riga dopo lo dice, con il tasto che li riporta al normale. Se il file delle playlist, delle impostazioni o dei marker non si legge, o la scheda audio scelta non c'è, la console lo dice con il suono dell'errore: il capitolo Quando qualcosa va storto spiega cosa succede.</p>
+<p>MeTeOra si apre a tutta finestra, con il fuoco nella plancia, sui Preferiti, e un suono. La prima riga della console dice la versione e la data, e ricorda F1, F12 e F7. Se la velocità o il tono non sono quelli normali, la riga dopo lo dice, con il tasto che li riporta al normale. Se il file delle playlist, delle impostazioni, dei marker o delle statistiche non si legge, o la scheda audio scelta non c'è, la console lo dice con il suono dell'errore: il capitolo Quando qualcosa va storto spiega cosa succede.</p>
 <p>Alla riapertura ritrovi, in pausa, il brano e il punto a cui eri all'uscita, con la selezione della plancia su di lui, e la console dice Riprendo da dove eri, con il percorso e il tempo. MeTeOra ritrova anche la lista da cui suonava: la playlist, i Preferiti, la cartella, o la cartella suonata con tutte le sottocartelle, così Z, B e l'avanzamento continuano lì; se la lista non c'è più, il brano resta da solo, come un file aperto con Apri file. X riparte dal punto, e se è un video apre anche la sua finestra; fino ad allora il fuoco resta nella plancia. Se il file non c'è più, la console dice Non trovo più, con il suo percorso, che suonava l'ultima volta.</p>
 <h3 id="da-windows">Aprire i file da Windows</h3>
 <p>MeTeOra suona anche i file che gli arrivano da Windows: aperti da Esplora risorse con Apri con, o con un doppio clic se MeTeOra è il programma predefinito per quel formato; trascinati sulla finestra; o passati sulla riga di comando, come MeTeOra.exe seguito dal percorso. Un file solo, o più file insieme, suonano come una lista che non entra fra le playlist, come quella di Apri file; una cartella sola suona con tutte le sue sottocartelle, come X su di lei nella plancia. I file che MeTeOra non sa suonare li dice la console.</p>
@@ -867,7 +877,7 @@ kbd {
 <li>su Questo PC, in tutte le unità, saltando le unità di rete e i CD;</li>
 <li>sul ramo Playlist, in tutte le playlist;</li>
 <li>su Questa rete, nei suoi percorsi, e su un computer della rete nelle sue cartelle condivise già trovate;</li>
-<li>sui comandi Apri file e Impostazioni, in tutto MeTeOra.</li>
+<li>sui comandi Apri file, Statistiche e Impostazioni, in tutto MeTeOra.</li>
 </ul>
 <p>Dove non c'è niente in cui cercare, per esempio su Questa rete senza percorsi, la console lo dice e ricorda Ctrl con la barra rovesciata. La barra rovesciata funziona così anche dal cruscotto e dalla finestra del video; dalla console, invece, cerca nella console. Partita la ricerca, la console dice cosa cerca e dove, e quando ha finito quanti risultati ha trovato.</p>
 <h3 id="ricerca-ovunque">La ricerca in tutto MeTeOra</h3>
@@ -1326,6 +1336,39 @@ kbd {
 <li>Metti accanto a Canzone.mp3 il file Canzone.lrc con il testo a tempo.</li>
 <li>Con i sottotitoli letti accesi, suona Canzone.mp3: le righe arrivano da sole, e la console le scrive.</li>
 </ol>
+<h2 id="statistiche">Le statistiche</h2>
+<h3 id="statistiche-finestra">La finestra delle statistiche</h3>
+<p>La voce Statistiche, nel primo livello della plancia subito prima di Impostazioni, e Maiuscolo con F7 da tutta la finestra aprono la finestra delle statistiche, con un suono suo. Prima MeTeOra conta in sottofondo la libreria di adesso, cioè le schede dello schedario: con centinaia di migliaia di file ci vuole un attimo. La finestra ha un campo di sola lettura, che ha il fuoco con il cursore sulla prima riga, e due pulsanti: Azzera le statistiche, Alt con A, e Chiudi, Alt con C, il predefinito. Esc e Chiudi chiudono sempre; Invio nel testo chiude, finché non hai fatto una ricerca.</p>
+<p>Il testo ha un'informazione per riga, nella forma Etichetta: valore, come i dettagli di F11, così si legge e si cerca una riga alla volta. In cima ci sono la versione, da quando le statistiche si raccolgono e da quanti giorni, oggi compreso, e se le hai azzerate; poi l'elenco delle sezioni. Ogni sezione comincia con una riga come Sezione 7 di 23, i brani. I numeri non hanno il punto delle migliaia, perché in MeTeOra il punto è quello dei decimali, come in 1.75 o 58.4%; le durate lunghe si dicono a parole, come 2 giorni, 19 ore e 40 minuti; le percentuali hanno un decimale, due sotto lo 0.1%.</p>
+<h3 id="statistiche-sezioni">Che cosa contano</h3>
+<ul>
+<li>In breve: avvii, tempo aperto e in riproduzione, brani avviati e finiti, file diversi ascoltati, il formato e il brano più ascoltati, i marker.</li>
+<li>Le sessioni: la sessione di adesso, la durata media, la più lunga e la più breve, più brani in una sessione, le chiusure regolari e quelle non regolari, i file arrivati da Windows, gli aggiornamenti e le versioni usate.</li>
+<li>Il tempo: aperto, in riproduzione, in pausa e fermo; audio e video, con l'immagine o senza, e lo schermo intero; le pause e la riproduzione più lunga senza fermarsi.</li>
+<li>Il tempo per famiglia e per formato: audio, SID, video, MIDI, tracker e console, e ogni estensione suonata, con il tempo, la percentuale, gli avvii e quanti sono arrivati alla fine; in fondo i formati mai suonati.</li>
+<li>Come hai ascoltato: il volume medio e il più alto, il tempo oltre 100 e in muto, la velocità e il tono cambiati, con il tempo guadagnato, l'equalizzatore, con la banda più ritoccata, la dissolvenza, la riproduzione casuale, la ripetizione, il ReplayGain e le schede audio.</li>
+<li>I brani: come sono partiti, quanti sono finiti, quanti lasciati prima della fine e quanti nei primi 10 secondi, quanti non si sono suonati, i file e i sottobrani diversi, la durata media e l'ascolto medio prima di lasciare un brano.</li>
+<li>Le classifiche, di venti posti: i brani ascoltati più volte e più a lungo, gli autori, gli album e i generi dai tag, i decenni e l'anno, le cartelle, le unità e da dove suonavi.</li>
+<li>Il calendario: i giorni con MeTeOra aperto e con ascolto, il giorno record, la serie più lunga di giorni di fila e quella di adesso, i mesi, i giorni della settimana, le fasce del giorno e ognuna delle 24 ore.</li>
+<li>I record; poi muoversi nel brano, i marker, playlist e Preferiti, ricerca e filtri, file e tag, video, sottotitoli e karaoke, plancia e tastiera, con i tasti più premuti, console e aiuto, impostazioni, rete e MIDI, e la salute: errori, problemi interni, chiusure non regolari, salvataggi non riusciti.</li>
+<li>La libreria di adesso, contata a ogni apertura: playlist, Preferiti, marker, punti da riprendere, percorsi di rete, e dallo schedario i file, lo spazio, la durata di tutta la libreria, le famiglie, i formati, le unità, il file più lungo e il più corto, gli autori, gli album, i generi e gli anni dei tag. Una durata oltre una settimana non è credibile e resta fuori dai conti: l'ultima riga dice quante sono.</li>
+<li>Le curiosità, e in fondo tutti gli eventi, uno per riga, dal più frequente: ogni azione di MeTeOra che ha un suono suo.</li>
+</ul>
+<p>Un brano è finito quando arriva alla fine da solo, anche sfumando nel seguente; è lasciato quando lo cambi o lo fermi prima; un brano che suona ancora quando chiudi MeTeOra non è lasciato, e ha una riga sua. X sul brano che suona lo fa ripartire da capo, e non è un altro avvio. Il tempo si conta a passi di un secondo: se il PC va in sospensione, o MeTeOra resta fermo, un passo vale al più cinque secondi. Gli effetti sonori si contano anche con il volume degli effetti a zero, e i tasti premuti nella finestra principale, non quelli dei dialoghi; un tasto tenuto giù conta una volta.</p>
+<h3 id="statistiche-ricerca">Cercare nelle statistiche</h3>
+<p>Nel testo la barra rovesciata apre il campo della ricerca, con le regole della ricerca nella console: il testo si cerca così com'è, maiuscole e minuscole non contano, l'asterisco vale qualsiasi testo nella stessa riga, il cancelletto una o più cifre, le virgolette la sequenza esatta. Il cursore va alla prima occorrenza, dall'inizio, con un suono, e NVDA legge la riga; Invio passa alla seguente, e arrivato in fondo riparte dall'inizio, con un suono suo. Se il testo non c'è, la console lo dice. Per andare a una sezione si cerca Sezione e il suo numero, come Sezione 12.</p>
+<h3 id="statistiche-azzerare">Azzerare le statistiche</h3>
+<p>Azzera le statistiche chiede una conferma, con No come risposta predefinita. Con Sì tutti i conti ripartono da zero, da quel momento, e il testo si riscrive al suo posto con il cursore in cima; restano la data della prima raccolta e quante volte le hai azzerate, con l'ultima data, e la sessione di adesso conta come la prima. La libreria di adesso non cambia, perché non è un conto. Per tornare indietro c'è la copia dell'ultimo avvio nella cartella copie, come per gli altri dati: a MeTeOra chiuso la si rimette al posto del file vero.</p>
+<h3 id="statistiche-file">Il file delle statistiche</h3>
+<p>Le statistiche stanno in MeTeOra - Statistiche.json, accanto agli altri dati, e si scrivono ogni minuto, in sottofondo, e all'uscita: un crollo perde al più l'ultimo minuto. Lo storico dei brani, da cui vengono le classifiche, ricorda fino a 50000 file; oltre, escono i meno ascoltati, e i totali restano giusti perché si contano a parte. Se l'ultima volta MeTeOra non si è chiuso bene, all'avvio la sessione di prima conta come chiusura non regolare. Le statistiche partono da zero con la versione che le porta, la 1.103.0, e niente esce dal PC.</p>
+<h3 id="esempi-statistiche">Esempi</h3>
+<ul>
+<li>Premi Maiuscolo con F7: senti il suono delle statistiche, e NVDA legge la prima riga, con la versione e da quando si raccolgono.</li>
+<li>Premi la barra rovesciata, scrivi Sezione 8 e premi Invio: il cursore va alle classifiche, e con freccia giù leggi i brani ascoltati più volte.</li>
+<li>Cerca più ascoltat: trovi Il formato più ascoltato, nella prima sezione; Invio ti porta alle altre righe che lo dicono, come Il brano più ascoltato.</li>
+<li>Cerca "SID": con le virgolette trovi solo SID scritto in maiuscolo, come SID del Commodore 64, e non le parole che lo contengono.</li>
+<li>Premi Alt con A, poi S alla domanda: le statistiche ripartono da zero, e la console dice Statistiche azzerate.</li>
+</ul>
 <h2 id="impostazioni">Le impostazioni</h2>
 <h3 id="impostazioni-finestra">La finestra delle impostazioni</h3>
 <p>La voce Impostazioni, l'ultima del primo livello della plancia, apre la finestra delle impostazioni: una lista con una riga per voce, il nome e il valore di adesso, per esempio Volume della musica: 80. Cinque voci dicono fra parentesi il tasto che le cambia: Riproduzione casuale (Maiuscolo+N), Ripetizione (Maiuscolo+V), Video (Maiuscolo+F1), Sottotitoli letti (Maiuscolo+F2) e Inseguimento della plancia (Maiuscolo+F8). Anche altre voci, come Volume della musica o Dissolvenza, hanno un tasto, che la guida rapida elenca, ma la loro riga non lo dice. Invio su una voce, o il doppio clic, la cambia, o fa la sua azione; Esc, o il pulsante Chiudi, torna alla plancia. Dentro la finestra le lettere non sono comandi del lettore: come in ogni lista di Windows portano alla voce seguente che comincia così, e ripremute alla successiva, e i tasti della finestra principale, compresi i tasti funzione, qui non valgono.</p>
@@ -1467,17 +1510,19 @@ kbd {
 <li>MeTeOra - Schedario.json: le durate, le dimensioni e i tag dei file che MeTeOra ha letto, così non li rilegge ogni volta. Dopo un aggiornamento che legge meglio un formato, le schede di quel formato si rileggono da sole.</li>
 <li>MeTeOra - Marcatori.json: i marker di tutti i file.</li>
 <li>MeTeOra - Posizioni.json: il punto in cui hai lasciato i file lunghi, fino a mille, i più recenti.</li>
+<li>MeTeOra - Statistiche.json: le statistiche, descritte nel capitolo Le statistiche. Si scrive ogni minuto, in sottofondo, e all'uscita.</li>
 <li>MeTeOra - Marcatori esportati.json: il nome proposto da Esporta selezionati, nella finestra dei marcatori.</li>
-<li>La cartella copie: le ultime tre versioni diverse di MeTeOra - Playlist.json, MeTeOra - Marcatori.json, MeTeOra - Impostazioni.json e MeTeOra - Posizioni.json, una per avvio, con il numero in fondo al nome: .1 è la più recente. Se una sessione è andata storta, per esempio hai svuotato una playlist per sbaglio, a MeTeOra chiuso copi la versione che vuoi al posto del file vero, togliendo il numero in fondo al nome. Lo schedario non ha copie: si rifà da solo rileggendo i file.</li>
+<li>La cartella copie: le ultime tre versioni diverse di MeTeOra - Playlist.json, MeTeOra - Marcatori.json, MeTeOra - Impostazioni.json, MeTeOra - Posizioni.json e MeTeOra - Statistiche.json, una per avvio, con il numero in fondo al nome: .1 è la più recente. Se una sessione è andata storta, per esempio hai svuotato una playlist per sbaglio, a MeTeOra chiuso copi la versione che vuoi al posto del file vero, togliendo il numero in fondo al nome. Lo schedario non ha copie: si rifà da solo rileggendo i file.</li>
 <li>MeTeOra - Errori.log, con la sua copia MeTeOra - Errori.log.1, e, dopo un crash, MeTeOra - Crash precedente.log: il registro degli errori e dei crash, descritto nel capitolo Quando qualcosa va storto.</li>
 <li>I file della console salvata, come MeTeOra-V1_51_3-2026_10_01-15_42.txt, scritti dalla voce Salva console.</li>
 </ul>
 <h3 id="file-illeggibili">Un file che non si legge</h3>
-<p>Un file delle playlist, delle impostazioni o dei marker rovinato, per esempio da una modifica a mano sbagliata, non si sovrascrive: all'avvio la console lo dice, con il suono dell'errore e il motivo, e il file resta com'è, da riparare.</p>
+<p>Un file delle playlist, delle impostazioni, dei marker o delle statistiche rovinato, per esempio da una modifica a mano sbagliata, non si sovrascrive: all'avvio la console lo dice, con il suono dell'errore e il motivo, e il file resta com'è, da riparare.</p>
 <ul>
 <li>Le playlist: MeTeOra parte senza playlist, e quelle nuove vanno in MeTeOra - Playlist.json.nuovo. Questo file MeTeOra non lo rilegge: alla volta dopo, se il file vero è ancora illeggibile, riparte di nuovo senza playlist. Per riavere le playlist del .nuovo, a MeTeOra chiuso lo si rinomina al posto del file vero.</li>
 <li>Le impostazioni: MeTeOra parte con quelle predefinite, e quelle nuove vanno in MeTeOra - Impostazioni.json.nuovo, che rilegge le volte dopo finché il file vero resta illeggibile, e la console lo dice.</li>
 <li>I marker: i marker nuovi vanno in MeTeOra - Marcatori.json.nuovo, che MeTeOra rilegge le volte dopo finché il file vero resta illeggibile.</li>
+<li>Le statistiche: ripartono da zero, e quelle nuove vanno in MeTeOra - Statistiche.json.nuovo, che MeTeOra rilegge le volte dopo finché il file vero resta illeggibile, e la console lo dice.</li>
 <li>Lo schedario fa eccezione: se non si legge MeTeOra non lo dice e riparte da uno schedario vuoto, rileggendo in sottofondo le durate e i tag, e al primo salvataggio lo riscrive al posto di quello rovinato. Non perdi niente, perché tutto ciò che contiene si rilegge dai file.</li>
 </ul>
 <h3 id="cartelle-programma">Le cartelle accanto al programma</h3>

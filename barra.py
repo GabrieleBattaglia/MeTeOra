@@ -1,6 +1,6 @@
 # MeTeOra, la barra dei comandi per il mouse: i comandi principali, per chi vede, sopra la finestra quando il mouse si muove.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.87.0, chiesta da Gabriele per chi vede. Nella 1.88.0 anche sopra il video, con la linea del tempo.
+# 04/10/2026: nasce con la 1.87.0, chiesta da Gabriele per chi vede. Nella 1.88.0 anche sopra il video, con la linea del tempo. Nella 1.103.0 i clic contati nelle statistiche.
 
 """La barra dei comandi per il mouse (1.87.0).
 
@@ -498,6 +498,8 @@ class BarraDeiComandi(wx.PopupWindow):
             return
         indice = self._cella_in(punto)
         if indice is not None:
+            # Il clic si conta nelle statistiche della finestra principale (1.103.0).
+            getattr(self._principale, "conta_un_clic", lambda: None)()
             getattr(self._principale, f"_comando_{self._celle[indice][1]}")()
 
     def _rilascio(self, _evento):

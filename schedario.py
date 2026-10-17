@@ -1,6 +1,6 @@
 # MeTeOra, lo schedario: durata, dimensione e tag dei file, ricordati fra un avvio e l'altro.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la 1.7.0, per le durate delle playlist (issue 4) e poi per il filtro (issue 2). Nella 1.62.4 le durate da libmpv per i formati che mutagen non conosce, e quella esatta dell'AAC grezzo. Nella 1.66.0 le schede della musica delle console, con i sottobrani. Nella 1.67.0 la scheda segue un file rinominato. Nella 1.69.0 i tag letti con tag.py, anche di WAV, AIFF, WMA e TTA. Nella 1.83.1 le variazioni delle schede, per i totali delle cartelle, e il filo che cede il passo alla finestra.
+# 30/09/2026: nasce con la 1.7.0, per le durate delle playlist (issue 4) e poi per il filtro (issue 2). Nella 1.62.4 le durate da libmpv per i formati che mutagen non conosce, e quella esatta dell'AAC grezzo. Nella 1.66.0 le schede della musica delle console, con i sottobrani. Nella 1.67.0 la scheda segue un file rinominato. Nella 1.69.0 i tag letti con tag.py, anche di WAV, AIFF, WMA e TTA. Nella 1.83.1 le variazioni delle schede, per i totali delle cartelle, e il filo che cede il passo alla finestra. Nella 1.103.0 la copia delle schede per le statistiche.
 
 """Lo schedario dei file.
 
@@ -312,6 +312,12 @@ class Schedario:
             durate = scheda.get("durate_sid")
             return durate[brano.sottobrano - 1] if durate and brano.sottobrano <= len(durate) else None
         return scheda.get("durata")
+
+    def istantanea(self):
+        """Una copia delle schede, presa sotto il lucchetto: le statistiche
+        la contano in disparte mentre il filo dello schedario lavora (1.103.0)."""
+        with self._lucchetto:
+            return dict(self.schede)
 
     def scheda(self, percorso):
         """La scheda del file se lo schedario ce l'ha, anche se non e' ancora

@@ -1,6 +1,6 @@
 # MeTeOra, le prove della finestra principale, sul desktop nascosto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15).
+# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche.
 
 import ctypes
 import datetime
@@ -54,7 +54,7 @@ def test_aree_nell_ordine_di_tabulazione(finestra):
 
 
 def test_rami_principali(finestra):
-    assert _etichette(finestra, finestra.albero.GetRootItem()) == ["Preferiti, brani: 0, totali: 0", "Playlist", "Questo PC", "Questa rete", "Apri file", "Impostazioni"]
+    assert _etichette(finestra, finestra.albero.GetRootItem()) == ["Preferiti, brani: 0, totali: 0", "Playlist", "Questo PC", "Questa rete", "Apri file", "Statistiche", "Impostazioni"]
     assert _etichette(finestra, finestra.nodo_playlist) == ["Nuova playlist"]
 
 
@@ -1521,7 +1521,7 @@ def test_ogni_tasto_e_nella_guida_rapida(finestra):
     """Ogni tasto a lettera e ogni tasto funzione ha la sua riga nella guida
     rapida, che comincia con il suo nome."""
     righe = modulo.guida_rapida(finestra._leggi_risorsa("manuale.html"))
-    tasti = [f"F{n}" for n in range(1, 13)] + [f"Maiuscolo con F{n}" for n in (1, 2, 3, 5, 6, 8, 10, 11)] + [
+    tasti = [f"F{n}" for n in range(1, 13)] + [f"Maiuscolo con F{n}" for n in (1, 2, 3, 5, 6, 7, 8, 10, 11)] + [
         "Esc", "Alt con F4", "Tab", "Maiuscolo con Tab", "Barra rovesciata", "Ctrl con la barra rovesciata", "Barra verticale",
         "Canc", "Maiuscolo con Canc", "Backspace", "Maiuscolo con Backspace", "Meno", "Più", "Cifre da 1 a 0", "Maiuscolo con le cifre da 1 a 0"]
     for (carattere, maiuscolo), _comando in modulo.TASTI.items():
@@ -2117,12 +2117,12 @@ def test_maiuscolo_e_ctrl_con_le_frecce_senza_passare_dall_albero(finestra):
     # Dopo Ctrl l'ancora resta, come in Esplora risorse: Maiuscolo con Fine
     # seleziona da b fino in fondo.
     _nell_albero(finestra, wx.WXK_END, maiuscolo=True)
-    assert _selezionate(finestra) == sorted(["b.mp3", "c.mp3", "d.mp3", "Nuova playlist", "Questo PC", "Questa rete", "Apri file", "Impostazioni"])
+    assert _selezionate(finestra) == sorted(["b.mp3", "c.mp3", "d.mp3", "Nuova playlist", "Questo PC", "Questa rete", "Apri file", "Statistiche", "Impostazioni"])
     assert finestra.albero.GetItemText(finestra._voce_corrente()) == "Impostazioni"
     # Un altro tasto lascia l'ancora: si riparte dalla voce col fuoco.
     _nell_albero(finestra, wx.WXK_LEFT)
     _nell_albero(finestra, wx.WXK_UP, maiuscolo=True)
-    assert _selezionate(finestra) == ["Apri file", "Impostazioni"]
+    assert _selezionate(finestra) == ["Impostazioni", "Statistiche"]
 
 
 def test_dopo_ctrl_i_comandi_agiscono_sulla_voce_selezionata(finestra, monkeypatch):
@@ -6297,3 +6297,87 @@ def test_t_su_un_capitolo_non_fa_perdere_il_posto(finestra):
     finestra._rinfresca_i_marker(finestra._chiave_della_voce(finestra._dati(voce_libro)))
     dati = finestra._dati(finestra._voce_corrente())
     assert dati.get("tipo") == "capitolo" and dati.get("numero") == numero
+
+
+# Le statistiche (1.103.0).
+
+
+class _FinestraStatisticheFinta:
+    """Al posto della finestra delle statistiche: annota testo e azioni."""
+
+    aperte = None
+
+    def __init__(self, genitore, testo, azioni):
+        type(self).aperte.append((genitore, testo, azioni))
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_a):
+        return False
+
+    def ShowModal(self):
+        return wx.ID_CANCEL
+
+
+def test_la_voce_statistiche_apre_la_pagina_e_maiuscolo_con_f7_anche(finestra, monkeypatch, suoni_annotati, tmp_path):
+    aperte = []
+    monkeypatch.setattr(_FinestraStatisticheFinta, "aperte", aperte)
+    monkeypatch.setattr(modulo, "FinestraStatistiche", _FinestraStatisticheFinta)
+    monkeypatch.setattr(finestra, "_in_disparte", lambda lavoro, al_termine: al_termine(lavoro()))
+    voce = _voce(finestra, finestra.albero.GetRootItem(), lambda d: d.get("comando") == "statistiche")
+    assert finestra.albero.GetItemText(voce) == "Statistiche"
+    finestra._seleziona(voce)
+    finestra._invio(wx.TreeEvent(wx.wxEVT_TREE_ITEM_ACTIVATED, finestra.albero, voce))
+    assert suoni_annotati[-1] == "statistiche"
+    genitore, testo, azioni = aperte[0]
+    assert genitore is finestra
+    righe = testo.split("\n")
+    # Raccolte dal 6 novembre, o dall'8 novembre.
+    assert righe[0].startswith(f"Statistiche di MeTeOra {modulo.version.VERSION}, raccolte dal")
+    assert "Sezione 1 di 23, in breve." in righe and "Sezione 23 di 23, tutti gli eventi." in righe
+    assert "Avvii di MeTeOra: 1." in righe
+    assert "Playlist: nessuna, oltre ai Preferiti." in righe and "Preferiti: 0 brani." in righe and "Schedario: ancora vuoto." in righe
+    # Maiuscolo con F7, da tutta la finestra; il tasto si conta.
+    _tasto(finestra, codice=wx.WXK_F7, maiuscolo=True)
+    assert len(aperte) == 2
+    dati = finestra._statistiche.dati
+    assert dati["tasti"]["Maiuscolo con F7"] == 1 and dati["eventi"]["statistiche"] == 2
+    # Azzera, dopo la conferma: il testo nuovo dice l'azzeramento, e il file c'e'.
+    monkeypatch.setattr(finestra, "_conferma", lambda *_a, **_k: True)
+    nuovo = azioni["azzera"](finestra)
+    assert "Azzerate 1 volta" in nuovo and suoni_annotati[-1] == "statistiche_azzerate"
+    assert (tmp_path / "MeTeOra - Statistiche.json").is_file()
+    monkeypatch.setattr(finestra, "_conferma", lambda *_a, **_k: False)
+    assert azioni["azzera"](finestra) is None
+    assert _ultima(finestra) == "Le statistiche restano come sono."
+
+
+def test_le_statistiche_contano_brani_tasti_e_uscita(finestra, monkeypatch, tmp_path):
+    import json
+
+    _finto_motore(finestra, monkeypatch)
+    finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n in ("a.mp3", "b.mp3", "c.mp3")])
+    pl = finestra.archivio.playlist[0]
+    finestra._suona(pl, pl.brani[0])
+    finestra._brano_finito()
+    finestra._comando_successivo()
+    dati = finestra._statistiche.dati
+    assert dati["modi"] == {"play": 1, "brano_seguente_da_solo": 1, "successivo": 1}
+    assert dati["conti"]["finiti"] == 1 and dati["conti"]["lasciati"] == 1 and dati["formati"][".mp3"]["avvii"] == 3
+    assert dati["conti"]["brani_aggiunti"] == 3 and dati["conti"]["aggiunte"] == 1
+    assert dati["eventi"]["play"] == 1 and dati["eventi"]["brano_seguente_da_solo"] == 1 and dati["eventi"]["successivo"] == 1
+    assert set(dati["sorgenti"]) <= {f"playlist {pl.nome}"}
+    # V ferma il brano: e' lasciato. I tasti si contano per nome.
+    _tasto(finestra, "v")
+    _tasto(finestra, "q")
+    assert dati["conti"]["lasciati"] == 2 and dati["tasti"]["V"] == 1 and dati["tasti"]["Q"] == 1
+    # Un tasto senza comando.
+    _tasto(finestra, "k", maiuscolo=True)
+    assert dati["senza_comando"] == {"Maiuscolo con K": 1}
+    finestra.apri_dall_esterno([], "trascinamento")
+    assert dati["conti"]["aperti_col_trascinamento"] == 1
+    # All'uscita il file si scrive, con la sessione chiusa.
+    finestra.Close(force=True)
+    salvate = json.loads((tmp_path / "MeTeOra - Statistiche.json").read_text(encoding="utf-8"))
+    assert salvate["sessione_aperta"] is False and salvate["conti"]["chiusure_regolari"] == 1 and salvate["conti"]["avvii"] == 1

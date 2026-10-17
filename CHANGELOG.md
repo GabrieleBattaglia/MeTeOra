@@ -2,6 +2,20 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.103.0] - 2026-10-17
+
+Le statistiche, chieste da Gabriele: più dati ci sono, più è contento. La proposta, discussa il 17 ottobre 2026, ha fissato venti posti per le classifiche, lo storico di 50000 brani, le durate a parole e la ricerca con la barra rovesciata, come nella console.
+
+- La voce Statistiche, nel primo livello della plancia prima di Impostazioni, e Maiuscolo con F7 da tutta la finestra aprono la finestra delle statistiche: un testo di sola lettura, con il fuoco sulla prima riga, e i pulsanti Azzera le statistiche e Chiudi, il predefinito. Esc e Chiudi chiudono sempre; Invio nel testo chiude finché non c'è una ricerca.
+- Ventitré sezioni, un'informazione per riga: in breve, le sessioni, il tempo, il tempo per famiglia e per ognuno dei formati, come hai ascoltato, i brani, le classifiche di brani, autori, album, generi, decenni, cartelle e unità, il calendario con le serie di giorni e le 24 ore, i record, il movimento nel brano, i marker, playlist e Preferiti, la ricerca, file e tag, video e sottotitoli, plancia e tastiera con i tasti più premuti, console e aiuto, impostazioni, rete e MIDI, la salute, la libreria di adesso, le curiosità e tutti gli eventi, uno per riga.
+- I conti arrivano da quattro strade: ogni effetto sonoro è un evento, contato anche con il volume degli effetti a zero; ogni tasto premuto nella finestra principale si conta per nome; un orologio di un secondo dà il tempo allo stato di prima, e un passo vale al più cinque secondi, così un PC sospeso non diventa ascolto; e i conti espliciti dove serve una quantità, come i marker tolti in blocco, i secondi saltati, i risultati della ricerca e i brani aggiunti.
+- Un brano è finito quando arriva alla fine da solo, anche sfumando; lasciato quando lo cambi o lo fermi, e lasciato subito nei primi 10 secondi; un brano ancora in corso all'uscita ha una riga sua. X da capo non è un altro avvio.
+- Autori, album, generi, anni, cartelle e unità non si salvano: si ricavano dallo storico dei brani e dai tag dello schedario. La libreria di adesso si conta a ogni apertura, in sottofondo, da una copia delle schede; le durate oltre una settimana restano fuori dai conti, e una riga dice quante sono: nello schedario di Gabriele ci sono file di prova rovinati che dicono migliaia di anni.
+- Il file è MeTeOra - Statistiche.json, scritto ogni minuto in sottofondo e all'uscita, e copiato nella cartella copie come gli altri dati; un file che non si legge non si sovrascrive, e le statistiche nuove vanno nel .nuovo. Una sessione che non si è chiusa conta come chiusura non regolare.
+- Azzera le statistiche chiede una conferma, con No predefinito; restano la data della prima raccolta e il numero degli azzeramenti.
+- Cinque suoni nuovi, da creare nella collezione di GBUtils: meteora_statistiche, meteora_statistiche_azzerate, meteora_statistiche_trovato, meteora_statistiche_ripartito e meteora_statistiche_non_trovato.
+- Il manuale ha il capitolo Le statistiche, e Maiuscolo con F7 nella guida rapida. Correzione del manuale: Maiuscolo con F9 e F12 non passano più a Windows da tempo; ora passa solo Maiuscolo con F4.
+
 ## [1.102.4] - 2026-10-06
 
 - L'invito a offrire un caffè non compare più alla chiusura, dove usciva una volta su cinque: resta soltanto la voce Dona per questo progetto, nelle impostazioni, che lo apre sempre (Gabriele, 6 ottobre 2026, per tutti i suoi programmi con una finestra).

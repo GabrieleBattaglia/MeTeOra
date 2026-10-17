@@ -29,7 +29,7 @@ MeTeOra non è firmato digitalmente, come molti programmi liberi scritti da una 
 
 A ogni avvio MeTeOra controlla su GitHub se c'è una versione nuova. Se c'è, una finestra mostra le novità e chiede se aggiornare. Con Aggiorna adesso, MeTeOra scarica la versione nuova, si chiude, sostituisce i suoi file e si riapre da solo. Playlist, impostazioni e marker restano come sono.
 
-Tutti i dati stanno nella cartella di MeTeOra, accanto a MeTeOra.exe. Sono i file il cui nome comincia per MeTeOra, come MeTeOra - Playlist.json e MeTeOra - Impostazioni.json, più la cartella copie, con le ultime tre versioni di playlist, marker, impostazioni e punti lasciati. Per salvarli, o portarli su un altro computer, basta copiare quei file.
+Tutti i dati stanno nella cartella di MeTeOra, accanto a MeTeOra.exe. Sono i file il cui nome comincia per MeTeOra, come MeTeOra - Playlist.json e MeTeOra - Impostazioni.json, più la cartella copie, con le ultime tre versioni di playlist, marker, impostazioni, punti lasciati e statistiche. Per salvarli, o portarli su un altro computer, basta copiare quei file.
 
 ## Il manuale
 

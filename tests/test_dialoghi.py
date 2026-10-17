@@ -1,6 +1,6 @@
 # MeTeOra, le prove dei dialoghi: impostazioni, scelta da una lista e marcatori, costruiti veri e mai mostrati.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8).
+# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8). Nella 1.103.0 la finestra delle statistiche.
 
 """I dialoghi veri, sul desktop nascosto e senza ShowModal: si leggono le
 righe e i nomi, e i tasti arrivano come eventi di wx mandati direttamente
@@ -436,5 +436,57 @@ def test_l_invito_a_offrire_un_caffe(genitore, monkeypatch):
         monkeypatch.setattr(webbrowser, "open", lambda _indirizzo: 1 / 0)
         dialogo.dona.GetEventHandler().ProcessEvent(clic)
         assert finiti[-1] == wx.ID_YES
+    finally:
+        dialogo.Destroy()
+
+
+def test_la_finestra_delle_statistiche(genitore, monkeypatch):
+    # 1.103.0: il testo in sola lettura, con il fuoco in cima; Chiudi
+    # predefinito, Esc chiude; la barra rovesciata cerca come nella console e
+    # Invio passa all'occorrenza seguente; senza una ricerca, Invio chiude.
+    import re
+
+    fatti = []
+    risposte = {"cerca": ("sezione", re.compile("(?i:sezione)")), "azzera": "Statistiche nuove."}
+    azioni = {"cerca": lambda _genitore, prima: fatti.append(("cerca", prima)) or risposte["cerca"],
+        "azzera": lambda _genitore: fatti.append(("azzera",)) or risposte["azzera"],
+        "suono": lambda evento: fatti.append(("suono", evento)),
+        "riscontro": lambda evento, testo: fatti.append(("riscontro", evento, testo))}
+    testo = "Statistiche.\nSezione 1 di 2, in breve.\nAvvii: 3.\nSezione 2 di 2, il tempo."
+    dialogo = dialoghi.FinestraStatistiche(genitore, testo, azioni)
+    try:
+        assert dialogo.GetTitle() == "Statistiche di MeTeOra" and dialogo.testo.GetName() == "Statistiche"
+        assert dialogo.testo.GetValue().replace("\r\n", "\n").replace("\r", "\n") == testo and dialogo.testo.GetInsertionPoint() == 0
+        assert (dialogo.azzera.GetLabelText(), dialogo.chiudi.GetLabelText()) == ("Azzera le statistiche", "Chiudi")
+        assert dialogo.GetDefaultItem() is dialogo.chiudi and dialogo.GetEscapeId() == wx.ID_CANCEL
+        finiti = []
+        monkeypatch.setattr(dialogo, "EndModal", finiti.append)
+        # Senza una ricerca Invio chiude; sui pulsanti Invio resta loro.
+        _tasto(dialogo, dialogo.testo)
+        assert finiti == [wx.ID_CANCEL]
+        assert _tasto(dialogo, dialogo.azzera).GetSkipped()
+        # La barra rovesciata cerca dall'inizio; Invio va avanti, e in fondo riparte.
+        _tasto(dialogo, dialogo.testo, carattere="\\")
+        assert fatti[0] == ("cerca", "")
+        assert dialogo.testo.GetInsertionPoint() == testo.index("Sezione 1") and fatti[-1] == ("suono", "trovato_nelle_statistiche")
+        _tasto(dialogo, dialogo.testo)
+        assert dialogo.testo.GetInsertionPoint() == testo.index("Sezione 2") and fatti[-1] == ("suono", "trovato_nelle_statistiche")
+        _tasto(dialogo, dialogo.testo)
+        assert dialogo.testo.GetInsertionPoint() == testo.index("Sezione 1") and fatti[-1] == ("suono", "ripartito_nelle_statistiche")
+        assert finiti == [wx.ID_CANCEL]
+        # La ricerca dopo riparte dal testo di prima.
+        risposte["cerca"] = ("assente", re.compile("assente"))
+        _tasto(dialogo, dialogo.testo, carattere="\\")
+        assert fatti[-2] == ("cerca", "sezione") and fatti[-1] == ("riscontro", "non_trovato_nelle_statistiche", "Nelle statistiche non c'è assente.")
+        # Azzera: il testo nuovo, con il cursore in cima; con None resta quello di prima.
+        clic = wx.CommandEvent(wx.wxEVT_BUTTON, dialogo.azzera.GetId())
+        clic.SetEventObject(dialogo.azzera)
+        dialogo.azzera.GetEventHandler().ProcessEvent(clic)
+        assert dialogo.valore == "Statistiche nuove." and dialogo.testo.GetInsertionPoint() == 0
+        risposte["azzera"] = None
+        dialogo.azzera.GetEventHandler().ProcessEvent(clic)
+        assert dialogo.valore == "Statistiche nuove."
+        for evento in ("trovato_nelle_statistiche", "ripartito_nelle_statistiche", "non_trovato_nelle_statistiche"):
+            assert evento in suoni.EVENTI
     finally:
         dialogo.Destroy()

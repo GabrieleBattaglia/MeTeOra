@@ -1,6 +1,6 @@
 # MeTeOra, le posizioni dei file lunghi: audiolibri e film riprendono dal punto in cui li si e' lasciati.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.92.0, tappa 12 e del piano.
+# 04/10/2026: nasce con la 1.92.0, tappa 12 e del piano. Nella 1.103.0 quante sono, per le statistiche.
 
 """Le posizioni dei file lunghi (1.92.0).
 
@@ -52,6 +52,10 @@ class Posizioni:
         """I secondi a cui riprendere il file, o None."""
         punto = self._punti.get(percorso)
         return punto["secondi"] if punto else None
+
+    def quante(self):
+        """Quanti file hanno un punto da riprendere, per le statistiche."""
+        return len(self._punti)
 
     def dimentica(self, percorso):
         if self._punti.pop(percorso, None) is not None:
