@@ -1,4 +1,4 @@
-Collaudo di MeTeOra 1.103.0 e 1.103.1, con NVDA: le statistiche, e lo schedario senza le durate assurde. Prima crea in GBUtils i cinque suoni meteora_statistiche, meteora_statistiche_azzerate, meteora_statistiche_trovato, meteora_statistiche_ripartito e meteora_statistiche_non_trovato: senza, la finestra non si apre. Poi python -m pytest, e l'avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Collaudo di MeTeOra 1.103.0, 1.103.1 e 1.103.2, con NVDA: le statistiche, i loro suoni e lo schedario senza le durate assurde. Prima git pull in MeTeOra e in GBUtils: serve GBUtils V206, con i cinque suoni nuovi. Poi python -m pytest, e l'avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta. Scrivi le note sulla riga della voce; le voci superate si cancellano.
 Nella plancia, al primo livello, la voce Statistiche sta fra Apri file e Impostazioni; Invio la apre, con il suo suono, e il fuoco è sulla prima riga del testo.
 Maiuscolo con F7, dalla plancia, dalla console, dal cruscotto e con la finestra di un video davanti, apre la stessa finestra. Premuto due volte di fila apre una finestra sola.
 Con lo schedario intero l'apertura arriva dopo un attimo: dimmi quanto aspetti, e se la finestra resta ferma mentre conta.
@@ -13,3 +13,8 @@ Chiudi MeTeOra e riaprilo: le statistiche restano, Avvii di MeTeOra cresce di un
 Chiudi MeTeOra dal Task Manager e riaprilo: Chiusure non regolari vale 1, con l'ora dell'ultimo salvataggio.
 F12: la guida rapida ha Maiuscolo con F7. F1: il manuale ha il capitolo Le statistiche, prima di Le impostazioni.
 1.103.1: apri nella plancia la cartella di backup con i file di prova, \\iliadbox_Server\iliadbox\backups\PC_Gigante\Claude-Temp\...\scratchpad\ft\fuzz: f13.opus e gli altri rovinati non dicono più migliaia di anni, ma restano senza durata, e la cartella non ha un totale gonfiato.
+I suoni, 1.103.2: in Acu_Maker cerca statistiche e ascolta i cinque nuovi; poi in MeTeOra dimmi se ognuno si riconosce e se il volume sta con gli altri effetti.
+Aprendo le statistiche: cinque tocchi che salgono da sinistra a destra e un do più lungo al centro. Deve essere diverso dalle due note dei dettagli di F11.
+Nella ricerca delle statistiche: trovato, la scorsa che sale e il salto di quarta; ripartito, la scivolata da destra a sinistra e la stessa chiusa; non trovato, la scorsa che ricade giù. Diversi da quelli della finestra dei marcatori, che sono di seno e più acuti.
+Azzerando le statistiche: la scivolata che scende da destra a sinistra, un do grave e un sol breve.
+python -m pytest con GBUtils V206: passano anche test_ogni_evento_ha_un_preset_suo_che_esiste e test_ogni_evento_suona_diverso.

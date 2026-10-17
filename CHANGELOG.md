@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.103.2] - 2026-10-17
+
+- I cinque suoni delle statistiche ci sono, nella collezione di GBUtils V206, fatti da ClaudIA su richiesta di Gabriele: meteora_statistiche, cinque tocchi pentatonici che salgono come le colonne di un istogramma e un do più lungo, il totale; meteora_statistiche_azzerate, una scivolata che scende, i contatori che tornano indietro, un do grave, lo zero, e un sol breve, il conto che riparte; e la ricerca nel testo, meteora_statistiche_trovato, ripartito e non_trovato, di onda triangolare, cugina di quella dei marcatori, che è di seno. Nessuno suona uguale a un altro preset della collezione, e nessuno è a onda quadra. Per suonarli serve GBUtils aggiornato alla V206.
+- La cartella licenze dice la 1.103.2 e GBUtils V206, con il suo commit.
+
 ## [1.103.1] - 2026-10-17
 
 - Correzione, lo schedario non tiene più le durate da una settimana in su: nello schedario di Gabriele 1430 schede venivano da file di prova rovinati, in una cartella di backup sull'Iliadbox, e sette dicevano fino a 1.4 milioni di milioni di secondi, circa 44600 anni. Nella plancia quei file restano senza durata, e i totali delle cartelle e delle playlist non ne sono più gonfiati; le schede già salvate si rileggono quando servono. Era la pulizia a parte scelta da Gabriele con le statistiche, che già lasciano fuori quelle durate.
