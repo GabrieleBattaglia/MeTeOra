@@ -54,7 +54,7 @@ def test_righe_della_cartella(tmp_path):
 def test_parole_dei_dettagli():
     assert dettagli.dimensione(512) == "512 byte" and dettagli.dimensione(1536) == "1.5 KB"
     assert dettagli.per_tipo(["a.mp3", "b.MP3", "c.sid", "d"]) == "mp3 2, senza estensione 1, sid 1"
-    assert dettagli.percentuale(1, 4) == "25.0%" and dettagli.percentuale(1, 0) == "0%"
+    assert dettagli.percentuale(1, 4) == "25.0%" and dettagli.percentuale(1, 0) == "0.0%"
     istante = time.mktime((2026, 10, 4, 9, 5, 0, 0, 0, -1))
     assert dettagli.quando(istante) == "4 ottobre 2026 alle 9:05"
     unita = {"radice": "E:\\", "tipo": "disco locale", "pronta": True, "nome": "Dati", "file_system": "NTFS", "totale": 4096, "libero": 1024, "occupato": 3072}

@@ -61,7 +61,7 @@ kbd {
 </head>
 <body>
 <h1>Manuale di MeTeOra</h1>
-<p>MeTeOra è un lettore audio e video pensato per chi usa uno screen reader e un display braille. Suona quasi tutti i formati audio e video, compresa la musica del Commodore 64 in formato SID, i moduli dei tracker dell'Amiga, la musica delle console di gioco e i MIDI, e si comanda tutto da tastiera. Ogni azione ha un suono suo e scrive una riga nella console.</p>
+<p>MeTeOra è un lettore audio e video pensato per chi usa uno screen reader e un display braille. Suona quasi tutti i formati audio e video, compresa la musica del Commodore 64 in formato SID, i moduli dei tracker dell'Amiga, la musica delle console di gioco e i MIDI, e si comanda tutto da tastiera. Ogni azione ha un suono suo e scrive una riga nella console. Per ora parla solo italiano.</p>
 <p>Questo manuale descrive ciò che c'è adesso, e cresce insieme al programma. Il primo capitolo, la guida rapida, elenca tutti i tasti, i comandi della ricerca e del filtro e i codici dei colori, per la consultazione al volo: F12 la scrive nella console. Gli altri capitoli spiegano un argomento alla volta, con i suoi tasti e degli esempi. F1 apre questo manuale nel browser: con NVDA, H e Maiuscolo con H passano da un titolo all'altro, e le cifre da 1 a 4 vanno ai titoli di quel livello. Il secondo capitolo, Installare MeTeOra, dice come si installa, che cosa serve e che cosa succede al primo avvio.</p>
 <nav aria-label="Indice">
 <ul>
@@ -1040,6 +1040,7 @@ kbd {
 <p>Velocità e tono li cambia rubberband, una libreria pensata per la musica, che tiene il passo regolare e cambia il tono senza toccare la durata. A velocità e tono normali rubberband si toglie, e il suono passa intatto. Per questo, quando lasci la velocità e il tono normali o ci torni, si può sentire un piccolo buco, di qualche centesimo di secondo; fra una velocità e l'altra, o fra un tono e l'altro, niente. Finché velocità o tono sono cambiati, ogni brano comincia con qualche centesimo di secondo più morbido e finisce con qualche centesimo di silenzio in più. Il tono sposta tutto il suono, timbro compreso, come un nastro che gira più veloce o più lento senza cambiare durata.</p>
 <h3 id="velocita">La velocità</h3>
 <p>La velocità va da 0.5, cioè la metà, a 2, il doppio, a passi di 0.05: A rallenta, D accelera, S torna a 1, la velocità normale. Il tono resta quello del brano. La console dice la velocità nuova, per esempio Velocità 0.85, e ai limiti che è già al minimo o al massimo.</p>
+<p>Un limite noto: un DSD256, cioè un DSF o un DFF a 11.2 MHz, con la velocità o il tono cambiati va a scatti, perché rubberband lavora sul suono già convertito, a 1.4 MHz, e non tiene il passo. A velocità e tono normali suona bene.</p>
 <h3 id="tono">Il tono</h3>
 <p>Il tono va da dodici semitoni sotto a dodici sopra, cioè un'ottava, a passi di un semitono: F lo abbassa, H lo alza, G lo riporta a 0. La velocità resta quella di prima. Come A e D per la velocità, a sinistra si scende e a destra si sale.</p>
 <h3 id="equalizzatore">L'equalizzatore</h3>
@@ -1146,6 +1147,7 @@ kbd {
 <p>I WAV hanno anche il blocco INFO, quello che leggono Esplora risorse e molti programmi di Windows. MeTeOra lo legge, prende da lì i tag comuni che ID3 non ha, e mostra gli altri campi, come Copyright e Programma, che si leggono e si modificano. Titolo, artista, album, anno, genere, commento e traccia si scrivono nei due posti. Nel blocco INFO il testo va nella codifica di Windows, e un carattere che quella codifica non ha, come una lettera di un altro alfabeto, fa scrivere il campo in UTF-8: MeTeOra lo rilegge giusto. Un WAV con la struttura irregolare, per esempio una registrazione interrotta, non si tocca, e la console lo dice.</p>
 <h3 id="tag-formati">I formati con i tag</h3>
 <p>MeTeOra scrive i tag di MP3, WAV, AIF e AIFF, TTA, FLAC, OGG e OGA, Opus, Speex, M4A, M4B, MP4, M4V, ALAC, APE, WavPack, Musepack, WMA, WMV e ASF. MKV e WebM no: servirebbe un programma a parte. Non hanno tag che MeTeOra legga nemmeno gli altri video, come AVI e MOV, e formati audio come AAC, AC3, DTS, MKA e TAK. I SID, i MIDI, i moduli dei tracker e la musica delle console hanno i loro titoli dentro il file, che non si modificano; dei SID e delle console il filtro e la ricerca usano il titolo, l'autore e l'anno.</p>
+<p>Un limite noto: un APE vecchio con un campo di testo che non è in UTF-8 perde tutti i tag, perché la libreria che li legge, mutagen, rifiuta il blocco intero. Succede, per esempio, con le lettere accentate scritte nella codifica di Windows, o con il genere scritto come un numero in un byte da 128 in su, come il 255 che alcuni vecchi programmi mettono per nessun genere. Il brano si suona lo stesso, ma senza titolo, artista e album; F11 dice che non riesce a leggere i tag, e MeTeOra non li può nemmeno riscrivere: vanno corretti con un altro programma.</p>
 <h3 id="esempi-tag">Esempi</h3>
 <h4>Leggere i tag di un brano</h4>
 <ol>

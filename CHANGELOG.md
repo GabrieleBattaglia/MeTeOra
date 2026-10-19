@@ -2,6 +2,15 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.104.1] - 2026-10-20
+
+Piccoli ritocchi decisi da Gabriele il 20 ottobre 2026, prima delle funzioni nuove della tappa 14 del piano.
+
+- F11 dice 0.0% invece di 0% quando il totale è zero, come le statistiche.
+- Il manuale dice che per ora MeTeOra parla solo italiano, e due limiti noti: un DSD256 con la velocità o il tono cambiati va a scatti, nel capitolo della velocità; un APE vecchio con un campo di testo che non è in UTF-8, per esempio con le lettere accentate nella codifica di Windows, perde tutti i tag, nel capitolo dei tag.
+- strumenti/prepara_ambiente.py cerca 7-Zip prima di scaricare qualunque cosa e, se manca, dice come installarlo, invece di cadere con un FileNotFoundError dopo il download di libmpv (issue 23).
+- strumenti/prepara_ambiente.py tiene libsidplayfp alla 2.16.1, quella che la cartella licenze nomina, installata dal suo pacchetto nell'archivio di MSYS2 anche al posto di una più nuova: una versione 3 non arriva più da sola. Se dopo l'installazione la versione è un'altra, sidshim non si compila.
+
 ## [1.104.0] - 2026-10-19
 
 Dal collaudo delle statistiche fatto da ClaudIA sul PC di Gabriele il 19 ottobre 2026: una novità, la pulizia all'avvio, e le correzioni che il collaudo ha trovato, decise da Gabriele tutte insieme in questa versione. Per i due suoni della pulizia serve GBUtils V207.

@@ -1,6 +1,6 @@
 # MeTeOra, preparazione dell'ambiente di sviluppo: scarica e compila le librerie native.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 29/09/2026: nasce con il repository. Nella 1.66.0 anche libgme, per la musica delle console. Nella 1.85.0 la build di libmpv fissata. Nella 1.99.0 il caricatore di Vulkan di scorta.
+# 29/09/2026: nasce con il repository. Nella 1.66.0 anche libgme, per la musica delle console. Nella 1.85.0 la build di libmpv fissata. Nella 1.99.0 il caricatore di Vulkan di scorta. Nella 1.104.1 libsidplayfp fissata e 7-Zip controllato prima di scaricare.
 
 """Mette in lib/ le DLL che il repository non contiene.
 
@@ -12,7 +12,13 @@
    raccogli_licenze.py. shinchiro toglie le build vecchie: se questa sparisce,
    va scelta la nuova.
 2. sidshim.dll: compilata da sidshim/sidshim.cpp con MSYS2 (UCRT64), insieme
-   a libsidplayfp e alle altre DLL di cui ha bisogno.
+   a libsidplayfp e alle altre DLL di cui ha bisogno. libsidplayfp e'
+   fissata alla versione SIDPLAYFP_VERSIONE (1.104.1), installata dal
+   pacchetto di quella versione nell'archivio di MSYS2: una versione nuova,
+   come la 3, puo' cambiare l'interfaccia che sidshim.cpp usa, e gli avvisi
+   della cartella licenze nominano i sorgenti esatti di questa. Per cambiarla
+   si aggiorna SIDPLAYFP_VERSIONE, si prova che sidshim compili e suoni, poi
+   si rifa' la cartella licenze con raccogli_licenze.py.
 3. libgme.dll, per la musica delle console (tappa 8): dal pacchetto MSYS2
    di libgme, con le DLL di cui ha bisogno.
 4. vulkan-1.dll di scorta, in lib/vulkan (1.99.0): libmpv-2.dll la chiede per
@@ -24,7 +30,8 @@
 
 MSYS2 si cerca nella cartella indicata dalla variabile METEORA_MSYS2, poi in
 strumenti/msys64; se non c'e' si scarica la versione portatile in
-strumenti/msys64, che git ignora. Serve 7-Zip installato.
+strumenti/msys64, che git ignora. Serve 7-Zip installato, che lo script
+cerca prima di scaricare qualunque cosa (1.104.1, issue 23).
 Uso: python strumenti/prepara_ambiente.py [--solo-mpv | --solo-sid | --solo-gme | --solo-vulkan]
 """
 
@@ -42,8 +49,12 @@ RADICE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LIB = os.path.join(RADICE, "lib")
 SETTEZIP = r"C:\Program Files\7-Zip\7z.exe"
 MSYS2_URL = "https://github.com/msys2/msys2-installer/releases/download/nightly-x86_64/msys2-base-x86_64-latest.sfx.exe"
-PACCHETTI = ["mingw-w64-ucrt-x86_64-gcc", "mingw-w64-ucrt-x86_64-libsidplayfp", "mingw-w64-ucrt-x86_64-pkgconf"]
+PACCHETTI = ["mingw-w64-ucrt-x86_64-gcc", "mingw-w64-ucrt-x86_64-pkgconf"]
 PACCHETTO_GME = "mingw-w64-ucrt-x86_64-libgme"
+# libsidplayfp fissata (1.104.1): la versione e il pacchetto nell'archivio di
+# MSYS2, che pacman controlla con la sua firma.
+SIDPLAYFP_VERSIONE = "2.16.1"
+SIDPLAYFP_PACCHETTO = f"https://repo.msys2.org/mingw/ucrt64/mingw-w64-ucrt-x86_64-libsidplayfp-{SIDPLAYFP_VERSIONE}-1-any.pkg.tar.zst"
 # La build di libmpv (1.85.0): il tag della release di shinchiro, l'archivio
 # e la sua impronta, come li da' GitHub; i commit di mpv e FFmpeg dentro la
 # DLL (mpv-version e ffmpeg-version), e quello degli script della build, dal
@@ -69,7 +80,18 @@ def scarica(url, destinazione):
         shutil.copyfileobj(risposta, f)
 
 
+def trova_7zip():
+    """7z.exe dove lo mette il suo installatore, oppure nella path. Se manca,
+    lo script si ferma subito con un messaggio chiaro, invece di scaricare
+    libmpv e cadere sull'estrazione (1.104.1, issue 23)."""
+    for candidato in (SETTEZIP, shutil.which("7z")):
+        if candidato and os.path.isfile(candidato):
+            return candidato
+    sys.exit("Manca 7-Zip, che serve per estrarre libmpv-2.dll: installalo, per esempio con winget install 7zip.7zip, e rilancia lo script.")
+
+
 def prepara_mpv():
+    settezip = trova_7zip()
     url = f"https://api.github.com/repos/shinchiro/mpv-winbuild-cmake/releases/tags/{MPV_BUILD}"
     richiesta = urllib.request.Request(url, headers={"User-Agent": "MeTeOra"})
     with urllib.request.urlopen(richiesta) as risposta:  # noqa: S310
@@ -83,7 +105,7 @@ def prepara_mpv():
         with open(archivio, "rb") as f:
             if hashlib.sha256(f.read()).hexdigest() != MPV_IMPRONTA:
                 sys.exit(f"L'archivio {MPV_ARCHIVIO} non ha l'impronta attesa: non lo uso.")
-        subprocess.run([SETTEZIP, "e", "-y", f"-o{LIB}", archivio, "libmpv-2.dll"], check=True, stdout=subprocess.DEVNULL)
+        subprocess.run([settezip, "e", "-y", f"-o{LIB}", archivio, "libmpv-2.dll"], check=True, stdout=subprocess.DEVNULL)
     print(f"libmpv-2.dll pronta, build {MPV_BUILD}", flush=True)
 
 
@@ -122,22 +144,33 @@ def trova_msys2():
 
 
 def bash(msys2, comando):
+    # MSYS2 scrive in UTF-8, anche i messaggi di pacman in italiano con le
+    # lettere accentate: senza encoding Python li leggerebbe in cp1252.
     ambiente = dict(os.environ, MSYSTEM="UCRT64", CHERE_INVOKING="1")
     return subprocess.run([os.path.join(msys2, "usr", "bin", "bash.exe"), "-lc", comando], env=ambiente, cwd=os.path.join(RADICE, "sidshim"),
-        check=True, capture_output=True, text=True).stdout
+        check=True, capture_output=True, encoding="utf-8", errors="replace").stdout
 
 
 def prepara_sid():
     msys2 = trova_msys2()
     print(f"MSYS2 in {msys2}", flush=True)
     bash(msys2, "pacman -S --noconfirm --needed " + " ".join(PACCHETTI))
+    # Il pacchetto della versione fissata, anche al posto di una piu' nuova
+    # gia' installata; le sue dipendenze arrivano dal repository.
+    try:
+        bash(msys2, f"pacman -U --noconfirm --needed {SIDPLAYFP_PACCHETTO}")
+    except subprocess.CalledProcessError as errore:
+        sys.exit(f"Il pacchetto di libsidplayfp {SIDPLAYFP_VERSIONE} non si installa: {errore.stderr.strip()}\n"
+            f"Se l'archivio di MSYS2 non l'ha piu', va scelta una versione nuova.")
+    versione = bash(msys2, "pkg-config --modversion libsidplayfp").strip()
+    if versione != SIDPLAYFP_VERSIONE:
+        sys.exit(f"Dopo l'installazione libsidplayfp e' alla {versione} e non alla {SIDPLAYFP_VERSIONE}: non compilo sidshim.")
     uscita = os.path.join(LIB, "sidshim.dll").replace("\\", "/")
     bash(msys2, f"g++ -O2 -shared -o '{uscita}' sidshim.cpp $(pkg-config --cflags --libs libsidplayfp) -static-libgcc -static-libstdc++")
     # Le dipendenze che non sono di Windows arrivano da /ucrt64/bin.
     dipendenze = re.findall(r"=> /ucrt64/bin/(\S+\.dll)", bash(msys2, f"ldd '{uscita}'"))
     for nome in dipendenze:
         shutil.copy2(os.path.join(msys2, "ucrt64", "bin", nome), LIB)
-    versione = bash(msys2, "pkg-config --modversion libsidplayfp").strip()
     print(f"sidshim.dll pronta con libsidplayfp {versione}, dipendenze copiate: {', '.join(dipendenze)}", flush=True)
 
 

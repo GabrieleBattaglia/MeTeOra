@@ -1,6 +1,6 @@
 # MeTeOra, i dettagli dei contenitori: cartelle, unita', Questo PC e playlist, che F11 scrive nella console.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.77.0, chiesto da Gabriele: tutti i dati possibili del contenitore su cui si e'.
+# 04/10/2026: nasce con la 1.77.0, chiesto da Gabriele: tutti i dati possibili del contenitore su cui si e'. Nella 1.104.1 lo 0.0% come le statistiche.
 
 """I dettagli di un contenitore, raccolti fuori dal filo della finestra.
 
@@ -166,8 +166,9 @@ def dati_dell_unita(radice):
 
 def percentuale(parte, tutto):
     """La percentuale con il punto, 58.4%, da dire senza articolo davanti:
-    l'8%, il 58%, lo 0.5% vorrebbero articoli diversi."""
-    return f"{100 * parte / tutto:.1f}%" if tutto else "0%"
+    l'8%, il 58%, lo 0.5% vorrebbero articoli diversi. Con il totale a zero,
+    0.0% come le statistiche (1.104.1)."""
+    return f"{100 * parte / tutto:.1f}%" if tutto else "0.0%"
 
 
 def righe_dell_unita(dati):
