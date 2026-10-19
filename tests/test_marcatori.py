@@ -1,6 +1,6 @@
 # MeTeOra, le prove dei marcatori per la finestra dei marcatori: elenco, Cancella tutto, esportazione e importazione.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.51.0, piano 5.8.5 e 5.8.7; le prove piu' vecchie dei marcatori restano in test_moduli.py.
+# 01/10/2026: nasce con la 1.51.0, piano 5.8.5 e 5.8.7; le prove piu' vecchie dei marcatori restano in test_moduli.py. Nella 1.104.0 le prove della pulizia all'avvio.
 
 import json
 import os
@@ -25,6 +25,11 @@ def _archivio(tmp_path, nome="marcatori.json"):
     archivio = Marcatori(str(tmp_path / nome))
     archivio.carica()
     return archivio
+
+
+def _norm(p):
+    # La forma concordata degli insiemi di percorsi mancanti (1.104.0).
+    return os.path.normcase(os.path.abspath(p))
 
 
 def _riempi(archivio):
@@ -349,3 +354,117 @@ def test_i_marker_seguono_un_file_rinominato(tmp_path):
     assert archivio.voci[nuova]["percorsi"] == [r"C:\Musica\Beta.mp3", r"E:\Copia\Beta.mp3"]
     # Un file senza marker non tocca niente.
     assert archivio.rinomina_file(r"C:\Altro\x.mp3", r"C:\Altro\y.mp3", [10.0]) == []
+
+
+def test_la_pulizia_toglie_i_file_che_non_ci_sono_piu(tmp_path):
+    # La pulizia all'avvio, 1.104.0: Gabriele ha deciso di togliere tutto.
+    archivio = _archivio(tmp_path)
+    a, copia, b = r"C:\Musica\a.mp3", r"E:\Copia\a.mp3", r"C:\Musica\B.mp3"
+    archivio.aggiungi(K_A, 5.0, a, 50.0)
+    archivio.aggiungi(K_A, 9.0, copia, 50.0)
+    archivio.aggiungi(K_B, 1.0, b, 100.0)
+    archivio.aggiungi(K_B, 2.0, b, 100.0)
+    archivio.aggiungi(K_SENZA_DURATA, 3.0, r"C:\Altro\e.mod")
+    # Una voce 'percorso|' senza percorsi, come la lascia un file ritoccato
+    # a mano: vale il percorso della chiave, con il sottobrano in fondo.
+    k_sid = marcatori.chiave(r"C:\Altro\Senza.sid", None, 2)
+    archivio.voci[k_sid] = {"file": "Senza.sid", "durata": None, "sottobrano": 2, "percorsi": [], "marker": [{"tempo": 4.0, "nome": "M1"}]}
+    archivio.importa([{"file": "Importato.mp3", "durata": 60.0, "marker": [{"tempo": 7.0, "nome": "Ritornello"}]}])
+    # La voce importata non ha percorsi da controllare.
+    assert archivio.percorsi_noti() == {a, copia, b, r"C:\Altro\e.mod", _norm(r"C:\Altro\Senza.sid")}
+    archivio.salva()
+    # Mancano la copia di a e B, scritti con altre maiuscole, e.mod e il SID.
+    mancanti = {_norm(p) for p in (r"e:\copia\A.MP3", "c:/musica/b.mp3", r"C:\Altro\e.mod", r"C:\Altro\SENZA.sid")}
+    assert archivio.togli_i_mancanti(mancanti) == (3, 4, [K_A, K_B, K_SENZA_DURATA, k_sid])
+    # La voce con una copia che resta perde solo il percorso mancante.
+    assert archivio.voci[K_A]["percorsi"] == [a] and [m["tempo"] for m in archivio.elenco(K_A)] == [5.0, 9.0]
+    assert list(archivio.voci) == [K_A, K_IMPORTATO] and archivio.modificato
+    # forse() non trova piu' i file tolti, e trova ancora quelli che restano.
+    assert archivio.forse(a) and archivio.forse(r"D:\Altrove\Importato.mp3")
+    assert not any(archivio.forse(p) for p in (b, r"C:\Altro\e.mod", r"C:\Altro\Senza.sid"))
+    archivio.salva()
+    riletto = _archivio(tmp_path)
+    assert riletto.voci == archivio.voci and riletto.forse(a) and not riletto.forse(b)
+    # Una seconda pulizia non trova niente da togliere.
+    assert riletto.togli_i_mancanti(mancanti) == (0, 0, []) and riletto.togli_i_mancanti(set()) == (0, 0, [])
+    assert not riletto.modificato
+    # Quando manca anche l'ultima copia, la voce se ne va con i suoi marker;
+    # quella importata resta sempre.
+    assert riletto.togli_i_mancanti({_norm(a)}) == (1, 2, [K_A]) and list(riletto.voci) == [K_IMPORTATO]
+    assert not riletto.forse(a) and riletto.percorsi_noti() == set()
+
+
+def test_la_pulizia_di_una_voce_percorso_con_i_percorsi(tmp_path):
+    # Una voce 'percorso|' si cancella se manca il suo file, anche scritto
+    # in un'altra forma; se il file c'e', resta com'e'.
+    archivio = _archivio(tmp_path)
+    archivio.aggiungi(K_SENZA_DURATA, 3.0, r"C:\Altro\e.mod")
+    altra = marcatori.chiave(r"C:\Altro\g.mod", None)
+    archivio.aggiungi(altra, 1.0, r"C:\Altro\g.mod")
+    archivio.modificato = False
+    assert archivio.togli_i_mancanti({_norm(r"C:\Altro\x.mod")}) == (0, 0, []) and not archivio.modificato
+    assert archivio.togli_i_mancanti({_norm("c:/altro/E.MOD")}) == (1, 1, [K_SENZA_DURATA]) and list(archivio.voci) == [altra]
+    assert archivio.forse(r"C:\Altro\g.mod") and not archivio.forse(r"C:\Altro\e.mod")
+
+
+def test_la_pulizia_tiene_le_voci_con_una_copia_altrove(tmp_path):
+    # 1.104.0: la cartella spostata con Esplora risorse lascia nelle voci i
+    # percorsi vecchi; le copie che lo schedario conosce salvano la voce.
+    archivio = _archivio(tmp_path)
+    a, b, z, e = r"C:\Musica\a.mp3", r"C:\Musica\B.mp3", r"C:\Musica\Z.sid", r"C:\Altro\e.mod"
+    archivio.aggiungi(K_A, 5.0, a, 50.0)
+    archivio.aggiungi(K_A, 9.0, a, 50.0)
+    archivio.aggiungi(K_B, 1.0, b, 100.0)
+    archivio.aggiungi(K_Z2, 3.0, z, 120.0, 2)
+    archivio.aggiungi(K_SENZA_DURATA, 4.0, e)
+    archivio.importa([{"file": "Importato.mp3", "durata": 60.0, "marker": [{"tempo": 7.0, "nome": "Ritornello"}]}])
+    spostato, spostato_sid = r"D:\Spostata\Musica\A.MP3", r"D:\Spostata\Musica\Z.sid"
+    schede = {
+        # I file vecchi, se lo schedario li ha ancora, mancano anche loro.
+        a: {"durata": 50.0}, b: {"durata": 100.0},
+        # La copia spostata, anche scritta in due forme, con la durata entro mezzo millesimo.
+        spostato: {"durata": 50.0004}, r"d:\spostata\musica\a.mp3": {"durata": 50.0004},
+        # Lo stesso nome con un'altra durata non e' una copia.
+        r"D:\Altro\a.mp3": {"durata": 50.0006},
+        # Per un sottobrano conta la sua durata in durate_sid, non quella del file.
+        spostato_sid: {"durata": 90.0, "durate_sid": [90.0, 120.0]}, r"E:\Altri\z.sid": {"durata": 120.0, "durate_sid": [120.0, 30.0]},
+        r"D:\Spostata\e.mod": {"durata": None}}
+    mancanti = {_norm(p) for p in (a, b, z, e)}
+    altre = marcatori.indice_delle_copie(schede, mancanti, _norm)
+    assert altre("A.MP3", 50.0) == [spostato, r"d:\spostata\musica\a.mp3"] and altre("b.mp3", 100.0) == []
+    assert altre("z.sid", 120.0, 2) == [spostato_sid] and altre("z.sid", 120.0) == [r"E:\Altri\z.sid"] and altre("z.sid", 30.0, 3) == []
+    # B non ha copie, e la voce 'percorso|' e quella importata seguono le regole di sempre.
+    assert archivio.togli_i_mancanti(mancanti, altre) == (2, 2, [K_A, K_B, K_Z2, K_SENZA_DURATA]) and archivio.voci_salvate == 2
+    assert list(archivio.voci) == [K_A, K_Z2, K_IMPORTATO] and archivio.modificato
+    # La voce resta con i suoi marker, e i percorsi delle copie al posto di quelli spariti, senza doppioni.
+    assert archivio.voci[K_A]["percorsi"] == [spostato] and [m["tempo"] for m in archivio.elenco(K_A)] == [5.0, 9.0]
+    assert archivio.voci[K_Z2]["percorsi"] == [spostato_sid] and [m["tempo"] for m in archivio.elenco(K_Z2)] == [3.0]
+    assert archivio.forse(spostato) and archivio.forse(spostato_sid) and not archivio.forse(b)
+    archivio.salva()
+    riletto = _archivio(tmp_path)
+    assert riletto.voci == archivio.voci
+    # Quando manca anche la copia, e lo schedario non ne conosce altre, la voce si cancella.
+    mancanti = {_norm(spostato)}
+    assert riletto.togli_i_mancanti(mancanti, marcatori.indice_delle_copie({spostato: {"durata": 50.0004}}, mancanti)) == (1, 2, [K_A])
+    assert riletto.voci_salvate == 0 and list(riletto.voci) == [K_Z2, K_IMPORTATO]
+
+
+def test_la_pulizia_chiede_le_copie_solo_quando_servono(tmp_path):
+    # 1.104.0: la domanda arriva solo per una voce 'nome|durata' rimasta senza percorsi.
+    archivio = _archivio(tmp_path)
+    a, copia = r"C:\Musica\a.mp3", r"E:\Copia\a.mp3"
+    archivio.aggiungi(K_A, 5.0, a, 50.0)
+    archivio.aggiungi(K_A, 9.0, copia, 50.0)
+    archivio.aggiungi(K_SENZA_DURATA, 3.0, r"C:\Altro\e.mod")
+    domande = []
+
+    def altre(nome, durata, sottobrano=None):
+        domande.append((nome, durata, sottobrano))
+        return [copia]
+
+    # Resta un percorso di a, e la voce 'percorso|' non ha copie da chiedere.
+    assert archivio.togli_i_mancanti({_norm(copia), _norm(r"C:\Altro\e.mod")}, altre) == (1, 1, [K_A, K_SENZA_DURATA])
+    assert archivio.voci[K_A]["percorsi"] == [a] and domande == [] and archivio.voci_salvate == 0
+    # Una copia che e' fra i mancanti non salva la voce.
+    assert archivio.togli_i_mancanti({_norm(a), _norm(copia)}, altre) == (1, 2, [K_A]) and domande == [("a.mp3", 50.0, None)]
+    assert archivio.voci == {} and archivio.voci_salvate == 0

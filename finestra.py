@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico.
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -60,6 +60,7 @@ import midi
 import ocr
 import percorsi
 import posizioni
+import pulizia
 import questa_rete
 import questo_pc
 import registro
@@ -90,7 +91,7 @@ from marcatori import Marcatori
 from motore import VOLUME_MASSIMO, durata_del_sottobrano, sottobrano_risolto
 from playlist import Archivio, Brano, Coda, Playlist
 from ricerca import AlberoDeiRisultati, NonRisponde, Ricerca, errore_di_rete, in_rete, leggi_in_rete, senza_annidati
-from schedario import Schedario
+from schedario import Schedario, credibile
 from valori import AREE, ErroreValore, leggi_tempo, leggi_tempo_nel_brano, secondi_da_leggere, tempo
 from video import FinestraVideo
 
@@ -712,7 +713,7 @@ ISTRUZIONI_DELLE_STATISTICHE = [
     "Asterisco: qualsiasi testo nella stessa riga, come brani*fine.",
     "Cancelletto: una o più cifre, come sezione # di.",
     'Virgolette: la sequenza esatta, maiuscole comprese, come "SID".',
-    "Sezione 12 porta all'inizio della dodicesima sezione; le sezioni le elenca la quarta riga.",
+    "Sezione 12 porta all'inizio della dodicesima sezione; le sezioni le elenca la riga che comincia con Le sezioni.",
     "Invio, dal testo delle statistiche, passa all'occorrenza seguente.",
     REGOLA_DEL_DOLLARO,
 ]
@@ -844,6 +845,12 @@ class Finestra(wx.Frame):
         # (1.80.0). La scelta degli impressi sta nelle impostazioni.
         self._lettura = None
         self._passata = None
+        # La pulizia all'avvio in corso, nel suo filo (1.104.0); i percorsi che
+        # aveva da guardare, cosi' come erano scritti, e quelli, normalizzati,
+        # che intanto sono tornati in uso, come il nome nuovo di una rinomina.
+        self._pulizia = None
+        self._guardati_in_pulizia = set()
+        self._toccati_in_pulizia = set()
         # I video su cui la passata non ha trovato niente: in questa sessione
         # non si rifa'.
         self._passate_vuote = set()
@@ -3300,7 +3307,9 @@ class Finestra(wx.Frame):
 
     def _segui_la_rinomina(self, vecchio, nuovo, durate):
         """Dopo Rinomina file: playlist, Preferiti, Risultati, cartelle aperte
-        nella plancia, schedario e marker passano al nome nuovo."""
+        nella plancia, schedario e marker passano al nome nuovo; dalla
+        1.104.0 anche il punto da riprendere e lo storico delle statistiche,
+        che altrimenti la pulizia all'avvio toglierebbe (Gabriele)."""
         stesso = os.path.normcase(vecchio)
         liste = [*self.archivio.playlist, self.archivio.preferiti, self.risultati, self.coda.playlist]
         liste += [dati["playlist"] for dati in (self._dati(v) for v in self._tutte_le_voci()) if dati and dati.get("playlist") is not None]
@@ -3309,6 +3318,19 @@ class Finestra(wx.Frame):
                 if os.path.normcase(brano.percorso) == stesso:
                     brano.percorso = nuovo
         self.schedario.rinomina(vecchio, nuovo)
+        # Il punto e lo storico si scrivono subito, come playlist e marker: con
+        # una chiusura a forza nel minuto, la pulizia dopo toglierebbe il nome
+        # vecchio con tutta la sua storia.
+        if self.posizioni.rinomina(vecchio, nuovo):
+            try:
+                self.posizioni.salva()
+            except OSError:
+                self._statistiche.conta("salvataggi_non_riusciti")
+        if self._statistiche.rinomina_brano(vecchio, nuovo):
+            self._salva_le_statistiche_in_disparte()
+        if self._pulizia is not None:
+            # Il nome nuovo puo' essere uno che la pulizia ha visto mancare.
+            self._toccati_in_pulizia.add(pulizia.norm(nuovo))
         chiavi = self.marcatori.rinomina_file(vecchio, nuovo, durate)
         self._salva_archivio()
         if chiavi:
@@ -5766,7 +5788,9 @@ class Finestra(wx.Frame):
             "volume": motore.volume, "muto": motore.muto, "velocita": motore.velocita, "tono": motore.tono, "eq": any(imp["bande"]),
             "dissolvenza": imp["dissolvenza"]["accesa"], "casuale": imp["casuale"], "ripetizione": imp["ripetizione"],
             "replaygain": imp["replaygain"], "scheda": self._scheda_per_le_statistiche, "sorgente": self._sorgente_per_le_statistiche(),
-            "durata": lambda: self.motore.durata,
+            # Con le regole dello schedario: un file rovinato che dice 37 ore in
+            # pochi KB non diventa il record del brano piu' lungo (1.104.0).
+            "durata": lambda: credibile(self.motore.durata, percorso, (self.schedario.scheda(percorso) or {}).get("dim")),
         }
 
     def _sorgente_per_le_statistiche(self):
@@ -5793,7 +5817,10 @@ class Finestra(wx.Frame):
     def _giro_delle_statistiche(self, _evento):
         """Ogni GIRO_DELLE_STATISTICHE un passo; ogni GIRI_PER_SALVARE_LE_STATISTICHE
         la scheda audio di adesso e il file, scritto in disparte. Un
-        salvataggio che non riesce lo si dice una volta sola."""
+        salvataggio che non riesce lo si dice una volta sola. Con il
+        salvataggio, il file del crash si svuota: le eccezioni che le
+        librerie gestiscono da se' passano nel registro degli errori, e alla
+        riapertura dopo una chiusura a forza non sembrano un crash (1.104.0)."""
         if self._chiusa:
             return
         self._scatto_delle_statistiche()
@@ -5801,7 +5828,11 @@ class Finestra(wx.Frame):
         if self._giri_delle_statistiche % GIRI_PER_SALVARE_LE_STATISTICHE == 1:
             self._aggiorna_la_scheda_delle_statistiche()
         if self._giri_delle_statistiche % GIRI_PER_SALVARE_LE_STATISTICHE == 0:
-            self._statistiche.salva_in_disparte(lambda e: wx.CallAfter(self._statistiche_non_salvate_in_disparte, e))
+            self._salva_le_statistiche_in_disparte()
+            registro.sopravvissuto()
+
+    def _salva_le_statistiche_in_disparte(self):
+        self._statistiche.salva_in_disparte(lambda e: wx.CallAfter(self._statistiche_non_salvate_in_disparte, e))
 
     def _statistiche_non_salvate_in_disparte(self, errore):
         self._statistiche.conta("salvataggi_non_riusciti")
@@ -8150,6 +8181,173 @@ class Finestra(wx.Frame):
         # Dopo il suono dell'avvio, che parte un attimo prima.
         self._riscontro_dopo("ripresa_all_avvio", f"Riprendo da dove eri: {percorso}, in pausa a {tempo(posizione)}. X riparte.")
 
+    def dopo_l_avvio(self):
+        """Da meteora.py, con la finestra mostrata, la ripresa fatta e i file
+        di Windows arrivati (1.104.0). Le statistiche si scrivono subito, con
+        la sessione aperta: anche una chiusura a forza nel primo minuto conta
+        come non regolare. Poi, dopo i suoni dell'avvio, la pulizia."""
+        self._salva_le_statistiche_in_disparte()
+        self._dopo_il_suono(self._comincia_la_pulizia)
+
+    # La pulizia all'avvio (Gabriele, 19 ottobre 2026, 1.104.0).
+
+    def _comincia_la_pulizia(self):
+        """Nel filo della finestra le copie di cio' che MeTeOra conosce:
+        schede dello schedario, brani di playlist e Preferiti, marker, punti
+        da riprendere e storico delle statistiche. Un filo a parte guarda se
+        i file ci sono ancora, e le voci di quelli spariti le toglie
+        _pulizia_finita, di nuovo nel filo della finestra. Senza niente da
+        guardare, come al primo avvio, non parte."""
+        if self._chiusa or self._pulizia is not None:
+            return
+        viste = self.schedario.istantanea()
+        in_uso = self._percorsi_in_uso()
+        da_guardare = set(viste) | in_uso
+        if not da_guardare:
+            return
+        self._guardati_in_pulizia, self._toccati_in_pulizia = set(da_guardare), set()
+
+        def finita(esito):
+            # Nel filo della pulizia, sulle copie: le schede da togliere e le
+            # copie vive dei file con i marker, perche' scorrere centomila
+            # percorsi fermerebbe la finestra per un attimo.
+            if "errore" not in esito:
+                esito["schede"], esito["doppioni"] = self._schede_della_pulizia(viste, esito, in_uso)
+                esito["altre_copie"] = marcatori.indice_delle_copie(viste, esito["mancanti"], pulizia.norm)
+            wx.CallAfter(self._pulizia_finita, esito)
+
+        self._riscontro("pulizia_avviata", f"Pulizia all'avvio: controllo {al_plurale(len(da_guardare), 'voce', 'voci')}.")
+        self._pulizia = pulizia.Pulizia(da_guardare, finita, cedi=self._cedi).avvia()
+
+    def _percorsi_in_uso(self):
+        """I percorsi, cosi' come sono scritti, di playlist e Preferiti, dei
+        marker, dei punti da riprendere e dello storico delle statistiche."""
+        return (self.archivio.percorsi() | self.marcatori.percorsi_noti() | set(self.posizioni.percorsi())
+            | set(self._statistiche.percorsi_dei_brani()))
+
+    @staticmethod
+    def _schede_della_pulizia(viste, esito, in_uso):
+        """Le schede viste da togliere, percorso -> scheda, e quali di loro
+        sono doppioni: quelle dei file spariti, e quelle scritte con
+        maiuscole diverse dal disco quando c'e' anche la scheda con il nome
+        vero e nessuno usa la scrittura sbagliata, che altrimenti si
+        rileggerebbe e tornerebbe a ogni avvio."""
+        mancanti, nomi_veri = esito["mancanti"], esito.get("nomi_veri") or {}
+        schede, doppioni = {}, set()
+        for percorso, scheda in viste.items():
+            chiave = pulizia.norm(percorso)
+            if chiave in mancanti:
+                schede[percorso] = scheda
+                continue
+            vero = nomi_veri.get(chiave)
+            if vero is not None and vero != percorso and vero in viste and percorso not in in_uso:
+                schede[percorso] = scheda
+                doppioni.add(percorso)
+        return schede, doppioni
+
+    def _pulizia_finita(self, esito):
+        """La pulizia ha guardato tutto: nel filo della finestra si tolgono
+        le voci dei file spariti, tranne quello che suona, e la console dice
+        cosa e' cambiato. Con un dialogo aperto si aspetta che si chiuda: la
+        plancia non cambia sotto le sue mani."""
+        if self._chiusa or self._pulizia is None:
+            return
+        if not ctypes.windll.user32.IsWindowEnabled(self.GetHandle()):
+            wx.CallLater(500, self._pulizia_finita, esito)
+            return
+        self._pulizia = None
+        toccati, guardati = self._toccati_in_pulizia, self._guardati_in_pulizia
+        self._toccati_in_pulizia, self._guardati_in_pulizia = set(), set()
+        if "errore" in esito:
+            self._statistiche.conta("pulizie_non_riuscite")
+            self._riscontro_dopo("errore", f"La pulizia all'avvio non è riuscita: {esito['errore']}")
+            return
+        self._statistiche.conta("pulizie")
+        # Tornati in uso mentre la pulizia guardava, e quindi da non toccare:
+        # il brano che suona, il nome nuovo di una rinomina, e i percorsi che
+        # playlist, marker, punti e storico hanno preso dopo la copia, come un
+        # file rimesso al suo posto e riaggiunto. Il prossimo avvio li guarda.
+        in_corso = self.motore.in_corso
+        tornati = set(toccati) | {pulizia.norm(p) for p in self._percorsi_in_uso() - guardati}
+        if in_corso:
+            tornati.add(pulizia.norm(in_corso))
+        mancanti = set(esito["mancanti"]) - tornati
+        da_togliere = esito["schede"]
+        if tornati:
+            da_togliere = {p: s for p, s in da_togliere.items() if pulizia.norm(p) not in tornati}
+        schede = self.schedario.togli(da_togliere)
+        if schede:
+            self._rinfresco_chiesto("schede")
+        doppioni = len(set(schede) & (esito.get("doppioni") or set()))
+        brani = self._togli_i_brani_spariti(mancanti)
+        voci_tolte, marker_tolti, chiavi = self.marcatori.togli_i_mancanti(mancanti, altre_copie=esito.get("altre_copie"))
+        if voci_tolte or chiavi:
+            self._salva_i_marker(*chiavi)
+        punti = self.posizioni.togli_i_mancanti(mancanti)
+        if punti:
+            try:
+                self.posizioni.salva()
+            except OSError:
+                # Restano da salvare: ci riprova l'orologio delle posizioni, o l'uscita.
+                self._statistiche.conta("salvataggi_non_riusciti")
+        storico = self._statistiche.togli_i_brani(mancanti, in_corso=in_corso)
+        saltate = esito.get("saltate") or {}
+        for nome, quanti in (("pulizia_schede", len(schede) - doppioni), ("pulizia_doppioni", doppioni), ("pulizia_brani", brani),
+                ("pulizia_marker", voci_tolte), ("pulizia_punti", punti), ("pulizia_storico", storico), ("pulizia_radici_saltate", len(saltate))):
+            if quanti:
+                self._statistiche.conta(nome, quanti)
+        self._salva_le_statistiche_in_disparte()
+        self._riscontro_dopo("pulizia_finita", self._frase_della_pulizia(len(mancanti), len(schede) - doppioni, doppioni, brani, voci_tolte, marker_tolti,
+            punti, storico, saltate))
+
+    def _togli_i_brani_spariti(self, mancanti):
+        """Toglie da playlist e Preferiti i brani dei file spariti, anche i
+        doppioni; il loop perde i suoi punti come con Canc. Se il fuoco era
+        su uno di loro, va dove andrebbe dopo una cancellazione. Torna
+        quanti brani ha tolto."""
+        nella_plancia = [v for nodo in (self.nodo_preferiti, self.nodo_playlist) for v in self._tutte_le_voci(nodo)
+            if (dati := self._dati(v)) and dati.get("tipo") == "brano" and pulizia.norm(dati["brano"].percorso) in mancanti]
+        fuoco = self._voce_corrente()
+        approdo = self._approdo(nella_plancia) if nella_plancia and self._dentro_una_di(fuoco, set(nella_plancia)) else None
+        tolti = self.archivio.togli_i_percorsi(mancanti)
+        if not tolti:
+            return 0
+        for pl, brano in tolti:
+            if self.coda.loop_playlist is pl and brano is self.coda.punto_a:
+                self.coda.togli_loop()
+            elif self.coda.loop_playlist is pl and brano is self.coda.punto_b:
+                self.coda.punto_b = None
+        self._salva_archivio()
+        if approdo is not None:
+            self._ricostruisci_dopo_la_cancellazione(approdo)
+        else:
+            self._popola_playlist()
+        return len(tolti)
+
+    @staticmethod
+    def _frase_della_pulizia(spariti, schede, doppioni, brani, voci, marker, punti, storico, saltate):
+        """La riga della console alla fine della pulizia: nei primi quaranta
+        caratteri quanti file sono spariti, poi da dove sono stati tolti, le
+        schede doppie dello schedario e le unita' che non hanno risposto."""
+        if spariti or schede:
+            parti = [f"Pulizia finita, {al_plurale(spariti, 'file sparito', 'file spariti')}."]
+            tolti = [f"dallo schedario {schede}" if schede else "", f"da playlist e Preferiti {brani_al_plurale(brani)}" if brani else "",
+                f"dai marker {al_plurale(voci, 'voce', 'voci')} con {al_plurale(marker, 'marker', 'marker')}" if voci else "",
+                f"punti da riprendere {punti}" if punti else "", f"dallo storico delle statistiche {brani_al_plurale(storico)}" if storico else ""]
+            tolti = [t for t in tolti if t]
+            if tolti:
+                parti.append(f"Tolti {'; '.join(tolti)}.")
+        else:
+            parti = ["Pulizia finita: c'è ancora tutto."]
+        if doppioni:
+            cosa = "1 scheda doppia, scritta" if doppioni == 1 else f"{doppioni} schede doppie, scritte"
+            parti.append(f"{'Tolta' if doppioni == 1 else 'Tolte'} dallo schedario {cosa} con le maiuscole diverse dal disco.")
+        if saltate:
+            radici = sorted(saltate)
+            restano = al_plurale(sum(saltate.values()), "voce resta", "voci restano")
+            parti.append(f"{'Non risponde' if len(radici) == 1 else 'Non rispondono'} {', '.join(radici)}, e {restano} per il prossimo avvio.")
+        return " ".join(parti)
+
     # L'uscita.
 
     @staticmethod
@@ -8184,7 +8382,9 @@ class Finestra(wx.Frame):
             self._salva_all_uscita(self.marcatori.salva, "i marker", non_salvati)
         self.contatore.ferma()
         self.schedario.ferma()
-        for lavoro in (self._lettura, self._passata):
+        # La pulizia ferma non porta piu' niente: quello che non ha finito di
+        # guardare resta per il prossimo avvio.
+        for lavoro in (self._lettura, self._passata, self._pulizia):
             if lavoro is not None:
                 lavoro.ferma()
         if self._video is not None:

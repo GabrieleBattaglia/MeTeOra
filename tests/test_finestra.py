@@ -1,6 +1,6 @@
 # MeTeOra, le prove della finestra principale, sul desktop nascosto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche.
+# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico.
 
 import ctypes
 import datetime
@@ -5654,13 +5654,14 @@ def test_i_file_aperti_da_windows(finestra, monkeypatch, suoni_annotati, tmp_pat
 
 def test_il_trascinamento_sulla_finestra(finestra, monkeypatch):
     arrivati = []
-    monkeypatch.setattr(finestra, "apri_dall_esterno", arrivati.append)
+    # Dalla 1.103.0 il trascinamento dice anche da dove arrivano, per le statistiche.
+    monkeypatch.setattr(finestra, "apri_dall_esterno", lambda percorsi, da=None: arrivati.append((percorsi, da)))
     for controllo in (finestra.albero, finestra.console, finestra.cruscotto):
         bersaglio = controllo.GetDropTarget()
         assert isinstance(bersaglio, modulo._Trascinamento)
         assert bersaglio.OnDropFiles(0, 0, ["C:\\m\\a.mp3"]) is True
     wx.Yield()
-    assert arrivati == [["C:\\m\\a.mp3"]] * 3
+    assert arrivati == [(["C:\\m\\a.mp3"], "trascinamento")] * 3
 
 
 def test_le_associazioni_dalle_impostazioni(finestra, monkeypatch, suoni_annotati):
@@ -6333,8 +6334,8 @@ def test_la_voce_statistiche_apre_la_pagina_e_maiuscolo_con_f7_anche(finestra, m
     genitore, testo, azioni = aperte[0]
     assert genitore is finestra
     righe = testo.split("\n")
-    # Raccolte dal 6 novembre, o dall'8 novembre.
-    assert righe[0].startswith(f"Statistiche di MeTeOra {modulo.version.VERSION}, raccolte dal")
+    # Raccolte da un giorno della settimana, come da lunedì 19 ottobre (1.104.0).
+    assert righe[0].startswith(f"Statistiche di MeTeOra {modulo.version.VERSION}, raccolte da ")
     assert "Sezione 1 di 23, in breve." in righe and "Sezione 23 di 23, tutti gli eventi." in righe
     assert "Avvii di MeTeOra: 1." in righe
     assert "Playlist: nessuna, oltre ai Preferiti." in righe and "Preferiti: 0 brani." in righe and "Schedario: ancora vuoto." in righe
@@ -6381,3 +6382,221 @@ def test_le_statistiche_contano_brani_tasti_e_uscita(finestra, monkeypatch, tmp_
     finestra.Close(force=True)
     salvate = json.loads((tmp_path / "MeTeOra - Statistiche.json").read_text(encoding="utf-8"))
     assert salvate["sessione_aperta"] is False and salvate["conti"]["chiusure_regolari"] == 1 and salvate["conti"]["avvii"] == 1
+
+
+def test_l_istruzione_delle_sezioni_non_conta_le_righe():
+    # Senza azzeramenti le sezioni stanno alla terza riga, dopo alla quarta (1.104.0).
+    assert modulo.ISTRUZIONI_DELLE_STATISTICHE[5].endswith("le sezioni le elenca la riga che comincia con Le sezioni.")
+
+
+def test_ogni_minuto_si_svuota_il_file_del_crash(finestra, monkeypatch):
+    svuotati = []
+    monkeypatch.setattr(modulo.registro, "sopravvissuto", lambda: svuotati.append(True) or 0)
+    finestra._giri_delle_statistiche = modulo.GIRI_PER_SALVARE_LE_STATISTICHE - 2
+    finestra._giro_delle_statistiche(None)
+    assert svuotati == []
+    finestra._giro_delle_statistiche(None)
+    assert svuotati == [True]
+
+
+# La pulizia all'avvio e le statistiche salvate subito (1.104.0).
+
+
+class _PuliziaFinta:
+    """Al posto della pulizia vera: annota cosa guarderebbe; la fine la
+    chiama la prova, come farebbe il filo."""
+
+    fatte = None
+
+    def __init__(self, percorsi, finita, cedi=None):
+        self.percorsi, self.finita, self.cedi, self.fermata = set(percorsi), finita, cedi, False
+        type(self).fatte.append(self)
+
+    def avvia(self):
+        return self
+
+    def ferma(self):
+        self.fermata = True
+
+
+@pytest.fixture
+def pulizia_finta(monkeypatch):
+    fatte = []
+    monkeypatch.setattr(_PuliziaFinta, "fatte", fatte)
+    monkeypatch.setattr(modulo.pulizia, "Pulizia", _PuliziaFinta)
+    monkeypatch.setattr(modulo.suoni, "attesa", lambda: 0.0)
+    return fatte
+
+
+def _esito_della_pulizia(mancanti=(), saltate=None, nomi_veri=None):
+    return {"mancanti": {modulo.pulizia.norm(p) for p in mancanti}, "saltate": saltate or {}, "nomi_veri": nomi_veri or {}, "controllati": 0}
+
+
+def _fine_della_pulizia(lavoro, esito):
+    """La fine come arriva dal filo: con wx.CallAfter, nel filo della finestra."""
+    lavoro.finita(esito)
+    wx.Yield()
+
+
+def test_dopo_l_avvio_le_statistiche_sono_subito_sul_disco(finestra, pulizia_finta, tmp_path):
+    import json
+
+    percorso = tmp_path / "MeTeOra - Statistiche.json"
+    assert not percorso.exists()
+    finestra.dopo_l_avvio()
+    finestra._statistiche._scrittura.join(5)
+    salvate = json.loads(percorso.read_text(encoding="utf-8"))
+    assert salvate["sessione_aperta"] is True and salvate["conti"]["avvii"] == 1
+    # Senza niente da guardare, come al primo avvio, la pulizia non parte.
+    assert pulizia_finta == []
+
+
+def test_la_pulizia_all_avvio_toglie_i_file_spariti(finestra, pulizia_finta, suoni_annotati, tmp_path):
+    cartella = tmp_path / "Musica"
+    cartella.mkdir()
+    resta = _wav_di_prova(cartella / "resta.wav", 1)
+    via = _wav_di_prova(cartella / "via.wav", 1)
+    finestra._aggiungi(None, [resta, via, via])
+    pl = finestra.archivio.playlist[0]
+    finestra.archivio.preferiti.brani.append(Brano(via))
+    for p in (resta, via):
+        finestra.schedario.leggi_subito(p)
+    k = finestra._chiave_dei_marker(via, leggi=True)
+    finestra.marcatori.aggiungi(k, 0.5, via, finestra._durata_dei_marker(via)[0])
+    finestra.posizioni.ricorda(via, 600.0, 3600.0)
+    finestra._statistiche.brano_avviato(via)
+    finestra._statistiche.brano_fermato()
+    os.remove(via)
+    finestra.dopo_l_avvio()
+    lavoro = pulizia_finta[0]
+    assert {resta, via} <= lavoro.percorsi and lavoro.cedi is finestra._cedi
+    assert suoni_annotati[-1] == "pulizia_avviata" and _ultima(finestra) == "Pulizia all'avvio: controllo 2 voci."
+    # Una seconda richiesta, mentre la prima lavora, non ne avvia un'altra.
+    finestra._comincia_la_pulizia()
+    assert len(pulizia_finta) == 1
+    _fine_della_pulizia(lavoro, _esito_della_pulizia([via]))
+    assert [b.percorso for b in pl.brani] == [resta] and finestra.archivio.preferiti.brani == []
+    assert finestra.schedario.scheda(via) is None and finestra.schedario.scheda(resta) is not None
+    assert via not in finestra.marcatori.percorsi_noti() and finestra.posizioni.percorsi() == []
+    assert via not in finestra._statistiche.percorsi_dei_brani()
+    with open(finestra.archivio.percorso, encoding="utf-8") as f:
+        assert "via.wav" not in f.read()
+    conti = finestra._statistiche.dati["conti"]
+    assert (conti["pulizie"], conti["pulizia_schede"], conti["pulizia_brani"], conti["pulizia_marker"], conti["pulizia_punti"], conti["pulizia_storico"]) == (1, 1, 3, 1, 1, 1)
+    assert suoni_annotati[-1] == "pulizia_finita"
+    assert _ultima(finestra) == ("Pulizia finita, 1 file sparito. Tolti dallo schedario 1; da playlist e Preferiti 3 brani; dai marker 1 voce con 1 marker; "
+        "punti da riprendere 1; dallo storico delle statistiche 1 brano.")
+    assert finestra._pulizia is None
+
+
+def test_la_pulizia_lascia_le_unita_che_non_rispondono_e_il_brano_che_suona(finestra, pulizia_finta, monkeypatch, tmp_path):
+    suona = str(tmp_path / "suona.mp3")
+    finestra.archivio.preferiti.brani.append(Brano(suona))
+    monkeypatch.setattr(finestra.motore._attivo, "percorso", suona)
+    finestra.dopo_l_avvio()
+    _fine_della_pulizia(pulizia_finta[0], _esito_della_pulizia([suona], saltate={"G:": 3}))
+    assert [b.percorso for b in finestra.archivio.preferiti.brani] == [suona]
+    assert _ultima(finestra) == "Pulizia finita: c'è ancora tutto. Non risponde G:, e 3 voci restano per il prossimo avvio."
+    assert finestra._statistiche.dati["conti"]["pulizia_radici_saltate"] == 1
+
+
+def test_la_pulizia_toglie_i_doppioni_dello_schedario_con_le_maiuscole_sbagliate(finestra, pulizia_finta, tmp_path):
+    giusto = _wav_di_prova(tmp_path / "Canzone.wav", 1)
+    sbagliato = str(tmp_path / "canzone.wav")
+    finestra.schedario.leggi_subito(giusto)
+    with finestra.schedario._lucchetto:
+        finestra.schedario.schede[sbagliato] = dict(finestra.schedario.schede[giusto])
+    finestra.dopo_l_avvio()
+    _fine_della_pulizia(pulizia_finta[0], _esito_della_pulizia(nomi_veri={modulo.pulizia.norm(sbagliato): giusto}))
+    assert finestra.schedario.scheda(sbagliato) is None and finestra.schedario.scheda(giusto) is not None
+    assert _ultima(finestra) == "Pulizia finita: c'è ancora tutto. Tolta dallo schedario 1 scheda doppia, scritta con le maiuscole diverse dal disco."
+    conti = finestra._statistiche.dati["conti"]
+    assert conti["pulizia_doppioni"] == 1 and "pulizia_schede" not in conti
+
+
+def test_la_pulizia_lascia_il_doppione_che_una_playlist_usa(finestra, pulizia_finta, tmp_path):
+    # Tolta la scheda, il brano scritto cosi' resterebbe senza durata, e la
+    # scheda si rileggerebbe e tornerebbe a ogni avvio.
+    giusto = _wav_di_prova(tmp_path / "Canzone.wav", 1)
+    sbagliato = str(tmp_path / "canzone.wav")
+    finestra.schedario.leggi_subito(giusto)
+    with finestra.schedario._lucchetto:
+        finestra.schedario.schede[sbagliato] = dict(finestra.schedario.schede[giusto])
+    finestra.archivio.preferiti.brani.append(Brano(sbagliato))
+    finestra.dopo_l_avvio()
+    _fine_della_pulizia(pulizia_finta[0], _esito_della_pulizia(nomi_veri={modulo.pulizia.norm(sbagliato): giusto}))
+    assert finestra.schedario.scheda(sbagliato) is not None and _ultima(finestra) == "Pulizia finita: c'è ancora tutto."
+
+
+def test_la_pulizia_porta_i_marker_sulla_copia_spostata(finestra, pulizia_finta, tmp_path):
+    # Una cartella spostata con Esplora risorse: la voce dei marker conosce
+    # solo il posto vecchio, ma lo schedario conosce la copia nel posto nuovo.
+    (tmp_path / "Vecchia").mkdir()
+    (tmp_path / "Nuova").mkdir()
+    prima = _wav_di_prova(tmp_path / "Vecchia" / "brano.wav", 1)
+    dopo = _wav_di_prova(tmp_path / "Nuova" / "brano.wav", 1)
+    k = finestra._chiave_dei_marker(prima, leggi=True)
+    finestra.marcatori.aggiungi(k, 0.5, prima, finestra._durata_dei_marker(prima)[0])
+    finestra.schedario.leggi_subito(dopo)
+    os.remove(prima)
+    finestra.dopo_l_avvio()
+    _fine_della_pulizia(pulizia_finta[0], _esito_della_pulizia([prima]))
+    assert finestra.marcatori.percorsi_noti() == {dopo} and [m["tempo"] for m in finestra.marcatori.elenco(k)] == [0.5]
+    assert _ultima(finestra) == "Pulizia finita, 1 file sparito. Tolti dallo schedario 1."
+
+
+def test_la_pulizia_non_toglie_cio_che_torna_in_uso_mentre_guarda(finestra, pulizia_finta, tmp_path):
+    vecchio, via, tornato = str(tmp_path / "Brano (1).mp3"), str(tmp_path / "Brano.mp3"), str(tmp_path / "tornato.mp3")
+    finestra.archivio.preferiti.brani.append(Brano(via))
+    finestra.archivio.preferiti.brani.append(Brano(vecchio))
+    finestra.dopo_l_avvio()
+    # Mentre la pulizia guarda: Brano (1).mp3 si rinomina nel nome di quello
+    # sparito, e un file sparito torna e si rimette nei Preferiti.
+    finestra._segui_la_rinomina(vecchio, via, {})
+    finestra.archivio.preferiti.brani.append(Brano(tornato))
+    _fine_della_pulizia(pulizia_finta[0], _esito_della_pulizia([via, tornato]))
+    assert sorted(os.path.basename(b.percorso) for b in finestra.archivio.preferiti.brani) == ["Brano.mp3", "Brano.mp3", "tornato.mp3"]
+    assert _ultima(finestra) == "Pulizia finita: c'è ancora tutto."
+
+
+def test_la_pulizia_aspetta_la_fine_dei_dialoghi_e_si_ferma_all_uscita(finestra, pulizia_finta, monkeypatch, suoni_annotati, tmp_path):
+    via = str(tmp_path / "via.mp3")
+    finestra.archivio.preferiti.brani.append(Brano(via))
+    finestra.dopo_l_avvio()
+    lavoro = pulizia_finta[0]
+    rimandate = []
+    monkeypatch.setattr(ctypes.windll.user32, "IsWindowEnabled", lambda _h: 0)
+    monkeypatch.setattr(modulo.wx, "CallLater", lambda ms, f, *a: rimandate.append((ms, f, a)))
+    _fine_della_pulizia(lavoro, _esito_della_pulizia([via]))
+    assert len(finestra.archivio.preferiti.brani) == 1 and rimandate and rimandate[0][0] == 500
+    monkeypatch.setattr(ctypes.windll.user32, "IsWindowEnabled", lambda _h: 1)
+    _ms, funzione, argomenti = rimandate[0]
+    funzione(*argomenti)
+    assert finestra.archivio.preferiti.brani == []
+    # Un guasto del lavoro lo dice la console.
+    finestra.archivio.preferiti.brani.append(Brano(via))
+    finestra.dopo_l_avvio()
+    _fine_della_pulizia(pulizia_finta[-1], {"errore": "disco in fiamme"})
+    assert _ultima(finestra) == "La pulizia all'avvio non è riuscita: disco in fiamme" and suoni_annotati[-1] == "errore"
+    conti = finestra._statistiche.dati["conti"]
+    assert conti["pulizie"] == 1 and conti["pulizie_non_riuscite"] == 1
+    # All'uscita una pulizia a meta' si ferma, e quel che porterebbe non arriva.
+    assert len(finestra.archivio.preferiti.brani) == 1
+    finestra.dopo_l_avvio()
+    ultima = pulizia_finta[-1]
+    finestra.Close(force=True)
+    assert ultima.fermata
+    # Senza wx.Yield: la finestra chiusa si distrugge al primo giro del ciclo.
+    finestra._pulizia_finita(_esito_della_pulizia([via]))
+    assert len(finestra.archivio.preferiti.brani) == 1
+
+
+def test_la_rinomina_porta_con_se_il_punto_e_lo_storico(finestra, tmp_path):
+    vecchio, nuovo = str(tmp_path / "vecchio.mp3"), str(tmp_path / "nuovo.mp3")
+    finestra.posizioni.ricorda(vecchio, 600.0, 3600.0)
+    finestra._statistiche.brano_avviato(vecchio)
+    finestra._statistiche.brano_fermato()
+    finestra._segui_la_rinomina(vecchio, nuovo, {})
+    assert finestra.posizioni.dove(nuovo) == 600.0 and finestra.posizioni.dove(vecchio) is None
+    brani = finestra._statistiche.dati["brani"]
+    assert vecchio not in brani and brani[nuovo]["volte"] == 1

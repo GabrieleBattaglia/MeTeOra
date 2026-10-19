@@ -18,3 +18,6 @@ MeTeOra - *.log
 MeTeOra - *.log.*
 # Le copie dei dati (1.90.0), che nascono accanto ai dati provando MeTeOra dai sorgenti.
 copie/
+# I dati di MeTeOra (1.104.0): playlist, impostazioni, schedario, marker, posizioni e statistiche, con i loro .tmp e .nuovo. Ogni macchina ha i suoi, e da qui parte da zero (Gabriele).
+MeTeOra - *.json
+MeTeOra - *.json.*

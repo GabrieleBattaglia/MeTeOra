@@ -2,8 +2,14 @@
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 
 import json
+import os
 
 from playlist import Archivio, Brano, Coda, Playlist
+
+
+def _norm(p):
+    # La forma concordata degli insiemi di percorsi spariti (1.104.0).
+    return os.path.normcase(os.path.abspath(p))
 
 
 def _pl(n=4, saltati=()):
@@ -125,3 +131,36 @@ def test_sottobrano_si_salva():
     assert b.sottobrano == 3
     assert "sottobrano" not in Brano("y.sid").come_dati()
     assert Brano.da_dati({"percorso": "z.sid", "sottobrano": "tre"}).sottobrano is None
+
+
+def test_togli_i_percorsi_toglie_anche_doppioni_e_sottobrani():
+    # La pulizia all'avvio, 1.104.0: lo stesso file scritto con altre
+    # maiuscole o con le barre dritte, e tutti i sottobrani di un SID.
+    pl = Playlist("prova", [Brano(r"C:\m\a.mp3"), Brano(r"C:\m\Z.sid", sottobrano=1), Brano(r"C:\M\A.MP3"), Brano(r"C:\m\b.mp3"), Brano("c:/m/z.sid", sottobrano=2)])
+    brani, resta = pl.brani, pl.brani[3]
+    tolti = pl.togli_i_percorsi({_norm(r"C:\m\a.mp3"), _norm(r"C:\m\Z.sid")})
+    assert [(b.percorso, b.sottobrano) for b in tolti] == [(r"C:\m\a.mp3", None), (r"C:\m\Z.sid", 1), (r"C:\M\A.MP3", None), ("c:/m/z.sid", 2)]
+    # La lista e' la stessa, cambiata sul posto.
+    assert pl.brani is brani and pl.brani == [resta]
+    assert pl.togli_i_percorsi({_norm(r"C:\m\x.mp3")}) == [] and pl.togli_i_percorsi(set()) == [] and pl.brani == [resta]
+
+
+def test_l_archivio_toglie_i_file_spariti_e_tiene_le_playlist_vuote(tmp_path):
+    percorso = str(tmp_path / "pl.json")
+    archivio = Archivio(percorso)
+    rock = archivio.nuova("Rock", [r"C:\m\a.mp3", r"C:\m\b.flac", r"C:\m\a.mp3"])
+    vuota = archivio.nuova("Solo a", [r"c:\M\A.mp3"])
+    archivio.preferiti.brani = [Brano(r"C:\m\a.mp3"), Brano(r"C:\m\c.ogg")]
+    # I percorsi tornano cosi' come sono scritti, Preferiti compresi.
+    assert archivio.percorsi() == {r"C:\m\a.mp3", r"C:\m\b.flac", r"c:\M\A.mp3", r"C:\m\c.ogg"}
+    tolti = archivio.togli_i_percorsi({_norm(r"C:\m\a.mp3")})
+    assert [(pl.nome, b.percorso) for pl, b in tolti] == [("Rock", r"C:\m\a.mp3"), ("Rock", r"C:\m\a.mp3"), ("Solo a", r"c:\M\A.mp3"), ("Preferiti", r"C:\m\a.mp3")]
+    assert tolti[0][0] is rock and tolti[2][0] is vuota and tolti[3][0] is archivio.preferiti
+    # La playlist rimasta vuota non si elimina.
+    assert [pl.nome for pl in archivio.playlist] == ["Rock", "Solo a"] and vuota.brani == []
+    assert archivio.togli_i_percorsi({_norm(r"C:\m\a.mp3")}) == []
+    archivio.salva()
+    di_nuovo = Archivio(percorso)
+    di_nuovo.carica()
+    assert [[b.percorso for b in pl.brani] for pl in di_nuovo.playlist] == [[r"C:\m\b.flac"], []]
+    assert [b.percorso for b in di_nuovo.preferiti.brani] == [r"C:\m\c.ogg"] and di_nuovo.percorsi() == {r"C:\m\b.flac", r"C:\m\c.ogg"}

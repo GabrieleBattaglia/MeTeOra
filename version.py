@@ -1,6 +1,6 @@
 # MeTeOra, la versione: numero, data e autori, in un posto solo.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 
-VERSION = "1.103.2"
-DATE = "17 ottobre 2026"
+VERSION = "1.104.0"
+DATE = "19 ottobre 2026"
 AUTHOR = "Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode)"

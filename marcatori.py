@@ -1,6 +1,6 @@
 # MeTeOra, i marker: punti con un nome dentro un brano, salvati in un file JSON.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.39.0, tappa 3, issue 12 e 14. Nella 1.51.0 l'elenco di tutti i marker, Cancella tutto, l'esportazione e l'importazione. Nella 1.67.0 i marker seguono un file rinominato.
+# 01/10/2026: nasce con la 1.39.0, tappa 3, issue 12 e 14. Nella 1.51.0 l'elenco di tutti i marker, Cancella tutto, l'esportazione e l'importazione. Nella 1.67.0 i marker seguono un file rinominato. Nella 1.104.0 si tolgono i percorsi dei file spariti, e le voci che restano senza, se lo schedario non conosce una copia del file altrove.
 
 """I marker dei brani.
 
@@ -39,6 +39,10 @@ VERSIONE_DELL_ESPORTAZIONE = 1
 # non chiuso, a 8000 Hz e 8 bit, ne dichiara 149 ore, e T ci mette i marker.
 # Vale all'andata e al ritorno, perche' MeTeOra non rifiuti i file che scrive.
 TETTO_DEI_SECONDI = 10_000_000_000
+# Entro questa differenza due durate sono quelle dello stesso file: mezzo
+# millesimo, come l'arrotondamento della chiave. Vale per Rinomina file e per
+# le copie che salvano una voce nella pulizia all'avvio (1.104.0).
+TOLLERANZA_DELLA_DURATA = 0.0005
 
 
 def chiave(percorso, durata, sottobrano=None):
@@ -66,6 +70,19 @@ def _durata_valida(durata):
     return numero if numero is not None and numero > 0 else None
 
 
+def _norm(percorso):
+    """Il percorso come si confronta, come nella chiave: assoluto e, su
+    Windows, con le maiuscole e le barre di sistema (1.104.0)."""
+    return os.path.normcase(os.path.abspath(percorso))
+
+
+def _percorso_della_chiave(k):
+    """Il percorso scritto in una chiave 'percorso|', o None per le chiavi
+    fatte di nome e durata (1.104.0)."""
+    parti = k.split("|")
+    return parti[1] if parti[0] == "percorso" and len(parti) > 1 and parti[1] else None
+
+
 def _nome_del_file(k, voce):
     """Il nome del file di una voce. Una voce scritta a mano senza nome lo
     prende dal primo percorso o, senza percorsi, dalla chiave."""
@@ -91,6 +108,64 @@ def _ordine(k, voce):
     return (not percorsi, cartella, _nome_del_file(k, voce).casefold(), sottobrano if isinstance(sottobrano, int) else 0, k)
 
 
+def indice_delle_copie(schede, mancanti, norm=_norm):
+    """La funzione altre_copie di Marcatori.togli_i_mancanti (1.104.0).
+    schede e' il dizionario percorso -> scheda dello schedario, una copia
+    come quella di Schedario.istantanea(), e mancanti l'insieme dei file
+    spariti, gia' normalizzati con norm. altre_copie(nome, durata,
+    sottobrano) da' i percorsi delle schede di quel nome, confrontato in
+    casefold, che non mancano e hanno la stessa durata entro
+    TOLLERANZA_DELLA_DURATA: per un sottobrano quella in durate_sid. L'indice
+    per nome si fa subito, cosi' il giro sulle centomila schede lo paga il
+    filo che chiama, come quello della pulizia; norm si calcola dopo, solo
+    per le schede con il nome e la durata giusti."""
+    indice = {}
+    for percorso, scheda in schede.items():
+        indice.setdefault(os.path.basename(percorso).casefold(), []).append((percorso, scheda))
+
+    def altre_copie(nome, durata, sottobrano=None):
+        copie = []
+        for percorso, scheda in indice.get(str(nome).casefold(), ()):
+            if not isinstance(scheda, dict):
+                continue
+            if sottobrano:
+                durate = scheda.get("durate_sid")
+                sua = durate[sottobrano - 1] if isinstance(durate, list) and 0 < sottobrano <= len(durate) else None
+            else:
+                sua = scheda.get("durata")
+            sua = _durata_valida(sua)
+            if sua is not None and abs(sua - durata) < TOLLERANZA_DELLA_DURATA and norm(percorso) not in mancanti:
+                copie.append(percorso)
+        return copie
+
+    return altre_copie
+
+
+def _copie_vive(k, voce, mancanti, altre_copie):
+    """I percorsi delle copie vive del file di una voce 'nome|durata', come
+    li da' altre_copie, senza i mancanti e senza doppioni. Nome e sottobrano
+    vengono dalla chiave, che e' l'identita' del file; la durata dalla voce,
+    piu' precisa della chiave, o dalla chiave se la voce non l'ha (1.104.0)."""
+    parti = k.split("|")
+    durata = _durata_valida(voce.get("durata"))
+    if durata is None and len(parti) > 1:
+        try:
+            durata = _durata_valida(float(parti[1]))
+        except ValueError:
+            durata = None
+    if durata is None:
+        return []
+    sottobrano = int(parti[2]) if len(parti) > 2 and parti[2].isdecimal() else None
+    copie, viste = [], set()
+    for percorso in altre_copie(parti[0], durata, sottobrano) or []:
+        percorso = str(percorso)
+        forma = _norm(percorso)
+        if forma not in mancanti and forma not in viste:
+            viste.add(forma)
+            copie.append(percorso)
+    return copie
+
+
 class Marcatori:
     def __init__(self, percorso):
         self.percorso = percorso
@@ -101,6 +176,9 @@ class Marcatori:
         self.modificato = False
         # Perche' il file non si e' letto, se non si e' letto.
         self.errore = None
+        # Quante voci l'ultima togli_i_mancanti ha salvato con le altre copie
+        # del file (1.104.0).
+        self.voci_salvate = 0
 
     def carica(self):
         """Legge il file. Un file che non si legge non si sovrascrive: i
@@ -184,7 +262,7 @@ class Marcatori:
             suoi = [p for p in percorsi if os.path.normcase(os.path.abspath(p)) == stesso]
             durata = _durata_valida(voce.get("durata"))
             importata = (not percorsi and _nome_del_file(k, voce).casefold() == nome and durata is not None
-                and any(d and abs(durata - d) < 0.0005 for d in durate))
+                and any(d and abs(durata - d) < TOLLERANZA_DELLA_DURATA for d in durate))
             if not suoi and not importata:
                 continue
             altri = [p for p in percorsi if p not in suoi]
@@ -210,6 +288,68 @@ class Marcatori:
             self._nomi = {_nome_del_file(k, v).casefold() for k, v in self.voci.items()}
             self.modificato = True
         return nuove
+
+    def percorsi_noti(self):
+        """I percorsi da controllare per la pulizia all'avvio: tutti quelli
+        delle voci, cosi' come sono scritti, e per le voci 'percorso|' senza
+        percorsi quello della chiave. Le voci importate, senza percorsi,
+        non ne danno nessuno (1.104.0)."""
+        noti = set()
+        for k, voce in self.voci.items():
+            percorsi = [str(p) for p in voce.get("percorsi") or []]
+            dalla_chiave = _percorso_della_chiave(k)
+            if percorsi:
+                noti.update(percorsi)
+            elif dalla_chiave:
+                noti.add(dalla_chiave)
+        return noti
+
+    def togli_i_mancanti(self, mancanti, altre_copie=None):
+        """La pulizia all'avvio: i file mancanti, un insieme di percorsi gia'
+        normalizzati con normcase e abspath, escono dalle voci. Una voce che
+        resta senza percorsi si cancella con i suoi marker, e cosi' una voce
+        'percorso|' il cui file manca; le voci importate, senza percorsi da
+        controllare, restano (Gabriele, 19 ottobre 2026: togli tutto).
+        Un percorso entra nella voce solo con T e con Rinomina file: una
+        cartella spostata con Esplora risorse lascia la voce con i percorsi
+        vecchi, anche se le copie del file sono altrove. Per questo una voce
+        'nome|durata' rimasta senza percorsi, prima di cancellarsi, chiede ad
+        altre_copie, se c'e', le copie vive conosciute: altre_copie(nome del
+        file in casefold, durata, sottobrano) da' i loro percorsi, come la
+        funzione di indice_delle_copie. Se ne trova, i loro percorsi prendono
+        il posto di quelli spariti e la voce resta con i suoi marker; quante
+        voci si salvano cosi' lo dice voci_salvate.
+        Restituisce (voci tolte, marker tolti, chiavi toccate); le chiavi
+        toccate, in ordine e senza doppioni, sono quelle delle voci
+        cancellate, salvate o a cui si e' tolto un percorso. Non salva: salva
+        chi chiama (1.104.0)."""
+        self.voci_salvate = 0
+        if not mancanti:
+            return 0, 0, []
+        voci_tolte, marker_tolti, toccate = 0, 0, []
+        for k, voce in list(self.voci.items()):
+            percorsi = [str(p) for p in voce.get("percorsi") or []]
+            restano = [p for p in percorsi if _norm(p) not in mancanti]
+            dalla_chiave = _percorso_della_chiave(k)
+            if percorsi and not restano and not dalla_chiave and altre_copie is not None:
+                copie = _copie_vive(k, voce, mancanti, altre_copie)
+                if copie:
+                    voce["percorsi"] = copie
+                    self.voci_salvate += 1
+                    toccate.append(k)
+                    continue
+            if (percorsi and not restano) or (dalla_chiave and _norm(dalla_chiave) in mancanti):
+                del self.voci[k]
+                voci_tolte += 1
+                marker_tolti += len(voce.get("marker") or [])
+                toccate.append(k)
+            elif len(restano) < len(percorsi):
+                voce["percorsi"] = restano
+                toccate.append(k)
+        if toccate:
+            self._nomi = {_nome_del_file(k, v).casefold() for k, v in self.voci.items()}
+            self.modificato = True
+        return voci_tolte, marker_tolti, toccate
 
     def rinomina(self, k, marker, nome):
         for m in self.voci.get(k, {}).get("marker", []):

@@ -1,6 +1,6 @@
 # MeTeOra, Questo PC: unita', cartelle e file supportati.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.4.0 il cestino, nella 1.5.0 le cartelle ricorsive. Nella 1.67.0 i nomi validi e i file compagni, per Rinomina file.
+# 30/09/2026: nasce con la tappa 1. Nella 1.4.0 il cestino, nella 1.5.0 le cartelle ricorsive. Nella 1.67.0 i nomi validi e i file compagni, per Rinomina file. Nella 1.104.0 il nome del volume si legge senza la finestra di errore solo nel suo filo.
 
 """Cosa mostra il ramo Questo PC della plancia.
 
@@ -36,12 +36,16 @@ def _nome_del_volume(radice):
     kernel32 = ctypes.windll.kernel32
     nome = ctypes.create_unicode_buffer(261)
     # Un'unita' vuota, per esempio un lettore CD senza disco, non deve far
-    # comparire la finestra di errore di Windows.
-    vecchia = kernel32.SetErrorMode(0x0001)
+    # comparire la finestra di errore di Windows: SEM_FAILCRITICALERRORS, con
+    # SetThreadErrorMode, che vale solo per questo filo. SetErrorMode varrebbe
+    # per tutto il processo, e la pulizia all'avvio fa lo stesso nel suo filo.
+    vecchia = wintypes.DWORD()
+    impostata = kernel32.SetThreadErrorMode(0x0001, ctypes.byref(vecchia))
     try:
         riuscito = kernel32.GetVolumeInformationW(wintypes.LPCWSTR(radice), nome, len(nome), None, None, None, None, 0)
     finally:
-        kernel32.SetErrorMode(vecchia)
+        if impostata:
+            kernel32.SetThreadErrorMode(vecchia.value, None)
     if riuscito and nome.value:
         return nome.value
     return _TIPI.get(kernel32.GetDriveTypeW(wintypes.LPCWSTR(radice)), "Unità")

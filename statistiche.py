@@ -1,6 +1,6 @@
 # MeTeOra, le statistiche: ogni sorta di conti, raccolti mentre lo si usa, e la pagina che li racconta.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (UltraCode).
-# 17/10/2026: nasce con la 1.103.0, chiesta da Gabriele: piu' dati ci sono, piu' e' contento.
+# 17/10/2026: nasce con la 1.103.0, chiesta da Gabriele: piu' dati ci sono, piu' e' contento. Nella 1.104.0 le righe che elencano voci tengono solo quelle diverse da zero, le percentuali uniformi, gli anni futuri dei tag ignorati, le date sempre con il giorno della settimana, e i brani dello storico tolti dalla pulizia all'avvio o rinominati, con i conti della pulizia nella salute.
 
 """Le statistiche di MeTeOra (1.103.0).
 
@@ -26,7 +26,15 @@ forma "Etichetta: valore.", come i dettagli di F11; ogni sezione si apre con
 "Sezione n di N", che si cerca con la barra rovesciata. I numeri non hanno il
 separatore delle migliaia, perche' in MeTeOra il punto e' quello dei
 decimali; le percentuali hanno il punto e niente articolo davanti; le durate
-lunghe si dicono a parole.
+lunghe si dicono a parole; le date hanno sempre il giorno della settimana.
+Le righe che elencano voci, come le ore o i mesi, tengono solo quelle
+diverse da zero (1.104.0).
+
+La pulizia all'avvio, che fa la finestra, toglie dallo storico dei brani i
+file che non ci sono piu', con togli_i_brani(), e i suoi conti li scrive con
+conta(); un file rinominato porta con se' la sua voce, con rinomina_brano().
+I percorsi si confrontano normalizzati con normcase e abspath, come negli
+altri moduli (1.104.0).
 """
 
 import contextlib
@@ -193,7 +201,22 @@ NOMI_DEGLI_EVENTI = {
     "statistiche_azzerate": "statistiche azzerate", "trovato_nelle_statistiche": "trovato nelle statistiche",
     "ripartito_nelle_statistiche": "ricerca nelle statistiche ripartita dall'inizio",
     "non_trovato_nelle_statistiche": "non trovato nelle statistiche",
+    # Nella 1.104.0, nell'ordine di suoni.EVENTI.
+    "pulizia_avviata": "pulizia all'avvio cominciata", "pulizia_finita": "pulizia all'avvio finita",
 }
+
+# Che cosa ha tolto la pulizia all'avvio: il conto, il singolare, il plurale
+# e se e' femminile, per l'accordo di tolto (1.104.0). pulizia_schede sono i
+# file spariti; pulizia_doppioni le schede doppie, che differiscono solo per
+# le maiuscole, tolte quando c'e' quella scritta come sul disco.
+TOLTI_DALLA_PULIZIA = (
+    ("pulizia_schede", "file dallo schedario", "file dallo schedario", False),
+    ("pulizia_doppioni", "scheda doppia dello schedario", "schede doppie dello schedario", True),
+    ("pulizia_brani", "brano da playlist e Preferiti", "brani da playlist e Preferiti", False),
+    ("pulizia_marker", "voce dei marker", "voci dei marker", True),
+    ("pulizia_punti", "punto da riprendere", "punti da riprendere", False),
+    ("pulizia_storico", "brano dallo storico", "brani dallo storico", False),
+)
 
 
 # Le parole.
@@ -240,24 +263,21 @@ def anni_e_mesi(giorni):
 
 def percentuale(parte, tutto):
     """Con il punto e un decimale, senza articolo davanti: 58.4%. Sotto lo
-    0.1% due decimali, perche' una parte piccola non sembri niente."""
+    0.1% due decimali, perche' una parte piccola non sembri niente. Il
+    formato si sceglie sul valore arrotondato a due decimali, cosi' 0.0996
+    da' 0.1% e non 0.10%; con il totale a zero, 0.0% come le altre (1.104.0)."""
     if not tutto:
-        return "0%"
+        return "0.0%"
     valore = 100 * parte / tutto
-    if 0 < valore < 0.01:
+    arrotondato = round(valore, 2)
+    if valore > 0 and arrotondato < 0.01:
         return "meno di 0.01%"
-    return f"{valore:.2f}%" if 0 < valore < 0.1 else f"{valore:.1f}%"
+    return f"{valore:.2f}%" if 0 < arrotondato < 0.1 else f"{valore:.1f}%"
 
 
 def numero_decimale(valore):
     """1.75, 0.8, 1: il punto, e senza zeri in fondo."""
     return f"{valore:.2f}".rstrip("0").rstrip(".")
-
-
-def _data(quando, con_il_giorno=False):
-    """Una data da dire: 1 novembre 2026, o domenica 1 novembre 2026."""
-    testo = f"{quando.day} {MESI[quando.month - 1]} {quando.year}"
-    return f"{GIORNI[quando.weekday()]} {testo}" if con_il_giorno else testo
 
 
 def _ora(quando):
@@ -269,15 +289,10 @@ def _alle(quando):
     return f"all'{_ora(quando)}" if quando.hour == 1 else f"alle {_ora(quando)}"
 
 
-# Le preposizioni davanti a una data, e la loro forma davanti all'1, all'8 e
-# all'11: l'8 novembre, dall'1 novembre.
-_ELISE = {"il": "l'", "dal": "dall'", "al": "all'", "del": "dell'"}
-
-
-def _con(preposizione, giorno, testo):
-    if preposizione is None:
-        return testo
-    return f"{_ELISE[preposizione]}{testo}" if giorno in (1, 8, 11) else f"{preposizione} {testo}"
+def _con(preposizione, testo):
+    """La preposizione davanti, se c'e', scritta com'e': da, a, di. Le date
+    cominciano con il giorno della settimana, e non si elide mai (1.104.0)."""
+    return f"{preposizione} {testo}" if preposizione else testo
 
 
 def dalle(ora):
@@ -297,24 +312,24 @@ def _leggi_data(testo):
         return None
 
 
-def data(quando, con_il_giorno=False, preposizione=None):
-    """Una data, con la preposizione davanti se c'e': il 6 novembre 2026,
-    l'8 novembre 2026, dall'1 novembre 2026; con il giorno della settimana
-    la preposizione non serve: domenica 1 novembre 2026."""
-    testo = _data(quando, con_il_giorno)
-    return testo if con_il_giorno else _con(preposizione, quando.day, testo)
+def data(quando, preposizione=None):
+    """Una data, sempre con il giorno della settimana, e la preposizione
+    davanti se c'e': lunedi' 19 ottobre 2026, da lunedi' 19 ottobre 2026.
+    Dalla 1.104.0 tutte le date sono cosi'."""
+    return _con(preposizione, f"{GIORNI[quando.weekday()]} {quando.day} {MESI[quando.month - 1]} {quando.year}")
 
 
-def data_e_ora(testo, con_il_giorno=False, preposizione=None):
-    """Una data del file con l'ora: il 6 novembre 2026 alle 10:12; "una data
-    che non si legge" se non e' una data."""
+def data_e_ora(testo, preposizione=None):
+    """Una data del file con l'ora: lunedi' 19 ottobre 2026 alle 18:03; "una
+    data che non si legge" se non e' una data, con la preposizione anche
+    davanti a questa."""
     quando = _leggi_data(testo)
-    return f"{data(quando, con_il_giorno, preposizione)} {_alle(quando)}" if quando else "una data che non si legge"
+    return f"{data(quando, preposizione)} {_alle(quando)}" if quando else _con(preposizione, "una data che non si legge")
 
 
-def solo_la_data(testo, con_il_giorno=False, preposizione=None):
+def solo_la_data(testo, preposizione=None):
     quando = _leggi_data(testo)
-    return data(quando, con_il_giorno, preposizione) if quando else "una data che non si legge"
+    return data(quando, preposizione) if quando else _con(preposizione, "una data che non si legge")
 
 
 def _decennio(anno):
@@ -325,6 +340,13 @@ def _decennio(anno):
 def _nome(percorso):
     # I percorsi sono di Windows: ntpath li tratta cosi' anche altrove.
     return ntpath.basename(percorso.rstrip("\\")) or percorso
+
+
+def _norm(percorso):
+    """Il percorso come si confronta: assoluto e, su Windows, con le
+    maiuscole e le barre di sistema. E' la forma degli insiemi di percorsi
+    mancanti che arrivano dalla pulizia (1.104.0)."""
+    return os.path.normcase(os.path.abspath(percorso))
 
 
 def unita_di(percorso):
@@ -345,6 +367,37 @@ def _piu(dizionario, chiave, quanto=1):
     si tengono al millesimo, perche' il file non cresca di cifre inutili."""
     valore = dizionario.get(chiave, 0) + quanto
     dizionario[chiave] = round(valore, 3) if isinstance(valore, float) else valore
+
+
+def _quando(testo):
+    """La data di un'ultima volta, da confrontare: senza il fuso, che un
+    file toccato a mano potrebbe avere."""
+    quando = _leggi_data(testo)
+    return quando.replace(tzinfo=None) if quando else None
+
+
+def _unisci(prima, dopo):
+    """Due voci dello storico dello stesso file, in una nuova: volte,
+    secondi, finiti e marker si sommano; l'ultima volta e' la piu' recente;
+    i sottobrani di prima, poi quelli di dopo che mancano, fino a
+    MASSIMO_DEI_SOTTOBRANI. Il resto viene da prima, o da dopo se prima non
+    ce l'ha (1.104.0)."""
+    voce = {**dopo, **prima}
+    for chiave in ("volte", "secondi", "finiti", "marker"):
+        if chiave in prima or chiave in dopo:
+            voce[chiave] = 0
+            _piu(voce, chiave, prima.get(chiave, 0) + dopo.get(chiave, 0))
+    ultime = [u for u in (prima.get("ultima"), dopo.get("ultima")) if _quando(u)]
+    if ultime:
+        voce["ultima"] = max(ultime, key=_quando)
+    sotto, visti = [], set()
+    for n in itertools.chain(prima.get("sotto", ()), dopo.get("sotto", ())):
+        if n not in visti and len(sotto) < MASSIMO_DEI_SOTTOBRANI:
+            visti.add(n)
+            sotto.append(n)
+    if sotto:
+        voce["sotto"] = sotto
+    return voce
 
 
 def _vuote(adesso):
@@ -808,6 +861,73 @@ class Statistiche:
         _piu(self._del_brano(percorso), "marker")
         _piu(self._giorno(self._ora()), "marker")
 
+    # Lo storico dei brani: la pulizia all'avvio e i file rinominati (1.104.0).
+
+    def percorsi_dei_brani(self):
+        """I percorsi dello storico dei brani, cosi' come sono scritti, da
+        controllare nella pulizia all'avvio: una lista nuova, che si puo'
+        passare a un filo."""
+        return list(self.dati["brani"])
+
+    def togli_i_brani(self, mancanti, in_corso=None):
+        """La pulizia all'avvio: le voci dei file mancanti, un insieme di
+        percorsi gia' normalizzati con normcase e abspath, escono dallo
+        storico. Restano il brano in corso e in_corso, il file che suona
+        adesso, anche se mancano. I totali non cambiano, come quando lo
+        storico supera il tetto: conti, tempi, formati, giorni, ore,
+        settimana, modi e record dicono anche dei file che non ci sono
+        piu'. Calano invece i conti che la pagina ricava dallo storico: i
+        file diversi ascoltati, quelli ascoltati una volta sola o piu' di 10
+        volte, i sottobrani diversi, la durata media dei brani avviati e le
+        classifiche, dei brani, degli autori, degli album, dei generi, degli
+        anni, delle cartelle e delle unita', e il brano con piu' marker.
+        Restituisce quante voci ha tolto."""
+        if not mancanti:
+            return 0
+        salvi = {_norm(p) for p in (in_corso, (self._brano or {}).get("percorso")) if p}
+        brani = self.dati["brani"]
+        tolti = 0
+        for percorso in list(brani):
+            normalizzato = _norm(percorso)
+            if normalizzato in mancanti and normalizzato not in salvi:
+                del brani[percorso]
+                tolti += 1
+        return tolti
+
+    def rinomina_brano(self, vecchio, nuovo):
+        """Un file rinominato sul disco: la sua voce dello storico passa al
+        nome nuovo, trovata con il percorso normalizzato. Se il nome nuovo
+        ha gia' una voce, si uniscono, e cosi' le voci dello stesso file
+        scritte in due forme. Anche il brano in corso segue il file, se e'
+        lui, e cosi' lo stato del passo di prima dell'orologio, perche' il
+        tempo del passo dopo vada al nome nuovo e non ricrei la voce del
+        vecchio. I totali non cambiano. Restituisce vero se una voce e'
+        passata al nome nuovo."""
+        da, a = _norm(vecchio), _norm(nuovo)
+        if self._brano is not None and _norm(self._brano["percorso"]) == da:
+            self._brano["percorso"] = nuovo
+        stato = self._stato
+        if isinstance(stato, dict) and isinstance(stato.get("percorso"), str) and stato["percorso"] and _norm(stato["percorso"]) == da:
+            # Una copia: il dizionario e' della finestra, che puo' tenerlo.
+            self._stato = {**stato, "percorso": nuovo}
+        brani = self.dati["brani"]
+        vecchie, nuove = [], []
+        for percorso in brani:
+            normalizzato = _norm(percorso)
+            if normalizzato == da:
+                vecchie.append(percorso)
+            elif normalizzato == a:
+                nuove.append(percorso)
+        if not vecchie:
+            return False
+        voce = {}
+        # Prima le voci del nome vecchio, che e' il file sul disco: i suoi
+        # sottobrani vengono per primi.
+        for percorso in vecchie + nuove:
+            voce = _unisci(voce, brani.pop(percorso))
+        brani[nuovo] = voce
+        return True
+
     # La pagina.
 
     def righe(self, versione, scheda=lambda _percorso: None, libreria=None, numeri_della_libreria=None, comandi_dei_tasti=None,
@@ -894,10 +1014,10 @@ class Pagina:
         sezioni = self.sezioni()
         dal = _leggi_data(self.d["dal"]) or self.oggi
         giorni = max(1, (self.oggi.date() - dal.date()).days + 1)
-        righe = [f"Statistiche di MeTeOra {self.versione}, raccolte {data_e_ora(self.d['dal'], preposizione='dal')}: {al_plurale(giorni, 'giorno', 'giorni')}, oggi compreso."]
+        righe = [f"Statistiche di MeTeOra {self.versione}, raccolte {data_e_ora(self.d['dal'], 'da')}: {al_plurale(giorni, 'giorno', 'giorni')}, oggi compreso."]
         if self.d["azzeramenti"]:
             righe.append(f"Prima raccolta: {data_e_ora(self.d['prima_raccolta'])}. Azzerate {al_plurale(self.d['azzeramenti'], 'volta', 'volte')}, "
-                f"l'ultima {data_e_ora(self.d['ultimo_azzeramento'], preposizione='il')}.")
+                f"l'ultima {data_e_ora(self.d['ultimo_azzeramento'])}.")
         righe.append("La barra rovesciata cerca nel testo, e Invio passa all'occorrenza seguente; senza una ricerca, Invio ed Esc chiudono. "
             "Azzera le statistiche le riporta a zero.")
         righe.append("Le sezioni: " + "; ".join(f"{n} {titolo}" for n, (titolo, _f) in enumerate(sezioni, 1)) + ".")
@@ -945,20 +1065,20 @@ class Pagina:
         s = self.s.sessione
         record = self.d["record"]
         avvii = self.c("avvii")
-        righe = [f"Questa è la sessione numero {s['numero']}, aperta {data_e_ora(s['inizio'], preposizione='il')}: da {durata(s['aperto'])}."]
+        righe = [f"Questa è la sessione numero {s['numero']}, aperta {data_e_ora(s['inizio'])}: da {durata(s['aperto'])}."]
         if avvii:
             righe.append(f"Durata media di una sessione: {durata(self.t('aperto') / avvii)}.")
         if "sessione_piu_lunga" in record:
-            righe.append(f"La sessione più lunga: {durata(record['sessione_piu_lunga']['valore'])}, cominciata {data_e_ora(record['sessione_piu_lunga']['quando'], True)}.")
+            righe.append(f"La sessione più lunga: {durata(record['sessione_piu_lunga']['valore'])}, cominciata {data_e_ora(record['sessione_piu_lunga']['quando'])}.")
         if "sessione_piu_breve" in record:
-            righe.append(f"La sessione più breve: {durata(record['sessione_piu_breve']['valore'])}, cominciata {data_e_ora(record['sessione_piu_breve']['quando'], preposizione='il')}.")
+            righe.append(f"La sessione più breve: {durata(record['sessione_piu_breve']['valore'])}, cominciata {data_e_ora(record['sessione_piu_breve']['quando'])}.")
         if "brani_in_una_sessione" in record:
-            righe.append(f"Più brani in una sessione: {record['brani_in_una_sessione']['valore']}, nella sessione cominciata {data_e_ora(record['brani_in_una_sessione']['quando'], preposizione='il')}.")
+            righe.append(f"Più brani in una sessione: {record['brani_in_una_sessione']['valore']}, nella sessione cominciata {data_e_ora(record['brani_in_una_sessione']['quando'])}.")
         righe.append(f"Chiusure regolari: {self.c('chiusure_regolari')}.")
         non_regolari = self.c("chiusure_non_regolari")
         riga = f"Chiusure non regolari, con MeTeOra caduto, chiuso a forza o il PC spento: {non_regolari}"
         if non_regolari and "chiusura_non_regolare" in record:
-            riga += f"; l'ultima dopo il salvataggio {data_e_ora(record['chiusura_non_regolare']['quando'], preposizione='del')}"
+            riga += f"; l'ultima dopo il salvataggio {data_e_ora(record['chiusura_non_regolare']['quando'], 'di')}"
         righe.append(riga + ".")
         righe.append(f"Avvii con un file aperto da Windows: {self.c('aperti_all_avvio')}.")
         righe.append(f"File e cartelle passati a MeTeOra già aperto, da Windows o da un'altra copia: {self.c('aperti_da_un_altra_copia')}.")
@@ -967,7 +1087,7 @@ class Pagina:
         righe.append(f"Aggiornamenti di MeTeOra: {self.c('aggiornamenti')}.")
         versioni = sorted(self.d["versioni"].items(), key=lambda v: v[1])
         if versioni:
-            righe.append("Versioni usate: " + ", ".join(f"{v} {solo_la_data(quando, preposizione='dal')}" for v, quando in versioni) + ".")
+            righe.append("Versioni usate: " + ", ".join(f"{v} {solo_la_data(quando, 'da')}" for v, quando in versioni) + ".")
         return righe
 
     # 3.
@@ -997,7 +1117,7 @@ class Pagina:
         filata = self.d["record"].get("filata")
         if filata:
             righe.append(f"La riproduzione più lunga senza fermarsi: {durata(filata['valore'])}, {al_plurale(int(filata.get('brani', 1)), 'brano', 'brani di fila')}, "
-                f"cominciata {data_e_ora(filata['quando'], True)}.")
+                f"cominciata {data_e_ora(filata['quando'])}.")
         return righe
 
     # 4 e 5.
@@ -1014,7 +1134,10 @@ class Pagina:
             f["avvii"] += voce.get("avvii", 0)
         ordine = list(FAMIGLIE)
         righe = []
-        for chiave in sorted(famiglie, key=lambda f: (-famiglie[f]["secondi"], -famiglie[f]["avvii"], ordine.index(f))):
+        # Solo le famiglie suonate: senza nessuna, la sezione dice che non
+        # c'e' ancora niente da dire (1.104.0).
+        suonate = [f for f in famiglie if famiglie[f]["secondi"] or famiglie[f]["avvii"]]
+        for chiave in sorted(suonate, key=lambda f: (-famiglie[f]["secondi"], -famiglie[f]["avvii"], ordine.index(f))):
             f = famiglie[chiave]
             righe.append(f"{FAMIGLIE[chiave]}: {durata(f['secondi'])}, {percentuale(f['secondi'], self.play)} della riproduzione; "
                 f"{al_plurale(int(f['avvii']), 'avvio', 'avvii')}.")
@@ -1030,9 +1153,10 @@ class Pagina:
             if avvii:
                 riga += f", {percentuale(voce.get('finiti', 0), avvii)} fino alla fine"
             righe.append(riga + ".")
-        mai = sorted(e.lstrip(".") for e in formati.TUTTI - suonati)
+        # Solo quanti sono, senza l'elenco dei nomi (1.104.0).
+        mai = len(formati.TUTTI - suonati)
         if mai:
-            righe.append(f"Formati mai suonati: {len(mai)}: {', '.join(mai)}.")
+            righe.append(f"Formati mai suonati: {mai}.")
         return righe
 
     # 6.
@@ -1074,7 +1198,7 @@ class Pagina:
         righe.append(f"Riproduzione casuale accesa: {durata(self.t('casuale'))}, {percentuale(self.t('casuale'), self.play)}; brani scelti a caso: {self.c('a_caso')}.")
         righe.append(f"Ripetizione del brano: {durata(self.t('ripetizione_brano'))}; ripetizione della lista: {durata(self.t('ripetizione_lista'))}.")
         righe.append(f"Volume uniforme con ReplayGain: per brano {durata(self.t('replaygain_brano'))}, per album {durata(self.t('replaygain_album'))}.")
-        schede = sorted(self.d["schede_audio"].items(), key=lambda s: -s[1])
+        schede = sorted(((nome, secondi) for nome, secondi in self.d["schede_audio"].items() if secondi), key=lambda s: -s[1])
         if schede:
             righe.append("Schede audio: " + "; ".join(f"{nome}, {percentuale(secondi, self.play)}" for nome, secondi in schede) + ".")
         return righe
@@ -1150,9 +1274,11 @@ class Pagina:
                 secondi[valore] += v.get("secondi", 0)
                 avvii[valore] += v.get("volte", 0)
                 file[valore] += 1
-            if not secondi:
+            # Una voce senza secondi e senza avvii, per esempio di un brano con
+            # solo i marker, non entra in classifica (1.104.0).
+            ordine = sorted((k for k in secondi if secondi[k] or avvii[k]), key=lambda k: (-secondi[k], k))
+            if not ordine:
                 continue
-            ordine = sorted(secondi, key=lambda k: (-secondi[k], k))
             righe += self.classifica(f"I {POSTI} {titolo} più ascoltati, dai tag", ordine,
                 lambda k, secondi=secondi, avvii=avvii, file=file: f"{k}: {durata(secondi[k])}, {percentuale(secondi[k], tempo_dei_brani)}; "
                     f"{al_plurale(int(avvii[k]), 'avvio', 'avvii')} di {al_plurale(file[k], 'file', 'file')}.")
@@ -1161,14 +1287,21 @@ class Pagina:
         senza_anno = 0
         for p, v in self.d["brani"].items():
             anno = self.tag(p)[0].get("anno")
-            if isinstance(anno, int) and not isinstance(anno, bool) and anno > 0:
+            # Un anno oltre quello di adesso e' un tag sbagliato: il suo tempo
+            # va con quelli senza anno (1.104.0).
+            if isinstance(anno, int) and not isinstance(anno, bool) and 0 < anno <= self.oggi.year:
                 decenni[_decennio(anno)] += v.get("secondi", 0)
                 anni[anno] += v.get("secondi", 0)
             else:
                 senza_anno += v.get("secondi", 0)
+        # Solo i decenni e gli anni con un po' d'ascolto, e senza anno se c'e'.
+        decenni = {k: s for k, s in decenni.items() if s}
+        anni = {a: s for a, s in anni.items() if s}
         if decenni:
             parti = [f"{k} {percentuale(s, tempo_dei_brani)}" for k, s in sorted(decenni.items(), key=lambda ks: -ks[1])]
-            righe.append(f"Per decennio, dall'anno dei tag: {'; '.join(parti)}; senza anno {percentuale(senza_anno, tempo_dei_brani)}.")
+            if senza_anno:
+                parti.append(f"senza anno {percentuale(senza_anno, tempo_dei_brani)}")
+            righe.append(f"Per decennio, dall'anno dei tag: {'; '.join(parti)}.")
             anno = max(anni, key=lambda a: (anni[a], -a))
             righe.append(f"L'anno più ascoltato: {anno}, {percentuale(anni[anno], tempo_dei_brani)}.")
         cartelle, unita = Counter(), Counter()
@@ -1179,7 +1312,7 @@ class Pagina:
             lambda k, s: f"{k}: {durata(s)}, {percentuale(s, tempo_dei_brani)}.")
         if any(unita.values()):
             righe.append("Per unità: " + "; ".join(f"{k} {percentuale(s, tempo_dei_brani)}" for k, s in sorted(unita.items(), key=lambda ks: -ks[1]) if s) + ".")
-        sorgenti = sorted(self.d["sorgenti"].items(), key=lambda s: -s[1])
+        sorgenti = sorted(((nome, secondi) for nome, secondi in self.d["sorgenti"].items() if secondi), key=lambda s: -s[1])
         if sorgenti:
             righe.append("Da dove: " + "; ".join(f"{nome} {percentuale(secondi, self.play)}" for nome, secondi in sorgenti) + ".")
         return righe
@@ -1202,7 +1335,7 @@ class Pagina:
             totale = sum(giorni[g]["play"] for g in con_ascolto)
             righe.append(f"Ascolto medio nei giorni con ascolto: {durata(totale / len(con_ascolto))}.")
             record = max(con_ascolto, key=lambda g: giorni[g]["play"])
-            righe.append(f"Il giorno con più ascolto: {_data(record, True)}, {durata(giorni[record]['play'])}.")
+            righe.append(f"Il giorno con più ascolto: {data(record)}, {durata(giorni[record]['play'])}.")
             serie, inizio, migliore = 1, con_ascolto[0], (1, con_ascolto[0], con_ascolto[0])
             for prima, dopo in itertools.pairwise(con_ascolto):
                 if (dopo - prima).days == 1:
@@ -1212,7 +1345,7 @@ class Pagina:
                 if serie > migliore[0]:
                     migliore = (serie, inizio, dopo)
             if migliore[0] > 1:
-                righe.append(f"La serie più lunga di giorni di fila con ascolto: {migliore[0]}, {data(migliore[1], preposizione='dal')} {data(migliore[2], preposizione='al')}.")
+                righe.append(f"La serie più lunga di giorni di fila con ascolto: {migliore[0]}, {data(migliore[1], 'da')} {data(migliore[2], 'a')}.")
             else:
                 righe.append("La serie più lunga di giorni di fila con ascolto: 1.")
             fine = self.oggi.date() if self.oggi.date() in giorni and giorni[self.oggi.date()].get("play") else self.oggi.date() - datetime.timedelta(days=1)
@@ -1221,28 +1354,34 @@ class Pagina:
             while fine - datetime.timedelta(days=di_adesso) in presenti:
                 di_adesso += 1
             righe.append(f"La serie di adesso: {al_plurale(di_adesso, 'giorno', 'giorni')}.")
+        # Negli elenchi per mese, per giorno, per fascia e per ora solo le voci
+        # con un po' d'ascolto: senza nessun mese d'ascolto la riga dei mesi
+        # non si scrive, perche' la prima riga gia' dice zero giorni (1.104.0).
         mesi = Counter()
         for g, v in giorni.items():
             mesi[(g.year, g.month)] += v.get("play", 0)
-        righe.append("Per mese: " + "; ".join(f"{MESI[m - 1]} {a}, {durata(s)}" for (a, m), s in sorted(mesi.items())) + ".")
+        mesi = sorted((am, s) for am, s in mesi.items() if s)
+        if mesi:
+            righe.append("Per mese: " + "; ".join(f"{MESI[m - 1]} {a}, {durata(s)}" for (a, m), s in mesi) + ".")
         settimana = self.d["settimana"]
         totale = sum(settimana)
         if totale:
-            ordine = sorted(range(7), key=lambda i: -settimana[i])
+            ordine = sorted((i for i in range(7) if settimana[i]), key=lambda i: -settimana[i])
             righe.append("Per giorno della settimana: " + "; ".join(f"{GIORNI[i]} {percentuale(settimana[i], totale)}" for i in ordine) + ".")
         ore = self.d["ore"]
         totale = sum(ore)
         if totale:
             fasce = [("sera, dalle 18", range(18, 24)), ("pomeriggio, dalle 12", range(12, 18)), ("mattina, dalle 6", range(6, 12)), ("notte, da mezzanotte alle 6", range(0, 6))]
-            fasce.sort(key=lambda f: -sum(ore[h] for h in f[1]))
-            righe.append("Per fascia: " + "; ".join(f"{nome}: {percentuale(sum(ore[h] for h in fascia), totale)}" for nome, fascia in fasce) + ".")
+            fasce = [(nome, sum(ore[h] for h in fascia)) for nome, fascia in fasce]
+            fasce = sorted((f for f in fasce if f[1]), key=lambda f: -f[1])
+            righe.append("Per fascia: " + "; ".join(f"{nome}: {percentuale(secondi, totale)}" for nome, secondi in fasce) + ".")
             ora = max(range(24), key=lambda h: ore[h])
             righe.append(f"L'ora con più ascolto: {dalle(ora)} {alle((ora + 1) % 24)}, {percentuale(ore[ora], totale)}, {durata(ore[ora])}.")
-            righe.append("Per ora: " + "; ".join(f"ore {h}: {percentuale(ore[h], totale)}" for h in range(24)) + ".")
+            righe.append("Per ora: " + "; ".join(f"ore {h}: {percentuale(ore[h], totale)}" for h in range(24) if ore[h]) + ".")
         con_marker = [g for g, v in giorni.items() if v.get("marker")]
         if con_marker:
             g = max(con_marker, key=lambda g: giorni[g]["marker"])
-            righe.append(f"Il giorno con più marker messi: {_data(g, True)}, {int(giorni[g]['marker'])}.")
+            righe.append(f"Il giorno con più marker messi: {data(g)}, {int(giorni[g]['marker'])}.")
         return righe
 
     # 10.
@@ -1251,17 +1390,17 @@ class Pagina:
         r = self.d["record"]
         righe = []
         if "sessione_piu_lunga" in r:
-            righe.append(f"La sessione più lunga: {durata(r['sessione_piu_lunga']['valore'])}, cominciata {data_e_ora(r['sessione_piu_lunga']['quando'], True)}.")
+            righe.append(f"La sessione più lunga: {durata(r['sessione_piu_lunga']['valore'])}, cominciata {data_e_ora(r['sessione_piu_lunga']['quando'])}.")
         if "filata" in r:
             righe.append(f"La riproduzione più lunga senza fermarsi: {durata(r['filata']['valore'])}, {al_plurale(int(r['filata'].get('brani', 1)), 'brano', 'brani di fila')}.")
         if "pausa_piu_lunga" in r:
-            righe.append(f"La pausa più lunga: {durata(r['pausa_piu_lunga']['valore'])}, {data_e_ora(r['pausa_piu_lunga']['quando'], preposizione='il')}.")
+            righe.append(f"La pausa più lunga: {durata(r['pausa_piu_lunga']['valore'])}, {data_e_ora(r['pausa_piu_lunga']['quando'])}.")
         if "finito_piu_lungo" in r:
             righe.append(f"Il brano più lungo ascoltato fino alla fine: {_nome(r['finito_piu_lungo'].get('cosa', ''))}, {durata(r['finito_piu_lungo']['valore'])}.")
         if "finito_piu_breve" in r:
             righe.append(f"Il brano più breve ascoltato fino alla fine: {_nome(r['finito_piu_breve'].get('cosa', ''))}, {durata(r['finito_piu_breve']['valore'])}.")
         if "volume_piu_alto" in r:
-            righe.append(f"Il volume più alto: {r['volume_piu_alto']['valore']}, {data_e_ora(r['volume_piu_alto']['quando'], preposizione='il')}.")
+            righe.append(f"Il volume più alto: {r['volume_piu_alto']['valore']}, {data_e_ora(r['volume_piu_alto']['quando'])}.")
         alta, bassa = r.get("velocita_piu_alta", {}).get("valore", 1), r.get("velocita_piu_bassa", {}).get("valore", 1)
         if alta != 1 or bassa != 1:
             righe.append(f"La velocità più alta: {numero_decimale(alta)}; la più bassa: {numero_decimale(bassa)}.")
@@ -1395,10 +1534,11 @@ class Pagina:
         totale = int(sum(tasti.values()))
         ore = self.t("aperto") / 3600
         riga = f"Tasti premuti: {totale}"
-        if ore >= 0.1:
-            riga += f", {round(totale / ore)} per ogni ora di MeTeOra aperto"
+        # Senza tasti premuti, il conto per ora non si dice (1.104.0).
+        if ore >= 0.1 and totale:
+            riga += f", cioè {round(totale / ore)} per ogni ora di MeTeOra aperto"
         righe = [riga + "."]
-        frecce = {k: v for k, v in tasti.items() if k.startswith("Freccia ")}
+        frecce = {k: v for k, v in tasti.items() if k.startswith("Freccia ") and v}
         if frecce:
             righe.append(f"Frecce: {int(sum(frecce.values()))}; " + "; ".join(f"{k[0].lower()}{k[1:]} {int(v)}" for k, v in sorted(frecce.items(), key=lambda kv: -kv[1])) + ".")
 
@@ -1406,8 +1546,11 @@ class Pagina:
             descrizione = self.descrizione_del_tasto(nome)
             return f"{nome}{', ' + descrizione if descrizione else ''}: {int(quanti)}."
 
-        righe += self.classifica(f"I {POSTI} tasti più premuti", sorted(tasti.items(), key=lambda kv: (-kv[1], kv[0])), scrivi)
-        senza = self.d["senza_comando"]
+        # Nella classifica e nei piu' frequenti solo le voci diverse da zero,
+        # che un file toccato a mano puo' avere (1.104.0).
+        premuti = [(k, v) for k, v in tasti.items() if v]
+        righe += self.classifica(f"I {POSTI} tasti più premuti", sorted(premuti, key=lambda kv: (-kv[1], kv[0])), scrivi)
+        senza = {k: v for k, v in self.d["senza_comando"].items() if v}
         riga = f"Tasti senza comando: {int(sum(senza.values()))}"
         if senza:
             nome, quanti = max(senza.items(), key=lambda kv: (kv[1], kv[0]))
@@ -1436,8 +1579,10 @@ class Pagina:
         ]
         totale = int(sum(self.eventi.values()))
         riga = f"Effetti sonori, contati anche con il volume degli effetti a zero: {totale}"
-        if self.eventi:
-            evento, quanti = max(self.eventi.items(), key=lambda kv: (kv[1], kv[0]))
+        # Il piu' suonato solo fra gli eventi accaduti (1.104.0).
+        accaduti = {k: v for k, v in self.eventi.items() if v}
+        if accaduti:
+            evento, quanti = max(accaduti.items(), key=lambda kv: (kv[1], kv[0]))
             riga += f"; il più suonato: {NOMI_DEGLI_EVENTI.get(evento, evento.replace('_', ' '))}, {al_plurale(int(quanti), 'volta', 'volte')}"
         righe.append(riga + ".")
         righe.append(f"Domande, con il loro suono: {self.e('domanda')}; annullate: {self.e('annullamento')}.")
@@ -1446,7 +1591,8 @@ class Pagina:
     # 19.
 
     def le_impostazioni(self):
-        voci = self.d["impostazioni"]
+        # La piu' usata solo fra le voci aperte almeno una volta (1.104.0).
+        voci = {k: v for k, v in self.d["impostazioni"].items() if v}
         riga = f"Voci delle impostazioni aperte con Invio: {int(sum(voci.values()))}"
         if voci:
             chiave, quante = max(voci.items(), key=lambda kv: (kv[1], kv[0]))
@@ -1476,10 +1622,43 @@ class Pagina:
             f"Chiusure non regolari: {self.c('chiusure_non_regolari')}.",
             f"Salvataggi non riusciti: {self.c('salvataggi_non_riusciti')}.",
             f"Cartelle di rete che non hanno risposto nella plancia: {self.c('rete_muta')}.",
+            self.riga_delle_pulizie(),
             f"Attese dei SID, dei MIDI e delle console oltre un secondo e mezzo, dopo un salto: {self.c('attese_lunghe')}.",
             f"Comandi che lì non valgono: {self.e('non_disponibile')}; niente da suonare: {self.e('niente_da_suonare')}.",
         ]
         return righe
+
+    def riga_delle_pulizie(self):
+        """Le pulizie all'avvio, quante in tutto e quante non riuscite, e
+        cio' che hanno tolto, solo le voci diverse da zero, con tolto
+        accordato a cio' che segue (1.104.0). pulizie conta quelle riuscite,
+        pulizie_non_riuscite quelle finite con un errore."""
+        riuscite, non_riuscite = self.c("pulizie"), self.c("pulizie_non_riuscite")
+        totale = riuscite + non_riuscite
+        if not totale:
+            return "Pulizie all'avvio: nessuna."
+        riga = f"Pulizie all'avvio: {totale}"
+        if non_riuscite == totale:
+            riga += ", non riuscita per un errore" if totale == 1 else ", tutte non riuscite per un errore"
+        elif non_riuscite:
+            riga += f", di cui {al_plurale(non_riuscite, 'non riuscita', 'non riuscite')} per un errore"
+        tolti = [(self.c(conto), singolare, plurale, femminile) for conto, singolare, plurale, femminile in TOLTI_DALLA_PULIZIA if self.c(conto)]
+        if tolti:
+            primo, _singolare, _plurale, femminile = tolti[0]
+            if len(tolti) > 1:
+                # Femminile solo se lo sono tutte le voci.
+                participio = "tolte" if all(f for *_resto, f in tolti) else "tolti"
+            elif femminile:
+                participio = "tolta" if primo == 1 else "tolte"
+            else:
+                participio = "tolto" if primo == 1 else "tolti"
+            riga += f"; {participio} " + ", ".join(al_plurale(n, singolare, plurale) for n, singolare, plurale, _f in tolti)
+        elif riuscite:
+            riga += "; niente da togliere"
+        saltate = self.c("pulizia_radici_saltate")
+        if saltate:
+            riga += f"; unità saltate perché non rispondevano: {saltate}"
+        return riga + "."
 
     # 21.
 
@@ -1515,7 +1694,8 @@ class Pagina:
     # 23.
 
     def tutti_gli_eventi(self):
-        eventi = sorted(self.eventi.items(), key=lambda kv: (-kv[1], kv[0]))
+        # Un evento a zero, da un file toccato a mano, non e' accaduto (1.104.0).
+        eventi = sorted(((evento, quante) for evento, quante in self.eventi.items() if quante), key=lambda kv: (-kv[1], kv[0]))
         righe = [f"Eventi diversi accaduti: {len(eventi)} su {len(NOMI_DEGLI_EVENTI)} che MeTeOra conosce."]
         for evento, quante in eventi:
             nome = NOMI_DEGLI_EVENTI.get(evento, evento.replace("_", " "))
@@ -1525,9 +1705,12 @@ class Pagina:
 
 # La libreria di adesso, dallo schedario.
 
-def censisci_la_libreria(schede):
+def censisci_la_libreria(schede, anno_di_adesso=None):
     """I conti dello schedario, da fare in disparte: schede e' una copia del
-    suo dizionario, percorso -> scheda."""
+    suo dizionario, percorso -> scheda. Gli anni dei tag oltre anno_di_adesso,
+    predefinito quello di oggi, sono sbagliati e non contano (1.104.0)."""
+    if anno_di_adesso is None:
+        anno_di_adesso = datetime.date.today().year
     c = {"file": 0, "byte": 0, "durata": 0.0, "senza_durata": 0, "non_credibili": 0, "sottobrani_sid": 0, "file_sid": 0,
         "famiglie": {f: {"file": 0, "durata": 0.0, "byte": 0} for f in FAMIGLIE}, "estensioni": Counter(), "unita": Counter(),
         "lungo": None, "corto": None, "autori": Counter(), "album": set(), "generi": set(), "anni": [], "decenni": Counter()}
@@ -1567,7 +1750,7 @@ def censisci_la_libreria(schede):
         if tag.get("genere"):
             c["generi"].add(str(tag["genere"]))
         anno = tag.get("anno")
-        if isinstance(anno, int) and not isinstance(anno, bool) and anno > 0:
+        if isinstance(anno, int) and not isinstance(anno, bool) and 0 < anno <= anno_di_adesso:
             c["anni"].append(anno)
             c["decenni"][_decennio(anno)] += 1
     return c
@@ -1590,7 +1773,9 @@ def righe_della_libreria(c, dimensione):
     righe.append(f"Schedario: {al_plurale(totale, 'file conosciuto', 'file conosciuti')}, {dimensione(c['byte'])}.")
     righe.append(f"Durata di tutta la libreria: {durata(c['durata'])}.")
     ordine = list(FAMIGLIE)
-    famiglie = sorted(c["famiglie"].items(), key=lambda kv: (-kv[1]["file"], ordine.index(kv[0])))
+    # Solo le famiglie che hanno dei file: con lo schedario non vuoto, almeno
+    # una c'e' (1.104.0).
+    famiglie = sorted((kv for kv in c["famiglie"].items() if kv[1]["file"]), key=lambda kv: (-kv[1]["file"], ordine.index(kv[0])))
     righe.append("Per numero di file: " + "; ".join(f"{NOMI_BREVI_DELLE_FAMIGLIE[k]} {v['file']}, {percentuale(v['file'], totale)}" for k, v in famiglie) + ".")
     con_durata = sorted((kv for kv in c["famiglie"].items() if kv[1]["durata"]), key=lambda kv: -kv[1]["durata"])
     if con_durata:
@@ -1608,8 +1793,19 @@ def righe_della_libreria(c, dimensione):
         righe.append(f"Il file più lungo: {_nome(c['lungo'][1])}, {durata(c['lungo'][0])}.")
     if c["corto"]:
         righe.append(f"Il file più corto: {_nome(c['corto'][1])}, {durata(c['corto'][0])}.")
-    anni = f"; anni dal {min(c['anni'])} al {max(c['anni'])}" if c["anni"] else ""
-    righe.append(f"Dai tag: {al_plurale(len(c['autori']), 'autore', 'autori')}, {len(c['album'])} album, {al_plurale(len(c['generi']), 'genere', 'generi')}{anni}.")
+    # Dai tag, solo cio' che c'e'; senza niente, una frase che lo dice (1.104.0).
+    parti = []
+    if c["autori"]:
+        parti.append(al_plurale(len(c["autori"]), "autore", "autori"))
+    if c["album"]:
+        parti.append(f"{len(c['album'])} album")
+    if c["generi"]:
+        parti.append(al_plurale(len(c["generi"]), "genere", "generi"))
+    testo = ", ".join(parti)
+    if c["anni"]:
+        anni = f"anni dal {min(c['anni'])} al {max(c['anni'])}"
+        testo = f"{testo}; {anni}" if testo else anni
+    righe.append(f"Dai tag: {testo or 'nessun autore, album, genere o anno'}.")
     if c["autori"]:
         autore, quanti = max(c["autori"].items(), key=lambda kv: (kv[1], kv[0]))
         righe.append(f"L'autore con più file: {autore}, {quanti}.")

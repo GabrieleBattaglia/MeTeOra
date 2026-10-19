@@ -27,7 +27,8 @@ def test_i_capitoli_degli_mp3():
 
 
 def test_lo_schedario_rilegge_solo_i_file_lunghi(tmp_path):
-    vecchia = {"dim": 1, "mod": 0, "tag": {}, "sottobrani": None, "durate_sid": None, "tag_v": 2}
+    # Un peso vero: dalla 1.104.0 una durata troppo lunga per i byte del file non si tiene.
+    vecchia = {"dim": 4_000_000, "mod": 0, "tag": {}, "sottobrani": None, "durate_sid": None, "tag_v": 2}
     schede = {
         r"C:\m\libro.m4b": {**vecchia, "durata": 3600.0},
         r"C:\m\canzone.mp3": {**vecchia, "durata": 200.0},

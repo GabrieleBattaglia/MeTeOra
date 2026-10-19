@@ -1,6 +1,6 @@
 # MeTeOra, lo schedario: durata, dimensione e tag dei file, ricordati fra un avvio e l'altro.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la 1.7.0, per le durate delle playlist (issue 4) e poi per il filtro (issue 2). Nella 1.62.4 le durate da libmpv per i formati che mutagen non conosce, e quella esatta dell'AAC grezzo. Nella 1.66.0 le schede della musica delle console, con i sottobrani. Nella 1.67.0 la scheda segue un file rinominato. Nella 1.69.0 i tag letti con tag.py, anche di WAV, AIFF, WMA e TTA. Nella 1.83.1 le variazioni delle schede, per i totali delle cartelle, e il filo che cede il passo alla finestra. Nella 1.103.0 la copia delle schede per le statistiche. Nella 1.103.1 le durate da una settimana in su non si tengono.
+# 30/09/2026: nasce con la 1.7.0, per le durate delle playlist (issue 4) e poi per il filtro (issue 2). Nella 1.62.4 le durate da libmpv per i formati che mutagen non conosce, e quella esatta dell'AAC grezzo. Nella 1.66.0 le schede della musica delle console, con i sottobrani. Nella 1.67.0 la scheda segue un file rinominato. Nella 1.69.0 i tag letti con tag.py, anche di WAV, AIFF, WMA e TTA. Nella 1.83.1 le variazioni delle schede, per i totali delle cartelle, e il filo che cede il passo alla finestra. Nella 1.103.0 la copia delle schede per le statistiche. Nella 1.103.1 le durate da una settimana in su non si tengono. Nella 1.104.0 le durate troppo lunghe per il peso di un file campionato non si tengono, togli() leva le schede dei file che mancano, e rinomina() trova la scheda anche con le maiuscole diverse.
 
 """Lo schedario dei file.
 
@@ -43,6 +43,12 @@ DURATA_CON_I_CAPITOLI = 600
 # Gabriele il 17 ottobre 2026. Non si tiene, e il file resta senza durata
 # (1.103.1).
 DURATA_CREDIBILE = 7 * 86400
+# Un file campionato, audio o video, pesa almeno tanti byte per ogni secondo
+# che dura: se pesa meno, la durata e' quella di un file rovinato, come il
+# WAV di prova di 4052 byte che diceva 37 ore, sotto la soglia della
+# settimana. Il file vero piu' leggero dello schedario di Gabriele, un
+# secondo di silenzio in WavPack, ne pesa 212 (1.104.0).
+BYTE_AL_SECONDO = 100
 
 VERSIONE_DEL_FILE = 1
 # Le chiavi dei tag, come le usa il filtro.
@@ -147,11 +153,28 @@ def durata_da_mpv(percorso):
         return _SONDA[0].durata(percorso)
 
 
-def credibile(durata):
-    """La durata, se e' un numero fra zero e una settimana; altrimenti None."""
-    if isinstance(durata, int | float) and not isinstance(durata, bool) and 0 <= durata < DURATA_CREDIBILE:
-        return durata
-    return None
+def _numero(valore):
+    return isinstance(valore, int | float) and not isinstance(valore, bool)
+
+
+def credibile(durata, percorso=None, dim=None):
+    """La durata, se e' un numero fra zero e una settimana; altrimenti None.
+    Con il percorso e la dimensione in byte, quella di un file campionato
+    non e' credibile nemmeno se il file pesa meno di BYTE_AL_SECONDO byte
+    per ogni secondo; SID, MIDI, tracker e console sono partiture, e non si
+    controllano (1.104.0)."""
+    if not (_numero(durata) and 0 <= durata < DURATA_CREDIBILE):
+        return None
+    # La moltiplicazione, e non la divisione, lascia passare la durata zero.
+    if percorso is not None and _numero(dim) and formati.e_campionato(percorso) and dim < BYTE_AL_SECONDO * durata:
+        return None
+    return durata
+
+
+def _norm(percorso):
+    """Il percorso come lo confrontano tutti i moduli: assoluto e, su
+    Windows, senza differenze di maiuscole e di barre (1.104.0)."""
+    return os.path.normcase(os.path.abspath(percorso))
 
 
 def _senza_capitoli(percorso, scheda):
@@ -203,7 +226,7 @@ def leggi_scheda(percorso):
         scheda["durata"] = float(audio.info.length)
     if scheda["durata"] is None:
         scheda["durata"] = durata_da_mpv(percorso)
-    scheda["durata"] = credibile(scheda["durata"])
+    scheda["durata"] = credibile(scheda["durata"], percorso, scheda["dim"])
     if audio is not None and tag.modificabile(percorso):
         comuni = tag.comuni_del_file(audio)
         anno = comuni.get("anno")
@@ -244,6 +267,9 @@ class Schedario:
         self._verificati = set()
         self._coda = queue.Queue()
         self._in_coda = set()
+        # I file che togli() ha tolto mentre erano in coda: se il filo non li
+        # legge, non contano come ricontrollati (1.104.0).
+        self._tolti_in_coda = set()
         self._lucchetto = threading.Lock()
         self._modificato = False
         self._fermo = False
@@ -257,17 +283,19 @@ class Schedario:
         # il lucchetto di Python conteso, andava venti volte piu' piano (1.83.1).
         self.cedi = threading.Event()
 
-    def _metti(self, percorso, scheda):
+    def _metti(self, percorso, scheda, annota=None):
         """Con il lucchetto: la scheda nuova del file, o None per toglierla;
         la variazione si annota, con la durata di prima e quella nuova, anche
-        se e' la stessa: la scheda puo' avere tag nuovi."""
+        se e' la stessa: la scheda puo' avere tag nuovi. annota, se c'e', e'
+        il percorso scritto nella variazione al posto di quello della chiave
+        (1.104.0, per rinomina)."""
         vecchia = (self.schede.get(percorso) or {}).get("durata")
         if scheda is None:
             self.schede.pop(percorso, None)
         else:
             self.schede[percorso] = scheda
         self._generazione += 1
-        self._variazioni.append((self._generazione, percorso, vecchia, (scheda or {}).get("durata")))
+        self._variazioni.append((self._generazione, annota or percorso, vecchia, (scheda or {}).get("durata")))
 
     def variazioni(self):
         """Le schede cambiate dall'ultima volta, (numero, percorso, durata di
@@ -301,9 +329,10 @@ class Schedario:
             # Dalla 1.93.0 i capitoli: si rileggono le schede vecchie dei file
             # lunghi dei formati che li hanno.
             # Dalla 1.103.1 si rileggono anche le schede con una durata non
-            # credibile, e il file resta senza durata.
+            # credibile, e il file resta senza durata; dalla 1.104.0 anche
+            # quelle troppo lunghe per il peso di un file campionato.
             self.schede = {chiave: scheda for chiave, scheda in dati["schede"].items()
-                if formati.ha_sottobrani(chiave) or (credibile(scheda.get("durata")) is not None and formati.estensione(chiave) != ".aac"
+                if formati.ha_sottobrani(chiave) or (credibile(scheda.get("durata"), chiave, scheda.get("dim")) is not None and formati.estensione(chiave) != ".aac"
                     and scheda.get("tag_v", 0) >= TAG_DA_RILEGGERE.get(formati.estensione(chiave), 0) and not _senza_capitoli(chiave, scheda))}
 
     def salva(self):
@@ -334,18 +363,63 @@ class Schedario:
         with self._lucchetto:
             return dict(self.schede)
 
+    def togli(self, viste):
+        """Toglie le schede dei file che non ci sono piu'. viste e' un
+        dizionario percorso -> scheda preso prima con istantanea(): si toglie
+        solo la scheda che e' ancora quella vista, perche' se intanto il filo
+        l'ha rifatta il file e' stato letto dal disco, e resta. Non si annota
+        nessuna variazione: i totali delle cartelle contano solo i file letti
+        dal disco in questa sessione, e un file che manca non c'e' mai stato.
+        Non salva: lo fa chi chiama. Torna i percorsi tolti (1.104.0)."""
+        tolti = []
+        with self._lucchetto:
+            for percorso, scheda in viste.items():
+                if scheda is not None and self.schede.get(percorso) is scheda:
+                    del self.schede[percorso]
+                    # Se il file torna, nella sessione si rilegge. Chi e' in
+                    # coda resta in _in_coda: il filo lo legge comunque, e
+                    # in_attesa() deve contarlo; ma se non lo trova, non lo
+                    # deve dare per ricontrollato, o chiedi() lo salterebbe.
+                    self._verificati.discard(percorso)
+                    if percorso in self._in_coda:
+                        self._tolti_in_coda.add(percorso)
+                    tolti.append(percorso)
+            if tolti:
+                self._modificato = True
+        return tolti
+
     def scheda(self, percorso):
         """La scheda del file se lo schedario ce l'ha, anche se non e' ancora
         stata ricontrollata; None se non c'e'."""
         return self.schede.get(percorso)
 
     def rinomina(self, vecchio, nuovo):
-        """Un file rinominato sul disco: la sua scheda passa al nome nuovo."""
+        """Un file rinominato sul disco: la sua scheda passa al nome nuovo.
+        Dalla 1.104.0 la chiave si trova anche con le maiuscole diverse, come
+        la confrontano gli altri moduli: la playlist puo' scrivere il percorso
+        in un modo e lo schedario averlo da una cartella in un altro. La
+        scheda va sotto nuovo, com'e' scritto; la variazione del nome nuovo,
+        se la cartella e' la stessa, la scrive come quella della chiave
+        trovata, come fa la variazione del nome vecchio: i totali delle
+        cartelle della plancia hanno le chiavi esatte, e altrimenti la durata
+        uscirebbe da una cartella senza rientrarvi."""
         with self._lucchetto:
-            scheda = self.schede.get(vecchio)
-            if scheda is not None:
-                self._metti(vecchio, None)
-                self._metti(nuovo, scheda)
+            chiave = vecchio if vecchio in self.schede else None
+            if chiave is None:
+                # Il giro su tutte le schede si fa solo quando serve: con le
+                # 140 mila di Gabriele costa due decimi di secondo. Fra piu'
+                # grafie dello stesso file passa quella ricontrollata in
+                # questa sessione; le altre restano, e se il file manca le
+                # toglie togli(), senza variazioni per i totali.
+                stesso = _norm(vecchio)
+                simili = [k for k in self.schede if _norm(k) == stesso]
+                chiave = next((k for k in simili if k in self._verificati), simili[0] if simili else None)
+            if chiave is not None:
+                scheda = self.schede[chiave]
+                cartella = os.path.dirname(chiave)
+                annota = os.path.join(cartella, os.path.basename(nuovo)) if _norm(os.path.dirname(nuovo)) == _norm(cartella) else nuovo
+                self._metti(chiave, None)
+                self._metti(nuovo, scheda, annota)
                 self._modificato = True
 
     def leggi_subito(self, percorso):
@@ -410,7 +484,12 @@ class Schedario:
                     self._modificato = True
                 fatti += 1
             with self._lucchetto:
-                self._verificati.add(percorso)
+                # Un file tolto da togli() mentre era in coda, che qui resta
+                # senza scheda, non e' ricontrollato: se torna nella sessione,
+                # chiedi() lo rimette in coda (1.104.0).
+                if percorso not in self._tolti_in_coda or self.schede.get(percorso) is not None:
+                    self._verificati.add(percorso)
+                self._tolti_in_coda.discard(percorso)
                 self._in_coda.discard(percorso)
             if fatti and time.monotonic() - ultimo_avviso >= INTERVALLO_DEGLI_AVVISI:
                 fatti = 0

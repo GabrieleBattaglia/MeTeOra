@@ -1,6 +1,6 @@
 # MeTeOra, i formati: quali file il programma sa suonare.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.65.0 i MIDI e i tracker a parte, nella 1.66.0 la musica delle console. Nella 1.82.0 testo_srt, da sottotitoli_ocr.py, per la passata e il karaoke.
+# 30/09/2026: nasce con la tappa 1. Nella 1.65.0 i MIDI e i tracker a parte, nella 1.66.0 la musica delle console. Nella 1.82.0 testo_srt, da sottotitoli_ocr.py, per la passata e il karaoke. Nella 1.104.0 i formati campionati, per le durate credibili dello schedario.
 
 """Le estensioni dei file supportati.
 
@@ -34,6 +34,11 @@ AUDIO = frozenset({
 }) | TRACKER
 VIDEO = frozenset({".mp4", ".mkv", ".avi", ".mov", ".wmv", ".webm", ".flv", ".m4v", ".mpg", ".mpeg", ".ts", ".m2ts", ".3gp", ".vob", ".ogv"})
 TUTTI = SID | MIDI | CHIP | AUDIO | VIDEO
+# I formati campionati, audio e video, che tengono il suono campione per
+# campione: piu' durano, piu' pesano, e lo schedario ne scarta le durate
+# troppo lunghe per il peso del file (1.104.0). AUDIO comprende anche i
+# tracker, che come i SID, i MIDI e le console sono partiture.
+CAMPIONATI = (AUDIO - TRACKER) | VIDEO
 
 
 def estensione(percorso):
@@ -54,6 +59,10 @@ def e_midi(percorso):
 
 def e_chip(percorso):
     return estensione(percorso) in CHIP
+
+
+def e_campionato(percorso):
+    return estensione(percorso) in CAMPIONATI
 
 
 def _tempo_srt(secondi):

@@ -1,7 +1,7 @@
 # MeTeOra, la ricerca globale: cerca con il filtro in tutte le playlist e in tutte le unita'.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 # 30/09/2026: nasce con la 1.15.0, issue 10. Nella 1.23.0 l'albero della provenienza dei risultati; nella 1.34.6 i risultati cestinati escono dal ramo.
-# Nella 1.73.0 la ricerca ovunque anche in rete, dopo i dischi, con le letture di rete a tempo.
+# Nella 1.73.0 la ricerca ovunque anche in rete, dopo i dischi, con le letture di rete a tempo. Nella 1.104.0 l'annullamento delle letture di rete diventa pubblico, per la pulizia all'avvio.
 
 """La ricerca in tutto MeTeOra.
 
@@ -104,13 +104,14 @@ def radici_di_rete(percorsi):
     return senza_annidati(list(percorsi) + lettere_di_rete())
 
 
-def _annulla_la_lettura(filo, per_quanto=3.0):
+def annulla_la_lettura(filo, per_quanto=3.0):
     """Annulla la lettura su cui il filo e' fermo, con CancelSynchronousIo:
     senza, un filo bloccato su una condivisione che tace resta li' finche'
     Windows non si arrende. Se il server ignora l'annullamento, questa
     chiamata resta ferma anche lei: va fatta in un filo a parte. Si ripete
     finche' il filo e' vivo, per per_quanto secondi: un annullamento che arriva
-    fra una lettura e l'altra non vale per quella dopo."""
+    fra una lettura e l'altra non vale per quella dopo. La usa anche la
+    pulizia all'avvio (1.104.0)."""
     import ctypes
     from ctypes import wintypes
 
@@ -179,7 +180,7 @@ def leggi_in_rete(cartella, fermo=None, attesa=None):
     while filo.is_alive() and not (fermo is not None and fermo()) and time.monotonic() - passo[0] < attesa:
         filo.join(0.1)
     if filo.is_alive():
-        threading.Thread(target=_annulla_la_lettura, args=(filo,), name="MeTeOra, annullamento in rete", daemon=True).start()
+        threading.Thread(target=annulla_la_lettura, args=(filo,), name="MeTeOra, annullamento in rete", daemon=True).start()
         if fermo is not None and fermo():
             return [], []
         raise NonRisponde(cartella)

@@ -27,6 +27,14 @@ def test_formati():
     assert "*.sid" in formati.filtro_dialogo()
 
 
+def test_formati_campionati():
+    # 1.104.0: i tracker stanno in AUDIO, ma come SID, MIDI e console sono partiture.
+    assert all(formati.e_campionato(p) for p in ("a.WAV", "b.wv", "c.opus", "d.mkv", "e.MP4"))
+    assert not any(formati.e_campionato(p) for p in ("f.mod", "g.XM", "h.sid", "i.mid", "j.nsf", "nota.txt"))
+    assert formati.CAMPIONATI.isdisjoint(formati.TRACKER | formati.SID | formati.MIDI | formati.CHIP)
+    assert formati.CAMPIONATI | formati.TRACKER == formati.AUDIO | formati.VIDEO
+
+
 def test_contenuto_filtra_e_ordina(tmp_path):
     (tmp_path / "b.mp3").write_bytes(b"")
     (tmp_path / "A.flac").write_bytes(b"")
@@ -213,13 +221,181 @@ def test_schedario_scarta_le_durate_non_credibili(tmp_path):
     assert credibile(19 * 3600.0) == 19 * 3600.0 and credibile(0) == 0
     assert credibile(1.4e12) is None and credibile(7 * 86400) is None and credibile(-1) is None and credibile(None) is None and credibile(True) is None
     archivio = tmp_path / "schede.json"
-    vuota = {"dim": 1, "mod": 1.0, "tag": {}, "sottobrani": None, "durate_sid": None}
+    vuota = {"dim": 4_000_000, "mod": 1.0, "tag": {}, "sottobrani": None, "durate_sid": None}
     archivio.write_text(json.dumps({"versione": VERSIONE_DEL_FILE, "schede": {
         r"C:\m\buono.mp3": {**vuota, "durata": 120.0}, r"C:\m\rotto.opus": {**vuota, "durata": 1.4e12}}}), encoding="utf-8")
     s = Schedario(str(archivio))
     s.carica()
     # La scheda rotta non si tiene: il file si rilegge, e resta senza durata.
     assert s.scheda(r"C:\m\buono.mp3")["durata"] == 120.0 and s.scheda(r"C:\m\rotto.opus") is None
+
+
+def test_schedario_scarta_le_durate_troppo_lunghe_per_il_peso(tmp_path, monkeypatch):
+    # 1.104.0: un WAV di prova di 4052 byte diceva 37 ore, sotto la soglia della settimana.
+    import schedario
+    from schedario import BYTE_AL_SECONDO, VERSIONE_DEL_FILE, Schedario, credibile
+
+    assert credibile(134217.7, r"C:\m\e7.wav", 4052) is None
+    # Il file vero piu' leggero: un secondo di silenzio in WavPack.
+    assert credibile(1.0, r"C:\m\silenzio.wv", 212) == 1.0
+    # Le partiture pesano poco e durano quanto vogliono, ma non piu' di una settimana.
+    for nome in ("brano.mid", "brano.sid", "brano.mod", "brano.nsf"):
+        assert credibile(600.0, rf"C:\m\{nome}", 300) == 600.0, nome
+    assert credibile(7 * 86400, r"C:\m\brano.mid", 300) is None
+    # La durata zero passa anche con il file vuoto.
+    assert credibile(0, r"C:\m\vuoto.wav", 0) == 0
+    assert credibile(10.0, r"C:\m\a.flac", 10 * BYTE_AL_SECONDO) == 10.0 and credibile(10.0, r"C:\m\a.flac", 10 * BYTE_AL_SECONDO - 1) is None
+    # Senza il percorso o la dimensione conta solo la settimana, come prima.
+    assert credibile(134217.7) == 134217.7 and credibile(134217.7, r"C:\m\e7.wav") == 134217.7 and credibile(134217.7, None, 4052) == 134217.7
+    # Lo schedario salvato: il WAV sottopeso si rilegge, il MIDI e il modulo sottopeso restano.
+    archivio = tmp_path / "schede.json"
+    vuota = {"mod": 1.0, "tag": {}, "sottobrani": None, "durate_sid": None, "tag_v": 3}
+    archivio.write_text(json.dumps({"versione": VERSIONE_DEL_FILE, "schede": {
+        r"C:\m\e7.wav": {**vuota, "dim": 4052, "durata": 134217.7}, r"C:\m\buono.wav": {**vuota, "dim": 4_000_000, "durata": 20.0},
+        r"C:\m\brano.mid": {**vuota, "dim": 300, "durata": 600.0}, r"C:\m\brano.mod": {**vuota, "dim": 300, "durata": 600.0}}}), encoding="utf-8")
+    s = Schedario(str(archivio))
+    s.carica()
+    assert sorted(s.schede) == [r"C:\m\brano.mid", r"C:\m\brano.mod", r"C:\m\buono.wav"]
+    # La lettura di un file: la durata che libmpv dice di un WAV sottopeso non si tiene.
+    monkeypatch.setattr(schedario, "durata_da_mpv", lambda _percorso: 134217.7)
+    for nome, durata in (("e7.wav", None), ("brano.xm", 134217.7)):
+        percorso = tmp_path / nome
+        percorso.write_bytes(b"\x00" * 4052)
+        assert schedario.leggi_scheda(str(percorso))["durata"] == durata, nome
+
+
+def test_schedario_toglie_solo_le_schede_viste(tmp_path):
+    # 1.104.0: le schede dei file che mancano si tolgono, ma non quelle che il
+    # filo ha rifatto intanto, e i totali delle cartelle non cambiano.
+    from schedario import Schedario
+
+    s = Schedario(str(tmp_path / "schede.json"))
+    via, rifatto, resta = r"C:\m\via.mp3", r"C:\m\rifatto.mp3", r"C:\m\resta.mp3"
+    with s._lucchetto:
+        for numero, percorso in enumerate((via, rifatto, resta), 1):
+            s._metti(percorso, {"durata": 10.0 * numero})
+    s._verificati.update({via, rifatto, resta})
+    s.variazioni()
+    s._modificato = False
+    viste = s.istantanea()
+    # Intanto il filo rifa' una scheda: e' un oggetto nuovo, anche se uguale.
+    with s._lucchetto:
+        s._metti(rifatto, {"durata": 20.0})
+    s.variazioni()
+    generazione = s.totale_delle_durate([])[2]
+    tolti = s.togli({via: viste[via], rifatto: viste[rifatto], r"C:\m\mai.mp3": None, r"C:\m\altro.mp3": {"durata": 1.0}})
+    assert tolti == [via]
+    assert s.scheda(via) is None and s.scheda(rifatto) == {"durata": 20.0} and s.scheda(resta) == {"durata": 30.0}
+    assert via not in s._verificati and {rifatto, resta} <= s._verificati
+    assert s.variazioni() == [] and s.totale_delle_durate([])[2] == generazione and s._modificato
+    # Una seconda volta non c'e' piu' niente da togliere; e togli non salva.
+    s._modificato = False
+    assert s.togli({via: viste[via]}) == [] and not s._modificato
+    assert not (tmp_path / "schede.json").exists()
+
+
+def test_schedario_rinomina_con_le_maiuscole_diverse(tmp_path):
+    # 1.104.0: la playlist puo' scrivere il percorso con le maiuscole diverse da quelle della scheda.
+    from schedario import Schedario
+
+    s = Schedario(str(tmp_path / "schede.json"))
+    with s._lucchetto:
+        s._metti(r"C:\Musica\Canzone.MP3", {"durata": 10.0})
+    s.variazioni()
+    s.rinomina(r"c:\musica\canzone.mp3", r"C:\Musica\Ballata.mp3")
+    assert s.scheda(r"C:\Musica\Canzone.MP3") is None and s.scheda(r"C:\Musica\Ballata.mp3") == {"durata": 10.0}
+    assert s.variazioni() == [(2, r"C:\Musica\Canzone.MP3", 10.0, None), (3, r"C:\Musica\Ballata.mp3", None, 10.0)]
+    # Fra due grafie dello stesso file passa quella ricontrollata in sessione;
+    # l'altra resta, e la togliera' togli().
+    with s._lucchetto:
+        s._metti(r"C:\m\A.mp3", {"durata": 1.0})
+        s._metti(r"C:\M\a.MP3", {"durata": 2.0})
+    s._verificati.add(r"C:\M\a.MP3")
+    s.rinomina("c:/m/a.mp3", r"C:\m\b.mp3")
+    assert s.scheda(r"C:\m\b.mp3") == {"durata": 2.0} and s.scheda(r"C:\m\A.mp3") == {"durata": 1.0} and s.scheda(r"C:\M\a.MP3") is None
+    # Un file senza scheda non cambia niente.
+    s._modificato = False
+    s.rinomina(r"C:\m\nessuno.mp3", r"C:\m\altro.mp3")
+    assert not s._modificato and s.scheda(r"C:\m\altro.mp3") is None
+
+
+def test_schedario_rinomina_annota_la_cartella_della_scheda(tmp_path):
+    # 1.104.0: la finestra fa il nome nuovo dalla cartella del vecchio, scritta
+    # come nella playlist; la variazione del nome nuovo va nella cartella
+    # scritta come la chiave, la stessa dei totali della plancia.
+    from schedario import Schedario
+
+    s = Schedario(str(tmp_path / "schede.json"))
+    with s._lucchetto:
+        s._metti(r"C:\Musica\Canzone.MP3", {"durata": 10.0})
+    s.variazioni()
+    vecchio = r"c:\musica\canzone.mp3"
+    nuovo = os.path.join(os.path.dirname(vecchio), "Ballata.mp3")
+    s.rinomina(vecchio, nuovo)
+    # La scheda va sotto il nome nuovo com'e' scritto.
+    assert list(s.schede) == [nuovo] and s.scheda(nuovo) == {"durata": 10.0}
+    variazioni = s.variazioni()
+    assert variazioni == [(2, r"C:\Musica\Canzone.MP3", 10.0, None), (3, r"C:\Musica\Ballata.mp3", None, 10.0)]
+    # Come li conta la plancia, per cartella con la chiave esatta: la durata esce e rientra.
+    netto = {}
+    for _numero, percorso, prima, dopo in variazioni:
+        netto[os.path.dirname(percorso)] = netto.get(os.path.dirname(percorso), 0) + (dopo or 0) - (prima or 0)
+    assert netto == {r"C:\Musica": 0}
+    # Un nome nuovo in un'altra cartella resta com'e', anche nella variazione.
+    s.rinomina(nuovo, r"D:\Altrove\Ballata.mp3")
+    assert s.variazioni() == [(4, nuovo, 10.0, None), (5, r"D:\Altrove\Ballata.mp3", None, 10.0)]
+
+
+def test_schedario_togli_mentre_il_file_e_in_coda(tmp_path, monkeypatch):
+    # 1.104.0: un file tolto mentre e' in coda, che il filo poi non trova, non
+    # conta come ricontrollato: se torna nella sessione, chiedi() lo rilegge.
+    import schedario
+    from schedario import Schedario
+
+    monkeypatch.setattr(schedario, "leggi_scheda", lambda percorso: {"dim": os.stat(percorso).st_size, "durata": 5.0})
+    s = Schedario(str(tmp_path / "schede.json"))
+    via, torna = str(tmp_path / "via.mp3"), str(tmp_path / "torna.mp3")
+    open(torna, "wb").close()
+    with s._lucchetto:
+        s._metti(via, {"durata": 10.0})
+        s._metti(torna, {"durata": 20.0})
+    viste = s.istantanea()
+    # Il filo cede il passo: togli() arriva prima che legga i file.
+    s.cedi.set()
+    assert s.chiedi([via, torna]) == 2
+    assert s.togli(viste) == [via, torna] and s.in_attesa() == 2
+    s.cedi.clear()
+    s.aspetta()
+    # Il file che c'e' si legge e conta; quello che manca no.
+    assert s.scheda(via) is None and via not in s._verificati
+    assert s.scheda(torna) == {"dim": 0, "durata": 5.0} and torna in s._verificati
+    assert not s._tolti_in_coda and s.in_attesa() == 0
+    # Il file torna: chiedi() lo rimette in coda e il filo lo legge.
+    open(via, "wb").close()
+    assert s.chiedi([via, torna]) == 1
+    s.aspetta()
+    assert s.scheda(via) == {"dim": 0, "durata": 5.0} and via in s._verificati
+    # togli() fra il controllo del filo, che con il file sparito tiene la
+    # scheda com'e', e la fine del suo giro.
+    altro = str(tmp_path / "altro.mp3")
+    with s._lucchetto:
+        s._metti(altro, {"durata": 3.0})
+    viste = s.istantanea()
+    controlla = s._aggiornata
+
+    def e_intanto_togli(percorso):
+        aggiornata = controlla(percorso)
+        s.togli({altro: viste[altro]})
+        return aggiornata
+
+    s._aggiornata = e_intanto_togli
+    assert s.chiedi([altro]) == 1
+    s.aspetta()
+    assert s.scheda(altro) is None and altro not in s._verificati and not s._tolti_in_coda
+    # Un file tolto fuori dalla coda non si annota.
+    with s._lucchetto:
+        s._metti(altro, {"durata": 3.0})
+    assert sorted(s.togli(s.istantanea())) == sorted([via, torna, altro]) and not s._tolti_in_coda
 
 
 def test_contatore_rinfresca_le_letture_vecchie(tmp_path):

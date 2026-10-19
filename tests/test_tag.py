@@ -250,7 +250,8 @@ def test_lo_schedario_rilegge_i_formati_senza_tag(tmp_path):
     import json
 
     file = tmp_path / "schedario.json"
-    vecchia = {"dim": 1, "mod": 1.0, "durata": 3.0, "tag": {}, "sottobrani": None, "durate_sid": None}
+    # Un peso vero: dalla 1.104.0 una durata troppo lunga per i byte del file non si tiene.
+    vecchia = {"dim": 4_000_000, "mod": 1.0, "durata": 3.0, "tag": {}, "sottobrani": None, "durate_sid": None}
     file.write_text(json.dumps({"versione": schedario.VERSIONE_DEL_FILE, "schede": {
         r"C:\m\a.wav": vecchia, r"C:\m\b.wma": vecchia, r"C:\m\c.mp3": vecchia, r"C:\m\d.wav": {**vecchia, "tag_v": 1},
         r"C:\m\e.wav": {**vecchia, "tag_v": 2}, r"C:\m\f.wma": {**vecchia, "tag_v": 1}}}), encoding="utf-8")

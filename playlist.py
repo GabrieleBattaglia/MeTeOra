@@ -1,6 +1,6 @@
 # MeTeOra, le playlist: brani, playlist, archivio e coda di riproduzione.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 il sottobrano dei SID, nella 1.3.0 il loop A-B, nella 1.6.0 i Preferiti, nella 1.8.0 il filtro. Nella 1.59.0 Coda.altri, per la riproduzione casuale.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 il sottobrano dei SID, nella 1.3.0 il loop A-B, nella 1.6.0 i Preferiti, nella 1.8.0 il filtro. Nella 1.59.0 Coda.altri, per la riproduzione casuale. Nella 1.104.0 si tolgono i brani dei file spariti, per la pulizia all'avvio.
 
 """Il modello dei dati, senza finestre e senza suono.
 
@@ -18,6 +18,13 @@ import os
 import random
 
 VERSIONE_DEL_FILE = 1
+
+
+def _norm(percorso):
+    """Il percorso come si confronta: assoluto e, su Windows, con le
+    maiuscole e le barre di sistema. E' la forma degli insiemi di percorsi
+    spariti che arrivano dalla pulizia (1.104.0)."""
+    return os.path.normcase(os.path.abspath(percorso))
 
 
 class Brano:
@@ -91,6 +98,21 @@ class Playlist:
             del self.brani[i]
         return i
 
+    def togli_i_percorsi(self, spariti):
+        """Toglie tutti i brani dei file spariti, un insieme di percorsi gia'
+        normalizzati con normcase e abspath: anche i doppioni e gli altri
+        sottobrani dello stesso file, scritti in qualunque forma. Lavora sul
+        posto, cosi' chi tiene la lista la vede cambiare, e restituisce i
+        brani tolti, nel loro ordine (1.104.0)."""
+        if not spariti:
+            return []
+        tolti, restano = [], []
+        for b in self.brani:
+            (tolti if _norm(b.percorso) in spariti else restano).append(b)
+        if tolti:
+            self.brani[:] = restano
+        return tolti
+
     def come_dati(self):
         dati = {"nome": self.nome, "brani": [b.come_dati() for b in self.brani]}
         if self.filtro:
@@ -155,6 +177,18 @@ class Archivio:
 
     def elimina(self, pl):
         self.playlist = [p for p in self.playlist if p is not pl]
+
+    def percorsi(self):
+        """I percorsi dei brani di tutte le playlist e dei Preferiti, cosi'
+        come sono scritti, per la pulizia all'avvio (1.104.0)."""
+        return {b.percorso for pl in (*self.playlist, self.preferiti) for b in pl.brani}
+
+    def togli_i_percorsi(self, spariti):
+        """Toglie i brani dei file spariti da tutte le playlist e dai
+        Preferiti, come Playlist.togli_i_percorsi, e restituisce le coppie
+        (playlist, brano) dei tolti. Una playlist rimasta vuota resta: la
+        si elimina a mano (1.104.0). Non salva: salva chi chiama."""
+        return [(pl, b) for pl in (*self.playlist, self.preferiti) for b in pl.togli_i_percorsi(spariti)]
 
 
 class Coda:
