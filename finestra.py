@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli.
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -88,7 +88,7 @@ from dialoghi import (
 from filtro import COMMENTO, ErroreFiltro, Filtro, modello_della_console
 from impostazioni import Impostazioni
 from marcatori import Marcatori
-from motore import VOLUME_MASSIMO, durata_del_sottobrano, sottobrano_risolto
+from motore import DURATA_SID_PREDEFINITA, VOLUME_MASSIMO, durata_del_sottobrano, sottobrano_risolto
 from playlist import CRITERI, Archivio, Brano, Coda, Playlist
 from ricerca import AlberoDeiRisultati, NonRisponde, Ricerca, errore_di_rete, in_rete, leggi_in_rete, senza_annidati
 from schedario import Schedario, credibile
@@ -172,6 +172,12 @@ TASTI = {
     (".", False): "capitolo_successivo",
     # Dove sono: tempo, brano e lista di cio' che suona (Gabriele, tappa 14 b).
     ("'", False): "dove_sono",
+    # La durata residua, Maiuscolo con l'apostrofo: il punto interrogativo
+    # della tastiera italiana, che come la barra verticale puo' arrivare in un
+    # modo o nell'altro (Gabriele, tappa 14 d).
+    ("'", True): "durata_residua",
+    ("?", False): "durata_residua",
+    ("?", True): "durata_residua",
     ("+", False): "volume_su",
     ("-", False): "volume_giu",
     ("\\", False): "ricerca",
@@ -251,6 +257,8 @@ TASTI_COMUNI = [
     "Maiuscolo con V la ripetizione, a giro: del brano, della lista, spenta. Maiuscolo con S il timer di spegnimento, fra tanti minuti o alla fine del brano.",
     "L'apostrofo dice dove sei: il tempo del brano che suona, il suo nome, il posto nella lista e quello che c'è di particolare, come la pausa; "
     "lo scrive nella console e lo manda alla sintesi e al braille dei sottotitoli, senza spostare il fuoco.",
+    "Maiuscolo con l'apostrofo dice la durata residua: quanto manca e quanto è passato di ciò che suonerà, anche nei rami aperti dopo nella plancia, "
+    "la percentuale ascoltata e l'ora in cui finisce; anche lei va nella console, alla sintesi e al braille dei sottotitoli.",
     "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, più e meno volume, Maiuscolo con M il passo del volume, M muto.",
     "Virgola e punto vanno al capitolo precedente e successivo, negli audiolibri e nei film che ne hanno; la virgola, oltre i primi secondi di un capitolo, torna al suo inizio.",
     "A e D rallentano e accelerano, S torna alla velocità normale; F e H abbassano e alzano il tono di un semitono, G lo riporta al normale.",
@@ -938,6 +946,8 @@ class Finestra(wx.Frame):
         # Il numero dell'ultima riga di Dove sono nella coda del braille: la
         # riga dopo ne prende il posto, come nella console (tappa 14 b).
         self._dove_sono_in_braille = None
+        # Lo stesso per la riga della durata residua (tappa 14 d).
+        self._durata_residua_in_braille = None
         # La banda dell'equalizzatore scelta con U e I, contata da zero: si
         # parte dalla prima, quella dei 60 Hz.
         self._banda = 0
@@ -4887,13 +4897,14 @@ class Finestra(wx.Frame):
             return not dati["brano"].saltato and not (self.albero.IsExpanded(voce) and self._ha_sottobrani(dati["brano"]))
         return False
 
-    def _voce_che_suona(self, sottobrano=None):
+    def _voce_che_suona(self, sottobrano=None, brano=None):
         """La voce visibile della plancia che corrisponde a cio' che suona, o
         None se non si vede: il sottobrano, se il SID e' aperto, altrimenti il
         brano o il file. Il sottobrano e' quello del motore, se non lo si da':
         al passaggio della dissolvenza il motore ha gia' quello che entra,
-        mentre la coda e' ancora sul brano che esce."""
-        corrente = self.coda.corrente
+        mentre la coda e' ancora sul brano che esce. brano, se c'e', prende il
+        posto di quello della coda, per la durata residua (tappa 14 d)."""
+        corrente = self.coda.corrente if brano is None else brano
         if corrente is None:
             return None
         numero = self.motore.sottobrano if sottobrano is None else sottobrano
@@ -4944,8 +4955,7 @@ class Finestra(wx.Frame):
             return None
         ripetizione = self.impostazioni["ripetizione"]
         pl, corrente = self.coda.playlist, self.coda.corrente
-        if (ripetizione == "brano" and not dopo_errore and corrente is not None and not corrente.saltato
-                and self.coda.ammesso(pl, corrente) and any(b is corrente for b in pl.brani)):
+        if not dopo_errore and corrente is not None and self._il_brano_si_ripete(pl, corrente):
             # Un brano saltato, tolto dalla lista o nascosto dal filtro non si
             # ripete: si va avanti come sempre.
             self._mazzo_finito = False
@@ -5093,6 +5103,13 @@ class Finestra(wx.Frame):
                 self._nella_storia -= 1
                 i -= 1
         return None
+
+    def _storia_in_avanti(self):
+        """I posti della storia della riproduzione casuale dopo quello in cui
+        si e', che dopo Z l'avanzamento ripercorre prima di pescare dal mazzo:
+        quelli ancora nella loro playlist, come in _dalla_storia, ma senza
+        dimenticare gli altri, per la durata residua (tappa 14 d)."""
+        return [posto for posto in self._storia[self._nella_storia + 1:] if any(b is posto[1] for b in posto[0].brani)]
 
     def _azzera_la_storia(self):
         """La storia della riproduzione casuale ricomincia: con il casuale
@@ -5529,8 +5546,7 @@ class Finestra(wx.Frame):
                 self._sveglia_del_timer.StartOnce(max(1, round(resto * 1000)))
 
     def _ora_del_timer(self):
-        resto = max(0.0, self._timer_scade - self._adesso())
-        return (datetime.datetime.now() + datetime.timedelta(seconds=resto)).strftime("%H:%M")
+        return self._ora_fra(max(0.0, self._timer_scade - self._adesso()))
 
     def _frase_del_timer(self):
         """Il timer di adesso, per la domanda di Maiuscolo con S."""
@@ -6113,9 +6129,14 @@ class Finestra(wx.Frame):
             nome = NOMI_DEI_TASTI[codice]
         elif modificatori in (wx.MOD_NONE, wx.MOD_SHIFT) and unicode not in (wx.WXK_NONE, 0) and unicode > 32 and chr(unicode).isprintable():
             carattere = chr(unicode).lower()
-            if modificatori == wx.MOD_SHIFT and carattere in CIFRE_COL_MAIUSCOLO:
+            maiuscolo = modificatori == wx.MOD_SHIFT
+            if maiuscolo and carattere in CIFRE_COL_MAIUSCOLO:
                 carattere = str(CIFRE_COL_MAIUSCOLO[carattere] % 10)
-            return nome_del_carattere(carattere, modificatori == wx.MOD_SHIFT)
+            if carattere == "?":
+                # Il punto interrogativo e' Maiuscolo con l'apostrofo, comunque
+                # arrivi: la durata residua ha un nome solo (tappa 14 d).
+                carattere, maiuscolo = "'", True
+            return nome_del_carattere(carattere, maiuscolo)
         elif unicode in (ord("\\"), 0x1C):
             nome = "barra rovesciata"
         elif unicode not in (wx.WXK_NONE, 0) and unicode > 32 and chr(unicode).isprintable():
@@ -8121,6 +8142,291 @@ class Finestra(wx.Frame):
         if self._timer_scade is not None:
             return f"timer fra {_minuti(max(1, math.ceil((self._timer_scade - self._adesso()) / 60)))}"
         return None
+
+    # La durata residua, Maiuscolo con l'apostrofo (Gabriele, 20 ottobre 2026, tappa 14 d).
+
+    def _comando_durata_residua(self):
+        """Maiuscolo con l'apostrofo: quanto manca e quanto e' passato di cio'
+        che l'avanzamento suonera', con il totale, la percentuale ascoltata e
+        l'ora di fine prevista, poi il brano e la lista come in Dove sono. Il
+        campo e' quello di _seguente_automatico: se decide la plancia, le sue
+        voci suonabili che si vedono dalla prima della lista che suona in
+        giu', anche nelle playlist, nelle cartelle e nei sottobrani aperti
+        dopo, o con la casuale tutte; altrimenti la lista o il loop. Come Dove
+        sono, la riga si riscrive a ogni pressione e va alla sintesi e al
+        braille dei sottotitoli, e il fuoco resta dov'e'. Se non suona niente,
+        come F8, ma la frase va anche alla sintesi e al braille, come in Dove
+        sono."""
+        pl, brano = self._brano_che_suona()
+        if brano is None or pl is None or not self.motore.in_corso:
+            testo = "Non sta suonando niente."
+            self._riscontro("niente_da_suonare", testo)
+        else:
+            testo = self._frase_della_durata_residua(pl, brano)
+            self._riscontro("durata_residua", testo, "durata_residua")
+        # Anche sulla barra la riga nuova prende il posto di quella di prima,
+        # e a voce, come Dove sono: la voce di Windows accodava le pressioni.
+        # Anche la frase di F8, come in Dove sono (ritocco della 1.110.0).
+        self._braille.togli(self._durata_residua_in_braille)
+        self._durata_residua_in_braille = self._ai_testi_letti(testo, interrompi=True)
+
+    def _brano_che_suona(self):
+        """(playlist, brano) di cio' che suona: quelli della coda, o al
+        passaggio della dissolvenza quelli del brano preparato, che il motore
+        ha gia' fatto entrare mentre la coda e' ancora su quello che esce,
+        finche' _passaggio non la sposta."""
+        pl, brano = self.coda.playlist, self.coda.corrente
+        preparato, in_corso = self._preparato, self.motore.in_corso
+        if preparato is not None and brano is not None and in_corso == preparato[1].percorso and in_corso != brano.percorso:
+            return preparato[0], preparato[1]
+        return pl, brano
+
+    def _voci_in_vista(self, voce=None):
+        """Le voci che si vedono nella plancia, nell'ordine della freccia giu':
+        come _tutte_le_voci con _visibile, ma senza entrare nei rami chiusi,
+        che dopo Maiuscolo con F10 possono avere migliaia di voci."""
+        for figlio in self._figli(voce or self.albero.GetRootItem()):
+            yield figlio
+            if self.albero.IsExpanded(figlio):
+                yield from self._voci_in_vista(figlio)
+
+    def _campo_della_durata_residua(self, pl, brano):
+        """Cio' che l'avanzamento suonera' prima e dopo il brano che suona,
+        come lo sceglie _seguente_automatico: (prima, dopo, esclusi, plancia,
+        fuori). prima e dopo sono posti suonabili (playlist, brano,
+        sottobrano), senza il brano che suona; esclusi i saltati lasciati
+        fuori; plancia e' vero se decide la plancia; fuori e' vero se il brano
+        non e' piu' nella lista o sta fuori dal loop, e allora tutta la lista,
+        o il loop, viene dopo, perche' la Coda riparte dal suo primo brano. I
+        brani nascosti dal filtro non contano, come nell'etichetta della
+        playlist. Se decide la plancia, senza la riproduzione casuale prima
+        comincia dalla prima voce della lista che suona: l'avanzamento va
+        solo avanti, e le voci aperte sopra, come i Preferiti in cima, non
+        le ha suonate e non le suonera'; con la ripetizione della lista
+        tornano nel giro dopo. La casuale invece pesca fra tutte le voci che
+        si vedono, e le conta tutte."""
+        loop = self.coda.intervallo(pl)
+        voce = None if loop is not None or getattr(pl, "selezione", False) else self._voce_che_suona(brano=brano)
+        prima, dopo, esclusi = [], [], 0
+        if voce is not None:
+            dentro = prima if self.impostazioni["casuale"] else None
+            for v in self._voci_in_vista():
+                if v == voce:
+                    dentro = dopo
+                    continue
+                dati = self._dati(v) or {}
+                if dentro is None:
+                    # Sopra la lista che suona: non conta, nemmeno fra i saltati.
+                    if dati.get("playlist") is not pl or dati.get("tipo") not in ("brano", "file", "sottobrano"):
+                        continue
+                    dentro = prima
+                if self._suonabile_in_plancia(v):
+                    dentro.append((dati["playlist"], dati["brano"], dati.get("numero")))
+                elif dati.get("tipo") in ("brano", "file", "sottobrano") and dati["brano"].saltato:
+                    # Un SID saltato e aperto conta con i suoi sottobrani, non da solo.
+                    esclusi += not (dati["tipo"] != "sottobrano" and self.albero.IsExpanded(v) and self._ha_sottobrani(dati["brano"]))
+            return prima, dopo, esclusi, True, False
+        primo, ultimo = loop or (0, len(pl.brani) - 1)
+        indice = pl.indice(brano)
+        fuori = indice is None or not primo <= indice <= ultimo
+        for i in range(primo, ultimo + 1):
+            altro = pl.brani[i]
+            if altro is brano or not self.coda.ammesso(pl, altro):
+                continue
+            if altro.saltato:
+                esclusi += 1
+            else:
+                (dopo if fuori or i > indice else prima).append((pl, altro, None))
+        return prima, dopo, esclusi, False, fuori
+
+    def _durata_nel_conto(self, brano, numero=None):
+        """La durata di un posto della durata residua, dalla scheda; None se
+        non si sa. Per un SID o un file delle console conta il sottobrano che
+        il motore suonera', numero, quello del brano o l'iniziale, di cui la
+        scheda tiene la durata come durata del file; se il database non la
+        sa, i secondi a cui il motore lo ferma. Cosi' i None di durate_sid
+        non arrivano mai a una somma."""
+        scheda = self.schedario.scheda(brano.percorso)
+        if scheda is None:
+            return None
+        if scheda.get("sottobrani") and formati.ha_sottobrani(brano.percorso):
+            numero = numero or brano.sottobrano
+            if numero is None:
+                durata = scheda.get("durata")
+            else:
+                durate = scheda.get("durate_sid") or []
+                durata = durate[numero - 1] if numero <= len(durate) else None
+            return DURATA_SID_PREDEFINITA if durata is None else durata
+        return scheda.get("durata")
+
+    def _durata_di_cio_che_suona(self, brano):
+        """La durata del brano che suona: per un SID o un file delle console
+        quella del sottobrano del motore, come la usa il motore; altrimenti
+        quella dello schedario, perche' per l'AAC grezzo il motore ha solo la
+        stima di libmpv, e se lo schedario non la sa quella del motore, se e'
+        credibile, come nelle statistiche."""
+        if self.motore.sottobrani and self.motore.sottobrano:
+            return durata_del_sottobrano(brano.percorso, self.motore.sottobrano)
+        durata = self._durata_nel_conto(brano)
+        if durata is None:
+            durata = credibile(self.motore.durata, brano.percorso, (self.schedario.scheda(brano.percorso) or {}).get("dim"))
+        return durata
+
+    def _il_brano_si_ripete(self, pl, brano):
+        """Vero se con la ripetizione del brano il brano che suona si ripete:
+        non se e' saltato, tolto dalla lista o nascosto dal filtro, che vanno
+        avanti come sempre."""
+        return (self.impostazioni["ripetizione"] == "brano" and not brano.saltato and self.coda.ammesso(pl, brano)
+            and any(b is brano for b in pl.brani))
+
+    def _ora_fra(self, secondi):
+        """L'ora, in ore e minuti, fra tanti secondi da adesso."""
+        return (datetime.datetime.now() + datetime.timedelta(seconds=secondi)).strftime("%H:%M")
+
+    def _ora_di_fine(self, secondi):
+        """L'ora di fine della durata residua, fra tanti secondi: se non e'
+        oggi, con di domani o con la data, perche' una lista lunga finisce
+        anche fra qualche giorno."""
+        adesso = datetime.datetime.now()
+        quando = adesso + datetime.timedelta(seconds=secondi)
+        giorni = (quando.date() - adesso.date()).days
+        ora = quando.strftime("%H:%M")
+        if giorni <= 0:
+            return ora
+        return f"{ora} di domani" if giorni == 1 else f"{ora} di {statistiche.data(quando)}"
+
+    def _frase_della_durata_residua(self, pl, brano):
+        """La riga della durata residua: prima i numeri, poi l'ora di fine
+        prevista o la pausa, poi il brano e la lista come in Dove sono, e in
+        fondo, quando ci sono, i rami aperti della plancia, i saltati
+        esclusi, i brani senza durata, cosa succede dopo e il timer. Il
+        mancante e' il totale meno il trascorso, in secondi interi, cosi' i
+        conti di chi ascolta tornano; a velocita' diversa da 1 si aggiunge il
+        tempo vero di ascolto, subito dopo il mancante, come nell'esempio di
+        Gabriele, e il totale va dopo, con in tutto; la dissolvenza non si
+        toglie. Con la riproduzione casuale a mazzo il trascorso sono i
+        brani gia' usciti e il mancante quelli che ci restano, piu' quelli
+        che dopo Z la storia fara' risuonare; con la casualita' totale, che
+        non finisce mai, il resto del brano e il totale."""
+        motore, imp = self.motore, self.impostazioni
+        prima, dopo, esclusi, plancia, fuori = self._campo_della_durata_residua(pl, brano)
+        altri = prima + dopo
+        durate = [self._durata_nel_conto(b, numero) for _pl, b, numero in altri]
+        durata = self._durata_di_cio_che_suona(brano)
+        posizione = max(0.0, motore.posizione or 0.0)
+        if durata is not None:
+            posizione = min(posizione, durata)
+        resto = None if durata is None else durata - posizione
+        modello = imp["modello_casuale"] if imp["casuale"] and altri else None
+        aggiunti = []
+        if modello not in (None, "totale"):
+            # Dopo Z l'avanzamento ripercorre prima la storia in avanti, e solo
+            # poi pesca dal mazzo: quei brani suoneranno di nuovo, anche se ne
+            # sono gia' usciti, e contano fra quelli che restano. Un posto
+            # della storia che non e' fra gli altri, come il brano che suona in
+            # un giro nuovo, si aggiunge.
+            avanti = self._storia_in_avanti()
+            # Le chiavi sono quelle del mazzo, anche senza sottobrano, che e'
+            # la voce di un SID chiuso: insiemi, perche' la storia tiene fino a
+            # mille posti e la plancia aperta migliaia di voci.
+            di_avanti = {(id(p), id(b), n) for p, b, n in avanti} | {(id(p), id(b), None) for p, b, _n in avanti}
+            chiavi = [(id(p), id(b), numero) for p, b, numero in altri]
+            usciti = [chiave in self._mazzo and chiave not in di_avanti for chiave in chiavi]
+            degli_altri = set(chiavi)
+            aggiunti = [(p, b, n) for p, b, n in avanti if (id(p), id(b), None) not in degli_altri and (id(p), id(b), n) not in degli_altri]
+            passati = [d for d, uscito in zip(durate, usciti, strict=True) if uscito]
+            futuri = [d for d, uscito in zip(durate, usciti, strict=True) if not uscito]
+            futuri += [self._durata_nel_conto(b, numero) for _pl, b, numero in aggiunti]
+        else:
+            passati, futuri = durate[:len(prima)], durate[len(prima):]
+        mai_letti = {b.percorso for b in [brano, *(b for _pl, b, _numero in altri + aggiunti)] if self.schedario.scheda(b.percorso) is None}
+        if mai_letti:
+            # Lo schedario le legge in disparte: ripremendo il tasto il conto si completa.
+            self.schedario.chiedi(mai_letti)
+        trascorso = sum(d for d in passati if d is not None) + posizione
+        totale = trascorso + sum(d for d in futuri if d is not None) + (resto or 0.0)
+        mancano = max(0, int(totale) - int(trascorso))
+        senza = sum(d is None for d in passati + futuri) + (durata is None)
+        nessuna = senza == len(passati) + len(futuri) + 1
+        velocita = motore.velocita
+
+        def alla_velocita(secondi):
+            return f", alla velocità {valori.scrivi_velocita(velocita)} sono {tempo(secondi / velocita)}" if velocita != 1 else ""
+
+        solo = not altri
+        # Il tempo vero di ascolto subito dopo il mancante, perche' non lo si
+        # prenda per quello del totale, che va dopo, con in tutto.
+        numeri = f"{tempo(mancano)} di {tempo(totale)}" if velocita == 1 else f"{tempo(mancano)}{alla_velocita(mancano)}, in tutto {tempo(totale)}"
+        numeri += f", trascorsi {tempo(trascorso)}, {dettagli.percentuale(trascorso, totale)} ascoltato"
+        if nessuna:
+            testa = "Suona un brano solo, e la sua durata non si sa" if solo else "Nessuna durata è nota"
+        elif solo:
+            testa = f"Suona un brano solo: mancano {tempo(mancano)}{alla_velocita(mancano)}"
+        elif modello == "totale":
+            del_brano = "Del brano la durata non si sa" if resto is None else f"Del brano mancano {tempo(resto)}{alla_velocita(resto)}"
+            testa = f"{del_brano}, in tutto {tempo(totale)}, ordine casuale senza fine"
+        elif modello is not None:
+            testa = f"Casuale: suonati {sum(usciti) + 1} di {len(altri) + 1}, nel mazzo restano {numeri}"
+        else:
+            testa = f"Mancano {numeri}"
+        # Cosa succede dopo: niente fine con il brano che si ripete o con la
+        # casualita' totale; un giro che ricomincia con il loop, il mazzo
+        # rimescolato e la ripetizione della lista. Il mazzo decide anche nel
+        # loop: finito, si rimescola o la musica si ferma, e non si torna al
+        # punto A.
+        loop = self.coda.intervallo(pl)
+        senza_fine = dopo_la_fine = None
+        if self._il_brano_si_ripete(pl, brano) or (loop is not None and loop[0] == loop[1] and not fuori):
+            senza_fine = "il brano si ripete" if solo else "il brano si ripete: la lista non va avanti finché la ripetizione resta accesa"
+        elif modello == "totale":
+            senza_fine = ""
+        elif modello is not None:
+            if modello == "a_giro" or imp["ripetizione"] == "lista":
+                dopo_la_fine = "poi il mazzo si rimescola"
+        elif loop is not None:
+            dopo_la_fine = "il brano è fuori dal loop: poi si va al punto A" if fuori else "poi si torna al punto A"
+        elif imp["ripetizione"] == "lista":
+            dopo_la_fine = "poi si riparte dalla prima voce della plancia" if plancia else "poi la lista ricomincia"
+        if solo and dopo_la_fine:
+            # Da solo, il giro nuovo e' lo stesso brano.
+            senza_fine, dopo_la_fine = "il brano si ripete", None
+        # Il timer scaduto, o alla fine di questo brano, ferma tutto prima.
+        fermo = None
+        if self._inizio_della_sfumatura is not None:
+            fermo = "il timer è scaduto, e la musica sta sfumando"
+        elif self._timer_a_fine_brano:
+            verso = "" if motore.in_pausa or resto is None else f", verso le {self._ora_di_fine(resto / velocita)}"
+            fermo = f"il timer ferma la musica alla fine di questo brano{verso}"
+        fine = not motore.in_pausa and not nessuna and fermo is None and senza_fine is None
+        frasi = [testa]
+        if motore.in_pausa:
+            frasi.append("in pausa")
+        elif fine:
+            frasi.append(f"{'il giro finisce' if dopo_la_fine else 'finisce'} verso le {self._ora_di_fine(mancano / velocita)}")
+        lista = self._lista_di_dove_sono(pl, brano)
+        if lista[0][:1].isdigit():
+            lista[0] = f"brano {lista[0]}"
+        frasi += lista
+        if plancia and any(p is not pl for p, _b, _numero in altri):
+            frasi.append(f"con i rami aperti della plancia, {brani_al_plurale(len(altri) + 1)} in tutto")
+        if fuori and altri and loop is None and modello is None and fermo is None:
+            frasi.append("dopo si riparte dal primo brano")
+        if esclusi:
+            frasi.append(al_plurale(esclusi, "saltato escluso", "saltati esclusi"))
+        if senza and not nessuna:
+            frasi.append(f"{brani_al_plurale(senza)} senza durata")
+        if fermo is None and (senza_fine or dopo_la_fine):
+            frasi.append(senza_fine or dopo_la_fine)
+        if fermo is None and self._timer_scade is not None:
+            # Senza una fine, anche con un giro che ricomincia, a fermare la
+            # musica sara' il timer; con la fine, solo se scade prima, e
+            # allora con il ma.
+            entro = self._timer_scade - self._adesso() < mancano / velocita
+            if not fine or dopo_la_fine or entro:
+                fermo = f"{'ma ' if fine and entro else ''}il timer ferma la musica alle {self._ora_del_timer()}"
+        if fermo is not None:
+            frasi.append(fermo)
+        return f"{', '.join(frasi)}."
 
     def _insegui(self):
         """Con l'inseguimento agganciato porta la selezione su cio' che suona,

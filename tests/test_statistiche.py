@@ -1,6 +1,6 @@
 # MeTeOra, le prove delle statistiche: l'orologio, la vita dei brani, il file, l'azzeramento e la pagina.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (UltraCode).
-# 17/10/2026: nasce con la 1.103.0. Nella 1.104.0 le prove delle righe-elenco senza le voci a zero, delle percentuali, degli anni futuri, delle date con il giorno della settimana, della pulizia all'avvio e dei brani rinominati. Nella 1.105.0 quella dei nomi di tutti gli eventi, con Dove sono. Nella 1.109.0 la riga delle playlist con Ordina e Mescola.
+# 17/10/2026: nasce con la 1.103.0. Nella 1.104.0 le prove delle righe-elenco senza le voci a zero, delle percentuali, degli anni futuri, delle date con il giorno della settimana, della pulizia all'avvio e dei brani rinominati. Nella 1.105.0 quella dei nomi di tutti gli eventi, con Dove sono. Nella 1.109.0 la riga delle playlist con Ordina e Mescola. Nella 1.110.0 la durata residua in fondo agli eventi.
 
 import datetime
 import json
@@ -571,8 +571,9 @@ def test_la_riga_delle_pulizie(tmp_path):
 
 
 def test_gli_eventi_della_pulizia_sono_in_fondo():
-    # In fondo, nell'ordine di suoni.EVENTI; dalla 1.105.0 li segue Dove sono.
-    assert list(statistiche.NOMI_DEGLI_EVENTI)[-3:] == ["pulizia_avviata", "pulizia_finita", "dove_sono"]
+    # In fondo, nell'ordine di suoni.EVENTI; dalla 1.105.0 li segue Dove
+    # sono, e dalla 1.110.0 la durata residua.
+    assert list(statistiche.NOMI_DEGLI_EVENTI)[-4:] == ["pulizia_avviata", "pulizia_finita", "dove_sono", "durata_residua"]
     assert statistiche.NOMI_DEGLI_EVENTI["pulizia_avviata"] == "pulizia all'avvio cominciata"
     assert statistiche.NOMI_DEGLI_EVENTI["pulizia_finita"] == "pulizia all'avvio finita"
 

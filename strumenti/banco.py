@@ -1,6 +1,6 @@
 # MeTeOra, il banco del collaudo: MeTeOra vero su un desktop di Windows nascosto, con una copia dei dati, pilotato da una tastiera simulata.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 19/10/2026: nasce con la 1.104.0, dal banco con cui ClaudIA ha collaudato le statistiche della 1.103; sul desktop nascosto, come preferisce Gabriele. Nella 1.105.0 la sessione di Dove sono, l'opzione --solo, la sintesi finta e la pipe dell'istanza con il numero del processo. Nella 1.109.0 la sessione ordina, con --ordina.
+# 19/10/2026: nasce con la 1.104.0, dal banco con cui ClaudIA ha collaudato le statistiche della 1.103; sul desktop nascosto, come preferisce Gabriele. Nella 1.105.0 la sessione di Dove sono, l'opzione --solo, la sintesi finta e la pipe dell'istanza con il numero del processo. Nella 1.109.0 la sessione ordina, con --ordina. Nella 1.110.0 la sessione della durata residua, e al_normale in comune con Dove sono.
 
 """Il banco del collaudo.
 
@@ -9,7 +9,7 @@ Uso, dalla cartella di MeTeOra:
   python strumenti\\banco.py --vuoti     tutte le sessioni, partendo senza dati
   python strumenti\\banco.py --video V   in piu' Maiuscolo con F7 con la finestra del video V davanti
   python strumenti\\banco.py --solo S    la sola sessione S, per quelle che non dipendono dalle altre,
-                                        come dove_sono
+                                        come dove_sono e durata_residua
   python strumenti\\banco.py --ordina    solo la sessione ordina, partendo senza dati
 
 Con --video la finestra del video di MeTeOra si apre e prende i tasti, ma
@@ -39,7 +39,14 @@ tastiera_simulata e guarda cosa succede dentro la finestra. Le sessioni:
   pausa e a velocita' cambiata, con Maiuscolo; il fuoco che resta dov'e' e la
   riga che va alla sintesi e al braille, dove si riscrive subito anche lei;
   ripetizione, casuale, velocita', tono e sintesi partono da quelli normali,
-  qualunque cosa dica la copia dei dati.
+  qualunque cosa dica la copia dei dati;
+- durata_residua: Maiuscolo con l'apostrofo, il tasto vero, anche come punto
+  interrogativo, con niente in corso e con due playlist di file veri aperte
+  nella plancia, con le durate lette dallo schedario: il conto che segue i
+  rami aperti e chiusi, la pausa, la velocita', un brano senza durata che lo
+  schedario rilegge, la lista che decide, le ripetizioni, il nome nelle
+  statistiche, il tempo del conto con tremila voci aperte, e le voci sopra
+  la lista che suona, che non contano.
 La sessione ordina (tappa 14 c) gira solo con --ordina: Ordina, Inverti
 l'ordine, Mescola e Ordine di prima su una playlist aperta di cinquemila
 brani, con i tempi, e Mescola sulla playlist che suona con la dissolvenza
@@ -68,12 +75,12 @@ from ctypes import wintypes
 RADICE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ISTANZA = "meteora_banco"
 FILE_DELLE_STATISTICHE = "MeTeOra - Statistiche.json"
-SESSIONI = ("principale", "riavvio", "dopo_il_crash", "controllo", "dove_sono")
+SESSIONI = ("principale", "riavvio", "dopo_il_crash", "controllo", "dove_sono", "durata_residua")
 # Le sessioni che girano solo quando si chiedono (tappa 14 c).
 SESSIONI_A_PARTE = ("ordina",)
 # Quanto puo' durare ogni sessione, in secondi: la pulizia sulla copia dei
 # dati veri guarda anche la rete.
-DURATE_MASSIME = {"principale": 1200, "riavvio": 900, "dopo_il_crash": 1200, "controllo": 900, "dove_sono": 900, "ordina": 600}
+DURATE_MASSIME = {"principale": 1200, "riavvio": 900, "dopo_il_crash": 1200, "controllo": 900, "dove_sono": 900, "durata_residua": 900, "ordina": 600}
 # I brani della playlist grande della sessione ordina, e quanto puo' durare al
 # massimo ogni riordino, in secondi.
 BRANI_DELLA_PLAYLIST_GRANDE = 5000
@@ -435,6 +442,19 @@ def _da_un_altra_sessione(nome):
     percorso = os.path.join(os.path.dirname(S.esito), f"{nome}.json")
     with open(percorso, encoding="utf-8") as f:
         return json.load(f)
+
+
+def al_normale():
+    """Nel filo della finestra. La copia dei dati di questa cartella puo'
+    avere la ripetizione, la riproduzione casuale, la velocita', il tono, la
+    sintesi o la barra dei sottotitoli cambiati: allungherebbero le righe di
+    Dove sono e della durata residua, o le toglierebbero alla sintesi e al
+    braille, mentre i controlli aspettano quelli di partenza, come con
+    --vuoti."""
+    f = S.finestra
+    f.impostazioni.update(ripetizione="spenta", casuale=False, velocita=1.0, tono=0, sintesi="automatica", destinazione="entrambi", celle_braille=0)
+    f._applica_la_riproduzione()
+    f.motore.muto = False
 
 
 # Gli scenari.
@@ -808,17 +828,6 @@ def scenario_dove_sono():
     premi("f5")
     # Il brano ripreso in pausa all'avvio, se c'e', si ferma.
     premi("v")
-
-    def al_normale():
-        """La copia dei dati di questa cartella puo' avere la ripetizione, la
-        riproduzione casuale, la velocita', il tono, la sintesi o la barra dei
-        sottotitoli cambiati: allungherebbero la riga, o la toglierebbero alla
-        sintesi e al braille, mentre i controlli aspettano quelli di partenza,
-        come con --vuoti."""
-        f.impostazioni.update(ripetizione="spenta", casuale=False, velocita=1.0, tono=0, sintesi="automatica", destinazione="entrambi", celle_braille=0)
-        f._applica_la_riproduzione()
-        f.motore.muto = False
-
     nel_filo(al_normale)
 
     def premi_l_apostrofo(**opzioni):
@@ -883,7 +892,9 @@ def scenario_dove_sono():
     riga, _suonati = premi_l_apostrofo()
     S.verifica(voce, "Il secondo file, 2 di 2", bool(re.match(r"^0:\d\d di 0:30, mancano 0:\d\d, dove due\.wav, 2 di 2, file aperti\.$", riga)), riga)
     riga, suonati = premi_l_apostrofo(maiuscolo=True)
-    S.verifica(voce, "Maiuscolo con l'apostrofo resta senza comando", riga == "Maiuscolo+apostrofo non ha un comando." and suonati == ["non_disponibile"],
+    # Dalla 1.110.0 Maiuscolo con l'apostrofo e' la durata residua, che ha una sessione sua.
+    S.verifica(voce, "Maiuscolo con l'apostrofo dice la durata residua", suonati == ["durata_residua"]
+        and bool(re.match(r"^Mancano \d:\d\d di \d:\d\d, trascorsi \d:\d\d, [\d.]+% ascoltato, finisce verso le \d\d:\d\d, brano 2 di 2, file aperti", riga)),
         (riga, suonati))
     premi("v")
     riga, _suonati = premi_l_apostrofo()
@@ -974,8 +985,196 @@ def scenario_ordina():
     premi("esc")
 
 
+def scenario_durata_residua():
+    """La durata residua, Maiuscolo con l'apostrofo (tappa 14 d): il tasto
+    vero della tastiera italiana, premuto con la tastiera simulata, su due
+    playlist di file veri aperte nella plancia, con le durate lette davvero
+    dallo schedario e il motore vero sull'uscita nulla; alla fine il costo
+    del conto con tremila voci aperte, e la seconda playlist che suona con
+    la prima aperta sopra, che non conta."""
+    import datetime
+    import re
+
+    f = S.finestra
+    voce = "durata residua"
+    aspetta_la_pulizia()
+    premi("f5")
+    # Il brano ripreso in pausa all'avvio, se c'e', si ferma.
+    premi("v")
+    nel_filo(al_normale)
+
+    def premi_il_tasto(tasto="'"):
+        """Preme Maiuscolo con l'apostrofo, o il punto interrogativo, e torna
+        l'ultima riga scritta e i suoni da li'."""
+        segno = time.monotonic()
+        premi(tasto, maiuscolo=True)
+        righe = S.console_da(segno)
+        return (righe[-1] if righe else ""), S.suoni_da(segno)
+
+    def righe():
+        return nel_filo(lambda: len(f._righe))
+
+    def suona(nome):
+        corrente = f.coda.corrente
+        return bool(f.motore.in_corso) and corrente is not None and os.path.basename(corrente.percorso) == nome and f.motore.posizione is not None
+
+    def numeri(riga, totale):
+        """Mancante e trascorso della riga, in secondi, se tornano con il
+        totale e con la percentuale; None altrimenti. A un'altra velocita' il
+        tempo vero viene subito dopo il mancante, e il totale dopo, con in
+        tutto."""
+        m = re.match(rf"^Mancano (\d+):(\d\d)(?: di {totale}|, alla velocità [\d.]+ sono \d+:\d\d, in tutto {totale}), trascorsi (\d+):(\d\d), ([\d.]+)% ascoltato, ",
+            riga)
+        if not m:
+            return None
+        mancano, trascorsi = int(m[1]) * 60 + int(m[2]), int(m[3]) * 60 + int(m[4])
+        minuti, secondi = totale.split(":")
+        tutto = int(minuti) * 60 + int(secondi)
+        return (mancano, trascorsi) if mancano + trascorsi == tutto and abs(float(m[5]) - 100 * trascorsi / tutto) < 1 else None
+
+    def ore_possibili(secondi):
+        adesso = datetime.datetime.now()
+        return {(adesso + datetime.timedelta(seconds=secondi + scarto)).strftime("%H:%M") for scarto in (-60, 0, 60)}
+
+    riga, suonati = premi_il_tasto()
+    S.verifica(voce, "Senza niente in corso, la frase e il suono di F8", riga == "Non sta suonando niente." and suonati == ["niente_da_suonare"], (riga, suonati))
+    S.verifica(voce, "La frase va anche alla sintesi, interrompendo la voce, e al braille", S.extra.get("interrotti", [])[-1:] == [["nvda", riga]]
+        and S.extra.get("braille", [])[-1:] == [["nvda", riga]], (S.extra.get("interrotti", [])[-1:], S.extra.get("braille", [])[-1:]))
+    cartella = _cartella_dei_brani()
+    secondi = {"uno": 40, "due": 30, "tre": 20, "quattro": 25, "cinque": 15}
+    percorsi = {nome: fai_un_wav(os.path.join(cartella, f"residua {nome}.wav"), durata) for nome, durata in secondi.items()}
+
+    def apri(*aperte, chiuse=()):
+        """Apre nella plancia il ramo Playlist e le playlist date, e chiude le altre date."""
+        f.albero.Expand(f.nodo_playlist)
+        for pl in aperte:
+            f.albero.Expand(f._nodo_della_playlist(pl))
+        for pl in chiuse:
+            f.albero.Collapse(f._nodo_della_playlist(pl))
+
+    def prepara():
+        """Due playlist nuove, aperte nella plancia, e tutto il resto chiuso;
+        la selezione sul primo brano della prima."""
+        f._chiudi_la_plancia()
+        f._aggiungi(None, [percorsi[n] for n in ("uno", "due", "tre")], nome="Residua")
+        prima = f.archivio.playlist[-1]
+        f._aggiungi(None, [percorsi[n] for n in ("quattro", "cinque")], nome="Residua dopo")
+        seconda = f.archivio.playlist[-1]
+        apri(prima, seconda)
+        f._seleziona(next(f._figli(f._nodo_della_playlist(prima))))
+        return prima, seconda
+
+    prima, seconda = nel_filo(prepara)
+    tutti = prima.brani + seconda.brani
+    letti = aspetta(lambda: all(f.schedario.durata(b) is not None for b in tutti), attesa=30)
+    S.verifica(voce, "Lo schedario legge le durate dei cinque file", letti, nel_filo(lambda: [f.schedario.durata(b) for b in tutti]))
+    premi("x")
+    S.verifica(voce, "X suona residua uno.wav dalla plancia", aspetta(lambda: suona("residua uno.wav"), attesa=20))
+    time.sleep(3)
+    # Decide la plancia: le due playlist aperte, cinque brani, 2:10 in tutto.
+    prima_del_tasto, quante = nel_filo(fuoco), righe()
+    riga, suonati = premi_il_tasto()
+    conto = numeri(riga, "2:10")
+    m = re.search(r", finisce verso le (\d\d:\d\d), brano 1 di 3, playlist (.+), con i rami aperti della plancia, 5 brani in tutto\.$", riga)
+    S.verifica(voce, "Dalla plancia: mancante, totale, trascorso, percentuale, ora di fine e lista, con il suo suono", conto is not None and conto[1] >= 2
+        and m is not None and m[1] in ore_possibili(conto[0]) and m[2] == prima.nome and suonati == ["durata_residua"], (riga, suonati))
+    S.verifica(voce, "Il fuoco resta dov'era", nel_filo(fuoco) == prima_del_tasto, f"{prima_del_tasto} -> {nel_filo(fuoco)}")
+    S.verifica(voce, "La riga va alla sintesi e al braille, senza l'ora", S.extra.get("detti", [])[-1:] == [["nvda", riga]]
+        and S.extra.get("braille", [])[-1:] == [["nvda", riga]], (S.extra.get("detti", [])[-1:], S.extra.get("braille", [])[-1:]))
+    S.verifica(voce, "La riga interrompe la voce che sta parlando", S.extra.get("interrotti", [])[-1:] == [["nvda", riga]], S.extra.get("interrotti", [])[-1:])
+    S.verifica(voce, "Una riga nuova nella console", righe() == quante + 1, f"{quante} -> {righe()}")
+    # Dalla console, con il punto interrogativo: la riga si riscrive.
+    premi("f6")
+    quante = righe()
+    riga, suonati = premi_il_tasto("?")
+    S.verifica(voce, "Dalla console, con il punto interrogativo, la riga si riscrive", numeri(riga, "2:10") is not None and righe() == quante
+        and suonati == ["durata_residua"] and S.extra.get("braille", [])[-1:] == [["nvda", riga]], (riga, quante, righe()))
+    S.verifica(voce, "Il fuoco resta nella console", "Console" in nel_filo(fuoco), nel_filo(fuoco))
+    # Chiusa la seconda playlist, restano i tre brani della prima.
+    nel_filo(lambda: apri(prima, chiuse=[seconda]))
+    riga, _suonati = premi_il_tasto()
+    S.verifica(voce, "Chiusa la seconda playlist, il conto si accorcia", numeri(riga, "1:30") is not None
+        and riga.endswith(f", brano 1 di 3, playlist {prima.nome}."), riga)
+    # In pausa niente ora di fine; a un'altra velocita' il tempo vero.
+    premi("c")
+    riga, _suonati = premi_il_tasto()
+    S.verifica(voce, "In pausa, senza l'ora di fine", numeri(riga, "1:30") is not None and ", in pausa, brano 1 di 3, " in riga and "finisce" not in riga, riga)
+    premi("c")
+    premi("d")
+    riga, _suonati = premi_il_tasto()
+    S.verifica(voce, "La velocita' cambiata, con il tempo vero di ascolto", numeri(riga, "1:30") is not None and ", alla velocità 1.05 sono " in riga, riga)
+    premi("s")
+    # Un brano mai letto: si conta a parte, lo schedario lo rilegge, e
+    # ripremendo il tasto il conto si completa.
+    tre = prima.brani[2]
+
+    def dimentica():
+        f.schedario.schede.pop(tre.percorso, None)
+        f.schedario._verificati.discard(tre.percorso)
+
+    nel_filo(dimentica)
+    riga, _suonati = premi_il_tasto()
+    S.verifica(voce, "Il brano senza durata si conta a parte", numeri(riga, "1:10") is not None and riga.endswith(", 1 brano senza durata."), riga)
+    riletto = aspetta(lambda: f.schedario.durata(tre) is not None, attesa=20)
+    riga, _suonati = premi_il_tasto()
+    S.verifica(voce, "Ripremendo il tasto, il conto si completa", riletto and numeri(riga, "1:30") is not None and "senza durata" not in riga, riga)
+    # Chiusa anche la prima, decide la lista: stessi numeri; e le ripetizioni, con Maiuscolo con V.
+    nel_filo(lambda: apri(chiuse=[prima]))
+    riga, _suonati = premi_il_tasto()
+    S.verifica(voce, "Con la playlist chiusa decide la lista", numeri(riga, "1:30") is not None and riga.endswith(f", brano 1 di 3, playlist {prima.nome}."), riga)
+    premi("v", maiuscolo=True)
+    riga, _suonati = premi_il_tasto()
+    S.verifica(voce, "Con la ripetizione del brano niente ora di fine", numeri(riga, "1:30") is not None and "finisce" not in riga
+        and riga.endswith(", il brano si ripete: la lista non va avanti finché la ripetizione resta accesa."), riga)
+    premi("v", maiuscolo=True)
+    riga, _suonati = premi_il_tasto()
+    S.verifica(voce, "Con la ripetizione della lista il giro e il suo ricominciare", ", il giro finisce verso le " in riga and riga.endswith(", poi la lista ricomincia."), riga)
+    premi("v", maiuscolo=True)
+    nomi = conti()["tasti"]
+    S.verifica(voce, "Nelle statistiche il tasto ha un nome solo", nomi.get("Maiuscolo con apostrofo", 0) >= 11 and "Maiuscolo con punto interrogativo" not in nomi,
+        {n: v for n, v in nomi.items() if "postrofo" in n or "interrogativo" in n})
+
+    def molte_voci():
+        """Tremila voci in piu' aperte nella plancia, gli stessi cinque file
+        seicento volte, e il tempo del conto."""
+        f._aggiungi(None, [percorsi[n] for n in secondi] * 600, nome="Residua grande")
+        grande = f.archivio.playlist[-1]
+        apri(prima, grande, chiuse=[seconda])
+        inizio = time.perf_counter()
+        f._frase_della_durata_residua(f.coda.playlist, f.coda.corrente)
+        return time.perf_counter() - inizio, sum(1 for _ in f._voci_in_vista())
+
+    durata, in_vista = nel_filo(molte_voci, attesa=120)
+    S.extra["conto_con_tremila_voci"] = {"secondi": round(durata, 3), "voci_in_vista": in_vista}
+    riga, _suonati = premi_il_tasto()
+    S.verifica(voce, "Con tremila voci aperte il conto resta rapido", durata < 1.0 and riga.endswith(", con i rami aperti della plancia, 3003 brani in tutto."),
+        f"{durata * 1000:.0f} ms con {in_vista} voci in vista; {riga}")
+
+    def suona_la_seconda():
+        """Apre anche la seconda playlist, fra la prima e la grande, e
+        seleziona il suo primo brano."""
+        apri(prima, seconda)
+        f._seleziona(next(f._figli(f._nodo_della_playlist(seconda))))
+
+    # Suona la seconda, con la prima aperta sopra: l'avanzamento va solo
+    # avanti, e le voci sopra la lista che suona non contano.
+    nel_filo(suona_la_seconda)
+    premi("x")
+    S.verifica(voce, "X suona residua quattro.wav, sotto la prima playlist aperta", aspetta(lambda: suona("residua quattro.wav"), attesa=20))
+    riga, _suonati = premi_il_tasto()
+    m = re.match(r"^Mancano \S+ di \S+, trascorsi (\d+):(\d\d), ", riga)
+    S.verifica(voce, "Le voci sopra la lista che suona non contano", m is not None and int(m[1]) * 60 + int(m[2]) < 25
+        and riga.endswith(f", brano 1 di 2, playlist {seconda.nome}, con i rami aperti della plancia, 3002 brani in tutto."), riga)
+    premi("v")
+    riga, _suonati = premi_il_tasto()
+    S.verifica(voce, "Dopo lo stop, come F8", riga == "Non sta suonando niente.", riga)
+    premi("f5")
+    S.nota("chiudo MeTeOra con Esc")
+    premi("esc")
+
+
 SCENARI = {"principale": scenario_principale, "riavvio": scenario_riavvio, "dopo_il_crash": scenario_dopo_il_crash, "controllo": scenario_controllo,
-    "dove_sono": scenario_dove_sono, "ordina": scenario_ordina}
+    "dove_sono": scenario_dove_sono, "durata_residua": scenario_durata_residua, "ordina": scenario_ordina}
 
 
 # Il banco intero: le sessioni una dopo l'altra, ognuna nel suo processo.
@@ -1079,6 +1278,9 @@ def _riassunto(esiti, sessioni=SESSIONI):
         tempi = esito["extra"].get("tempi")
         if tempi:
             print("  Tempi: " + "; ".join(f"{voce} {secondi} s" for voce, secondi in tempi.items()) + ".")
+        conto = esito.get("extra", {}).get("conto_con_tremila_voci")
+        if conto:
+            print(f"  Durata residua con {conto['voci_in_vista']} voci in vista nella plancia: {round(conto['secondi'] * 1000)} ms.")
         falliti += len(no)
     return falliti
 
@@ -1087,7 +1289,7 @@ def main():
     parser = argparse.ArgumentParser(description="Il banco del collaudo di MeTeOra, sul desktop nascosto.")
     parser.add_argument("--vuoti", action="store_true", help="parte senza i dati di questa cartella")
     parser.add_argument("--video", help="un video per Maiuscolo con F7 con la sua finestra davanti")
-    parser.add_argument("--solo", choices=SESSIONI, help="la sola sessione data, per quelle che non dipendono dalle altre, come dove_sono")
+    parser.add_argument("--solo", choices=SESSIONI, help="la sola sessione data, per quelle che non dipendono dalle altre, come dove_sono e durata_residua")
     parser.add_argument("--ordina", action="store_true", help="solo la sessione di Ordina e Mescola, partendo senza dati")
     parser.add_argument("--sessione", choices=SESSIONI + SESSIONI_A_PARTE, help=argparse.SUPPRESS)
     parser.add_argument("--dati", help=argparse.SUPPRESS)

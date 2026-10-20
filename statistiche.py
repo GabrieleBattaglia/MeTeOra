@@ -1,6 +1,6 @@
 # MeTeOra, le statistiche: ogni sorta di conti, raccolti mentre lo si usa, e la pagina che li racconta.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (UltraCode).
-# 17/10/2026: nasce con la 1.103.0, chiesta da Gabriele: piu' dati ci sono, piu' e' contento. Nella 1.104.0 le righe che elencano voci tengono solo quelle diverse da zero, le percentuali uniformi, gli anni futuri dei tag ignorati, le date sempre con il giorno della settimana, e i brani dello storico tolti dalla pulizia all'avvio o rinominati, con i conti della pulizia nella salute. Nella 1.105.0 i nomi di Dove sono, il comando dell'apostrofo, e del suo suono. Nella 1.109.0 le playlist ordinate, invertite, mescolate e rimesse nell'ordine di prima.
+# 17/10/2026: nasce con la 1.103.0, chiesta da Gabriele: piu' dati ci sono, piu' e' contento. Nella 1.104.0 le righe che elencano voci tengono solo quelle diverse da zero, le percentuali uniformi, gli anni futuri dei tag ignorati, le date sempre con il giorno della settimana, e i brani dello storico tolti dalla pulizia all'avvio o rinominati, con i conti della pulizia nella salute. Nella 1.105.0 i nomi di Dove sono, il comando dell'apostrofo, e del suo suono. Nella 1.109.0 le playlist ordinate, invertite, mescolate e rimesse nell'ordine di prima. Nella 1.110.0 quelli della durata residua, Maiuscolo con l'apostrofo.
 
 """Le statistiche di MeTeOra (1.103.0).
 
@@ -124,7 +124,7 @@ DESCRIZIONI_DEI_COMANDI = {
     "velocita_su": "più veloce", "tono_giu": "tono giù", "tono_normale": "tono normale", "tono_su": "tono su",
     "banda_precedente": "banda precedente", "banda_successiva": "banda successiva", "banda_giu": "banda giù", "banda_su": "banda su",
     "azzera_la_banda": "azzera la banda", "azzera_le_bande": "azzera le bande", "dissolvenza": "dissolvenza",
-    "durata_della_dissolvenza": "durata della dissolvenza", "dove_sono": "dove sono",
+    "durata_della_dissolvenza": "durata della dissolvenza", "dove_sono": "dove sono", "durata_residua": "durata residua",
 }
 # Le descrizioni degli altri tasti, per nome.
 DESCRIZIONI_DEI_TASTI = {
@@ -207,6 +207,8 @@ NOMI_DEGLI_EVENTI = {
     "pulizia_avviata": "pulizia all'avvio cominciata", "pulizia_finita": "pulizia all'avvio finita",
     # Nella 1.105.0.
     "dove_sono": "dove sono, con l'apostrofo",
+    # Nella 1.110.0.
+    "durata_residua": "durata residua, con Maiuscolo e l'apostrofo",
 }
 
 # Che cosa ha tolto la pulizia all'avvio: il conto, il singolare, il plurale

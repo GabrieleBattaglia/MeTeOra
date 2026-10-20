@@ -1,4 +1,4 @@
-Collaudo di MeTeOra dalla 1.103.0 in poi, con NVDA: restano le voci da leggere e da sentire; il resto l'ha provato ClaudIA il 19 e il 20 ottobre 2026, con pytest e con strumenti\banco.py sul desktop nascosto. La 1.104.1 e la 1.104.2 non hanno voci tue. Prima git pull in MeTeOra e in GBUtils: serve almeno GBUtils V207, e una voce con suoni più nuovi dice che cosa le serve. Sulle altre macchine, dopo il pull e prima di MeTeOra, python pulisci_i_dati.py, che chiede una S e cancella per sempre i dati vecchi. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Collaudo di MeTeOra dalla 1.103.0 alla 1.110.0, con NVDA: restano le voci da leggere e da sentire; il resto l'ha provato ClaudIA il 19 e il 20 ottobre 2026, con pytest e con strumenti\banco.py sul desktop nascosto. La 1.104.1, la 1.104.2 e la 1.105.1 non hanno voci tue. Prima git pull in MeTeOra e in GBUtils: serve GBUtils V209. Sulle altre macchine, dopo il pull e prima di MeTeOra, python pulisci_i_dati.py, che chiede una S e cancella per sempre i dati vecchi. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta. Scrivi le note sulla riga della voce; le voci superate si cancellano.
 I suoni della pulizia, 1.104.0: in Acu_Maker cerca pulizia e ascolta i due nuovi; poi in MeTeOra dimmi se si riconoscono, se il volume sta con gli altri effetti, e se all'avvio non si confondono con il suono della partenza e con quello della ripresa.
 Leggi tutto il testo delle statistiche con le frecce: ogni riga si capisce da sola? Dalla 1.104.0 le date hanno il giorno della settimana, le righe che elencano solo le voci diverse da zero e Tasti premuti il suo cioè. Segna le righe con parole storte, numeri strani o che vorresti diverse.
 Barra rovesciata nelle statistiche, scrivi Sezione 8 e Invio: NVDA legge la riga della sezione 8? Poi cerca Sezione e premi Invio qualche volta: NVDA legge ogni riga su cui arriva? Che il cursore ci arrivi l'ho già controllato io.
@@ -38,3 +38,22 @@ Dove sono dal video: il video resta davanti?
 1.109.0, sempre lì scegli Per autore: la riga della console si legge bene con NVDA e sul display braille, compreso il conto di quelli senza autore in fondo?
 1.109.0: con Crea playlist da qui fai una playlist da una cartella grande che MeTeOra non ha mai letto, e scegli subito Per autore: se lo schedario non ha ancora finito, la riga conta a parte i brani non ancora letti e dice che un nuovo Ordina li mette al loro posto. Ti sembra chiara?
 1.109.0, su una playlist di SID scegli Per album: i SID non hanno l'album, e la riga dice tutti senza album, in ordine di percorso. Ti sembra chiara, o sembra un difetto?
+Durata residua, 1.110.0, il suono: in Acu_Maker cerca durata_residua e ascolta meteora_durata_residua, due tocchi che scendono dal centro verso destra e una scivolata di un'ottava giù; poi fallo suonare in MeTeOra con Maiuscolo e l'apostrofo.
+Durata residua, il suono in MeTeOra: si riconosce?
+Durata residua, il suono in MeTeOra: il volume sta con gli altri effetti?
+Durata residua, il suono in MeTeOra: non lo confondi con quello di Dove sono, l'apostrofo senza Maiuscolo?
+Durata residua, con NVDA: apri una playlist nella plancia, suonane un brano, scorri la plancia e premi Maiuscolo con l'apostrofo.
+Durata residua, con NVDA: NVDA dice la riga, con mancante, totale, trascorso, percentuale, ora di fine e lista?
+Durata residua, con NVDA: NVDA la dice una volta sola?
+Durata residua senza musica: ferma con V, resta nella plancia e premi Maiuscolo con l'apostrofo.
+Durata residua senza musica: NVDA dice Non sta suonando niente, e la frase arriva anche alla barra braille?
+Durata residua con la voce di Windows: metti Sintesi di sottotitoli e karaoke su la voce di Windows, SAPI5, premi Maiuscolo con l'apostrofo tre volte di seguito, svelto, poi rimetti la sintesi su automatica.
+Durata residua con la voce di Windows: la voce lascia ogni riga a metà e dice per intero solo l'ultima?
+Durata residua, con NVDA: l'ordine e le parole si capiscono al primo ascolto?
+Durata residua, con NVDA: il totale ti torna con quello che la plancia dice della playlist?
+Durata residua, con NVDA: apri un'altra playlist sotto quella che suona e premi di nuovo; il mancante cresce, e la riga dice i brani in tutto?
+Durata residua, con NVDA: con la riproduzione casuale accesa, Maiuscolo con N, la riga del mazzo, suonati e nel mazzo restano, si capisce?
+Durata residua dalla console: premi F6 e poi Maiuscolo con l'apostrofo, due volte; NVDA dice la riga senza rileggerla per il cursore?
+Durata residua sul display braille, con Celle della barra braille a 0: la riga arriva alla barra e la leggi tutta?
+Durata residua sul display braille, se ti va, con le celle a 40: premi Maiuscolo con l'apostrofo due volte di seguito; la barra passa subito alla riga nuova?
+Durata residua, con NVDA: alza la velocità con D e premi Maiuscolo con l'apostrofo; nella riga Mancano, alla velocità sono, in tutto, capisci al primo ascolto che il tempo vero è quello di ciò che manca, e non del totale?

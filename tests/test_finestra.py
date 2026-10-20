@@ -1,6 +1,6 @@
 # MeTeOra, le prove della finestra principale, sul desktop nascosto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola.
+# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo.
 
 import ctypes
 import datetime
@@ -93,8 +93,9 @@ def test_tasti_liberi_e_numpad(finestra, suoni_annotati):
     assert _premi(finestra, "ò") == "Il tasto o accentata non ha un comando." and suoni_annotati[-1] == "non_disponibile"
     assert _premi(finestra, "ì") == "Il tasto i accentata non ha un comando."
     assert _premi(finestra, "a", maiuscolo=True) == "Maiuscolo+A non ha un comando."
-    # L'apostrofo e' Dove sono dalla 1.105.0; con il Maiuscolo resta libero.
-    assert _premi(finestra, "'", maiuscolo=True) == "Maiuscolo+apostrofo non ha un comando."
+    # L'apostrofo e' Dove sono dalla 1.105.0, e con il Maiuscolo la durata
+    # residua dalla 1.110.0: la i accentata col Maiuscolo resta libera.
+    assert _premi(finestra, "ì", maiuscolo=True) == "Maiuscolo+i accentata non ha un comando."
     righe, suonati = len(finestra._righe), len(suoni_annotati)
     _tasto(finestra, codice=wx.WXK_NUMPAD_ADD)
     assert len(finestra._righe) == righe and len(suoni_annotati) == suonati
@@ -1558,7 +1559,7 @@ def test_ogni_tasto_e_nella_guida_rapida(finestra):
     tasti = [f"F{n}" for n in range(1, 13)] + [f"Maiuscolo con F{n}" for n in (1, 2, 3, 5, 6, 7, 8, 10, 11)] + [
         "Esc", "Alt con F4", "Tab", "Maiuscolo con Tab", "Barra rovesciata", "Ctrl con la barra rovesciata", "Barra verticale",
         "Canc", "Maiuscolo con Canc", "Backspace", "Maiuscolo con Backspace", "Meno", "Più", "Cifre da 1 a 0", "Maiuscolo con le cifre da 1 a 0",
-        "Apostrofo"]
+        "Apostrofo", "Maiuscolo con l'apostrofo"]
     for (carattere, maiuscolo), _comando in modulo.TASTI.items():
         if carattere.isalpha():
             tasti.append(f"Maiuscolo con {carattere.upper()}" if maiuscolo else carattere.upper())
@@ -7211,3 +7212,452 @@ def test_ordina_tiene_aperti_il_sid_e_il_brano_con_i_marker(finestra, monkeypatc
     assert finestra._voce_corrente() == nodo
     finestra._brano_finito()
     assert suonati[-1] == ("s.sid", 3)
+
+
+# La durata residua, Maiuscolo con l'apostrofo (tappa 14 d, 1.110.0).
+
+
+def _schedario_annotato(finestra, monkeypatch):
+    """Lo schedario non legge niente, e le richieste si annotano: va fermato
+    prima di aggiungere i brani, perche' il suo filo, non trovando i file
+    finti, toglierebbe le loro schede mentre la prova le usa."""
+    chiesti = []
+    monkeypatch.setattr(finestra.schedario, "chiedi", lambda percorsi: chiesti.append(set(percorsi)))
+    return chiesti
+
+
+def _con_le_durate(finestra, brani, durate):
+    """Le schede finte dei brani, con le durate date, None per un brano mai letto."""
+    for brano, durata in zip(brani, durate, strict=True):
+        if durata is None:
+            finestra.schedario.schede.pop(brano.percorso, None)
+        else:
+            finestra.schedario.schede[brano.percorso] = {"dim": 1, "mod": 0, "durata": durata, "tag": {}, "sottobrani": None, "durate_sid": None}
+
+
+def _cinque_brani(finestra, monkeypatch, **stato):
+    """Una playlist chiusa nella plancia, quindi decide la lista: cinque brani
+    da 100, 200, 300, 400 e 500 secondi, e suona il terzo, a 50 secondi.
+    L'orologio e' fermo alle 15:42."""
+    chiesti = _schedario_annotato(finestra, monkeypatch)
+    finestra._aggiungi(None, [os.path.join(r"C:\m", f"{n}.mp3") for n in ("uno", "due", "tre", "quattro", "cinque")])
+    pl = finestra.archivio.playlist[0]
+    pl.nome = "Rock"
+    _con_le_durate(finestra, pl.brani, [100.0, 200.0, 300.0, 400.0, 500.0])
+    chiesti.clear()
+    lettore = _in_corso_per_dove_sono(finestra, monkeypatch, pl, pl.brani[2], **{"posizione": 50.0, "durata": 299.0, **stato})
+    monkeypatch.setattr(modulo, "datetime", types.SimpleNamespace(datetime=_Fermo, timedelta=datetime.timedelta))
+    assert finestra._voce_che_suona() is None
+    return pl, chiesti, lettore
+
+
+def _durata_residua(finestra):
+    _tasto(finestra, "'", maiuscolo=True)
+    return _ultima(finestra)
+
+
+def test_durata_residua_senza_niente_in_corso(finestra, suoni_annotati, sintesi_finta):
+    niente = "Non sta suonando niente."
+    assert _durata_residua(finestra) == niente and suoni_annotati[-1] == "niente_da_suonare"
+    # Come F8, ma anche alla sintesi, interrompendo la voce, e al braille,
+    # come in Dove sono (ritocco della 1.110.0).
+    assert sintesi_finta.detti == [("nvda", niente)] and sintesi_finta.interrotti == [("nvda", niente)] and sintesi_finta.braille == [("nvda", niente)]
+    # La coda ricorda il brano anche dopo lo stop: conta il motore, come per F8.
+    finestra._aggiungi(None, [r"C:\m\a.mp3"])
+    pl = finestra.archivio.playlist[0]
+    finestra.coda.imposta(pl, pl.brani[0])
+    assert _durata_residua(finestra) == niente and sintesi_finta.interrotti[-1] == ("nvda", niente)
+    # Con la voce delle impostazioni su solo alla sintesi, la barra non la riceve.
+    finestra.impostazioni["destinazione"] = "sintesi"
+    braille = len(sintesi_finta.braille)
+    assert _durata_residua(finestra) == niente and len(sintesi_finta.interrotti) == 3 and len(sintesi_finta.braille) == braille
+    assert finestra._durata_residua_in_braille is None
+
+
+def test_durata_residua_della_lista(finestra, monkeypatch, suoni_annotati, sintesi_finta):
+    pl, chiesti, lettore = _cinque_brani(finestra, monkeypatch)
+    finestra._seleziona(finestra.nodo_pc)
+    voce, fuoco, righe = finestra._voce_corrente(), wx.Window.FindFocus(), len(finestra._righe)
+    # Trascorsi i brani prima e il punto del terzo, mancanti il suo resto e i
+    # brani dopo; la durata del brano che suona e' quella dello schedario.
+    riga = "Mancano 19:10 di 25:00, trascorsi 5:50, 23.3% ascoltato, finisce verso le 16:01, brano 3 di 5, playlist Rock."
+    assert _durata_residua(finestra) == riga and suoni_annotati[-1] == "durata_residua"
+    assert len(finestra._righe) == righe + 1 and not chiesti
+    assert sintesi_finta.detti == [("nvda", riga)] and sintesi_finta.braille == [("nvda", riga)]
+    assert finestra._voce_corrente() == voce and wx.Window.FindFocus() == fuoco
+    # In pausa niente ora di fine; ripremuto, il tasto riscrive la sua riga.
+    lettore["in_pausa"] = True
+    assert _durata_residua(finestra) == "Mancano 19:10 di 25:00, trascorsi 5:50, 23.3% ascoltato, in pausa, brano 3 di 5, playlist Rock."
+    assert len(finestra._righe) == righe + 1
+    # A un'altra velocita' anche il tempo vero di ascolto, e l'ora di fine con
+    # lui: subito dopo il mancante, e il totale dopo, con in tutto.
+    lettore.update(in_pausa=False, velocita=1.5)
+    assert _durata_residua(finestra) == ("Mancano 19:10, alla velocità 1.5 sono 12:46, in tutto 25:00, trascorsi 5:50, 23.3% ascoltato, finisce verso le 15:54, "
+        "brano 3 di 5, playlist Rock.")
+    lettore["velocita"] = 1.0
+    # I saltati non si contano e si dicono; i brani senza durata si dicono,
+    # e lo schedario li legge.
+    pl.brani[0].saltato = True
+    finestra.schedario.schede.pop(pl.brani[4].percorso)
+    assert _durata_residua(finestra) == ("Mancano 10:50 di 15:00, trascorsi 4:10, 27.8% ascoltato, finisce verso le 15:52, brano 3 di 5, playlist Rock, "
+        "1 saltato escluso, 1 brano senza durata.")
+    assert chiesti == [{pl.brani[4].percorso}]
+    # I brani nascosti dal filtro non contano, e non sono esclusi.
+    pl.filtro = "-quattro"
+    assert _durata_residua(finestra) == ("Mancano 4:10 di 8:20, trascorsi 4:10, 50.0% ascoltato, finisce verso le 15:46, brano 3 di 4 col filtro, playlist Rock, "
+        "1 saltato escluso, 1 brano senza durata.")
+
+
+def test_durata_residua_segue_la_plancia(finestra, monkeypatch):
+    """Decide la plancia: si contano le voci suonabili che si vedono, anche
+    nell'altra playlist aperta dopo; il numero cambia aprendo e chiudendo i
+    rami."""
+    _schedario_annotato(finestra, monkeypatch)
+    prima, seconda = _playlist_di_prova(finestra, ("a.mp3", "b.mp3", "c.mp3"), ("x.mp3", "y.mp3"))
+    rock, jazz = finestra.archivio.playlist
+    _con_le_durate(finestra, rock.brani + jazz.brani, [60.0, 120.0, 180.0, 240.0, 300.0])
+    _in_corso_per_dove_sono(finestra, monkeypatch, rock, rock.brani[1], posizione=30.0)
+    monkeypatch.setattr(modulo, "datetime", types.SimpleNamespace(datetime=_Fermo, timedelta=datetime.timedelta))
+    assert _durata_residua(finestra) == (f"Mancano 13:30 di 15:00, trascorsi 1:30, 10.0% ascoltato, finisce verso le 15:55, brano 2 di 3, playlist {rock.nome}, "
+        "con i rami aperti della plancia, 5 brani in tutto.")
+    # Chiusa la seconda playlist, resta la prima.
+    finestra.albero.Collapse(seconda)
+    riga = f"Mancano 4:30 di 6:00, trascorsi 1:30, 25.0% ascoltato, finisce verso le 15:46, brano 2 di 3, playlist {rock.nome}."
+    assert _durata_residua(finestra) == riga
+    # Con la ripetizione della lista la plancia riparte dalla sua prima voce.
+    finestra.impostazioni["ripetizione"] = "lista"
+    assert _durata_residua(finestra) == (f"Mancano 4:30 di 6:00, trascorsi 1:30, 25.0% ascoltato, il giro finisce verso le 15:46, brano 2 di 3, playlist {rock.nome}, "
+        "poi si riparte dalla prima voce della plancia.")
+    # Chiusa anche la prima, decide la lista, con gli stessi numeri.
+    finestra.albero.Collapse(prima)
+    assert _durata_residua(finestra) == (f"Mancano 4:30 di 6:00, trascorsi 1:30, 25.0% ascoltato, il giro finisce verso le 15:46, brano 2 di 3, playlist {rock.nome}, "
+        "poi la lista ricomincia.")
+    # Una voce saltata che si vede non conta, e si dice.
+    finestra.impostazioni["ripetizione"] = "spenta"
+    finestra.albero.Expand(prima)
+    finestra.albero.Expand(seconda)
+    jazz.brani[0].saltato = True
+    assert _durata_residua(finestra) == (f"Mancano 9:30 di 11:00, trascorsi 1:30, 13.6% ascoltato, finisce verso le 15:51, brano 2 di 3, playlist {rock.nome}, "
+        "con i rami aperti della plancia, 4 brani in tutto, 1 saltato escluso.")
+
+
+def test_durata_residua_senza_le_voci_sopra_la_lista(finestra, monkeypatch):
+    """Decide la plancia, e sopra la lista che suona c'e' un'altra playlist
+    aperta, come i Preferiti in cima: l'avanzamento va solo avanti, quindi
+    il trascorso parte dalla prima voce della lista che suona, e le voci
+    sopra non contano, nemmeno fra i saltati. Con la casuale, che pesca fra
+    tutte le voci che si vedono, contano tutte."""
+    _schedario_annotato(finestra, monkeypatch)
+    _playlist_di_prova(finestra, ("a.mp3", "b.mp3", "c.mp3"), ("x.mp3", "y.mp3"))
+    rock, jazz = finestra.archivio.playlist
+    _con_le_durate(finestra, rock.brani + jazz.brani, [3600.0, 3600.0, 3600.0, 60.0, 120.0])
+    _in_corso_per_dove_sono(finestra, monkeypatch, jazz, jazz.brani[0], posizione=30.0)
+    monkeypatch.setattr(modulo, "datetime", types.SimpleNamespace(datetime=_Fermo, timedelta=datetime.timedelta))
+    assert _durata_residua(finestra) == f"Mancano 2:30 di 3:00, trascorsi 0:30, 16.7% ascoltato, finisce verso le 15:44, brano 1 di 2, playlist {jazz.nome}."
+    _in_corso_per_dove_sono(finestra, monkeypatch, jazz, jazz.brani[1], posizione=30.0)
+    rock.brani[0].saltato = True
+    numeri = "Mancano 1:30 di 3:00, trascorsi 1:30, 50.0% ascoltato"
+    assert _durata_residua(finestra) == f"{numeri}, finisce verso le 15:43, brano 2 di 2, playlist {jazz.nome}."
+    # Con la ripetizione della lista le voci sopra tornano nel giro dopo.
+    finestra.impostazioni["ripetizione"] = "lista"
+    assert _durata_residua(finestra) == f"{numeri}, il giro finisce verso le 15:43, brano 2 di 2, playlist {jazz.nome}, poi si riparte dalla prima voce della plancia."
+    finestra.impostazioni["ripetizione"] = "spenta"
+    # La casuale pesca da tutte le voci che si vedono, anche quelle sopra.
+    finestra.impostazioni.update(casuale=True, modello_casuale="una_volta")
+    finestra._mazzo = {(id(jazz), id(jazz.brani[1]), None)}
+    assert _durata_residua(finestra) == (f"Casuale: suonati 1 di 4, nel mazzo restano 2:02:30 di 2:03:00, trascorsi 0:30, 0.4% ascoltato, finisce verso le 17:44, "
+        f"brano 2 di 2, playlist {jazz.nome}, con i rami aperti della plancia, 4 brani in tutto, 1 saltato escluso.")
+
+
+def test_durata_residua_con_la_riproduzione_casuale(finestra, monkeypatch):
+    pl, _chiesti, lettore = _cinque_brani(finestra, monkeypatch)
+    finestra.impostazioni.update(casuale=True, modello_casuale="una_volta")
+    # Usciti dal mazzo il primo, il quarto e il brano che suona.
+    finestra._mazzo = {(id(pl), id(pl.brani[i]), None) for i in (0, 2, 3)}
+    riga = "Casuale: suonati 3 di 5, nel mazzo restano 15:50 di 25:00, trascorsi 9:10, 36.7% ascoltato, finisce verso le 15:57, brano 3 di 5, playlist Rock."
+    assert _durata_residua(finestra) == riga
+    # Il mazzo che ricomincia, da solo o con la ripetizione della lista.
+    finestra.impostazioni["modello_casuale"] = "a_giro"
+    a_giro = riga.replace("finisce", "il giro finisce").replace("playlist Rock.", "playlist Rock, poi il mazzo si rimescola.")
+    assert _durata_residua(finestra) == a_giro
+    finestra.impostazioni.update(modello_casuale="una_volta", ripetizione="lista")
+    assert _durata_residua(finestra) == a_giro
+    finestra.impostazioni["ripetizione"] = "spenta"
+    # Dopo Z l'avanzamento ripercorre prima la storia in avanti: il quarto,
+    # gia' uscito, suonera' di nuovo, e conta fra quelli che restano.
+    finestra._storia = [(pl, pl.brani[i], None) for i in (0, 2, 3)]
+    finestra._nella_storia = 1
+    assert _durata_residua(finestra) == ("Casuale: suonati 2 di 5, nel mazzo restano 22:30 di 25:00, trascorsi 2:30, 10.0% ascoltato, finisce verso le 16:04, "
+        "brano 3 di 5, playlist Rock.")
+    # A mazzo finito non si finisce con il brano che suona: prima la storia,
+    # anche con un brano di un'altra playlist, che si aggiunge.
+    finestra._aggiungi(None, [r"C:\m\altro.mp3"])
+    altra = finestra.archivio.playlist[1]
+    _con_le_durate(finestra, altra.brani, [60.0])
+    finestra._mazzo = {(id(pl), id(b), None) for b in pl.brani}
+    finestra._storia = [(pl, b, None) for b in pl.brani] + [(altra, altra.brani[0], None)]
+    finestra._nella_storia = 2
+    assert _durata_residua(finestra) == ("Casuale: suonati 3 di 5, nel mazzo restano 20:10 di 26:00, trascorsi 5:50, 22.4% ascoltato, finisce verso le 16:02, "
+        "brano 3 di 5, playlist Rock.")
+    # Senza la storia davanti: il mazzo e' finito, e la riga finisce con il brano.
+    finestra._nella_storia = len(finestra._storia) - 1
+    assert _durata_residua(finestra).startswith("Casuale: suonati 5 di 5, nel mazzo restano 4:10 di 25:00, trascorsi 20:50, 83.3% ascoltato, finisce verso le 15:46, ")
+    finestra._storia, finestra._nella_storia = [], -1
+    # Il mazzo decide anche nel loop A-B: finito, la musica si ferma, e non
+    # si torna al punto A; a giro si rimescola.
+    coda = finestra.coda
+    coda.loop_playlist, coda.punto_a, coda.punto_b = pl, pl.brani[1], pl.brani[3]
+    finestra._mazzo = {(id(pl), id(pl.brani[i]), None) for i in (1, 2, 3)}
+    nel_loop = "Casuale: suonati 3 di 3, nel mazzo restano 4:10 di 15:00, trascorsi 10:50, 72.2% ascoltato, finisce verso le 15:46, brano 3 di 5, playlist Rock."
+    assert _durata_residua(finestra) == nel_loop
+    assert finestra._seguente_automatico() is None and finestra._mazzo_finito
+    finestra.impostazioni["modello_casuale"] = "a_giro"
+    assert _durata_residua(finestra) == nel_loop.replace("finisce", "il giro finisce").replace("playlist Rock.", "playlist Rock, poi il mazzo si rimescola.")
+    coda.togli_loop()
+    finestra._mazzo_finito = False
+    # La casualita' totale non finisce mai: il resto del brano e il totale.
+    finestra.impostazioni.update(modello_casuale="totale", ripetizione="spenta")
+    lettore["velocita"] = 2.0
+    assert _durata_residua(finestra) == "Del brano mancano 4:10, alla velocità 2 sono 2:05, in tutto 25:00, ordine casuale senza fine, brano 3 di 5, playlist Rock."
+    # Senza la durata del brano che suona, lo dice.
+    finestra.schedario.schede.pop(pl.brani[2].percorso)
+    lettore.update(velocita=1.0, durata=None)
+    assert _durata_residua(finestra).startswith("Del brano la durata non si sa, in tutto 20:50, ordine casuale senza fine, ")
+
+
+def test_durata_residua_ripetizioni_loop_e_timer(finestra, monkeypatch):
+    pl, _chiesti, lettore = _cinque_brani(finestra, monkeypatch)
+    numeri = "Mancano 19:10 di 25:00, trascorsi 5:50, 23.3% ascoltato"
+    finestra.impostazioni["ripetizione"] = "lista"
+    assert _durata_residua(finestra) == f"{numeri}, il giro finisce verso le 16:01, brano 3 di 5, playlist Rock, poi la lista ricomincia."
+    finestra.impostazioni["ripetizione"] = "brano"
+    assert _durata_residua(finestra) == f"{numeri}, brano 3 di 5, playlist Rock, il brano si ripete: la lista non va avanti finché la ripetizione resta accesa."
+    # Un brano saltato non si ripete.
+    pl.brani[2].saltato = True
+    assert _durata_residua(finestra) == f"{numeri}, finisce verso le 16:01, brano 3 di 5, playlist Rock."
+    pl.brani[2].saltato = False
+    finestra.impostazioni["ripetizione"] = "spenta"
+    # Il loop A-B: dall'inizio di A alla fine di B, poi di nuovo ad A.
+    coda = finestra.coda
+    coda.loop_playlist, coda.punto_a, coda.punto_b = pl, pl.brani[1], pl.brani[3]
+    assert _durata_residua(finestra) == ("Mancano 10:50 di 15:00, trascorsi 4:10, 27.8% ascoltato, il giro finisce verso le 15:52, brano 3 di 5, playlist Rock, "
+        "poi si torna al punto A.")
+    # Il brano fuori dal loop: dopo di lui tutto il loop.
+    coda.punto_a, coda.punto_b = pl.brani[0], pl.brani[1]
+    assert _durata_residua(finestra) == ("Mancano 9:10 di 10:00, trascorsi 0:50, 8.3% ascoltato, il giro finisce verso le 15:51, brano 3 di 5, playlist Rock, "
+        "il brano è fuori dal loop: poi si va al punto A.")
+    # A e B sullo stesso brano: si ripete lui; il solo punto A non conta.
+    coda.punto_a = coda.punto_b = pl.brani[2]
+    assert _durata_residua(finestra) == "Suona un brano solo: mancano 4:10, brano 3 di 5, playlist Rock, il brano si ripete."
+    coda.punto_b = None
+    assert _durata_residua(finestra) == f"{numeri}, finisce verso le 16:01, brano 3 di 5, playlist Rock."
+    coda.togli_loop()
+    # Il timer a minuti si dice solo se ferma la musica prima della fine.
+    monkeypatch.setattr(finestra, "_adesso", lambda: 1000.0)
+    finestra._timer_scade = 1600.0
+    assert _durata_residua(finestra) == f"{numeri}, finisce verso le 16:01, brano 3 di 5, playlist Rock, ma il timer ferma la musica alle 15:52."
+    lettore["in_pausa"] = True
+    assert _durata_residua(finestra) == f"{numeri}, in pausa, brano 3 di 5, playlist Rock, il timer ferma la musica alle 15:52."
+    lettore["in_pausa"] = False
+    finestra._timer_scade = 3000.0
+    assert _durata_residua(finestra) == f"{numeri}, finisce verso le 16:01, brano 3 di 5, playlist Rock."
+    # Con un giro che ricomincia la musica non finisce: il timer si dice
+    # sempre, e con il ma solo se scade dentro il giro.
+    finestra.impostazioni["ripetizione"] = "lista"
+    giro = f"{numeri}, il giro finisce verso le 16:01, brano 3 di 5, playlist Rock, poi la lista ricomincia"
+    assert _durata_residua(finestra) == f"{giro}, il timer ferma la musica alle 16:15."
+    finestra._timer_scade = 1600.0
+    assert _durata_residua(finestra) == f"{giro}, ma il timer ferma la musica alle 15:52."
+    finestra.impostazioni["ripetizione"] = "spenta"
+    # Il timer alla fine del brano, e quello scaduto che sfuma, fermano tutto prima.
+    finestra._timer_scade = None
+    finestra._timer_a_fine_brano = True
+    finestra.impostazioni["ripetizione"] = "lista"
+    assert _durata_residua(finestra) == f"{numeri}, brano 3 di 5, playlist Rock, il timer ferma la musica alla fine di questo brano, verso le 15:46."
+    finestra._timer_a_fine_brano = False
+    finestra._inizio_della_sfumatura = 990.0
+    assert _durata_residua(finestra) == f"{numeri}, brano 3 di 5, playlist Rock, il timer è scaduto, e la musica sta sfumando."
+    finestra._inizio_della_sfumatura = None
+
+
+def test_durata_residua_un_brano_solo_tolto_e_senza_durate(finestra, monkeypatch):
+    from playlist import Playlist
+
+    aperto = Playlist("file aperto", [Brano(r"C:\m\solo.mp3")], cartella="")
+    chiesti = _schedario_annotato(finestra, monkeypatch)
+    _con_le_durate(finestra, aperto.brani, [300.0])
+    lettore = _in_corso_per_dove_sono(finestra, monkeypatch, aperto, aperto.brani[0], posizione=50.0, durata=None)
+    monkeypatch.setattr(modulo, "datetime", types.SimpleNamespace(datetime=_Fermo, timedelta=datetime.timedelta))
+    assert _durata_residua(finestra) == "Suona un brano solo: mancano 4:10, finisce verso le 15:46, file aperto."
+    lettore["velocita"] = 1.25
+    assert _durata_residua(finestra) == "Suona un brano solo: mancano 4:10, alla velocità 1.25 sono 3:20, finisce verso le 15:45, file aperto."
+    lettore["velocita"] = 1.0
+    # Se lo schedario non la sa, la durata del lettore, se credibile.
+    finestra.schedario.schede.clear()
+    assert _durata_residua(finestra) == "Suona un brano solo, e la sua durata non si sa, file aperto."
+    assert chiesti[-1] == {r"C:\m\solo.mp3"}
+    lettore["durata"] = 299.0
+    assert _durata_residua(finestra) == "Suona un brano solo: mancano 4:09, finisce verso le 15:46, file aperto."
+    lettore["durata"] = 9e9
+    assert _durata_residua(finestra) == "Suona un brano solo, e la sua durata non si sa, file aperto."
+    # Una fine che non e' oggi dice il giorno.
+    _con_le_durate(finestra, aperto.brani, [40050.0])
+    assert _durata_residua(finestra) == "Suona un brano solo: mancano 11:06:40, finisce verso le 02:48 di domani, file aperto."
+    _con_le_durate(finestra, aperto.brani, [200050.0])
+    assert _durata_residua(finestra) == "Suona un brano solo: mancano 55:33:20, finisce verso le 23:15 di sabato 3 ottobre 2026, file aperto."
+
+
+def test_durata_residua_del_brano_tolto_e_delle_durate_ignote(finestra, monkeypatch):
+    pl, chiesti, lettore = _cinque_brani(finestra, monkeypatch)
+    # Il brano che suona, senza durata, si conta fra quelli senza durata.
+    finestra.schedario.schede.pop(pl.brani[2].percorso)
+    lettore["durata"] = None
+    assert _durata_residua(finestra) == ("Mancano 15:00 di 20:50, trascorsi 5:50, 28.0% ascoltato, finisce verso le 15:57, brano 3 di 5, playlist Rock, "
+        "1 brano senza durata.")
+    assert chiesti == [{pl.brani[2].percorso}]
+    # Nessuna durata nota: lo dice, e le chiede tutte.
+    finestra.schedario.schede.clear()
+    assert _durata_residua(finestra) == "Nessuna durata è nota, brano 3 di 5, playlist Rock."
+    assert chiesti[-1] == {b.percorso for b in pl.brani}
+    # Tolto dalla lista mentre suona: dopo di lui la Coda riparte dal primo.
+    _con_le_durate(finestra, pl.brani, [100.0, 200.0, 300.0, 400.0, 500.0])
+    pl.brani.remove(finestra.coda.corrente)
+    assert _durata_residua(finestra) == ("Mancano 24:10 di 25:00, trascorsi 0:50, 3.3% ascoltato, finisce verso le 16:06, non è più nella playlist Rock, "
+        "dopo si riparte dal primo brano.")
+
+
+def test_durata_residua_dei_sid(finestra, monkeypatch):
+    """Il sottobrano che suona conta con la durata del motore; gli altri SID
+    con quella della scheda, o i secondi a cui il motore li ferma."""
+    _schedario_annotato(finestra, monkeypatch)
+    finestra._aggiungi(None, [r"C:\m\a.sid", r"C:\m\b.mp3", r"C:\m\c.sid"])
+    pl = finestra.archivio.playlist[0]
+    _con_le_durate(finestra, pl.brani, [None, 200.0, None])
+    sid = {"dim": 1, "mod": 0, "tag": {}}
+    finestra.schedario.schede[r"C:\m\a.sid"] = {**sid, "durata": 100.0, "sottobrani": 4, "durate_sid": [100.0, None, 120.0]}
+    # Fuori dalla collezione HVSC: nessuna durata, e il motore lo ferma a 3:00.
+    finestra.schedario.schede[r"C:\m\c.sid"] = {**sid, "durata": None, "sottobrani": 3, "durate_sid": None}
+    assert [finestra._durata_nel_conto(Brano(r"C:\m\a.sid"), n) for n in (None, 1, 2, 3, 4)] == [100.0, 100.0, 180.0, 120.0, 180.0]
+    assert finestra._durata_nel_conto(Brano(r"C:\m\a.sid", sottobrano=3)) == 120.0
+    assert finestra._durata_nel_conto(Brano(r"C:\m\c.sid")) == 180.0
+    # Un SID che non si legge non ha sottobrani nella scheda, ne' durata.
+    finestra.schedario.schede[r"C:\m\d.sid"] = {**sid, "durata": None, "sottobrani": None, "durate_sid": None}
+    assert finestra._durata_nel_conto(Brano(r"C:\m\d.sid")) is None
+    # Suona il secondo sottobrano di a.sid, che il database dice di 2:05.
+    monkeypatch.setattr(modulo.sottobrani, "durate", lambda percorso: [100.0, 125.0] if percorso == r"C:\m\a.sid" else None)
+    _in_corso_per_dove_sono(finestra, monkeypatch, pl, pl.brani[0], posizione=25.0, durata=None)
+    finestra.motore.sottobrano, finestra.motore.sottobrani = 2, 4
+    monkeypatch.setattr(modulo, "datetime", types.SimpleNamespace(datetime=_Fermo, timedelta=datetime.timedelta))
+    assert _durata_residua(finestra) == f"Mancano 8:00 di 8:25, trascorsi 0:25, 5.0% ascoltato, finisce verso le 15:50, brano 1 di 3, playlist {pl.nome}."
+
+
+def test_durata_residua_dei_sid_nella_plancia(finestra, monkeypatch):
+    """Decide la plancia, con un SID aperto: contano i suoi sottobrani che si
+    vedono, nell'ordine in cui la plancia li suonera', e quello che suona e'
+    il sottobrano del motore. Aperto, un SID saltato esclude i suoi
+    sottobrani uno per uno, come la plancia li salta; chiuso, conta una
+    volta. Il SID e' finto: le sue informazioni le danno sottobrani.info e
+    sottobrani.durate sostituiti."""
+    _schedario_annotato(finestra, monkeypatch)
+    sid = r"C:\m\a.sid"
+    monkeypatch.setattr(modulo.sottobrani, "info", lambda percorso: {"sottobrani": 4, "titoli": []} if percorso == sid else None)
+    monkeypatch.setattr(modulo.sottobrani, "durate", lambda percorso: [100.0, 125.0, 150.0, 120.0] if percorso == sid else None)
+    nodo, = _playlist_di_prova(finestra, ("a.sid", "b.mp3", "c.mp3"))
+    pl = finestra.archivio.playlist[0]
+    _con_le_durate(finestra, pl.brani[1:], [200.0, 300.0])
+    finestra.schedario.schede[sid] = {"dim": 1, "mod": 0, "tag": {}, "durata": 100.0, "sottobrani": 4, "durate_sid": [100.0, 125.0, 150.0, 120.0]}
+    voce_del_sid = _voce_di(finestra, nodo, "a.sid")
+    finestra.albero.Expand(voce_del_sid)
+    _in_corso_per_dove_sono(finestra, monkeypatch, pl, pl.brani[0], posizione=25.0, durata=None)
+    finestra.motore.sottobrano, finestra.motore.sottobrani = 2, 4
+    monkeypatch.setattr(modulo, "datetime", types.SimpleNamespace(datetime=_Fermo, timedelta=datetime.timedelta))
+    prima, dopo, esclusi, plancia, fuori = finestra._campo_della_durata_residua(pl, pl.brani[0])
+    assert [(b.nome_del_file, n) for _pl, b, n in prima] == [("a.sid", 1)]
+    assert [(b.nome_del_file, n) for _pl, b, n in dopo] == [("a.sid", 3), ("a.sid", 4), ("b.mp3", None), ("c.mp3", None)]
+    assert (esclusi, plancia, fuori) == (0, True, False)
+    assert _durata_residua(finestra) == f"Mancano 14:30 di 16:35, trascorsi 2:05, 12.6% ascoltato, finisce verso le 15:56, brano 1 di 3, playlist {pl.nome}."
+    # Suona b.mp3, e il SID e' saltato: aperto, i suoi quattro sottobrani
+    # sono esclusi; chiuso, il SID conta una volta, come nella lista.
+    _in_corso_per_dove_sono(finestra, monkeypatch, pl, pl.brani[1], posizione=50.0, durata=None)
+    finestra.motore.sottobrano = finestra.motore.sottobrani = None
+    pl.brani[0].saltato = True
+    numeri = f"Mancano 7:30 di 8:20, trascorsi 0:50, 10.0% ascoltato, finisce verso le 15:49, brano 2 di 3, playlist {pl.nome}"
+    assert _durata_residua(finestra) == f"{numeri}, 4 saltati esclusi."
+    finestra.albero.Collapse(voce_del_sid)
+    assert _durata_residua(finestra) == f"{numeri}, 1 saltato escluso."
+
+
+def test_durata_residua_al_passaggio_della_dissolvenza(finestra, monkeypatch):
+    """Il motore ha gia' il brano che entra, la coda e' ancora su quello che
+    esce: conta quello del motore."""
+    pl, _chiesti, _lettore = _cinque_brani(finestra, monkeypatch)
+    finestra.motore._in_corso = pl.brani[3].percorso
+    finestra._preparato = (pl, pl.brani[3], None)
+    try:
+        assert _durata_residua(finestra) == "Mancano 14:10 di 25:00, trascorsi 10:50, 43.3% ascoltato, finisce verso le 15:56, brano 4 di 5, playlist Rock."
+    finally:
+        finestra._preparato = None
+
+
+def test_durata_residua_tasti_e_statistiche(finestra, monkeypatch, suoni_annotati):
+    import statistiche
+
+    _cinque_brani(finestra, monkeypatch)
+    nomi = []
+    monkeypatch.setattr(finestra._statistiche, "tasto", nomi.append)
+    riga = "Mancano 19:10 di 25:00, trascorsi 5:50, 23.3% ascoltato, finisce verso le 16:01, brano 3 di 5, playlist Rock."
+    # Maiuscolo con l'apostrofo puo' arrivare come apostrofo o come punto
+    # interrogativo, con il Maiuscolo o senza: e' sempre lo stesso tasto.
+    for carattere, maiuscolo in (("'", True), ("?", False), ("?", True)):
+        assert _premi(finestra, carattere, maiuscolo) == riga and suoni_annotati[-1] == "durata_residua"
+    assert nomi == ["Maiuscolo con apostrofo"] * 3
+    assert finestra._comandi_dei_tasti()["Maiuscolo con apostrofo"] == "durata_residua"
+    assert statistiche.DESCRIZIONI_DEI_COMANDI["durata_residua"] == "durata residua"
+    assert statistiche.NOMI_DEGLI_EVENTI["durata_residua"] == "durata residua, con Maiuscolo e l'apostrofo"
+
+
+def test_durata_residua_si_riscrive_anche_sulla_barra(finestra, monkeypatch, sintesi_finta):
+    """Come Dove sono: sulla barra la riga nuova prende il posto della sua di
+    prima, e non tocca quella di Dove sono. L'orologio della coda del braille
+    e' fermo e le sue attese non scadono mai."""
+    finestra._braille = modulo.braille.Coda(finestra._mostra_in_braille, lambda _secondi, _funzione: types.SimpleNamespace(Stop=lambda: None), lambda: 0.0)
+    _pl, _chiesti, lettore = _cinque_brani(finestra, monkeypatch)
+    finestra.impostazioni.update(destinazione="braille", celle_braille=20)
+    _durata_residua(finestra)
+    in_fila = finestra._braille.in_fila
+    assert sintesi_finta.braille == [("nvda", "Mancano 19:10 di")] and in_fila > 0
+    lettore["posizione"] = 51.0
+    _durata_residua(finestra)
+    assert sintesi_finta.braille[-1] == ("nvda", "Mancano 19:09 di") and finestra._braille.in_fila == in_fila
+    # La riga di Dove sono va in fila dopo; la durata residua seguente toglie
+    # solo la sua di prima, e sulla barra arriva Dove sono, che resta.
+    _tasto(finestra, "'")
+    con_dove_sono = finestra._braille.in_fila
+    assert finestra._dove_sono_in_braille is not None and con_dove_sono > in_fila
+    lettore["posizione"] = 52.0
+    riga = _durata_residua(finestra)
+    assert sintesi_finta.braille[-1] == ("nvda", "0:51 di 4:59,") and finestra._braille.in_fila == con_dove_sono
+    # Dopo lo stop anche la frase di F8 prende il posto della riga di prima,
+    # in fila dopo Dove sono, che resta sulla barra: via i blocchi della riga,
+    # dentro i due della frase, Non sta suonando e niente (ritocco della
+    # 1.110.0).
+    finestra.motore._in_corso = None
+    assert _durata_residua(finestra) == "Non sta suonando niente."
+    assert modulo.braille.blocchi("Non sta suonando niente.", 20) == ["Non sta suonando", "niente."]
+    assert sintesi_finta.braille[-1] == ("nvda", "0:51 di 4:59,")
+    assert finestra._braille.in_fila == con_dove_sono - len(modulo.braille.blocchi(riga, 20)) + 2
+
+
+def test_durata_residua_interrompe_la_voce(finestra, monkeypatch, sintesi_finta):
+    # Ritocco della 1.110.0: come Dove sono, la riga interrompe la voce che
+    # sta parlando, anche la sua di prima; la voce di Windows le accodava. E
+    # come in Dove sono la interrompe anche la frase di F8.
+    _pl, _chiesti, lettore = _cinque_brani(finestra, monkeypatch)
+    finestra.impostazioni["sintesi"] = "sapi5"
+    prima = _durata_residua(finestra)
+    lettore["posizione"] = 51.0
+    dopo = _durata_residua(finestra)
+    assert prima != dopo and sintesi_finta.interrotti == [("sapi5", prima), ("sapi5", dopo)]
+    finestra.motore._in_corso = None
+    assert _durata_residua(finestra) == "Non sta suonando niente."
+    assert sintesi_finta.interrotti[2:] == [("sapi5", "Non sta suonando niente.")]
