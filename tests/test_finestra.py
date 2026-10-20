@@ -426,6 +426,9 @@ def test_cartella_suona_con_le_sottocartelle_e_f8_la_ritrova(finestra, monkeypat
         finestra.motore._in_corso = percorso
 
     monkeypatch.setattr(finestra.motore, "suona", suona)
+    # Lo schedario non legge i file finti: la sonda di libmpv li terrebbe
+    # aperti mentre la cartella si cancella, e Windows la troverebbe in uso.
+    monkeypatch.setattr(finestra.schedario, "chiedi", lambda _percorsi: None)
     # Una cartella visibile: le cartelle temporanee di Windows stanno sotto
     # AppData, che e' nascosta e in Questo PC non compare.
     with tempfile.TemporaryDirectory(dir=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) as radice:
@@ -441,7 +444,36 @@ def test_cartella_suona_con_le_sottocartelle_e_f8_la_ritrova(finestra, monkeypat
         finestra._vai_al_brano()
         selezione = finestra._voce_corrente()
         assert finestra.albero.GetItemText(selezione) == "due.mp3, in riproduzione"
-        assert finestra._dati(finestra.albero.GetItemParent(selezione))["percorso"] == os.path.join(base, "Dentro")
+        # La plancia scrive le cartelle con le maiuscole vere del disco, che
+        # possono non essere quelle del percorso della prova (sul PC gigante
+        # la cartella e' Mine).
+        assert os.path.normcase(finestra._dati(finestra.albero.GetItemParent(selezione))["percorso"]) == os.path.normcase(os.path.join(base, "Dentro"))
+        finestra.motore._in_corso = None
+
+
+def test_f8_ritrova_la_cartella_scritta_con_altre_maiuscole(finestra, monkeypatch):
+    # 1.104.2: una cartella suonata con un percorso scritto in maiuscolo e'
+    # la stessa che la plancia apre con le maiuscole vere del disco. Prima
+    # diventavano due playlist temporanee, e F8 non ritrovava il brano.
+    import tempfile
+
+    def suona(percorso, sottobrano=None, inizio=None, sfuma_lo_stesso=False, **_altro):
+        finestra.motore._in_corso = percorso
+
+    monkeypatch.setattr(finestra.motore, "suona", suona)
+    monkeypatch.setattr(finestra.schedario, "chiedi", lambda _percorsi: None)
+    with tempfile.TemporaryDirectory(dir=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) as radice:
+        base = os.path.join(radice, "Musica")
+        os.makedirs(os.path.join(base, "Dentro"))
+        for percorso in (os.path.join(base, "uno.mp3"), os.path.join(base, "Dentro", "due.mp3")):
+            open(percorso, "wb").close()
+        finestra._riproduci_cartella(base.upper())
+        _tasto(finestra, "b")
+        assert finestra.coda.corrente.percorso == os.path.join(base.upper(), "Dentro", "due.mp3")
+        finestra._vai_al_brano()
+        selezione = finestra._voce_corrente()
+        assert finestra.albero.GetItemText(selezione) == "due.mp3, in riproduzione"
+        assert finestra._dati(selezione)["brano"] is finestra.coda.corrente
         finestra.motore._in_corso = None
 
 

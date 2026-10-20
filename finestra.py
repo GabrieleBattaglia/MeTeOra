@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola.
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -4443,8 +4443,12 @@ class Finestra(wx.Frame):
         """La playlist temporanea di una cartella: i suoi file supportati.
         Se i file sono gli stessi resta la stessa playlist, con gli stessi
         brani: cosi' il brano che suona, e il loop, non si perdono quando la
-        cartella si riapre o si aggiorna."""
-        pl = self._temporanee.get(cartella)
+        cartella si riapre o si aggiorna.
+        Cartelle e file si confrontano senza badare alle maiuscole, come fa
+        Windows (1.104.2): E:\\git\\mine e E:\\git\\Mine sono la stessa cartella,
+        e il brano che suona da una resta lo stesso aprendo l'altra."""
+        chiave = pulizia.norm(cartella)
+        pl = self._temporanee.get(chiave)
         if files is None:
             if pl is not None:
                 return pl
@@ -4452,9 +4456,9 @@ class Finestra(wx.Frame):
                 files = questo_pc.contenuto(cartella)[1]
             except OSError:
                 files = []
-        if pl is None or [b.percorso for b in pl.brani] != files:
+        if pl is None or [pulizia.norm(b.percorso) for b in pl.brani] != [pulizia.norm(f) for f in files]:
             nome = os.path.basename(cartella.rstrip("\\")) or cartella
-            pl = self._temporanee[cartella] = Playlist.da_percorsi(nome, files, cartella)
+            pl = self._temporanee[chiave] = Playlist.da_percorsi(nome, files, cartella)
         return pl
 
     def _suona(self, pl, brano, evento="play", sottobrano=None, inizio=None, sfuma_lo_stesso=False):

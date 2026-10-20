@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.104.2] - 2026-10-20
+
+- Correzione, la stessa cartella scritta con maiuscole diverse, come E:\git\mine ed E:\git\Mine, è una cartella sola, come per Windows. Prima MeTeOra ne faceva due liste: suonando una cartella da un percorso scritto in un modo e aprendola nella plancia, che usa le maiuscole vere del disco, F8 non ritrovava il brano che suonava e la plancia non lo diceva in riproduzione. L'ha trovato la suite delle prove sul PC gigante di Gabriele, dove la cartella dei progetti si chiama Mine.
+- Correzione delle prove: quella di F8 sulle sottocartelle non conta più sulle maiuscole del percorso, e non lascia più leggere allo schedario i file finti, che la sonda di libmpv teneva aperti mentre la cartella si cancellava; una prova nuova suona una cartella scritta tutta in maiuscolo.
+
 ## [1.104.1] - 2026-10-20
 
 Piccoli ritocchi decisi da Gabriele il 20 ottobre 2026, prima delle funzioni nuove della tappa 14 del piano.
