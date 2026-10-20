@@ -4,6 +4,7 @@
 # 03/10/2026, 1.72.0: os.startfile vietato, perche' F1 apre il manuale nel browser.
 # 04/10/2026, 1.75.0: il browser vietato e Donazione muta, per l'invito a offrire un caffe'.
 # 20/10/2026, 1.105.0: la sintesi finta annota anche i testi che interrompono la voce, per Dove sono.
+# 20/10/2026, 1.112.0: la Sentinella dei dischi non chiede niente ai dischi veri, e il MachineGuid non si legge.
 
 """Le regole comuni delle prove.
 
@@ -102,6 +103,20 @@ def donazione_muta(monkeypatch):
     import GBUtils
 
     monkeypatch.setattr(GBUtils, "Donazione", lambda *argomenti, **opzioni: None)
+
+
+@pytest.fixture(autouse=True)
+def dischi_non_guardati(monkeypatch):
+    """Chi risponde a una lettera non si sa, come per una condivisione
+    scritta per esteso: la Sentinella, che guarda il disco di ogni file che
+    la finestra suona, aggiunge o legge, non chiede niente ai dischi veri, e
+    il file dei dischi non cambia da solo (1.112.0). Le prove della
+    protezione dei dischi la sostituiscono a loro volta. Anche il MachineGuid
+    non si legge: il file dei dischi e' lo stesso su ogni computer."""
+    import pulizia
+
+    monkeypatch.setattr(pulizia, "_identita", lambda _radice: None)
+    monkeypatch.setattr(pulizia, "guid_del_computer", lambda: "")
 
 
 @pytest.fixture(autouse=True)

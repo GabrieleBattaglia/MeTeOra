@@ -1,6 +1,6 @@
 # MeTeOra, le statistiche: ogni sorta di conti, raccolti mentre lo si usa, e la pagina che li racconta.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (UltraCode).
-# 17/10/2026: nasce con la 1.103.0, chiesta da Gabriele: piu' dati ci sono, piu' e' contento. Nella 1.104.0 le righe che elencano voci tengono solo quelle diverse da zero, le percentuali uniformi, gli anni futuri dei tag ignorati, le date sempre con il giorno della settimana, e i brani dello storico tolti dalla pulizia all'avvio o rinominati, con i conti della pulizia nella salute. Nella 1.105.0 i nomi di Dove sono, il comando dell'apostrofo, e del suo suono. Nella 1.109.0 le playlist ordinate, invertite, mescolate e rimesse nell'ordine di prima. Nella 1.110.0 quelli della durata residua, Maiuscolo con l'apostrofo.
+# 17/10/2026: nasce con la 1.103.0, chiesta da Gabriele: piu' dati ci sono, piu' e' contento. Nella 1.104.0 le righe che elencano voci tengono solo quelle diverse da zero, le percentuali uniformi, gli anni futuri dei tag ignorati, le date sempre con il giorno della settimana, e i brani dello storico tolti dalla pulizia all'avvio o rinominati, con i conti della pulizia nella salute. Nella 1.105.0 i nomi di Dove sono, il comando dell'apostrofo, e del suo suono. Nella 1.109.0 le playlist ordinate, invertite, mescolate e rimesse nell'ordine di prima. Nella 1.110.0 quelli della durata residua, Maiuscolo con l'apostrofo. Nella 1.112.0, nella salute, anche le unita' saltate dalla pulizia perche' usate da dischi diversi o perche' il disco che rispondeva non si riconosceva, i dischi riconosciuti a mano e le lettere rese contese dalla Sentinella.
 
 """Le statistiche di MeTeOra (1.103.0).
 
@@ -209,6 +209,8 @@ NOMI_DEGLI_EVENTI = {
     "dove_sono": "dove sono, con l'apostrofo",
     # Nella 1.110.0.
     "durata_residua": "durata residua, con Maiuscolo e l'apostrofo",
+    # Nella 1.112.0, nell'ordine di suoni.EVENTI.
+    "disco_riconosciuto": "disco riconosciuto a mano", "disco_diverso": "lettera resa contesa dalla Sentinella",
 }
 
 # Che cosa ha tolto la pulizia all'avvio: il conto, il singolare, il plurale
@@ -1630,6 +1632,8 @@ class Pagina:
             f"Salvataggi non riusciti: {self.c('salvataggi_non_riusciti')}.",
             f"Cartelle di rete che non hanno risposto nella plancia: {self.c('rete_muta')}.",
             self.riga_delle_pulizie(),
+            # Dalla 1.112.0: Riconosci questo disco e la Sentinella che rende contesa una lettera, contati dai loro eventi.
+            f"Dischi riconosciuti a mano: {self.e('disco_riconosciuto')}; lettere rese contese dalla Sentinella, a MeTeOra aperto: {self.e('disco_diverso')}.",
             f"Attese dei SID, dei MIDI e delle console oltre un secondo e mezzo, dopo un salto: {self.c('attese_lunghe')}.",
             f"Comandi che lì non valgono: {self.e('non_disponibile')}; niente da suonare: {self.e('niente_da_suonare')}.",
         ]
@@ -1639,7 +1643,9 @@ class Pagina:
         """Le pulizie all'avvio, quante in tutto e quante non riuscite, e
         cio' che hanno tolto, solo le voci diverse da zero, con tolto
         accordato a cio' che segue (1.104.0). pulizie conta quelle riuscite,
-        pulizie_non_riuscite quelle finite con un errore."""
+        pulizie_non_riuscite quelle finite con un errore. In fondo le unita'
+        saltate perche' non rispondevano e, dalla 1.112.0, perche' usate da
+        dischi diversi o perche' il disco che rispondeva non si riconosceva."""
         riuscite, non_riuscite = self.c("pulizie"), self.c("pulizie_non_riuscite")
         totale = riuscite + non_riuscite
         if not totale:
@@ -1662,9 +1668,11 @@ class Pagina:
             riga += f"; {participio} " + ", ".join(al_plurale(n, singolare, plurale) for n, singolare, plurale, _f in tolti)
         elif riuscite:
             riga += "; niente da togliere"
-        saltate = self.c("pulizia_radici_saltate")
-        if saltate:
-            riga += f"; unità saltate perché non rispondevano: {saltate}"
+        perche = [f"{motivo}: {self.c(conto)}" for conto, motivo in (("pulizia_radici_saltate", "non rispondevano"),
+            ("pulizia_dischi_diversi", "usate da dischi diversi"), ("pulizia_dischi_non_riconosciuti", "il disco che rispondeva non si riconosceva"))
+            if self.c(conto)]
+        if perche:
+            riga += "; unità saltate perché " + "; perché ".join(perche)
         return riga + "."
 
     # 21.

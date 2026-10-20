@@ -305,6 +305,23 @@ def test_schedario_rinomina_con_le_maiuscole_diverse(tmp_path):
     s.rinomina(r"c:\musica\canzone.mp3", r"C:\Musica\Ballata.mp3")
     assert s.scheda(r"C:\Musica\Canzone.MP3") is None and s.scheda(r"C:\Musica\Ballata.mp3") == {"durata": 10.0}
     assert s.variazioni() == [(2, r"C:\Musica\Canzone.MP3", 10.0, None), (3, r"C:\Musica\Ballata.mp3", None, 10.0)]
+
+
+def test_schedario_dice_i_file_che_legge(tmp_path):
+    # 1.112.0: la finestra guarda il disco di ogni file che lo schedario
+    # legge davvero; quelli che non ci sono non contano.
+    from schedario import Schedario
+
+    letti = []
+    presente = tmp_path / "presente.mid"
+    presente.write_bytes(b"MThd\x00\x00\x00\x06\x00\x00\x00\x01\x00\x60MTrk\x00\x00\x00\x04\x00\xff\x2f\x00")
+    s = Schedario(str(tmp_path / "schede.json"), letto=letti.append)
+    s.chiedi([str(presente), str(tmp_path / "manca.mid")])
+    s.aspetta()
+    assert letti == [str(presente)]
+    s.leggi_subito(str(presente))
+    s.leggi_subito(str(tmp_path / "manca.mid"))
+    assert letti == [str(presente), str(presente)]
     # Fra due grafie dello stesso file passa quella ricontrollata in sessione;
     # l'altra resta, e la togliera' togli().
     with s._lucchetto:

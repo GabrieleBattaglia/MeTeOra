@@ -1,6 +1,6 @@
 # MeTeOra, il banco del collaudo: MeTeOra vero su un desktop di Windows nascosto, con una copia dei dati, pilotato da una tastiera simulata.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 19/10/2026: nasce con la 1.104.0, dal banco con cui ClaudIA ha collaudato le statistiche della 1.103; sul desktop nascosto, come preferisce Gabriele. Nella 1.105.0 la sessione di Dove sono, l'opzione --solo, la sintesi finta e la pipe dell'istanza con il numero del processo. Nella 1.109.0 la sessione ordina, con --ordina. Nella 1.110.0 la sessione della durata residua, e al_normale in comune con Dove sono. Nella 1.111.0 il banco della plancia, con --plancia: lo stato della selezione letto come lo legge NVDA (issue 21).
+# 19/10/2026: nasce con la 1.104.0, dal banco con cui ClaudIA ha collaudato le statistiche della 1.103; sul desktop nascosto, come preferisce Gabriele. Nella 1.105.0 la sessione di Dove sono, l'opzione --solo, la sintesi finta e la pipe dell'istanza con il numero del processo. Nella 1.109.0 la sessione ordina, con --ordina. Nella 1.110.0 la sessione della durata residua, e al_normale in comune con Dove sono. Nella 1.111.0 il banco della plancia, con --plancia: lo stato della selezione letto come lo legge NVDA (issue 21). Nella 1.112.0 la sessione dischi, per la protezione dei dischi nella pulizia all'avvio, con Riconosci questo disco e la Sentinella; poi la conferma con il conto delle voci, e la riga e il suono della Sentinella.
 
 """Il banco del collaudo.
 
@@ -47,7 +47,15 @@ tastiera_simulata e guarda cosa succede dentro la finestra. Le sessioni:
   rami aperti e chiusi, la pausa, la velocita', un brano senza durata che lo
   schedario rilegge, la lista che decide, le ripetizioni, il nome nelle
   statistiche, il tempo del conto con tremila voci aperte, e le voci sopra
-  la lista che suona, che non contano.
+  la lista che suona, che non contano;
+- dischi: prima il banco scrive nel file dei dischi un altro numero di serie
+  per l'unita' dei dati, e cancella l'altro file dei Preferiti; la pulizia
+  salta l'unita' usata da dischi diversi e lo dice, con
+  dove riconoscerla; il file cancellato resta, e il disco vero va fra gli
+  altri; Riconosci questo disco, dal menu dell'unita', chiede conferma con
+  il conto delle voci da togliere: Esc annulla, S la sblocca con il disco
+  vero; la Sentinella, con un altro disco finto mentre un file suona, la
+  rende di nuovo contesa e lo dice subito, con il suo suono (1.112.0).
 La sessione ordina (tappa 14 c) gira solo con --ordina: Ordina, Inverti
 l'ordine, Mescola e Ordine di prima su una playlist aperta di cinquemila
 brani, con i tempi, e Mescola sulla playlist che suona con la dissolvenza
@@ -87,7 +95,8 @@ from ctypes import wintypes
 RADICE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ISTANZA = "meteora_banco"
 FILE_DELLE_STATISTICHE = "MeTeOra - Statistiche.json"
-SESSIONI = ("principale", "riavvio", "dopo_il_crash", "controllo", "dove_sono", "durata_residua")
+FILE_DEI_DISCHI = "MeTeOra - Dischi.json"
+SESSIONI = ("principale", "riavvio", "dopo_il_crash", "controllo", "dove_sono", "durata_residua", "dischi")
 # Le sessioni che girano solo quando si chiedono (tappa 14 c).
 SESSIONI_A_PARTE = ("ordina",)
 # Il banco della plancia (1.111.0): la sessione delle misure e cinque
@@ -95,7 +104,7 @@ SESSIONI_A_PARTE = ("ordina",)
 SESSIONI_DELLA_PLANCIA = ("plancia", *(f"chiusura_{n}" for n in range(1, 6)))
 # Quanto puo' durare ogni sessione, in secondi: la pulizia sulla copia dei
 # dati veri guarda anche la rete.
-DURATE_MASSIME = {"principale": 1200, "riavvio": 900, "dopo_il_crash": 1200, "controllo": 900, "dove_sono": 900, "durata_residua": 900, "ordina": 600, "plancia": 600,
+DURATE_MASSIME = {"principale": 1200, "riavvio": 900, "dopo_il_crash": 1200, "controllo": 900, "dove_sono": 900, "durata_residua": 900, "ordina": 600, "plancia": 600, "dischi": 900,
     **dict.fromkeys(SESSIONI_DELLA_PLANCIA[1:], 300)}
 # I brani della playlist grande della sessione ordina, e quanto puo' durare al
 # massimo ogni riordino, in secondi.
@@ -229,7 +238,7 @@ def _apri_meteora():
 
     registro.sopravvissuto = svuota
     import librerie  # noqa: F401
-    from finestra import FILE_IMPOSTAZIONI, FILE_MARCATORI, FILE_PLAYLIST, FILE_POSIZIONI, FILE_STATISTICHE, Finestra
+    from finestra import FILE_CON_LE_COPIE, FILE_STATISTICHE, Finestra
 
     scrivi_di_prima = Finestra.scrivi
 
@@ -255,7 +264,7 @@ def _apri_meteora():
 
     Finestra._comando_statistiche = comando
     FinestraStatistiche.ShowModal = mostra
-    mancate = copie.ruota(S.dati, [FILE_PLAYLIST, FILE_MARCATORI, FILE_IMPOSTAZIONI, FILE_POSIZIONI, FILE_STATISTICHE])
+    mancate = copie.ruota(S.dati, FILE_CON_LE_COPIE)
     f = S.finestra = Finestra(ao="null", cartella_dati=S.dati)
     f.ascolta_i_problemi()
     if mancate:
@@ -1486,8 +1495,111 @@ def scenario_chiusura():
     premi("esc")
 
 
+def scenario_dischi():
+    f = S.finestra
+    with open(os.path.join(os.path.dirname(S.esito), "dischi_prima.json"), encoding="utf-8") as fl:
+        prima = json.load(fl)
+    lettera, ricordo, falso = prima["lettera"], prima["ricordo"] or {}, prima["falso"]
+    vero = ricordo.get("disco", "")
+    S.verifica("dischi", "Le pulizie di prima hanno imparato il numero di serie dell'unita' dei dati", _numero_di_serie(vero) and "altri" not in ricordo, prima)
+    righe = aspetta_la_pulizia()
+    S.verifica("dischi", "Con un altro numero di serie la pulizia salta l'unita' e lo dice", any(f"Saltata {lettera}, usata da dischi diversi: " in r
+        for r in righe), righe)
+    tenuto = _da_un_altra_sessione("principale")["extra"]["da_tenere"]
+
+    def guarda():
+        return tenuto in [b.percorso for b in f.archivio.preferiti.brani], f.schedario.scheda(tenuto) is not None
+
+    S.verifica("dischi", "Il file cancellato resta nei Preferiti e nello schedario", nel_filo(guarda) == (True, True), nel_filo(guarda))
+    S.verifica("dischi", "La riga dice dove trovare Riconosci questo disco", any(
+        f"Per riconoscere il disco di adesso, Riconosci questo disco nel menu di {lettera} in Questo PC." in r for r in righe), righe)
+    with contextlib.suppress(OSError, ValueError), open(os.path.join(S.dati, FILE_DEI_DISCHI), encoding="utf-8") as fl:
+        S.extra["dischi"] = json.load(fl)
+    dopo = _ricordo_nel_file(prima)
+    S.verifica("dischi", "Il disco vero va fra gli altri, e la lettera resta contesa", dopo == {"disco": falso, "altri": [vero]}, dopo)
+    import pulizia
+
+    guid = (S.extra.get("dischi") or {}).get(prima["computer"], {}).get("guid")
+    S.verifica("dischi", "Accanto al nome del computer c'e' il suo MachineGuid", bool(guid) and guid == pulizia.guid_del_computer(), guid)
+    S.verifica("dischi", "Le statistiche contano l'unita' saltata", conti()["conti"].get("pulizia_dischi_diversi") == 1)
+
+    # Riconosci questo disco, dal menu dell'unita' dei dati in Questo PC:
+    # chi risponde lo chiede in disparte al disco vero.
+    def voci_dell_unita():
+        f.albero.Expand(f.nodo_pc)
+        for voce in f._figli(f.nodo_pc):
+            dati = f._dati(voce) or {}
+            if dati.get("tipo") == "unita" and dati["percorso"][:2].upper() == lettera:
+                return dict(f._voci_del_menu(dati))
+        return {}
+
+    voci = nel_filo(voci_dell_unita)
+    S.verifica("dischi", "Il menu dell'unita' contesa ha Riconosci questo disco", "Riconosci questo disco" in voci, list(voci))
+    if "Riconosci questo disco" in voci:
+        # Prima la domanda, con il conto delle voci che la prossima pulizia
+        # togliera', fatto in disparte: il file cancellato e' fra loro. Esc
+        # annulla, e la lettera resta contesa.
+        segno = time.monotonic()
+        nel_filo(voci["Riconosci questo disco"])
+        aperta = aspetta(lambda: bool(domande()), attesa=15)
+        testo = nel_filo(lambda: domande()[0].domanda.GetLabelText()) if aperta else ""
+        S.extra["domanda"] = testo
+        S.verifica("dischi", "Riconosci questo disco chiede conferma, con il suono della domanda e il conto delle voci da togliere", aperta
+            and "domanda" in S.suoni_da(segno) and testo.startswith(f"{lettera} diventa del disco che risponde adesso; ") and testo.endswith(" Riconosco?")
+            and "toglierà." in testo and "non toglierà" not in testo and "non si sono potute contare" not in testo, testo)
+        if aperta:
+            premi("esc")
+            aspetta(lambda: not domande(), attesa=5)
+            annullato = aspetta(lambda: f"Il disco di {lettera} resta da riconoscere: la pulizia all'avvio continua a saltarla." in S.console_da(segno),
+                attesa=5)
+            S.verifica("dischi", "Esc annulla, con il suono dell'annullamento, e la lettera resta contesa", annullato and "annullamento" in S.suoni_da(segno)
+                and _ricordo_nel_file(prima) == {"disco": falso, "altri": [vero]}, S.console_da(segno))
+        # Con S si riconosce.
+        segno = time.monotonic()
+        nel_filo(voci["Riconosci questo disco"])
+        if aspetta(lambda: bool(domande()), attesa=15):
+            premi("s")
+            aspetta(lambda: not domande(), attesa=5)
+        detto = aspetta(lambda: any(t.startswith(f"Disco di {lettera} riconosciuto") for t in S.console_da(segno)), attesa=15)
+        S.verifica("dischi", "Riconosci questo disco lo dice, con il suo suono", detto and "disco_riconosciuto" in S.suoni_da(segno), S.console_da(segno))
+        S.verifica("dischi", "Il disco vero diventa il suo, salvato subito", _ricordo_nel_file(prima) == {"disco": vero}, _ricordo_nel_file(prima))
+        S.verifica("dischi", "La voce sparisce dal menu", "Riconosci questo disco" not in nel_filo(voci_dell_unita))
+    # La Sentinella: un altro disco nella lettera mentre ne suona un file la
+    # rende di nuovo contesa, e la salva. Il disco non si puo' cambiare
+    # davvero: lo finge _identita, solo in questa sessione.
+    identita_vera = pulizia._identita
+    pulizia._identita = lambda radice: "0000-0003" if radice == lettera else identita_vera(radice)
+    try:
+        nel_filo(lambda: setattr(f._sentinella, "_memoria", 0.0))
+        brano = fai_un_wav(os.path.join(_cartella_dei_brani(), "sentinella.wav"), 1)
+        segno = time.monotonic()
+        nel_filo(lambda: f._suona_file(brano, os.path.dirname(brano)))
+        contesa = aspetta(lambda: _ricordo_nel_file(prima) == {"disco": vero, "altri": ["0000-0003"]}, attesa=15)
+        S.verifica("dischi", "La Sentinella rende contesa la lettera usata con un altro disco, e la salva", contesa, _ricordo_nel_file(prima))
+        detta = aspetta(lambda: any(t.startswith(f"{lettera} ha un disco diverso da quello che conosco: ") for t in S.console_da(segno)), attesa=5)
+        S.verifica("dischi", "La Sentinella lo dice subito, con il suo suono, una volta sola", detta and S.suoni_da(segno).count("disco_diverso") == 1,
+            S.console_da(segno))
+    finally:
+        pulizia._identita = identita_vera
+    premi("f5")
+    premi("esc")
+
+
+def _ricordo_nel_file(prima):
+    """Il ricordo della lettera dei dati nel file dei dischi, sotto il nome
+    del computer; None se non c'e' o il file non si legge."""
+    with contextlib.suppress(OSError, ValueError), open(os.path.join(S.dati, FILE_DEI_DISCHI), encoding="utf-8") as fl:
+        return json.load(fl).get(prima["computer"], {}).get("lettere", {}).get(prima["lettera"])
+    return None
+
+
+def _numero_di_serie(testo):
+    """Vero per un numero di serie come lo scrive il comando vol, 1A2B-3C4D."""
+    return len(testo) == 9 and testo[4] == "-" and all(c in "0123456789ABCDEF" for c in testo[:4] + testo[5:])
+
+
 SCENARI = {"principale": scenario_principale, "riavvio": scenario_riavvio, "dopo_il_crash": scenario_dopo_il_crash, "controllo": scenario_controllo,
-    "dove_sono": scenario_dove_sono, "durata_residua": scenario_durata_residua, "ordina": scenario_ordina, "plancia": scenario_plancia,
+    "dove_sono": scenario_dove_sono, "durata_residua": scenario_durata_residua, "ordina": scenario_ordina, "plancia": scenario_plancia, "dischi": scenario_dischi,
     **dict.fromkeys(SESSIONI_DELLA_PLANCIA[1:], scenario_chiusura)}
 
 
@@ -1519,6 +1631,36 @@ def _aspetta_il_processo(processo, nome):
         processo.wait()
 
 
+def _un_disco_diverso(dati, esiti):
+    """Prima della sessione dischi: nel file dei dischi l'unita' dei dati ha
+    un altro numero di serie, come se il suo disco fosse staccato e nella
+    sua lettera ce ne fosse un altro; e il file da tenere della sessione
+    principale si cancella, perche' la pulizia lo darebbe per sparito. Il
+    ricordo di prima e il numero falso vanno negli esiti. I dischi stanno
+    fra le lettere del nome del computer, come li scrive MeTeOra, e il
+    MachineGuid accanto resta com'e'."""
+    if RADICE not in sys.path:
+        sys.path.insert(0, RADICE)
+    import pulizia
+
+    lettera = os.path.splitdrive(dati)[0].upper()
+    percorso = os.path.join(dati, FILE_DEI_DISCHI)
+    dischi = {}
+    with contextlib.suppress(OSError, ValueError), open(percorso, encoding="utf-8") as f:
+        dischi = json.load(f)
+    computer = pulizia.nome_del_computer()
+    suoi = dischi.setdefault(computer, {}).setdefault("lettere", {})
+    ricordo = suoi.get(lettera)
+    falso = "0000-0002" if (ricordo or {}).get("disco") == "0000-0001" else "0000-0001"
+    with open(os.path.join(esiti, "dischi_prima.json"), "w", encoding="utf-8") as f:
+        json.dump({"lettera": lettera, "computer": computer, "ricordo": ricordo, "falso": falso}, f, ensure_ascii=False)
+    suoi[lettera] = {"disco": falso}
+    with open(percorso, "w", encoding="utf-8") as f:
+        json.dump(dischi, f, ensure_ascii=False, indent=1)
+    with contextlib.suppress(OSError, ValueError, KeyError), open(os.path.join(esiti, "principale.json"), encoding="utf-8") as f:
+        os.remove(json.load(f)["extra"]["da_tenere"])
+
+
 def banco(vuoti, video, solo=None):
     """Le sessioni una dopo l'altra, o la sola sessione solo."""
     sessioni = (solo,) if solo else SESSIONI
@@ -1531,6 +1673,10 @@ def banco(vuoti, video, solo=None):
             shutil.copy2(percorso, dati)
     print(f"Banco del collaudo: dati di prova in {dati}", flush=True)
     for nome in sessioni:
+        if nome == "dischi":
+            # Il disco finto si prepara subito prima della sua sessione,
+            # cosi' le sessioni che vengono prima lavorano con i dischi veri.
+            _un_disco_diverso(dati, esiti)
         processo = _lancia(nome, dati, esiti, video, vuoti)
         if nome == "riavvio":
             pronto = os.path.join(esiti, "riavvio.pronto")

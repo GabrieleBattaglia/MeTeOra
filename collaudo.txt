@@ -1,4 +1,8 @@
-Collaudo di MeTeOra dalla 1.103.0 alla 1.111.0, con NVDA: restano le voci da leggere e da sentire; il resto l'ha provato ClaudIA il 19 e il 20 ottobre 2026, con pytest e con strumenti\banco.py sul desktop nascosto. La 1.104.1 e la 1.104.2 non hanno voci tue. Le voci della 1.111.0 si fanno con il log di NVDA acceso: la prima ti dice come accenderlo, l'ultima come rimetterlo com'era. Prima git pull in MeTeOra e in GBUtils: serve GBUtils V207. Sulle altre macchine, dopo il pull e prima di MeTeOra, python pulisci_i_dati.py, che chiede una S e cancella per sempre i dati vecchi. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Collaudo di MeTeOra dalla 1.103.0 alla 1.112.0, con NVDA: restano le voci da leggere e da sentire; il resto l'ha provato ClaudIA il 19 e il 20 ottobre 2026, con pytest e con strumenti\banco.py sul desktop nascosto. Le 1.104.1 e 1.104.2 non hanno voci tue. Prima git pull in MeTeOra e in GBUtils: serve GBUtils V207, e per i suoni di Riconosci questo disco e della Sentinella la versione che porta meteora_disco_riconosciuto e meteora_disco_diverso nella collezione. Sulle altre macchine, dopo il pull e prima di MeTeOra, python pulisci_i_dati.py, che chiede una S e cancella per sempre i dati vecchi. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+1.104.0 e 1.112.0, la prima pulizia, qui sul gigante: avvia MeTeOra, che riparte da zero, e in Questo PC suona E:\git\tmp\prova-pulizia\Prova della pulizia.wav, poi mettilo nei Preferiti con F4 ed esci con Esc.
+Riapri MeTeOra con il file ancora al suo posto: dopo il suono della partenza, la scopa che va verso destra e la riga Pulizia all'avvio: controllo e il numero delle voci; poi le tre note che tornano al centro e la riga Pulizia finita: c'è ancora tutto, senza Saltata. Così la pulizia impara il disco di E:; se il file fosse già spostato, E: diventerebbe contesa, e per pulirla servirebbe Riconosci questo disco. Esci con Esc e dimmelo: io sposto il file.
+Riapri MeTeOra: la scopa, la riga del controllo, poi le tre note e la riga che dice che 1 file è sparito e da dove l'ha tolto, Preferiti compresi.
+Le righe della pulizia si capiscono con NVDA e con il display braille?
 I suoni della pulizia, 1.104.0: in Acu_Maker cerca pulizia e ascolta i due nuovi; poi in MeTeOra dimmi se si riconoscono, se il volume sta con gli altri effetti, e se all'avvio non si confondono con il suono della partenza e con quello della ripresa.
 Leggi tutto il testo delle statistiche con le frecce: ogni riga si capisce da sola? Dalla 1.104.0 le date hanno il giorno della settimana, le righe che elencano solo le voci diverse da zero e Tasti premuti il suo cioè. Segna le righe con parole storte, numeri strani o che vorresti diverse.
 Barra rovesciata nelle statistiche, scrivi Sezione 8 e Invio: NVDA legge la riga della sezione 8? Poi cerca Sezione e premi Invio qualche volta: NVDA legge ogni riga su cui arriva? Che il cursore ci arrivi l'ho già controllato io.
@@ -74,3 +78,30 @@ Durata residua, con NVDA: alza la velocità con D e premi Maiuscolo con l'apostr
 1.111.0: con la voce ancora su no, Ctrl con la barra spaziatrice non fa dire niente a NVDA? Poi rimetti la voce su sì.
 1.111.0: esci con Esc mentre NVDA legge ancora la plancia, e riapri MeTeOra; fallo due o tre volte: alla riapertura nessun avviso di errore grave?
 1.111.0, alla fine: dimmi che hai finito, così leggo nvda.log; poi rimetti il Livello di logging di NVDA com'era, cioè disattivato.
+1.112.0, la protezione dei dischi, con due chiavette che prendono la stessa lettera: infila la prima, avvia MeTeOra, suona un suo file e mettilo nei Preferiti con F4, poi esci con Esc.
+Riavvia con la stessa chiavetta: la riga della fine della pulizia non dice Saltata con la lettera della chiavetta. Così la pulizia impara il suo disco. Esci con Esc.
+Togli la chiavetta, infila l'altra e riavvia: in fondo alla riga della fine della pulizia c'è Saltata, la lettera, usata da dischi diversi, poi la sua voce resta, se della prima chiavetta MeTeOra conosce un file solo, o le sue, il numero, voci restano, e in fondo Per riconoscere il disco di adesso, Riconosci questo disco nel menu della lettera in Questo PC.
+La riga con Saltata si capisce con NVDA e con il display braille?
+Il file della prima chiavetta è ancora nei Preferiti?
+Poi, nelle statistiche, sezione La salute: la riga delle pulizie finisce con unità saltate perché usate da dischi diversi: 1; se in quelle pulizie qualche unità non rispondeva, prima c'è perché non rispondevano e il numero, poi perché usate da dischi diversi: 1.
+La riga delle pulizie si legge bene?
+In Questo PC, sulla lettera della chiavetta, premi F7: il cruscotto parla di Riconosci questo disco in modo chiaro?
+Torna nella plancia con F5 e, sulla lettera, premi Invio: il menu ha Riconosci questo disco, subito dopo Aggiorna.
+Il menu con Riconosci questo disco si legge bene con NVDA?
+Scegli Riconosci questo disco: il suono della domanda e la domanda Sì e No, che dice quante voci della lettera la prossima pulizia toglierà; se della prima chiavetta MeTeOra conosce un file solo, dice che l'unica voce della lettera è di un file che qui non c'è.
+La domanda con il conto si capisce con NVDA? Il fuoco è su No?
+Premi Esc: il suono dell'annullamento e la riga Il disco di, la lettera, resta da riconoscere; nel menu della lettera Riconosci questo disco c'è ancora.
+Scegli di nuovo Riconosci questo disco e rispondi con la S: il suono nuovo, una scivolata che sale e ricade sul sol al centro, e la riga Disco di, la lettera, riconosciuto, con quello che farà la pulizia al prossimo avvio.
+La riga di Riconosci questo disco si capisce con NVDA e con il display braille?
+Il suono di Riconosci questo disco si riconosce? In Acu_Maker è meteora_disco_riconosciuto.
+Il volume del suono di Riconosci questo disco sta con gli altri effetti?
+Riapri il menu della lettera: Riconosci questo disco non c'è più.
+Esci con Esc e riavvia con la stessa chiavetta: la riga della fine della pulizia dice che il file della prima chiavetta è sparito e l'ha tolto dai Preferiti, perché ora la lettera è della seconda.
+La Sentinella, a MeTeOra aperto: togli la seconda chiavetta, infila la prima e apri la sua lettera in Questo PC: appena la apri, un suono nuovo, due colpetti, a sinistra e a destra, e una nota più lunga e più bassa al centro, e la riga con la lettera, ha un disco diverso da quello che conosco, e dove trovare Riconosci questo disco.
+La riga della Sentinella si capisce con NVDA e con il display braille?
+Il suono della Sentinella si riconosce, e non si confonde con quello dell'errore né con quello di Riconosci questo disco? In Acu_Maker è meteora_disco_diverso.
+Il volume del suono della Sentinella sta con gli altri effetti?
+Suona un file della chiavetta: la Sentinella non dice più niente. Poi esci con Esc.
+Riavvia con la prima chiavetta: la riga dice di nuovo Saltata, la lettera, usata da dischi diversi, anche se nessuna pulizia ha visto la prima chiavetta dopo il Riconosci.
+Nelle statistiche, sezione La salute, subito dopo la riga delle pulizie: Dischi riconosciuti a mano: 1; lettere rese contese dalla Sentinella, a MeTeOra aperto: 1. Si legge bene?
+Finita la prova, con la chiavetta che userai di solito in quella lettera, scegli Riconosci questo disco e rispondi con la S: la pulizia torna a controllarla.

@@ -1,6 +1,6 @@
 # MeTeOra, lo schedario: durata, dimensione e tag dei file, ricordati fra un avvio e l'altro.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la 1.7.0, per le durate delle playlist (issue 4) e poi per il filtro (issue 2). Nella 1.62.4 le durate da libmpv per i formati che mutagen non conosce, e quella esatta dell'AAC grezzo. Nella 1.66.0 le schede della musica delle console, con i sottobrani. Nella 1.67.0 la scheda segue un file rinominato. Nella 1.69.0 i tag letti con tag.py, anche di WAV, AIFF, WMA e TTA. Nella 1.83.1 le variazioni delle schede, per i totali delle cartelle, e il filo che cede il passo alla finestra. Nella 1.103.0 la copia delle schede per le statistiche. Nella 1.103.1 le durate da una settimana in su non si tengono. Nella 1.104.0 le durate troppo lunghe per il peso di un file campionato non si tengono, togli() leva le schede dei file che mancano, e rinomina() trova la scheda anche con le maiuscole diverse. Nella 1.109.0 la traccia e il disco, per Ordina.
+# 30/09/2026: nasce con la 1.7.0, per le durate delle playlist (issue 4) e poi per il filtro (issue 2). Nella 1.62.4 le durate da libmpv per i formati che mutagen non conosce, e quella esatta dell'AAC grezzo. Nella 1.66.0 le schede della musica delle console, con i sottobrani. Nella 1.67.0 la scheda segue un file rinominato. Nella 1.69.0 i tag letti con tag.py, anche di WAV, AIFF, WMA e TTA. Nella 1.83.1 le variazioni delle schede, per i totali delle cartelle, e il filo che cede il passo alla finestra. Nella 1.103.0 la copia delle schede per le statistiche. Nella 1.103.1 le durate da una settimana in su non si tengono. Nella 1.104.0 le durate troppo lunghe per il peso di un file campionato non si tengono, togli() leva le schede dei file che mancano, e rinomina() trova la scheda anche con le maiuscole diverse. Nella 1.109.0 la traccia e il disco, per Ordina. Nella 1.112.0 letto() dice i file letti, per il controllo dei dischi.
 
 """Lo schedario dei file.
 
@@ -280,11 +280,15 @@ def leggi_scheda(percorso):
 
 
 class Schedario:
-    def __init__(self, percorso, avvisa=None):
+    def __init__(self, percorso, avvisa=None, letto=None):
         """avvisa() viene chiamata dal filo dello schedario quando arrivano
-        schede nuove: chi la passa deve riportarla nel suo filo."""
+        schede nuove: chi la passa deve riportarla nel suo filo. letto(percorso),
+        se c'e', si chiama per ogni file che lo schedario legge davvero, nel
+        filo di chi legge, e deve tornare subito: la finestra ci guarda il
+        disco della sua lettera (1.112.0)."""
         self.percorso = percorso
         self.avvisa = avvisa
+        self.letto = letto
         self.schede = {}
         self._verificati = set()
         self._coda = queue.Queue()
@@ -451,6 +455,8 @@ class Schedario:
             scheda = leggi_scheda(percorso)
         except OSError:
             return None
+        if self.letto:
+            self.letto(percorso)
         with self._lucchetto:
             self._metti(percorso, scheda)
             self._modificato = True
@@ -501,6 +507,8 @@ class Schedario:
                     scheda = leggi_scheda(percorso)
                 except OSError:
                     scheda = None
+                if scheda is not None and self.letto:
+                    self.letto(percorso)
                 with self._lucchetto:
                     self._metti(percorso, scheda)
                     self._modificato = True

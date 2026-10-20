@@ -1,6 +1,6 @@
 # MeTeOra, le prove delle statistiche: l'orologio, la vita dei brani, il file, l'azzeramento e la pagina.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (UltraCode).
-# 17/10/2026: nasce con la 1.103.0. Nella 1.104.0 le prove delle righe-elenco senza le voci a zero, delle percentuali, degli anni futuri, delle date con il giorno della settimana, della pulizia all'avvio e dei brani rinominati. Nella 1.105.0 quella dei nomi di tutti gli eventi, con Dove sono. Nella 1.109.0 la riga delle playlist con Ordina e Mescola. Nella 1.110.0 la durata residua in fondo agli eventi.
+# 17/10/2026: nasce con la 1.103.0. Nella 1.104.0 le prove delle righe-elenco senza le voci a zero, delle percentuali, degli anni futuri, delle date con il giorno della settimana, della pulizia all'avvio e dei brani rinominati. Nella 1.105.0 quella dei nomi di tutti gli eventi, con Dove sono. Nella 1.109.0 la riga delle playlist con Ordina e Mescola. Nella 1.110.0 la durata residua in fondo agli eventi. Nella 1.112.0 la riga delle pulizie con le unita' usate da dischi diversi o con un disco che non si riconosceva, e la riga dei dischi riconosciuti a mano e delle lettere rese contese dalla Sentinella.
 
 import datetime
 import json
@@ -547,6 +547,19 @@ def test_la_riga_delle_pulizie(tmp_path):
         "3 brani dallo storico; unità saltate perché non rispondevano: 2.") in _pagina(s).la_salute()
     s.dati["conti"] = {"pulizie": 1, "pulizia_radici_saltate": 1}
     assert "Pulizie all'avvio: 1; niente da togliere; unità saltate perché non rispondevano: 1." in _pagina(s).la_salute()
+    # Le unita' saltate perche' usate da dischi diversi (1.112.0), da sole e con quelle che non rispondevano.
+    s.dati["conti"] = {"pulizie": 1, "pulizia_dischi_diversi": 1}
+    assert "Pulizie all'avvio: 1; niente da togliere; unità saltate perché usate da dischi diversi: 1." in _pagina(s).la_salute()
+    s.dati["conti"] = {"pulizie": 3, "pulizia_marker": 2, "pulizia_radici_saltate": 2, "pulizia_dischi_diversi": 4}
+    assert ("Pulizie all'avvio: 3; tolte 2 voci dei marker; unità saltate perché non rispondevano: 2; perché usate da dischi diversi: 4."
+        in _pagina(s).la_salute())
+    # E quelle con un disco che la pulizia non riconosceva, a parte.
+    s.dati["conti"] = {"pulizie": 2, "pulizia_dischi_non_riconosciuti": 1}
+    assert ("Pulizie all'avvio: 2; niente da togliere; unità saltate perché il disco che rispondeva non si riconosceva: 1."
+        in _pagina(s).la_salute())
+    s.dati["conti"] = {"pulizie": 2, "pulizia_radici_saltate": 1, "pulizia_dischi_diversi": 2, "pulizia_dischi_non_riconosciuti": 3}
+    assert ("Pulizie all'avvio: 2; niente da togliere; unità saltate perché non rispondevano: 1; perché usate da dischi diversi: 2; "
+        "perché il disco che rispondeva non si riconosceva: 3.") in _pagina(s).la_salute()
     # Le schede doppie dello schedario, a parte dai file spariti, con
     # l'accordo di tolto.
     s.dati["conti"] = {"pulizie": 1, "pulizia_doppioni": 82}
@@ -570,12 +583,14 @@ def test_la_riga_delle_pulizie(tmp_path):
         "pulizia_punti", "pulizia_storico"]
 
 
-def test_gli_eventi_della_pulizia_sono_in_fondo():
-    # In fondo, nell'ordine di suoni.EVENTI; dalla 1.105.0 li segue Dove
-    # sono, e dalla 1.110.0 la durata residua.
-    assert list(statistiche.NOMI_DEGLI_EVENTI)[-4:] == ["pulizia_avviata", "pulizia_finita", "dove_sono", "durata_residua"]
+def test_gli_eventi_della_pulizia_e_dei_dischi_sono_in_fondo():
+    # In fondo, nell'ordine di suoni.EVENTI: la pulizia, poi Dove sono dalla
+    # 1.105.0, la durata residua dalla 1.110.0 e i dischi dalla 1.112.0.
+    assert list(statistiche.NOMI_DEGLI_EVENTI)[-6:] == ["pulizia_avviata", "pulizia_finita", "dove_sono", "durata_residua", "disco_riconosciuto", "disco_diverso"]
     assert statistiche.NOMI_DEGLI_EVENTI["pulizia_avviata"] == "pulizia all'avvio cominciata"
     assert statistiche.NOMI_DEGLI_EVENTI["pulizia_finita"] == "pulizia all'avvio finita"
+    assert statistiche.NOMI_DEGLI_EVENTI["disco_riconosciuto"] == "disco riconosciuto a mano"
+    assert statistiche.NOMI_DEGLI_EVENTI["disco_diverso"] == "lettera resa contesa dalla Sentinella"
 
 
 def test_ogni_evento_ha_il_suo_nome():
@@ -594,3 +609,16 @@ def test_la_riga_delle_playlist_dice_ordinate_invertite_mescolate_e_rimesse(tmp_
             s.evento(evento)
     assert ("Playlist rinominate: 0; eliminate: 0; ordinate: 3; invertite: 1; mescolate: 2; rimesse nell'ordine di prima: 1."
         in _pagina(s).le_playlist())
+
+
+def test_la_riga_dei_dischi_nella_salute(tmp_path):
+    # Riconosci questo disco e la Sentinella che rende contesa una lettera,
+    # contati dai loro eventi, anche a zero (1.112.0).
+    s, _o = _nuove(tmp_path)
+    riga = "Dischi riconosciuti a mano: 0; lettere rese contese dalla Sentinella, a MeTeOra aperto: 0."
+    salute = _pagina(s).la_salute()
+    assert riga in salute and salute.index(riga) == salute.index(next(r for r in salute if r.startswith("Pulizie all'avvio"))) + 1
+    s.evento("disco_riconosciuto")
+    for _volta in range(3):
+        s.evento("disco_diverso")
+    assert "Dischi riconosciuti a mano: 1; lettere rese contese dalla Sentinella, a MeTeOra aperto: 3." in _pagina(s).la_salute()

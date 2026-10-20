@@ -1,12 +1,13 @@
 # MeTeOra, una volta sola per macchina: cancella i dati di MeTeOra accanto ai sorgenti, perche' la 1.104.0 riparta da zero.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 20/10/2026: nasce con la 1.104.0, chiesto da Gabriele: si lancia prima di MeTeOra su ogni macchina, e poi si toglie dal progetto.
+# 20/10/2026: nasce con la 1.104.0, chiesto da Gabriele: si lancia prima di MeTeOra su ogni macchina, e poi si toglie dal progetto. Nella 1.112.0 anche i dischi della pulizia all'avvio.
 
 """Cancella per sempre, senza copie, i dati di MeTeOra nella cartella di questo
 script, cioe' quella dei sorgenti: impostazioni, playlist e Preferiti,
-schedario, marker, punti da riprendere e statistiche, con i loro file .tmp e
-.nuovo, la cartella copie e i registri degli errori e dei crash. Restano i
-file che si fanno a mano: i marker esportati e le console salvate.
+schedario, marker, punti da riprendere, statistiche e dischi riconosciuti
+dalla pulizia all'avvio, con i loro file .tmp e .nuovo, la cartella copie e
+i registri degli errori e dei crash. Restano i file che si fanno a mano: i
+marker esportati e le console salvate.
 Uso, con MeTeOra chiuso: python pulisci_i_dati.py
 """
 
@@ -24,7 +25,7 @@ import istanza
 import registro
 
 CARTELLA = os.path.dirname(os.path.abspath(__file__))
-DATI = ("Impostazioni", "Playlist", "Schedario", "Marcatori", "Posizioni", "Statistiche")
+DATI = ("Impostazioni", "Playlist", "Schedario", "Marcatori", "Posizioni", "Statistiche", "Dischi")
 SYNCHRONIZE = 0x00100000
 
 

@@ -1,6 +1,6 @@
 # MeTeOra, le prove della finestra principale, sul desktop nascosto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21).
+# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21). Nella 1.112.0 quelle dei dischi della pulizia, anche del loro file che non si legge, e la prova della pulizia che toglie i file spariti non fa piu' leggere allo schedario i file finti; poi Riconosci questo disco, la riga che lo indica e la Sentinella che guarda i dischi dei file usati; infine la domanda di Riconosci questo disco con il conto delle voci, e la riga e il suono della Sentinella.
 
 import contextlib
 import ctypes
@@ -6892,8 +6892,9 @@ class _PuliziaFinta:
 
     fatte = None
 
-    def __init__(self, percorsi, finita, cedi=None):
-        self.percorsi, self.finita, self.cedi, self.fermata = set(percorsi), finita, cedi, False
+    def __init__(self, percorsi, finita, cedi=None, dischi=None, dischi_ignoti=False):
+        self.percorsi, self.finita, self.cedi, self.dischi, self.fermata = set(percorsi), finita, cedi, dischi, False
+        self.dischi_ignoti = dischi_ignoti
         type(self).fatte.append(self)
 
     def avvia(self):
@@ -6912,8 +6913,9 @@ def pulizia_finta(monkeypatch):
     return fatte
 
 
-def _esito_della_pulizia(mancanti=(), saltate=None, nomi_veri=None):
-    return {"mancanti": {modulo.pulizia.norm(p) for p in mancanti}, "saltate": saltate or {}, "nomi_veri": nomi_veri or {}, "controllati": 0}
+def _esito_della_pulizia(mancanti=(), saltate=None, nomi_veri=None, contese=None, dischi=None, non_riconosciute=None):
+    return {"mancanti": {modulo.pulizia.norm(p) for p in mancanti}, "saltate": saltate or {}, "contese": contese or {},
+        "non_riconosciute": non_riconosciute or {}, "dischi": dischi or {}, "nomi_veri": nomi_veri or {}, "controllati": 0}
 
 
 def _fine_della_pulizia(lavoro, esito):
@@ -6935,7 +6937,11 @@ def test_dopo_l_avvio_le_statistiche_sono_subito_sul_disco(finestra, pulizia_fin
     assert pulizia_finta == []
 
 
-def test_la_pulizia_all_avvio_toglie_i_file_spariti(finestra, pulizia_finta, suoni_annotati, tmp_path):
+def test_la_pulizia_all_avvio_toglie_i_file_spariti(finestra, pulizia_finta, suoni_annotati, tmp_path, monkeypatch):
+    # Lo schedario non legge in sottofondo i file finti: li terrebbe aperti
+    # mentre la prova cancella via.wav, e Windows lo troverebbe in uso. Le
+    # schede che servono le legge la prova, con leggi_subito.
+    monkeypatch.setattr(finestra.schedario, "chiedi", lambda _percorsi: None)
     cartella = tmp_path / "Musica"
     cartella.mkdir()
     resta = _wav_di_prova(cartella / "resta.wav", 1)
@@ -7073,6 +7079,534 @@ def test_la_pulizia_aspetta_la_fine_dei_dialoghi_e_si_ferma_all_uscita(finestra,
     # Senza wx.Yield: la finestra chiusa si distrugge al primo giro del ciclo.
     finestra._pulizia_finita(_esito_della_pulizia([via]))
     assert len(finestra.archivio.preferiti.brani) == 1
+
+
+def test_la_pulizia_ricorda_i_dischi_e_salta_le_lettere_contese(finestra, pulizia_finta, tmp_path):
+    import json
+
+    lontano, via = "G:\\Musica\\lontano.mp3", str(tmp_path / "via.mp3")
+    finestra.archivio.preferiti.brani.extend([Brano(lontano), Brano(via)])
+    finestra.dopo_l_avvio()
+    # La prima volta la pulizia non conosce nessun disco, e il file dei
+    # dischi, che non c'e', non e' un errore.
+    assert pulizia_finta[0].dischi == {} and not pulizia_finta[0].dischi_ignoti
+    ricordi = {"F:": {"disco": "1A2B-3C4D"}, "G:": {"disco": "5E6F-7A8B", "altri": ["9F00-0001"]}, "H:": {"altri": ["0000-0005"]}}
+    _fine_della_pulizia(pulizia_finta[0], _esito_della_pulizia([via], contese={"G:": 3}, non_riconosciute={"H:": 2}, dischi=ricordi))
+    assert [b.percorso for b in finestra.archivio.preferiti.brani] == [lontano]
+    # Riconosci questo disco si suggerisce solo per la lettera usata da
+    # dischi diversi: H:, vista con un disco solo, si dice soltanto saltata.
+    assert _ultima(finestra) == ("Pulizia finita, 1 file sparito. Tolti da playlist e Preferiti 1 brano. "
+        "Saltata G:, usata da dischi diversi: le sue 3 voci restano. Saltata H:, non riconosco il disco che risponde: le sue 2 voci restano. "
+        "Per riconoscere il disco di adesso, Riconosci questo disco nel menu di G: in Questo PC.")
+    conti = finestra._statistiche.dati["conti"]
+    assert conti["pulizia_dischi_diversi"] == 1 and conti["pulizia_dischi_non_riconosciuti"] == 1
+    percorso = tmp_path / "MeTeOra - Dischi.json"
+    assert json.loads(percorso.read_text(encoding="utf-8")) == {modulo.pulizia.nome_del_computer(): {"lettere": ricordi}} and not finestra.dischi.modificati
+    # La pulizia dopo li conosce, in una copia tutta sua.
+    finestra.dopo_l_avvio()
+    assert pulizia_finta[1].dischi == ricordi
+    pulizia_finta[1].dischi["G:"]["altri"].append("0000-0001")
+    assert finestra.dischi.conosciuti() == ricordi
+
+
+def test_la_riga_delle_lettere_contese():
+    frase = modulo.Finestra._frase_della_pulizia
+    assert frase(0, 0, 0, 0, 0, 0, 0, 0, {}, {"F:": 1}) == "Pulizia finita: c'è ancora tutto. Saltata F:, usata da dischi diversi: la sua voce resta."
+    assert frase(0, 0, 0, 0, 0, 0, 0, 0, {"H:": 2}, {"G:": 3, "F:": 1}) == ("Pulizia finita: c'è ancora tutto. Non risponde H:, e 2 voci restano "
+        "per il prossimo avvio. Saltate F:, G:, usate da dischi diversi: le loro 4 voci restano.")
+    # Le lettere a cui risponde un disco che non riconosce, da sole o con le contese.
+    assert frase(0, 0, 0, 0, 0, 0, 0, 0, {}, {}, {"G:": 1}) == ("Pulizia finita: c'è ancora tutto. "
+        "Saltata G:, non riconosco il disco che risponde: la sua voce resta.")
+    assert frase(1, 0, 0, 1, 0, 0, 0, 0, {}, {"F:": 2}, {"E:": 5, "C:": 7}) == ("Pulizia finita, 1 file sparito. Tolti da playlist e Preferiti "
+        "1 brano. Saltata F:, usata da dischi diversi: le sue 2 voci restano. Saltate C:, E:, non riconosco i dischi che rispondono: "
+        "le loro 12 voci restano.")
+    # In fondo, dove si sbloccano le lettere da riconoscere: una, o piu'.
+    assert frase(0, 0, 0, 0, 0, 0, 0, 0, {}, {"F:": 30}, {}, ["F:"]) == ("Pulizia finita: c'è ancora tutto. Saltata F:, usata da dischi diversi: "
+        "le sue 30 voci restano. Per riconoscere il disco di adesso, Riconosci questo disco nel menu di F: in Questo PC.")
+    assert frase(0, 0, 0, 0, 0, 0, 0, 0, {}, {"G:": 1, "F:": 2}, {"H:": 1}, ["H:", "G:", "F:"]).endswith(
+        "Saltata H:, non riconosco il disco che risponde: la sua voce resta. "
+        "Per riconoscere i dischi di adesso, Riconosci questo disco nel menu di F:, di G: e di H: in Questo PC.")
+
+
+def test_il_file_dei_dischi_che_non_si_legge(app, tmp_path, pulizia_finta, suoni_annotati):
+    # Le lettere contese non si rileggono da nessuna parte: il file resta
+    # com'e', la console lo dice con il suono dell'errore, e la pulizia salta
+    # ogni lettera senza imparare niente.
+    from finestra import Finestra
+
+    percorso = tmp_path / modulo.FILE_DISCHI
+    percorso.write_text('{"F:": {"disco": "1A2B-3C4D",}}', encoding="utf-8")
+    f = Finestra(ao="null", cartella_dati=str(tmp_path))
+    try:
+        righe = [_senza_ora(r) for r in f._righe]
+        assert any(r.startswith("Il file dei dischi della pulizia non si legge, e resta com'è: ") and r.endswith(
+            "Finché non si legge, la pulizia all'avvio salta tutte le unità con la lettera.") for r in righe), righe
+        wx.Yield()
+        assert "errore" in suoni_annotati
+        f.archivio.preferiti.brani.append(Brano("F:\\Musica\\a.mp3"))
+        f.dopo_l_avvio()
+        assert pulizia_finta[0].dischi_ignoti and pulizia_finta[0].dischi == {}
+        _fine_della_pulizia(pulizia_finta[0], _esito_della_pulizia(non_riconosciute={"F:": 1}, dischi={"F:": {"disco": "5E6F-7A8B"}}))
+        assert _ultima(f) == "Pulizia finita: c'è ancora tutto. Saltata F:, non riconosco il disco che risponde: la sua voce resta."
+        assert not f.dischi.modificati
+        # Riconosci questo disco non c'e', e chiamato lo stesso dice perche'.
+        assert "Riconosci questo disco" not in [e for e, _a in f._voci_del_menu({"tipo": "unita", "percorso": "F:\\", "etichetta": "F:\\"})]
+        f._riconosci_il_disco("F:\\")
+        assert _ultima(f).startswith("Il file dei dischi della pulizia non si legge: ") and _ultima(f).endswith(
+            ". Finché non si legge, F: non si può riconoscere.")
+        f.Close(force=True)
+    finally:
+        f.Destroy()
+    assert percorso.read_text(encoding="utf-8") == '{"F:": {"disco": "1A2B-3C4D",}}'
+
+
+def test_i_dischi_non_salvati_si_salvano_all_uscita(finestra, pulizia_finta, monkeypatch, tmp_path):
+    import json
+
+    def disco_pieno():
+        raise OSError(28, "Spazio su disco insufficiente")
+
+    finestra.archivio.preferiti.brani.append(Brano(str(tmp_path / "a.mp3")))
+    finestra.dopo_l_avvio()
+    salva = finestra.dischi.salva
+    monkeypatch.setattr(finestra.dischi, "salva", disco_pieno)
+    _fine_della_pulizia(pulizia_finta[0], _esito_della_pulizia(dischi={"F:": {"disco": "1A2B-3C4D"}}))
+    assert finestra.dischi.modificati and finestra._statistiche.dati["conti"]["salvataggi_non_riusciti"] == 1
+    monkeypatch.setattr(finestra.dischi, "salva", salva)
+    finestra.Close(force=True)
+    assert json.loads((tmp_path / "MeTeOra - Dischi.json").read_text(encoding="utf-8")) == {modulo.pulizia.nome_del_computer(): {"lettere": {"F:": {"disco": "1A2B-3C4D"}}}}
+
+
+def test_i_dischi_hanno_le_copie_e_pulisci_i_dati_li_cancella(tmp_path, monkeypatch):
+    # Le copie dell'avvio si fanno con l'elenco di finestra, in meteora.py e
+    # nel banco; pulisci_i_dati cancella anche i dischi.
+    import copie
+    import pulisci_i_dati
+
+    assert modulo.FILE_DISCHI in modulo.FILE_CON_LE_COPIE
+    (tmp_path / modulo.FILE_DISCHI).write_text("{}", encoding="utf-8")
+    assert copie.ruota(str(tmp_path), modulo.FILE_CON_LE_COPIE) == []
+    assert (tmp_path / copie.CARTELLA / f"{modulo.FILE_DISCHI}.1").is_file()
+    monkeypatch.setattr(pulisci_i_dati, "CARTELLA", str(tmp_path))
+    assert str(tmp_path / modulo.FILE_DISCHI) in pulisci_i_dati.da_cancellare()
+
+
+# Riconosci questo disco e la Sentinella (1.112.0).
+
+
+PRIMO, SECONDO = "1A2B-3C4D", "5E6F-7A8B"
+UNITA_F = {"tipo": "unita", "percorso": "F:\\", "etichetta": "F:\\Chiavetta", "caricato": False}
+
+
+def _voci(f, dati):
+    return [etichetta for etichetta, _azione in f._voci_del_menu(dati)]
+
+
+def _nel_file_dei_dischi(cartella):
+    """Le lettere di questo computer nel file dei dischi, e i nomi dei
+    computer che ci sono: qui il MachineGuid non si legge, e non c'e'."""
+    import json
+
+    tutti = json.loads((cartella / modulo.FILE_DISCHI).read_text(encoding="utf-8"))
+    assert list(tutti) == [modulo.pulizia.nome_del_computer()] and list(tutti[modulo.pulizia.nome_del_computer()]) == ["lettere"], tutti
+    return tutti[modulo.pulizia.nome_del_computer()]["lettere"]
+
+
+@pytest.fixture
+def risposte(monkeypatch, finestra):
+    """Chi risponde a ogni lettera per Riconosci questo disco, e il conto
+    delle sue voci, senza chiedere niente ai dischi veri: la domanda torna
+    subito, come se il filo a parte avesse gia' finito, e la risposta arriva
+    con wx.CallAfter come quella vera; "" per una lettera che non risponde.
+    Il conto e' (voci, mancanti), (0, 0) se la prova non lo dice. Le domande
+    con Si' e No della finestra le annota domande, e le risponde si, una
+    dopo l'altra: Si' quando sono finite."""
+    stato = types.SimpleNamespace(chi={}, conti={}, chieste=[], domande=[], si=[])
+
+    def chiedi(lettera, percorsi, fatto, fermo=None, cedi=None):
+        stato.chieste.append((lettera, set(percorsi)))
+        fatto(stato.chi.get(lettera, ""), stato.conti.get(lettera, (0, 0)))
+
+    def conferma(domanda, titolo, genitore=None):
+        stato.domande.append((domanda, titolo))
+        return stato.si.pop(0) if stato.si else True
+
+    monkeypatch.setattr(modulo.pulizia, "chiedi_il_conto", chiedi)
+    monkeypatch.setattr(finestra, "_conferma", conferma)
+    return stato
+
+
+def test_riconosci_questo_disco_solo_sulle_lettere_contese(finestra):
+    # La voce compare solo dove serve, sulle lettere che la pulizia salta.
+    normali = ["Riproduci", "Crea playlist da qui", "Aggiungi alla playlist", "Aggiorna", "Leggi i dettagli"]
+    assert _voci(finestra, UNITA_F) == normali
+    finestra.dischi.aggiorna({"F:": {"disco": PRIMO}, "G:": {"visti": [PRIMO]}})
+    assert _voci(finestra, UNITA_F) == normali and _voci(finestra, {**UNITA_F, "percorso": "G:\\"}) == normali
+    finestra.dischi.aggiorna({"F:": {"disco": PRIMO, "altri": [SECONDO]}})
+    assert _voci(finestra, UNITA_F) == [*normali[:4], "Riconosci questo disco", "Leggi i dettagli"]
+    # Anche con un disco solo visto, che non e' mai stato il suo; mai su una cartella.
+    finestra.dischi.aggiorna({"H:": {"altri": [PRIMO]}})
+    assert "Riconosci questo disco" in _voci(finestra, {**UNITA_F, "percorso": "H:\\"})
+    assert "Riconosci questo disco" not in _voci(finestra, {"tipo": "cartella", "percorso": "F:\\Musica", "caricato": False})
+
+
+def test_riconosci_questo_disco(finestra, risposte, suoni_annotati, tmp_path, monkeypatch):
+    finestra.dischi.aggiorna({"F:": {"disco": PRIMO, "altri": [SECONDO]}})
+    risposte.chi["F:"], risposte.conti["F:"] = SECONDO, (120, 30)
+    # Il conto si fa sui percorsi che la pulizia guarderebbe: schedario,
+    # playlist e Preferiti, marker, punti da riprendere e storico.
+    monkeypatch.setattr(finestra.schedario, "istantanea", lambda: {"F:\\Musica\\schedario.mp3": {}})
+    finestra.archivio.preferiti.brani.append(Brano("F:\\Musica\\preferito.mp3"))
+    finestra.posizioni.ricorda("G:\\Libri\\lungo.mp3", 600.0, 3600.0)
+    # Dal menu dell'unita', come lo sceglie chi ascolta. Prima la domanda,
+    # con il conto delle voci che la prossima pulizia togliera'; No, o Esc,
+    # annulla.
+    risposte.si.append(False)
+    dict(finestra._voci_del_menu(UNITA_F))["Riconosci questo disco"]()
+    wx.Yield()
+    assert risposte.chieste == [("F:", {"F:\\Musica\\schedario.mp3", "F:\\Musica\\preferito.mp3", "G:\\Libri\\lungo.mp3"})]
+    assert risposte.domande == [("F: diventa del disco che risponde adesso; delle 120 voci di F:, 30 sono di file che qui non ci sono e la prossima "
+        "pulizia le toglierà. Riconosco?", "Riconosci questo disco")]
+    assert _ultima(finestra) == "Il disco di F: resta da riconoscere: la pulizia all'avvio continua a saltarla."
+    assert suoni_annotati[-1] == "annullamento" and finestra.dischi.contesa("F:") and not (tmp_path / modulo.FILE_DISCHI).exists()
+    # Con Si'.
+    finestra._riconosci_il_disco("F:\\")
+    wx.Yield()
+    assert len(risposte.domande) == 2
+    assert _ultima(finestra) == ("Disco di F: riconosciuto: è quello che risponde adesso. Dal prossimo avvio la pulizia controlla F:, "
+        "e toglie le voci dei file che su questo disco non ci sono.")
+    assert suoni_annotati[-1] == "disco_riconosciuto"
+    # Non e' piu' contesa, la voce sparisce, e il file e' gia' salvato.
+    assert not finestra.dischi.contesa("F:") and "Riconosci questo disco" not in _voci(finestra, UNITA_F)
+    assert _nel_file_dei_dischi(tmp_path) == {"F:": {"disco": SECONDO}} and not finestra.dischi.modificati
+    # Le statistiche lo contano dal suo evento, per la salute.
+    assert finestra._statistiche.dati["eventi"]["disco_riconosciuto"] == 1
+    # Di nuovo con lo stesso disco: lo dice senza domanda, e niente cambia.
+    finestra._riconosci_il_disco("F:\\")
+    wx.Yield()
+    assert len(risposte.domande) == 2
+    assert _ultima(finestra) == "Il disco di F: è già quello riconosciuto: la pulizia all'avvio la controlla."
+    assert suoni_annotati[-1] == "non_disponibile"
+
+
+def test_la_domanda_di_riconosci_questo_disco():
+    domanda = modulo.Finestra._domanda_del_riconoscimento
+    inizio = "F: diventa del disco che risponde adesso; "
+    assert domanda("F:", (120, 30)) == (inizio + "delle 120 voci di F:, 30 sono di file che qui non ci sono e la prossima pulizia le toglierà. "
+        "Riconosco?")
+    assert domanda("F:", (120, 1)) == inizio + "delle 120 voci di F:, 1 è di un file che qui non c'è e la prossima pulizia la toglierà. Riconosco?"
+    assert domanda("F:", (12, 12)) == inizio + "le 12 voci di F: sono tutte di file che qui non ci sono, e la prossima pulizia le toglierà. Riconosco?"
+    assert domanda("F:", (12, 0)) == inizio + "le 12 voci di F: sono tutte di file che ci sono, e la prossima pulizia non toglierà niente. Riconosco?"
+    assert domanda("F:", (1, 1)) == inizio + "l'unica voce di F: è di un file che qui non c'è, e la prossima pulizia la toglierà. Riconosco?"
+    assert domanda("F:", (1, 0)) == inizio + "l'unica voce di F: è di un file che c'è, e la prossima pulizia non toglierà niente. Riconosco?"
+    assert domanda("F:", (0, 0)) == inizio + "di F: non conosco nessuna voce, e la prossima pulizia non avrà niente da togliere. Riconosco?"
+    # Il conto che non si e' potuto fare: senza numeri.
+    assert domanda("F:", None) == (inizio + "le sue voci non si sono potute contare, e la prossima pulizia toglierà quelle dei file che qui non ci sono. "
+        "Riconosco?")
+
+
+def test_riconosci_questo_disco_aspetta_il_conto_e_i_dialoghi(finestra, risposte, suoni_annotati, monkeypatch):
+    # Mentre il conto lavora la lettera non se ne chiede un altro; la
+    # domanda aspetta che si chiuda un dialogo aperto, come la fine della
+    # pulizia, e a finestra chiusa non arriva piu'.
+    finestra.dischi.aggiorna({"F:": {"disco": PRIMO, "altri": [SECONDO]}})
+    fatti = []
+    monkeypatch.setattr(modulo.pulizia, "chiedi_il_conto", lambda lettera, percorsi, fatto, fermo=None, cedi=None: fatti.append((fatto, fermo)))
+    finestra._riconosci_il_disco("F:\\")
+    finestra._riconosci_il_disco("F:\\")
+    assert len(fatti) == 1 and _ultima(finestra) == "Sto ancora contando le voci di F:, e la domanda arriva appena ho finito."
+    assert suoni_annotati[-1] == "non_disponibile"
+    rimandate = []
+    monkeypatch.setattr(ctypes.windll.user32, "IsWindowEnabled", lambda _h: 0)
+    monkeypatch.setattr(modulo.wx, "CallLater", lambda ms, f, *a: rimandate.append((ms, f, a)))
+    fatto, fermo = fatti[0]
+    fatto(SECONDO, (3, 1))
+    wx.Yield()
+    assert risposte.domande == [] and rimandate and rimandate[0][0] == 500 and finestra.dischi.contesa("F:")
+    monkeypatch.setattr(ctypes.windll.user32, "IsWindowEnabled", lambda _h: 1)
+    _ms, funzione, argomenti = rimandate[0]
+    funzione(*argomenti)
+    assert len(risposte.domande) == 1 and not finestra.dischi.contesa("F:")
+    # Finito il conto, se ne puo' chiedere un altro; all'uscita si ferma.
+    finestra.dischi.aggiorna({"F:": {"disco": SECONDO, "altri": [PRIMO]}})
+    finestra._riconosci_il_disco("F:\\")
+    assert len(fatti) == 2 and not fermo()
+    fatto, fermo = fatti[1]
+    finestra.Close(force=True)
+    assert fermo()
+    # Senza wx.Yield: la finestra chiusa si distrugge al primo giro del ciclo.
+    finestra._disco_da_riconoscere("F:", PRIMO, (3, 1))
+    assert len(risposte.domande) == 1
+
+
+def test_riconosci_questo_disco_con_la_lettera_che_non_risponde(finestra, risposte, suoni_annotati, monkeypatch):
+    def disco_pieno():
+        raise OSError(28, "Spazio su disco insufficiente")
+
+    finestra.dischi.aggiorna({"G:": {"altri": [PRIMO]}})
+    finestra._riconosci_il_disco("G:\\")
+    wx.Yield()
+    # Niente domanda: non c'e' un disco da riconoscere.
+    assert _ultima(finestra) == "G: non risponde, o non dice quale disco c'è: il disco resta da riconoscere." and suoni_annotati[-1] == "errore"
+    assert finestra.dischi.contesa("G:") and risposte.domande == []
+    # Il file che non si salva ci riprova all'uscita.
+    salva = finestra.dischi.salva
+    monkeypatch.setattr(finestra.dischi, "salva", disco_pieno)
+    risposte.chi["G:"] = SECONDO
+    finestra._riconosci_il_disco("G:\\")
+    wx.Yield()
+    assert suoni_annotati[-1] == "disco_riconosciuto" and finestra.dischi.modificati
+    assert finestra._statistiche.dati["conti"]["salvataggi_non_riusciti"] == 1
+    monkeypatch.setattr(finestra.dischi, "salva", salva)
+    finestra.Close(force=True)
+    assert not finestra.dischi.modificati
+    # Una risposta che arriva a finestra chiusa non conta. Senza wx.Yield:
+    # la finestra chiusa si distrugge al primo giro del ciclo.
+    finestra._disco_da_riconoscere("H:", PRIMO, (0, 0))
+    assert "H:" not in finestra.dischi.conosciuti()
+
+
+def test_riconosci_mentre_la_pulizia_lavora(finestra, pulizia_finta, risposte):
+    # La pulizia ha la copia di prima, con F: contesa: quando finisce non la
+    # rende di nuovo contesa, e la riga non dice piu' di riconoscerla.
+    finestra.dischi.aggiorna({"F:": {"disco": PRIMO, "altri": [SECONDO]}})
+    finestra.archivio.preferiti.brani.append(Brano("F:\\Musica\\a.mp3"))
+    finestra.dopo_l_avvio()
+    assert pulizia_finta[0].dischi == {"F:": {"disco": PRIMO, "altri": [SECONDO]}}
+    risposte.chi["F:"] = SECONDO
+    finestra._riconosci_il_disco("F:\\")
+    wx.Yield()
+    _fine_della_pulizia(pulizia_finta[0], _esito_della_pulizia(contese={"F:": 1}, dischi={"F:": {"disco": PRIMO, "altri": [SECONDO, "9F00-0001"]}}))
+    assert finestra.dischi.conosciuti() == {"F:": {"disco": SECONDO}} and len(risposte.domande) == 1
+    assert _ultima(finestra) == "Pulizia finita: c'è ancora tutto. Saltata F:, usata da dischi diversi: la sua voce resta."
+
+
+def test_riconosci_dopo_la_sentinella_mentre_la_pulizia_lavora(finestra, pulizia_finta, risposte, tmp_path):
+    # F: e' della prima chiavetta, e la pulizia la legge cosi': i file della
+    # seconda le mancano. Intanto la seconda prende F:, la Sentinella la
+    # rende contesa, e chi ascolta segue la riga e la riconosce. Alla fine
+    # della pulizia F: non e' piu' contesa, ma i file della seconda restano
+    # dappertutto: li guarda il prossimo avvio, sul disco riconosciuto. Le
+    # voci delle altre lettere si tolgono come sempre.
+    prima, seconda, via = "F:\\Prima\\a.mp3", "F:\\Seconda\\b.mp3", str(tmp_path / "via.mp3")
+    finestra.archivio.preferiti.brani.extend(Brano(p) for p in (prima, seconda, via))
+    finestra.dischi.aggiorna({"F:": {"disco": PRIMO}})
+    finestra.dopo_l_avvio()
+    assert pulizia_finta[0].dischi == {"F:": {"disco": PRIMO}}
+    finestra._disco_visto("F:", SECONDO)
+    assert finestra.dischi.contesa("F:")
+    risposte.chi["F:"], risposte.conti["F:"] = SECONDO, (2, 1)
+    finestra._riconosci_il_disco("F:\\")
+    wx.Yield()
+    assert finestra.dischi.conosciuti() == {"F:": {"disco": SECONDO}} and len(risposte.domande) == 1
+    _fine_della_pulizia(pulizia_finta[0], _esito_della_pulizia([seconda, via]))
+    assert [b.percorso for b in finestra.archivio.preferiti.brani] == [prima, seconda]
+    assert finestra.dischi.conosciuti() == {"F:": {"disco": SECONDO}}
+    assert _ultima(finestra) == "Pulizia finita, 1 file sparito. Tolti da playlist e Preferiti 1 brano."
+
+
+def test_la_lettera_contesa_alla_fine_della_pulizia_si_dice(finestra, pulizia_finta, suoni_annotati):
+    # La prima volta che la pulizia incontra F: ne impara il disco, mentre la
+    # Sentinella ci aveva visto un'altra chiavetta, la prima e quindi senza
+    # riga: insieme la lettera e' contesa, le voci restano, e dopo la riga
+    # della pulizia lo si dice come la Sentinella, con la sua riga e il suo
+    # suono. G:, che la riga della pulizia nomina gia', non si dice di nuovo.
+    seconda = "F:\\Seconda\\b.mp3"
+    finestra.archivio.preferiti.brani.extend([Brano("F:\\Prima\\a.mp3"), Brano(seconda), Brano("G:\\Musica\\c.mp3")])
+    finestra.dopo_l_avvio()
+    righe = len(finestra._righe)
+    finestra._disco_visto("F:", SECONDO)
+    finestra._disco_visto("G:", SECONDO)
+    assert "disco_diverso" not in suoni_annotati
+    _fine_della_pulizia(pulizia_finta[0], _esito_della_pulizia([seconda], non_riconosciute={"G:": 1},
+        dischi={"F:": {"disco": PRIMO}, "G:": {"altri": [PRIMO]}}))
+    assert finestra.dischi.conosciuti() == {"F:": {"disco": PRIMO, "altri": [SECONDO]}, "G:": {"altri": [SECONDO, PRIMO]}}
+    assert seconda in [b.percorso for b in finestra.archivio.preferiti.brani]
+    assert [_senza_ora(r) for r in finestra._righe[righe:]] == [
+        "Pulizia finita: c'è ancora tutto. Saltata G:, non riconosco il disco che risponde: la sua voce resta.",
+        "F: ha un disco diverso da quello che conosco: le sue voci restano, e la pulizia la salta finché non usi Riconosci questo disco "
+        "nel menu di F: in Questo PC."]
+    assert suoni_annotati[-2:] == ["pulizia_finita", "disco_diverso"] and suoni_annotati.count("disco_diverso") == 1
+    assert finestra._statistiche.dati["eventi"]["disco_diverso"] == 1
+
+
+def test_riconosci_questo_disco_con_un_altro_disco_mentre_chiede(finestra, risposte, suoni_annotati, monkeypatch):
+    # Mentre la domanda aspetta, la Sentinella vede un terzo disco in F: e
+    # lo dice: il Si' non riconosce niente, perche' cancellerebbe il disco
+    # appena visto, che magari e' quello di adesso.
+    monkeypatch.setattr(modulo.suoni, "attesa", lambda: 0.0)
+    finestra.dischi.aggiorna({"F:": {"disco": PRIMO, "altri": [SECONDO]}})
+    risposte.chi["F:"] = SECONDO
+    conferma, visti = finestra._conferma, []
+
+    def con_la_sentinella(domanda, titolo, genitore=None):
+        for chi in visti:
+            finestra._disco_visto("F:", chi)
+        return conferma(domanda, titolo, genitore)
+
+    monkeypatch.setattr(finestra, "_conferma", con_la_sentinella)
+    visti.append("9F00-0001")
+    finestra._riconosci_il_disco("F:\\")
+    wx.Yield()
+    assert finestra.dischi.conosciuti() == {"F:": {"disco": PRIMO, "altri": [SECONDO, "9F00-0001"]}}
+    assert _ultima(finestra) == ("Intanto a F: ha risposto un altro disco: il disco resta da riconoscere. "
+        "Per riconoscere quello di adesso, scegli di nuovo Riconosci questo disco.")
+    assert suoni_annotati[-2:] == ["disco_diverso", "non_disponibile"] and "disco_riconosciuto" not in suoni_annotati
+    # Dischi gia' visti nella lettera non cambiano niente: il Si' riconosce.
+    visti[:] = [PRIMO, SECONDO]
+    finestra._riconosci_il_disco("F:\\")
+    wx.Yield()
+    assert finestra.dischi.conosciuti() == {"F:": {"disco": SECONDO}} and suoni_annotati[-1] == "disco_riconosciuto"
+
+
+def test_la_lettera_contesa_mentre_la_pulizia_lavora_tiene_le_sue_voci(finestra, pulizia_finta, tmp_path):
+    # La prima volta di F:, con le voci di due chiavette: la pulizia trova la
+    # prima, ne impara il disco e da' per mancanti i file della seconda. G:
+    # e' gia' della prima, e la pulizia la trova senza un file. Prima che le
+    # voci si tolgano, la seconda chiavetta prende F: e poi G:, e la
+    # Sentinella la vede: le due lettere sono contese, e i file della
+    # seconda, solo staccati quando la pulizia guardava, restano dappertutto.
+    # Le voci delle altre lettere si tolgono come sempre. F:, che per la
+    # Sentinella era il primo disco visto, diventa contesa alla fine della
+    # pulizia, e lo si dice dopo la sua riga.
+    prima, seconda, altra, via = "F:\\Prima\\a.mp3", "F:\\Seconda\\b.mp3", "G:\\Seconda\\c.mp3", str(tmp_path / "via.mp3")
+    finestra.archivio.preferiti.brani.extend(Brano(p) for p in (prima, seconda, altra, via))
+    letto = _wav_di_prova(tmp_path / "letto.wav", 1)
+    finestra.schedario.leggi_subito(letto)
+    with finestra.schedario._lucchetto:
+        finestra.schedario.schede[seconda] = dict(finestra.schedario.schede[letto])
+    finestra.dischi.aggiorna({"G:": {"disco": PRIMO}})
+    finestra.dopo_l_avvio()
+    # La fine arriva dal filo con wx.CallAfter: prima che la finestra la
+    # prenda, la Sentinella.
+    pulizia_finta[0].finita(_esito_della_pulizia([seconda, altra, via], dischi={"F:": {"disco": PRIMO}}))
+    finestra._disco_visto("F:", SECONDO)
+    finestra._disco_visto("G:", SECONDO)
+    wx.Yield()
+    assert finestra.dischi.conosciuti() == {"F:": {"disco": PRIMO, "altri": [SECONDO]}, "G:": {"disco": PRIMO, "altri": [SECONDO]}}
+    assert [b.percorso for b in finestra.archivio.preferiti.brani] == [prima, seconda, altra]
+    assert finestra.schedario.scheda(seconda) is not None
+    assert [_senza_ora(r) for r in finestra._righe[-2:]] == ["Pulizia finita, 1 file sparito. Tolti da playlist e Preferiti 1 brano.",
+        "F: ha un disco diverso da quello che conosco: le sue voci restano, e la pulizia la salta finché non usi Riconosci questo disco "
+        "nel menu di F: in Questo PC."]
+
+
+def test_la_sentinella_guarda_i_file_che_la_finestra_usa(finestra, monkeypatch, tmp_path):
+    # Ogni volta che MeTeOra usa un file la Sentinella ne guarda il disco:
+    # suonato, aggiunto a una playlist o ai Preferiti, letto dallo schedario,
+    # con la cartella aperta nella plancia. Lo schedario non legge in
+    # sottofondo: le lettere delle prove possono non esserci, o essere un
+    # lettore di schede vuoto.
+    assert finestra.schedario.letto == finestra._sentinella.guarda
+    monkeypatch.setattr(finestra.schedario, "chiedi", lambda _percorsi: None)
+    guardati = []
+    monkeypatch.setattr(finestra._sentinella, "guarda", lambda *percorsi: guardati.extend(percorsi))
+    finestra._aggiungi(None, ["F:\\Musica\\a.mp3", "G:\\Musica\\b.mp3"])
+    assert guardati == ["F:\\Musica\\a.mp3", "G:\\Musica\\b.mp3"]
+    guardati.clear()
+    finestra._ai_preferiti(Brano("H:\\Musica\\c.mp3"))
+    assert guardati == ["H:\\Musica\\c.mp3"]
+    guardati.clear()
+    monkeypatch.setattr(modulo.questo_pc, "file_ricorsivi", lambda cartella: ["J:\\Dischi\\d.mp3"])
+    finestra._crea_da_qui("J:\\Dischi", "Dischi")
+    assert guardati == ["J:\\Dischi\\d.mp3"]
+    guardati.clear()
+    brano = _wav_di_prova(tmp_path / "suona.wav", 1)
+    cartella = finestra.albero.AppendItem(finestra.nodo_pc, "prova", data={"tipo": "cartella", "percorso": str(tmp_path), "caricato": False})
+    finestra.albero.SetItemHasChildren(cartella, True)
+    finestra.albero.Expand(cartella)
+    assert guardati == [str(tmp_path)]
+    guardati.clear()
+    finestra._suona_file(brano, str(tmp_path))
+    assert guardati == [brano]
+
+
+def test_la_sentinella_guarda_la_selezione_il_seguente_e_la_ripresa(finestra, monkeypatch, tmp_path):
+    # F4 su piu' voci selezionate, il seguente preparato per la dissolvenza
+    # e la ripresa all'avvio, con il motore finto: niente suona davvero.
+    monkeypatch.setattr(finestra.schedario, "chiedi", lambda _percorsi: None)
+    _motore_che_prepara(finestra, monkeypatch)
+    guardati = []
+    monkeypatch.setattr(finestra._sentinella, "guarda", lambda *percorsi: guardati.extend(percorsi))
+    rock, = _playlist_di_prova(finestra, ("a.mp3", "b.mp3", "c.mp3"))
+    finestra._seleziona(_voce_di(finestra, rock, "a.mp3"))
+    finestra._aggiungi_alla_selezione(_voce_di(finestra, rock, "c.mp3"))
+    guardati.clear()
+    finestra._f4()
+    assert guardati == ["C:\\m\\a.mp3", "C:\\m\\c.mp3"]
+    pl = finestra.archivio.playlist[-1]
+    finestra._suona(pl, pl.brani[0])
+    guardati.clear()
+    finestra._prepara_il_seguente()
+    assert guardati == ["C:\\m\\b.mp3"]
+    guardati.clear()
+    brano = _wav_di_prova(tmp_path / "ripreso.wav", 1)
+    finestra.impostazioni["ripresa"] = {"percorso": brano, "posizione": 0.5}
+    finestra.riprendi()
+    assert guardati == [brano]
+
+
+def _aspetta_i_dischi(f, attesi, secondi=5):
+    """Aspetta che i dischi visti dalla Sentinella, nel suo filo, arrivino
+    con wx.CallAfter nel filo della finestra."""
+    scadenza = time.monotonic() + secondi
+    while f.dischi.conosciuti() != attesi and time.monotonic() < scadenza:
+        wx.Yield()
+        time.sleep(0.01)
+    return f.dischi.conosciuti() == attesi
+
+
+def test_la_sentinella_rende_contesa_la_lettera_e_la_salva(finestra, monkeypatch, tmp_path, suoni_annotati):
+    # Una chiavetta in F:, poi un'altra, usate a MeTeOra aperto: la lettera
+    # diventa contesa, e si salva subito; il menu offre di riconoscerla.
+    chi = {"F:": PRIMO}
+    monkeypatch.setattr(modulo.pulizia, "_identita", lambda radice: chi.get(radice))
+    monkeypatch.setattr(finestra.schedario, "chiedi", lambda _percorsi: None)
+    monkeypatch.setattr(modulo.suoni, "attesa", lambda: 0.0)
+    righe = len(finestra._righe)
+    finestra._aggiungi(None, ["F:\\Musica\\a.mp3"])
+    assert _aspetta_i_dischi(finestra, {"F:": {"visti": [PRIMO]}})
+    assert _nel_file_dei_dischi(tmp_path) == {"F:": {"visti": [PRIMO]}}
+    # Il primo disco visto non e' una contesa: la Sentinella non dice niente.
+    assert "disco_diverso" not in suoni_annotati and not any("disco diverso" in r for r in finestra._righe[righe:])
+    chi["F:"] = SECONDO
+    finestra._sentinella._memoria = 0.0
+    finestra._ai_preferiti(Brano("F:\\Musica\\b.mp3"))
+    assert _aspetta_i_dischi(finestra, {"F:": {"altri": [PRIMO, SECONDO]}})
+    assert _nel_file_dei_dischi(tmp_path) == {"F:": {"altri": [PRIMO, SECONDO]}}
+    assert "Riconosci questo disco" in _voci(finestra, UNITA_F)
+    # La contesa la dice subito, con la riga e il suono suo (Gabriele).
+    frase = ("F: ha un disco diverso da quello che conosco: le sue voci restano, e la pulizia la salta finché non usi Riconosci questo disco "
+        "nel menu di F: in Questo PC.")
+    dette = [r for r in map(_senza_ora, finestra._righe[righe:]) if "disco diverso" in r]
+    assert dette == [frase] and suoni_annotati.count("disco_diverso") == 1
+    # Una volta sola per lettera e per disco: lo stesso disco visto di
+    # nuovo, e quello di prima che torna, tacciono; un terzo disco si dice.
+    finestra._disco_visto("F:", SECONDO)
+    finestra._disco_visto("F:", PRIMO)
+    assert suoni_annotati.count("disco_diverso") == 1
+    finestra._disco_visto("F:", "9F00-0001")
+    assert suoni_annotati.count("disco_diverso") == 2 and _ultima(finestra) == frase
+    assert finestra._statistiche.dati["eventi"]["disco_diverso"] == 2
+
+
+def test_il_disco_visto_non_salvato_si_salva_all_uscita(finestra, monkeypatch, tmp_path):
+    def disco_pieno():
+        raise OSError(28, "Spazio su disco insufficiente")
+
+    salva = finestra.dischi.salva
+    monkeypatch.setattr(finestra.dischi, "salva", disco_pieno)
+    finestra._disco_visto("F:", PRIMO)
+    assert finestra.dischi.modificati and finestra._statistiche.dati["conti"]["salvataggi_non_riusciti"] == 1
+    # Lo stesso disco di nuovo non cambia niente, e non si riprova.
+    finestra._disco_visto("F:", PRIMO)
+    assert finestra._statistiche.dati["conti"]["salvataggi_non_riusciti"] == 1
+    monkeypatch.setattr(finestra.dischi, "salva", salva)
+    finestra.Close(force=True)
+    assert _nel_file_dei_dischi(tmp_path) == {"F:": {"visti": [PRIMO]}}
+    # A finestra chiusa non conta piu' niente.
+    finestra._disco_visto("G:", PRIMO)
+    assert "G:" not in finestra.dischi.conosciuti()
 
 
 def test_la_rinomina_porta_con_se_il_punto_e_lo_storico(finestra, tmp_path):

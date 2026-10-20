@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21).
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi.
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -102,6 +102,12 @@ FILE_SCHEDARIO = "MeTeOra - Schedario.json"
 FILE_MARCATORI = "MeTeOra - Marcatori.json"
 FILE_POSIZIONI = "MeTeOra - Posizioni.json"
 FILE_STATISTICHE = "MeTeOra - Statistiche.json"
+# I dischi che la pulizia all'avvio riconosce (1.112.0).
+FILE_DISCHI = "MeTeOra - Dischi.json"
+# I file dei dati con le copie nella cartella copie, una per sessione (1.90.0):
+# lo schedario no, perche' si rifa' da solo rileggendo i file; dalla
+# 1.112.0 anche i dischi.
+FILE_CON_LE_COPIE = (FILE_PLAYLIST, FILE_MARCATORI, FILE_IMPOSTAZIONI, FILE_POSIZIONI, FILE_STATISTICHE, FILE_DISCHI)
 # Ogni quanti millisecondi scatta l'orologio delle statistiche, e ogni quanti
 # scatti si scrive il loro file (1.103.0).
 GIRO_DELLE_STATISTICHE = 1000
@@ -296,7 +302,8 @@ TASTI_DEL_CONTESTO = {
     "computer_della_rete": ("i computer della rete", "Freccia destra li cerca, in disparte: può volerci qualche secondo. Invio, Applicazioni o Spazio: menu con Cerca di nuovo."),
     "computer": ("un computer della rete", "Freccia destra mostra le sue cartelle condivise. Invio, Applicazioni o Spazio: menu con Aggiorna."),
     "attesa": ("una ricerca in corso", "Aspetta: la voce sparisce quando la ricerca finisce."),
-    "unita": ("un'unità", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Riproduci, Crea playlist da qui, Aggiungi alla playlist e Aggiorna."),
+    "unita": ("un'unità", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Riproduci, Crea playlist da qui, Aggiungi alla playlist, Aggiorna e, "
+        "se la pulizia all'avvio la salta per il disco che risponde, Riconosci questo disco, che prima chiede conferma dicendo quante voci la pulizia toglierà."),
     "cartella": ("una cartella", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Riproduci, Crea playlist da qui, Aggiungi alla playlist e Aggiorna. "
         "Maiuscolo con Canc la manda nel cestino, se è vuota."),
     "file": ("un file", "Invio, Applicazioni o Spazio: menu con Riproduci, Aggiungi alla playlist, Aggiungi ai preferiti, Rinomina file, Leggi i tag e Tag per i formati che li hanno, e Manda nel cestino. "
@@ -874,6 +881,17 @@ class Finestra(wx.Frame):
         self._pulizia = None
         self._guardati_in_pulizia = set()
         self._toccati_in_pulizia = set()
+        # Il disco di ogni lettera e gli altri che ci hanno risposto: la
+        # pulizia salta una lettera usata da dischi diversi (1.112.0).
+        self.dischi = pulizia.Dischi(os.path.join(cartella_dati, FILE_DISCHI))
+        # La Sentinella guarda il disco di una lettera ogni volta che MeTeOra
+        # ne usa un file: uno diverso da quello ricordato rende la lettera
+        # contesa. Chi risponde arriva dal suo filo (1.112.0).
+        self._sentinella = pulizia.Sentinella(lambda lettera, chi: wx.CallAfter(self._disco_visto, lettera, chi))
+        # Le lettere di cui Riconosci questo disco sta contando le voci, in
+        # disparte, e l'evento che ferma i conti all'uscita (1.112.0).
+        self._lettere_in_conto = set()
+        self._conti_fermati = threading.Event()
         # I video su cui la passata non ha trovato niente: in questa sessione
         # non si rifa'.
         self._passate_vuote = set()
@@ -975,7 +993,8 @@ class Finestra(wx.Frame):
         self._rinfreschi = set()
         self._rinfresco_pianificato = False
         self._prossimo_rinfresco = 0.0
-        self.schedario = Schedario(os.path.join(cartella_dati, FILE_SCHEDARIO), avvisa=lambda: wx.CallAfter(self._rinfresco_chiesto, "schede"))
+        self.schedario = Schedario(os.path.join(cartella_dati, FILE_SCHEDARIO), avvisa=lambda: wx.CallAfter(self._rinfresco_chiesto, "schede"),
+            letto=self._sentinella.guarda)
         self.schedario.carica()
         self.contatore = Contatore(self.schedario, avvisa=lambda: wx.CallAfter(self._rinfresco_chiesto, "conti"))
         # Il segnale che fa aspettare i fili del contatore e dello schedario
@@ -1107,6 +1126,10 @@ class Finestra(wx.Frame):
             else:
                 testo = f"Il file delle statistiche non si legge, e resta com'è: {self._statistiche.errore}. Le statistiche nuove vanno in {nuovo}."
             self._avviso_all_avvio("errore", testo)
+        if self.dischi.errore:
+            # Le lettere contese non si rileggono da nessuna parte: niente .nuovo, la pulizia non impara niente (1.112.0).
+            self._avviso_all_avvio("errore", f"Il file dei dischi della pulizia non si legge, e resta com'è: {self.dischi.errore}. "
+                "Finché non si legge, la pulizia all'avvio salta tutte le unità con la lettera.")
         self._scrivi_la_scheda_all_avvio(esito_della_scheda, errore_della_scheda)
         self._chiedi_schede(*self.archivio.playlist, self.archivio.preferiti)
         self._orologio_pronto = True
@@ -3008,6 +3031,8 @@ class Finestra(wx.Frame):
                 self._riscontro("errore", f"Non riesco a leggere {dati['percorso']}: {e.strerror or e}")
             self.albero.SetItemHasChildren(voce, False)
             return
+        # La cartella aperta: il disco della sua lettera (1.112.0).
+        self._sentinella.guarda(dati["percorso"])
         # Una cartella di rete letta: la sua radice risponde, e i conti che
         # aveva lasciato a meta' si rifanno.
         if di_rete:
@@ -3332,6 +3357,9 @@ class Finestra(wx.Frame):
                 ("Aggiorna", lambda: self._aggiorna_cartella(cartella))]
             if dati.get("a_mano"):
                 voci.append(("Togli il percorso", lambda: self._togli_percorso_di_rete(cartella)))
+            if tipo == "unita" and self.dischi.contesa(pulizia.lettera_di(cartella)):
+                # Solo dove serve: sulle lettere contese, che la pulizia salta (1.112.0, Gabriele).
+                voci.append(("Riconosci questo disco", lambda: self._riconosci_il_disco(cartella)))
             return [*voci, dettagli_della_voce]
         if tipo == "file":
             pl, brano = dati["playlist"], dati["brano"]
@@ -4020,6 +4048,7 @@ class Finestra(wx.Frame):
             self._riscontro("gia_nei_preferiti", "I brani selezionati sono già tutti nei Preferiti.")
             return
         self.archivio.preferiti.brani.extend(nuovi)
+        self._sentinella.guarda(*(b.percorso for b in nuovi))
         self._chiedi_schede(self.archivio.preferiti)
         self._salva_archivio()
         self._popola_playlist()
@@ -4203,6 +4232,8 @@ class Finestra(wx.Frame):
         if nuova:
             pl = self.archivio.nuova(nome)
         pl.brani.extend(b if isinstance(b, Brano) else Brano(b) for b in percorsi_da_aggiungere)
+        # Il disco delle lettere dei brani aggiunti (1.112.0).
+        self._sentinella.guarda(*(b.percorso for b in pl.brani[-len(percorsi_da_aggiungere):]))
         self._statistiche.conta("brani_aggiunti", len(percorsi_da_aggiungere))
         self._statistiche.conta("aggiunte")
         self._chiedi_schede(pl)
@@ -4220,6 +4251,7 @@ class Finestra(wx.Frame):
             self._riscontro("gia_nei_preferiti", f"{brano.nome_del_file} è già nei Preferiti.")
             return
         self.archivio.preferiti.brani.append(Brano(brano.percorso, sottobrano=brano.sottobrano))
+        self._sentinella.guarda(brano.percorso)
         self._chiedi_schede(self.archivio.preferiti)
         self._salva_archivio()
         self._popola_playlist()
@@ -4530,6 +4562,7 @@ class Finestra(wx.Frame):
             self._riscontro("niente_da_suonare", f"In {cartella} non c'è niente da suonare.")
             return
         pl = self.archivio.nuova(nome or "Playlist", files)
+        self._sentinella.guarda(*files)
         self._statistiche.conta("playlist_da_una_cartella")
         self._chiedi_schede(pl)
         self._salva_archivio()
@@ -4821,6 +4854,7 @@ class Finestra(wx.Frame):
             ripresa = inizio = self.posizioni.dove(brano.percorso)
         self.coda.imposta(pl, brano)
         self._segna_nel_mazzo(pl, brano, sottobrano)
+        self._sentinella.guarda(brano.percorso)
         self.motore.suona(brano.percorso, sottobrano or brano.sottobrano, inizio=inizio, sfuma_lo_stesso=sfuma_lo_stesso, a_volume_pieno=sveglio)
         self._annuncia(pl, brano, evento)
         if ripresa:
@@ -5286,6 +5320,7 @@ class Finestra(wx.Frame):
         if formati.e_midi(brano.percorso) and not self._midi_pronti():
             # Senza banco il MIDI non si prepara: a fine brano lo chiede _suona.
             return
+        self._sentinella.guarda(brano.percorso)
         if self.motore.prepara(brano.percorso, sottobrano or brano.sottobrano):
             self._uscente = (self.coda.playlist, self.coda.corrente, self.motore.sottobrano)
             self._preparato = seguente
@@ -8980,6 +9015,7 @@ class Finestra(wx.Frame):
         # Un video ripreso in pausa apre la sua finestra con X, non subito:
         # il fuoco resta nella plancia (tappa 9).
         self._video_in_attesa = percorso
+        self._sentinella.guarda(percorso)
         self.motore.suona(percorso, sottobrano, inizio=posizione, in_pausa=True)
         self._statistiche.brano_avviato(percorso, sottobrano, "ripresa_all_avvio")
         voce = self._trova_voce_che_suona()
@@ -9026,7 +9062,9 @@ class Finestra(wx.Frame):
             wx.CallAfter(self._pulizia_finita, esito)
 
         self._riscontro("pulizia_avviata", f"Pulizia all'avvio: controllo {al_plurale(len(da_guardare), 'voce', 'voci')}.")
-        self._pulizia = pulizia.Pulizia(da_guardare, finita, cedi=self._cedi).avvia()
+        # Con il file dei dischi che non si legge, ogni lettera si salta (1.112.0).
+        self._pulizia = pulizia.Pulizia(da_guardare, finita, cedi=self._cedi, dischi=self.dischi.per_la_pulizia(),
+            dischi_ignoti=bool(self.dischi.errore)).avvia()
 
     def _percorsi_in_uso(self):
         """I percorsi, cosi' come sono scritti, di playlist e Preferiti, dei
@@ -9056,9 +9094,11 @@ class Finestra(wx.Frame):
 
     def _pulizia_finita(self, esito):
         """La pulizia ha guardato tutto: nel filo della finestra si tolgono
-        le voci dei file spariti, tranne quello che suona, e la console dice
-        cosa e' cambiato. Con un dialogo aperto si aspetta che si chiuda: la
-        plancia non cambia sotto le sue mani."""
+        le voci dei file spariti, tranne quello che suona e quelle delle
+        lettere diventate contese o riconosciute a mano intanto, e la console
+        dice cosa e' cambiato, anche delle lettere diventate contese adesso.
+        Con un dialogo aperto si aspetta che si chiuda: la plancia non cambia
+        sotto le sue mani."""
         if self._chiusa or self._pulizia is None:
             return
         if not ctypes.windll.user32.IsWindowEnabled(self.GetHandle()):
@@ -9072,6 +9112,16 @@ class Finestra(wx.Frame):
             self._riscontro_dopo("errore", f"La pulizia all'avvio non è riuscita: {esito['errore']}")
             return
         self._statistiche.conta("pulizie")
+        # I dischi imparati e le lettere diventate contese si ricordano anche
+        # se intanto non si toglie niente (1.112.0).
+        nuovi_dischi = esito.get("dischi") or {}
+        contese_prima = {radice for radice in nuovi_dischi if self.dischi.contesa(radice)}
+        if self.dischi.aggiorna(nuovi_dischi):
+            try:
+                self.dischi.salva()
+            except OSError:
+                # Restano da salvare: ci riprova l'uscita.
+                self._statistiche.conta("salvataggi_non_riusciti")
         # Tornati in uso mentre la pulizia guardava, e quindi da non toccare:
         # il brano che suona, il nome nuovo di una rinomina, e i percorsi che
         # playlist, marker, punti e storico hanno preso dopo la copia, come un
@@ -9080,6 +9130,15 @@ class Finestra(wx.Frame):
         tornati = set(toccati) | {pulizia.norm(p) for p in self._percorsi_in_uso() - guardati}
         if in_corso:
             tornati.add(pulizia.norm(in_corso))
+        # Anche le voci delle lettere contese adesso, dopo i dischi della
+        # pulizia: la Sentinella puo' averne resa contesa una dopo che la
+        # pulizia l'ha guardata, con un altro disco infilato e usato, i cui
+        # file sono fra i mancanti solo perche' allora era staccato. Una
+        # lettera contesa tiene le sue voci, e cosi' una riconosciuta a mano
+        # intanto, magari proprio con quel disco: la pulizia l'aveva letta con
+        # quello di prima (1.112.0).
+        riconosciute = self.dischi.riconosciute_dopo_la_copia()
+        tornati |= {m for m in esito["mancanti"] if (lettera := pulizia.lettera_di(m)) in riconosciute or self.dischi.contesa(lettera)}
         mancanti = set(esito["mancanti"]) - tornati
         da_togliere = esito["schede"]
         if tornati:
@@ -9100,14 +9159,28 @@ class Finestra(wx.Frame):
                 # Restano da salvare: ci riprova l'orologio delle posizioni, o l'uscita.
                 self._statistiche.conta("salvataggi_non_riusciti")
         storico = self._statistiche.togli_i_brani(mancanti, in_corso=in_corso)
-        saltate = esito.get("saltate") or {}
+        saltate, contese = esito.get("saltate") or {}, esito.get("contese") or {}
+        non_riconosciute = esito.get("non_riconosciute") or {}
+        # La riga suggerisce Riconosci questo disco solo per le lettere usate
+        # da dischi diversi; per una vista con un disco solo, che non e' mai
+        # stato il suo, dice soltanto che la salta, anche se il menu lo offre
+        # (1.112.0, Gabriele).
+        da_riconoscere = [radice for radice in contese if self.dischi.contesa(radice)]
         for nome, quanti in (("pulizia_schede", len(schede) - doppioni), ("pulizia_doppioni", doppioni), ("pulizia_brani", brani),
-                ("pulizia_marker", voci_tolte), ("pulizia_punti", punti), ("pulizia_storico", storico), ("pulizia_radici_saltate", len(saltate))):
+                ("pulizia_marker", voci_tolte), ("pulizia_punti", punti), ("pulizia_storico", storico), ("pulizia_radici_saltate", len(saltate)),
+                ("pulizia_dischi_diversi", len(contese)), ("pulizia_dischi_non_riconosciuti", len(non_riconosciute))):
             if quanti:
                 self._statistiche.conta(nome, quanti)
         self._salva_le_statistiche_in_disparte()
         self._riscontro_dopo("pulizia_finita", self._frase_della_pulizia(len(mancanti), len(schede) - doppioni, doppioni, brani, voci_tolte, marker_tolti,
-            punti, storico, saltate))
+            punti, storico, saltate, contese, non_riconosciute, da_riconoscere))
+        # Una lettera che la pulizia ha letto, e che diventa contesa solo
+        # adesso, unendo il disco imparato a quello che la Sentinella ci aveva
+        # visto intanto, il primo e quindi senza riga: la riga della pulizia
+        # non la nomina, e lo si dice come la Sentinella.
+        for radice in sorted(nuovi_dischi):
+            if radice not in contese_prima and radice not in contese and radice not in non_riconosciute and self.dischi.contesa(radice):
+                self._di_la_lettera_contesa(radice)
 
     def _togli_i_brani_spariti(self, mancanti):
         """Toglie da playlist e Preferiti i brani dei file spariti, anche i
@@ -9134,10 +9207,15 @@ class Finestra(wx.Frame):
         return len(tolti)
 
     @staticmethod
-    def _frase_della_pulizia(spariti, schede, doppioni, brani, voci, marker, punti, storico, saltate):
+    def _frase_della_pulizia(spariti, schede, doppioni, brani, voci, marker, punti, storico, saltate, contese=None, non_riconosciute=None,
+            da_riconoscere=None):
         """La riga della console alla fine della pulizia: nei primi quaranta
         caratteri quanti file sono spariti, poi da dove sono stati tolti, le
-        schede doppie dello schedario e le unita' che non hanno risposto."""
+        schede doppie dello schedario, le unita' che non hanno risposto, le
+        lettere usate da dischi diversi e quelle a cui risponde un disco che
+        la pulizia non riconosce (1.112.0); in fondo, per le lettere da
+        riconoscere, cioe' quelle usate da dischi diversi, dove si trova
+        Riconosci questo disco."""
         if spariti or schede:
             parti = [f"Pulizia finita, {al_plurale(spariti, 'file sparito', 'file spariti')}."]
             tolti = [f"dallo schedario {schede}" if schede else "", f"da playlist e Preferiti {brani_al_plurale(brani)}" if brani else "",
@@ -9155,7 +9233,140 @@ class Finestra(wx.Frame):
             radici = sorted(saltate)
             restano = al_plurale(sum(saltate.values()), "voce resta", "voci restano")
             parti.append(f"{'Non risponde' if len(radici) == 1 else 'Non rispondono'} {', '.join(radici)}, e {restano} per il prossimo avvio.")
+        for gruppo, perche_una, perche_piu in ((contese, "usata da dischi diversi", "usate da dischi diversi"),
+                (non_riconosciute, "non riconosco il disco che risponde", "non riconosco i dischi che rispondono")):
+            if not gruppo:
+                continue
+            radici, quante = sorted(gruppo), sum(gruppo.values())
+            if len(radici) > 1:
+                parti.append(f"Saltate {', '.join(radici)}, {perche_piu}: le loro {quante} voci restano.")
+            else:
+                restano = "la sua voce resta" if quante == 1 else f"le sue {quante} voci restano"
+                parti.append(f"Saltata {radici[0]}, {perche_una}: {restano}.")
+        if da_riconoscere:
+            radici = sorted(da_riconoscere)
+            if len(radici) == 1:
+                parti.append(f"Per riconoscere il disco di adesso, Riconosci questo disco nel menu di {radici[0]} in Questo PC.")
+            else:
+                menu = ", ".join(f"di {radice}" for radice in radici[:-1]) + f" e di {radici[-1]}"
+                parti.append(f"Per riconoscere i dischi di adesso, Riconosci questo disco nel menu {menu} in Questo PC.")
         return " ".join(parti)
+
+    # I dischi a MeTeOra aperto: la Sentinella e Riconosci questo disco (1.112.0, Gabriele).
+
+    def _disco_visto(self, lettera, chi):
+        """La Sentinella ha visto chi rispondere alla lettera mentre MeTeOra
+        ne usava un file: se non e' il suo disco, la lettera diventa contesa,
+        e si salva subito, perche' una chiusura a forza non lo perda. Se cosi'
+        la lettera e' contesa, lo si dice subito, con la riga e il suono suo
+        (Gabriele): una volta sola per lettera e per disco, perche' un disco
+        gia' visto non cambia il ricordo. La riga va subito, il suono dopo
+        l'ultimo effetto, come quello del brano che parte; la domanda di un
+        campo che si sta aprendo suona lo stesso."""
+        if self._chiusa or not self.dischi.visto(lettera, chi):
+            return
+        try:
+            self.dischi.salva()
+        except OSError:
+            # Restano da salvare: ci riprova l'uscita.
+            self._statistiche.conta("salvataggi_non_riusciti")
+        if self.dischi.contesa(lettera):
+            self._di_la_lettera_contesa(lettera)
+
+    def _di_la_lettera_contesa(self, lettera):
+        """La riga della Sentinella per una lettera appena diventata contesa a
+        MeTeOra aperto, e dopo l'ultimo effetto il suo suono (Gabriele)."""
+        self.scrivi(f"{lettera} ha un disco diverso da quello che conosco: le sue voci restano, e la pulizia la salta finché non usi "
+            f"Riconosci questo disco nel menu di {lettera} in Questo PC.")
+        self._dopo_il_suono(self._suono, "disco_diverso")
+
+    def _riconosci_il_disco(self, radice):
+        """Riconosci questo disco, dal menu di un'unita' contesa in Questo PC:
+        da adesso la lettera e' del disco che risponde, non e' piu' contesa, e
+        la pulizia del prossimo avvio la controlla, togliendo le voci dei file
+        che su quel disco non ci sono. Prima chiede conferma, dicendo quante
+        sono (Gabriele): chi risponde e il conto si chiedono in disparte, su
+        una copia dei percorsi che la pulizia guarderebbe, e una lettera che
+        non risponde non ferma la finestra."""
+        lettera = pulizia.lettera_di(radice)
+        if self.dischi.errore:
+            self._riscontro("errore", f"Il file dei dischi della pulizia non si legge: {self.dischi.errore}. Finché non si legge, {lettera} non si può riconoscere.")
+            return
+        if lettera in self._lettere_in_conto:
+            self._riscontro("non_disponibile", f"Sto ancora contando le voci di {lettera}, e la domanda arriva appena ho finito.")
+            return
+        self._lettere_in_conto.add(lettera)
+        percorsi = set(self.schedario.istantanea()) | self._percorsi_in_uso()
+        pulizia.chiedi_il_conto(lettera, percorsi, lambda chi, conto: wx.CallAfter(self._disco_da_riconoscere, lettera, chi, conto),
+            fermo=self._conti_fermati.is_set, cedi=self._cedi)
+
+    def _disco_da_riconoscere(self, lettera, chi, conto):
+        """Chi risponde alla lettera e il conto delle sue voci, arrivati dal
+        loro filo: la domanda con Si' e No, con No predefinito ed Esc che vale
+        No; con Si' chi risponde diventa il suo disco, si salva subito e lo si
+        dice. Si riconosce il disco che rispondeva alla fine del conto: se
+        dopo ne arriva un altro, la pulizia e la Sentinella rendono di nuovo
+        contesa la lettera, e niente si toglie. Se pero' la Sentinella lo vede
+        mentre la domanda aspetta, e lo dice, il Si' non riconosce niente:
+        cancellerebbe il disco appena visto, che magari e' quello di adesso.
+        Con un dialogo aperto si aspetta che si chiuda, come la fine della
+        pulizia."""
+        if self._chiusa:
+            return
+        if not ctypes.windll.user32.IsWindowEnabled(self.GetHandle()):
+            wx.CallLater(500, self._disco_da_riconoscere, lettera, chi, conto)
+            return
+        self._lettere_in_conto.discard(lettera)
+        if not chi:
+            self._riscontro("errore", f"{lettera} non risponde, o non dice quale disco c'è: il disco resta da riconoscere.")
+            return
+        gia = f"Il disco di {lettera} è già quello riconosciuto: la pulizia all'avvio la controlla."
+        ricordo = self.dischi.conosciuti().get(lettera)
+        if ricordo == {"disco": chi}:
+            self._riscontro("non_disponibile", gia)
+            return
+        if not self._conferma(self._domanda_del_riconoscimento(lettera, conto), "Riconosci questo disco"):
+            self._annullato(f"Il disco di {lettera} resta da riconoscere: la pulizia all'avvio continua a saltarla.")
+            return
+        if self.dischi.conosciuti().get(lettera) != ricordo:
+            self._riscontro("non_disponibile", f"Intanto a {lettera} ha risposto un altro disco: il disco resta da riconoscere. "
+                "Per riconoscere quello di adesso, scegli di nuovo Riconosci questo disco.")
+            return
+        if not self.dischi.riconosci(lettera, chi):
+            self._riscontro("non_disponibile", gia)
+            return
+        try:
+            self.dischi.salva()
+        except OSError:
+            # Resta da salvare: ci riprova l'uscita.
+            self._statistiche.conta("salvataggi_non_riusciti")
+        self._riscontro("disco_riconosciuto", f"Disco di {lettera} riconosciuto: è quello che risponde adesso. Dal prossimo avvio la pulizia controlla {lettera}, "
+            "e toglie le voci dei file che su questo disco non ci sono.")
+
+    @staticmethod
+    def _domanda_del_riconoscimento(lettera, conto):
+        """La domanda di Riconosci questo disco, con quante voci della lettera
+        la prossima pulizia togliera' (Gabriele). conto e' (voci, mancanti),
+        come lo da' pulizia.conta_le_voci, o None se non si e' potuto fare:
+        allora la domanda lo dice, senza numeri."""
+        if conto is None:
+            quante = "le sue voci non si sono potute contare, e la prossima pulizia toglierà quelle dei file che qui non ci sono."
+        else:
+            voci, mancanti = conto
+            if not voci:
+                quante = f"di {lettera} non conosco nessuna voce, e la prossima pulizia non avrà niente da togliere."
+            elif voci == 1:
+                quante = (f"l'unica voce di {lettera} è di un file che qui non c'è, e la prossima pulizia la toglierà." if mancanti
+                    else f"l'unica voce di {lettera} è di un file che c'è, e la prossima pulizia non toglierà niente.")
+            elif not mancanti:
+                quante = f"le {voci} voci di {lettera} sono tutte di file che ci sono, e la prossima pulizia non toglierà niente."
+            elif mancanti == voci:
+                quante = f"le {voci} voci di {lettera} sono tutte di file che qui non ci sono, e la prossima pulizia le toglierà."
+            elif mancanti == 1:
+                quante = f"delle {voci} voci di {lettera}, 1 è di un file che qui non c'è e la prossima pulizia la toglierà."
+            else:
+                quante = f"delle {voci} voci di {lettera}, {mancanti} sono di file che qui non ci sono e la prossima pulizia le toglierà."
+        return f"{lettera} diventa del disco che risponde adesso; {quante} Riconosco?"
 
     # L'uscita.
 
@@ -9193,6 +9404,8 @@ class Finestra(wx.Frame):
             self._salva_all_uscita(self.posizioni.salva, "le posizioni dei file lunghi", non_salvati)
         if self.marcatori.modificato:
             self._salva_all_uscita(self.marcatori.salva, "i marker", non_salvati)
+        if self.dischi.modificati:
+            self._salva_all_uscita(self.dischi.salva, "i dischi della pulizia all'avvio", non_salvati)
         self.contatore.ferma()
         self.schedario.ferma()
         # La pulizia ferma non porta piu' niente: quello che non ha finito di
@@ -9200,6 +9413,8 @@ class Finestra(wx.Frame):
         for lavoro in (self._lettura, self._passata, self._pulizia):
             if lavoro is not None:
                 lavoro.ferma()
+        # Anche i conti di Riconosci questo disco: la loro domanda non arriva piu'.
+        self._conti_fermati.set()
         if self._video is not None:
             # Prima la barra: un trascinamento in corso tiene il mouse, e una
             # finestra distrutta con il mouse preso fa cadere wx (revisione

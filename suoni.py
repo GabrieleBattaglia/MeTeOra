@@ -1,6 +1,6 @@
 # MeTeOra, gli effetti sonori: un suono per ogni azione, con Acusticator.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.51.0 i suoni delle impostazioni, della console salvata, della finestra dei marcatori, della sua ricerca e della scheda audio. Nella 1.55.0 quelli di velocita', tono, equalizzatore e dissolvenza. Nella 1.58.0 i suoni al volo dell'equalizzatore, e il loop con i soffi rimasti liberi. Nella 1.59.0 l'acceso e lo spento della riproduzione casuale. Nella 1.63.0 i suoni del video. Nella 1.64.0 quelli di Questa rete. Nella 1.65.0 quelli dello scaricamento. Nella 1.66.36 l'annullamento, il ramo aggiornato e il video nascosto, e la playlist creata con dei brani ha un suono solo. Nella 1.67.0 il file rinominato. Nella 1.69.0 i suoni dei tag. Nella 1.75.0 il suono dell'invito a offrire un caffe'. Nella 1.84.0 quello dell'aggiornamento accettato. Nella 1.86.0 i tasti rapidi spenti e accesi. Nella 1.93.0 i capitoli. Nella 1.103.0 i suoni delle statistiche, nella collezione dalla V206 di GBUtils. Nella 1.104.0 quelli della pulizia all'avvio, dalla V207. Nella 1.105.0 quello di Dove sono, dalla V208. Nella 1.109.0 quelli di Ordina, Inverti l'ordine, Mescola e Ordine di prima. Nella 1.110.0 quello della durata residua, dalla V209.
+# 30/09/2026: nasce con la tappa 1. Nella 1.51.0 i suoni delle impostazioni, della console salvata, della finestra dei marcatori, della sua ricerca e della scheda audio. Nella 1.55.0 quelli di velocita', tono, equalizzatore e dissolvenza. Nella 1.58.0 i suoni al volo dell'equalizzatore, e il loop con i soffi rimasti liberi. Nella 1.59.0 l'acceso e lo spento della riproduzione casuale. Nella 1.63.0 i suoni del video. Nella 1.64.0 quelli di Questa rete. Nella 1.65.0 quelli dello scaricamento. Nella 1.66.36 l'annullamento, il ramo aggiornato e il video nascosto, e la playlist creata con dei brani ha un suono solo. Nella 1.67.0 il file rinominato. Nella 1.69.0 i suoni dei tag. Nella 1.75.0 il suono dell'invito a offrire un caffe'. Nella 1.84.0 quello dell'aggiornamento accettato. Nella 1.86.0 i tasti rapidi spenti e accesi. Nella 1.93.0 i capitoli. Nella 1.103.0 i suoni delle statistiche, nella collezione dalla V206 di GBUtils. Nella 1.104.0 quelli della pulizia all'avvio, dalla V207. Nella 1.105.0 quello di Dove sono, dalla V208. Nella 1.109.0 quelli di Ordina, Inverti l'ordine, Mescola e Ordine di prima. Nella 1.110.0 quello della durata residua, dalla V209. Nella 1.112.0 quello di Riconosci questo disco e quello della Sentinella che rende contesa una lettera.
 
 """La mappa degli eventi di MeTeOra sui preset della collezione di GBUtils.
 
@@ -248,6 +248,13 @@ EVENTI = {
     # originale, nella collezione di GBUtils V209; onda triangolare, un tic
     # tac che scende e una scivolata di un'ottava, la sabbia della clessidra.
     "durata_residua": "meteora_durata_residua",
+    # Riconosci questo disco (1.112.0): suono originale, che va nella
+    # collezione di GBUtils; un disco che prende giri e si ferma al suo posto.
+    "disco_riconosciuto": "meteora_disco_riconosciuto",
+    # La Sentinella che rende contesa una lettera a MeTeOra aperto
+    # (1.112.0): suono originale, che va nella collezione di GBUtils; due
+    # colpetti a una porta che si conosce, e risponde qualcun altro.
+    "disco_diverso": "meteora_disco_diverso",
 }
 
 
