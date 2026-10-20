@@ -1,12 +1,13 @@
 # MeTeOra, le associazioni dei formati: Apri con MeTeOra e le app predefinite di Windows.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.91.0, tappa 12 d del piano.
+# 04/10/2026: nasce con la 1.91.0, tappa 12 d del piano. Nella 1.113.0 le playlist M3U, M3U8 e PLS, con un ProgID loro.
 
 """Le associazioni dei formati (1.91.0).
 
 Solo per l'utente di Windows, in HKEY_CURRENT_USER: niente diritti di
 amministratore. registra() fa comparire MeTeOra in Apri con per tutti i
-formati che suona, e fra le app predefinite delle impostazioni di Windows;
+formati che suona, e dalla 1.113.0 per le playlist che importa, e fra le
+app predefinite delle impostazioni di Windows;
 renderlo il programma predefinito, pero', Windows non lo lascia fare a un
 programma da solo: lo sceglie chi usa il PC, nella pagina che apri_le_app_predefinite()
 apre. togli() cancella soltanto le chiavi e i valori che registra() ha scritto.
@@ -22,6 +23,9 @@ import formati
 NOME = "MeTeOra"
 PROGID_AUDIO = "MeTeOra.Audio"
 PROGID_VIDEO = "MeTeOra.Video"
+PROGID_PLAYLIST = "MeTeOra.Playlist"
+# I tre ProgID, con la descrizione che Windows mostra.
+PROGID = ((PROGID_AUDIO, "Audio per MeTeOra"), (PROGID_VIDEO, "Video per MeTeOra"), (PROGID_PLAYLIST, "Playlist per MeTeOra"))
 _CLASSI = r"Software\Classes"
 _APPLICAZIONE = rf"{_CLASSI}\Applications\MeTeOra.exe"
 _CAPACITA = r"Software\MeTeOra\Capabilities"
@@ -30,8 +34,11 @@ _SHCNE_ASSOCCHANGED = 0x08000000
 
 
 def estensioni():
-    """Le estensioni di MeTeOra, con il loro ProgID: video o audio."""
-    return {estensione: (PROGID_VIDEO if estensione in formati.VIDEO else PROGID_AUDIO) for estensione in sorted(formati.TUTTI)}
+    """Le estensioni di MeTeOra, con il loro ProgID: video, audio, o dalla
+    1.113.0 playlist, per gli M3U e i PLS che MeTeOra importa."""
+    tipi = {estensione: (PROGID_VIDEO if estensione in formati.VIDEO else PROGID_AUDIO) for estensione in formati.TUTTI}
+    tipi.update(dict.fromkeys(formati.PLAYLIST, PROGID_PLAYLIST))
+    return dict(sorted(tipi.items()))
 
 
 def _scrivi(reg, percorso, valori):
@@ -41,7 +48,7 @@ def _scrivi(reg, percorso, valori):
 
 
 def registra(eseguibile, reg=winreg):
-    """Scrive le chiavi: l'applicazione con i tipi che apre, i due ProgID,
+    """Scrive le chiavi: l'applicazione con i tipi che apre, i tre ProgID,
     MeTeOra fra i programmi di Apri con di ogni estensione, e le capacita'
     per le app predefinite. Torna quante estensioni ha registrato."""
     comando = f'"{eseguibile}" "%1"'
@@ -50,7 +57,7 @@ def registra(eseguibile, reg=winreg):
     _scrivi(reg, _APPLICAZIONE, {"FriendlyAppName": NOME})
     _scrivi(reg, rf"{_APPLICAZIONE}\shell\open\command", {"": comando})
     _scrivi(reg, rf"{_APPLICAZIONE}\SupportedTypes", dict.fromkeys(tipi, ""))
-    for progid, descrizione in ((PROGID_AUDIO, "Audio per MeTeOra"), (PROGID_VIDEO, "Video per MeTeOra")):
+    for progid, descrizione in PROGID:
         _scrivi(reg, rf"{_CLASSI}\{progid}", {"": descrizione})
         _scrivi(reg, rf"{_CLASSI}\{progid}\DefaultIcon", {"": icona})
         _scrivi(reg, rf"{_CLASSI}\{progid}\shell\open\command", {"": comando})
@@ -89,8 +96,8 @@ def togli(reg=winreg):
     """Cancella cio' che registra() ha scritto, e solo quello: le chiavi delle
     estensioni restano, perche' sono anche di altri programmi."""
     _cancella_albero(reg, _APPLICAZIONE)
-    _cancella_albero(reg, rf"{_CLASSI}\{PROGID_AUDIO}")
-    _cancella_albero(reg, rf"{_CLASSI}\{PROGID_VIDEO}")
+    for progid, _descrizione in PROGID:
+        _cancella_albero(reg, rf"{_CLASSI}\{progid}")
     for estensione, progid in estensioni().items():
         _cancella_valore(reg, rf"{_CLASSI}\{estensione}\OpenWithProgids", progid)
     _cancella_albero(reg, r"Software\MeTeOra")

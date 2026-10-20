@@ -1,6 +1,6 @@
 # MeTeOra, le prove dell'istanza unica e delle associazioni dei formati: pipe di prova e registro finto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.91.0.
+# 04/10/2026: nasce con la 1.91.0. Nella 1.113.0 le associazioni delle playlist M3U e PLS.
 
 """La pipe ha un nome solo per la prova, mai quello del MeTeOra che magari e'
 aperto; il registro di Windows e' finto, in memoria: niente di vero si tocca."""
@@ -121,7 +121,11 @@ def test_le_associazioni_si_scrivono_e_si_tolgono(monkeypatch):
     reg.chiavi[r"software\classes\.mp3\openwithprogids"]["VLC.mp3"] = ""
     eseguibile = r"C:\Programmi\MeTeOra\MeTeOra.exe"
     quante = associazioni.registra(eseguibile, reg)
-    assert quante == len(formati.TUTTI)
+    # Dalla 1.113.0 anche le playlist, con il loro ProgID.
+    assert quante == len(formati.TUTTI) + len(formati.PLAYLIST)
+    for estensione in (".m3u", ".m3u8", ".pls"):
+        assert reg.chiavi[rf"software\classes\{estensione}\openwithprogids"] == {"MeTeOra.Playlist": ""}
+    assert reg.chiavi[r"software\classes\meteora.playlist"][""] == "Playlist per MeTeOra"
     comando = reg.chiavi[r"software\classes\applications\meteora.exe\shell\open\command"][""]
     assert comando == f'"{eseguibile}" "%1"'
     assert ".mp3" in reg.chiavi[r"software\classes\applications\meteora.exe\supportedtypes"]

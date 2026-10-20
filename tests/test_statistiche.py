@@ -1,6 +1,6 @@
 # MeTeOra, le prove delle statistiche: l'orologio, la vita dei brani, il file, l'azzeramento e la pagina.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (UltraCode).
-# 17/10/2026: nasce con la 1.103.0. Nella 1.104.0 le prove delle righe-elenco senza le voci a zero, delle percentuali, degli anni futuri, delle date con il giorno della settimana, della pulizia all'avvio e dei brani rinominati. Nella 1.105.0 quella dei nomi di tutti gli eventi, con Dove sono. Nella 1.109.0 la riga delle playlist con Ordina e Mescola. Nella 1.110.0 la durata residua in fondo agli eventi. Nella 1.112.0 la riga delle pulizie con le unita' usate da dischi diversi o con un disco che non si riconosceva, e la riga dei dischi riconosciuti a mano e delle lettere rese contese dalla Sentinella.
+# 17/10/2026: nasce con la 1.103.0. Nella 1.104.0 le prove delle righe-elenco senza le voci a zero, delle percentuali, degli anni futuri, delle date con il giorno della settimana, della pulizia all'avvio e dei brani rinominati. Nella 1.105.0 quella dei nomi di tutti gli eventi, con Dove sono. Nella 1.109.0 la riga delle playlist con Ordina e Mescola. Nella 1.110.0 la durata residua in fondo agli eventi. Nella 1.112.0 la riga delle pulizie con le unita' usate da dischi diversi o con un disco che non si riconosceva, e la riga dei dischi riconosciuti a mano e delle lettere rese contese dalla Sentinella. Nella 1.113.0 la prova che ogni evento dei suoni ha il suo nome.
 
 import datetime
 import json
@@ -10,6 +10,7 @@ import pytest
 
 import formati
 import statistiche
+import suoni
 from statistiche import Statistiche
 
 
@@ -595,8 +596,6 @@ def test_gli_eventi_della_pulizia_e_dei_dischi_sono_in_fondo():
 
 def test_ogni_evento_ha_il_suo_nome():
     """Ogni suono di MeTeOra ha un nome nelle statistiche, e ogni nome un suono."""
-    import suoni
-
     assert set(statistiche.NOMI_DEGLI_EVENTI) == set(suoni.EVENTI)
 
 
@@ -622,3 +621,10 @@ def test_la_riga_dei_dischi_nella_salute(tmp_path):
     for _volta in range(3):
         s.evento("disco_diverso")
     assert "Dischi riconosciuti a mano: 1; lettere rese contese dalla Sentinella, a MeTeOra aperto: 3." in _pagina(s).la_salute()
+
+
+def test_ogni_evento_dei_suoni_ha_il_suo_nome():
+    # Senza nome la pagina direbbe l'evento com'e', senza accenti, e il conto
+    # di quelli che MeTeOra conosce sarebbe sbagliato (1.113.0).
+    assert statistiche.NOMI_DEGLI_EVENTI["playlist_gia_importata"] == "playlist importata arrivata di nuovo"
+    assert statistiche.NOMI_DEGLI_EVENTI["playlist_riletta"] == "playlist riletta dal suo file"

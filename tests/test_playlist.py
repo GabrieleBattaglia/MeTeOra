@@ -1,6 +1,7 @@
 # MeTeOra, le prove del modello delle playlist.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 # Nella 1.109.0 le prove di Ordina, Inverti l'ordine, Mescola e Ordine di prima.
+# Nella 1.113.0 le prove dell'origine delle playlist importate.
 
 import json
 import os
@@ -325,3 +326,30 @@ def test_mescola_senza_in_cima_e_con_un_brano_che_non_c_e():
     assert mescolati(pl.brani, lambda altri: altri.reverse()) == pl.brani[::-1]
     assert mescolati(pl.brani, lambda altri: altri.reverse(), in_cima=Brano("x.mp3")) == pl.brani[::-1]
     assert mescolati(pl.brani, lambda altri: altri.reverse(), in_cima=pl.brani[1]) == [pl.brani[1], pl.brani[2], pl.brani[0]]
+
+
+def test_l_origine_di_una_playlist_importata_si_salva_e_si_ritrova(tmp_path):
+    # 1.113.0: la playlist importata ricorda il suo file, anche rinominata.
+    percorso = str(tmp_path / "pl.json")
+    archivio = Archivio(percorso)
+    archivio.nuova("Vuota")
+    rock = archivio.nuova("Rock", [r"E:\Musica\a.mp3"])
+    rock.origine = {"percorso": r"E:\Musica\Rock.m3u", "data": 1760000000.5, "dimensione": 120}
+    archivio.salva()
+    dati = json.loads((tmp_path / "pl.json").read_text(encoding="utf-8"))
+    assert dati["versione"] == 1 and "origine" not in dati["playlist"][0]
+    assert dati["playlist"][1]["origine"] == {"percorso": r"E:\Musica\Rock.m3u", "data": 1760000000.5, "dimensione": 120}
+    di_nuovo = Archivio(percorso)
+    di_nuovo.carica()
+    ritrovata = di_nuovo.dall_origine(r"e:\musica\ROCK.m3u")
+    assert ritrovata is di_nuovo.playlist[1] and ritrovata.origine["dimensione"] == 120
+    ritrovata.nome = "Rock anni 80"
+    assert di_nuovo.dall_origine(r"E:\Musica\Rock.m3u") is ritrovata
+    assert di_nuovo.dall_origine(r"E:\Musica\Pop.m3u") is None and di_nuovo.playlist[0].origine is None
+
+
+def test_un_origine_scritta_male_si_ignora():
+    for origine in (r"E:\Rock.m3u", {"percorso": "", "data": 1.0, "dimensione": 1}, {"percorso": "x.m3u", "data": True, "dimensione": 1},
+            {"percorso": "x.m3u", "data": 1.0, "dimensione": "1"}, {"percorso": "x.m3u", "dimensione": 1}):
+        assert Playlist.da_dati({"nome": "x", "brani": [], "origine": origine}).origine is None
+    assert Playlist.da_dati({"nome": "x", "origine": {"percorso": "x.m3u", "data": 3, "dimensione": 7}}).origine == {"percorso": "x.m3u", "data": 3.0, "dimensione": 7}

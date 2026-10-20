@@ -1,6 +1,6 @@
 # MeTeOra, le statistiche: ogni sorta di conti, raccolti mentre lo si usa, e la pagina che li racconta.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (UltraCode).
-# 17/10/2026: nasce con la 1.103.0, chiesta da Gabriele: piu' dati ci sono, piu' e' contento. Nella 1.104.0 le righe che elencano voci tengono solo quelle diverse da zero, le percentuali uniformi, gli anni futuri dei tag ignorati, le date sempre con il giorno della settimana, e i brani dello storico tolti dalla pulizia all'avvio o rinominati, con i conti della pulizia nella salute. Nella 1.105.0 i nomi di Dove sono, il comando dell'apostrofo, e del suo suono. Nella 1.109.0 le playlist ordinate, invertite, mescolate e rimesse nell'ordine di prima. Nella 1.110.0 quelli della durata residua, Maiuscolo con l'apostrofo. Nella 1.112.0, nella salute, anche le unita' saltate dalla pulizia perche' usate da dischi diversi o perche' il disco che rispondeva non si riconosceva, i dischi riconosciuti a mano e le lettere rese contese dalla Sentinella.
+# 17/10/2026: nasce con la 1.103.0, chiesta da Gabriele: piu' dati ci sono, piu' e' contento. Nella 1.104.0 le righe che elencano voci tengono solo quelle diverse da zero, le percentuali uniformi, gli anni futuri dei tag ignorati, le date sempre con il giorno della settimana, e i brani dello storico tolti dalla pulizia all'avvio o rinominati, con i conti della pulizia nella salute. Nella 1.105.0 i nomi di Dove sono, il comando dell'apostrofo, e del suo suono. Nella 1.109.0 le playlist ordinate, invertite, mescolate e rimesse nell'ordine di prima. Nella 1.110.0 quelli della durata residua, Maiuscolo con l'apostrofo. Nella 1.112.0, nella salute, anche le unita' saltate dalla pulizia perche' usate da dischi diversi o perche' il disco che rispondeva non si riconosceva, i dischi riconosciuti a mano e le lettere rese contese dalla Sentinella. Nella 1.113.0 le playlist importate da un M3U o da un PLS, riaperte e rilette.
 
 """Le statistiche di MeTeOra (1.103.0).
 
@@ -161,7 +161,10 @@ NOMI_DEGLI_EVENTI = {
     "passo_di_salto": "passo di salto cambiato", "passo_del_volume": "passo del volume cambiato",
     "volume_su": "volume su", "volume_giu": "volume giù", "volume_al_limite": "volume già al limite",
     "muto_acceso": "muto acceso", "muto_spento": "muto spento", "menu": "menu aperto",
-    "nuova_playlist": "nuova playlist vuota", "playlist_creata": "playlist creata", "playlist_eliminata": "playlist eliminata",
+    "nuova_playlist": "nuova playlist vuota", "playlist_creata": "playlist creata",
+    # Nella 1.113.0, accanto alla playlist creata come in suoni.EVENTI.
+    "playlist_gia_importata": "playlist importata arrivata di nuovo", "playlist_riletta": "playlist riletta dal suo file",
+    "playlist_eliminata": "playlist eliminata",
     "playlist_rinominata": "playlist rinominata", "file_rinominato": "file rinominato", "tag_letti": "tag letti",
     "tag_cambiato": "tag cambiati", "tag_cancellato": "tag cancellati", "brano_aggiunto": "brani aggiunti a una playlist",
     "preferito_aggiunto": "brano messo nei Preferiti", "filtro_messo": "filtro messo", "ricerca_avviata": "ricerca avviata",
@@ -1467,9 +1470,14 @@ class Pagina:
     def le_playlist(self):
         create = self.e("playlist_creata") + self.e("nuova_playlist")
         dalla_ricerca, da_cartella = self.c("playlist_dalla_ricerca"), self.c("playlist_da_una_cartella")
-        altre = max(0, self.e("playlist_creata") - dalla_ricerca - da_cartella)
+        # Le importate da un M3U o da un PLS suonano anche loro playlist_creata (1.113.0).
+        importate = self.c("playlist_importate")
+        altre = max(0, self.e("playlist_creata") - dalla_ricerca - da_cartella - importate)
         return [
-            f"Playlist create: {create}; da una cartella {da_cartella}, dai risultati della ricerca {dalla_ricerca}, da una selezione o dal menu {altre}, vuote {self.e('nuova_playlist')}.",
+            f"Playlist create: {create}; da una cartella {da_cartella}, dai risultati della ricerca {dalla_ricerca}, "
+            f"importate {importate}, da una selezione o dal menu {altre}, vuote {self.e('nuova_playlist')}.",
+            f"Playlist importate da un M3U o da un PLS: {importate}, con {al_plurale(self.c('brani_importati'), 'brano', 'brani')}; "
+            f"arrivate di nuovo con il loro file com'era: {self.e('playlist_gia_importata')}; rilette dal loro file cambiato: {self.e('playlist_riletta')}.",
             f"Playlist rinominate: {self.e('playlist_rinominata')}; eliminate: {self.e('playlist_eliminata')}; ordinate: {self.e('playlist_ordinata')}; "
             f"invertite: {self.e('ordine_invertito')}; mescolate: {self.e('playlist_mescolata')}; rimesse nell'ordine di prima: {self.e('ordine_ripristinato')}.",
             f"Brani aggiunti alle playlist: {self.c('brani_aggiunti')}, in {al_plurale(self.c('aggiunte'), 'volta', 'volte')}.",

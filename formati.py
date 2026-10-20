@@ -1,6 +1,6 @@
 # MeTeOra, i formati: quali file il programma sa suonare.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.65.0 i MIDI e i tracker a parte, nella 1.66.0 la musica delle console. Nella 1.82.0 testo_srt, da sottotitoli_ocr.py, per la passata e il karaoke. Nella 1.104.0 i formati campionati, per le durate credibili dello schedario.
+# 30/09/2026: nasce con la tappa 1. Nella 1.65.0 i MIDI e i tracker a parte, nella 1.66.0 la musica delle console. Nella 1.82.0 testo_srt, da sottotitoli_ocr.py, per la passata e il karaoke. Nella 1.104.0 i formati campionati, per le durate credibili dello schedario. Nella 1.113.0 le playlist di altri programmi, a parte.
 
 """Le estensioni dei file supportati.
 
@@ -39,6 +39,10 @@ TUTTI = SID | MIDI | CHIP | AUDIO | VIDEO
 # troppo lunghe per il peso del file (1.104.0). AUDIO comprende anche i
 # tracker, che come i SID, i MIDI e le console sono partiture.
 CAMPIONATI = (AUDIO - TRACKER) | VIDEO
+# Le playlist di altri programmi, che MeTeOra importa (1.113.0). Stanno
+# fuori da TUTTI: non si suonano, la plancia non le mostra nelle cartelle, e
+# le statistiche non le contano fra i formati.
+PLAYLIST = frozenset({".m3u", ".m3u8", ".pls"})
 
 
 def estensione(percorso):
@@ -47,6 +51,10 @@ def estensione(percorso):
 
 def supportato(percorso):
     return estensione(percorso) in TUTTI
+
+
+def e_playlist(percorso):
+    return estensione(percorso) in PLAYLIST
 
 
 def e_sid(percorso):
@@ -89,7 +97,18 @@ def ha_sottobrani(percorso):
     return estensione(percorso) in SID | CHIP
 
 
+def _modelli(estensioni):
+    return ";".join(f"*{e}" for e in sorted(estensioni))
+
+
 def filtro_dialogo():
-    """Il filtro dei file per la finestra Apri file."""
-    tutti = ";".join(f"*{e}" for e in sorted(TUTTI))
-    return f"File multimediali ({tutti})|{tutti}|Tutti i file (*.*)|*.*"
+    """Il filtro dei file per la finestra Apri file: dalla 1.113.0 i file
+    multimediali comprendono le playlist, che hanno anche un filtro loro."""
+    tutti, playlist = _modelli(TUTTI | PLAYLIST), _modelli(PLAYLIST)
+    return f"File multimediali ({tutti})|{tutti}|Playlist ({playlist})|{playlist}|Tutti i file (*.*)|*.*"
+
+
+def filtro_delle_playlist():
+    """Il filtro dei file per il comando Importa playlist (1.113.0)."""
+    playlist = _modelli(PLAYLIST)
+    return f"Playlist ({playlist})|{playlist}|Tutti i file (*.*)|*.*"

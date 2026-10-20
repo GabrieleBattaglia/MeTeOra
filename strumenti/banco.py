@@ -1,6 +1,6 @@
 # MeTeOra, il banco del collaudo: MeTeOra vero su un desktop di Windows nascosto, con una copia dei dati, pilotato da una tastiera simulata.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 19/10/2026: nasce con la 1.104.0, dal banco con cui ClaudIA ha collaudato le statistiche della 1.103; sul desktop nascosto, come preferisce Gabriele. Nella 1.105.0 la sessione di Dove sono, l'opzione --solo, la sintesi finta e la pipe dell'istanza con il numero del processo. Nella 1.109.0 la sessione ordina, con --ordina. Nella 1.110.0 la sessione della durata residua, e al_normale in comune con Dove sono. Nella 1.111.0 il banco della plancia, con --plancia: lo stato della selezione letto come lo legge NVDA (issue 21). Nella 1.112.0 la sessione dischi, per la protezione dei dischi nella pulizia all'avvio, con Riconosci questo disco e la Sentinella; poi la conferma con il conto delle voci, e la riga e il suono della Sentinella.
+# 19/10/2026: nasce con la 1.104.0, dal banco con cui ClaudIA ha collaudato le statistiche della 1.103; sul desktop nascosto, come preferisce Gabriele. Nella 1.105.0 la sessione di Dove sono, l'opzione --solo, la sintesi finta e la pipe dell'istanza con il numero del processo. Nella 1.109.0 la sessione ordina, con --ordina. Nella 1.110.0 la sessione della durata residua, e al_normale in comune con Dove sono. Nella 1.111.0 il banco della plancia, con --plancia: lo stato della selezione letto come lo legge NVDA (issue 21). Nella 1.112.0 la sessione dischi, per la protezione dei dischi nella pulizia all'avvio, con Riconosci questo disco e la Sentinella; poi la conferma con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 la sessione dell'importazione delle playlist, a parte, con --importazione.
 
 """Il banco del collaudo.
 
@@ -12,6 +12,7 @@ Uso, dalla cartella di MeTeOra:
                                         come dove_sono e durata_residua
   python strumenti\\banco.py --ordina    solo la sessione ordina, partendo senza dati
   python strumenti\\banco.py --plancia   il banco della plancia, da solo, partendo senza dati
+  python strumenti\\banco.py --importazione   solo la sessione dell'importazione delle playlist, senza dati
 
 Con --video la finestra del video di MeTeOra si apre e prende i tasti, ma
 libmpv, che disegna in un suo filo nato sul desktop di partenza, li' non puo'
@@ -71,6 +72,13 @@ un processo a parte sullo stesso desktop nascosto (issue 21):
 - chiusura_1 e seguenti: il lettore legge la plancia senza sosta mentre
   MeTeOra si chiude con Esc; il banco controlla che il processo esca pulito,
   senza crash.
+La sessione importazione (1.113.0) non fa parte delle altre, e parte
+senza dati: Importa playlist dalla plancia, con la finestra dei file di
+Windows sostituita da una che sceglie da se'; la stessa playlist che arriva
+da un'altra copia di MeTeOra, com'era e suona, poi cambiata, con la domanda
+chiusa con Esc e poi con S; un PLS senza niente da importare; F11 sulla
+playlist; esce con Esc. Le letture e i controlli dei file passano dai fili
+veri.
 Alla fine un riassunto, una riga per ogni controllo non riuscito; l'uscita
 vale 1 se ce n'e' almeno uno. La cartella di prova resta solo in quel caso.
 """
@@ -97,14 +105,14 @@ ISTANZA = "meteora_banco"
 FILE_DELLE_STATISTICHE = "MeTeOra - Statistiche.json"
 FILE_DEI_DISCHI = "MeTeOra - Dischi.json"
 SESSIONI = ("principale", "riavvio", "dopo_il_crash", "controllo", "dove_sono", "durata_residua", "dischi")
-# Le sessioni che girano solo quando si chiedono (tappa 14 c).
-SESSIONI_A_PARTE = ("ordina",)
+# Le sessioni che girano solo quando si chiedono, con la loro opzione (tappa 14 c e g).
+SESSIONI_A_PARTE = ("ordina", "importazione")
 # Il banco della plancia (1.111.0): la sessione delle misure e cinque
 # chiusure con il lettore che legge.
 SESSIONI_DELLA_PLANCIA = ("plancia", *(f"chiusura_{n}" for n in range(1, 6)))
 # Quanto puo' durare ogni sessione, in secondi: la pulizia sulla copia dei
 # dati veri guarda anche la rete.
-DURATE_MASSIME = {"principale": 1200, "riavvio": 900, "dopo_il_crash": 1200, "controllo": 900, "dove_sono": 900, "durata_residua": 900, "ordina": 600, "plancia": 600, "dischi": 900,
+DURATE_MASSIME = {"principale": 1200, "riavvio": 900, "dopo_il_crash": 1200, "controllo": 900, "dove_sono": 900, "durata_residua": 900, "ordina": 600, "plancia": 600, "dischi": 900, "importazione": 300,
     **dict.fromkeys(SESSIONI_DELLA_PLANCIA[1:], 300)}
 # I brani della playlist grande della sessione ordina, e quanto puo' durare al
 # massimo ogni riordino, in secondi.
@@ -1598,8 +1606,134 @@ def _numero_di_serie(testo):
     return len(testo) == 9 and testo[4] == "-" and all(c in "0123456789ABCDEF" for c in testo[:4] + testo[5:])
 
 
+def scenario_importazione():
+    """L'importazione delle playlist M3U e PLS di altri programmi (1.113.0)."""
+    import wx
+
+    import finestra as modulo
+    import istanza
+
+    f = S.finestra
+    albero = f.albero
+    aspetta_la_pulizia()
+    cartella = _cartella_dei_brani()
+    for nome in ("uno.wav", "due.wav"):
+        fai_un_wav(os.path.join(cartella, nome), 20)
+    m3u = os.path.join(cartella, "Rock anni 80.m3u")
+    with open(m3u, "w", encoding="cp1252", newline="\r\n") as fl:
+        fl.write("#EXTM3U\n#EXTINF:20,Uno\nuno.wav\nhttp://radio.example/flusso\nmanca.wav\ndue.wav\n")
+    pls = os.path.join(cartella, "Radio.pls")
+    with open(pls, "w", encoding="utf-8") as fl:
+        fl.write("[playlist]\nFile1=http://radio.example/uno\nFile2=https://radio.example/due\nNumberOfEntries=2\n")
+
+    class Scelta:
+        """La finestra dei file di Windows, che sceglie da se' la playlist."""
+
+        def __init__(self, _genitore, titolo, **opzioni):
+            S.extra.setdefault("finestre_dei_file", []).append({"titolo": titolo, "filtri": opzioni.get("wildcard"), "stile": opzioni.get("style")})
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_argomenti):
+            return False
+
+        def ShowModal(self):
+            return wx.ID_OK
+
+        def GetPaths(self):
+            return [m3u]
+
+        def GetPath(self):
+            return m3u
+
+    modulo.DialogoDiFile = Scelta
+
+    def col_fuoco():
+        return nel_filo(lambda: albero.GetItemText(albero.GetFocusedItem()))
+
+    def playlist():
+        return nel_filo(lambda: [(pl.nome, [os.path.basename(b.percorso) for b in pl.brani]) for pl in f.archivio.playlist])
+
+    def suona(nome):
+        return nel_filo(lambda: bool(f.motore.in_corso and f.coda.corrente is not None and os.path.basename(f.coda.corrente.percorso) == nome))
+
+    # Il comando, ultima voce del ramo Playlist.
+    premi("f5")
+    premi("inizio")
+    premi("giu")
+    premi("destra")
+    premi("giu")
+    premi("giu")
+    S.verifica("g", "L'ultima voce del ramo Playlist e' Importa playlist", col_fuoco() == "Importa playlist", col_fuoco())
+    segno = time.monotonic()
+    premi("invio")
+    riepilogo = f"Importata la playlist Rock anni 80: 2 brani, da {m3u}. Saltate 2 voci: 1 file che non c'è, 1 indirizzo in rete."
+    arrivata = aspetta(lambda: riepilogo in S.console_da(segno), attesa=30)
+    S.verifica("g", "Importa playlist: la riga del riepilogo, con il suono della playlist creata", arrivata and "playlist_creata" in S.suoni_da(segno),
+        S.console_da(segno))
+    S.verifica("g", "Una riga per ogni voce saltata, nell'ordine del file", S.console_da(segno)[-2:] == [
+        "Saltata http://radio.example/flusso: indirizzo in rete.", f"Saltata {os.path.join(cartella, 'manca.wav')}: file che non c'è."], S.console_da(segno))
+    finestre = S.extra.get("finestre_dei_file") or [{}]
+    S.verifica("g", "La finestra dei file a selezione multipla, con i filtri Playlist e Tutti i file", finestre[-1].get("titolo") == "Importa playlist"
+        and bool((finestre[-1].get("stile") or 0) & wx.FD_MULTIPLE) and str(finestre[-1].get("filtri")).startswith("Playlist ("), finestre[-1])
+    S.verifica("g", "La playlist con il nome del file e i due brani", playlist() == [("Rock anni 80", ["uno.wav", "due.wav"])], playlist())
+    S.verifica("g", "Dal comando si salva soltanto, e la selezione va sulla playlist", col_fuoco().startswith("Rock anni 80, brani: 2")
+        and not nel_filo(lambda: f.motore.in_corso), col_fuoco())
+
+    # La stessa playlist da un'altra copia, con il file com'era: si usa lei, e suona.
+    segno = time.monotonic()
+    istanza.manda([m3u])
+    S.verifica("g", "Da un'altra copia, con il file com'era, suona uno.wav", aspetta(lambda: suona("uno.wav"), attesa=30))
+    suoni = S.suoni_da(segno)
+    S.verifica("g", "La riga La playlist viene gia' da, e il suo suono prima di quello del file aperto",
+        f"La playlist Rock anni 80 viene già da {m3u}." in S.console_da(segno) and "playlist_gia_importata" in suoni and "file_aperto" in suoni
+        and suoni.index("playlist_gia_importata") < suoni.index("file_aperto"), (S.console_da(segno), suoni))
+    S.verifica("g", "Da fuori la selezione non si sposta", col_fuoco().startswith("Rock anni 80, brani: 2"), col_fuoco())
+
+    # Il file cambia: la domanda, Esc tiene quella che c'e'.
+    premi("v")
+    with open(m3u, "a", encoding="cp1252", newline="\r\n") as fl:
+        fl.write("uno.wav\n")
+    for tasto, righe, brani in (("esc", "La playlist Rock anni 80 resta com'è.", ["uno.wav", "due.wav"]),
+            ("s", f"Riletta la playlist Rock anni 80: 3 brani, da {m3u}. Saltate 2 voci: 1 file che non c'è, 1 indirizzo in rete.",
+                ["uno.wav", "due.wav", "uno.wav"])):
+        segno = time.monotonic()
+        istanza.manda([m3u])
+        aperta = aspetta(lambda: bool(domande()), attesa=30)
+        # Wrap manda a capo la domanda a una sessantina di caratteri.
+        domanda = nel_filo(lambda: domande()[0].domanda.GetLabelText().replace("\n", " ")) if aperta else ""
+        S.verifica("g", "Il file cambiato: la domanda, con No e il fuoco su No", aperta
+            and domanda == "Rock anni 80.m3u è cambiato dopo l'importazione. Rileggerlo, perdendo le modifiche fatte in MeTeOra?" and "No" in nel_filo(fuoco),
+            f"{domanda}; {nel_filo(fuoco)}")
+        if not aperta:
+            continue
+        premi(tasto)
+        aspetta(lambda: not domande(), attesa=5)
+        S.verifica("g", f"Con {tasto}: la riga, i brani e la musica", aspetta(lambda righe=righe, segno=segno: righe in S.console_da(segno) and suona("uno.wav"), attesa=30)
+            and playlist() == [("Rock anni 80", brani)], (S.console_da(segno), playlist()))
+        S.verifica("g", f"Con {tasto}: il suono", ("annullamento" if tasto == "esc" else "playlist_riletta") in S.suoni_da(segno), S.suoni_da(segno))
+        premi("v")
+
+    # Un PLS senza niente da importare.
+    segno = time.monotonic()
+    istanza.manda([pls])
+    S.verifica("g", "Un PLS con le sole radio: niente da importare", aspetta(lambda: "Niente da importare da Radio.pls. Saltate 2 voci: indirizzi in rete."
+        in S.console_da(segno), attesa=30) and "niente_da_suonare" in S.suoni_da(segno) and len(playlist()) == 1, S.console_da(segno))
+
+    # F11 sulla playlist dice da dove viene.
+    premi("f5")
+    segno = time.monotonic()
+    premi("f11")
+    S.verifica("g", "F11 dice da dove viene la playlist", aspetta(lambda: f"Importata da {m3u}." in S.console_da(segno), attesa=15), S.console_da(segno))
+    S.salva()
+    premi("f5")
+    S.nota("chiudo MeTeOra con Esc")
+    premi("esc")
+
+
 SCENARI = {"principale": scenario_principale, "riavvio": scenario_riavvio, "dopo_il_crash": scenario_dopo_il_crash, "controllo": scenario_controllo,
-    "dove_sono": scenario_dove_sono, "durata_residua": scenario_durata_residua, "ordina": scenario_ordina, "plancia": scenario_plancia, "dischi": scenario_dischi,
+    "dove_sono": scenario_dove_sono, "durata_residua": scenario_durata_residua, "ordina": scenario_ordina, "plancia": scenario_plancia, "dischi": scenario_dischi, "importazione": scenario_importazione,
     **dict.fromkeys(SESSIONI_DELLA_PLANCIA[1:], scenario_chiusura)}
 
 
@@ -1809,6 +1943,7 @@ def main():
     parser.add_argument("--solo", choices=SESSIONI, help="la sola sessione data, per quelle che non dipendono dalle altre, come dove_sono e durata_residua")
     parser.add_argument("--ordina", action="store_true", help="solo la sessione di Ordina e Mescola, partendo senza dati")
     parser.add_argument("--plancia", action="store_true", help="il banco della plancia: lo stato della selezione letto come lo legge NVDA")
+    parser.add_argument("--importazione", action="store_true", help="solo la sessione dell'importazione delle playlist, senza dati")
     parser.add_argument("--sessione", choices=SESSIONI + SESSIONI_A_PARTE + SESSIONI_DELLA_PLANCIA, help=argparse.SUPPRESS)
     parser.add_argument("--dati", help=argparse.SUPPRESS)
     parser.add_argument("--esito", help=argparse.SUPPRESS)
@@ -1818,6 +1953,8 @@ def main():
         return 0
     if argomenti.ordina:
         base, _esiti, falliti = banco_a_parte("ordina")
+    elif argomenti.importazione:
+        base, _esiti, falliti = banco_a_parte("importazione")
     else:
         base, _esiti, falliti = banco_della_plancia() if argomenti.plancia else banco(argomenti.vuoti, argomenti.video, argomenti.solo)
     if falliti:

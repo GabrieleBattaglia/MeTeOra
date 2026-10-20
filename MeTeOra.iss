@@ -1,6 +1,6 @@
 ; MeTeOra, l'installatore con Inno Setup 6 (1.97.0).
 ; Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-; 05/10/2026: nasce con la prima release, scelto da Gabriele.
+; 05/10/2026: nasce con la prima release, scelto da Gabriele. Nella 1.113.0 la disinstallazione toglie anche il ProgID delle playlist.
 ;
 ; Si compila con python setup_maker.py, dopo la compilazione di PyInstaller e
 ; zip_maker.py: lo script passa la versione di version.py.
@@ -126,6 +126,7 @@ begin
   RegDeleteKeyIncludingSubkeys(HKCU, 'Software\Classes\Applications\MeTeOra.exe');
   RegDeleteKeyIncludingSubkeys(HKCU, 'Software\Classes\MeTeOra.Audio');
   RegDeleteKeyIncludingSubkeys(HKCU, 'Software\Classes\MeTeOra.Video');
+  RegDeleteKeyIncludingSubkeys(HKCU, 'Software\Classes\MeTeOra.Playlist');
   RegDeleteKeyIncludingSubkeys(HKCU, 'Software\MeTeOra');
   RegDeleteValue(HKCU, 'Software\RegisteredApplications', 'MeTeOra');
 end;

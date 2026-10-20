@@ -105,3 +105,17 @@ Suona un file della chiavetta: la Sentinella non dice più niente. Poi esci con 
 Riavvia con la prima chiavetta: la riga dice di nuovo Saltata, la lettera, usata da dischi diversi, anche se nessuna pulizia ha visto la prima chiavetta dopo il Riconosci.
 Nelle statistiche, sezione La salute, subito dopo la riga delle pulizie: Dischi riconosciuti a mano: 1; lettere rese contese dalla Sentinella, a MeTeOra aperto: 1. Si legge bene?
 Finita la prova, con la chiavetta che userai di solito in quella lettera, scegli Riconosci questo disco e rispondi con la S: la pulizia torna a controllarla.
+I suoni dell'importazione, 1.113.0, prima: git pull in GBUtils, che deve avere i due suoni nuovi meteora_playlist_gia_importata e meteora_playlist_riletta; poi in Acu_Maker cerca playlist_gia e playlist_riletta e ascoltali.
+I suoni dell'importazione, 1.113.0: si riconoscono fra loro e dal jingle della playlist creata, che senti con Importa playlist?
+I suoni dell'importazione, 1.113.0: nelle prove qui sotto, in MeTeOra il loro volume sta con gli altri effetti?
+Importa playlist, 1.113.0, i passi: apri il ramo Playlist, scendi fino all'ultima voce, Importa playlist, e premi Invio; nella finestra dei file di Windows scegli una playlist M3U o PLS di un altro programma, meglio se ha qualche radio o qualche file che non c'è più.
+Importa playlist, 1.113.0: NVDA legge bene il comando e la finestra dei file?
+Importa playlist, 1.113.0: la riga Importata la playlist si capisce con NVDA e con il display braille?
+Importa playlist, 1.113.0: le righe Saltata, una per voce, si capiscono con NVDA e con il display braille?
+Da fuori, 1.113.0, i passi: con Apri file, nella plancia, scegli una playlist M3U nel filtro Playlist, che si importa e suona subito; poi rifallo con la stessa playlist.
+Da fuori, 1.113.0: la seconda volta, la riga La playlist viene già da, il suono suo e poi la musica si distinguono, o si accavallano?
+La domanda, 1.113.0, i passi: apri con il Blocco note la playlist che hai già importato, aggiungi una riga con un file vero, salva e importala di nuovo.
+La domanda, 1.113.0: la domanda È cambiato dopo l'importazione, rileggerlo? si legge bene con NVDA e in braille?
+La domanda, 1.113.0: Esc la chiude con il suono dell'annullamento?
+La domanda, 1.113.0: importala ancora e rispondi Sì: senti il suono della playlist riletta, e si distingue da quello della playlist che c'è già?
+Le associazioni, 1.113.0, solo con il programma compilato: nelle impostazioni rifai Associa, poi in Esplora risorse apri il menu contestuale di un file m3u o pls: in Apri con c'è MeTeOra?

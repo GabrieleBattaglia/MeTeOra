@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows.
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -55,6 +55,7 @@ import associazioni
 import braille
 import dettagli
 import formati
+import importazione
 import karaoke
 import marcatori
 import midi
@@ -292,7 +293,7 @@ TASTI_DEL_CONTESTO = {
     "gruppo_risultati": ("un ramo dei Risultati", "Freccia destra lo apre: i risultati stanno come stavano, sotto la loro playlist o lungo il percorso della loro cartella. Invio, Applicazioni o Spazio: menu con Salva come playlist."),
     "preferiti": ("i Preferiti", "Invio, Applicazioni o Spazio: menu con Riproduci, Filtro e, se c'è un filtro, Togli il filtro; Ordina, un sottomenu con i criteri, poi, dopo un riordino, Ordine di prima, e in fondo Inverti l'ordine; e Mescola. "
         "Barra verticale: il filtro. Canc su un loro brano lo toglie dai Preferiti."),
-    "radice_playlist": ("il ramo Playlist", "Invio, Applicazioni o Spazio: menu con Nuova playlist."),
+    "radice_playlist": ("il ramo Playlist", "Invio, Applicazioni o Spazio: menu con Nuova playlist e Importa playlist, che importa le playlist M3U, M3U8 e PLS di altri programmi."),
     "playlist": ("una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Filtro, Togli il filtro se c'è un filtro, Rinomina, Ordina, Mescola ed Elimina. "
         "Ordina è un sottomenu con i criteri, poi, dopo un riordino, Ordine di prima, e in fondo Inverti l'ordine. Barra verticale: il filtro. Canc elimina la playlist, dopo una conferma."),
     "brano": ("un brano di una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Sposta su, giù, in cima e in fondo, Saltato, Togli dalla playlist, Aggiungi ai preferiti, Rinomina file, Leggi i tag e Tag per i formati che li hanno, e Manda nel cestino. "
@@ -643,6 +644,49 @@ def al_plurale(n, singolare, plurale):
 
 def brani_al_plurale(n):
     return al_plurale(n, "brano", "brani")
+
+
+# Quante voci saltate la console elenca una per una, dopo l'importazione di
+# una playlist M3U o PLS; le altre si contano soltanto (Gabriele, 1.113.0).
+MASSIMO_DELLE_VOCI_SALTATE = 20
+
+
+def frase_delle_saltate(scartate):
+    """Le voci saltate di una playlist importata, contate per motivo:
+    Saltate 3 voci: 2 file che non ci sono, 1 indirizzo in rete. Con un
+    motivo solo il numero non si ripete: Saltate 2 voci: file che non ci sono."""
+    if not scartate:
+        return ""
+    testa = "Saltata 1 voce" if len(scartate) == 1 else f"Saltate {len(scartate)} voci"
+    motivi = importazione.conta_i_motivi(scartate)
+    if len(motivi) == 1:
+        motivo, quante = motivi[0]
+        return f"{testa}: {importazione.MOTIVI[motivo][0 if quante == 1 else 1]}."
+    return f"{testa}: {', '.join(al_plurale(quante, *importazione.MOTIVI[motivo]) for motivo, quante in motivi)}."
+
+
+def righe_delle_saltate(scartate, massimo=MASSIMO_DELLE_VOCI_SALTATE):
+    """Una riga per ogni voce saltata, con il motivo, fino a massimo; poi
+    quante altre ce ne sono."""
+    righe = [f"Saltata {voce.leggibile}: {importazione.MOTIVI[voce.motivo][0]}." for voce in scartate[:massimo]]
+    altre = len(scartate) - massimo
+    if altre == 1:
+        righe.append("E un'altra voce saltata.")
+    elif altre > 1:
+        righe.append(f"E altre {altre} voci saltate.")
+    return righe
+
+
+def frase_delle_tenute(tenute):
+    """Le voci delle radici che non hanno risposto, tenute senza controllo
+    come nella pulizia all'avvio: Tenute senza controllo 30 voci di F:, che
+    non risponde."""
+    if not tenute:
+        return ""
+    quante, radici = sum(tenute.values()), sorted(tenute)
+    elenco = radici[0] if len(radici) == 1 else f"{', '.join(radici[:-1])} e {radici[-1]}"
+    voci = "Tenuta senza controllo 1 voce" if quante == 1 else f"Tenute senza controllo {quante} voci"
+    return f"{voci} di {elenco}, che {'non risponde' if len(radici) == 1 else 'non rispondono'}."
 
 
 def _passo_nostro(nome_del_file):
@@ -1087,6 +1131,10 @@ class Finestra(wx.Frame):
         self._da_aprire = []
         self._apertura_esterna_pianificata = False
         self.ascolto_delle_copie = None
+        # Le playlist M3U e PLS da importare, una per una, come coppie
+        # (percorso, gruppo), e quella che si sta importando (1.113.0).
+        self._da_importare = []
+        self._importazione = None
         for controllo in (self.albero, self.console, self.cruscotto):
             controllo.SetDropTarget(_Trascinamento(self))
         # La barra dei comandi per il mouse, per chi vede (Gabriele, 1.87.0):
@@ -1450,9 +1498,16 @@ class Finestra(wx.Frame):
         percorsi, self._da_aprire = list(dict.fromkeys(self._da_aprire)), []
         if self._chiusa or not percorsi:
             return
+        # Le playlist M3U e PLS di altri programmi si importano, una per una,
+        # e la prima suona se non arriva altro da suonare (1.113.0). Quelle
+        # dentro una cartella non si guardano.
+        liste = [p for p in percorsi if formati.e_playlist(p) and os.path.isfile(p)]
+        if liste:
+            percorsi = [p for p in percorsi if p not in set(liste)]
         cartelle = [p for p in percorsi if os.path.isdir(p)]
         if len(cartelle) == len(percorsi) == 1:
             # Una cartella sola suona come X su di lei nella plancia.
+            self._importa_le_playlist(liste)
             self._riproduci_cartella(cartelle[0])
             return
         brani, scartati = [], []
@@ -1465,8 +1520,10 @@ class Finestra(wx.Frame):
                 scartati.append(os.path.basename(percorso.rstrip("\\")) or percorso)
         if scartati:
             self.scrivi(f"MeTeOra non suona {', '.join(scartati)}: non è un formato che conosce, o non c'è.")
+        self._importa_le_playlist(liste, None if brani else "suona")
         if not brani:
-            self._riscontro("niente_da_suonare", "Niente da suonare in quello che arriva da Windows.")
+            if not liste:
+                self._riscontro("niente_da_suonare", "Niente da suonare in quello che arriva da Windows.")
             return
         # Come Apri file: la lista non entra fra le playlist, e la sua
         # cartella vuota la tiene fuori da Questo PC.
@@ -2825,7 +2882,7 @@ class Finestra(wx.Frame):
         elif voce_selezionata.IsOk() and voce_selezionata != self.nodo_playlist and self._sotto(voce_selezionata, self.nodo_playlist):
             dati = self._dati(voce_selezionata) or {}
             dentro = True
-            selezionato = "nuova_playlist" if dati.get("comando") == "nuova_playlist" else (dati.get("brano") or dati.get("playlist"))
+            selezionato = dati.get("comando") or dati.get("brano") or dati.get("playlist")
         # Un sottobrano o un marker col fuoco si ritrova dentro il suo brano
         # (tappa 9), che dalla 1.109.0 rinasce aperto, come gli altri.
         interno = None
@@ -2863,9 +2920,12 @@ class Finestra(wx.Frame):
                 self._riapri_i_brani(nodo, brani_aperti)
                 if isinstance(selezionato, Brano):
                     da_selezionare = next((v for v in self._figli(nodo) if self._dati(v).get("brano") is selezionato), da_selezionare)
-        comando = self.albero.AppendItem(self.nodo_playlist, "Nuova playlist", data={"tipo": "comando", "comando": "nuova_playlist"})
-        if selezionato == "nuova_playlist":
-            da_selezionare = comando
+        # In fondo i comandi del ramo: Nuova playlist e, dalla 1.113.0,
+        # Importa playlist. Uno dei due col fuoco lo ritrova dal suo nome.
+        for etichetta, nome in (("Nuova playlist", "nuova_playlist"), ("Importa playlist", "importa_playlist")):
+            comando = self.albero.AppendItem(self.nodo_playlist, etichetta, data={"tipo": "comando", "comando": nome})
+            if selezionato == nome:
+                da_selezionare = comando
         if dentro:
             if da_selezionare is None or self._sotto(da_selezionare, self.nodo_playlist):
                 self.albero.Expand(self.nodo_playlist)
@@ -3311,7 +3371,7 @@ class Finestra(wx.Frame):
         # I dettagli della voce del menu, anche se intanto il fuoco si sposta.
         dettagli_della_voce = ("Leggi i dettagli", lambda: self._leggi_i_dettagli(dati))
         if tipo == "radice_playlist":
-            return [("Nuova playlist", self._comando_nuova_playlist), dettagli_della_voce]
+            return [("Nuova playlist", self._comando_nuova_playlist), ("Importa playlist", self._comando_importa_playlist), dettagli_della_voce]
         if tipo == "risultati":
             return [("Riproduci", lambda: self._riproduci_playlist(self.risultati)), ("Salva come playlist", self._salva_risultati),
                 ("Nuova ricerca", self._ricerca_globale), ("Ferma la ricerca", self._ferma_ricerca), dettagli_della_voce]
@@ -3594,21 +3654,23 @@ class Finestra(wx.Frame):
 
     # I dettagli dei contenitori (Gabriele, 4 ottobre 2026, 1.77.0).
 
-    def _in_disparte(self, lavoro, al_termine):
+    def _in_disparte(self, lavoro, al_termine, nome="MeTeOra, dettagli", guasto=None):
         """lavoro() in un filo a parte, e al_termine(esito) nel filo della
         finestra; le prove lo sostituiscono per fare tutto subito. Un guasto
-        del lavoro arriva ad al_termine come riga della console, e poi risale
-        come problema interno, invece di lasciare chi aspetta nel silenzio."""
+        del lavoro arriva ad al_termine come riga della console, o come
+        guasto(errore) se c'e', e poi risale come problema interno, invece di
+        lasciare chi aspetta nel silenzio. nome e' quello del filo: dalla
+        1.113.0 lavora qui anche l'importazione delle playlist."""
 
         def fai():
             try:
                 esito = lavoro()
             except Exception as errore:
-                wx.CallAfter(al_termine, [f"Non riesco a raccogliere i dettagli: {errore}"])
+                wx.CallAfter(al_termine, guasto(errore) if guasto else [f"Non riesco a raccogliere i dettagli: {errore}"])
                 raise
             wx.CallAfter(al_termine, esito)
 
-        threading.Thread(target=fai, name="MeTeOra, dettagli", daemon=True).start()
+        threading.Thread(target=fai, name=nome, daemon=True).start()
 
     def _durata_del_percorso(self, percorso):
         return (self.schedario.scheda(percorso) or {}).get("durata")
@@ -3733,6 +3795,8 @@ class Finestra(wx.Frame):
     def _dettagli_dei_brani(self, titolo, brani, pl=None, fermo=None):
         """Le righe di una playlist, dei Preferiti, dei Risultati o di un loro ramo."""
         righe = [f"{titolo}: {al_plurale(len(brani), 'brano', 'brani')}."]
+        if pl is not None and pl.origine:
+            righe.append(f"Importata da {pl.origine['percorso']}.")
         if not brani:
             return righe
         censimento = dettagli.censisci_brani([b.percorso for b in brani], fermo)
@@ -4111,7 +4175,7 @@ class Finestra(wx.Frame):
         oggetto = interno = None
         if rinasce:
             dati = self._dati(approdo) or {}
-            oggetto = "nuova_playlist" if dati.get("comando") == "nuova_playlist" else (dati.get("brano") or dati.get("playlist"))
+            oggetto = dati.get("comando") or dati.get("brano") or dati.get("playlist")
             interno = dict(dati)
         self._azzera_la_selezione()
         if approdo is not None and not rinasce:
@@ -4223,6 +4287,251 @@ class Finestra(wx.Frame):
         self._salva_archivio()
         self._popola_playlist(seleziona=pl)
         self._riscontro("nuova_playlist", f"Creata la playlist {pl.nome}, vuota. Si riempie da Questo PC, con Aggiungi alla playlist.")
+
+    # L'importazione delle playlist di altri programmi (Gabriele, 20 ottobre 2026, 1.113.0).
+
+    def _comando_importa_playlist(self):
+        """Importa playlist, nel ramo Playlist e nel suo menu: la finestra dei
+        file di Windows, a selezione multipla. Le playlist scelte si importano
+        una per una e si salvano soltanto; la selezione va sulla prima, come
+        con Nuova playlist."""
+        self._domanda()
+        stile = wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE
+        with DialogoDiFile(self, "Importa playlist", wildcard=formati.filtro_delle_playlist(), style=stile) as dialogo:
+            if dialogo.ShowModal() != wx.ID_OK:
+                self._annullato("Nessuna playlist importata.")
+                return
+            percorsi = list(dialogo.GetPaths())
+        liste = [p for p in percorsi if formati.e_playlist(p)]
+        altri = [os.path.basename(p) for p in percorsi if not formati.e_playlist(p)]
+        if altri:
+            cosa = "non è una playlist" if len(altri) == 1 else "non sono playlist"
+            self._riscontro("non_disponibile", f"{', '.join(altri)}: {cosa}. MeTeOra importa i file m3u, m3u8 e pls.")
+        self._importa_le_playlist(liste, "seleziona")
+
+    def _importa_le_playlist(self, percorsi, dopo=None):
+        """Mette in coda le playlist M3U, M3U8 e PLS da importare, che si
+        importano una per una. dopo dice cosa fare della prima del gruppo che
+        si importa, o che c'era gia': "suona" per quelle che arrivano da fuori,
+        da Windows o da Apri file; "seleziona" per il comando Importa
+        playlist; None quando insieme arrivano altri file, che suonano loro.
+        Se un'altra importazione le tiene in coda, _avvisa_se_aspetta."""
+        if not percorsi:
+            return
+        gruppo = {"dopo": dopo}
+        coda = [(percorso, gruppo) for percorso in percorsi]
+        self._da_importare.extend(coda)
+        self._prossima_importazione()
+        if any(voce is coda[0] for voce in self._da_importare):
+            self._avvisa_se_aspetta(coda)
+
+    def _avvisa_se_aspetta(self, coda):
+        """Le playlist appena arrivate aspettano un'altra importazione, per
+        esempio da una condivisione lenta: se dopo un attimo la prima non e'
+        ancora partita, la console lo dice una volta, perche' chi le ha
+        mandate non resti nel silenzio."""
+
+        def se_aspetta():
+            lavoro = self._importazione
+            in_attesa = [voce for voce in coda if any(voce is altra for altra in self._da_importare)]
+            if self._chiusa or lavoro is None or not in_attesa or in_attesa[0] is not coda[0]:
+                return
+            nome, altre = os.path.basename(coda[0][0]), len(in_attesa) - 1
+            if altre == 0:
+                chi = f"{nome} aspetta"
+            elif altre == 1:
+                chi = f"{nome} e un'altra playlist aspettano"
+            else:
+                chi = f"{nome} e altre {altre} playlist aspettano"
+            self.scrivi(f"{chi} che finisca l'importazione di {lavoro['nome']}.")
+
+        wx.CallLater(800, se_aspetta)
+
+    def _prossima_importazione(self):
+        """La prossima playlist della coda, se nessuna si sta importando:
+        la lettura del file in un filo a parte, poi _playlist_letta."""
+        if self._chiusa or self._importazione is not None or not self._da_importare:
+            return
+        percorso, gruppo = self._da_importare.pop(0)
+        lavoro = self._importazione = {"percorso": percorso, "nome": os.path.basename(percorso), "gruppo": gruppo}
+        self._avvisa_se_tarda(lavoro, f"Leggo {lavoro['nome']}: ci vuole qualche secondo.")
+        self._in_disparte(lambda: importazione.leggi(percorso), lambda letta: self._esito_dell_importazione(self._playlist_letta, lavoro, letta),
+            "MeTeOra, importazione", guasto=self._guasto_dell_importazione)
+
+    @staticmethod
+    def _guasto_dell_importazione(errore):
+        return {"errore": f"{type(errore).__name__}: {errore}" if str(errore) else type(errore).__name__}
+
+    def _avvisa_se_tarda(self, lavoro, testo):
+        """Se la lettura o il controllo dei file tardano, come su una
+        condivisione lenta, la console lo dice una volta."""
+        segno = lavoro["attesa"] = object()
+
+        def se_tarda():
+            if not self._chiusa and self._importazione is lavoro and lavoro.get("attesa") is segno:
+                self.scrivi(testo)
+
+        wx.CallLater(800, se_tarda)
+
+    def _esito_dell_importazione(self, funzione, lavoro, *argomenti):
+        """L'esito del filo dell'importazione e' arrivato: l'avviso di chi
+        tarda non serve piu', anche se funzione aspetta la fine di un dialogo."""
+        lavoro["attesa"] = None
+        self._quando_libera(funzione, lavoro, *argomenti)
+
+    def _quando_libera(self, funzione, *argomenti):
+        """funzione quando la finestra non ha un dialogo aperto, come per la
+        pulizia all'avvio: una domanda o la plancia che cambia non arrivano
+        sotto le mani di un'altra finestra, come le impostazioni."""
+        if self._chiusa:
+            return
+        if not ctypes.windll.user32.IsWindowEnabled(self.GetHandle()):
+            wx.CallLater(500, self._quando_libera, funzione, *argomenti)
+            return
+        funzione(*argomenti)
+
+    def _importazione_finita(self, lavoro):
+        if self._importazione is lavoro:
+            self._importazione = None
+        self._prossima_importazione()
+
+    def _scrivi_l_importazione(self, evento, righe):
+        """Il resoconto: una riga sola come ogni riscontro, piu' righe con
+        l'ora solo in fondo, senza spostare il fuoco."""
+        self._domanda_viva = None
+        if len(righe) == 1:
+            self._riscontro(evento, righe[0])
+        else:
+            self._stampa(evento, righe, porta_il_fuoco=False)
+
+    def _playlist_letta(self, lavoro, letta):
+        """Il file della playlist e' letto. Se una playlist viene gia' da lui
+        e il file non e' cambiato, si usa quella; se e' cambiato, si chiede se
+        rileggerlo, e No o Esc tengono quella che c'e'. Altrimenti i file
+        delle voci si controllano in un filo a parte, come nella pulizia."""
+        if self._chiusa or self._importazione is not lavoro:
+            return
+        percorso, nome = lavoro["percorso"], lavoro["nome"]
+        if "errore" in letta:
+            self._riscontro("errore", f"Non riesco a leggere {nome}: {letta['errore']}")
+            self._importazione_finita(lavoro)
+            return
+        if letta["libgme"]:
+            self._riscontro("niente_da_suonare", f"Niente da importare da {nome}: è la lista dei brani di {letta['libgme']}, che MeTeOra usa già da sola "
+                f"quando suona {letta['libgme']}.")
+            self._importazione_finita(lavoro)
+            return
+        esistente = self.archivio.dall_origine(percorso)
+        if esistente is not None:
+            if not importazione.cambiata(esistente.origine, letta["origine"]):
+                self._riscontro("playlist_gia_importata", f"La playlist {esistente.nome} viene già da {percorso}.")
+                self._dopo_l_importazione(lavoro, esistente)
+                return
+            if not self._conferma(f"{nome} è cambiato dopo l'importazione. Rileggerlo, perdendo le modifiche fatte in MeTeOra?", "Importa playlist"):
+                self._annullato(f"La playlist {esistente.nome} resta com'è.")
+                self._dopo_l_importazione(lavoro, esistente)
+                return
+        voci = letta["voci"]
+        if not voci:
+            if esistente is not None:
+                # Si' alla rilettura di un file svuotato: resta quella che
+                # c'e', e va avanti come con No.
+                self._riscontro("niente_da_suonare", f"Niente da rileggere da {nome}: non ha nessuna voce, e la playlist {esistente.nome} resta com'è.")
+                self._dopo_l_importazione(lavoro, esistente)
+                return
+            self._riscontro("niente_da_suonare", f"Niente da importare da {nome}: non ha nessuna voce.")
+            self._importazione_finita(lavoro)
+            return
+        candidati = [voce.percorso for voce in voci if voce.motivo is None]
+        if not candidati:
+            self._playlist_controllata(lavoro, letta, esistente, {"mancanti": set(), "saltate": {}})
+            return
+        self._avvisa_se_tarda(lavoro, f"Controllo i file di {nome}: ci vuole qualche secondo.")
+        self._in_disparte(lambda: pulizia.controlla(candidati, fermo=lambda: self._chiusa, cedi=self._cedi),
+            lambda esito: self._esito_dell_importazione(self._playlist_controllata, lavoro, letta, esistente, esito), "MeTeOra, importazione",
+            guasto=self._guasto_dell_importazione)
+
+    def _playlist_controllata(self, lavoro, letta, esistente, esito):
+        """I file delle voci sono controllati: si tolgono quelli che mancano
+        su una radice che risponde, e si tengono quelli delle radici che non
+        rispondono. Nasce la playlist nuova, con il nome del file, o quella
+        che c'era prende i brani nuovi; la console dice cosa e' arrivato e
+        cosa si e' saltato."""
+        if self._chiusa or self._importazione is not lavoro:
+            return
+        percorso, nome = lavoro["percorso"], lavoro["nome"]
+        if "errore" in esito:
+            self._riscontro("errore", f"Non riesco a controllare i file di {nome}: {esito['errore']}")
+            self._importazione_finita(lavoro)
+            return
+        if esistente is not None and esistente not in self.archivio.playlist:
+            # Eliminata mentre si controllavano i file: si importa da capo.
+            esistente = None
+        percorsi, scartate, tenute = importazione.esito(letta["voci"], esito["mancanti"], esito.get("saltate"))
+        saltate = [frase_delle_saltate(scartate), frase_delle_tenute(tenute)]
+        if not percorsi:
+            if esistente is not None:
+                testa = f"Niente da rileggere da {nome}: la playlist {esistente.nome} resta com'è."
+            else:
+                testa = f"Niente da importare da {nome}."
+            self._scrivi_l_importazione("niente_da_suonare", [" ".join(t for t in (testa, *saltate) if t), *righe_delle_saltate(scartate)])
+            if esistente is not None:
+                # Resta quella che c'e', e va avanti come con No.
+                self._dopo_l_importazione(lavoro, esistente)
+            else:
+                self._importazione_finita(lavoro)
+            return
+        brani = [Brano(p) for p in percorsi]
+        seleziona = lavoro["gruppo"]["dopo"] == "seleziona"
+        if esistente is not None:
+            # Nome, posto, filtro e tasto cifra restano; cambiano i brani. Il
+            # brano che suona continua, e poi si riparte dal primo, come
+            # quando si toglie il brano corrente; il loop su di lei si toglie.
+            # Il fuoco su uno dei suoi brani di prima va sulla playlist.
+            pl = esistente
+            dati = self._dati(self._voce_corrente()) or {}
+            seleziona = seleziona or (dati.get("playlist") is pl and dati.get("tipo") != "playlist")
+            pl.brani[:] = brani
+            pl.origine = letta["origine"]
+            if self.coda.loop_playlist is pl:
+                self.coda.togli_loop()
+            evento, testa = "playlist_riletta", f"Riletta la playlist {pl.nome}: {brani_al_plurale(len(brani))}, da {percorso}."
+        else:
+            pl = self.archivio.nuova(os.path.splitext(nome)[0].strip() or "Playlist", percorsi)
+            pl.origine = letta["origine"]
+            self._statistiche.conta("playlist_importate")
+            self._statistiche.conta("brani_importati", len(brani))
+            evento, testa = "playlist_creata", f"Importata la playlist {pl.nome}: {brani_al_plurale(len(brani))}, da {percorso}."
+        self._chiedi_schede(pl)
+        self._salva_archivio()
+        self._popola_playlist(seleziona=pl if seleziona else None)
+        if lavoro["gruppo"]["dopo"] == "seleziona":
+            lavoro["gruppo"]["dopo"] = None
+        self._scrivi_l_importazione(evento, [" ".join(t for t in (testa, *saltate) if t), *righe_delle_saltate(scartate)])
+        self._dopo_l_importazione(lavoro, pl)
+
+    def _dopo_l_importazione(self, lavoro, pl):
+        """La playlist importata, o quella che c'era gia': la prima del gruppo
+        suona, se arriva da fuori, dopo il suono del resoconto; dal comando
+        Importa playlist la selezione va su di lei. Poi la prossima della coda."""
+        gruppo = lavoro["gruppo"]
+        if gruppo["dopo"] == "suona":
+            gruppo["dopo"] = None
+            self._dopo_il_suono(self._suona_l_importata, pl)
+        elif gruppo["dopo"] == "seleziona":
+            gruppo["dopo"] = None
+            self._popola_playlist(seleziona=pl)
+        self._importazione_finita(lavoro)
+
+    def _suona_l_importata(self, pl):
+        """Come un file aperto da Windows: suona subito, dal primo brano che si puo' suonare."""
+        if self._chiusa or pl not in self.archivio.playlist:
+            return
+        brano = self.coda.primo(pl)
+        if brano is None:
+            self._riscontro("niente_da_suonare", f"La playlist {pl.nome} non ha brani da suonare.")
+            return
+        self._suona(pl, brano, "file_aperto")
 
     def _aggiungi(self, pl, percorsi_da_aggiungere, nome=None):
         if not percorsi_da_aggiungere:
@@ -6149,6 +6458,10 @@ class Finestra(wx.Frame):
                 self._annullato("Nessun file aperto.")
                 return
             percorso = dialogo.GetPath()
+        if formati.e_playlist(percorso):
+            # Una playlist di altri programmi si importa, e poi suona (1.113.0).
+            self._importa_le_playlist([percorso], "suona")
+            return
         # Il file aperto non entra in nessuna playlist: resta finche' non si
         # suona altro. La sua cartella vuota lo tiene fuori da Questo PC.
         pl = Playlist("file aperto", [Brano(percorso)], cartella="")

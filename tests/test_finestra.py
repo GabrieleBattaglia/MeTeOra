@@ -1,6 +1,6 @@
 # MeTeOra, le prove della finestra principale, sul desktop nascosto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21). Nella 1.112.0 quelle dei dischi della pulizia, anche del loro file che non si legge, e la prova della pulizia che toglie i file spariti non fa piu' leggere allo schedario i file finti; poi Riconosci questo disco, la riga che lo indica e la Sentinella che guarda i dischi dei file usati; infine la domanda di Riconosci questo disco con il conto delle voci, e la riga e il suono della Sentinella.
+# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21). Nella 1.112.0 quelle dei dischi della pulizia, anche del loro file che non si legge, e la prova della pulizia che toglie i file spariti non fa piu' leggere allo schedario i file finti; poi Riconosci questo disco, la riga che lo indica e la Sentinella che guarda i dischi dei file usati; infine la domanda di Riconosci questo disco con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 quelle dell'importazione delle playlist M3U, M3U8 e PLS.
 
 import contextlib
 import ctypes
@@ -56,7 +56,7 @@ def test_aree_nell_ordine_di_tabulazione(finestra):
 
 def test_rami_principali(finestra):
     assert _etichette(finestra, finestra.albero.GetRootItem()) == ["Preferiti, brani: 0, totali: 0", "Playlist", "Questo PC", "Questa rete", "Apri file", "Statistiche", "Impostazioni"]
-    assert _etichette(finestra, finestra.nodo_playlist) == ["Nuova playlist"]
+    assert _etichette(finestra, finestra.nodo_playlist) == ["Nuova playlist", "Importa playlist"]
 
 
 def test_questo_pc_si_carica_all_espansione(finestra):
@@ -2154,7 +2154,8 @@ def test_maiuscolo_e_ctrl_con_le_frecce_senza_passare_dall_albero(finestra):
     # Dopo Ctrl l'ancora resta, come in Esplora risorse: Maiuscolo con Fine
     # seleziona da b fino in fondo.
     _nell_albero(finestra, wx.WXK_END, maiuscolo=True)
-    assert _selezionate(finestra) == sorted(["b.mp3", "c.mp3", "d.mp3", "Nuova playlist", "Questo PC", "Questa rete", "Apri file", "Statistiche", "Impostazioni"])
+    assert _selezionate(finestra) == sorted(["b.mp3", "c.mp3", "d.mp3", "Nuova playlist", "Importa playlist", "Questo PC", "Questa rete", "Apri file", "Statistiche",
+        "Impostazioni"])
     assert finestra.albero.GetItemText(finestra._voce_corrente()) == "Impostazioni"
     # Un altro tasto lascia l'ancora: si riparte dalla voce col fuoco.
     _nell_albero(finestra, wx.WXK_LEFT)
@@ -8643,3 +8644,379 @@ def test_durata_residua_interrompe_la_voce(finestra, monkeypatch, sintesi_finta)
     finestra.motore._in_corso = None
     assert _durata_residua(finestra) == "Non sta suonando niente."
     assert sintesi_finta.interrotti[2:] == [("sapi5", "Non sta suonando niente.")]
+
+
+
+# L'importazione delle playlist di altri programmi (Gabriele, 20 ottobre 2026, 1.113.0).
+
+class _FileScelti(_FileFinto):
+    """Il dialogo dei file a selezione multipla, che risponde con piu' percorsi."""
+
+    def GetPaths(self):
+        return [str(p) for p in self.percorso]
+
+
+@pytest.fixture
+def cartella_visibile():
+    """Una cartella accanto al progetto: le temporanee di Windows stanno sotto
+    AppData, che e' nascosta."""
+    import tempfile
+
+    with tempfile.TemporaryDirectory(dir=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) as radice:
+        yield radice
+
+
+def _importazione_subito(finestra, monkeypatch):
+    """La lettura e il controllo dei file fatti subito, nel filo della prova,
+    con il guasto che arriva come nel filo vero. Lo schedario non legge i
+    file finti, che la sonda di libmpv terrebbe aperti mentre la cartella si
+    cancella; i suoni non si aspettano, e le attese rimandate si annotano."""
+
+    def subito(lavoro, al_termine, nome="", guasto=None):
+        try:
+            esito = lavoro()
+        except Exception as errore:
+            if guasto is None:
+                raise
+            esito = guasto(errore)
+        al_termine(esito)
+
+    monkeypatch.setattr(finestra, "_in_disparte", subito)
+    monkeypatch.setattr(finestra.schedario, "chiedi", lambda _percorsi: None)
+    monkeypatch.setattr(modulo.suoni, "attesa", lambda: 0.0)
+    rimandate = []
+    monkeypatch.setattr(modulo.wx, "CallLater", lambda ms, f, *a: rimandate.append((ms, f, a)))
+    return rimandate
+
+
+def _file(percorso, testo="", codifica="utf-8"):
+    os.makedirs(os.path.dirname(percorso), exist_ok=True)
+    with open(percorso, "w", encoding=codifica, newline="") as f:
+        f.write(testo)
+    return percorso
+
+
+def test_il_ramo_playlist_ha_il_comando_importa_playlist(finestra, monkeypatch, suoni_annotati):
+    finestra._comando_nuova_playlist()
+    assert _etichette(finestra, finestra.nodo_playlist) == ["Playlist, brani: 0, totali: 0", "Nuova playlist", "Importa playlist"]
+    assert [nome for nome, _azione in finestra._voci_del_menu({"tipo": "radice_playlist"})] == ["Nuova playlist", "Importa playlist", "Leggi i dettagli"]
+    assert "Importa playlist" in modulo.TASTI_DEL_CONTESTO["radice_playlist"][1]
+    # Il fuoco sul comando si ritrova quando il ramo si ricostruisce.
+    finestra._seleziona(list(finestra._figli(finestra.nodo_playlist))[-1])
+    finestra._popola_playlist()
+    assert finestra.albero.GetItemText(finestra._voce_corrente()) == "Importa playlist"
+    # Invio lo esegue: la finestra dei file, a selezione multipla; Annulla non importa niente.
+    monkeypatch.setattr(modulo, "DialogoDiFile", _FileFinto(None))
+    finestra._esegui_invio(types.SimpleNamespace(GetItem=finestra._voce_corrente))
+    _genitore, titolo, opzioni = modulo.DialogoDiFile.aperture[0]
+    assert titolo == "Importa playlist" and opzioni["style"] & wx.FD_MULTIPLE
+    assert opzioni["wildcard"] == "Playlist (*.m3u;*.m3u8;*.pls)|*.m3u;*.m3u8;*.pls|Tutti i file (*.*)|*.*"
+    assert _ultima(finestra) == "Nessuna playlist importata." and suoni_annotati[-2:] == ["domanda", "annullamento"]
+    # Eliminata l'ultima playlist, il fuoco va su Nuova playlist, come prima.
+    monkeypatch.setattr(finestra, "_conferma", lambda domanda, titolo: True)
+    finestra._elimina_playlist(finestra.archivio.playlist[0])
+    assert finestra.albero.GetItemText(finestra._voce_corrente()) == "Nuova playlist"
+
+
+def test_importa_playlist_dal_comando(finestra, monkeypatch, suoni_annotati, cartella_visibile):
+    import json
+
+    _importazione_subito(finestra, monkeypatch)
+    suonati = _finto_motore(finestra, monkeypatch)
+    musica = os.path.join(cartella_visibile, "Musica")
+    os.makedirs(os.path.join(musica, "Album"))
+    for nome in ("uno.mp3", "due.flac"):
+        _file(os.path.join(musica, nome))
+    m3u = _file(os.path.join(musica, "Rock anni 80.m3u"), "#EXTM3U\n#EXTINF:10,Uno\nuno.mp3\nhttp://radio.example/flusso\nmanca.mp3\nAlbum\ndue.flac\nuno.mp3\n")
+    finestra._aggiungi(None, [os.path.join(musica, "due.flac")], nome="Rock anni 80")
+    finestra._seleziona(finestra.nodo_preferiti)
+    monkeypatch.setattr(modulo, "DialogoDiFile", _FileScelti([m3u, os.path.join(musica, "uno.mp3")]))
+    finestra._comando_importa_playlist()
+    # Un file che non e' una playlist lo si dice; la playlist prende il nome del file, con il numero se c'e' gia'.
+    assert "uno.mp3: non è una playlist. MeTeOra importa i file m3u, m3u8 e pls." in [_senza_ora(r) for r in finestra._righe]
+    pl = finestra.archivio.playlist[1]
+    assert pl.nome == "Rock anni 80 2" and [b.percorso for b in pl.brani] == [os.path.join(musica, n) for n in ("uno.mp3", "due.flac", "uno.mp3")]
+    assert pl.origine == {"percorso": m3u, "data": os.path.getmtime(m3u), "dimensione": os.path.getsize(m3u)}
+    assert [_senza_ora(r) for r in finestra._righe[-4:]] == [
+        f"Importata la playlist Rock anni 80 2: 3 brani, da {m3u}. Saltate 3 voci: 1 file che non c'è, 1 indirizzo in rete, 1 cartella.",
+        "Saltata http://radio.example/flusso: indirizzo in rete.",
+        f"Saltata {os.path.join(musica, 'manca.mp3')}: file che non c'è.",
+        f"Saltata {os.path.join(musica, 'Album')}: cartella.",
+    ]
+    assert suoni_annotati[-1] == "playlist_creata" and suonati == []
+    # Dal comando si salva soltanto, e la selezione va sulla playlist nuova, come con Nuova playlist.
+    assert finestra.albero.GetItemText(finestra._voce_corrente()).startswith("Rock anni 80 2, brani: 3")
+    with open(finestra.archivio.percorso, encoding="utf-8") as f:
+        assert json.load(f)["playlist"][1]["origine"]["percorso"] == m3u
+    conti = finestra._statistiche.dati["conti"]
+    assert conti["playlist_importate"] == 1 and conti["brani_importati"] == 3
+    righe = modulo.statistiche.Pagina(finestra._statistiche, "", None, None, {}, {}, {}).le_playlist()
+    assert "importate 1, da una selezione o dal menu 1," in righe[0] and righe[1].startswith("Playlist importate da un M3U o da un PLS: 1, con 3 brani;")
+    # F11 sulla playlist dice da dove viene.
+    _tasto(finestra, codice=wx.WXK_F11)
+    assert f"Importata da {m3u}." in [_senza_ora(r) for r in finestra._righe[-8:]]
+
+
+def test_una_playlist_gia_importata_si_riusa_o_si_rilegge(finestra, monkeypatch, suoni_annotati, cartella_visibile):
+    _importazione_subito(finestra, monkeypatch)
+    suonati = _finto_motore(finestra, monkeypatch)
+    musica = os.path.join(cartella_visibile, "Musica")
+    for nome in ("a.mp3", "b.mp3", "c.mp3"):
+        _file(os.path.join(musica, nome))
+    m3u = _file(os.path.join(musica, "Rock.m3u"), "a.mp3\nb.mp3\n")
+    finestra._importa_le_playlist([m3u], "seleziona")
+    pl, = finestra.archivio.playlist
+    # Rinominata, con un filtro e un loop, arriva da Windows con il file com'era: si usa lei, e suona.
+    pl.nome, pl.filtro = "Rock anni 80", "mp3"
+    finestra.coda.loop_playlist, finestra.coda.punto_a = pl, pl.brani[0]
+    finestra.apri_dall_esterno([m3u])
+    finestra._apri_i_percorsi()
+    assert finestra.archivio.playlist == [pl] and suonati == [("a.mp3", None)] and finestra.coda.playlist is pl
+    assert f"La playlist Rock anni 80 viene già da {m3u}." in [_senza_ora(r) for r in finestra._righe[-3:]]
+    assert suoni_annotati[-2:] == ["playlist_gia_importata", "file_aperto"]
+    # Il file cambia: la domanda; No ed Esc tengono quella che c'e'.
+    with open(m3u, "a", encoding="utf-8") as f:
+        f.write("c.mp3\n")
+    domande = []
+    monkeypatch.setattr(finestra, "_conferma", lambda domanda, titolo: domande.append((domanda, titolo)) or False)
+    finestra._importa_le_playlist([m3u], "seleziona")
+    assert domande == [("Rock.m3u è cambiato dopo l'importazione. Rileggerlo, perdendo le modifiche fatte in MeTeOra?", "Importa playlist")]
+    assert _ultima(finestra) == "La playlist Rock anni 80 resta com'è." and suoni_annotati[-1] == "annullamento" and len(pl.brani) == 2
+    # Si': cambiano solo i brani, e il loop su di lei si toglie; il brano che suona continua, poi B riparte dal primo.
+    # Il fuoco su uno dei brani di prima va sulla playlist.
+    nodo = next(finestra._figli(finestra.nodo_playlist))
+    finestra.albero.Expand(nodo)
+    finestra._seleziona(next(finestra._figli(nodo)))
+    monkeypatch.setattr(finestra, "_conferma", lambda domanda, titolo: True)
+    finestra._importa_le_playlist([m3u])
+    assert finestra._dati(finestra._voce_corrente())["playlist"] is pl and finestra._dati(finestra._voce_corrente())["tipo"] == "playlist"
+    assert finestra.archivio.playlist == [pl] and (pl.nome, pl.filtro) == ("Rock anni 80", "mp3")
+    assert [os.path.basename(b.percorso) for b in pl.brani] == ["a.mp3", "b.mp3", "c.mp3"] and finestra.coda.loop_playlist is None
+    assert _ultima(finestra) == f"Riletta la playlist Rock anni 80: 3 brani, da {m3u}." and suoni_annotati[-1] == "playlist_riletta"
+    assert pl.origine["dimensione"] == os.path.getsize(m3u) and pl.indice(finestra.coda.corrente) is None
+    assert finestra.coda.successivo() is pl.brani[0]
+    # Riletto un'altra volta, ora che e' com'era, non chiede piu'.
+    finestra._importa_le_playlist([m3u])
+    assert _ultima(finestra) == f"La playlist Rock anni 80 viene già da {m3u}."
+
+
+def test_le_playlist_da_windows_e_da_apri_file(finestra, monkeypatch, suoni_annotati, cartella_visibile):
+    _importazione_subito(finestra, monkeypatch)
+    suonati = _finto_motore(finestra, monkeypatch)
+    musica = os.path.join(cartella_visibile, "Musica")
+    a, b = _file(os.path.join(musica, "a.mp3")), _file(os.path.join(musica, "b.mp3"))
+    uno = _file(os.path.join(musica, "uno.m3u8"), "\ufeffa.mp3\n")
+    due = _file(os.path.join(musica, "due.pls"), "[playlist]\nFile1=b.mp3\nNumberOfEntries=1\n")
+    finestra._seleziona(finestra.nodo_preferiti)
+    # Arrivate insieme si importano una per una, e suona la prima; la selezione non si sposta.
+    finestra.apri_dall_esterno([uno, due])
+    finestra._apri_i_percorsi()
+    assert [p.nome for p in finestra.archivio.playlist] == ["uno", "due"]
+    assert suonati == [("a.mp3", None)] and finestra.coda.playlist is finestra.archivio.playlist[0]
+    assert finestra._voce_corrente() == finestra.nodo_preferiti
+    # Con altri file suonano quelli, come file aperti, e la playlist si importa soltanto.
+    tre = _file(os.path.join(musica, "tre.m3u"), "a.mp3\n")
+    finestra.apri_dall_esterno([tre, b])
+    finestra._apri_i_percorsi()
+    assert suonati[-1] == ("b.mp3", None) and len(suonati) == 2 and finestra.coda.playlist.nome == "file aperto"
+    assert finestra.archivio.playlist[-1].nome == "tre"
+    # Apri file ha il filtro delle playlist, e una playlist scelta li' si importa e suona.
+    quattro = _file(os.path.join(musica, "quattro.m3u"), f"{a}\n")
+    monkeypatch.setattr(modulo, "DialogoDiFile", _FileFinto(quattro))
+    finestra._comando_apri_file()
+    filtri = modulo.DialogoDiFile.aperture[0][2]["wildcard"].split("|")
+    assert "*.m3u;*.m3u8" in filtri[1] and "*.mp3" in filtri[1] and filtri[2:] == ["Playlist (*.m3u;*.m3u8;*.pls)", "*.m3u;*.m3u8;*.pls", "Tutti i file (*.*)", "*.*"]
+    assert finestra.archivio.playlist[-1].nome == "quattro" and suonati[-1] == ("a.mp3", None) and finestra.coda.playlist is finestra.archivio.playlist[-1]
+    # Una playlist che non c'e' piu' resta fra i file che MeTeOra non suona.
+    finestra.apri_dall_esterno([os.path.join(musica, "sparita.m3u")])
+    finestra._apri_i_percorsi()
+    assert _ultima(finestra) == "Niente da suonare in quello che arriva da Windows."
+
+
+def test_le_playlist_senza_niente_da_importare(finestra, monkeypatch, suoni_annotati, cartella_visibile):
+    _importazione_subito(finestra, monkeypatch)
+    radio = _file(os.path.join(cartella_visibile, "radio.m3u"), "#EXTM3U\nhttp://a.example/1\nhttps://b.example/2\n")
+    finestra._importa_le_playlist([radio])
+    assert finestra.archivio.playlist == [] and suoni_annotati[-1] == "niente_da_suonare"
+    assert [_senza_ora(r) for r in finestra._righe[-3:]] == ["Niente da importare da radio.m3u. Saltate 2 voci: indirizzi in rete.",
+        "Saltata http://a.example/1: indirizzo in rete.", "Saltata https://b.example/2: indirizzo in rete."]
+    vuota = _file(os.path.join(cartella_visibile, "vuota.m3u"), "#EXTM3U\n")
+    finestra._importa_le_playlist([vuota])
+    assert _ultima(finestra) == "Niente da importare da vuota.m3u: non ha nessuna voce."
+    gioco = _file(os.path.join(cartella_visibile, "gioco.m3u"), "gioco.nsf::NSF,1,Titolo,2:30\n", "cp1252")
+    finestra._importa_le_playlist([gioco])
+    assert _ultima(finestra) == "Niente da importare da gioco.m3u: è la lista dei brani di gioco.nsf, che MeTeOra usa già da sola quando suona gioco.nsf."
+    finestra._importa_le_playlist([os.path.join(cartella_visibile, "sparita.m3u")])
+    assert _ultima(finestra).startswith("Non riesco a leggere sparita.m3u: ") and suoni_annotati[-1] == "errore"
+    # Un guasto del controllo lo dice la console, e la coda va avanti con la seguente.
+    _file(os.path.join(cartella_visibile, "a.mp3"))
+    buona = _file(os.path.join(cartella_visibile, "buona.m3u"), "a.mp3\n")
+
+    def guasto(*_a, **_k):
+        raise RuntimeError("disco in fiamme")
+
+    monkeypatch.setattr(modulo.pulizia, "controlla", guasto)
+    finestra._importa_le_playlist([buona, radio])
+    assert "Non riesco a controllare i file di buona.m3u: RuntimeError: disco in fiamme" in [_senza_ora(r) for r in finestra._righe]
+    assert _ultima(finestra) == "Saltata https://b.example/2: indirizzo in rete." and finestra.archivio.playlist == []
+    assert finestra._importazione is None and finestra._da_importare == []
+
+
+def test_il_resoconto_e_le_radici_che_non_rispondono(finestra, monkeypatch, suoni_annotati, cartella_visibile):
+    # Come la pulizia: le voci di una radice che non risponde restano, senza
+    # controllo; la console elenca fino a venti voci saltate.
+    _importazione_subito(finestra, monkeypatch)
+    a = _file(os.path.join(cartella_visibile, "a.mp3"))
+    m3u = _file(os.path.join(cartella_visibile, "Misto.m3u"), "\n".join(["a.mp3", r"F:\lontano\b.mp3", r"F:\lontano\c.mp3", *[f"http://radio/{n}" for n in range(25)]]))
+    controllati = []
+
+    def controlla(percorsi, fermo=None, cedi=None):
+        controllati.append((list(percorsi), cedi))
+        return {"mancanti": set(), "saltate": {"F:": 2}, "nomi_veri": {}, "controllati": 1}
+
+    monkeypatch.setattr(modulo.pulizia, "controlla", controlla)
+    finestra._seleziona(finestra.nodo_preferiti)
+    finestra._importa_le_playlist([m3u])
+    assert controllati == [([a, r"F:\lontano\b.mp3", r"F:\lontano\c.mp3"], finestra._cedi)]
+    assert len(finestra.archivio.playlist[0].brani) == 3 and finestra._voce_corrente() == finestra.nodo_preferiti
+    righe = [_senza_ora(r) for r in finestra._righe[-22:]]
+    assert righe[0] == f"Importata la playlist Misto: 3 brani, da {m3u}. Saltate 25 voci: indirizzi in rete. Tenute senza controllo 2 voci di F:, che non risponde."
+    assert righe[1] == "Saltata http://radio/0: indirizzo in rete." and righe[20] == "Saltata http://radio/19: indirizzo in rete."
+    assert righe[21] == "E altre 5 voci saltate." and re.search(r" \d\d:\d\d$", finestra._righe[-1]) and not re.search(r" \d\d:\d\d$", finestra._righe[-2])
+
+
+def test_le_frasi_del_resoconto():
+    voce = modulo.importazione.Voce
+    assert modulo.frase_delle_saltate([voce("x", r"E:\x.mp3", "mancante")]) == "Saltata 1 voce: file che non c'è."
+    assert modulo.frase_delle_saltate([voce("x", None, "indirizzo"), voce("y", r"E:\y", "cartella"), voce("z", None, "indirizzo")]) == (
+        "Saltate 3 voci: 2 indirizzi in rete, 1 cartella.")
+    assert modulo.righe_delle_saltate([voce(str(n), None, "indirizzo") for n in range(21)])[-1] == "E un'altra voce saltata."
+    assert modulo.frase_delle_tenute({"F:": 1}) == "Tenuta senza controllo 1 voce di F:, che non risponde."
+    assert modulo.frase_delle_tenute({"G:": 2, "F:": 1, "\\\\nas\\musica": 3}) == (
+        "Tenute senza controllo 6 voci di F:, G: e \\\\nas\\musica, che non rispondono.")
+
+
+def test_l_importazione_aspetta_la_fine_dei_dialoghi(finestra, monkeypatch, cartella_visibile):
+    rimandate = _importazione_subito(finestra, monkeypatch)
+    _file(os.path.join(cartella_visibile, "a.mp3"))
+    m3u = _file(os.path.join(cartella_visibile, "Rock.m3u"), "a.mp3\n")
+    monkeypatch.setattr(ctypes.windll.user32, "IsWindowEnabled", lambda _h: 0)
+    finestra._importa_le_playlist([m3u])
+    assert finestra.archivio.playlist == []
+    attese = [(f, a) for ms, f, a in rimandate if ms == 500]
+    assert len(attese) == 1
+    # Il file e' gia' letto: chi avvisa che la lettura tarda non scrive
+    # niente, anche se l'esito aspetta ancora la fine del dialogo.
+    righe = list(finestra._righe)
+    for funzione, argomenti in [(f, a) for ms, f, a in rimandate if ms == 800]:
+        funzione(*argomenti)
+    assert finestra._righe == righe
+    # Un'altra playlist arrivata intanto aspetta la sua volta.
+    finestra._importa_le_playlist([m3u])
+    assert len(finestra._da_importare) == 1
+    monkeypatch.setattr(ctypes.windll.user32, "IsWindowEnabled", lambda _h: 1)
+    funzione, argomenti = attese[0]
+    funzione(*argomenti)
+    assert len(finestra.archivio.playlist) == 1 and _ultima(finestra) == f"La playlist Rock viene già da {m3u}."
+    assert finestra._importazione is None and finestra._da_importare == []
+
+
+def test_l_importazione_lunga_lo_dice_e_chi_aspetta_anche(finestra, monkeypatch, cartella_visibile):
+    # Su una condivisione lenta lettura e controllo tardano: dopo un attimo
+    # la console lo dice, e lo dice anche per la playlist rimasta in coda.
+    rimandate = _importazione_subito(finestra, monkeypatch)
+    in_corso = []
+    monkeypatch.setattr(finestra, "_in_disparte", lambda lavoro, al_termine, nome="", guasto=None: in_corso.append((lavoro, al_termine)))
+
+    def scaduti():
+        # Le attese di 800 millisecondi chieste fin qui, tolte ed eseguite.
+        for voce in [v for v in rimandate if v[0] == 800]:
+            rimandate.remove(voce)
+            voce[1](*voce[2])
+
+    def finito():
+        lavoro, al_termine = in_corso.pop(0)
+        al_termine(lavoro())
+
+    _file(os.path.join(cartella_visibile, "a.mp3"))
+    rock = _file(os.path.join(cartella_visibile, "Rock.m3u"), "a.mp3\n")
+    pop = _file(os.path.join(cartella_visibile, "Pop.m3u"), "a.mp3\n")
+    finestra._importa_le_playlist([rock])
+    scaduti()
+    assert _ultima(finestra) == "Leggo Rock.m3u: ci vuole qualche secondo."
+    finestra._importa_le_playlist([pop])
+    scaduti()
+    assert _ultima(finestra) == "Pop.m3u aspetta che finisca l'importazione di Rock.m3u."
+    # Il file e' letto: ora tarda il controllo.
+    finito()
+    scaduti()
+    assert _ultima(finestra) == "Controllo i file di Rock.m3u: ci vuole qualche secondo."
+    finito()
+    assert [p.nome for p in finestra.archivio.playlist] == ["Rock"]
+    # Poi tocca a Pop.m3u, che finisce in fretta: nessun avviso.
+    finito()
+    finito()
+    righe = list(finestra._righe)
+    scaduti()
+    assert finestra._righe == righe and [p.nome for p in finestra.archivio.playlist] == ["Rock", "Pop"]
+    assert finestra._importazione is None and in_corso == []
+    # Piu' playlist in coda insieme si dicono con la prima.
+    finestra._importa_le_playlist([rock])
+    finestra._importa_le_playlist([pop, rock, pop])
+    scaduti()
+    assert _ultima(finestra) == "Pop.m3u e altre 2 playlist aspettano che finisca l'importazione di Rock.m3u."
+
+
+def test_la_rilettura_senza_niente_da_rileggere(finestra, monkeypatch, suoni_annotati, cartella_visibile):
+    # Si' alla domanda, ma nel file cambiato non c'e' niente da importare:
+    # la playlist resta com'e', e si va avanti come con No.
+    _importazione_subito(finestra, monkeypatch)
+    suonati = _finto_motore(finestra, monkeypatch)
+    musica = os.path.join(cartella_visibile, "Musica")
+    _file(os.path.join(musica, "a.mp3"))
+    m3u = _file(os.path.join(musica, "Rock.m3u"), "a.mp3\n")
+    finestra._importa_le_playlist([m3u])
+    pl, = finestra.archivio.playlist
+    brani = list(pl.brani)
+    monkeypatch.setattr(finestra, "_conferma", lambda domanda, titolo: True)
+    # Svuotato: arrivato da Windows, suona quella che c'e'.
+    _file(m3u, "#EXTM3U\n")
+    finestra.apri_dall_esterno([m3u])
+    finestra._apri_i_percorsi()
+    assert "Niente da rileggere da Rock.m3u: non ha nessuna voce, e la playlist Rock resta com'è." in [_senza_ora(r) for r in finestra._righe[-3:]]
+    assert pl.brani == brani and suonati == [("a.mp3", None)] and finestra.coda.playlist is pl
+    assert suoni_annotati[-2:] == ["niente_da_suonare", "file_aperto"]
+    # Voci tutte saltate: dal comando, la selezione va su di lei.
+    _file(m3u, "http://radio/x\nmanca.mp3\n")
+    finestra._seleziona(finestra.nodo_preferiti)
+    finestra._importa_le_playlist([m3u], "seleziona")
+    assert [_senza_ora(r) for r in finestra._righe[-3:]] == [
+        "Niente da rileggere da Rock.m3u: la playlist Rock resta com'è. Saltate 2 voci: 1 file che non c'è, 1 indirizzo in rete.",
+        "Saltata http://radio/x: indirizzo in rete.", f"Saltata {os.path.join(musica, 'manca.mp3')}: file che non c'è."]
+    assert pl.brani == brani and finestra._dati(finestra._voce_corrente())["playlist"] is pl
+    assert finestra._importazione is None and finestra._da_importare == []
+    # Eliminata mentre si controllano i file: si importa da capo.
+    _file(m3u, "a.mp3\na.mp3\n")
+
+    def controlla(percorsi, fermo=None, cedi=None):
+        finestra._elimina_playlist(pl)
+        return {"mancanti": set(), "saltate": {}, "nomi_veri": {}, "controllati": 1}
+
+    monkeypatch.setattr(modulo.pulizia, "controlla", controlla)
+    finestra._importa_le_playlist([m3u])
+    nuova, = finestra.archivio.playlist
+    assert nuova is not pl and nuova.nome == "Rock" and len(nuova.brani) == 2 and nuova.origine["dimensione"] == os.path.getsize(m3u)
+    assert _ultima(finestra) == f"Importata la playlist Rock: 2 brani, da {m3u}." and suoni_annotati[-1] == "playlist_creata"
+
+
+def test_importa_playlist_con_due_playlist_seleziona_la_prima(finestra, monkeypatch, cartella_visibile):
+    _importazione_subito(finestra, monkeypatch)
+    _file(os.path.join(cartella_visibile, "a.mp3"))
+    uno = _file(os.path.join(cartella_visibile, "Uno.m3u"), "a.mp3\n")
+    due = _file(os.path.join(cartella_visibile, "Due.pls"), "[playlist]\nFile1=a.mp3\nFile2=a.mp3\n")
+    finestra._seleziona(finestra.nodo_preferiti)
+    monkeypatch.setattr(modulo, "DialogoDiFile", _FileScelti([uno, due]))
+    finestra._comando_importa_playlist()
+    assert [(p.nome, len(p.brani)) for p in finestra.archivio.playlist] == [("Uno", 1), ("Due", 2)]
+    assert finestra._dati(finestra._voce_corrente())["playlist"] is finestra.archivio.playlist[0]
+    assert finestra.albero.GetItemText(finestra._voce_corrente()).startswith("Uno, brani: 1")

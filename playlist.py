@@ -1,12 +1,14 @@
 # MeTeOra, le playlist: brani, playlist, archivio e coda di riproduzione.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 il sottobrano dei SID, nella 1.3.0 il loop A-B, nella 1.6.0 i Preferiti, nella 1.8.0 il filtro. Nella 1.59.0 Coda.altri, per la riproduzione casuale. Nella 1.104.0 si tolgono i brani dei file spariti, per la pulizia all'avvio. Nella 1.109.0 Ordina, Inverti l'ordine, Mescola e Ordine di prima.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 il sottobrano dei SID, nella 1.3.0 il loop A-B, nella 1.6.0 i Preferiti, nella 1.8.0 il filtro. Nella 1.59.0 Coda.altri, per la riproduzione casuale. Nella 1.104.0 si tolgono i brani dei file spariti, per la pulizia all'avvio. Nella 1.109.0 Ordina, Inverti l'ordine, Mescola e Ordine di prima. Nella 1.113.0 l'origine delle playlist importate da un M3U o da un PLS di altri programmi.
 
 """Il modello dei dati, senza finestre e senza suono.
 
 Una Playlist e' una lista di Brano. Quelle dell'archivio si salvano nel file
 JSON di MeTeOra; quelle temporanee nascono da una cartella di Questo PC, o
-dal file aperto con Apri file, e si perdono alla chiusura.
+dal file aperto con Apri file, e si perdono alla chiusura. Una playlist
+importata da un M3U o da un PLS ricorda il file da cui viene, la sua
+origine, per riconoscerlo quando arriva di nuovo (1.113.0).
 La Coda dice cosa sta suonando: la playlist di provenienza e il brano. Tiene
 il brano e non la sua posizione, cosi' spostare o togliere altri brani
 mentre suona non la confonde. Tiene anche il loop A-B: due brani di una
@@ -195,6 +197,20 @@ def _norm(percorso):
     return os.path.normcase(os.path.abspath(percorso))
 
 
+def _origine(dati):
+    """L'origine di una playlist importata, come la scrive il file dei dati:
+    il percorso, la data e la dimensione del file M3U o PLS al momento
+    dell'importazione (1.113.0). None se manca o non e' scritta bene."""
+    if not isinstance(dati, dict):
+        return None
+    percorso, data, dimensione = dati.get("percorso"), dati.get("data"), dati.get("dimensione")
+    if not isinstance(percorso, str) or not percorso or isinstance(data, bool) or not isinstance(data, (int, float)):
+        return None
+    if isinstance(dimensione, bool) or not isinstance(dimensione, int):
+        return None
+    return {"percorso": percorso, "data": float(data), "dimensione": dimensione}
+
+
 class Brano:
     def __init__(self, percorso, saltato=False, sottobrano=None):
         self.percorso = percorso
@@ -225,7 +241,7 @@ class Brano:
 
 
 class Playlist:
-    def __init__(self, nome, brani=None, cartella=None, filtro=""):
+    def __init__(self, nome, brani=None, cartella=None, filtro="", origine=None):
         self.nome = nome
         self.brani = list(brani or [])
         # Il testo del filtro; vuoto vuol dire tutti i brani.
@@ -235,6 +251,9 @@ class Playlist:
         # L'ordine di prima dell'ultimo Ordina, Inverti l'ordine o Mescola,
         # con gli stessi oggetti Brano; solo in memoria, non si salva.
         self.ordine_di_prima = None
+        # Il file M3U o PLS da cui e' stata importata, con la sua data e la
+        # sua dimensione di allora, o None (1.113.0).
+        self.origine = origine
 
     @property
     def temporanea(self):
@@ -331,12 +350,15 @@ class Playlist:
         dati = {"nome": self.nome, "brani": [b.come_dati() for b in self.brani]}
         if self.filtro:
             dati["filtro"] = self.filtro
+        if self.origine:
+            dati["origine"] = dict(self.origine)
         return dati
 
     @classmethod
     def da_dati(cls, dati):
         filtro = dati.get("filtro")
-        return cls(dati["nome"], [Brano.da_dati(b) for b in dati.get("brani", [])], filtro=filtro if isinstance(filtro, str) else "")
+        return cls(dati["nome"], [Brano.da_dati(b) for b in dati.get("brani", [])], filtro=filtro if isinstance(filtro, str) else "",
+            origine=_origine(dati.get("origine")))
 
 
 class Archivio:
@@ -391,6 +413,12 @@ class Archivio:
 
     def elimina(self, pl):
         self.playlist = [p for p in self.playlist if p is not pl]
+
+    def dall_origine(self, percorso):
+        """La playlist importata dal file M3U o PLS percorso, anche se poi e'
+        stata rinominata, o None (1.113.0)."""
+        chiave = _norm(percorso)
+        return next((p for p in self.playlist if p.origine and _norm(p.origine["percorso"]) == chiave), None)
 
     def percorsi(self):
         """I percorsi dei brani di tutte le playlist e dei Preferiti, cosi'
