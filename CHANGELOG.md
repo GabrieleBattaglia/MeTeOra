@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.105.1] - 2026-10-20
+
+- Correzione, la riga In riproduzione, che la console scrive a ogni brano che parte, chiama la lista come Dove sono: Preferiti e Risultati, invece di playlist Preferiti e cartella Risultati, come ha deciso Gabriele il 20 ottobre 2026 con il punto b della tappa 14. Con lo stesso nome cambiano anche i file aperti da Windows, che erano cartella file aperti, e le unità, che erano per esempio cartella E:\ e ora sono unità E:. Le cartelle e le unità suonate con tutto ciò che hanno sotto, invece, non dicono con le sottocartelle, come fa Dove sono: nella riga di avvio Gabriele l'ha lasciato fuori, perché allungherebbe ogni riga. Il resto della riga resta com'era: il percorso intero del file, il posto nella lista, il nome soltanto con un brano solo, la selezione e il sottobrano.
+- Le prove della riga di avvio: i Preferiti, i Risultati, anche quelli di una ricerca di prima, e le altre liste; quella delle cartelle suonate con le sottocartelle controlla la riga fino in fondo, che finisce con il nome della cartella, senza con le sottocartelle.
+
 ## [1.105.0] - 2026-10-20
 
 Il punto b della tappa 14 del piano, deciso da Gabriele il 20 ottobre 2026: il tasto che dice a che punto si è, tolto da F9 nella 1.12.0, torna sull'apostrofo. Per il suo suono serve GBUtils V208.

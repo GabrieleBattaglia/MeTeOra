@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti.
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -4521,7 +4521,11 @@ class Finestra(wx.Frame):
         if getattr(pl, "selezione", False):
             dove = f"{numero} di {totale} della selezione"
         else:
-            dove = f"{numero} di {totale}, {'cartella' if pl.temporanea else 'playlist'} {pl.nome}" if totale > 1 else pl.nome
+            # La lista con il nome della plancia, come in Dove sono: Preferiti e
+            # Risultati, non playlist Preferiti e cartella Risultati (1.105.1).
+            # Senza con le sottocartelle, che allungherebbe ogni riga di avvio:
+            # resta solo in Dove sono (Gabriele).
+            dove = f"{numero} di {totale}, {self._nome_della_lista(pl, sottocartelle=False)}" if totale > 1 else pl.nome
         testo = f"In riproduzione: {brano.percorso}, {dove}."
         if self.motore.sottobrani:
             testo += f" Sottobrano {self.motore.sottobrano} di {self.motore.sottobrani}."
@@ -7830,11 +7834,12 @@ class Finestra(wx.Frame):
             return [f"{numero + 1} di {len(passano)} col filtro", nome]
         return [f"{indice + 1} di {len(pl.brani)}", nome] if len(pl.brani) > 1 else [nome]
 
-    def _nome_della_lista(self, pl):
+    def _nome_della_lista(self, pl, sottocartelle=True):
         """La lista da cui suona un brano, detta con il nome che ha nella
         plancia: Preferiti, playlist X, Risultati, selezione, cartella X o
         unita' E:, con le sottocartelle se suona tutta, o file aperto (tappa
-        14 b)."""
+        14 b). La usa anche la riga In riproduzione (1.105.1), con
+        sottocartelle falso: con le sottocartelle lo dice solo Dove sono."""
         if pl is self.archivio.preferiti:
             return "Preferiti"
         if not pl.temporanea:
@@ -7847,7 +7852,7 @@ class Finestra(wx.Frame):
         if pl.cartella:
             # Un'unita' suonata con X ha per nome la radice, E:\.
             nome = f"unità {pl.cartella[:2].upper()}" if re.fullmatch(r"[A-Za-z]:\\?", pl.cartella) else f"cartella {pl.nome}"
-            return f"{nome}{' con le sottocartelle' if getattr(pl, 'ricorsiva', False) else ''}"
+            return f"{nome}{' con le sottocartelle' if sottocartelle and getattr(pl, 'ricorsiva', False) else ''}"
         return pl.nome
 
     def _aggiunte_di_dove_sono(self):

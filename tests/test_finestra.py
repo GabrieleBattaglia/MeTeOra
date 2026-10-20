@@ -1,6 +1,6 @@
 # MeTeOra, le prove della finestra principale, sul desktop nascosto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo.
+# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono.
 
 import ctypes
 import datetime
@@ -440,7 +440,7 @@ def test_cartella_suona_con_le_sottocartelle_e_f8_la_ritrova(finestra, monkeypat
             open(percorso, "wb").close()
         finestra._riproduci_cartella(base)
         assert suonati == [os.path.join(base, "uno.mp3")]
-        assert "1 di 2, cartella Musica" in _ultima(finestra)
+        assert _ultima(finestra).endswith(", 1 di 2, cartella Musica.")
         _tasto(finestra, "b")
         assert suonati[-1] == os.path.join(base, "Dentro", "due.mp3")
         finestra._vai_al_brano()
@@ -6795,9 +6795,9 @@ def test_dove_sono_nomi_delle_liste(finestra, monkeypatch):
     assert riga(salvata, salvata.brani[0]) == f"a.mp3, 1 di 2, playlist {salvata.nome}."
 
 
-def test_dove_sono_nei_risultati(finestra, monkeypatch):
-    """I Risultati si chiamano cosi' anche dopo una ricerca nuova, se il
-    brano che suona viene da quelli di prima."""
+def _ricerca_finta(finestra, monkeypatch, testo):
+    """I Risultati di una ricerca che non cerca niente, nati come per una
+    ricerca vera: le prove li riempiono a mano."""
     from filtro import Filtro
 
     class RicercaFinta:
@@ -6818,13 +6818,18 @@ def test_dove_sono_nei_risultati(finestra, monkeypatch):
 
     monkeypatch.setattr(modulo, "Ricerca", RicercaFinta)
     monkeypatch.setattr(modulo.questa_rete, "percorsi_salvati", lambda: [])
-    finestra._avvia_ricerca("rock", Filtro("rock"), unita=[])
-    prima = finestra.risultati
+    finestra._avvia_ricerca(testo, Filtro(testo), unita=[])
+    return finestra.risultati
+
+
+def test_dove_sono_nei_risultati(finestra, monkeypatch):
+    """I Risultati si chiamano cosi' anche dopo una ricerca nuova, se il
+    brano che suona viene da quelli di prima."""
+    prima = _ricerca_finta(finestra, monkeypatch, "rock")
     prima.brani[:] = [Brano(r"C:\m\rock.mp3"), Brano(r"C:\m\hard rock.mp3")]
     _in_corso_per_dove_sono(finestra, monkeypatch, prima, prima.brani[1])
     assert _dove_sono(finestra).endswith(", hard rock.mp3, 2 di 2, Risultati.")
-    finestra._avvia_ricerca("jazz", Filtro("jazz"), unita=[])
-    assert finestra.risultati is not prima
+    assert _ricerca_finta(finestra, monkeypatch, "jazz") is not prima
     assert _dove_sono(finestra).endswith(", hard rock.mp3, 2 di 2, Risultati.")
 
 
@@ -6951,3 +6956,59 @@ def test_dove_sono_nelle_statistiche(finestra):
     assert finestra._comandi_dei_tasti()["apostrofo"] == "dove_sono"
     assert statistiche.DESCRIZIONI_DEI_COMANDI["dove_sono"] == "dove sono"
     assert statistiche.NOMI_DEGLI_EVENTI["dove_sono"] == "dove sono, con l'apostrofo"
+
+
+# La riga In riproduzione, con i nomi delle liste di Dove sono (1.105.1).
+
+
+def test_riga_di_avvio_con_i_nomi_delle_liste(finestra, monkeypatch, suoni_annotati):
+    """La riga di un brano che parte chiama la lista come Dove sono:
+    Preferiti e Risultati, non piu' playlist Preferiti e cartella Risultati,
+    ma senza con le sottocartelle. Il resto resta com'era: il percorso
+    intero, il posto nella lista, solo il nome con un brano solo, e la
+    selezione."""
+    from playlist import Playlist
+
+    _finto_motore(finestra, monkeypatch)
+
+    def riga(pl, brano):
+        finestra._suona(pl, brano)
+        return _ultima(finestra)
+
+    preferiti = finestra.archivio.preferiti
+    preferiti.brani.append(Brano(r"C:\m\a.mp3"))
+    assert riga(preferiti, preferiti.brani[0]) == r"In riproduzione: C:\m\a.mp3, Preferiti."
+    preferiti.brani.append(Brano(r"C:\m\b.mp3"))
+    assert riga(preferiti, preferiti.brani[1]) == r"In riproduzione: C:\m\b.mp3, 2 di 2, Preferiti."
+    assert suoni_annotati[-1] == "play"
+    risultati = _ricerca_finta(finestra, monkeypatch, "rock")
+    risultati.brani[:] = [Brano(r"C:\m\rock.mp3"), Brano(r"C:\m\hard rock.mp3")]
+    assert riga(risultati, risultati.brani[1]) == r"In riproduzione: C:\m\hard rock.mp3, 2 di 2, Risultati."
+    # Dopo una ricerca nuova, quelli di prima restano Risultati.
+    assert _ricerca_finta(finestra, monkeypatch, "jazz") is not risultati
+    assert riga(risultati, risultati.brani[0]) == r"In riproduzione: C:\m\rock.mp3, 1 di 2, Risultati."
+    solo = _ricerca_finta(finestra, monkeypatch, "blues")
+    solo.brani[:] = [Brano(r"C:\m\blues.mp3")]
+    assert riga(solo, solo.brani[0]) == r"In riproduzione: C:\m\blues.mp3, Risultati."
+    # Le playlist, le cartelle e la selezione come prima.
+    finestra._aggiungi(None, [r"C:\m\a.mp3", r"C:\m\b.mp3"])
+    pl = finestra.archivio.playlist[0]
+    assert riga(pl, pl.brani[1]) == f"In riproduzione: {pl.brani[1].percorso}, 2 di 2, playlist {pl.nome}."
+    cartella = Playlist("Musica", [Brano(r"C:\m\Musica\a.mp3"), Brano(r"C:\m\Musica\b.mp3")], cartella=r"C:\m\Musica")
+    assert riga(cartella, cartella.brani[0]) == r"In riproduzione: C:\m\Musica\a.mp3, 1 di 2, cartella Musica."
+    selezione = Playlist("Selezione", [Brano(r"C:\m\a.mp3"), Brano(r"C:\m\b.mp3"), Brano(r"C:\m\c.mp3")], cartella="")
+    selezione.selezione = True
+    assert riga(selezione, selezione.brani[1]) == r"In riproduzione: C:\m\b.mp3, 2 di 3 della selezione."
+    # Con il nome di Dove sono cambiano anche le unita' e i file aperti da
+    # Windows, che prima erano cartella file aperti. Con le sottocartelle lo
+    # dice solo Dove sono: nella riga di avvio allungherebbe ogni riga.
+    cartella.ricorsiva = True
+    assert riga(cartella, cartella.brani[1]) == r"In riproduzione: C:\m\Musica\b.mp3, 2 di 2, cartella Musica."
+    unita = Playlist("E:\\", [Brano(r"E:\a.mp3"), Brano(r"E:\Musica\b.mp3")], cartella="E:\\")
+    unita.ricorsiva = True
+    assert riga(unita, unita.brani[0]) == r"In riproduzione: E:\a.mp3, 1 di 2, unità E:."
+    assert finestra._nome_della_lista(unita) == "unità E: con le sottocartelle"
+    aperti = Playlist("file aperti", [Brano(r"C:\m\a.mp3"), Brano(r"C:\m\b.mp3")], cartella="")
+    assert riga(aperti, aperti.brani[1]) == r"In riproduzione: C:\m\b.mp3, 2 di 2, file aperti."
+    aperto = Playlist("file aperto", [Brano(r"C:\m\a.mp3")], cartella="")
+    assert riga(aperto, aperto.brani[0]) == r"In riproduzione: C:\m\a.mp3, file aperto."
