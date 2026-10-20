@@ -151,6 +151,7 @@ kbd {
 <li><a href="#salti">Muoversi nel brano</a></li>
 <li><a href="#volume">Il volume</a></li>
 <li><a href="#f8-inseguimento">F8 e l'inseguimento</a></li>
+<li><a href="#dove-sono">Dove sono</a></li>
 <li><a href="#file-lunghi">I file lunghi: audiolibri e film</a></li>
 <li><a href="#brano-in-errore">Un brano che non si suona</a></li>
 <li><a href="#esempi-riproduzione">Esempi</a></li>
@@ -320,6 +321,7 @@ kbd {
 <li><kbd>F4</kbd>: mette nei Preferiti il brano, il file o il sottobrano selezionato.</li>
 <li><kbd>F8</kbd>: porta la selezione e il fuoco della plancia su ciò che suona, aprendo i rami che servono.</li>
 <li><kbd>Maiuscolo con F8</kbd>: aggancia o sgancia l'inseguimento, che porta da solo la selezione su ogni brano che parte.</li>
+<li><kbd>Apostrofo</kbd>: dice dove sei, cioè il tempo del brano che suona, il suo nome, il posto nella lista e quello che c'è di particolare, come la pausa o la velocità cambiata; lo scrive nella console e lo manda alla sintesi e al braille dei sottotitoli, senza spostare il fuoco.</li>
 </ul>
 <h4>Le playlist</h4>
 <ul>
@@ -467,7 +469,7 @@ kbd {
 </ul>
 <h4>I tasti senza comando</h4>
 <ul>
-<li><kbd>Lettere e segni senza comando</kbd>: come Maiuscolo con A o l'apostrofo, dicono che non hanno un comando, con un suono, e il fuoco resta dov'è.</li>
+<li><kbd>Lettere e segni senza comando</kbd>: come Maiuscolo con A o la o accentata, dicono che non hanno un comando, con un suono, e il fuoco resta dov'è.</li>
 <li><kbd>Tastierino numerico</kbd>: resta a NVDA, e i suoi tasti non sono comandi di MeTeOra.</li>
 <li><kbd>Ctrl e Alt con le lettere e le cifre</kbd>: restano ai comandi di Windows, tranne Ctrl con la barra rovesciata.</li>
 </ul>
@@ -581,11 +583,11 @@ kbd {
 <h4>La voce su cui agiscono i comandi</h4>
 <p>I comandi per una voce sola agiscono sulla voce che ha il fuoco. C'è un caso diverso, come in Esplora risorse: se con Ctrl e le frecce hai portato il fuoco su una voce non selezionata, e di selezionate ce n'è una sola, i comandi agiscono su quella selezionata. Vale per Canc, Maiuscolo con Canc, X, Maiuscolo con X, F4, il menu, la barra rovesciata, Maiuscolo con le cifre, F11 e Maiuscolo con F11; il cruscotto, in quel caso, lo ricorda. F9, F10, J, K, Backspace e la barra verticale lavorano invece sempre dalla voce che ha il fuoco. La selezione multipla è spiegata nel capitolo La riproduzione.</p>
 <h4>La voce selezionata e il brano che suona</h4>
-<p>Il brano in riproduzione e la voce selezionata sono due cose diverse: quando un brano finisce e ne parte un altro, la selezione resta dov'è. Nella plancia il brano che suona ha l'indicazione in riproduzione dopo il nome; F8 porta la selezione su di lui, e l'inseguimento, Maiuscolo con F8, ce la porta da solo a ogni cambio di brano.</p>
+<p>Il brano in riproduzione e la voce selezionata sono due cose diverse: quando un brano finisce e ne parte un altro, la selezione resta dov'è. Nella plancia il brano che suona ha l'indicazione in riproduzione dopo il nome; F8 porta la selezione su di lui, e l'inseguimento, Maiuscolo con F8, ce la porta da solo a ogni cambio di brano. L'apostrofo, invece, dice a che punto è e da dove suona, senza toccare la selezione.</p>
 <h3 id="console">La console</h3>
 <p>La console, F6, ha una riga per ogni azione, la più recente in fondo, con l'ora, in ore e minuti, in fondo alla riga; un testo lungo, come la guida rapida o le novità, ha l'ora solo in fondo all'ultima riga. Quando ci torni, il cursore è dove l'avevi lasciato. È in sola lettura: le frecce, Pagina su e giù, Inizio e Fine servono a leggerla, e Ctrl con C copia il testo selezionato.</p>
 <p>La console tiene le ultime duemila righe, se non lo cambi con la voce Righe della console delle impostazioni: quando le supera di cento, toglie dalla cima le più vecchie. Un testo lungo, come la guida rapida, resta comunque intero. Con la voce Salva console delle impostazioni la scrivi tutta in un file.</p>
-<p>Le informazioni che si ripetono di seguito riscrivono la loro riga invece di aggiungerne sempre una nuova: il volume e il muto, i salti nel brano, il passo del volume e quello dei salti, la velocità, il tono, la banda dell'equalizzatore, la dissolvenza, Backspace e Maiuscolo con Backspace, l'avanzamento della ricerca dei banchi dei MIDI e dello scaricamento di FluidR3, il testo non trovato nella console e lo stesso problema interno ripetuto.</p>
+<p>Le informazioni che si ripetono di seguito riscrivono la loro riga invece di aggiungerne sempre una nuova: il volume e il muto, Dove sono, i salti nel brano, il passo del volume e quello dei salti, la velocità, il tono, la banda dell'equalizzatore, la dissolvenza, Backspace e Maiuscolo con Backspace, l'avanzamento della ricerca dei banchi dei MIDI e dello scaricamento di FluidR3, il testo non trovato nella console e lo stesso problema interno ripetuto.</p>
 <p>Se dentro MeTeOra qualcosa va storto, la console lo dice con una riga che comincia con Problema interno, o Problema interno nel motore, e un suono suo: è il punto da riferire a chi sviluppa. Il capitolo Quando qualcosa va storto spiega come.</p>
 <p>La barra rovesciata, dalla console, cerca un testo nella console, e Invio passa all'occorrenza seguente: il capitolo La ricerca e il filtro spiega come.</p>
 <h3 id="cruscotto">Il cruscotto</h3>
@@ -596,7 +598,7 @@ kbd {
 <p>Con la tastiera e lo screen reader la barra non cambia niente: non prende mai il fuoco, nemmeno quando la si clicca, non si raggiunge con Tab, e quando è nascosta per Windows non c'è. Compare solo con un movimento vero del mouse, mai sotto il puntatore, e un suo pulsante risponde solo al puntatore arrivato lì muovendosi: il mouse che NVDA porta su un oggetto fa un salto solo, quindi la barra non compare e il clic di NVDA va dove deve. Con un menu aperto, o mentre la finestra si sposta, sparisce. La voce Barra dei comandi per il mouse delle impostazioni la spegne del tutto.</p>
 <h3 id="tasti-ovunque">I tasti in tutta la finestra</h3>
 <p>Tutti i tasti funzionano in tutta la finestra, qualunque area abbia il fuoco: dalla console si può mettere in pausa, cambiare il volume o aprire il filtro. Fanno eccezione i tasti propri della plancia, come Invio, Canc, Backspace, le frecce e la barra spaziatrice, e Invio della console. Le lettere valgono anche nella plancia, dove per questo non si salta alle voci digitandone l'iniziale, a meno di spegnere i tasti rapidi a carattere con Maiuscolo con F12, come spiega la sezione Muoversi nella plancia.</p>
-<p>Un tasto a lettera o un segno senza comando, premuto da solo o con Maiuscolo, lo dice con un suono, per esempio Il tasto apostrofo non ha un comando, o Maiuscolo+A non ha un comando, e il fuoco resta dov'è. Altri tasti passano a Windows in silenzio: Ctrl e Alt con le lettere e le cifre, tranne Ctrl con la barra rovesciata; Maiuscolo con F4; i caratteri scritti con AltGr, che nella plancia si fermano senza nessun riscontro. Il tastierino numerico resta a NVDA: nemmeno il più e il meno del tastierino cambiano il volume.</p>
+<p>Un tasto a lettera o un segno senza comando, premuto da solo o con Maiuscolo, lo dice con un suono, per esempio Il tasto o accentata non ha un comando, o Maiuscolo+A non ha un comando, e il fuoco resta dov'è. Altri tasti passano a Windows in silenzio: Ctrl e Alt con le lettere e le cifre, tranne Ctrl con la barra rovesciata; Maiuscolo con F4; i caratteri scritti con AltGr, che nella plancia si fermano senza nessun riscontro. Il tastierino numerico resta a NVDA: nemmeno il più e il meno del tastierino cambiano il volume.</p>
 <h3 id="esempi-finestra">Esempi</h3>
 <h4>Sapere quali tasti valgono su una voce</h4>
 <ol>
@@ -1007,6 +1009,13 @@ kbd {
 <h3 id="f8-inseguimento">F8 e l'inseguimento</h3>
 <p>F8 porta la selezione della plancia su ciò che suona, caricando la sua playlist e aprendo se serve le cartelle e i rami dei Risultati fino a lì, e porta lì anche il fuoco della tastiera: dalla console, per esempio, passi alla plancia. Di un file aperto con Apri file dice che non è nella plancia.</p>
 <p>Maiuscolo con F8 aggancia o sgancia l'inseguimento, e MeTeOra se lo ricorda. Agganciato, a ogni cambio di brano la selezione della plancia va da sola su ciò che suona, senza portarci il fuoco della tastiera; agganciandolo mentre un brano suona, la selezione ci va subito.</p>
+<h3 id="dove-sono">Dove sono</h3>
+<p>L'apostrofo dice dove sei, con un suono suo, in una riga della console: prima il tempo, poi il nome del file che suona, poi il suo posto nella lista da cui suona, e in fondo, solo quando ci sono, le cose particolari. Per esempio: 1:23 di 4:56, mancano 3:33, Caruso.mp3, 3 di 12, playlist Dalla, in pausa. Il fuoco resta dov'è, anche nella finestra del video, e la riga si riscrive a ogni pressione.</p>
+<p>La riga va anche alla sintesi e al braille scelti per i sottotitoli, con le voci Sintesi di sottotitoli e karaoke e Dove vanno sottotitoli e karaoke delle impostazioni, senza l'ora che la console mette in fondo: così NVDA la dice anche con il fuoco nella plancia. Al braille arriva come i sottotitoli, a blocchi lunghi quanto le celle della barra, se le hai impostate; e come nella console la riga nuova prende subito il posto di quella di prima, se è ancora sulla barra o in fila, senza aspettare il tempo minimo di lettura né togliere i sottotitoli in fila. Anche a voce la riga nuova prende il posto di quella di prima: la sintesi lascia quello che sta dicendo e dice subito la riga, così premendo l'apostrofo più volte di seguito non senti le righe una dopo l'altra, nemmeno con la voce di Windows, che da sola non interrompe. I sottotitoli e il karaoke invece non interrompono la voce.</p>
+<p>Il tempo è quello trascorso, la durata del brano e quanto manca. Se la durata non si sa, la riga dice il tempo trascorso e che la durata non si sa; subito dopo l'avvio di un brano, o mentre un SID si prepara dopo un salto, dice che il tempo non si sa ancora, con la durata, se MeTeOra la conosce.</p>
+<p>Il posto nella lista si conta come nella plancia: in una playlist o nei Preferiti con un filtro, fra i brani che passano il filtro, con le parole col filtro, per esempio 2 di 5 col filtro; senza filtro, fra tutti i brani, saltati compresi. Se il filtro è arrivato dopo che il brano è partito, e il brano non lo passa, la riga dice fuori dal filtro, 15 di 120 in tutto. La lista si chiama come nella plancia: playlist con il suo nome, Preferiti, Risultati, cartella con il suo nome o unità con la sua lettera, con le sottocartelle quando la suoni tutta, oppure file aperto; una selezione suonata con X dice per esempio 3 di 12 della selezione. Con un brano solo, la riga dice solo da dove suona. Un brano tolto dalla lista mentre suona non è più nella playlist, e la riga lo dice; un brano segnato come saltato mentre suona ha la parola saltato dopo la lista.</p>
+<p>Le cose particolari vengono in quest'ordine: in pausa; il sottobrano di un SID o di un file delle console, come sottobrano 2 di 5, oppure il capitolo di un audiolibro o di un film, con il titolo, come capitolo 3 di 12: Il ritorno; la ripetizione, del brano o della lista, la riproduzione casuale, il timer, fra quanti minuti, alla fine del brano, o scaduto mentre la musica sfuma, il loop A-B e il muto; la velocità e il tono, se non sono quelli normali, come velocità 1.25 e tono più 2 semitoni.</p>
+<p>Se non suona niente, l'apostrofo dice Non sta suonando niente, come F8, e anche questa frase va alla sintesi e al braille. Maiuscolo con l'apostrofo non ha un comando.</p>
 <h3 id="file-lunghi">I file lunghi: audiolibri e film</h3>
 <p>I file più lunghi di dieci minuti, come gli audiolibri, i podcast e i film, ricordano il punto in cui li hai lasciati: quando li suoni di nuovo, da qualunque parte, riprendono da lì, e la console dice Riprendo da, con il tempo, dove l'avevi lasciato. X, sul file ripreso, lo fa ripartire da capo, come su ogni brano che suona. I file più corti, come le canzoni, ripartono da capo come sempre; un file ascoltato fino alla fine, o lasciato nei primi o negli ultimi trenta secondi, non ha un punto da riprendere. Il limite dei dieci minuti si cambia nelle impostazioni, con la voce Punto lasciato dei file lunghi, e 0 spegne la ripresa. I marker, W e la ripresa all'avvio vanno sempre dove dicono loro.</p>
 <p>Molti audiolibri, soprattutto gli M4B, e molti film hanno i capitoli. Mentre suonano, la virgola va al capitolo precedente e il punto al successivo, e la console dice quale, per esempio Capitolo 3 di 12: Il ritorno, 23:10; la virgola, oltre i primi tre secondi di un capitolo, torna al suo inizio, come nei lettori. Nella plancia, un file con i capitoli è un ramo: dentro ci sono i capitoli, prima dei marker, e X, Invio o il menu su un capitolo suonano il file da lì. I capitoli della plancia vengono dai tag, e MeTeOra li legge negli M4B, negli M4A, negli MP4 e negli MP3; quelli degli MKV si vedono solo mentre il file suona, con la virgola e il punto.</p>
@@ -1034,6 +1043,12 @@ kbd {
 <li>Mentre il brano suona, premi W: il campo dice quanto dura il brano.</li>
 <li>Scrivi 1:02:30 e premi Invio: la console dice Vado a 1:02:30, e la durata.</li>
 <li>Per gli ultimi trenta secondi, premi W, scrivi -30 e premi Invio.</li>
+</ol>
+<h4>Sapere a che punto sei senza lasciare la plancia</h4>
+<ol>
+<li>Mentre un brano suona, scorri pure la plancia con le frecce.</li>
+<li>Premi l'apostrofo: NVDA dice per esempio 2:10 di 3:45, mancano 1:35, Volare.mp3, 4 di 9, playlist Estate, e il fuoco resta sulla voce dov'eri.</li>
+<li>La stessa riga è nella console, F6, se vuoi rileggerla; F8, invece, porta la selezione sul brano che suona.</li>
 </ol>
 <h2 id="velocita-tono-equalizzatore-dissolvenza">Velocità, tono, equalizzatore e dissolvenza</h2>
 <p>Velocità, tono, equalizzatore e dissolvenza valgono per tutti i brani, SID compresi, e MeTeOra se li ricorda fra un avvio e l'altro: ogni cambio si salva subito. Se all'avvio la velocità o il tono non sono quelli normali, la console lo dice, con il tasto che li riporta al normale. Ogni tasto ha il suo suono, e uno suo anche quando arriva a un limite; la console lo scrive in una riga breve, che si riscrive a ogni pressione, come quella del volume. Si cambiano anche dalla finestra delle impostazioni.</p>
@@ -1418,9 +1433,9 @@ kbd {
 <h4>Sottotitoli impressi</h4>
 <p>Invio apre una lista con i due modi: letti al volo, mentre il video suona, con circa mezzo secondo di ritardo, il modo di partenza; oppure letti prima, con una passata che salva accanto al video un file usato le volte dopo. Il capitolo Il video, alla sezione I sottotitoli fatti di immagini, li spiega.</p>
 <h4>Sintesi di sottotitoli e karaoke</h4>
-<p>Invio apre una lista con l'automatica, che usa lo screen reader attivo e altrimenti la voce di Windows, e le sintesi che si possono usare adesso, fra NVDA, JAWS e la voce di Windows, SAPI5. Una sintesi scelta prima che adesso non risponde resta in fondo alla lista, e lo dice. La riga dice quale usa adesso l'automatica.</p>
+<p>Invio apre una lista con l'automatica, che usa lo screen reader attivo e altrimenti la voce di Windows, e le sintesi che si possono usare adesso, fra NVDA, JAWS e la voce di Windows, SAPI5. Una sintesi scelta prima che adesso non risponde resta in fondo alla lista, e lo dice. La riga dice quale usa adesso l'automatica. La stessa sintesi dice anche la riga di Dove sono, l'apostrofo.</p>
 <h4>Dove vanno sottotitoli e karaoke</h4>
-<p>Invio apre una lista: alla sintesi e al braille, il modo di partenza, solo alla sintesi, o solo al braille. Vale per i sottotitoli dei video, per quelli letti con il riconoscimento dei caratteri e per il testo del karaoke. Il braille arriva con NVDA e JAWS; con la voce di Windows solo al braille vuol dire solo nella console, e la console lo dice quando scegli.</p>
+<p>Invio apre una lista: alla sintesi e al braille, il modo di partenza, solo alla sintesi, o solo al braille. Vale per i sottotitoli dei video, per quelli letti con il riconoscimento dei caratteri, per il testo del karaoke e per la riga di Dove sono, l'apostrofo. Il braille arriva con NVDA e JAWS; con la voce di Windows solo al braille vuol dire solo nella console, e la console lo dice quando scegli.</p>
 <h4>Testo del karaoke</h4>
 <p>Invio apre una lista: per riga, il modo di partenza, o per strofa, dove il file le segna; altrimenti per riga. Il capitolo Il karaoke spiega tutto.</p>
 <h4>Celle della barra braille</h4>

@@ -61,7 +61,7 @@ Poi MeTeOra si avvia con `python meteora.py`, e le prove con `python -m pytest`:
 
 I file dei dati, `MeTeOra - *.json`, non stanno nel repository dalla 1.104.0: avviando dai sorgenti nascono accanto a `meteora.py`, e ogni macchina ha i suoi.
 
-Il banco del collaudo, `python strumenti/banco.py`, apre MeTeOra vero su un desktop nascosto, con una copia dei dati della cartella, lo pilota con una tastiera simulata e controlla le statistiche, la pulizia all'avvio, il riavvio e la chiusura a forza; alla fine scrive un riassunto, una riga per ogni controllo non riuscito.
+Il banco del collaudo, `python strumenti/banco.py`, apre MeTeOra vero su un desktop nascosto, con una copia dei dati della cartella, lo pilota con una tastiera simulata e controlla le statistiche, la pulizia all'avvio, il riavvio, la chiusura a forza e Dove sono; alla fine scrive un riassunto, una riga per ogni controllo non riuscito. Una sessione che non dipende dalle altre si lancia da sola, per esempio `python strumenti/banco.py --solo dove_sono`.
 
 Il pacchetto si compila con `python -m PyInstaller --noconfirm MeTeOra.spec`; poi `python zip_maker.py` fa l'archivio per l'aggiornamento automatico, e `python setup_maker.py` il programma di installazione, con Inno Setup 6.
 

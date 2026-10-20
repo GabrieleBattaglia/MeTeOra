@@ -3,6 +3,7 @@
 # 30/09/2026: nasce con la tappa 1, sul modello di tests/conftest.py di Tornello.
 # 03/10/2026, 1.72.0: os.startfile vietato, perche' F1 apre il manuale nel browser.
 # 04/10/2026, 1.75.0: il browser vietato e Donazione muta, per l'invito a offrire un caffe'.
+# 20/10/2026, 1.105.0: la sintesi finta annota anche i testi che interrompono la voce, per Dove sono.
 
 """Le regole comuni delle prove.
 
@@ -132,13 +133,14 @@ def sintesi_finta(monkeypatch):
     """La sintesi dei sottotitoli non parla mai: le uscite sono finte. Si
     aprono quelle in presenti, sono attive quelle vere in attive (la voce di
     Windows, aperta, lo e' sempre), e i testi detti finiscono in detti, come
-    (chiave, testo), quelli mandati al braille in braille. Le prove cambiano
-    presenti e attive a piacere."""
+    (chiave, testo), e anche in interrotti se interrompono la voce, quelli
+    mandati al braille in braille. Le prove cambiano presenti e attive a
+    piacere."""
     import types
 
     import sintesi
 
-    stato = types.SimpleNamespace(detti=[], braille=[], presenti={"nvda", "jaws", "sapi5"}, attive={"nvda": True, "jaws": False})
+    stato = types.SimpleNamespace(detti=[], interrotti=[], braille=[], presenti={"nvda", "jaws", "sapi5"}, attive={"nvda": True, "jaws": False})
 
     class Finta:
         def __init__(self, chiave):
@@ -149,6 +151,8 @@ def sintesi_finta(monkeypatch):
 
         def speak(self, testo, interrupt=False):
             stato.detti.append((self.chiave, testo))
+            if interrupt:
+                stato.interrotti.append((self.chiave, testo))
 
         def braille(self, testo):
             # Come in accessible_output2: la voce di Windows il braille non ce l'ha.

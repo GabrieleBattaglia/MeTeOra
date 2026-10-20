@@ -1,6 +1,6 @@
 # MeTeOra, la barra braille a blocchi: i testi letti divisi nelle celle della barra, in fila con il tempo minimo di lettura.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.83.0, per la tappa 10, punto g.
+# 04/10/2026: nasce con la 1.83.0, per la tappa 10, punto g. Nella 1.105.0 un testo superato si toglie dalla fila, per Dove sono che sulla barra si riscrive come nella console.
 
 """La barra braille a blocchi (tappa 10, punto g; Gabriele, 4 ottobre 2026).
 
@@ -72,6 +72,8 @@ class Coda:
         # testo, minimo in secondi, numero del testo)
         self._fila = collections.deque()
         self._testi = 0
+        # Il numero del testo del blocco mostrato, per togli.
+        self._mostrato = None
         # Fin quando il blocco mostrato deve restare: con la sua parte del
         # tempo del testo, e con il solo minimo; e l'attesa pianificata.
         self._libera = float("-inf")
@@ -82,10 +84,11 @@ class Coda:
         """Un testo nuovo, in coda: celle quante ne ha la barra, 0 per il
         testo intero; minimo il tempo minimo di lettura di ogni blocco, in
         secondi; durata quanti secondi d'orologio resta il testo, se si sa,
-        per dividerla fra i blocchi."""
+        per dividerla fra i blocchi. Torna il numero del testo, per togli,
+        o None se il testo e' vuoto."""
         pezzi = blocchi(testo, celle)
         if not pezzi:
-            return
+            return None
         self._testi += 1
         fine = self._orologio() + min(durata, DURATA_MASSIMA) if durata else None
         for numero, pezzo in enumerate(pezzi):
@@ -98,6 +101,25 @@ class Coda:
                 self._attesa = None
         if self._attesa is None:
             self._prossimo()
+        return self._testi
+
+    def togli(self, numero):
+        """Toglie il testo numero, quello che aggiungi ha restituito, perche'
+        uno nuovo ne prende il posto: i suoi blocchi ancora in fila e, se il
+        blocco mostrato e' suo, il tempo che deve restare, cosi' il testo dopo
+        si mostra subito. Gli altri testi in fila restano. Lo usa Dove sono,
+        che sulla barra si riscrive come nella console (tappa 14 b). None non
+        toglie niente."""
+        if numero is None:
+            return
+        self._fila = collections.deque(voce for voce in self._fila if voce[4] != numero)
+        if self._mostrato != numero:
+            return
+        self._libera = self._minimo_fino = float("-inf")
+        if self._attesa is not None:
+            self._attesa.Stop()
+            self._attesa = None
+        self._prossimo()
 
     def svuota(self):
         """Toglie dalla fila i testi non ancora mostrati, e il tempo minimo
@@ -121,6 +143,7 @@ class Coda:
             self._attesa = self._pianifica(self._libera - ora, self._prossimo)
             return
         pezzo, fine, rimasti, minimo, numero = self._fila.popleft()
+        self._mostrato = numero
         self._mostra(pezzo)
         # La parte del tempo del testo vale finche' non aspetta un altro testo.
         altro = any(voce[4] != numero for voce in self._fila)

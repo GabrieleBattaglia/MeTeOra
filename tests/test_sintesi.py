@@ -1,6 +1,6 @@
 # MeTeOra, le prove della sintesi dei sottotitoli.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/10/2026: nasce con la tappa 7.
+# 03/10/2026: nasce con la tappa 7. Nella 1.105.0 la prova della voce interrotta, per Dove sono.
 
 """Le uscite sono finte, dal conftest: nessuna prova parla."""
 
@@ -57,6 +57,16 @@ def test_dove_vanno_i_testi(sintesi_finta):
     assert sintesi_finta.detti == [("nvda", "uno"), ("nvda", "due")] and sintesi_finta.braille == [("nvda", "uno"), ("nvda", "tre")]
     assert voce.dici("quattro", "sapi5", "braille") and sintesi_finta.braille[-1] == ("nvda", "tre")
     assert set(sintesi.DESTINAZIONI) == {"entrambi", "sintesi", "braille"}
+
+
+def test_dici_puo_interrompere_la_voce(sintesi_finta):
+    # 1.105.0: Dove sono interrompe la voce, i sottotitoli no.
+    voce = sintesi.Sintesi()
+    assert voce.dici("uno") and voce.dici("due", interrompi=True) and voce.dici("tre", "sapi5", "sintesi", interrompi=True)
+    assert sintesi_finta.detti == [("nvda", "uno"), ("nvda", "due"), ("sapi5", "tre")]
+    assert sintesi_finta.interrotti == [("nvda", "due"), ("sapi5", "tre")]
+    # Al solo braille non c'e' voce da interrompere.
+    assert voce.dici("quattro", dove="braille", interrompi=True) and len(sintesi_finta.interrotti) == 2
 
 
 def test_la_voce_di_windows_si_apre_anche_senza_l_elenco_delle_voci(monkeypatch):

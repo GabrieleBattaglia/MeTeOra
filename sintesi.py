@@ -1,6 +1,6 @@
 # MeTeOra, la sintesi dei sottotitoli: gli screen reader e la voce di Windows, con accessible_output2.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/10/2026: nasce con la tappa 7, per i sottotitoli letti. Nella 1.82.0 dove vanno i testi, alla voce, al braille o a tutti e due, chiamati uno per uno. Nella 1.83.3 la voce di Windows aperta da MeTeOra quando accessible_output2 non ci riesce. Nella 1.85.0 fuori ZDSR, Dolphin, System Access e PC-Talker.
+# 03/10/2026: nasce con la tappa 7, per i sottotitoli letti. Nella 1.82.0 dove vanno i testi, alla voce, al braille o a tutti e due, chiamati uno per uno. Nella 1.83.3 la voce di Windows aperta da MeTeOra quando accessible_output2 non ci riesce. Nella 1.85.0 fuori ZDSR, Dolphin, System Access e PC-Talker. Nella 1.105.0 dici puo' interrompere la voce che sta parlando, per Dove sono.
 
 """Le uscite a cui MeTeOra manda i sottotitoli letti (tappa 7).
 
@@ -120,10 +120,13 @@ class Sintesi:
             return chiave if chiave in USCITE and _attiva(chiave, self._uscita(chiave)) else None
         return next((c for c in USCITE if _attiva(c, self._uscita(c))), None)
 
-    def dici(self, testo, chiave=AUTOMATICA, dove="entrambi"):
+    def dici(self, testo, chiave=AUTOMATICA, dove="entrambi", interrompi=False):
         """Dice il testo con l'uscita scelta, senza interrompere quello che
-        sta dicendo: alla voce, al braille o a tutti e due, come dice dove,
-        una chiave di DESTINAZIONI. Il braille ce l'hanno solo le uscite di
+        sta dicendo, o con interrompi lasciandolo a meta': alla voce, al
+        braille o a tutti e due, come dice dove, una chiave di DESTINAZIONI.
+        Interrompe Dove sono, la cui riga nuova prende il posto della vecchia
+        anche a voce: la voce di Windows, che da sola non interrompe, accodava
+        le pressioni ravvicinate (1.105.0). Il braille ce l'hanno solo le uscite di
         CON_IL_BRAILLE. Falso se nessuna uscita risponde. Voce e braille si chiamano
         uno per uno: output di accessible_output2, con NVDA, dopo averli
         fatti tutti e due solleva un errore, perche' le funzioni di NVDA non
@@ -135,7 +138,7 @@ class Sintesi:
         uscita = self._uscita(effettiva)
         try:
             if dove in ("entrambi", "sintesi"):
-                uscita.speak(testo, interrupt=False)
+                uscita.speak(testo, interrupt=interrompi)
             if dove in ("entrambi", "braille"):
                 uscita.braille(testo)
         except Exception:  # noqa: BLE001 - uno screen reader chiuso nel frattempo

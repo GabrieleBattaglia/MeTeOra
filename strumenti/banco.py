@@ -1,6 +1,6 @@
 # MeTeOra, il banco del collaudo: MeTeOra vero su un desktop di Windows nascosto, con una copia dei dati, pilotato da una tastiera simulata.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 19/10/2026: nasce con la 1.104.0, dal banco con cui ClaudIA ha collaudato le statistiche della 1.103; sul desktop nascosto, come preferisce Gabriele.
+# 19/10/2026: nasce con la 1.104.0, dal banco con cui ClaudIA ha collaudato le statistiche della 1.103; sul desktop nascosto, come preferisce Gabriele. Nella 1.105.0 la sessione di Dove sono, l'opzione --solo, la sintesi finta e la pipe dell'istanza con il numero del processo.
 
 """Il banco del collaudo.
 
@@ -8,6 +8,8 @@ Uso, dalla cartella di MeTeOra:
   python strumenti\\banco.py             tutte le sessioni, su una copia dei dati di questa cartella
   python strumenti\\banco.py --vuoti     tutte le sessioni, partendo senza dati
   python strumenti\\banco.py --video V   in piu' Maiuscolo con F7 con la finestra del video V davanti
+  python strumenti\\banco.py --solo S    la sola sessione S, per quelle che non dipendono dalle altre,
+                                        come dove_sono
 
 Con --video la finestra del video di MeTeOra si apre e prende i tasti, ma
 libmpv, che disegna in un suo filo nato sul desktop di partenza, li' non puo'
@@ -16,8 +18,9 @@ MeTeOra, non il disegno del video.
 
 Ogni sessione e' un processo a parte che apre MeTeOra come meteora.py, ma con
 i dati in una cartella temporanea e su un desktop di Windows nascosto: lo
-schermo non cambia, NVDA non legge, i suoni si annotano senza suonare e il
-motore suona sull'uscita nulla. Un filo pilota preme i tasti con
+schermo non cambia, NVDA non legge, i suoni si annotano senza suonare, il
+motore suona sull'uscita nulla e la sintesi dei sottotitoli annota soltanto,
+senza mai arrivare a NVDA. Un filo pilota preme i tasti con
 tastiera_simulata e guarda cosa succede dentro la finestra. Le sessioni:
 - principale: la pulizia all'avvio, la voce Statistiche, Maiuscolo con F7 da
   plancia, console, cruscotto e dal video, la ricerca nelle statistiche, Invio,
@@ -29,7 +32,13 @@ tastiera_simulata e guarda cosa succede dentro la finestra. Le sessioni:
 - dopo_il_crash: la chiusura non regolare contata, senza l'errore grave; resta
   aperta oltre il minuto, per il salvataggio e lo svuotamento del file del
   crash, ed esce con Esc;
-- controllo: le chiusure regolari e gli avvii contati.
+- controllo: le chiusure regolari e gli avvii contati;
+- dove_sono: l'apostrofo, il tasto vero della tastiera italiana, con niente
+  in corso e con due file che suonano, dalla plancia e dalla console, in
+  pausa e a velocita' cambiata, con Maiuscolo; il fuoco che resta dov'e' e la
+  riga che va alla sintesi e al braille, dove si riscrive subito anche lei;
+  ripetizione, casuale, velocita', tono e sintesi partono da quelli normali,
+  qualunque cosa dica la copia dei dati.
 Alla fine un riassunto, una riga per ogni controllo non riuscito; l'uscita
 vale 1 se ce n'e' almeno uno. La cartella di prova resta solo in quel caso.
 """
@@ -54,10 +63,10 @@ from ctypes import wintypes
 RADICE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ISTANZA = "meteora_banco"
 FILE_DELLE_STATISTICHE = "MeTeOra - Statistiche.json"
-SESSIONI = ("principale", "riavvio", "dopo_il_crash", "controllo")
+SESSIONI = ("principale", "riavvio", "dopo_il_crash", "controllo", "dove_sono")
 # Quanto puo' durare ogni sessione, in secondi: la pulizia sulla copia dei
 # dati veri guarda anche la rete.
-DURATE_MASSIME = {"principale": 1200, "riavvio": 900, "dopo_il_crash": 1200, "controllo": 900}
+DURATE_MASSIME = {"principale": 1200, "riavvio": 900, "dopo_il_crash": 1200, "controllo": 900, "dove_sono": 900}
 # Quanto aspettare la fine della pulizia all'avvio, in secondi.
 ATTESA_DELLA_PULIZIA = 900
 
@@ -133,6 +142,30 @@ def _prepara_i_moduli():
 
     webbrowser.open = lambda *argomenti, **opzioni: S.nota("browser", argomenti)
     aggiornamento.controlla = lambda *argomenti, **opzioni: None
+    # La sintesi dei sottotitoli, e di Dove sono, annota soltanto: quella
+    # vera parlerebbe con NVDA anche dal desktop nascosto. NVDA e' attivo,
+    # cosi' l'automatica sceglie lui, come sul PC di Gabriele.
+    import sintesi
+
+    class SintesiFinta:
+        def __init__(self, chiave):
+            self.chiave = chiave
+
+        def is_active(self):
+            return self.chiave == "nvda"
+
+        def speak(self, testo, interrupt=False):
+            S.extra.setdefault("detti", []).append([self.chiave, testo])
+            if interrupt:
+                # Anche i testi che interrompono la voce, come Dove sono.
+                S.extra.setdefault("interrotti", []).append([self.chiave, testo])
+            S.nota("sintesi che interrompe" if interrupt else "sintesi", self.chiave, testo)
+
+        def braille(self, testo):
+            S.extra.setdefault("braille", []).append([self.chiave, testo])
+            S.nota("braille", self.chiave, testo)
+
+    sintesi._crea = SintesiFinta
 
 
 def _apri_meteora():
@@ -212,7 +245,10 @@ def _apri_meteora():
 def sessione(nome, dati, esito, video, vuoti=False):
     global S
     _desktop_nascosto()
-    os.environ["METEORA_ISTANZA"] = ISTANZA
+    # La pipe dell'istanza unica ha il numero del processo: due banchi
+    # insieme, per esempio da due copie di lavoro, con lo stesso nome se la
+    # contenderebbero, e i file di uno arriverebbero all'altro.
+    os.environ["METEORA_ISTANZA"] = f"{ISTANZA}_{os.getpid()}"
     sys.path.insert(0, RADICE)
     os.chdir(RADICE)
     S = Sessione(nome, dati, esito, video)
@@ -747,7 +783,107 @@ def scenario_controllo():
     premi("esc")
 
 
-SCENARI = {"principale": scenario_principale, "riavvio": scenario_riavvio, "dopo_il_crash": scenario_dopo_il_crash, "controllo": scenario_controllo}
+def scenario_dove_sono():
+    """Dove sono, l'apostrofo (tappa 14 b): il tasto vero della tastiera
+    italiana, premuto con la tastiera simulata, e la riga che ne esce con il
+    motore vero sull'uscita nulla."""
+    import re
+
+    import istanza
+
+    f = S.finestra
+    voce = "dove sono"
+    aspetta_la_pulizia()
+    premi("f5")
+    # Il brano ripreso in pausa all'avvio, se c'e', si ferma.
+    premi("v")
+
+    def al_normale():
+        """La copia dei dati di questa cartella puo' avere la ripetizione, la
+        riproduzione casuale, la velocita', il tono, la sintesi o la barra dei
+        sottotitoli cambiati: allungherebbero la riga, o la toglierebbero alla
+        sintesi e al braille, mentre i controlli aspettano quelli di partenza,
+        come con --vuoti."""
+        f.impostazioni.update(ripetizione="spenta", casuale=False, velocita=1.0, tono=0, sintesi="automatica", destinazione="entrambi", celle_braille=0)
+        f._applica_la_riproduzione()
+        f.motore.muto = False
+
+    nel_filo(al_normale)
+
+    def premi_l_apostrofo(**opzioni):
+        """Preme l'apostrofo e torna l'ultima riga scritta e i suoni da li'."""
+        segno = time.monotonic()
+        premi("'", **opzioni)
+        righe = S.console_da(segno)
+        return (righe[-1] if righe else ""), S.suoni_da(segno)
+
+    def righe():
+        return nel_filo(lambda: len(f._righe))
+
+    def suona(nome):
+        corrente = f.coda.corrente
+        return bool(f.motore.in_corso) and corrente is not None and os.path.basename(corrente.percorso) == nome and f.motore.posizione is not None
+
+    riga, suonati = premi_l_apostrofo()
+    S.verifica(voce, "Senza niente in corso, la frase e il suono di F8", riga == "Non sta suonando niente." and suonati == ["niente_da_suonare"], (riga, suonati))
+    S.verifica(voce, "La frase va anche alla sintesi, interrompendo la voce, e al braille", S.extra.get("interrotti", [])[-1:] == [["nvda", riga]]
+        and S.extra.get("braille", [])[-1:] == [["nvda", riga]], (S.extra.get("interrotti", [])[-1:], S.extra.get("braille", [])[-1:]))
+    cartella = _cartella_dei_brani()
+    # Nomi loro: la cartella e' quella della sessione principale, che ha gia'
+    # un due.wav di 12 secondi.
+    uno, due = fai_un_wav(os.path.join(cartella, "dove uno.wav"), 40), fai_un_wav(os.path.join(cartella, "dove due.wav"), 30)
+    mandati = istanza.manda([uno, due])
+    S.verifica(voce, "I due file arrivano da un'altra copia e dove uno.wav suona", mandati and aspetta(lambda: suona("dove uno.wav"), attesa=20), f"mandati: {mandati}")
+    modello = re.compile(r"^0:\d\d di 0:40, mancano 0:\d\d, dove uno\.wav, 1 di 2, file aperti")
+    # Dalla plancia, dopo qualche secondo: il tempo corre, e il mancante con lui.
+    premi("f5")
+    time.sleep(3)
+    prima, quante = nel_filo(fuoco), righe()
+    riga, suonati = premi_l_apostrofo()
+    tempi = re.match(r"^0:(\d\d) di 0:40, mancano 0:(\d\d), ", riga)
+    S.verifica(voce, "Dalla plancia: tempo, brano e lista, con il suo suono", bool(modello.match(riga)) and riga.endswith("file aperti.")
+        and suonati == ["dove_sono"] and tempi is not None and int(tempi[1]) >= 2 and int(tempi[1]) + int(tempi[2]) == 40, (riga, suonati))
+    S.verifica(voce, "Il fuoco resta dov'era", nel_filo(fuoco) == prima, f"{prima} -> {nel_filo(fuoco)}")
+    S.verifica(voce, "La riga va alla sintesi e al braille, senza l'ora", S.extra.get("detti", [])[-1:] == [["nvda", riga]]
+        and S.extra.get("braille", [])[-1:] == [["nvda", riga]], (S.extra.get("detti", [])[-1:], S.extra.get("braille", [])[-1:]))
+    S.verifica(voce, "La riga interrompe la voce che sta parlando", S.extra.get("interrotti", [])[-1:] == [["nvda", riga]], S.extra.get("interrotti", [])[-1:])
+    S.verifica(voce, "Una riga nuova nella console", righe() == quante + 1, f"{quante} -> {righe()}")
+    # Dalla console la riga si riscrive, e il fuoco resta li'.
+    premi("f6")
+    quante = righe()
+    riga, suonati = premi_l_apostrofo()
+    S.verifica(voce, "Dalla console la riga si riscrive", bool(modello.match(riga)) and righe() == quante and suonati == ["dove_sono"], (riga, quante, righe()))
+    S.verifica(voce, "Il fuoco resta nella console", "Console" in nel_filo(fuoco), nel_filo(fuoco))
+    # Anche sulla barra la riga nuova prende subito il posto di quella di
+    # prima, senza aspettarne il tempo minimo di lettura.
+    S.verifica(voce, "La riga riscritta arriva subito anche al braille", S.extra.get("braille", [])[-1:] == [["nvda", riga]], S.extra.get("braille", [])[-1:])
+    # In pausa, e a velocita' cambiata.
+    premi("c")
+    riga, _suonati = premi_l_apostrofo()
+    S.verifica(voce, "In pausa, in fondo alla riga", bool(modello.match(riga)) and riga.endswith(", file aperti, in pausa."), riga)
+    premi("c")
+    premi("d")
+    riga, _suonati = premi_l_apostrofo()
+    S.verifica(voce, "La velocita' cambiata, con il punto", riga.endswith(", file aperti, velocità 1.05."), riga)
+    premi("s")
+    # Il secondo file.
+    premi("b")
+    S.verifica(voce, "B passa a dove due.wav", aspetta(lambda: suona("dove due.wav"), attesa=15))
+    riga, _suonati = premi_l_apostrofo()
+    S.verifica(voce, "Il secondo file, 2 di 2", bool(re.match(r"^0:\d\d di 0:30, mancano 0:\d\d, dove due\.wav, 2 di 2, file aperti\.$", riga)), riga)
+    riga, suonati = premi_l_apostrofo(maiuscolo=True)
+    S.verifica(voce, "Maiuscolo con l'apostrofo resta senza comando", riga == "Maiuscolo+apostrofo non ha un comando." and suonati == ["non_disponibile"],
+        (riga, suonati))
+    premi("v")
+    riga, _suonati = premi_l_apostrofo()
+    S.verifica(voce, "Dopo lo stop, come F8", riga == "Non sta suonando niente.", riga)
+    premi("f5")
+    S.nota("chiudo MeTeOra con Esc")
+    premi("esc")
+
+
+SCENARI = {"principale": scenario_principale, "riavvio": scenario_riavvio, "dopo_il_crash": scenario_dopo_il_crash, "controllo": scenario_controllo,
+    "dove_sono": scenario_dove_sono}
 
 
 # Il banco intero: le sessioni una dopo l'altra, ognuna nel suo processo.
@@ -778,7 +914,9 @@ def _aspetta_il_processo(processo, nome):
         processo.wait()
 
 
-def banco(vuoti, video):
+def banco(vuoti, video, solo=None):
+    """Le sessioni una dopo l'altra, o la sola sessione solo."""
+    sessioni = (solo,) if solo else SESSIONI
     base = tempfile.mkdtemp(prefix="meteora_banco_")
     dati, esiti = os.path.join(base, "dati"), os.path.join(base, "esiti")
     os.makedirs(dati)
@@ -787,7 +925,7 @@ def banco(vuoti, video):
         for percorso in glob.glob(os.path.join(RADICE, "MeTeOra - *.json")):
             shutil.copy2(percorso, dati)
     print(f"Banco del collaudo: dati di prova in {dati}", flush=True)
-    for nome in SESSIONI:
+    for nome in sessioni:
         processo = _lancia(nome, dati, esiti, video, vuoti)
         if nome == "riavvio":
             pronto = os.path.join(esiti, "riavvio.pronto")
@@ -812,14 +950,14 @@ def banco(vuoti, video):
                 shutil.copy2(statistiche_alla_chiusura, os.path.join(esiti, "statistiche_alla_chiusura.json"))
             with contextlib.suppress(OSError, ValueError, KeyError), open(os.path.join(esiti, "principale.json"), encoding="utf-8") as f:
                 os.remove(json.load(f)["extra"]["da_cancellare"])
-    return base, esiti, _riassunto(esiti)
+    return base, esiti, _riassunto(esiti, sessioni)
 
 
-def _riassunto(esiti):
+def _riassunto(esiti, sessioni=SESSIONI):
     """Il riassunto per la console e il display braille: una riga per
     sessione, una per ogni controllo non riuscito, una per ogni apertura."""
     falliti = 0
-    for nome in SESSIONI:
+    for nome in sessioni:
         percorso = os.path.join(esiti, f"{nome}.json")
         if not os.path.isfile(percorso):
             print(f"Sessione {nome}: nessun esito.")
@@ -843,6 +981,7 @@ def main():
     parser = argparse.ArgumentParser(description="Il banco del collaudo di MeTeOra, sul desktop nascosto.")
     parser.add_argument("--vuoti", action="store_true", help="parte senza i dati di questa cartella")
     parser.add_argument("--video", help="un video per Maiuscolo con F7 con la sua finestra davanti")
+    parser.add_argument("--solo", choices=SESSIONI, help="la sola sessione data, per quelle che non dipendono dalle altre, come dove_sono")
     parser.add_argument("--sessione", choices=SESSIONI, help=argparse.SUPPRESS)
     parser.add_argument("--dati", help=argparse.SUPPRESS)
     parser.add_argument("--esito", help=argparse.SUPPRESS)
@@ -850,7 +989,7 @@ def main():
     if argomenti.sessione:
         sessione(argomenti.sessione, argomenti.dati, argomenti.esito, argomenti.video, argomenti.vuoti)
         return 0
-    base, _esiti, falliti = banco(argomenti.vuoti, argomenti.video)
+    base, _esiti, falliti = banco(argomenti.vuoti, argomenti.video, argomenti.solo)
     if falliti:
         print(f"Controlli non riusciti: {falliti}. I dati e i registri restano in {base}.")
         return 1

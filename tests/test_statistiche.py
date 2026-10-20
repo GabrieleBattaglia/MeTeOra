@@ -1,6 +1,6 @@
 # MeTeOra, le prove delle statistiche: l'orologio, la vita dei brani, il file, l'azzeramento e la pagina.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (UltraCode).
-# 17/10/2026: nasce con la 1.103.0. Nella 1.104.0 le prove delle righe-elenco senza le voci a zero, delle percentuali, degli anni futuri, delle date con il giorno della settimana, della pulizia all'avvio e dei brani rinominati.
+# 17/10/2026: nasce con la 1.103.0. Nella 1.104.0 le prove delle righe-elenco senza le voci a zero, delle percentuali, degli anni futuri, delle date con il giorno della settimana, della pulizia all'avvio e dei brani rinominati. Nella 1.105.0 quella dei nomi di tutti gli eventi, con Dove sono.
 
 import datetime
 import json
@@ -571,6 +571,14 @@ def test_la_riga_delle_pulizie(tmp_path):
 
 
 def test_gli_eventi_della_pulizia_sono_in_fondo():
-    assert list(statistiche.NOMI_DEGLI_EVENTI)[-2:] == ["pulizia_avviata", "pulizia_finita"]
+    # In fondo, nell'ordine di suoni.EVENTI; dalla 1.105.0 li segue Dove sono.
+    assert list(statistiche.NOMI_DEGLI_EVENTI)[-3:] == ["pulizia_avviata", "pulizia_finita", "dove_sono"]
     assert statistiche.NOMI_DEGLI_EVENTI["pulizia_avviata"] == "pulizia all'avvio cominciata"
     assert statistiche.NOMI_DEGLI_EVENTI["pulizia_finita"] == "pulizia all'avvio finita"
+
+
+def test_ogni_evento_ha_il_suo_nome():
+    """Ogni suono di MeTeOra ha un nome nelle statistiche, e ogni nome un suono."""
+    import suoni
+
+    assert set(statistiche.NOMI_DEGLI_EVENTI) == set(suoni.EVENTI)

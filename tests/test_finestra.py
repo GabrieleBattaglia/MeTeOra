@@ -1,6 +1,6 @@
 # MeTeOra, le prove della finestra principale, sul desktop nascosto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico.
+# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo.
 
 import ctypes
 import datetime
@@ -90,9 +90,11 @@ def test_nuova_playlist_aggiungi_sposta_togli(finestra, suoni_annotati):
 def test_tasti_liberi_e_numpad(finestra, suoni_annotati):
     # Un tasto senza comando lo dice, con il suo suono, e non arriva
     # all'albero (tappa 9); il tastierino resta a NVDA, in silenzio.
-    assert _premi(finestra, "'") == "Il tasto apostrofo non ha un comando." and suoni_annotati[-1] == "non_disponibile"
+    assert _premi(finestra, "ò") == "Il tasto o accentata non ha un comando." and suoni_annotati[-1] == "non_disponibile"
     assert _premi(finestra, "ì") == "Il tasto i accentata non ha un comando."
     assert _premi(finestra, "a", maiuscolo=True) == "Maiuscolo+A non ha un comando."
+    # L'apostrofo e' Dove sono dalla 1.105.0; con il Maiuscolo resta libero.
+    assert _premi(finestra, "'", maiuscolo=True) == "Maiuscolo+apostrofo non ha un comando."
     righe, suonati = len(finestra._righe), len(suoni_annotati)
     _tasto(finestra, codice=wx.WXK_NUMPAD_ADD)
     assert len(finestra._righe) == righe and len(suoni_annotati) == suonati
@@ -1555,7 +1557,8 @@ def test_ogni_tasto_e_nella_guida_rapida(finestra):
     righe = modulo.guida_rapida(finestra._leggi_risorsa("manuale.html"))
     tasti = [f"F{n}" for n in range(1, 13)] + [f"Maiuscolo con F{n}" for n in (1, 2, 3, 5, 6, 7, 8, 10, 11)] + [
         "Esc", "Alt con F4", "Tab", "Maiuscolo con Tab", "Barra rovesciata", "Ctrl con la barra rovesciata", "Barra verticale",
-        "Canc", "Maiuscolo con Canc", "Backspace", "Maiuscolo con Backspace", "Meno", "Più", "Cifre da 1 a 0", "Maiuscolo con le cifre da 1 a 0"]
+        "Canc", "Maiuscolo con Canc", "Backspace", "Maiuscolo con Backspace", "Meno", "Più", "Cifre da 1 a 0", "Maiuscolo con le cifre da 1 a 0",
+        "Apostrofo"]
     for (carattere, maiuscolo), _comando in modulo.TASTI.items():
         if carattere.isalpha():
             tasti.append(f"Maiuscolo con {carattere.upper()}" if maiuscolo else carattere.upper())
@@ -6632,3 +6635,319 @@ def test_la_rinomina_porta_con_se_il_punto_e_lo_storico(finestra, tmp_path):
     assert finestra.posizioni.dove(nuovo) == 600.0 and finestra.posizioni.dove(vecchio) is None
     brani = finestra._statistiche.dati["brani"]
     assert vecchio not in brani and brani[nuovo]["volte"] == 1
+
+
+# Dove sono, l'apostrofo (tappa 14 b, 1.105.0).
+
+
+def _in_corso_per_dove_sono(finestra, monkeypatch, pl, brano, **stato):
+    """Il brano che suona, senza il motore: la coda, il file in corso e le
+    proprieta' del lettore, che le prove cambiano nello stato restituito."""
+    finestra.coda.imposta(pl, brano)
+    finestra.motore._in_corso = brano.percorso
+    valori_del_lettore = {"posizione": 83.4, "durata": 296.7, "in_pausa": False, "muto": False, "velocita": 1.0, "tono": 0, **stato}
+    for nome in valori_del_lettore:
+        monkeypatch.setattr(type(finestra.motore), nome, property(lambda _self, n=nome: valori_del_lettore[n]))
+    return valori_del_lettore
+
+
+def _dove_sono(finestra):
+    _tasto(finestra, "'")
+    return _ultima(finestra)
+
+
+def test_dove_sono_senza_niente_in_corso(finestra, suoni_annotati, sintesi_finta):
+    niente = "Non sta suonando niente."
+    assert _dove_sono(finestra) == niente and suoni_annotati[-1] == "niente_da_suonare"
+    # Come F8, ma anche alla sintesi e al braille, come la riga (ritocco della 1.105.0).
+    assert sintesi_finta.detti == [("nvda", niente)] and sintesi_finta.braille == [("nvda", niente)]
+    # La coda ricorda il brano anche dopo lo stop: conta il motore, come per F8.
+    finestra._aggiungi(None, [r"C:\m\a.mp3"])
+    pl = finestra.archivio.playlist[0]
+    finestra.coda.imposta(pl, pl.brani[0])
+    assert _dove_sono(finestra) == niente and sintesi_finta.detti[-1] == ("nvda", niente)
+    # Con la voce delle impostazioni su solo alla sintesi, la barra non la riceve.
+    finestra.impostazioni["destinazione"] = "sintesi"
+    braille = len(sintesi_finta.braille)
+    assert _dove_sono(finestra) == niente and len(sintesi_finta.detti) == 3 and len(sintesi_finta.braille) == braille
+
+
+def test_dove_sono_dice_tempo_brano_e_lista(finestra, monkeypatch, suoni_annotati, sintesi_finta):
+    _playlist_di_prova(finestra, [f"{n:02d}.mp3" for n in range(1, 13)])
+    pl = finestra.archivio.playlist[0]
+    pl.nome = "Dalla"
+    pl.brani[2].percorso = r"C:\m\Caruso.mp3"
+    stato = _in_corso_per_dove_sono(finestra, monkeypatch, pl, pl.brani[2], in_pausa=True)
+    finestra._seleziona(finestra.nodo_pc)
+    voce, fuoco, righe = finestra._voce_corrente(), wx.Window.FindFocus(), len(finestra._righe)
+    riga = "1:23 di 4:56, mancano 3:33, Caruso.mp3, 3 di 12, playlist Dalla, in pausa."
+    assert _dove_sono(finestra) == riga and suoni_annotati[-1] == "dove_sono"
+    assert len(finestra._righe) == righe + 1 and re.search(r" \d\d:\d\d$", finestra._righe[-1])
+    # Alla sintesi e al braille senza l'ora; la selezione e il fuoco non si muovono.
+    assert sintesi_finta.detti == [("nvda", riga)] and sintesi_finta.braille == [("nvda", riga)]
+    assert finestra._voce_corrente() == voce and wx.Window.FindFocus() == fuoco
+    # Premuto di nuovo, la riga si riscrive.
+    stato["in_pausa"] = False
+    stato["posizione"] = 3723.9
+    stato["durata"] = 7200.0
+    assert _dove_sono(finestra) == "1:02:03 di 2:00:00, mancano 57:57, Caruso.mp3, 3 di 12, playlist Dalla."
+    assert len(finestra._righe) == righe + 1
+    # Il mancante si conta dai secondi interi che la riga dice, e oltre la fine resta a zero.
+    stato["posizione"], stato["durata"] = 59.9, 61.2
+    assert _dove_sono(finestra).startswith("0:59 di 1:01, mancano 0:02, ")
+    stato["posizione"] = 70.0
+    assert _dove_sono(finestra).startswith("1:10 di 1:01, mancano 0:00, ")
+
+
+def test_dove_sono_quando_il_tempo_non_si_sa(finestra, monkeypatch):
+    finestra._aggiungi(None, [r"C:\m\a.mp3", r"C:\m\b.mp3"])
+    pl = finestra.archivio.playlist[0]
+    stato = _in_corso_per_dove_sono(finestra, monkeypatch, pl, pl.brani[1], posizione=None, durata=None)
+    # Il lettore non e' ancora pronto: niente punto interrogativo.
+    assert _dove_sono(finestra) == f"il tempo non si sa ancora, b.mp3, 2 di 2, playlist {pl.nome}."
+    # La durata, se si sa, dallo schedario, come nella plancia.
+    finestra.schedario.schede[r"C:\m\b.mp3"] = {"dim": 1, "mod": 0, "durata": 125.5, "tag": {}, "sottobrani": None, "durate_sid": None}
+    assert _dove_sono(finestra).startswith("il tempo non si sa ancora, dura 2:05, b.mp3, ")
+    stato["posizione"] = 10.0
+    assert _dove_sono(finestra).startswith("0:10 di 2:05, mancano 1:55, ")
+    del finestra.schedario.schede[r"C:\m\b.mp3"]
+    assert _dove_sono(finestra).startswith("0:10, la durata non si sa, b.mp3, ")
+
+
+def test_dove_sono_la_durata_del_sottobrano(finestra, monkeypatch):
+    """Mentre un SID si prepara dopo un salto, la durata viene dal database
+    dei sottobrani, per il sottobrano che suona, non per quello della voce
+    ne' dallo schedario."""
+    finestra._aggiungi(None, [r"C:\m\a.sid"])
+    pl = finestra.archivio.playlist[0]
+    pl.brani[0].sottobrano = 1
+    stato = _in_corso_per_dove_sono(finestra, monkeypatch, pl, pl.brani[0], posizione=None, durata=None)
+    finestra.schedario.schede[r"C:\m\a.sid"] = {"dim": 1, "mod": 0, "durata": 999.0, "tag": {}, "sottobrani": None, "durate_sid": None}
+    monkeypatch.setattr(modulo.sottobrani, "durate", lambda percorso: [100.0, 125.0] if percorso == r"C:\m\a.sid" else None)
+    finestra.motore.sottobrano, finestra.motore.sottobrani = 2, 3
+    assert _dove_sono(finestra) == f"il tempo non si sa ancora, dura 2:05, a.sid, playlist {pl.nome}, sottobrano 2 di 3."
+    # Oltre la lista delle durate, la durata non si sa.
+    finestra.motore.sottobrano = 3
+    assert _dove_sono(finestra) == f"il tempo non si sa ancora, a.sid, playlist {pl.nome}, sottobrano 3 di 3."
+    # Con il punto noto, il mancante si conta sulla durata del sottobrano.
+    finestra.motore.sottobrano = 2
+    stato["posizione"] = 10.0
+    assert _dove_sono(finestra) == f"0:10 di 2:05, mancano 1:55, a.sid, playlist {pl.nome}, sottobrano 2 di 3."
+
+
+def test_dove_sono_conta_come_la_plancia(finestra, monkeypatch):
+    _playlist_di_prova(finestra, ("a.mp3", "b.mp3", "c.mp3", "d.mp3"))
+    pl = finestra.archivio.playlist[0]
+    pl.nome = "Rock"
+    _in_corso_per_dove_sono(finestra, monkeypatch, pl, pl.brani[2])
+    # Senza filtro si contano tutti i brani, saltati compresi.
+    pl.brani[0].saltato = True
+    assert _dove_sono(finestra).endswith(", c.mp3, 3 di 4, playlist Rock.")
+    # Con il filtro, fra i brani che lo passano, come l'etichetta della playlist.
+    pl.filtro = "-b"
+    assert _dove_sono(finestra).endswith(", c.mp3, 2 di 3 col filtro, playlist Rock.")
+    assert finestra._etichetta_della_playlist(pl) == "Rock, brani: 3 (senza durata), totali: 4 (senza durata), filtro: -b"
+    # Il brano che il filtro, arrivato dopo, lascia fuori.
+    _in_corso_per_dove_sono(finestra, monkeypatch, pl, pl.brani[1])
+    assert _dove_sono(finestra).endswith(", b.mp3, fuori dal filtro, 2 di 4 in tutto, playlist Rock.")
+    # Segnato come saltato mentre suona, e poi tolto dalla lista.
+    pl.filtro = ""
+    pl.brani[1].saltato = True
+    assert _dove_sono(finestra).endswith(", b.mp3, 2 di 4, playlist Rock, saltato.")
+    brano = pl.brani[1]
+    pl.brani.remove(brano)
+    assert _dove_sono(finestra).endswith(", b.mp3, non è più nella playlist Rock, saltato.")
+
+
+def test_dove_sono_nomi_delle_liste(finestra, monkeypatch):
+    from playlist import Playlist
+
+    def riga(pl, brano):
+        _in_corso_per_dove_sono(finestra, monkeypatch, pl, brano)
+        return _dove_sono(finestra).removeprefix("1:23 di 4:56, mancano 3:33, ")
+
+    preferiti = finestra.archivio.preferiti
+    preferiti.brani.append(Brano(r"C:\m\a.mp3"))
+    # Con un brano solo, solo il nome della lista.
+    assert riga(preferiti, preferiti.brani[0]) == "a.mp3, Preferiti."
+    preferiti.brani.append(Brano(r"C:\m\b.mp3"))
+    assert riga(preferiti, preferiti.brani[1]) == "b.mp3, 2 di 2, Preferiti."
+    tolto = preferiti.brani.pop()
+    assert riga(preferiti, tolto) == "b.mp3, non è più nei Preferiti."
+    selezione = Playlist("Selezione", [Brano(r"C:\m\a.mp3"), Brano(r"C:\m\b.mp3"), Brano(r"C:\m\c.mp3")], cartella="")
+    selezione.selezione = True
+    assert riga(selezione, selezione.brani[1]) == "b.mp3, 2 di 3 della selezione."
+    cartella = Playlist("Musica", [Brano(r"C:\m\Musica\a.mp3"), Brano(r"C:\m\Musica\b.mp3")], cartella=r"C:\m\Musica")
+    assert riga(cartella, cartella.brani[0]) == "a.mp3, 1 di 2, cartella Musica."
+    cartella.ricorsiva = True
+    assert riga(cartella, cartella.brani[0]) == "a.mp3, 1 di 2, cartella Musica con le sottocartelle."
+    unita = Playlist("E:\\", [Brano(r"E:\a.mp3"), Brano(r"E:\Musica\b.mp3")], cartella="e:\\")
+    unita.ricorsiva = True
+    assert riga(unita, unita.brani[1]) == "b.mp3, 2 di 2, unità E: con le sottocartelle."
+    aperto = Playlist("file aperto", [Brano(r"C:\m\a.mp3")], cartella="")
+    assert riga(aperto, aperto.brani[0]) == "a.mp3, file aperto."
+    aperti = Playlist("file aperti", [Brano(r"C:\m\a.mp3"), Brano(r"C:\m\b.mp3")], cartella="")
+    assert riga(aperti, aperti.brani[1]) == "b.mp3, 2 di 2, file aperti."
+    # Una playlist eliminata mentre suonava resta una playlist.
+    finestra._aggiungi(None, [r"C:\m\a.mp3", r"C:\m\b.mp3"])
+    salvata = finestra.archivio.playlist[0]
+    finestra.archivio.elimina(salvata)
+    assert riga(salvata, salvata.brani[0]) == f"a.mp3, 1 di 2, playlist {salvata.nome}."
+
+
+def test_dove_sono_nei_risultati(finestra, monkeypatch):
+    """I Risultati si chiamano cosi' anche dopo una ricerca nuova, se il
+    brano che suona viene da quelli di prima."""
+    from filtro import Filtro
+
+    class RicercaFinta:
+        def __init__(self, *_argomenti, **_opzioni):
+            self.finita = self.fermata = False
+
+        def avvia(self):
+            pass
+
+        def ferma(self):
+            self.fermata = True
+
+        def quanti(self):
+            return 0
+
+        def pezzo(self, _inizio, _fine):
+            return []
+
+    monkeypatch.setattr(modulo, "Ricerca", RicercaFinta)
+    monkeypatch.setattr(modulo.questa_rete, "percorsi_salvati", lambda: [])
+    finestra._avvia_ricerca("rock", Filtro("rock"), unita=[])
+    prima = finestra.risultati
+    prima.brani[:] = [Brano(r"C:\m\rock.mp3"), Brano(r"C:\m\hard rock.mp3")]
+    _in_corso_per_dove_sono(finestra, monkeypatch, prima, prima.brani[1])
+    assert _dove_sono(finestra).endswith(", hard rock.mp3, 2 di 2, Risultati.")
+    finestra._avvia_ricerca("jazz", Filtro("jazz"), unita=[])
+    assert finestra.risultati is not prima
+    assert _dove_sono(finestra).endswith(", hard rock.mp3, 2 di 2, Risultati.")
+
+
+def test_dove_sono_le_aggiunte(finestra, monkeypatch, suoni_annotati):
+    finestra._aggiungi(None, [r"C:\m\a.sid", r"C:\m\libro.m4b"])
+    pl = finestra.archivio.playlist[0]
+    stato = _in_corso_per_dove_sono(finestra, monkeypatch, pl, pl.brani[0], in_pausa=True, muto=True, velocita=1.25, tono=2)
+    finestra.motore.sottobrano, finestra.motore.sottobrani = 2, 5
+    finestra.impostazioni["ripetizione"] = "lista"
+    finestra.impostazioni["casuale"] = True
+    finestra._timer_a_fine_brano = True
+    finestra.coda.loop_playlist, finestra.coda.punto_a, finestra.coda.punto_b = pl, pl.brani[0], pl.brani[1]
+    assert _dove_sono(finestra) == (f"1:23 di 4:56, mancano 3:33, a.sid, 1 di 2, playlist {pl.nome}, in pausa, sottobrano 2 di 5, ripetizione della lista, "
+        "riproduzione casuale, timer alla fine del brano, loop A-B, muto, velocità 1.25, tono più 2 semitoni.")
+    # Il timer a minuti, e quello scaduto che sfuma; il tono che scende.
+    finestra._timer_a_fine_brano = False
+    monkeypatch.setattr(finestra, "_adesso", lambda: 1000.0)
+    finestra._timer_scade = 1125.0
+    stato.update(in_pausa=False, muto=False, velocita=1.0, tono=-1)
+    finestra.impostazioni["ripetizione"] = "brano"
+    finestra.impostazioni["casuale"] = False
+    finestra.coda.togli_loop()
+    assert _dove_sono(finestra).endswith(", sottobrano 2 di 5, ripetizione del brano, timer fra 3 minuti, tono meno 1 semitono.")
+    finestra._timer_scade = 1030.0
+    assert _dove_sono(finestra).endswith(", timer fra 1 minuto, tono meno 1 semitono.")
+    finestra._timer_scade = None
+    finestra._inizio_della_sfumatura = 990.0
+    assert _dove_sono(finestra).endswith(", timer scaduto, la musica sfuma, tono meno 1 semitono.")
+    finestra._inizio_della_sfumatura = None
+    # Il capitolo, con il titolo, per i file che ne hanno; un loop col solo punto A non conta.
+    finestra.motore.sottobrano = finestra.motore.sottobrani = None
+    finestra.coda.loop_playlist, finestra.coda.punto_a = pl, pl.brani[1]
+    _in_corso_per_dove_sono(finestra, monkeypatch, pl, pl.brani[1], posizione=125.0)
+    finestra.impostazioni["ripetizione"] = "spenta"
+    monkeypatch.setattr(finestra.motore, "capitoli", lambda: [(0.0, "Inizio"), (60.0, "Il ritorno"), (120.0, "")])
+    assert _dove_sono(finestra) == f"2:05 di 4:56, mancano 2:51, libro.m4b, 2 di 2, playlist {pl.nome}, capitolo 3 di 3."
+    _in_corso_per_dove_sono(finestra, monkeypatch, pl, pl.brani[1], posizione=60.2)
+    assert _dove_sono(finestra).endswith(", capitolo 2 di 3: Il ritorno.")
+    # Un SID di un sottobrano solo non dice il sottobrano.
+    monkeypatch.setattr(finestra.motore, "capitoli", lambda: [])
+    finestra.motore.sottobrano, finestra.motore.sottobrani = 1, 1
+    assert _dove_sono(finestra) == f"1:00 di 4:56, mancano 3:56, libro.m4b, 2 di 2, playlist {pl.nome}."
+    assert suoni_annotati.count("dove_sono") == 7
+
+
+def test_dove_sono_segue_le_impostazioni_dei_sottotitoli(finestra, monkeypatch, sintesi_finta):
+    finestra._aggiungi(None, [r"C:\m\a.mp3"])
+    pl = finestra.archivio.playlist[0]
+    _in_corso_per_dove_sono(finestra, monkeypatch, pl, pl.brani[0])
+    riga = f"1:23 di 4:56, mancano 3:33, a.mp3, playlist {pl.nome}."
+    finestra.impostazioni["destinazione"] = "sintesi"
+    assert _dove_sono(finestra) == riga and sintesi_finta.detti == [("nvda", riga)] and not sintesi_finta.braille
+    finestra.impostazioni["destinazione"] = "braille"
+    assert _dove_sono(finestra) == riga and len(sintesi_finta.detti) == 1 and sintesi_finta.braille == [("nvda", riga)]
+    # Al braille a blocchi, come i sottotitoli: il primo subito, gli altri in
+    # fila. La riga di prima, ancora sulla barra, lascia il posto alla nuova.
+    finestra.impostazioni["celle_braille"] = 20
+    _dove_sono(finestra)
+    assert sintesi_finta.braille[-1] == ("nvda", "1:23 di 4:56,") and finestra._braille.in_fila > 0
+    finestra._braille.svuota()
+    finestra.impostazioni["celle_braille"] = 0
+    # La sintesi scelta, e nessuna uscita: resta la riga della console.
+    finestra.impostazioni["destinazione"] = "entrambi"
+    finestra.impostazioni["sintesi"] = "jaws"
+    sintesi_finta.attive["jaws"] = True
+    _dove_sono(finestra)
+    assert sintesi_finta.detti[-1] == ("jaws", riga)
+    sintesi_finta.presenti.clear()
+    finestra._sintesi = modulo.sintesi.Sintesi()
+    detti = len(sintesi_finta.detti)
+    assert _dove_sono(finestra) == riga and len(sintesi_finta.detti) == detti
+
+
+def test_dove_sono_si_riscrive_anche_sulla_barra(finestra, monkeypatch, sintesi_finta):
+    """Due pressioni di seguito, senza svuotare la fila a mano: i blocchi
+    della riga di prima non arrivano piu' alla barra, e il primo della riga
+    nuova arriva subito, come la riga riscritta nella console. Un testo dei
+    sottotitoli in fila resta. L'orologio della coda e' fermo e le sue attese
+    non scadono mai: nessun blocco passa da solo."""
+    finestra._braille = modulo.braille.Coda(finestra._mostra_in_braille, lambda _secondi, _funzione: types.SimpleNamespace(Stop=lambda: None), lambda: 0.0)
+    finestra._aggiungi(None, [r"C:\m\a.mp3"])
+    pl = finestra.archivio.playlist[0]
+    stato = _in_corso_per_dove_sono(finestra, monkeypatch, pl, pl.brani[0])
+    finestra.impostazioni.update(destinazione="braille", celle_braille=20)
+    _dove_sono(finestra)
+    in_fila = finestra._braille.in_fila
+    assert sintesi_finta.braille == [("nvda", "1:23 di 4:56,")] and in_fila > 0
+    stato["posizione"] = 84.6
+    _dove_sono(finestra)
+    assert sintesi_finta.braille == [("nvda", "1:23 di 4:56,"), ("nvda", "1:24 di 4:56,")] and finestra._braille.in_fila == in_fila
+    # Un sottotitolo arrivato in mezzo resta in fila, prima della riga nuova.
+    finestra._braille.aggiungi("Una riga del sottotitolo", 20, 2.0)
+    stato["posizione"] = 85.7
+    _dove_sono(finestra)
+    assert sintesi_finta.braille[-1] == ("nvda", "Una riga del") and finestra._braille.in_fila == 1 + in_fila + 1
+    # Con la riga solo alla sintesi, la barra non ha niente da togliere.
+    finestra.impostazioni["destinazione"] = "sintesi"
+    _dove_sono(finestra)
+    assert finestra._dove_sono_in_braille is None
+
+
+def test_dove_sono_interrompe_la_voce(finestra, monkeypatch, sintesi_finta):
+    """Ritocco della 1.105.0: la riga di Dove sono, e la frase di F8,
+    interrompono la voce che sta parlando, anche la riga di prima, perche'
+    la voce di Windows, che da sola non interrompe, accodava le pressioni
+    ravvicinate. I sottotitoli invece si dicono uno dopo l'altro."""
+    finestra.impostazioni.update(sintesi="sapi5", sottotitoli=True)
+    assert _dove_sono(finestra) == "Non sta suonando niente."
+    assert sintesi_finta.interrotti == [("sapi5", "Non sta suonando niente.")]
+    finestra._aggiungi(None, [r"C:\m\a.mp3"])
+    pl = finestra.archivio.playlist[0]
+    stato = _in_corso_per_dove_sono(finestra, monkeypatch, pl, pl.brani[0])
+    prima = _dove_sono(finestra)
+    stato["posizione"] = 84.6
+    dopo = _dove_sono(finestra)
+    assert sintesi_finta.interrotti[1:] == [("sapi5", prima), ("sapi5", dopo)]
+    finestra._sottotitolo("Una riga del sottotitolo")
+    assert sintesi_finta.detti[-1] == ("sapi5", "Una riga del sottotitolo") and len(sintesi_finta.interrotti) == 3
+
+
+def test_dove_sono_nelle_statistiche(finestra):
+    import statistiche
+
+    assert finestra._comandi_dei_tasti()["apostrofo"] == "dove_sono"
+    assert statistiche.DESCRIZIONI_DEI_COMANDI["dove_sono"] == "dove sono"
+    assert statistiche.NOMI_DEGLI_EVENTI["dove_sono"] == "dove sono, con l'apostrofo"

@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima.
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -170,6 +170,8 @@ TASTI = {
     # I capitoli degli audiolibri e dei film (Gabriele, 1.93.0).
     (",", False): "capitolo_precedente",
     (".", False): "capitolo_successivo",
+    # Dove sono: tempo, brano e lista di cio' che suona (Gabriele, tappa 14 b).
+    ("'", False): "dove_sono",
     ("+", False): "volume_su",
     ("-", False): "volume_giu",
     ("\\", False): "ricerca",
@@ -247,6 +249,8 @@ TASTI_COMUNI = [
     "X suona la voce selezionata, riprende dalla pausa o fa ripartire da capo il brano che suona già; C pausa, V stop, Z e B brano precedente e successivo, N brano a caso, "
     "Maiuscolo con N la riproduzione casuale, con cui B sceglie a caso e Z torna ai brani suonati prima; "
     "Maiuscolo con V la ripetizione, a giro: del brano, della lista, spenta. Maiuscolo con S il timer di spegnimento, fra tanti minuti o alla fine del brano.",
+    "L'apostrofo dice dove sei: il tempo del brano che suona, il suo nome, il posto nella lista e quello che c'è di particolare, come la pausa; "
+    "lo scrive nella console e lo manda alla sintesi e al braille dei sottotitoli, senza spostare il fuoco.",
     "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, più e meno volume, Maiuscolo con M il passo del volume, M muto.",
     "Virgola e punto vanno al capitolo precedente e successivo, negli audiolibri e nei film che ne hanno; la virgola, oltre i primi secondi di un capitolo, torna al suo inizio.",
     "A e D rallentano e accelerano, S torna alla velocità normale; F e H abbassano e alzano il tono di un semitono, G lo riporta al normale.",
@@ -566,6 +570,13 @@ RITORNO_AL_CAPITOLO = 3.0
 def frase_del_capitolo(numero, totale, titolo, secondi):
     """Capitolo 3 di 12: Il titolo, 23:10."""
     return f"Capitolo {numero} di {totale}{f': {titolo}' if titolo else ''}, {tempo(secondi)}"
+
+
+def capitolo_attuale(elenco, posizione):
+    """L'indice del capitolo in cui cade posizione, in secondi: il mezzo
+    secondo in piu' tiene dentro un capitolo appena raggiunto con un salto,
+    che il lettore puo' dare un attimo prima del suo inizio."""
+    return max((i for i, (secondi, _titolo) in enumerate(elenco) if secondi <= posizione + 0.5), default=0)
 
 
 def novita_recenti(righe, massimo=RIGHE_DEL_CHANGELOG):
@@ -922,6 +933,9 @@ class Finestra(wx.Frame):
         # La barra braille a blocchi (1.83.0): i testi letti in fila, con il
         # tempo minimo di lettura; le attese sono di wx, nel filo della finestra.
         self._braille = braille.Coda(self._mostra_in_braille, lambda secondi, funzione: wx.CallLater(max(1, round(secondi * 1000)), funzione))
+        # Il numero dell'ultima riga di Dove sono nella coda del braille: la
+        # riga dopo ne prende il posto, come nella console (tappa 14 b).
+        self._dove_sono_in_braille = None
         # La banda dell'equalizzatore scelta con U e I, contata da zero: si
         # parte dalla prima, quella dei 60 Hz.
         self._banda = 0
@@ -1475,7 +1489,7 @@ class Finestra(wx.Frame):
             self._riscontro("non_disponibile", f"{os.path.basename(self.motore.in_corso)} non ha capitoli.")
             return
         posizione = self.motore.posizione or 0.0
-        attuale = max((i for i, (secondi, _titolo) in enumerate(elenco) if secondi <= posizione + 0.5), default=0)
+        attuale = capitolo_attuale(elenco, posizione)
         if passo < 0:
             indice = attuale if posizione - elenco[attuale][0] > RITORNO_AL_CAPITOLO else attuale - 1
             if indice < 0:
@@ -4180,6 +4194,9 @@ class Finestra(wx.Frame):
             # I brani si prendono prima che i Risultati, se sono loro, si svuotino.
             brani = list(brani)
         self.risultati = Playlist("Risultati", cartella="")
+        # Dove sono riconosce i Risultati anche dopo una ricerca nuova, se il
+        # brano che suona viene da quelli di prima (tappa 14 b).
+        self.risultati.risultati = True
         self._risultati_letti = 0
         self._dove_si_cerca = dove
         salvati = questa_rete.percorsi_salvati()
@@ -6587,17 +6604,30 @@ class Finestra(wx.Frame):
         testo = " ".join(testo.split())
         if self._chiusa or not testo or not self.impostazioni["sottotitoli"]:
             return
-        imp = self.impostazioni
         self._statistiche.conta("righe_dei_sottotitoli")
         if self._lettura is not None:
             self._statistiche.conta("righe_riconosciute")
         elif formati.e_midi(self.motore.in_corso or ""):
             self._statistiche.conta("righe_del_karaoke")
-        if imp["destinazione"] in ("entrambi", "sintesi"):
-            self._sintesi.dici(testo, imp["sintesi"], "sintesi")
-        if imp["destinazione"] in ("entrambi", "braille"):
-            self._braille.aggiungi(testo, imp["celle_braille"], imp["lettura_minima"] / 1000, self.motore.resto_del_sottotitolo())
+        self._ai_testi_letti(testo, self.motore.resto_del_sottotitolo)
         self.scrivi(testo)
+
+    def _ai_testi_letti(self, testo, resto=None, interrompi=False):
+        """Il testo alla sintesi e al braille scelti per sottotitoli e karaoke,
+        come dice la voce Dove vanno sottotitoli e karaoke: alla voce intero,
+        al braille in fila, a blocchi lunghi quanto la barra. resto, se c'e',
+        da' i secondi che restano al testo, da dividere fra i blocchi; senza,
+        ogni blocco resta il tempo minimo di lettura. interrompi fa lasciare
+        alla voce quello che sta dicendo: lo vuole Dove sono, non i
+        sottotitoli e il karaoke, che si dicono uno dopo l'altro. Lo usano i
+        sottotitoli e Dove sono (tappa 14 b). Torna il numero del testo nella
+        coda del braille, o None se al braille non va."""
+        imp = self.impostazioni
+        if imp["destinazione"] in ("entrambi", "sintesi"):
+            self._sintesi.dici(testo, imp["sintesi"], "sintesi", interrompi=interrompi)
+        if imp["destinazione"] in ("entrambi", "braille"):
+            return self._braille.aggiungi(testo, imp["celle_braille"], imp["lettura_minima"] / 1000, resto() if resto else None)
+        return None
 
     def _testo_superato(self):
         """Un salto, uno stop, un brano nuovo o un'altra traccia: i blocchi in
@@ -7725,6 +7755,150 @@ class Finestra(wx.Frame):
         self._seleziona(voce)
         self._riscontro("vai_al_brano", f"Selezione su {self._nome_della_voce(voce)}.")
         self.albero.SetFocus()
+
+    # Dove sono, l'apostrofo (Gabriele, 20 ottobre 2026, tappa 14 b).
+
+    def _comando_dove_sono(self):
+        """L'apostrofo: il tempo, il brano e la lista di cio' che suona, in
+        quest'ordine, e in fondo solo quello che c'e', per esempio la pausa,
+        il capitolo o la velocita' cambiata. La riga si riscrive a ogni
+        pressione e va anche alla sintesi e al braille scelti per sottotitoli
+        e karaoke, senza l'ora; il fuoco resta dov'e', anche nel video. Se non
+        suona niente, come F8, ma la frase va anche alla sintesi e al braille,
+        come la riga. Durante una dissolvenza parla del brano che entra,
+        quello della coda."""
+        brano = self.coda.corrente
+        if not brano or not self.motore.in_corso:
+            testo = "Non sta suonando niente."
+            self._riscontro("niente_da_suonare", testo)
+        else:
+            parti = [self._tempo_di_dove_sono(brano), brano.nome_del_file, *self._lista_di_dove_sono(self.coda.playlist, brano)]
+            if brano.saltato:
+                parti.append("saltato")
+            testo = f"{', '.join(parti + self._aggiunte_di_dove_sono())}."
+            self._riscontro("dove_sono", testo, "dove_sono")
+        # Anche sulla barra la riga nuova prende il posto di quella di prima,
+        # se e' ancora in fila o sulla barra: i dati vecchi non si leggono
+        # dopo i nuovi, e i sottotitoli in fila restano. E anche a voce: la
+        # voce di Windows, che da sola non interrompe, accodava le pressioni
+        # ravvicinate (ritocco della 1.105.0).
+        self._braille.togli(self._dove_sono_in_braille)
+        self._dove_sono_in_braille = self._ai_testi_letti(testo, interrompi=True)
+
+    def _tempo_di_dove_sono(self, brano):
+        """1:23 di 4:56, mancano 3:33. Il mancante si conta dai secondi interi
+        che la riga dice, cosi' torna con la sottrazione di chi ascolta."""
+        posizione, durata = self.motore.posizione, self.motore.durata
+        if durata is None:
+            durata = self._durata_senza_il_lettore(brano)
+        if posizione is None:
+            # Subito dopo l'avvio, o nell'attesa del SID dopo un salto, il
+            # lettore non dice ancora il punto.
+            return "il tempo non si sa ancora" + (f", dura {tempo(durata)}" if durata else "")
+        if durata is None:
+            return f"{tempo(posizione)}, la durata non si sa"
+        return f"{tempo(posizione)} di {tempo(durata)}, mancano {tempo(max(0, int(durata) - int(posizione)))}"
+
+    def _durata_senza_il_lettore(self, brano):
+        """La durata di cio' che suona quando il lettore non la dice: quella
+        del sottobrano, se il database dei SID o delle console la sa, e
+        altrimenti quella dello schedario, come nella plancia."""
+        numero, quanti = self.motore.sottobrano, self.motore.sottobrani
+        if quanti and numero:
+            durate = sottobrani.durate(brano.percorso) or []
+            return durate[numero - 1] if numero <= len(durate) else None
+        return self.schedario.durata(brano)
+
+    def _lista_di_dove_sono(self, pl, brano):
+        """Il posto del brano nella lista, contato come la plancia: con un
+        filtro fra i brani che lo passano, e senza fra tutti, saltati
+        compresi. Con un brano solo, solo il nome della lista; una selezione
+        suonata con X dice 3 di 12 della selezione."""
+        nome = self._nome_della_lista(pl)
+        indice = pl.indice(brano)
+        if indice is None:
+            # Tolto dalla lista mentre suona.
+            return [f"non è più {'nei' if nome in ('Preferiti', 'Risultati') else 'nella'} {nome}"]
+        if getattr(pl, "selezione", False):
+            return [f"{indice + 1} di {len(pl.brani)} della selezione" if len(pl.brani) > 1 else nome]
+        if self._filtro_di(pl) is not None:
+            passano = [b for b in pl.brani if self._ammesso(pl, b)]
+            numero = next((n for n, b in enumerate(passano) if b is brano), None)
+            if numero is None:
+                # Il filtro e' arrivato dopo che il brano e' partito.
+                return [f"fuori dal filtro, {indice + 1} di {len(pl.brani)} in tutto", nome]
+            return [f"{numero + 1} di {len(passano)} col filtro", nome]
+        return [f"{indice + 1} di {len(pl.brani)}", nome] if len(pl.brani) > 1 else [nome]
+
+    def _nome_della_lista(self, pl):
+        """La lista da cui suona un brano, detta con il nome che ha nella
+        plancia: Preferiti, playlist X, Risultati, selezione, cartella X o
+        unita' E:, con le sottocartelle se suona tutta, o file aperto (tappa
+        14 b)."""
+        if pl is self.archivio.preferiti:
+            return "Preferiti"
+        if not pl.temporanea:
+            # Anche una playlist eliminata mentre suonava.
+            return f"playlist {pl.nome}"
+        if pl is self.risultati or getattr(pl, "risultati", False):
+            return "Risultati"
+        if getattr(pl, "selezione", False):
+            return "selezione"
+        if pl.cartella:
+            # Un'unita' suonata con X ha per nome la radice, E:\.
+            nome = f"unità {pl.cartella[:2].upper()}" if re.fullmatch(r"[A-Za-z]:\\?", pl.cartella) else f"cartella {pl.nome}"
+            return f"{nome}{' con le sottocartelle' if getattr(pl, 'ricorsiva', False) else ''}"
+        return pl.nome
+
+    def _aggiunte_di_dove_sono(self):
+        """In fondo alla riga, solo quando ci sono: la pausa; il sottobrano o
+        il capitolo; ripetizione, riproduzione casuale, timer, loop A-B e
+        muto; velocita' e tono diversi dal normale, con i decimali col punto."""
+        motore, imp = self.motore, self.impostazioni
+        parti = ["in pausa"] if motore.in_pausa else []
+        if motore.sottobrani and motore.sottobrani > 1:
+            parti.append(f"sottobrano {motore.sottobrano} di {motore.sottobrani}")
+        elif (capitolo := self._capitolo_di_dove_sono()) is not None:
+            parti.append(capitolo)
+        if imp["ripetizione"] != "spenta":
+            parti.append(f"ripetizione {valori.RIPETIZIONI[imp['ripetizione']]}")
+        if imp["casuale"]:
+            parti.append("riproduzione casuale")
+        if (timer := self._timer_di_dove_sono()) is not None:
+            parti.append(timer)
+        if self.coda.intervallo() is not None:
+            parti.append("loop A-B")
+        if motore.muto:
+            parti.append("muto")
+        if motore.velocita != 1:
+            parti.append(f"velocità {valori.scrivi_velocita(motore.velocita)}")
+        if motore.tono:
+            # Il segno in parole, come l'ha scritto Gabriele: tono piu' 2 semitoni.
+            semitoni = abs(motore.tono)
+            parti.append(f"tono {'più' if motore.tono > 0 else 'meno'} {semitoni} {'semitono' if semitoni == 1 else 'semitoni'}")
+        return parti
+
+    def _capitolo_di_dove_sono(self):
+        """Capitolo 3 di 12: il titolo, per gli audiolibri e i film che ne
+        hanno; None senza capitoli, o finche' il lettore non dice il punto."""
+        posizione = self.motore.posizione
+        elenco = self._capitoli_in_corso() if posizione is not None else []
+        if not elenco:
+            return None
+        attuale = capitolo_attuale(elenco, posizione)
+        titolo = elenco[attuale][1]
+        return f"capitolo {attuale + 1} di {len(elenco)}{f': {titolo}' if titolo else ''}"
+
+    def _timer_di_dove_sono(self):
+        """Il timer di spegnimento, se c'e': fra quanti minuti, alla fine del
+        brano, o scaduto mentre la musica sfuma."""
+        if self._inizio_della_sfumatura is not None:
+            return "timer scaduto, la musica sfuma"
+        if self._timer_a_fine_brano:
+            return "timer alla fine del brano"
+        if self._timer_scade is not None:
+            return f"timer fra {_minuti(max(1, math.ceil((self._timer_scade - self._adesso()) / 60)))}"
+        return None
 
     def _insegui(self):
         """Con l'inseguimento agganciato porta la selezione su cio' che suona,

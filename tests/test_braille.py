@@ -1,6 +1,6 @@
 # MeTeOra, le prove della barra braille a blocchi: la divisione nelle celle e la coda con il tempo minimo.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.83.0.
+# 04/10/2026: nasce con la 1.83.0. Nella 1.105.0 la prova del testo superato che si toglie dalla fila, per Dove sono.
 
 """L'orologio e le attese sono finti: le prove non aspettano niente."""
 
@@ -121,3 +121,43 @@ def test_un_testo_in_ritardo_usa_solo_il_minimo_e_svuota():
     assert coda.in_fila == 0 and not tempo.attese
     coda.aggiungi("ffff", minimo=1.0)
     assert mostrati[-1][1] == "ffff"
+
+
+def test_un_testo_superato_si_toglie_dalla_fila():
+    # Dove sono (tappa 14 b): sulla barra, come nella console, la riga nuova
+    # prende il posto di quella di prima, e i testi degli altri restano.
+    coda, tempo, mostrati = _coda()
+    primo = coda.aggiungi("1:23 di 4:56, Caruso.mp3", celle=14, minimo=2.0)
+    assert mostrati == [(0.0, "1:23 di 4:56,")] and coda.in_fila == 1
+    coda.aggiungi("Una riga", minimo=2.0)
+    tempo.avanza(1)
+    # Il blocco mostrato e' del testo tolto: il suo minimo non trattiene piu'
+    # niente, e il sottotitolo in fila arriva subito.
+    coda.togli(primo)
+    assert mostrati[-1] == (1.0, "Una riga") and coda.in_fila == 0
+    # La riga nuova aspetta il minimo del sottotitolo, che non e' suo.
+    secondo = coda.aggiungi("1:24 di 4:56, Caruso.mp3", celle=14, minimo=2.0)
+    tempo.avanza(2)
+    assert mostrati[-1] == (3.0, "1:24 di 4:56,") and coda.in_fila == 1
+    tempo.avanza(0.5)
+    coda.togli(secondo)
+    terzo = coda.aggiungi("1:25 di 4:56, Caruso.mp3", celle=14, minimo=2.0)
+    assert mostrati[-1] == (3.5, "1:25 di 4:56,")
+    tempo.avanza(10)
+    assert [b for _t, b in mostrati] == ["1:23 di 4:56,", "Una riga", "1:24 di 4:56,", "1:25 di 4:56,", "Caruso.mp3"]
+    # Un testo gia' passato, o None, non tocca niente.
+    coda.togli(terzo)
+    coda.togli(None)
+    assert coda.in_fila == 0 and not tempo.attese
+    # Con un sottotitolo sulla barra, la riga tolta dalla fila non gli toglie
+    # il suo minimo.
+    coda.aggiungi("Sottotitolo", minimo=2.0)
+    quarto = coda.aggiungi("1:26 di 4:56, Caruso.mp3", celle=14, minimo=2.0)
+    coda.togli(quarto)
+    assert coda.in_fila == 0
+    coda.aggiungi("1:27 di 4:56, Caruso.mp3", celle=14, minimo=2.0)
+    tempo.avanza(1.9)
+    assert mostrati[-1] == (13.5, "Sottotitolo")
+    tempo.avanza(0.1)
+    assert mostrati[-1] == (15.5, "1:27 di 4:56,")
+    assert braille.Coda(print, tempo.pianifica, tempo).aggiungi("   ") is None
