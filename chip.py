@@ -1,6 +1,6 @@
 # MeTeOra, la musica delle console: libgme, resa in RAM come i SID.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/10/2026: nasce con la tappa 8.
+# 03/10/2026: nasce con la tappa 8. Nella 1.113.1 le informazioni di un file di cui libgme non legge nessun brano hanno titolo, autore e copyright vuoti, e lo schedario non cade piu' (issue 24).
 
 """La musica delle console con libgme, Game Music Emu (tappa 8).
 
@@ -137,7 +137,9 @@ def info(percorso):
     """Le informazioni di un file, lette una volta sola, nella forma di
     songlengths.info_del_sid: sottobrani, iniziale, titolo, autore,
     copyright, piu' sistema e durate, una per brano. None se libgme manca o
-    non legge il file."""
+    non legge il file. Titolo, autore, copyright e sistema vengono dal primo
+    brano che libgme legge, e restano vuoti se non ne legge nessuno, come con
+    un .m3u che nomina solo brani che il file non ha (issue 24)."""
     with _INFORMAZIONI_BLOCCO:
         if percorso in _INFORMAZIONI:
             return _INFORMAZIONI[percorso]
@@ -164,7 +166,10 @@ def info(percorso):
                         generali = {"titolo": _testo(dati.game), "autore": _testo(dati.author), "copyright": _testo(dati.copyright), "sistema": _testo(dati.system)}
                     gme.gme_free_info(puntatore)
                 if durate:
-                    risultato = {"sottobrani": len(durate), "iniziale": 1, "durate": durate, "titoli": titoli, **generali}
+                    # Lo schedario chiede titolo, autore e copyright anche
+                    # quando nessun brano si legge.
+                    risultato = {"sottobrani": len(durate), "iniziale": 1, "durate": durate, "titoli": titoli,
+                        "titolo": "", "autore": "", "copyright": "", "sistema": "", **generali}
             finally:
                 gme.gme_delete(emu)
     with _INFORMAZIONI_BLOCCO:

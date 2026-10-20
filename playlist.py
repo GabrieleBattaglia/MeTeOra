@@ -1,6 +1,6 @@
 # MeTeOra, le playlist: brani, playlist, archivio e coda di riproduzione.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 il sottobrano dei SID, nella 1.3.0 il loop A-B, nella 1.6.0 i Preferiti, nella 1.8.0 il filtro. Nella 1.59.0 Coda.altri, per la riproduzione casuale. Nella 1.104.0 si tolgono i brani dei file spariti, per la pulizia all'avvio. Nella 1.109.0 Ordina, Inverti l'ordine, Mescola e Ordine di prima. Nella 1.113.0 l'origine delle playlist importate da un M3U o da un PLS di altri programmi.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 il sottobrano dei SID, nella 1.3.0 il loop A-B, nella 1.6.0 i Preferiti, nella 1.8.0 il filtro. Nella 1.59.0 Coda.altri, per la riproduzione casuale. Nella 1.104.0 si tolgono i brani dei file spariti, per la pulizia all'avvio. Nella 1.109.0 Ordina, Inverti l'ordine, Mescola e Ordine di prima. Nella 1.113.0 l'origine delle playlist importate da un M3U o da un PLS di altri programmi. Nella 1.113.1 un file con piu' sottobrani di cui nessuno ha la durata va in fondo con i brani senza durata, non in cima come se durasse zero (issue 24).
 
 """Il modello dei dati, senza finestre e senza suono.
 
@@ -72,15 +72,17 @@ def chiave_del_percorso(brano):
 
 def durata_mostrata(brano, scheda):
     """La durata come la mostra la plancia: per un sottobrano la sua, per un
-    SID o un file delle console con piu' sottobrani il totale; None se non
-    si sa."""
+    SID o un file delle console con piu' sottobrani il totale delle durate
+    note; None se non si sa, anche quando nessun sottobrano ha la durata,
+    come un file delle console di cui libgme non ne sa nessuna (issue 24)."""
     if not scheda:
         return None
     durate = scheda.get("durate_sid")
     if brano.sottobrano:
         return durate[brano.sottobrano - 1] if durate and brano.sottobrano <= len(durate) else None
     if formati.ha_sottobrani(brano.percorso) and (scheda.get("sottobrani") or 0) > 1:
-        return sum(d or 0 for d in durate) if durate else None
+        note = [d for d in durate or [] if d is not None]
+        return sum(note) if note else None
     return scheda.get("durata")
 
 

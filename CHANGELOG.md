@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.113.1] - 2026-10-20
+
+- Correzione, nella plancia l'etichetta di un file delle console con più sottobrani, di cui qualcuno senza una durata nota, non cade più in errore (issue 24): ora, come per le cartelle, il totale somma le durate note e dice a parte quanti sottobrani ne restano senza, per esempio gioco.nsf, 5 sottobrani, 12:30 in tutto, 1 senza durata. Succede quando libgme non legge un brano, come con un .m3u che nomina brani che il file non ha; se non ne legge nessuno, l'etichetta dice solo il numero dei sottobrani, lo schedario fa lo stesso la scheda del file invece di fermarsi, e Ordina per durata lo mette in fondo con i brani senza durata, non in cima come se durasse zero. Il manuale lo dice nel capitolo Unità, cartelle e file; le prove nuove usano file finti.
+
 ## [1.113.0] - 2026-10-20
 
 L'importazione delle playlist di altri programmi, il punto g della tappa 14 del piano, con le decisioni di Gabriele del 20 ottobre 2026. Per i due suoni nuovi serve GBUtils V212.

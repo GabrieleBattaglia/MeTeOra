@@ -1,6 +1,6 @@
 # MeTeOra, le prove della finestra principale, sul desktop nascosto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21). Nella 1.112.0 quelle dei dischi della pulizia, anche del loro file che non si legge, e la prova della pulizia che toglie i file spariti non fa piu' leggere allo schedario i file finti; poi Riconosci questo disco, la riga che lo indica e la Sentinella che guarda i dischi dei file usati; infine la domanda di Riconosci questo disco con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 quelle dell'importazione delle playlist M3U, M3U8 e PLS.
+# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21). Nella 1.112.0 quelle dei dischi della pulizia, anche del loro file che non si legge, e la prova della pulizia che toglie i file spariti non fa piu' leggere allo schedario i file finti; poi Riconosci questo disco, la riga che lo indica e la Sentinella che guarda i dischi dei file usati; infine la domanda di Riconosci questo disco con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 quelle dell'importazione delle playlist M3U, M3U8 e PLS. Nella 1.113.1 quella dell'etichetta di un file delle console con un sottobrano senza durata (issue 24).
 
 import contextlib
 import ctypes
@@ -9020,3 +9020,54 @@ def test_importa_playlist_con_due_playlist_seleziona_la_prima(finestra, monkeypa
     assert [(p.nome, len(p.brani)) for p in finestra.archivio.playlist] == [("Uno", 1), ("Due", 2)]
     assert finestra._dati(finestra._voce_corrente())["playlist"] is finestra.archivio.playlist[0]
     assert finestra.albero.GetItemText(finestra._voce_corrente()).startswith("Uno, brani: 1")
+
+
+# L'etichetta di un file delle console con un sottobrano senza durata (issue 24).
+
+
+def test_file_delle_console_con_un_sottobrano_senza_durata(finestra, monkeypatch):
+    # libgme puo' non sapere la durata di un sottobrano: la plancia somma
+    # quelle note e dice a parte quanti ne restano senza, come per le
+    # cartelle, invece di cadere con la somma di un None. Il file non c'e':
+    # le sue informazioni si mettono in memoria al posto di quelle di libgme.
+    import chip
+
+    gioco = os.path.join(r"C:\m", "gioco.nsf")
+    durate = [150.0, 120.0, None, 240.0, 240.0]
+    monkeypatch.setitem(chip._INFORMAZIONI, gioco, {"sottobrani": 5, "iniziale": 1, "durate": durate, "titoli": [""] * 5,
+        "titolo": "Gioco", "autore": "", "copyright": "", "sistema": ""})
+    pl = _playlist_con_le_schede(finestra, "Console", [("gioco.nsf", {"durata": 150.0, "sottobrani": 5, "durate_sid": durate})])
+    finestra.albero.Expand(finestra.nodo_playlist)
+    nodo = finestra._nodo_della_playlist(pl)
+    finestra.albero.Expand(nodo)
+    assert _etichette(finestra, nodo) == ["gioco.nsf, 5 sottobrani, 12:30 in tutto, 1 senza durata"]
+    # Con tutte le durate, il totale e basta.
+    finestra.schedario.schede[gioco]["durate_sid"] = [150.0, 120.0, 30.0, 240.0, 240.0]
+    finestra._aggiorna_etichette()
+    assert _etichette(finestra, nodo) == ["gioco.nsf, 5 sottobrani, 13:00 in tutto"]
+
+
+def test_file_delle_console_senza_durate_da_libgme(finestra, tmp_path):
+    # Tutta la catena: libgme, lo schedario e la plancia. Un .m3u che nomina
+    # brani che il file non ha li lascia senza durata; se li nomina tutti
+    # cosi', la scheda c'e' lo stesso, e resta il numero dei sottobrani.
+    import chip
+
+    if not chip.presente():
+        pytest.skip("manca lib/libgme.dll: la mette strumenti/prepara_ambiente.py")
+    from test_chip import nsf_di_prova
+
+    cartella = tmp_path / "nes"
+    cartella.mkdir()
+    nsf_di_prova(cartella / "misto.nsf")
+    (cartella / "misto.m3u").write_text("misto.nsf::NSF,1,,1:05,,\nmisto.nsf::NSF,7,,0:42,,\nmisto.nsf::NSF,2,,0:30,,\n", encoding="cp1252")
+    nsf_di_prova(cartella / "fuori.nsf")
+    (cartella / "fuori.m3u").write_text("fuori.nsf::NSF,7,,1:05,,\nfuori.nsf::NSF,8,,0:42,,\n", encoding="cp1252")
+    finestra.albero.Expand(finestra.nodo_pc)
+    nodo = finestra.albero.AppendItem(finestra.nodo_pc, "nes", data={"tipo": "cartella", "percorso": str(cartella), "caricato": False})
+    finestra.albero.SetItemHasChildren(nodo, True)
+    finestra.albero.Expand(nodo)
+    finestra.schedario.aspetta()
+    finestra._aggiorna_etichette()
+    assert _etichette(finestra, nodo) == ["fuori.nsf, 2 sottobrani", "misto.nsf, 3 sottobrani, 1:51 in tutto, 1 senza durata"]
+    assert finestra.schedario.scheda(str(cartella / "fuori.nsf"))["durate_sid"] == [None, None]

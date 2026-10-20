@@ -1,6 +1,6 @@
 # MeTeOra, le prove della musica delle console: libgme, i file a piu' brani, la resa e il motore.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/10/2026: nasce con la tappa 8.
+# 03/10/2026: nasce con la tappa 8. Nella 1.113.1 la prova di un .m3u che nomina brani che il file non ha (issue 24).
 
 """I file delle prove li scrive la prova stessa: un VGM del Sega con un la
 a 440 Hz, e un NSF del NES a piu' brani, muti o con un la. Il motore suona
@@ -106,6 +106,25 @@ def test_un_file_che_libgme_non_legge(tmp_path):
     percorso.write_bytes(b"niente di buono")
     assert sottobrani.info(str(percorso)) is None and sottobrani.durate(str(percorso)) is None
     assert motore.sottobrano_risolto(str(percorso), None) is None
+
+
+def test_un_m3u_con_brani_che_il_file_non_ha(tmp_path):
+    # libgme non legge i brani che il .m3u nomina e il file non ha: la loro
+    # durata resta None (issue 24). Se il .m3u nomina solo brani cosi',
+    # titolo, autore e copyright restano vuoti, e lo schedario fa lo stesso
+    # la sua scheda, invece di cadere con un KeyError.
+    import schedario
+
+    misto = nsf_di_prova(tmp_path / "misto.nsf")
+    (tmp_path / "misto.m3u").write_text("misto.nsf::NSF,1,Il primo,1:05,,\nmisto.nsf::NSF,7,Il fantasma,0:42,,\nmisto.nsf::NSF,2,,0:30,,\n", encoding="cp1252")
+    info = chip.info(misto)
+    assert info["durate"] == [65 + chip.DISSOLVENZA, None, 30 + chip.DISSOLVENZA] and info["titolo"] == "Prova"
+    fuori = nsf_di_prova(tmp_path / "fuori.nsf")
+    (tmp_path / "fuori.m3u").write_text("fuori.nsf::NSF,7,Uno,1:05,,\nfuori.nsf::NSF,8,Due,0:42,,\n", encoding="cp1252")
+    info = chip.info(fuori)
+    assert info["durate"] == [None, None] and (info["titolo"], info["autore"], info["copyright"], info["sistema"]) == ("", "", "", "")
+    scheda = schedario.leggi_scheda(fuori)
+    assert (scheda["sottobrani"], scheda["durate_sid"], scheda["durata"], scheda["tag"]) == (2, [None, None], None, {})
 
 
 def test_la_resa_di_un_vgm(tmp_path):

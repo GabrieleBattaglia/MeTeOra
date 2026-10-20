@@ -2,6 +2,7 @@
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 # Nella 1.109.0 le prove di Ordina, Inverti l'ordine, Mescola e Ordine di prima.
 # Nella 1.113.0 le prove dell'origine delle playlist importate.
+# Nella 1.113.1 quella di Ordina per durata con un file delle console senza durate (issue 24).
 
 import json
 import os
@@ -284,6 +285,17 @@ def test_per_durata_come_la_mostra_la_plancia():
     assert pl.ordina("durata", scheda_di) == (True, 1)
     # Il SID con tre sottobrani vale il totale, il sottobrano a se' il suo.
     assert _nomi(pl) == [r"C:\m\Corto.sid", r"C:\m\Lungo.sid 2", r"C:\m\canzone.mp3", r"C:\m\Lungo.sid", r"C:\m\ignota.mp3"]
+
+
+def test_per_durata_un_file_delle_console_senza_durate_va_in_fondo():
+    # libgme puo' non sapere la durata di qualche brano, o di nessuno (issue
+    # 24): vale il totale di quelle note, come nella plancia, e senza
+    # nessuna il file va in fondo con i senza durata, non in cima a 0:00.
+    nsf = {"dim": 1, "mod": 0, "durata": None, "tag": {}, "sottobrani": 3, "durate_sid": [None, None, None]}
+    pl, scheda_di = _con_le_schede((r"C:\m\muto.nsf", nsf), (r"C:\m\canzone.mp3", _scheda(durata=30.5)),
+        (r"C:\m\misto.nsf", {**nsf, "durate_sid": [10.0, None, 15.0]}))
+    assert pl.ordina("durata", scheda_di) == (True, 1)
+    assert _nomi(pl) == [r"C:\m\misto.nsf", r"C:\m\canzone.mp3", r"C:\m\muto.nsf"]
 
 
 def test_l_ordine_e_stabile_e_tiene_saltati_e_doppioni():
