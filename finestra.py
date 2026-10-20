@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21).
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -50,6 +50,7 @@ from html.parser import HTMLParser
 
 import wx
 
+import accessibilita
 import associazioni
 import braille
 import dettagli
@@ -430,6 +431,7 @@ VOCI_DELLE_IMPOSTAZIONI = {
     "colori_testo": ("Colori dei caratteri", "cambiati"),
     "colori_sfondo": ("Colori dello sfondo", "cambiati"),
     "barra_dei_comandi": ("Barra dei comandi per il mouse", "cambiata"),
+    "stato_della_selezione": ("Stato della selezione per lo screen reader", "cambiato"),
     "righe_della_console": ("Righe della console", "cambiate"),
     "salva_console": ("Salva console", None),
     "marcatori": ("Marcatori", None),
@@ -1042,6 +1044,12 @@ class Finestra(wx.Frame):
         # altrimenti le voci scelte con Maiuscolo, Ctrl o i clic, per numero
         # di voce.
         self._selezione = None
+        # Lo stato della selezione per lo screen reader (issue 21): l'oggetto
+        # di accessibilita' della plancia, se attaccato, e la voce col fuoco
+        # di prima di una freccia o di un'iniziale che Windows muove, finche'
+        # la selezione multipla non e' chiusa dopo di loro.
+        self._accessibile = None
+        self._fuoco_prima_della_freccia = None
         self._righe = []
         self._chiusa = False
         # Il turno dell'ultimo beep dei livelli: un beep rimandato che nel
@@ -1121,6 +1129,12 @@ class Finestra(wx.Frame):
         # stesso con il mouse.
         self.albero = wx.TreeCtrl(pannello, style=wx.TR_DEFAULT_STYLE | wx.TR_HIDE_ROOT)
         self.albero.SetName("Plancia dei comandi")
+        # Lo stato della selezione per lo screen reader (issue 21): l'oggetto
+        # si attacca solo con la voce delle impostazioni accesa all'avvio, o
+        # quando la si accende; spenta, risponde come Windows, e non si stacca
+        # mai a finestra aperta.
+        if self.impostazioni["stato_della_selezione"]:
+            self._attacca_lo_stato_della_selezione()
         colonna_sinistra.Add(self.albero, 1, wx.EXPAND)
         colonna_destra = wx.BoxSizer(wx.VERTICAL)
         colonna_destra.Add(wx.StaticText(pannello, label="Console"), 0, wx.ALL, 2)
@@ -1765,12 +1779,13 @@ class Finestra(wx.Frame):
 
     def _dopo_l_iniziale(self, prima):
         """La ricerca per iniziale di Windows sposta la voce col fuoco, come
-        una freccia: la selezione multipla, se c'era, finisce (1.98.0)."""
-        if self._chiusa:
-            return
-        voce = self.albero.GetFocusedItem()
-        if voce.IsOk() and voce != prima:
-            self._azzera_la_selezione()
+        una freccia: la selezione multipla, se c'era, finisce (1.98.0). La
+        voce di prima si scorda solo dopo, come in _dopo_la_freccia."""
+        if not self._chiusa:
+            voce = self.albero.GetFocusedItem()
+            if voce.IsOk() and voce != prima:
+                self._azzera_la_selezione()
+        self._fuoco_prima_della_freccia = None
 
     def _carattere_nell_albero(self, evento):
         """I caratteri che arrivano fino all'albero, per esempio con AltGr o
@@ -1781,6 +1796,7 @@ class Finestra(wx.Frame):
         if codice > 32 and chr(codice).isprintable():
             if self._tasti_rapidi:
                 return
+            self._aspetta_la_fine_della_selezione(self.albero.GetFocusedItem())
             wx.CallAfter(self._dopo_l_iniziale, self.albero.GetFocusedItem())
         evento.Skip()
 
@@ -1797,6 +1813,7 @@ class Finestra(wx.Frame):
             if codice in (wx.WXK_LEFT, wx.WXK_RIGHT) and evento.GetModifiers() == wx.MOD_NONE:
                 # Sinistra e destra aprono e chiudono i rami, oppure spostano
                 # il fuoco: solo se lo spostano la selezione multipla finisce.
+                self._aspetta_la_fine_della_selezione(voce)
                 wx.CallAfter(self._dopo_la_freccia, voce)
 
     def _esegui_nell_albero(self, evento):
@@ -1830,6 +1847,9 @@ class Finestra(wx.Frame):
             self._muovi_il_fuoco(codice, allarga=modificatori == wx.MOD_SHIFT)
         elif codice == wx.WXK_SPACE and modificatori == wx.MOD_CONTROL:
             self._alterna_nella_selezione(self._voce_corrente())
+            # Il fuoco non si muove: lo stato nuovo NVDA lo sente solo se
+            # glielo si annuncia (issue 21).
+            self._annuncia_lo_stato(self._voce_corrente())
             self._di_la_selezione()
         elif codice == wx.WXK_BACK and modificatori == wx.MOD_NONE:
             self._risali()
@@ -2128,6 +2148,11 @@ class Finestra(wx.Frame):
         """Resta selezionata la sola voce col fuoco, come dopo una freccia."""
         if self._selezione is None:
             return
+        # La voce col fuoco, se per NVDA era non selezionata, adesso lo e':
+        # se il fuoco resta li', glielo si annuncia (issue 21).
+        fuoco = self.albero.GetFocusedItem()
+        if self._accessibile is not None and fuoco.IsOk() and self._selezionata_per_lo_screen_reader(int(fuoco.GetID())) is False:
+            wx.CallAfter(self._annuncia_a_fuoco_fermo, fuoco)
         for voce in self._selezione.values():
             if voce.IsOk():
                 self._colora(voce, False)
@@ -2158,8 +2183,10 @@ class Finestra(wx.Frame):
 
     def _di_la_selezione(self):
         """La riga della console, riscritta a ogni tasto: se la voce col
-        fuoco e' selezionata e quante voci lo sono. NVDA non lo dice da se',
-        perche' la selezione multipla e' di MeTeOra."""
+        fuoco e' selezionata e quante voci lo sono. Senza lo stato della
+        selezione per lo screen reader NVDA non lo dice da se', perche' la
+        selezione multipla e' di MeTeOra; con lo stato dice solo non
+        selezionato, e il conto resta qui (issue 21)."""
         voce = self._voce_corrente()
         if not voce.IsOk():
             return
@@ -2171,12 +2198,14 @@ class Finestra(wx.Frame):
 
     def _dopo_la_freccia(self, prima):
         """Sinistra o destra hanno spostato il fuoco: come le altre frecce,
-        la selezione multipla finisce."""
-        if self._chiusa:
-            return
-        voce = self._voce_corrente()
-        if voce.IsOk() and voce != prima:
-            self._azzera_la_selezione()
+        la selezione multipla finisce. La voce di prima si scorda solo dopo:
+        la voce d'arrivo NVDA l'ha gia' sentita selezionata, come per
+        Windows, e chiudendo la selezione non c'e' niente da annunciargli."""
+        if not self._chiusa:
+            voce = self._voce_corrente()
+            if voce.IsOk() and voce != prima:
+                self._azzera_la_selezione()
+        self._fuoco_prima_della_freccia = None
 
     def _clic_nell_albero(self, evento):
         """Il clic del mouse nella plancia, per chi vede: con Ctrl la voce
@@ -2201,6 +2230,10 @@ class Finestra(wx.Frame):
         self.albero.SetFocus()
         self._sposta_il_cursore(voce)
         self._fuoco_atteso = voce
+        if voce == corrente:
+            # Sulla voce col fuoco Windows non manda un fuoco nuovo: lo stato
+            # cambiato si annuncia, come con Ctrl+Spazio (issue 21).
+            self._annuncia_lo_stato(voce)
         self._di_la_selezione()
 
     def _voce_tolta(self, evento):
@@ -2209,6 +2242,63 @@ class Finestra(wx.Frame):
         if self._selezione:
             self._selezione.pop(int(evento.GetItem().GetID()), None)
         evento.Skip()
+
+    # Lo stato della selezione per lo screen reader (issue 21).
+
+    def _attacca_lo_stato_della_selezione(self):
+        """L'oggetto di accessibilita' della plancia, che a NVDA da' lo stato
+        di ogni voce secondo la selezione di MeTeOra; il resto lo da'
+        Windows. Si attacca una volta sola."""
+        if self._accessibile is None:
+            self._accessibile = accessibilita.StatoDellaSelezione(self.albero, self._stato_della_selezione_acceso,
+                self._selezionata_per_lo_screen_reader)
+            self.albero.SetAccessible(self._accessibile)
+
+    def _stato_della_selezione_acceso(self):
+        return not self._chiusa and self.impostazioni["stato_della_selezione"]
+
+    def _selezionata_per_lo_screen_reader(self, numero):
+        """Se la voce con questo numero, un HTREEITEM, e' selezionata per
+        MeTeOra; None quando vale cio' che dice Windows, cioe' senza la
+        selezione multipla, quando la selezionata e' la sola voce col fuoco.
+        Lo chiede NVDA, anche a ogni voce: niente _voci_selezionate, che
+        ordina. Una freccia sinistra o destra o un'iniziale che Windows ha gia'
+        mosso chiudono la selezione multipla solo dopo, con un CallAfter: se
+        intanto NVDA chiede, la voce d'arrivo e' gia' selezionata come per
+        Windows, e non sente un non selezionato sbagliato."""
+        if self._selezione is None:
+            return None
+        prima = self._fuoco_prima_della_freccia
+        if prima is not None and int(self.albero.GetFocusedItem().GetID()) != prima:
+            return None
+        return numero in self._selezione
+
+    def _aspetta_la_fine_della_selezione(self, voce):
+        """Una freccia o un'iniziale che muove Windows sta per partire dalla
+        voce col fuoco: fino al suo CallAfter, se il fuoco si muove, per lo
+        screen reader vale la selezione di Windows."""
+        self._fuoco_prima_della_freccia = int(voce.GetID()) if voce.IsOk() else None
+
+    def _annuncia_lo_stato(self, voce):
+        """Lo stato della voce col fuoco e' cambiato senza che il fuoco si
+        muova, con Ctrl+Spazio, con un clic sulla voce stessa o con la
+        selezione multipla chiusa a fuoco fermo: NVDA lo dice selezionato o
+        non selezionato se glielo si annuncia."""
+        if self._accessibile is not None and voce.IsOk():
+            self._accessibile.annuncia(int(voce.GetID()))
+
+    def _annuncia_a_fuoco_fermo(self, voce):
+        """La selezione multipla si e' chiusa mentre la voce col fuoco ne era
+        fuori, e per NVDA era non selezionata: adesso e' selezionata.
+        Se il fuoco e' rimasto li', come con freccia giu' sull'ultima voce,
+        con F9 sul ramo che ha il fuoco o con un clic sulla voce stessa,
+        Windows non manda niente, e lo stato si annuncia; se si e' mosso,
+        basta il suo evento di fuoco, che porta gia' lo stato nuovo. Si
+        guarda dopo, perche' le frecce il fuoco lo muovono dopo il gestore
+        del tasto: annunciato subito, NVDA direbbe selezionato sulla voce di
+        partenza prima di ogni freccia."""
+        if not self._chiusa and self._voce_corrente() == voce:
+            self._annuncia_lo_stato(voce)
 
     def _dati(self, voce):
         return self.albero.GetItemData(voce) if voce and voce.IsOk() else None
@@ -6315,6 +6405,7 @@ class Finestra(wx.Frame):
             "colori_testo": lambda: self._colori_da_leggere("colori_testo"),
             "colori_sfondo": lambda: self._colori_da_leggere("colori_sfondo"),
             "barra_dei_comandi": lambda: "sì" if imp["barra_dei_comandi"] else "no",
+            "stato_della_selezione": lambda: "sì" if imp["stato_della_selezione"] else "no",
             "righe_della_console": lambda: str(imp["righe_della_console"]),
             "salva_console": lambda: "scrive la console in un file di testo",
             "marcatori": self._marcatori_da_leggere,
@@ -6487,6 +6578,13 @@ class Finestra(wx.Frame):
                 "Non prende mai il fuoco e non si raggiunge con Tab: con la tastiera e lo screen reader non cambia niente.",
                 "Scrivi sì per accenderla, no per spegnerla; valgono anche s, n, 1, 0, acceso e spento.",
                 f"Adesso è {'accesa' if imp['barra_dei_comandi'] else 'spenta'}.", REGOLA_DEL_DOLLARO], "sì" if imp["barra_dei_comandi"] else "no"
+        if chiave == "stato_della_selezione":
+            return (lambda testo: valori.leggi_si_no(testo, "Stato della selezione per lo screen reader")), [
+                "Con lo stato acceso, nella plancia NVDA dice non selezionato sulle voci che non sono nella selezione multipla, come in Esplora risorse, "
+                "per esempio quando Ctrl con le frecce porta il fuoco fuori dalla selezione; con Ctrl e la barra spaziatrice dice selezionato o non selezionato.",
+                "Spento, la plancia risponde a NVDA come un albero di Windows, e se una voce è selezionata lo dice solo la console.",
+                "Scrivi sì per accenderlo, no per spegnerlo; valgono anche s, n, 1, 0, acceso e spento.",
+                f"Adesso è {'acceso' if imp['stato_della_selezione'] else 'spento'}.", REGOLA_DEL_DOLLARO], "sì" if imp["stato_della_selezione"] else "no"
         if chiave == "insegui":
             return valori.leggi_si_no, [
                 "Con l'inseguimento agganciato, a ogni cambio di brano la selezione della plancia va da sola su ciò che suona, senza spostare il fuoco.",
@@ -6588,6 +6686,11 @@ class Finestra(wx.Frame):
             if valore:
                 return "Barra dei comandi per il mouse accesa: compare quando il mouse si muove sopra MeTeOra."
             return "Barra dei comandi per il mouse spenta."
+        if chiave == "stato_della_selezione":
+            if valore:
+                self._attacca_lo_stato_della_selezione()
+                return "Stato della selezione per lo screen reader acceso: nella plancia NVDA dice non selezionato sulle voci fuori dalla selezione."
+            return "Stato della selezione per lo screen reader spento: la plancia risponde a NVDA come un albero di Windows."
         if chiave == "insegui":
             if not valore:
                 return "Inseguimento sganciato: la selezione resta dove la lasci."
@@ -9068,6 +9171,10 @@ class Finestra(wx.Frame):
             evento.Skip()
             return
         self._chiusa = True
+        # Da qui la plancia risponde a NVDA come Windows (issue 21): NVDA puo'
+        # chiedere anche mentre la finestra si chiude.
+        if self._accessibile is not None:
+            self._accessibile.chiudi()
         if self.ascolto_delle_copie is not None:
             self.ascolto_delle_copie.ferma()
         self.barra.ferma()

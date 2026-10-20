@@ -1,4 +1,4 @@
-Collaudo di MeTeOra dalla 1.103.0 alla 1.110.0, con NVDA: restano le voci da leggere e da sentire; il resto l'ha provato ClaudIA il 19 e il 20 ottobre 2026, con pytest e con strumenti\banco.py sul desktop nascosto. La 1.104.1, la 1.104.2 e la 1.105.1 non hanno voci tue. Prima git pull in MeTeOra e in GBUtils: serve GBUtils V209. Sulle altre macchine, dopo il pull e prima di MeTeOra, python pulisci_i_dati.py, che chiede una S e cancella per sempre i dati vecchi. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta. Scrivi le note sulla riga della voce; le voci superate si cancellano.
+Collaudo di MeTeOra dalla 1.103.0 alla 1.111.0, con NVDA: restano le voci da leggere e da sentire; il resto l'ha provato ClaudIA il 19 e il 20 ottobre 2026, con pytest e con strumenti\banco.py sul desktop nascosto. La 1.104.1 e la 1.104.2 non hanno voci tue. Le voci della 1.111.0 si fanno con il log di NVDA acceso: la prima ti dice come accenderlo, l'ultima come rimetterlo com'era. Prima git pull in MeTeOra e in GBUtils: serve GBUtils V207. Sulle altre macchine, dopo il pull e prima di MeTeOra, python pulisci_i_dati.py, che chiede una S e cancella per sempre i dati vecchi. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta. Scrivi le note sulla riga della voce; le voci superate si cancellano.
 I suoni della pulizia, 1.104.0: in Acu_Maker cerca pulizia e ascolta i due nuovi; poi in MeTeOra dimmi se si riconoscono, se il volume sta con gli altri effetti, e se all'avvio non si confondono con il suono della partenza e con quello della ripresa.
 Leggi tutto il testo delle statistiche con le frecce: ogni riga si capisce da sola? Dalla 1.104.0 le date hanno il giorno della settimana, le righe che elencano solo le voci diverse da zero e Tasti premuti il suo cioè. Segna le righe con parole storte, numeri strani o che vorresti diverse.
 Barra rovesciata nelle statistiche, scrivi Sezione 8 e Invio: NVDA legge la riga della sezione 8? Poi cerca Sezione e premi Invio qualche volta: NVDA legge ogni riga su cui arriva? Che il cursore ci arrivi l'ho già controllato io.
@@ -57,3 +57,20 @@ Durata residua dalla console: premi F6 e poi Maiuscolo con l'apostrofo, due volt
 Durata residua sul display braille, con Celle della barra braille a 0: la riga arriva alla barra e la leggi tutta?
 Durata residua sul display braille, se ti va, con le celle a 40: premi Maiuscolo con l'apostrofo due volte di seguito; la barra passa subito alla riga nuova?
 Durata residua, con NVDA: alza la velocità con D e premi Maiuscolo con l'apostrofo; nella riga Mancano, alla velocità sono, in tutto, capisci al primo ascolto che il tempo vero è quello di ciò che manca, e non del totale?
+1.111.0, NVDA e lo stato della selezione nella plancia (issue 21), prima di tutto: in NVDA apri Preferenze, Impostazioni, categoria Generale, metti Livello di logging su input/output, conferma con Sì la domanda Livello di log ad alto rischio, e riavvia NVDA, così il log riparte di sicuro; poi apri MeTeOra.
+1.111.0: in una playlist con qualche brano scendi e sali con le frecce semplici, poi Inizio e Fine: NVDA legge le voci come prima, con la posizione e il livello, e non dice mai non selezionato?
+1.111.0: con le stesse frecce, Inizio e Fine, sul display braille le voci si leggono come prima, senza niente di nuovo?
+1.111.0: da un brano scendi con Ctrl e freccia giù: sul brano d'arrivo NVDA dice non selezionato dopo il nome?
+1.111.0: sullo stesso brano, sul display braille compare nsel, o quale altra abbreviazione?
+1.111.0: lì premi Ctrl con la barra spaziatrice: NVDA dice solo selezionato, senza rileggere la voce?
+1.111.0: ripremi Ctrl con la barra spaziatrice: NVDA dice solo non selezionato?
+1.111.0: con Maiuscolo e freccia giù allarga la selezione di due brani, poi torna su con Ctrl e freccia su fino a uscirne: sui brani selezionati NVDA tace, e sul primo fuori dice non selezionato?
+1.111.0: da un brano premi Ctrl con Fine, che porta il fuoco su Impostazioni dicendo non selezionato, poi freccia giù, che non va oltre: NVDA dice selezionato?
+1.111.0: con la selezione ancora accesa premi freccia sinistra su un brano: NVDA legge la playlist senza non selezionato?
+1.111.0: poi freccia destra, e Backspace che chiude la playlist e risale: NVDA li legge come sempre?
+1.111.0: con Maiuscolo e F12 spegni i tasti rapidi, seleziona due brani con Maiuscolo e freccia giù e scrivi l'iniziale di un altro brano: NVDA lo legge senza non selezionato? Poi riaccendi i tasti rapidi con Maiuscolo e F12.
+1.111.0, nelle impostazioni: la riga Stato della selezione per lo screen reader: sì si capisce, con NVDA e con il display braille?
+1.111.0: mettila su no, e nella plancia muoviti con Ctrl e le frecce fuori dalla selezione: NVDA non dice mai non selezionato?
+1.111.0: con la voce ancora su no, Ctrl con la barra spaziatrice non fa dire niente a NVDA? Poi rimetti la voce su sì.
+1.111.0: esci con Esc mentre NVDA legge ancora la plancia, e riapri MeTeOra; fallo due o tre volte: alla riapertura nessun avviso di errore grave?
+1.111.0, alla fine: dimmi che hai finito, così leggo nvda.log; poi rimetti il Livello di logging di NVDA com'era, cioè disattivato.

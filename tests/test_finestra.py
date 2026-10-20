@@ -1,7 +1,8 @@
 # MeTeOra, le prove della finestra principale, sul desktop nascosto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo.
+# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21).
 
+import contextlib
 import ctypes
 import datetime
 import math
@@ -2770,6 +2771,7 @@ def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_an
         ("colori_testo", "Colori dei caratteri: quelli di Windows"),
         ("colori_sfondo", "Colori dello sfondo: quelli di Windows"),
         ("barra_dei_comandi", "Barra dei comandi per il mouse: sì"),
+        ("stato_della_selezione", "Stato della selezione per lo screen reader: sì"),
         ("righe_della_console", "Righe della console: 2000"),
         ("salva_console", "Salva console: scrive la console in un file di testo"),
         ("marcatori", "Marcatori: nessuno"),
@@ -2852,6 +2854,28 @@ def test_impostazioni_inseguimento(finestra, monkeypatch, suoni_annotati):
     _cambia(finestra, monkeypatch, "insegui", "spento")
     assert finestra.impostazioni["insegui"] is False and inseguiti == [True]
     assert _ultima(finestra) == "Inseguimento sganciato: la selezione resta dove la lasci."
+
+
+def test_impostazioni_stato_della_selezione(finestra, monkeypatch, suoni_annotati):
+    # Issue 21, dalla revisione: il campo della voce, il salvataggio, la riga
+    # della finestra e quella della console; spenta e riaccesa, l'oggetto
+    # della plancia resta lo stesso, attaccato.
+    accessibile = finestra._accessibile
+    assert accessibile is not None
+    campo, lista = _cambia(finestra, monkeypatch, "stato_della_selezione", "forse", "no")
+    assert [a["testo"] for a in campo.aperture] == ["sì", "forse"]
+    assert campo.aperture[1]["titolo"].startswith("Stato della selezione per lo screen reader: forse non è né sì né no; scrivi sì o no.")
+    assert "Adesso è acceso." in campo.aperture[0]["istruzioni"]
+    assert finestra.impostazioni["stato_della_selezione"] is False and _salvate(finestra)["stato_della_selezione"] is False
+    assert lista.righe["stato_della_selezione"] == "Stato della selezione per lo screen reader: no"
+    assert _ultima(finestra) == "Stato della selezione per lo screen reader spento: la plancia risponde a NVDA come un albero di Windows."
+    assert finestra.albero.GetAccessible() is accessibile
+    campo, lista = _cambia(finestra, monkeypatch, "stato_della_selezione", "sì")
+    assert [a["testo"] for a in campo.aperture] == ["no"] and "Adesso è spento." in campo.aperture[0]["istruzioni"]
+    assert finestra.impostazioni["stato_della_selezione"] is True and _salvate(finestra)["stato_della_selezione"] is True
+    assert lista.righe["stato_della_selezione"] == "Stato della selezione per lo screen reader: sì"
+    assert _ultima(finestra) == "Stato della selezione per lo screen reader acceso: nella plancia NVDA dice non selezionato sulle voci fuori dalla selezione."
+    assert finestra.albero.GetAccessible() is finestra._accessibile is accessibile
 
 
 def test_impostazioni_riproduzione_casuale(finestra, monkeypatch, suoni_annotati):
@@ -6256,6 +6280,430 @@ def test_la_selezione_multipla_e_di_meteora(finestra):
     finestra._aggiungi_alla_selezione(b)
     finestra.albero.Delete(b)
     assert finestra._voci_selezionate() == [a]
+
+
+# Lo stato della selezione per lo screen reader (issue 21): un client MSAA
+# nel processo, con le chiamate di IAccessible per posto nella tabella.
+_oleacc = ctypes.WinDLL("oleacc")
+_oleacc.AccessibleObjectFromWindow.argtypes = [ctypes.c_void_p, ctypes.c_ulong, ctypes.c_void_p, ctypes.POINTER(ctypes.c_void_p)]
+_oleacc.AccessibleObjectFromWindow.restype = ctypes.c_long
+_oleaut32 = ctypes.WinDLL("oleaut32")
+_oleaut32.SysFreeString.argtypes = [ctypes.c_void_p]
+_oleaut32.VariantClear.argtypes = [ctypes.c_void_p]
+_SELEZIONATO, _SELEZIONABILE, _A_SELEZIONE_MULTIPLA = 0x2, 0x200000, 0x1000000
+
+
+def _msaa_testo(oggetto, indice, numero):
+    import accessibilita
+
+    uscita = ctypes.c_void_p()
+    esito = accessibilita.chiama(oggetto, indice, accessibilita.figlio(numero), ctypes.byref(uscita), tipi=(accessibilita.VARIANT, ctypes.POINTER(ctypes.c_void_p)))
+    testo = ctypes.wstring_at(uscita.value) if uscita.value else None
+    _oleaut32.SysFreeString(uscita.value)
+    return esito, testo
+
+
+def _msaa_stato(oggetto, numero, indice=14):
+    """accState, o accRole con l'indice 13, come (esito, vt, valore)."""
+    import accessibilita
+
+    uscita = accessibilita.VARIANT()
+    esito = accessibilita.chiama(oggetto, indice, accessibilita.figlio(numero), ctypes.byref(uscita), tipi=(accessibilita.VARIANT, ctypes.POINTER(accessibilita.VARIANT)))
+    letto = (esito, uscita.vt, uscita.u.lVal & 0xFFFFFFFF)
+    _oleaut32.VariantClear(ctypes.byref(uscita))
+    return letto
+
+
+def _msaa_lettura(oggetto, numero):
+    """Tutto cio' che un client legge di una voce, o della plancia con 0."""
+    import accessibilita
+
+    misure = [ctypes.c_long() for _ in range(4)]
+    posto = accessibilita.chiama(oggetto, 22, *(ctypes.byref(m) for m in misure), accessibilita.figlio(numero), tipi=(ctypes.POINTER(ctypes.c_long),) * 4 + (accessibilita.VARIANT,))
+    return {"nome": _msaa_testo(oggetto, 10, numero), "valore": _msaa_testo(oggetto, 11, numero), "descrizione": _msaa_testo(oggetto, 12, numero),
+        "ruolo": _msaa_stato(oggetto, numero, 13), "stato": _msaa_stato(oggetto, numero), "aiuto": _msaa_testo(oggetto, 15, numero),
+        "scorciatoia": _msaa_testo(oggetto, 17, numero), "azione": _msaa_testo(oggetto, 20, numero), "posto": (posto, [m.value for m in misure])}
+
+
+def _msaa_della_plancia(finestra):
+    """L'oggetto che NVDA riceve dalla plancia, chiesto con WM_GETOBJECT come
+    fa lui, e quello standard di Windows: tutti e due da rilasciare."""
+    import accessibilita
+
+    oggetto = ctypes.c_void_p()
+    hwnd = finestra.albero.GetHandle()
+    assert _oleacc.AccessibleObjectFromWindow(hwnd, 0xFFFFFFFC, ctypes.addressof(accessibilita.IID_IACCESSIBLE), ctypes.byref(oggetto)) == 0
+    return oggetto.value, accessibilita.oggetto_standard(hwnd)
+
+
+def _wm_getobject(finestra):
+    from ctypes import wintypes
+
+    user32 = ctypes.WinDLL("user32")
+    user32.SendMessageW.argtypes = [wintypes.HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM]
+    user32.SendMessageW.restype = ctypes.c_ssize_t
+    return user32.SendMessageW(finestra.albero.GetHandle(), 0x003D, 0, 0xFFFFFFFC)
+
+
+def _numeri_delle_voci(finestra):
+    import accessibilita
+
+    return [(voce, accessibilita.numero_della_voce(finestra.albero.GetHandle(), int(voce.GetID()))) for voce in finestra._tutte_le_voci()]
+
+
+def _confronta_con_windows(finestra, oggetto, standard):
+    """Ogni voce si legge come dall'oggetto standard, tranne selezionata,
+    che segue la selezione di MeTeOra, e selezionabile, sempre acceso."""
+    for voce, numero in _numeri_delle_voci(finestra):
+        nostra, di_windows = _msaa_lettura(oggetto, numero), _msaa_lettura(standard, numero)
+        stato, stato_di_windows = nostra.pop("stato"), di_windows.pop("stato")
+        assert nostra == di_windows, finestra.albero.GetItemText(voce)
+        assert stato[:2] == stato_di_windows[:2] == (0, 3)
+        assert (stato[2] ^ stato_di_windows[2]) & ~_SELEZIONATO == 0 and stato[2] & _SELEZIONABILE
+        assert bool(stato[2] & _SELEZIONATO) == finestra._e_selezionata(voce), finestra.albero.GetItemText(voce)
+
+
+def test_la_plancia_da_a_nvda_lo_stato_della_selezione(finestra):
+    # Issue 21: con la voce delle impostazioni accesa, di partenza, la
+    # plancia risponde a WM_GETOBJECT con il suo oggetto, che legge tutto
+    # come Windows tranne lo stato della selezione di MeTeOra.
+    import accessibilita
+
+    rock, = _playlist_di_prova(finestra, ("a.mp3", "b.mp3", "c.mp3", "d.mp3"))
+    finestra.Show()
+    finestra.albero.SetFocus()
+    a, b, c, d = (_voce_di(finestra, rock, n) for n in ("a.mp3", "b.mp3", "c.mp3", "d.mp3"))
+    finestra._seleziona(a)
+    assert finestra.impostazioni["stato_della_selezione"] is True and _wm_getobject(finestra) != 0
+    oggetto, standard = _msaa_della_plancia(finestra)
+    try:
+        # Senza la selezione multipla e' tutto come per Windows.
+        _confronta_con_windows(finestra, oggetto, standard)
+        # La plancia stessa si dichiara a selezione multipla, e nient'altro cambia.
+        nostra, di_windows = _msaa_lettura(oggetto, 0), _msaa_lettura(standard, 0)
+        assert nostra.pop("stato")[2] == di_windows.pop("stato")[2] | _A_SELEZIONE_MULTIPLA and nostra == di_windows
+        # Ctrl+Spazio toglie a: per Windows resta selezionata.
+        _nell_albero(finestra, wx.WXK_SPACE, ctrl=True)
+        _, numero_di_a = next(x for x in _numeri_delle_voci(finestra) if x[0] == a)
+        assert not _msaa_stato(oggetto, numero_di_a)[2] & _SELEZIONATO and _msaa_stato(standard, numero_di_a)[2] & _SELEZIONATO
+        _confronta_con_windows(finestra, oggetto, standard)
+        # Maiuscolo con giu', poi Ctrl con giu' due volte: d col fuoco, fuori dalla selezione.
+        _nell_albero(finestra, wx.WXK_DOWN, maiuscolo=True)
+        _nell_albero(finestra, wx.WXK_DOWN, ctrl=True)
+        _nell_albero(finestra, wx.WXK_DOWN, ctrl=True)
+        assert finestra._voci_selezionate() == [a, b] and finestra._voce_corrente() == d
+        _confronta_con_windows(finestra, oggetto, standard)
+        _, numero_di_d = next(x for x in _numeri_delle_voci(finestra) if x[0] == d)
+        assert not _msaa_stato(oggetto, numero_di_d)[2] & _SELEZIONATO
+        # Una freccia chiude la selezione: di nuovo come per Windows.
+        _nell_albero(finestra, wx.WXK_UP)
+        finestra._sposta_il_cursore(c)
+        _confronta_con_windows(finestra, oggetto, standard)
+    finally:
+        accessibilita.rilascia(oggetto)
+        accessibilita.rilascia(standard)
+
+
+def test_lo_stato_della_selezione_spento_e_quello_di_windows(finestra, tmp_path):
+    # Issue 21: spenta la voce, l'oggetto attaccato risponde come Windows
+    # anche con la selezione multipla; da spenta all'avvio non si attacca, e
+    # riaccesa si attacca subito.
+    import json
+
+    import accessibilita
+    from finestra import Finestra
+
+    rock, = _playlist_di_prova(finestra, ("a.mp3", "b.mp3", "c.mp3"))
+    a, b, c = (_voce_di(finestra, rock, n) for n in ("a.mp3", "b.mp3", "c.mp3"))
+    finestra._seleziona(a)
+    finestra._aggiungi_alla_selezione(c)
+    finestra._sposta_il_cursore(b)
+    frase = finestra._applica_l_impostazione("stato_della_selezione", False)
+    assert frase == "Stato della selezione per lo screen reader spento: la plancia risponde a NVDA come un albero di Windows."
+    assert finestra._riga_dell_impostazione("stato_della_selezione") == "Stato della selezione per lo screen reader: no"
+    oggetto, standard = _msaa_della_plancia(finestra)
+    try:
+        for _voce, numero in [(None, 0), *_numeri_delle_voci(finestra)]:
+            assert _msaa_lettura(oggetto, numero) == _msaa_lettura(standard, numero)
+    finally:
+        accessibilita.rilascia(oggetto)
+        accessibilita.rilascia(standard)
+    cartella = tmp_path / "spento"
+    cartella.mkdir()
+    (cartella / modulo.FILE_IMPOSTAZIONI).write_text(json.dumps({"stato_della_selezione": False}), encoding="utf-8")
+    f = Finestra(ao="null", cartella_dati=str(cartella))
+    try:
+        assert f._accessibile is None and f.albero.GetAccessible() is None and _wm_getobject(f) == 0
+        frase = f._applica_l_impostazione("stato_della_selezione", True)
+        assert frase.startswith("Stato della selezione per lo screen reader acceso: nella plancia NVDA dice non selezionato")
+        assert f.albero.GetAccessible() is f._accessibile is not None and _wm_getobject(f) != 0
+        f.Close(force=True)
+    finally:
+        f.Destroy()
+
+
+def test_lo_stato_della_selezione_converte_ogni_stato(finestra, monkeypatch):
+    # Issue 21: gli stati di wx hanno altri valori, e wx li riconverte uno
+    # per uno. Ogni stato che si puo' dare torna uguale; uno che wx
+    # perderebbe lascia lo stato intero a Windows.
+    import accessibilita
+
+    finestra.Show()
+    oggetto, standard = _msaa_della_plancia(finestra)
+    finto = {}
+    monkeypatch.setattr(accessibilita, "stato_di", lambda _oggetto, _numero: finto["stato"])
+    try:
+        di_windows = _msaa_stato(standard, 0)[2]
+        persi = []
+        for nome, bit in accessibilita.STATI.items():
+            finto["stato"] = bit
+            atteso = bit | _A_SELEZIONE_MULTIPLA if bit in accessibilita.DA_MSAA_A_WX else di_windows
+            letto = _msaa_stato(oggetto, 0)
+            if letto != (0, 3, atteso):
+                persi.append((nome, hex(letto[2]), hex(atteso)))
+        assert persi == []
+        assert {nome for nome, bit in accessibilita.STATI.items() if bit not in accessibilita.DA_MSAA_A_WX} == {
+            "SIZEABLE", "MOVEABLE", "LINKED", "TRAVERSED", "PROTECTED", "HASPOPUP"}
+    finally:
+        accessibilita.rilascia(oggetto)
+        accessibilita.rilascia(standard)
+
+
+def test_un_errore_nello_stato_della_selezione_lascia_rispondere_windows(finestra, monkeypatch):
+    # Issue 21: un'eccezione dentro GetState non arriva a NVDA, che sente lo
+    # stato di Windows; la pila va nel registro degli errori una volta sola.
+    import accessibilita
+    import registro
+
+    rock, = _playlist_di_prova(finestra, ("a.mp3", "b.mp3"))
+    finestra._seleziona(_voce_di(finestra, rock, "a.mp3"))
+    finestra._aggiungi_alla_selezione(_voce_di(finestra, rock, "b.mp3"))
+    scritti = []
+    monkeypatch.setattr(registro, "problema", lambda *argomenti: scritti.append(argomenti[1]))
+    oggetto, standard = _msaa_della_plancia(finestra)
+
+    def rotto(_oggetto, _numero):
+        raise RuntimeError("stato rotto")
+
+    monkeypatch.setattr(accessibilita, "stato_di", rotto)
+    try:
+        for _voce, numero in [(None, 0), *_numeri_delle_voci(finestra)]:
+            assert _msaa_stato(oggetto, numero) == _msaa_stato(standard, numero)
+        assert len(scritti) == 1 and str(scritti[0]) == "stato rotto"
+    finally:
+        accessibilita.rilascia(oggetto)
+        accessibilita.rilascia(standard)
+
+
+def test_la_freccia_che_muove_windows_non_fa_dire_non_selezionato(finestra):
+    # Issue 21: freccia sinistra, e la ricerca per iniziale a tasti rapidi
+    # spenti, chiudono la selezione multipla con un CallAfter, dopo che
+    # Windows ha gia' mosso il fuoco. Se NVDA chiede prima, la voce d'arrivo
+    # e' gia' selezionata.
+    import accessibilita
+
+    rock, = _playlist_di_prova(finestra, ("a.mp3", "b.mp3", "c.mp3"))
+    finestra.Show()
+    finestra.albero.SetFocus()
+    a, b, c = (_voce_di(finestra, rock, n) for n in ("a.mp3", "b.mp3", "c.mp3"))
+    finestra._seleziona(c)
+    finestra._aggiungi_alla_selezione(a)
+    oggetto, standard = _msaa_della_plancia(finestra)
+    try:
+        numero_di = {int(v.GetID()): n for v, n in _numeri_delle_voci(finestra)}
+        _nell_albero(finestra, wx.WXK_LEFT)
+        # Qui Windows sale al ramo della playlist, fuori dalla selezione.
+        finestra._sposta_il_cursore(rock)
+        assert finestra._selezione is not None
+        assert _msaa_stato(oggetto, numero_di[int(rock.GetID())])[2] & _SELEZIONATO
+        assert not _msaa_stato(oggetto, numero_di[int(c.GetID())])[2] & _SELEZIONATO
+        wx.Yield()
+        assert finestra._selezione is None and finestra._fuoco_prima_della_freccia is None
+        _confronta_con_windows(finestra, oggetto, standard)
+        # Senza una freccia in corso la voce fuori dalla selezione non lo e'.
+        finestra._seleziona(c)
+        finestra._aggiungi_alla_selezione(a)
+        finestra._sposta_il_cursore(b)
+        assert not _msaa_stato(oggetto, numero_di[int(b.GetID())])[2] & _SELEZIONATO
+        # La ricerca per iniziale, a tasti rapidi spenti: qui Windows va da c
+        # a b, fuori dalla selezione, e per NVDA vale cio' che dice Windows.
+        finestra._sposta_il_cursore(c)
+        finestra._tasti_rapidi = False
+        evento = wx.KeyEvent(wx.wxEVT_CHAR)
+        evento.SetUnicodeKey(ord("b"))
+        finestra._carattere_nell_albero(evento)
+        assert evento.GetSkipped()
+        finestra._sposta_il_cursore(b)
+        assert finestra._selezione is not None and finestra._fuoco_prima_della_freccia == int(c.GetID())
+        assert _msaa_stato(oggetto, numero_di[int(b.GetID())])[2] & _SELEZIONATO
+        assert not _msaa_stato(oggetto, numero_di[int(c.GetID())])[2] & _SELEZIONATO
+        wx.Yield()
+        assert finestra._selezione is None and finestra._fuoco_prima_della_freccia is None
+        _confronta_con_windows(finestra, oggetto, standard)
+    finally:
+        accessibilita.rilascia(oggetto)
+        accessibilita.rilascia(standard)
+
+
+@contextlib.contextmanager
+def _cambi_di_stato(finestra):
+    """Gli EVENT_OBJECT_STATECHANGE della plancia, raccolti nel processo con
+    SetWinEventHook: la lista dei cambi, come (oggetto, figlio), che parte
+    vuota, e la funzione che fa arrivare quelli gia' mandati."""
+    from ctypes import wintypes
+
+    user32 = ctypes.WinDLL("user32", use_last_error=True)
+    procedura = ctypes.WINFUNCTYPE(None, wintypes.HANDLE, wintypes.DWORD, wintypes.HWND, wintypes.LONG, wintypes.LONG, wintypes.DWORD, wintypes.DWORD)
+    user32.SetWinEventHook.restype = wintypes.HANDLE
+    user32.SetWinEventHook.argtypes = [wintypes.DWORD, wintypes.DWORD, wintypes.HMODULE, procedura, wintypes.DWORD, wintypes.DWORD, wintypes.DWORD]
+    user32.UnhookWinEvent.argtypes = [wintypes.HANDLE]
+    hwnd = finestra.albero.GetHandle()
+    cambi = []
+
+    def ricevi(_aggancio, evento, finestra_evento, oggetto, figlio, _filo, _tempo):
+        if finestra_evento == hwnd and evento == 0x800A:  # EVENT_OBJECT_STATECHANGE
+            cambi.append((oggetto, figlio))
+
+    def pompa():
+        messaggio = wintypes.MSG()
+        fine = time.monotonic() + 0.3
+        while time.monotonic() < fine:
+            user32.PeekMessageW(ctypes.byref(messaggio), None, 0x7FFF, 0x7FFF, 0)  # PM_NOREMOVE
+            time.sleep(0.01)
+
+    richiamo = procedura(ricevi)
+    aggancio = user32.SetWinEventHook(0x800A, 0x800A, None, richiamo, os.getpid(), 0, 0)
+    try:
+        pompa()
+        cambi.clear()
+        yield cambi, pompa
+    finally:
+        user32.UnhookWinEvent(aggancio)
+
+
+def test_ctrl_spazio_annuncia_a_nvda_lo_stato_della_voce(finestra):
+    # Issue 21: lo stato che cambia senza che il fuoco si muova, con
+    # Ctrl+Spazio e con il clic con Ctrl sulla voce col fuoco, si annuncia
+    # con un EVENT_OBJECT_STATECHANGE; le frecce non ne mandano, e con la
+    # voce spenta nemmeno Ctrl+Spazio.
+    rock, = _playlist_di_prova(finestra, ("a.mp3", "b.mp3", "c.mp3", "d.mp3"))
+    finestra.Show()
+    finestra.albero.SetFocus()
+    a, d = (_voce_di(finestra, rock, n) for n in ("a.mp3", "d.mp3"))
+    finestra._seleziona(a)
+    numero_di = {int(v.GetID()): n for v, n in _numeri_delle_voci(finestra)}
+    with _cambi_di_stato(finestra) as (cambi, pompa):
+        _nell_albero(finestra, wx.WXK_SPACE, ctrl=True)
+        pompa()
+        assert cambi == [(-4, numero_di[int(a.GetID())])]
+        _nell_albero(finestra, wx.WXK_SPACE, ctrl=True)
+        pompa()
+        assert cambi == [(-4, numero_di[int(a.GetID())])] * 2
+        cambi.clear()
+        _nell_albero(finestra, wx.WXK_DOWN, maiuscolo=True)
+        _nell_albero(finestra, wx.WXK_DOWN, ctrl=True)
+        _clic(finestra, d, ctrl=True)
+        pompa()
+        assert cambi == []
+        _clic(finestra, d, ctrl=True)
+        pompa()
+        assert cambi == [(-4, numero_di[int(d.GetID())])]
+        cambi.clear()
+        finestra._applica_l_impostazione("stato_della_selezione", False)
+        _nell_albero(finestra, wx.WXK_SPACE, ctrl=True)
+        pompa()
+        assert cambi == []
+
+
+def test_la_selezione_chiusa_a_fuoco_fermo_si_annuncia(finestra, suoni_annotati):
+    # Issue 21, dalla revisione: la selezione multipla che si chiude mentre
+    # la voce col fuoco ne e' fuori fa diventare la voce selezionata. Se il
+    # fuoco resta li', con freccia giu' sull'ultima voce, con F9 sul ramo
+    # chiuso che ha il fuoco o con il clic sulla voce col fuoco, Windows non
+    # manda niente, e MeTeOra annuncia il cambio dopo il tasto. Niente se la
+    # freccia muove il fuoco, anche sinistra prima della chiusura, o se la
+    # voce col fuoco era nella selezione.
+    import accessibilita
+
+    rock, = _playlist_di_prova(finestra, ("a.mp3", "b.mp3", "c.mp3"))
+    finestra.Show()
+    finestra.albero.SetFocus()
+    a, b, c = (_voce_di(finestra, rock, n) for n in ("a.mp3", "b.mp3", "c.mp3"))
+    ultima = finestra._ultima_visibile()
+    penultima = finestra._prima(ultima)
+    finestra._seleziona(a)
+    numero_di = {int(v.GetID()): n for v, n in _numeri_delle_voci(finestra)}
+    oggetto, standard = _msaa_della_plancia(finestra)
+    try:
+        with _cambi_di_stato(finestra) as (cambi, pompa):
+            # Ctrl+Fine porta il fuoco sull'ultima voce, fuori dalla
+            # selezione; freccia giu', che Windows non muove, la chiude.
+            _nell_albero(finestra, wx.WXK_END, ctrl=True)
+            assert finestra._voce_corrente() == ultima and finestra._voci_selezionate() == [a]
+            assert not _msaa_stato(oggetto, numero_di[int(ultima.GetID())])[2] & _SELEZIONATO
+            _nell_albero(finestra, wx.WXK_DOWN)
+            pompa()
+            assert cambi == []
+            wx.Yield()
+            pompa()
+            assert finestra._selezione is None and cambi == [(-4, numero_di[int(ultima.GetID())])]
+            assert _msaa_stato(oggetto, numero_di[int(ultima.GetID())])[2] & _SELEZIONATO
+            # La voce col fuoco nella selezione: niente.
+            cambi.clear()
+            _nell_albero(finestra, wx.WXK_UP, maiuscolo=True)
+            _nell_albero(finestra, wx.WXK_DOWN, maiuscolo=True)
+            assert finestra._selezione is not None and finestra._voci_selezionate() == [ultima]
+            _nell_albero(finestra, wx.WXK_END)
+            wx.Yield()
+            pompa()
+            assert finestra._selezione is None and cambi == []
+            # La freccia che muove il fuoco: basta il fuoco.
+            _nell_albero(finestra, wx.WXK_UP, ctrl=True)
+            assert finestra._voce_corrente() == penultima
+            _nell_albero(finestra, wx.WXK_UP)
+            finestra._sposta_il_cursore(finestra._prima(penultima))
+            wx.Yield()
+            pompa()
+            assert finestra._selezione is None and cambi == []
+            # F9 sul ramo chiuso che ha il fuoco, fuori dalla selezione.
+            finestra._seleziona(a)
+            finestra._aggiungi_alla_selezione(b)
+            finestra._sposta_il_cursore(rock)
+            finestra.albero.Collapse(rock)
+            wx.Yield()
+            pompa()
+            cambi.clear()
+            finestra._chiudi_tutto()
+            wx.Yield()
+            pompa()
+            assert finestra._selezione is None and cambi == [(-4, numero_di[int(rock.GetID())])]
+            # Il clic semplice sulla voce col fuoco, fuori dalla selezione. La
+            # playlist riaperta ha voci nuove.
+            finestra.albero.Expand(rock)
+            a, b, c = (_voce_di(finestra, rock, n) for n in ("a.mp3", "b.mp3", "c.mp3"))
+            numero_di = {int(v.GetID()): n for v, n in _numeri_delle_voci(finestra)}
+            finestra._seleziona(a)
+            finestra._aggiungi_alla_selezione(b)
+            finestra._sposta_il_cursore(c)
+            wx.Yield()
+            pompa()
+            cambi.clear()
+            _clic(finestra, c)
+            wx.Yield()
+            pompa()
+            assert finestra._selezione is None and cambi == [(-4, numero_di[int(c.GetID())])]
+            # Freccia sinistra, che Windows muove prima che la selezione si
+            # chiuda: NVDA ha gia' sentito la voce d'arrivo selezionata.
+            cambi.clear()
+            finestra._aggiungi_alla_selezione(a)
+            _nell_albero(finestra, wx.WXK_LEFT)
+            finestra._sposta_il_cursore(rock)
+            wx.Yield()
+            pompa()
+            assert finestra._selezione is None and finestra._voce_corrente() == rock and cambi == []
+    finally:
+        accessibilita.rilascia(oggetto)
+        accessibilita.rilascia(standard)
 
 
 def test_il_clic_destro_porta_il_fuoco_sulla_voce(finestra, monkeypatch):

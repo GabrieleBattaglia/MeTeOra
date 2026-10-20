@@ -1,6 +1,6 @@
 # MeTeOra, le impostazioni: i valori che il programma ricorda fra un avvio e l'altro.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 le righe della console. Nella 1.51.0 caratteri, colori e scheda audio, e i limiti controllati alla lettura del file. Nella 1.51.2 un file con un JSON che non e' un dizionario non ferma l'avvio. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza (tappa 4, issue 15). Nella 1.59.0 la riproduzione casuale (issue 17). Nella 1.61.0 il modello della riproduzione casuale. Nella 1.63.0 video, sottotitoli letti e sintesi (tappa 7). Nella 1.64.0 i percorsi di rete scritti a mano. Nella 1.65.0 il banco dei suoni MIDI. Nella 1.66.36 un file illeggibile non si sovrascrive: si salva accanto, con .nuovo. Nella 1.82.0 destinazione, karaoke e anticipo del karaoke. Nella 1.83.0 celle della barra braille e tempo minimo di lettura. Nella 1.84.0 la versione dell'ultimo avvio. Nella 1.102.2 il volume di partenza e' 100, il livello originale dei file (issue 22).
+# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 le righe della console. Nella 1.51.0 caratteri, colori e scheda audio, e i limiti controllati alla lettura del file. Nella 1.51.2 un file con un JSON che non e' un dizionario non ferma l'avvio. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza (tappa 4, issue 15). Nella 1.59.0 la riproduzione casuale (issue 17). Nella 1.61.0 il modello della riproduzione casuale. Nella 1.63.0 video, sottotitoli letti e sintesi (tappa 7). Nella 1.64.0 i percorsi di rete scritti a mano. Nella 1.65.0 il banco dei suoni MIDI. Nella 1.66.36 un file illeggibile non si sovrascrive: si salva accanto, con .nuovo. Nella 1.82.0 destinazione, karaoke e anticipo del karaoke. Nella 1.83.0 celle della barra braille e tempo minimo di lettura. Nella 1.84.0 la versione dell'ultimo avvio. Nella 1.102.2 il volume di partenza e' 100, il livello originale dei file (issue 22). Nella 1.111.0 lo stato della selezione per lo screen reader, acceso di partenza (issue 21).
 
 """Le impostazioni, in un file JSON accanto al programma.
 
@@ -65,6 +65,11 @@ PREDEFINITE = {
     # La barra dei comandi per il mouse, per chi vede (1.87.0): accesa di
     # partenza, perche' a chi usa la tastiera non da' niente.
     "barra_dei_comandi": True,
+    # Lo stato della selezione per lo screen reader (issue 21): nella plancia
+    # NVDA dice non selezionato sulle voci fuori dalla selezione multipla.
+    # Acceso di partenza (Gabriele, 20 ottobre 2026); spento, la plancia
+    # risponde a NVDA come un albero di Windows.
+    "stato_della_selezione": True,
     # Maiuscolo con N: quando un brano finisce da solo, il seguente si sceglie
     # a caso (issue 17).
     "casuale": False,

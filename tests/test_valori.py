@@ -1,6 +1,6 @@
 # MeTeOra, le prove dei valori scritti nei campi delle impostazioni e dei controlli sul file delle impostazioni.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.51.0, insieme a valori.py. Nella 1.55.0 le prove di velocita', tono, bande dell'equalizzatore e dissolvenza.
+# 01/10/2026: nasce con la 1.51.0, insieme a valori.py. Nella 1.55.0 le prove di velocita', tono, bande dell'equalizzatore e dissolvenza. Nella 1.111.0 la voce dello stato della selezione per lo screen reader.
 
 import json
 import os
@@ -627,7 +627,7 @@ def _caricate(tmp_path, contenuto):
 def test_predefinite_nuove_e_controllate():
     for chiave in ("caratteri", "colori_testo", "colori_sfondo", "scheda_audio"):
         assert PREDEFINITE[chiave] == {}
-    assert set(PREDEFINITE) - set(CONTROLLI) == {"insegui", "casuale", "ripresa", "video", "sottotitoli", "banco_midi", "impressi_scelti", "barra_dei_comandi"}
+    assert set(PREDEFINITE) - set(CONTROLLI) == {"insegui", "casuale", "ripresa", "video", "sottotitoli", "banco_midi", "impressi_scelti", "barra_dei_comandi", "stato_della_selezione"}
     assert set(CONTROLLI) <= set(PREDEFINITE)
     for chiave, controllo in CONTROLLI.items():
         assert controllo(PREDEFINITE[chiave]), chiave
@@ -643,7 +643,7 @@ def test_predefinite_della_tappa_4():
 
 
 def test_carica_i_valori_buoni(tmp_path):
-    buoni = {"volume": 300, "passo_volume": 50, "passo_indietro": 0.1, "passo_avanti": 0.23, "volume_effetti": 1, "insegui": True, "casuale": True, "modello_casuale": "totale", "ripetizione": "lista", "replaygain": "album", "video": True, "sottotitoli": True, "sintesi": "nvda", "impressi": "passata", "impressi_scelti": True, "destinazione": "braille", "karaoke": "strofa", "anticipo_karaoke": 10000, "celle_braille": 160, "lettura_minima": 100, "versione": "1.83.3", "barra_dei_comandi": False, "ripresa_oltre": 30, "banco_midi": "C:\\banchi\\FluidR3_GM.sf2", "percorsi_di_rete": ["\\\\server\\musica"],
+    buoni = {"volume": 300, "passo_volume": 50, "passo_indietro": 0.1, "passo_avanti": 0.23, "volume_effetti": 1, "insegui": True, "casuale": True, "modello_casuale": "totale", "ripetizione": "lista", "replaygain": "album", "video": True, "sottotitoli": True, "sintesi": "nvda", "impressi": "passata", "impressi_scelti": True, "destinazione": "braille", "karaoke": "strofa", "anticipo_karaoke": 10000, "celle_braille": 160, "lettura_minima": 100, "versione": "1.83.3", "barra_dei_comandi": False, "stato_della_selezione": False, "ripresa_oltre": 30, "banco_midi": "C:\\banchi\\FluidR3_GM.sf2", "percorsi_di_rete": ["\\\\server\\musica"],
         "ripresa": {"percorso": "x"}, "righe_della_console": 100, "caratteri": {"p": 6, "t": 72}, "colori_testo": {"c": [0, 100, 50]},
         "colori_sfondo": {"p": [31, 31, 31], "c": [100, 100, 100], "t": [0, 0, 0]},
         "scheda_audio": {"dispositivo": "Altoparlanti (Realtek(R) Audio)", "interfaccia": "Windows WASAPI"},

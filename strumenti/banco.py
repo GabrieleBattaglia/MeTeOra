@@ -1,6 +1,6 @@
 # MeTeOra, il banco del collaudo: MeTeOra vero su un desktop di Windows nascosto, con una copia dei dati, pilotato da una tastiera simulata.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 19/10/2026: nasce con la 1.104.0, dal banco con cui ClaudIA ha collaudato le statistiche della 1.103; sul desktop nascosto, come preferisce Gabriele. Nella 1.105.0 la sessione di Dove sono, l'opzione --solo, la sintesi finta e la pipe dell'istanza con il numero del processo. Nella 1.109.0 la sessione ordina, con --ordina. Nella 1.110.0 la sessione della durata residua, e al_normale in comune con Dove sono.
+# 19/10/2026: nasce con la 1.104.0, dal banco con cui ClaudIA ha collaudato le statistiche della 1.103; sul desktop nascosto, come preferisce Gabriele. Nella 1.105.0 la sessione di Dove sono, l'opzione --solo, la sintesi finta e la pipe dell'istanza con il numero del processo. Nella 1.109.0 la sessione ordina, con --ordina. Nella 1.110.0 la sessione della durata residua, e al_normale in comune con Dove sono. Nella 1.111.0 il banco della plancia, con --plancia: lo stato della selezione letto come lo legge NVDA (issue 21).
 
 """Il banco del collaudo.
 
@@ -11,6 +11,7 @@ Uso, dalla cartella di MeTeOra:
   python strumenti\\banco.py --solo S    la sola sessione S, per quelle che non dipendono dalle altre,
                                         come dove_sono e durata_residua
   python strumenti\\banco.py --ordina    solo la sessione ordina, partendo senza dati
+  python strumenti\\banco.py --plancia   il banco della plancia, da solo, partendo senza dati
 
 Con --video la finestra del video di MeTeOra si apre e prende i tasti, ma
 libmpv, che disegna in un suo filo nato sul desktop di partenza, li' non puo'
@@ -51,6 +52,17 @@ La sessione ordina (tappa 14 c) gira solo con --ordina: Ordina, Inverti
 l'ordine, Mescola e Ordine di prima su una playlist aperta di cinquemila
 brani, con i tempi, e Mescola sulla playlist che suona con la dissolvenza
 accesa, quando il brano seguente e' gia' preparato.
+Con --plancia le sessioni sono altre, ognuna con i suoi dati vuoti, e in
+ognuna MeTeOra lancia strumenti\\lettore_msaa.py, che fa la parte di NVDA da
+un processo a parte sullo stesso desktop nascosto (issue 21):
+- plancia: cio' che la plancia espone via MSAA confrontato con l'oggetto
+  standard di Windows, voce per voce, con e senza la selezione multipla e con
+  la voce delle impostazioni accesa e spenta; gli eventi di fuoco e di cambio
+  di stato dei tasti veri, letti come li legge NVDA; i tempi di lettura,
+  anche con migliaia di voci e con il filo della finestra occupato;
+- chiusura_1 e seguenti: il lettore legge la plancia senza sosta mentre
+  MeTeOra si chiude con Esc; il banco controlla che il processo esca pulito,
+  senza crash.
 Alla fine un riassunto, una riga per ogni controllo non riuscito; l'uscita
 vale 1 se ce n'e' almeno uno. La cartella di prova resta solo in quel caso.
 """
@@ -78,9 +90,13 @@ FILE_DELLE_STATISTICHE = "MeTeOra - Statistiche.json"
 SESSIONI = ("principale", "riavvio", "dopo_il_crash", "controllo", "dove_sono", "durata_residua")
 # Le sessioni che girano solo quando si chiedono (tappa 14 c).
 SESSIONI_A_PARTE = ("ordina",)
+# Il banco della plancia (1.111.0): la sessione delle misure e cinque
+# chiusure con il lettore che legge.
+SESSIONI_DELLA_PLANCIA = ("plancia", *(f"chiusura_{n}" for n in range(1, 6)))
 # Quanto puo' durare ogni sessione, in secondi: la pulizia sulla copia dei
 # dati veri guarda anche la rete.
-DURATE_MASSIME = {"principale": 1200, "riavvio": 900, "dopo_il_crash": 1200, "controllo": 900, "dove_sono": 900, "durata_residua": 900, "ordina": 600}
+DURATE_MASSIME = {"principale": 1200, "riavvio": 900, "dopo_il_crash": 1200, "controllo": 900, "dove_sono": 900, "durata_residua": 900, "ordina": 600, "plancia": 600,
+    **dict.fromkeys(SESSIONI_DELLA_PLANCIA[1:], 300)}
 # I brani della playlist grande della sessione ordina, e quanto puo' durare al
 # massimo ogni riordino, in secondi.
 BRANI_DELLA_PLAYLIST_GRANDE = 5000
@@ -126,6 +142,10 @@ class Sessione:
         return [testo for t, testo in self.console if t >= segno]
 
 
+def _nome_del_desktop():
+    return f"meteora_banco_{os.getpid()}"
+
+
 def _desktop_nascosto():
     """Come tests/conftest.py: il filo della finestra passa a un desktop
     nascosto prima che wx crei una finestra qualsiasi."""
@@ -134,7 +154,7 @@ def _desktop_nascosto():
     user32.CreateDesktopW.argtypes = [wintypes.LPCWSTR, wintypes.LPCWSTR, ctypes.c_void_p, wintypes.DWORD, wintypes.DWORD, ctypes.c_void_p]
     user32.SetThreadDesktop.restype = wintypes.BOOL
     user32.SetThreadDesktop.argtypes = [wintypes.HANDLE]
-    desktop = user32.CreateDesktopW(f"meteora_banco_{os.getpid()}", None, None, 0, 0x10000000, None)
+    desktop = user32.CreateDesktopW(_nome_del_desktop(), None, None, 0, 0x10000000, None)
     if not desktop or not user32.SetThreadDesktop(desktop):
         raise SystemExit(f"Il desktop nascosto non si crea: errore {ctypes.get_last_error()}.")
     return desktop
@@ -1173,8 +1193,302 @@ def scenario_durata_residua():
     premi("esc")
 
 
+# Il banco della plancia (1.111.0, issue 21): lo stato della selezione
+# che NVDA legge, misurato da un processo a parte.
+
+SELEZIONATO, SELEZIONABILE, A_SELEZIONE_MULTIPLA = 0x2, 0x200000, 0x1000000
+CARTELLA_FINTA = r"C:\banco della plancia"
+
+
+class Lettore:
+    """strumenti\\lettore_msaa.py, che fa la parte di NVDA, in un processo a
+    parte sul desktop nascosto di questa sessione."""
+
+    def __init__(self):
+        finestra = nel_filo(lambda: S.finestra.albero.GetHandle())
+        comando = [sys.executable, "-B", os.path.join(RADICE, "strumenti", "lettore_msaa.py"), _nome_del_desktop(), str(finestra), str(os.getpid())]
+        self.errori = open(S.esito + ".lettore.txt", "w", encoding="utf-8")  # noqa: SIM115 - resta aperto finche' vive il lettore
+        self.processo = subprocess.Popen(comando, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=self.errori, text=True, encoding="utf-8")
+        pronto = self._risposta()
+        S.verifica("lettore", "Il lettore MSAA parte sul desktop nascosto della sessione", pronto.get("pronto"), pronto)
+
+    def _risposta(self):
+        riga = self.processo.stdout.readline()
+        return json.loads(riga) if riga.strip() else {}
+
+    def chiedi(self, comando):
+        S.nota("al lettore:", comando["comando"])
+        self.processo.stdin.write(json.dumps(comando) + "\n")
+        self.processo.stdin.flush()
+        return self._risposta()
+
+    def eventi(self):
+        return self.chiedi({"comando": "eventi"}).get("eventi", [])
+
+    def esci(self):
+        with contextlib.suppress(OSError, ValueError):
+            self.chiedi({"comando": "esci"})
+        try:
+            self.processo.wait(15)
+        except subprocess.TimeoutExpired:
+            self.processo.kill()
+
+
+def _prepara_la_plancia():
+    """Due playlist di file che non ci sono: una di quattro brani, aperta,
+    con il fuoco sul primo, e una di tremila, chiusa. Torna i due rami."""
+    f = S.finestra
+
+    def prepara():
+        f._aggiungi(None, [os.path.join(CARTELLA_FINTA, n) for n in ("a.mp3", "b.mp3", "c.mp3", "d.mp3")])
+        f._aggiungi(None, [os.path.join(CARTELLA_FINTA, "grande", f"brano {i:04}.mp3") for i in range(3000)])
+        f.albero.Expand(f.nodo_playlist)
+        piccola, grande = (f._nodo_della_playlist(pl) for pl in f.archivio.playlist)
+        f.albero.Expand(piccola)
+        f._seleziona(next(f._figli(piccola)))
+        f.albero.SetFocus()
+        return piccola, grande
+
+    return nel_filo(prepara)
+
+
+def _scendendo(quante, da=None):
+    """Le prime voci che si leggono scendendo con la freccia giu', da una
+    voce o dalla prima della plancia. Nel filo della finestra."""
+    f = S.finestra
+    voci, voce = [], da or next(f._figli(f.albero.GetRootItem()), None)
+    while voce is not None and len(voci) < quante:
+        voci.append(voce)
+        voce = f._dopo(voce)
+    return voci
+
+
+def _attese(voci):
+    """Per ogni voce il suo numero MSAA, il testo e se e' selezionata per
+    MeTeOra. Nel filo della finestra."""
+    import accessibilita
+
+    f = S.finestra
+    return [(accessibilita.numero_della_voce(f.albero.GetHandle(), int(v.GetID())), f.albero.GetItemText(v), f._e_selezionata(v)) for v in voci]
+
+
+def _differenze(letto):
+    """Le letture dell'oggetto della plancia diverse da quelle dell'oggetto
+    standard, figlio per figlio: {figlio: {campo: (standard, plancia)}}."""
+    plancia, standard = letto["voci"].get("plancia", {}), letto["voci"].get("standard", {})
+    return {n: {k: (standard[n][k], plancia[n][k]) for k in plancia[n] if plancia[n][k] != standard[n].get(k)} for n in plancia if plancia[n] != standard.get(n)}
+
+
+def _controlla_le_letture(voce, cosa, letto, attese, acceso):
+    """Accesa la voce delle impostazioni, ogni voce si legge come dall'oggetto
+    standard tranne selezionata, che segue MeTeOra, e la plancia si dichiara a
+    selezione multipla; spenta, tutto uguale."""
+    differenze = _differenze(letto)
+    plancia = letto["voci"].get("plancia", {})
+    sbagliate = []
+    for numero, testo, selezionata in attese:
+        diversa = differenze.get(str(numero), {})
+        stato = (plancia.get(str(numero), {}).get("stato") or [None, 0])[1] or 0
+        if acceso:
+            giusta = set(diversa) <= {"stato"} and (not diversa or diversa["stato"][0][1] ^ diversa["stato"][1][1] == SELEZIONATO) and bool(stato & SELEZIONATO) == selezionata
+        else:
+            giusta = not diversa
+        if not giusta:
+            sbagliate.append((testo, diversa, selezionata))
+    della_plancia = differenze.get("0", {})
+    if acceso:
+        plancia_giusta = set(della_plancia) == {"stato"} and della_plancia["stato"][0][1] ^ della_plancia["stato"][1][1] == A_SELEZIONE_MULTIPLA
+    else:
+        plancia_giusta = not della_plancia
+    S.verifica(voce, cosa, letto.get("esito") == 0 and not sbagliate and plancia_giusta and len(plancia) == len(attese) + 1,
+        sbagliate or della_plancia or letto.get("esito"))
+
+
+def _parola(evento, stato, prima):
+    """Cio' che NVDA dice della selezione per un evento, dallo stato letto e
+    da quello che aveva visto prima della stessa voce: sul fuoco solo non
+    selezionato, su una voce selezionabile; su un cambio di stato selezionato
+    o non selezionato, se e' cambiato proprio quello. Il secondo NVDA lo dice
+    solo se la voce ha anche il fuoco, che sul desktop nascosto Windows non
+    segna mai."""
+    if not isinstance(stato, int):
+        return "?"
+    if evento == "fuoco":
+        return "non selezionato" if stato & SELEZIONABILE and not stato & SELEZIONATO else ""
+    if prima is not None and not (stato ^ prima) & SELEZIONATO:
+        return ""
+    return "selezionato" if stato & SELEZIONATO else "non selezionato"
+
+
+def _premi_e_ascolta(lettore, tasto, **opzioni):
+    """Il tasto vero, e gli eventi di fuoco e di cambio di stato che arrivano
+    al lettore, come (evento, nome, parola di adesso, parola di prima)."""
+    lettore.eventi()
+    premi(tasto, **opzioni)
+    time.sleep(0.5)
+    letti = [e for e in lettore.eventi() if e["evento"] in ("fuoco", "stato")]
+    S.extra.setdefault("eventi_us", []).extend(e["microsecondi"] for e in letti if "microsecondi" in e)
+    S.extra.setdefault("eventi_us_standard", []).extend(e["microsecondi_standard"] for e in letti if "microsecondi_standard" in e)
+    visti = S.extra.setdefault("stati_visti", {"adesso": {}, "prima": {}})
+    arrivati = []
+    for e in letti:
+        figlio = str(e["figlio"])
+        parole = []
+        for chiave, campo in (("adesso", "stato"), ("prima", "stato_standard")):
+            stato = (e.get(campo) or [0, None])[1]
+            parole.append(_parola(e["evento"], stato, visti[chiave].get(figlio)))
+            visti[chiave][figlio] = stato
+        arrivati.append((e["evento"], (e.get("nome") or [0, ""])[1] or "", *parole))
+    return arrivati
+
+
+def _prova_gli_eventi(lettore, passi, voce):
+    """Ogni passo e' (tasto, opzioni, eventi attesi come (evento, inizio del
+    nome, parola)): arrivano quelli e solo quelli, in un ordine qualsiasi,
+    perche' Windows puo' mandare prima il fuoco o il cambio di un ramo."""
+    diversi = []
+    for tasto, opzioni, attesi in passi:
+        arrivati = _premi_e_ascolta(lettore, tasto, **opzioni)
+        S.nota("eventi di", tasto, opzioni, arrivati)
+        restano = list(attesi)
+        for evento, nome, parola, _di_prima in arrivati:
+            uguale = next((a for a in restano if a[0] == evento and nome.startswith(a[1]) and a[2] == parola), None)
+            if uguale is None:
+                break
+            restano.remove(uguale)
+        else:
+            if not restano:
+                continue
+        diversi.append((tasto, opzioni, arrivati))
+    S.verifica(voce, "Gli eventi dei tasti veri, letti come li legge NVDA", not diversi, diversi)
+
+
+def scenario_plancia():
+    import wx
+
+    f = S.finestra
+    aspetta_la_pulizia()
+    piccola, grande = _prepara_la_plancia()
+    nome_della_piccola = nel_filo(lambda: f.albero.GetItemText(piccola))
+    lettore = Lettore()
+    S.verifica("plancia", "La voce Stato della selezione per lo screen reader e' accesa di partenza, e l'oggetto e' attaccato",
+        nel_filo(lambda: f.impostazioni["stato_della_selezione"] and f.albero.GetAccessible() is f._accessibile is not None))
+
+    # Le letture, senza e con la selezione multipla.
+    attese = nel_filo(lambda: _attese(_scendendo(20)))
+    letto = lettore.chiedi({"comando": "leggi", "figli": [n for n, _t, _s in attese], "giri": 3})
+    S.verifica("plancia", "La plancia risponde a WM_GETOBJECT con il suo oggetto", letto.get("wm_getobject"), letto.get("wm_getobject"))
+    _controlla_le_letture("plancia", "Senza la selezione multipla ogni voce si legge come da Windows", letto, attese, acceso=True)
+    S.extra.setdefault("misure", []).append(f"Lettura completa di una voce da fuori, su {len(attese) + 1} figli: {letto['tempi_us'].get('plancia')} "
+        f"microsecondi dall'oggetto della plancia, {letto['tempi_us'].get('standard')} da quello standard.")
+    premi("spazio", ctrl=True)
+    premi("giu", maiuscolo=True)
+    premi("giu", ctrl=True)
+    premi("giu", ctrl=True)
+    attese = nel_filo(lambda: _attese(_scendendo(20)))
+    S.verifica("plancia", "La selezione multipla preparata: a e b selezionate, il fuoco su d", nel_filo(lambda: [f.albero.GetItemText(v)[:5] for v in f._voci_selezionate()]
+        + [f.albero.GetItemText(f._voce_corrente())[:5]]) == ["a.mp3", "b.mp3", "d.mp3"], attese)
+    letto = lettore.chiedi({"comando": "leggi", "figli": [n for n, _t, _s in attese], "giri": 1})
+    _controlla_le_letture("plancia", "Con la selezione multipla cambia solo selezionata, secondo MeTeOra", letto, attese, acceso=True)
+
+    # Gli eventi dei tasti veri, come li riceve NVDA.
+    premi("su")
+    premi("su")
+    premi("su")
+    S.verifica("eventi", "Le frecce riportano il fuoco su a, senza selezione multipla", nel_filo(lambda: f._selezione is None
+        and f.albero.GetItemText(f._voce_corrente()).startswith("a.mp3")), nel_filo(lambda: f.albero.GetItemText(f._voce_corrente())))
+    _prova_gli_eventi(lettore, [
+        ("giu", {}, [("fuoco", "b.mp3", "")]),
+        ("giu", {"ctrl": True}, [("fuoco", "c.mp3", "non selezionato")]),
+        ("spazio", {"ctrl": True}, [("stato", "c.mp3", "selezionato")]),
+        ("spazio", {"ctrl": True}, [("stato", "c.mp3", "non selezionato")]),
+        ("giu", {"maiuscolo": True}, [("fuoco", "d.mp3", "")]),
+        ("su", {"ctrl": True}, [("fuoco", "c.mp3", "")]),
+        ("su", {"ctrl": True}, [("fuoco", "b.mp3", "non selezionato")]),
+        ("sinistra", {}, [("fuoco", nome_della_piccola, "")]),
+        ("destra", {}, [("fuoco", "a.mp3", "")]),
+        ("spazio", {"ctrl": True}, [("stato", "a.mp3", "non selezionato")]),
+        # Backspace chiude il ramo, che prende il fuoco fuori dalla selezione
+        # vuota, e poi la chiude: un cambio di stato di Windows e uno di
+        # MeTeOra, muti tutti e due, perche' NVDA il ramo lo legge gia'
+        # selezionato.
+        ("indietro", {}, [("fuoco", nome_della_piccola, ""), ("stato", nome_della_piccola, ""), ("stato", nome_della_piccola, "")]),
+        # La selezione chiusa a fuoco fermo, sull'ultima voce: Windows non
+        # manda niente, MeTeOra annuncia selezionato; con il fuoco che si
+        # muove basta il fuoco.
+        ("fine", {"ctrl": True}, [("fuoco", "Impostazioni", "non selezionato")]),
+        ("giu", {}, [("stato", "Impostazioni", "selezionato")]),
+        ("su", {"ctrl": True}, [("fuoco", "Statistiche", "non selezionato")]),
+        ("su", {}, [("fuoco", "Apri file", "")]),
+    ], "eventi")
+
+    # La voce spenta: tutto come da Windows, e niente cambi di stato.
+    frase = nel_filo(lambda: f._applica_l_impostazione("stato_della_selezione", False))
+    nel_filo(lambda: (f.albero.Expand(piccola), f._seleziona(next(f._figli(piccola)))))
+    premi("spazio", ctrl=True)
+    premi("giu", ctrl=True)
+    attese = nel_filo(lambda: _attese(_scendendo(20)))
+    letto = lettore.chiedi({"comando": "leggi", "figli": [n for n, _t, _s in attese], "giri": 1})
+    _controlla_le_letture("spenta", f"Spenta la voce ({frase}) tutto si legge come da Windows, anche con la selezione multipla", letto, attese, acceso=False)
+    nel_filo(lambda: f._seleziona(next(f._figli(piccola))))
+    _prova_gli_eventi(lettore, [
+        ("giu", {}, [("fuoco", "b.mp3", "")]),
+        ("giu", {"ctrl": True}, [("fuoco", "c.mp3", "")]),
+        ("spazio", {"ctrl": True}, []),
+        ("giu", {"maiuscolo": True}, [("fuoco", "d.mp3", "")]),
+    ], "spenta")
+    nel_filo(lambda: f._applica_l_impostazione("stato_della_selezione", True))
+
+    # I tempi, con la playlist grande aperta e con il filo della finestra occupato.
+    nel_filo(lambda: (f.albero.Expand(grande), f._seleziona(next(f._figli(grande)))))
+    attese = nel_filo(lambda: _attese(_scendendo(200, da=next(f._figli(grande)))))
+    numeri = [n for n, _t, _s in attese]
+    letto = lettore.chiedi({"comando": "leggi", "figli": numeri, "giri": 3})
+    _controlla_le_letture("tempi", "Con la playlist grande aperta ogni voce si legge come da Windows", letto, attese, acceso=True)
+    tempi = letto["tempi_us"]
+    S.extra["misure"].append(f"Con la playlist di tremila brani aperta, su {len(numeri) + 1} figli: {tempi.get('plancia')} microsecondi a voce dall'oggetto "
+        f"della plancia, {tempi.get('standard')} da quello standard.")
+    S.verifica("tempi", "Una lettura completa di una voce resta sotto i 3 millisecondi", (tempi.get("plancia") or 10 ** 9) < 3000, tempi)
+    eventi, di_oggi = S.extra.get("eventi_us", []), S.extra.get("eventi_us_standard", [])
+    if eventi and di_oggi:
+        S.extra["misure"].append(f"Nome, ruolo e stato per un evento, come NVDA, su {len(eventi)} eventi: in media {round(sum(eventi) / len(eventi))} "
+            f"microsecondi dall'oggetto della plancia, al piu' {max(eventi)}; con l'oggetto standard creato dal lettore, come oggi, "
+            f"{round(sum(di_oggi) / len(di_oggi))}, al piu' {max(di_oggi)}.")
+    attese_del_filo = {}
+    for chiave in ("standard", "plancia"):
+        nel_filo(lambda: wx.CallAfter(time.sleep, 0.5))
+        inizio = time.monotonic()
+        lettore.chiedi({"comando": "leggi", "figli": numeri[:1], "giri": 1, "oggetti": [chiave]})
+        attese_del_filo[chiave] = round(time.monotonic() - inizio, 2)
+    S.extra["misure"].append(f"Con il filo della finestra occupato mezzo secondo, una lettura aspetta {attese_del_filo['standard']} s dall'oggetto standard "
+        f"e {attese_del_filo['plancia']} s dalla plancia.")
+    S.verifica("tempi", "Con il filo occupato la plancia non aspetta piu' dell'oggetto standard", attese_del_filo["plancia"] <= attese_del_filo["standard"] + 0.2,
+        attese_del_filo)
+    lettore.esci()
+    S.salva()
+    premi("f5")
+    premi("esc")
+
+
+def scenario_chiusura():
+    aspetta_la_pulizia()
+    _prepara_la_plancia()
+    lettore = Lettore()
+    numeri = [n for n, _t, _s in nel_filo(lambda: _attese(_scendendo(10)))]
+    martellata = S.esito + ".martellata.json"
+    risposta = lettore.chiedi({"comando": "martella", "figli": numeri, "file": martellata})
+    S.verifica("chiusura", "Il lettore legge la plancia senza sosta", risposta.get("martella"), risposta)
+    time.sleep(1)
+    S.extra["martellata"] = martellata
+    S.salva()
+    # Il lettore resta a leggere: quando la sessione esce, il suo stdin si
+    # chiude e lui scrive il conto delle letture.
+    premi("esc")
+
+
 SCENARI = {"principale": scenario_principale, "riavvio": scenario_riavvio, "dopo_il_crash": scenario_dopo_il_crash, "controllo": scenario_controllo,
-    "dove_sono": scenario_dove_sono, "durata_residua": scenario_durata_residua, "ordina": scenario_ordina}
+    "dove_sono": scenario_dove_sono, "durata_residua": scenario_durata_residua, "ordina": scenario_ordina, "plancia": scenario_plancia,
+    **dict.fromkeys(SESSIONI_DELLA_PLANCIA[1:], scenario_chiusura)}
 
 
 # Il banco intero: le sessioni una dopo l'altra, ognuna nel suo processo.
@@ -1255,9 +1569,64 @@ def banco_a_parte(nome):
     return base, esiti, _riassunto(esiti, (nome,))
 
 
+def banco_della_plancia():
+    """Le sessioni della plancia, ognuna con i suoi dati vuoti; poi, per
+    ognuna, l'uscita del processo e il file del crash."""
+    base = tempfile.mkdtemp(prefix="meteora_banco_plancia_")
+    esiti = os.path.join(base, "esiti")
+    os.makedirs(esiti)
+    print(f"Banco della plancia: dati di prova in {base}", flush=True)
+    uscite = {}
+    for nome in SESSIONI_DELLA_PLANCIA:
+        dati = os.path.join(base, nome)
+        os.makedirs(dati)
+        processo = _lancia(nome, dati, esiti, None, True)
+        _aspetta_il_processo(processo, nome)
+        uscite[nome] = processo.returncode
+    falliti = _riassunto(esiti, SESSIONI_DELLA_PLANCIA)
+    return base, esiti, falliti + _controlla_le_uscite(base, esiti, uscite)
+
+
+def _controlla_le_uscite(base, esiti, uscite):
+    """Ogni MeTeOra esce con 0 e senza un crash vero nel suo file; nelle
+    chiusure il lettore ha letto la plancia fino in fondo. Una riga per
+    sessione; torna quanti controlli non sono riusciti."""
+    sys.path.insert(0, RADICE)
+    import registro
+
+    falliti = 0
+    for nome, uscita in uscite.items():
+        crash = os.path.join(base, nome, "MeTeOra - Crash.log")
+        testo = ""
+        if os.path.isfile(crash):
+            with open(crash, encoding="utf-8", errors="replace") as f:
+                testo = f.read()
+        vero = registro.crash_vero(testo) if testo else False
+        riga = f"Sessione {nome}: MeTeOra uscito con {uscita}, {'con un crash vero' if vero else 'senza crash'}."
+        if nome.startswith("chiusura"):
+            martellata = os.path.join(esiti, f"{nome}.martellata.json")
+            fine = time.monotonic() + 20
+            while not os.path.isfile(martellata) and time.monotonic() < fine:
+                time.sleep(0.2)
+            conti = {}
+            with contextlib.suppress(OSError, ValueError), open(martellata, encoding="utf-8") as f:
+                conti = json.load(f)
+            riga += (f" Il lettore ha letto {conti.get('riuscite', 0)} volte, {conti.get('fallite', 0)} senza risposta dopo la chiusura, "
+                f"con {conti.get('nuovi', 0)} oggetti chiesti di nuovo e {conti.get('nuovi_rifiutati', 0)} rifiutati.")
+            if not conti.get("riuscite"):
+                falliti += 1
+                riga += " NO: il lettore non ha letto niente."
+        if uscita != 0 or vero:
+            falliti += 1
+            riga += " NO."
+        print(riga, flush=True)
+    return falliti
+
+
 def _riassunto(esiti, sessioni=SESSIONI):
     """Il riassunto per la console e il display braille: una riga per
-    sessione, una per ogni controllo non riuscito, una per ogni apertura."""
+    sessione, una per ogni controllo non riuscito, una per ogni apertura e
+    una per ogni misura."""
     falliti = 0
     for nome in sessioni:
         percorso = os.path.join(esiti, f"{nome}.json")
@@ -1275,6 +1644,8 @@ def _riassunto(esiti, sessioni=SESSIONI):
         for a in esito["aperture"]:
             print(f"  Statistiche {a['da']}: {a['secondi']} s dal tasto, {a.get('dentro')} s dentro MeTeOra, "
                 f"finestra ferma al massimo {round(a['risposta_piu_lenta'] * 1000)} ms.")
+        for misura in esito["extra"].get("misure", []):
+            print(f"  {misura}")
         tempi = esito["extra"].get("tempi")
         if tempi:
             print("  Tempi: " + "; ".join(f"{voce} {secondi} s" for voce, secondi in tempi.items()) + ".")
@@ -1291,7 +1662,8 @@ def main():
     parser.add_argument("--video", help="un video per Maiuscolo con F7 con la sua finestra davanti")
     parser.add_argument("--solo", choices=SESSIONI, help="la sola sessione data, per quelle che non dipendono dalle altre, come dove_sono e durata_residua")
     parser.add_argument("--ordina", action="store_true", help="solo la sessione di Ordina e Mescola, partendo senza dati")
-    parser.add_argument("--sessione", choices=SESSIONI + SESSIONI_A_PARTE, help=argparse.SUPPRESS)
+    parser.add_argument("--plancia", action="store_true", help="il banco della plancia: lo stato della selezione letto come lo legge NVDA")
+    parser.add_argument("--sessione", choices=SESSIONI + SESSIONI_A_PARTE + SESSIONI_DELLA_PLANCIA, help=argparse.SUPPRESS)
     parser.add_argument("--dati", help=argparse.SUPPRESS)
     parser.add_argument("--esito", help=argparse.SUPPRESS)
     argomenti = parser.parse_args()
@@ -1301,7 +1673,7 @@ def main():
     if argomenti.ordina:
         base, _esiti, falliti = banco_a_parte("ordina")
     else:
-        base, _esiti, falliti = banco(argomenti.vuoti, argomenti.video, argomenti.solo)
+        base, _esiti, falliti = banco_della_plancia() if argomenti.plancia else banco(argomenti.vuoti, argomenti.video, argomenti.solo)
     if falliti:
         print(f"Controlli non riusciti: {falliti}. I dati e i registri restano in {base}.")
         return 1

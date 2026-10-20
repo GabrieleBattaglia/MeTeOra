@@ -28,7 +28,8 @@ ignore = [
 # 7-Zip, l'installatore di MSYS2 appena scaricato e la bash di MSYS2.
 "strumenti/prepara_ambiente.py" = ["S603"]
 # Il banco del collaudo (1.104.0) rilancia se stesso, con l'interprete che
-# lo sta eseguendo, una volta per sessione.
+# lo sta eseguendo, una volta per sessione; dalla 1.111.0 lancia allo
+# stesso modo strumenti/lettore_msaa.py.
 "strumenti/banco.py" = ["S603"]
 # I prototipi sono prove usa e getta: provano a leggere un formato e se
 # qualcosa va storto passano oltre, senza badare al tipo di errore.
