@@ -1,6 +1,6 @@
 # MeTeOra, le prove della finestra principale, sul desktop nascosto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21). Nella 1.112.0 quelle dei dischi della pulizia, anche del loro file che non si legge, e la prova della pulizia che toglie i file spariti non fa piu' leggere allo schedario i file finti; poi Riconosci questo disco, la riga che lo indica e la Sentinella che guarda i dischi dei file usati; infine la domanda di Riconosci questo disco con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 quelle dell'importazione delle playlist M3U, M3U8 e PLS. Nella 1.113.1 quella dell'etichetta di un file delle console con un sottobrano senza durata (issue 24).
+# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21). Nella 1.112.0 quelle dei dischi della pulizia, anche del loro file che non si legge, e la prova della pulizia che toglie i file spariti non fa piu' leggere allo schedario i file finti; poi Riconosci questo disco, la riga che lo indica e la Sentinella che guarda i dischi dei file usati; infine la domanda di Riconosci questo disco con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 quelle dell'importazione delle playlist M3U, M3U8 e PLS. Nella 1.113.1 quella dell'etichetta di un file delle console con un sottobrano senza durata (issue 24). Nella 1.113.3 quella della Barra dei comandi per il mouse, che nell'errore dice il suo nome (issue 26).
 
 import contextlib
 import ctypes
@@ -2890,6 +2890,21 @@ def test_impostazioni_riproduzione_casuale(finestra, monkeypatch, suoni_annotati
     _cambia(finestra, monkeypatch, "casuale", "no")
     assert finestra.impostazioni["casuale"] is False
     assert _ultima(finestra) == "Riproduzione casuale spenta: a fine brano si va avanti in ordine."
+
+
+def test_impostazioni_barra_dei_comandi(finestra, monkeypatch, suoni_annotati):
+    # L'errore dice il nome della sua voce, non quello dell'Inseguimento
+    # della plancia (issue 26).
+    campo, lista = _cambia(finestra, monkeypatch, "barra_dei_comandi", "forse", "  ", "spento")
+    errore = "Barra dei comandi per il mouse: forse non è né sì né no; scrivi sì o no."
+    assert [a["testo"] for a in campo.aperture] == ["sì", "forse", ""]
+    assert campo.aperture[1]["titolo"] == f"{errore} Barra dei comandi per il mouse"
+    assert campo.aperture[2]["titolo"].startswith("Barra dei comandi per il mouse: manca la risposta; scrivi sì o no.")
+    assert "Adesso è accesa." in campo.aperture[0]["istruzioni"]
+    assert suoni_annotati[-6:] == ["domanda", "errore", "domanda", "errore", "domanda", "impostazione_cambiata"]
+    assert finestra.impostazioni["barra_dei_comandi"] is False and _salvate(finestra)["barra_dei_comandi"] is False
+    assert lista.righe["barra_dei_comandi"] == "Barra dei comandi per il mouse: no"
+    assert _ultima(finestra) == "Barra dei comandi per il mouse spenta."
 
 
 def test_impostazioni_righe_della_console_tagliano_subito(finestra, monkeypatch):

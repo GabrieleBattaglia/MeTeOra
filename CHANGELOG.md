@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.113.3] - 2026-10-20
+
+- Correzione, nelle impostazioni la voce Barra dei comandi per il mouse, con una risposta che non è né sì né no, diceva nell'errore il nome dell'Inseguimento della plancia, per esempio Inseguimento della plancia: forse non è né sì né no; ora dice il suo, come Riproduzione casuale, Video e Sottotitoli letti (issue 26). Il difetto c'era dalla 1.87.0. Anche l'Inseguimento della plancia ora passa il suo nome, invece di avere quello giusto per caso. Una prova nuova scrive nella Barra dei comandi una risposta sbagliata e una vuota.
+
 ## [1.113.2] - 2026-10-20
 
 - Correzione, issue 25: lo schedario legge i tag APEv2 dei TTA, come F11 dalla 1.69.0, e il titolo, l'autore, l'album, il genere e l'anno dei TTA arrivano nel filtro, nella ricerca e nelle statistiche, e insieme alla traccia e al disco anche in Ordina. Prima lo schedario apriva i TTA solo con mutagen, che ne vede l'ID3, di solito vuoto, e quei tag restavano vuoti. I tag che l'APEv2 non ha si prendono ancora dall'ID3, come in un TTA codificato da FFmpeg, che nell'APEv2 mette solo il nome del codificatore, e poi taggato in ID3. Le schede dei TTA si rileggono da sole, e solo quelle.
