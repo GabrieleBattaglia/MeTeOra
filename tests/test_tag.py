@@ -1,6 +1,6 @@
 # MeTeOra, le prove dei tag: le cinque famiglie, su file veri fatti da libmpv.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/10/2026: nasce con la 1.69.0, tappa 10, punto d. Nella 1.109.0 traccia e disco nello schedario.
+# 03/10/2026: nasce con la 1.69.0, tappa 10, punto d. Nella 1.109.0 traccia e disco nello schedario. Nella 1.113.2 l'APEv2 dei TTA nello schedario, unito all'ID3.
 
 """I file delle prove li codifica libmpv, a uscita nulla, da un secondo di
 silenzio: nessun suono. Ogni prova lavora su una copia."""
@@ -421,12 +421,12 @@ def test_tak_dsf_dff_e_l_autore_dei_speex():
     assert tag.comuni_del_file(speex) == {"titolo": "OLS 2004", "artista": "Dave McCracken"}
 
 
-@pytest.mark.parametrize("estensione", [e for e in FORMATI_DEI_TAG if e != "tta"])
+@pytest.mark.parametrize("estensione", FORMATI_DEI_TAG)
 def test_lo_schedario_tiene_traccia_e_disco_fuori_dai_tag(file_muti, tmp_path, estensione):
     # Tappa 14 c: dentro un album Ordina va per disco e traccia. Non sono
-    # tag della scheda, dove il filtro cercherebbe anche i numeri. Il TTA
-    # resta fuori: lo schedario apre i TTA con mutagen.File, che non legge
-    # il loro APEv2, e la scheda non ha nemmeno il titolo.
+    # tag della scheda, dove il filtro cercherebbe anche i numeri. Dalla
+    # 1.113.2 anche il TTA, con l'APEv2 che prima lo schedario non
+    # leggeva (issue 25).
     percorso = _copia(file_muti, estensione, tmp_path)
     assert "traccia" not in schedario.leggi_scheda(percorso) and "disco" not in schedario.leggi_scheda(percorso)
     tag.scrivi(percorso, "traccia", "03/12")
@@ -434,6 +434,87 @@ def test_lo_schedario_tiene_traccia_e_disco_fuori_dai_tag(file_muti, tmp_path, e
     scheda = schedario.leggi_scheda(percorso)
     assert (scheda["traccia"], scheda["disco"]) == (3, 2), estensione
     assert "traccia" not in scheda["tag"] and "disco" not in scheda["tag"]
+
+
+def test_lo_schedario_legge_l_ape_dei_tta(file_muti, tmp_path, monkeypatch):
+    # Issue 25: mutagen.File da' dei TTA un TrueAudio con l'ID3 vuoto, e lo
+    # schedario legge l'APEv2 come tag.py; la durata resta quella del
+    # TrueAudio, perche' l'APEv2File non ne ha.
+    import mutagen
+    from mutagen.apev2 import APEv2
+
+    percorso = _copia(file_muti, "tta", tmp_path)
+    ape = APEv2()
+    ape.update({"Title": "Titolo APE", "Artist": "Gabriele", "Album": "Prove", "Genre": "Rock", "Year": "1999", "Track": "3/12", "Disc": "2"})
+    ape.save(percorso)
+    assert type(mutagen.File(percorso)).__name__ == "TrueAudio" and not mutagen.File(percorso).tags
+    scheda = schedario.leggi_scheda(percorso)
+    assert scheda["tag"] == {"titolo": "Titolo APE", "autore": "Gabriele", "album": "Prove", "genere": "Rock", "anno": 1999}
+    assert (scheda["traccia"], scheda["disco"]) == (3, 2) and scheda["tag_v"] == schedario.VERSIONE_DEI_TAG
+    assert scheda["durata"] == pytest.approx(1.0, abs=0.1)
+    # Gli altri file restano come li da' mutagen.File.
+    mp3 = mutagen.File(_copia(file_muti, "mp3", tmp_path))
+    assert tag.con_l_ape(mp3) is mp3 and tag.con_l_ape(None) is None
+
+    # Un APEv2 che non si legge non ferma lo schedario: la durata resta.
+    def rotto(_file):
+        raise IndexError("APEv2 rovinato")
+
+    monkeypatch.setattr(tag, "con_l_ape", rotto)
+    scheda = schedario.leggi_scheda(percorso)
+    assert scheda["tag"] == {} and scheda["durata"] == pytest.approx(1.0, abs=0.1)
+
+
+def test_lo_schedario_tiene_l_id3_dei_tta(file_muti, tmp_path, monkeypatch):
+    # Revisione della issue 25: FFmpeg e libmpv mettono nell'APEv2 dei TTA
+    # il solo Encoder, e un TTA taggato poi in ID3, come fa Picard, tiene i
+    # tag dell'ID3. L'APEv2 viene prima, perche' e' li' che F11 scrive, e
+    # l'ID3 da' i tag che l'APEv2 non ha.
+    import mutagen
+    from mutagen.apev2 import APEv2
+    from mutagen.id3 import ID3, TALB, TIT2, TPE1
+
+    percorso = _copia(file_muti, "tta", tmp_path)
+    ape = APEv2()
+    ape["Encoder"] = "Lavf63.7.101"
+    ape.save(percorso)
+    id3 = ID3()
+    for frame in (TIT2(encoding=3, text=["Titolo ID3"]), TPE1(encoding=3, text=["Artista ID3"]), TALB(encoding=3, text=["Album ID3"])):
+        id3.add(frame)
+    id3.save(percorso)
+    dell_id3 = {"titolo": "Titolo ID3", "autore": "Artista ID3", "album": "Album ID3"}
+    scheda = schedario.leggi_scheda(percorso)
+    assert scheda["tag"] == dell_id3 and scheda["durata"] == pytest.approx(1.0, abs=0.1)
+    # Il titolo che F11 scrive nell'APEv2 vince su quello dell'ID3.
+    tag.scrivi(percorso, "titolo", "Titolo APE")
+    assert schedario.leggi_scheda(percorso)["tag"] == {**dell_id3, "titolo": "Titolo APE"}
+
+    # Un APEv2 che non si legge non toglie l'ID3.
+    def rotto(_file):
+        raise IndexError("APEv2 rovinato")
+
+    monkeypatch.setattr(tag, "con_l_ape", rotto)
+    assert schedario.leggi_scheda(percorso)["tag"] == dell_id3
+    monkeypatch.undo()
+    # Un TTA con il solo ID3.
+    APEv2(percorso).delete()
+    audio = mutagen.File(percorso)
+    assert tag.con_l_ape(audio) is audio and schedario.leggi_scheda(percorso)["tag"] == dell_id3
+
+
+def test_lo_schedario_rilegge_solo_le_schede_dei_tta(tmp_path):
+    import json
+
+    file = tmp_path / "schedario.json"
+    # Le schede scritte dalla 1.93.0 in poi hanno tag_v 3: si rileggono solo
+    # quelle dei TTA (issue 25), e i file lunghi coi capitoli restano.
+    vecchia = {"dim": 4_000_000, "mod": 1.0, "durata": 3.0, "tag": {}, "sottobrani": None, "durate_sid": None, "tag_v": 3}
+    file.write_text(json.dumps({"versione": schedario.VERSIONE_DEL_FILE, "schede": {
+        r"C:\m\a.tta": vecchia, r"C:\m\b.tta": {**vecchia, "tag_v": schedario.VERSIONE_DEI_TAG}, r"C:\m\c.wav": vecchia,
+        r"C:\m\d.mp3": vecchia, r"C:\m\e.wma": vecchia, r"C:\m\f.m4b": {**vecchia, "durata": 3600.0}}}), encoding="utf-8")
+    s = schedario.Schedario(str(file))
+    s.carica()
+    assert sorted(s.schede) == [r"C:\m\b.tta", r"C:\m\c.wav", r"C:\m\d.mp3", r"C:\m\e.wma", r"C:\m\f.m4b"]
 
 
 def test_il_numero_di_traccia_e_disco():

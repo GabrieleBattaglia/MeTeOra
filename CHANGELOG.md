@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.113.2] - 2026-10-20
+
+- Correzione, issue 25: lo schedario legge i tag APEv2 dei TTA, come F11 dalla 1.69.0, e il titolo, l'autore, l'album, il genere e l'anno dei TTA arrivano nel filtro, nella ricerca e nelle statistiche, e insieme alla traccia e al disco anche in Ordina. Prima lo schedario apriva i TTA solo con mutagen, che ne vede l'ID3, di solito vuoto, e quei tag restavano vuoti. I tag che l'APEv2 non ha si prendono ancora dall'ID3, come in un TTA codificato da FFmpeg, che nell'APEv2 mette solo il nome del codificatore, e poi taggato in ID3. Le schede dei TTA si rileggono da sole, e solo quelle.
+
 ## [1.113.1] - 2026-10-20
 
 - Correzione, nella plancia l'etichetta di un file delle console con più sottobrani, di cui qualcuno senza una durata nota, non cade più in errore (issue 24): ora, come per le cartelle, il totale somma le durate note e dice a parte quanti sottobrani ne restano senza, per esempio gioco.nsf, 5 sottobrani, 12:30 in tutto, 1 senza durata. Succede quando libgme non legge un brano, come con un .m3u che nomina brani che il file non ha; se non ne legge nessuno, l'etichetta dice solo il numero dei sottobrani, lo schedario fa lo stesso la scheda del file invece di fermarsi, e Ordina per durata lo mette in fondo con i brani senza durata, non in cima come se durasse zero. Il manuale lo dice nel capitolo Unità, cartelle e file; le prove nuove usano file finti.

@@ -1,6 +1,6 @@
 # MeTeOra, lo schedario: durata, dimensione e tag dei file, ricordati fra un avvio e l'altro.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la 1.7.0, per le durate delle playlist (issue 4) e poi per il filtro (issue 2). Nella 1.62.4 le durate da libmpv per i formati che mutagen non conosce, e quella esatta dell'AAC grezzo. Nella 1.66.0 le schede della musica delle console, con i sottobrani. Nella 1.67.0 la scheda segue un file rinominato. Nella 1.69.0 i tag letti con tag.py, anche di WAV, AIFF, WMA e TTA. Nella 1.83.1 le variazioni delle schede, per i totali delle cartelle, e il filo che cede il passo alla finestra. Nella 1.103.0 la copia delle schede per le statistiche. Nella 1.103.1 le durate da una settimana in su non si tengono. Nella 1.104.0 le durate troppo lunghe per il peso di un file campionato non si tengono, togli() leva le schede dei file che mancano, e rinomina() trova la scheda anche con le maiuscole diverse. Nella 1.109.0 la traccia e il disco, per Ordina. Nella 1.112.0 letto() dice i file letti, per il controllo dei dischi.
+# 30/09/2026: nasce con la 1.7.0, per le durate delle playlist (issue 4) e poi per il filtro (issue 2). Nella 1.62.4 le durate da libmpv per i formati che mutagen non conosce, e quella esatta dell'AAC grezzo. Nella 1.66.0 le schede della musica delle console, con i sottobrani. Nella 1.67.0 la scheda segue un file rinominato. Nella 1.69.0 i tag letti con tag.py, anche di WAV, AIFF, WMA e TTA. Nella 1.83.1 le variazioni delle schede, per i totali delle cartelle, e il filo che cede il passo alla finestra. Nella 1.103.0 la copia delle schede per le statistiche. Nella 1.103.1 le durate da una settimana in su non si tengono. Nella 1.104.0 le durate troppo lunghe per il peso di un file campionato non si tengono, togli() leva le schede dei file che mancano, e rinomina() trova la scheda anche con le maiuscole diverse. Nella 1.109.0 la traccia e il disco, per Ordina. Nella 1.112.0 letto() dice i file letti, per il controllo dei dischi. Nella 1.113.2 l'APEv2 dei TTA, unito all'ID3 da tag.py, e le loro schede si rileggono.
 
 """Lo schedario dei file.
 
@@ -30,15 +30,19 @@ import tag
 
 # La versione della lettura dei tag, e quella che serve a ogni formato:
 # prima della 1.69.0 lo schedario non leggeva i tag di WAV, AIFF, WMA, WMV e
-# TTA, e prima della 1.70.0 il blocco INFO dei WAV. Le schede piu' vecchie si
-# rileggono.
-VERSIONE_DEI_TAG = 3
-TAG_DA_RILEGGERE = {".wav": 2, ".aif": 1, ".aiff": 1, ".wma": 1, ".wmv": 1, ".asf": 1, ".tta": 1}
+# TTA, prima della 1.70.0 il blocco INFO dei WAV, e prima della 1.113.2
+# l'APEv2 dei TTA (issue 25). Le schede piu' vecchie si rileggono.
+VERSIONE_DEI_TAG = 4
+TAG_DA_RILEGGERE = {".wav": 2, ".aif": 1, ".aiff": 1, ".wma": 1, ".wmv": 1, ".asf": 1, ".tta": 4}
 # Dalla 1.93.0 la scheda ha anche i capitoli: si rileggono le schede piu'
 # vecchie dei formati che li hanno, ma solo dei file lunghi, che sono quelli
-# con i capitoli; rileggere ogni canzone costerebbe troppo.
+# con i capitoli; rileggere ogni canzone costerebbe troppo. Il confronto e'
+# con la versione dei tag di allora, non con quella di adesso: le schede
+# scritte dalla 1.93.0 in poi i capitoli li hanno gia', e alzare
+# VERSIONE_DEI_TAG non le fa rileggere (issue 25).
 CON_I_CAPITOLI = frozenset({".mp3", ".m4a", ".m4b", ".mp4", ".m4v"})
 DURATA_CON_I_CAPITOLI = 600
+VERSIONE_CON_I_CAPITOLI = 3
 # Una durata da una settimana in su non e' credibile: i file rovinati ne
 # danno di migliaia di anni, come i file di prova trovati nello schedario di
 # Gabriele il 17 ottobre 2026. Non si tiene, e il file resta senza durata
@@ -200,7 +204,7 @@ def _norm(percorso):
 def _senza_capitoli(percorso, scheda):
     """Vero per la scheda di un file lungo, di un formato con i capitoli,
     letta prima che lo schedario li leggesse (1.93.0)."""
-    return (formati.estensione(percorso) in CON_I_CAPITOLI and scheda.get("tag_v", 0) < VERSIONE_DEI_TAG
+    return (formati.estensione(percorso) in CON_I_CAPITOLI and scheda.get("tag_v", 0) < VERSIONE_CON_I_CAPITOLI
         and (scheda.get("durata") or 0) >= DURATA_CON_I_CAPITOLI)
 
 
@@ -248,6 +252,8 @@ def leggi_scheda(percorso):
         scheda["durata"] = durata_da_mpv(percorso)
     scheda["durata"] = credibile(scheda["durata"], percorso, scheda["dim"])
     if audio is not None and tag.modificabile(percorso):
+        # Dei TTA tag.py legge anche l'APEv2, che il TrueAudio non vede, e
+        # lo unisce all'ID3 (issue 25).
         comuni = tag.comuni_del_file(audio)
         anno = comuni.get("anno")
         scheda["tag"] = {"titolo": comuni.get("titolo"), "autore": comuni.get("artista"), "album": comuni.get("album"),
@@ -351,7 +357,8 @@ class Schedario:
             # quella dell'AAC grezzo si conta: le schede senza durata, e quelle
             # degli AAC, si rileggono.
             # Dalla 1.69.0 i tag di WAV, AIFF, WMA, WMV e TTA si leggono: le
-            # loro schede di prima si rileggono.
+            # loro schede di prima si rileggono. Dalla 1.113.2 anche
+            # l'APEv2 dei TTA: si rileggono le schede dei TTA, e solo quelle.
             # Dalla 1.93.0 i capitoli: si rileggono le schede vecchie dei file
             # lunghi dei formati che li hanno.
             # Dalla 1.103.1 si rileggono anche le schede con una durata non

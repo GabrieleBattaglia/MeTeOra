@@ -1,6 +1,6 @@
 # MeTeOra, i tag dei file: letti, scritti e cancellati con mutagen.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/10/2026: nasce con la tappa 10, punto d. Nella 1.70.0 il blocco INFO dei WAV. Nella 1.83.3 TAK, DSF e DFF, e l'AUTHOR dei Speex.
+# 03/10/2026: nasce con la tappa 10, punto d. Nella 1.70.0 il blocco INFO dei WAV. Nella 1.83.3 TAK, DSF e DFF, e l'AUTHOR dei Speex. Nella 1.113.2 l'APEv2 dei TTA anche per lo schedario: comuni_del_file lo unisce all'ID3, con con_l_ape().
 
 """I tag dei file audio e video, con mutagen (tappa 10, 1.69.0).
 
@@ -106,22 +106,30 @@ def _motivo(errore):
     return getattr(errore, "strerror", None) or str(errore) or type(errore).__name__
 
 
+def con_l_ape(file):
+    """Il file aperto con mutagen.File, o il suo APEv2File se e' un TTA con
+    i tag APEv2: i TTA portano di solito un APEv2, che mutagen.trueaudio non
+    legge, e il TrueAudio ha solo l'ID3, spesso vuoto. Lo usano _apri e
+    comuni_del_file (issue 25). Un file rovinato puo' far sollevare a mutagen
+    ogni sorta di eccezione."""
+    from mutagen.apev2 import APEv2File
+
+    if type(file).__name__ != "TrueAudio":
+        return file
+    ape = APEv2File(file.filename)
+    return ape if ape.tags is not None else file
+
+
 def _apri(percorso):
     """(file di mutagen, famiglia), con i tag pronti. Un file rovinato puo'
     far sollevare a mutagen ogni sorta di eccezione: diventano tutte
     ErroreTag."""
     import mutagen
-    from mutagen.apev2 import APEv2File
 
     nome = os.path.basename(percorso)
     try:
-        file = mutagen.File(percorso)
+        file = con_l_ape(mutagen.File(percorso))
         famiglia = _FAMIGLIE.get(type(file).__name__) if file is not None else None
-        if type(file).__name__ == "TrueAudio":
-            # I TTA portano di solito un APEv2, che mutagen.trueaudio non legge.
-            ape = APEv2File(percorso)
-            if ape.tags is not None:
-                file, famiglia = ape, "ape"
         if famiglia is not None and file.tags is None:
             file.add_tags()
     except Exception as e:
@@ -209,7 +217,18 @@ def comuni_del_file(file):
             # speexenc scrive l'artista in AUTHOR (1.83.3).
             risultato["artista"] = SEPARATORE.join(_pulito(v) for v in file.tags["author"])
     except Exception:  # noqa: BLE001 - un file rovinato non deve fermare lo schedario
-        return {}
+        risultato = {}
+    if type(file).__name__ == "TrueAudio":
+        # L'APEv2 dei TTA, che il TrueAudio non legge, viene prima: e' li' che
+        # F11 legge e scrive. Dove non ha un tag resta quello dell'ID3, come in
+        # un TTA codificato da FFmpeg, che nell'APEv2 mette solo l'Encoder, e
+        # poi taggato in ID3 con un altro programma (issue 25).
+        try:
+            ape = con_l_ape(file)
+        except Exception:  # noqa: BLE001 - un APEv2 rovinato non deve fermare lo schedario
+            ape = file
+        if ape is not file:
+            risultato.update(comuni_del_file(ape))
     return risultato
 
 
