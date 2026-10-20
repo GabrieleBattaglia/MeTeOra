@@ -1,6 +1,6 @@
 # MeTeOra, le playlist: brani, playlist, archivio e coda di riproduzione.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 il sottobrano dei SID, nella 1.3.0 il loop A-B, nella 1.6.0 i Preferiti, nella 1.8.0 il filtro. Nella 1.59.0 Coda.altri, per la riproduzione casuale. Nella 1.104.0 si tolgono i brani dei file spariti, per la pulizia all'avvio.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 il sottobrano dei SID, nella 1.3.0 il loop A-B, nella 1.6.0 i Preferiti, nella 1.8.0 il filtro. Nella 1.59.0 Coda.altri, per la riproduzione casuale. Nella 1.104.0 si tolgono i brani dei file spariti, per la pulizia all'avvio. Nella 1.109.0 Ordina, Inverti l'ordine, Mescola e Ordine di prima.
 
 """Il modello dei dati, senza finestre e senza suono.
 
@@ -11,13 +11,181 @@ La Coda dice cosa sta suonando: la playlist di provenienza e il brano. Tiene
 il brano e non la sua posizione, cosi' spostare o togliere altri brani
 mentre suona non la confonde. Tiene anche il loop A-B: due brani di una
 playlist fra i quali la riproduzione gira in tondo.
+Ordina, Inverti l'ordine e Mescola cambiano l'ordine dei brani di una
+playlist sul posto, con gli stessi oggetti Brano, e la playlist ricorda in
+memoria l'ordine di prima, finche' MeTeOra resta aperto (tappa 14 c).
 """
 
 import json
 import os
 import random
+import re
+
+import filtro
+import formati
 
 VERSIONE_DEL_FILE = 1
+
+# I criteri di Ordina, nell'ordine del sottomenu (Gabriele, 20 ottobre 2026):
+# la chiave, la voce del menu e il dato che puo' mancare, None per quelli che
+# ogni brano ha. Ogni criterio va in un verso solo: dalla A alla Z, dal piu'
+# vecchio, dal piu' corto. I brani senza il dato vanno in fondo.
+CRITERI = {
+    "nome": ("Per nome del file", None),
+    "percorso": ("Per percorso", None),
+    "titolo": ("Per titolo", "titolo"),
+    "autore": ("Per autore", "autore"),
+    "album": ("Per album", "album"),
+    "anno": ("Per anno", "anno"),
+    "durata": ("Per durata", "durata"),
+}
+_CIFRE = re.compile(r"(\d+)")
+_BARRE = re.compile(r"[\\/]+")
+
+
+def chiave_naturale(testo):
+    """Un testo come si confronta per ordinare: senza maiuscole e senza
+    accenti, come lo confronta il filtro, e con i numeri per il loro valore,
+    cosi' Traccia 2 viene prima di Traccia 10. Nessuna regola sugli articoli:
+    The Beatles va sotto la T. Fra due testi che cosi' sono uguali, come 2 e
+    02, decide il testo senza maiuscole (tappa 14 c)."""
+    normale = filtro.normale(testo)
+    # Le cifre stanno sempre nei posti dispari: due chiavi si confrontano
+    # numero con numero e testo con testo.
+    return tuple(int(p) if i % 2 else p for i, p in enumerate(_CIFRE.split(normale))), normale
+
+
+def chiave_del_percorso(brano):
+    """Il posto del brano nell'ordine di Crea playlist da qui: unita' per
+    unita' e cartella per cartella, con i file di una cartella prima delle
+    sue sottocartelle e i numeri per valore. Un sottobrano messo in playlist
+    come brano a se' va dopo il suo file, nell'ordine dei numeri."""
+    unita, resto = os.path.splitdrive(brano.percorso)
+    parti = [p for p in _BARRE.split(resto) if p]
+    nome = parti.pop() if parti else ""
+    # Una cartella vale 1 e il file 0: nella stessa cartella i file vengono
+    # prima delle sottocartelle.
+    return chiave_naturale(unita), (*((1, chiave_naturale(c)) for c in parti), (0, chiave_naturale(nome))), brano.sottobrano or 0
+
+
+def durata_mostrata(brano, scheda):
+    """La durata come la mostra la plancia: per un sottobrano la sua, per un
+    SID o un file delle console con piu' sottobrani il totale; None se non
+    si sa."""
+    if not scheda:
+        return None
+    durate = scheda.get("durate_sid")
+    if brano.sottobrano:
+        return durate[brano.sottobrano - 1] if durate and brano.sottobrano <= len(durate) else None
+    if formati.ha_sottobrani(brano.percorso) and (scheda.get("sottobrani") or 0) > 1:
+        return sum(d or 0 for d in durate) if durate else None
+    return scheda.get("durata")
+
+
+def _intero(valore):
+    return valore if isinstance(valore, int) and not isinstance(valore, bool) and valore >= 0 else None
+
+
+# Il segnaposto della HVSC per un titolo o un autore che non si conosce: per
+# Ordina e' un dato che manca, come per le statistiche.
+SCONOSCIUTO = "<?>"
+
+
+def _testo_del_tag(valore):
+    """Un tag di testo come lo usa Ordina: None se manca, se e' vuoto o se e'
+    il segnaposto della HVSC."""
+    testo = str(valore or "").strip()
+    return testo if testo and testo != SCONOSCIUTO else None
+
+
+def _dati_per_ordinare(brano, scheda):
+    """I dati della scheda che servono a Ordina, None quelli che mancano;
+    traccia e disco ci sono solo nelle schede lette dalla tappa 14 c."""
+    tag = (scheda or {}).get("tag") or {}
+    testi = {chiave: _testo_del_tag(tag.get(chiave)) for chiave in ("titolo", "autore", "album")}
+    return {**testi, "anno": _intero(tag.get("anno")), "durata": durata_mostrata(brano, scheda),
+        "traccia": _intero((scheda or {}).get("traccia")), "disco": _intero((scheda or {}).get("disco"))}
+
+
+def _secondario(testo):
+    """Un dato che ordina dopo il criterio: prima chi ce l'ha, in ordine, poi chi no."""
+    return (0, chiave_naturale(testo)) if testo else (1,)
+
+
+def ordinati(brani, criterio, scheda_di):
+    """(i brani nell'ordine del criterio, una chiave di CRITERI, quanti sono
+    andati in fondo perche' senza il dato). scheda_di(brano) da' la scheda
+    dello schedario, o None se non c'e' ancora. L'ordine e' stabile.
+    Le chiavi dopo il criterio (Gabriele e ClaudIA, 20 ottobre 2026): per
+    titolo l'autore e il percorso; per autore l'album; per anno l'autore e
+    l'album; per durata il percorso; per nome del file il percorso. Dentro
+    un album, cioe' fra i brani con lo stesso album nella stessa cartella,
+    si va per disco e traccia se tutti hanno la traccia, con il disco che
+    manca contato come il primo, altrimenti per percorso: le schede di prima
+    della tappa 14 c non li hanno, e non si rileggono. Un titolo, un autore
+    o un album <?>, il segnaposto della HVSC, manca come uno vuoto."""
+    percorsi = {id(b): chiave_del_percorso(b) for b in brani}
+    if criterio == "percorso":
+        return sorted(brani, key=lambda b: percorsi[id(b)]), 0
+    if criterio == "nome":
+        return sorted(brani, key=lambda b: (chiave_naturale(b.nome_del_file), percorsi[id(b)])), 0
+    dato = CRITERI[criterio][1]
+    dati = {id(b): _dati_per_ordinare(b, scheda_di(b)) for b in brani}
+    con = [b for b in brani if dati[id(b)][dato] is not None]
+    senza = sorted((b for b in brani if dati[id(b)][dato] is None), key=lambda b: percorsi[id(b)])
+
+    def testa(b):
+        """(il criterio con le chiavi che lo seguono, vero se il brano sta in
+        un album). Dentro un album la testa finisce con la cartella: lo
+        stesso album in due cartelle, come due Greatest Hits di autori
+        diversi, sono due album."""
+        d = dati[id(b)]
+        if criterio == "titolo":
+            return (chiave_naturale(d["titolo"]), _secondario(d["autore"])), False
+        if criterio == "durata":
+            return (d["durata"],), False
+        if criterio == "autore":
+            prima = (chiave_naturale(d["autore"]), _secondario(d["album"]))
+        elif criterio == "album":
+            prima = (chiave_naturale(d["album"]),)
+        else:
+            prima = (d["anno"], _secondario(d["autore"]), _secondario(d["album"]))
+        if not d["album"]:
+            return prima, False
+        unita, cartelle, _sottobrano = percorsi[id(b)]
+        return (*prima, (unita, cartelle[:-1])), True
+
+    teste = {id(b): testa(b) for b in con}
+    # Un album va per disco e traccia solo se tutti i suoi brani hanno la traccia.
+    con_la_traccia = {}
+    for b in con:
+        album, in_un_album = teste[id(b)]
+        if in_un_album:
+            con_la_traccia[album] = con_la_traccia.get(album, True) and dati[id(b)]["traccia"] is not None
+
+    def chiave(b):
+        d, (prima, _in_un_album) = dati[id(b)], teste[id(b)]
+        # Un disco che manca, in un album che ha le tracce, e' il primo.
+        numeri = (d["disco"] if d["disco"] is not None else 1, d["traccia"]) if con_la_traccia.get(prima) else (0, 0)
+        return (*prima, numeri, percorsi[id(b)])
+
+    return sorted(con, key=chiave) + senza, len(senza)
+
+
+def _stesso_ordine(uno, altro):
+    """Vero se le due liste hanno gli stessi oggetti, nello stesso ordine."""
+    return len(uno) == len(altro) and all(a is b for a, b in zip(uno, altro, strict=True))
+
+
+def mescolati(brani, mescola=random.shuffle, in_cima=None):
+    """I brani in un ordine a caso, con ogni ordine ugualmente probabile:
+    mescola e' random.shuffle, che le prove sostituiscono. Con in_cima, un
+    brano della lista, quel brano va per primo e gli altri dopo di lui, a
+    caso (Gabriele, 20 ottobre 2026)."""
+    primo = [b for b in brani if b is in_cima][:1] if in_cima is not None else []
+    altri = [b for b in brani if b is not in_cima] if primo else list(brani)
+    mescola(altri)
+    return primo + altri
 
 
 def _norm(percorso):
@@ -64,6 +232,9 @@ class Playlist:
         self.filtro = filtro
         # La cartella di Questo PC da cui nasce una playlist temporanea.
         self.cartella = cartella
+        # L'ordine di prima dell'ultimo Ordina, Inverti l'ordine o Mescola,
+        # con gli stessi oggetti Brano; solo in memoria, non si salva.
+        self.ordine_di_prima = None
 
     @property
     def temporanea(self):
@@ -90,6 +261,49 @@ class Playlist:
         if nuovo == i or not 0 <= nuovo < len(self.brani):
             return False
         self.brani.insert(nuovo, self.brani.pop(i))
+        return True
+
+    def riordina(self, nuovi):
+        """Mette i brani nell'ordine nuovo, sul posto, e ricorda quello di
+        prima per Ordine di prima. Falso, e niente cambia, se l'ordine e'
+        lo stesso: allora anche l'ordine di prima resta com'era."""
+        if _stesso_ordine(nuovi, self.brani):
+            return False
+        self.ordine_di_prima = list(self.brani)
+        self.brani[:] = nuovi
+        return True
+
+    def ordina(self, criterio, scheda_di):
+        """Ordina, con un criterio di CRITERI: (vero se l'ordine e'
+        cambiato, quanti brani sono andati in fondo perche' senza il dato)."""
+        nuovi, senza = ordinati(self.brani, criterio, scheda_di)
+        return self.riordina(nuovi), senza
+
+    def inverti(self):
+        """Inverti l'ordine: la lista com'e', rovesciata, anche se l'ordine
+        l'ha fatto chi ascolta. Vero se e' cambiata."""
+        return self.riordina(self.brani[::-1])
+
+    def mescola(self, mescola=random.shuffle, in_cima=None):
+        """Mescola, come mescolati. Vero se l'ordine e' cambiato."""
+        return self.riordina(mescolati(self.brani, mescola, in_cima))
+
+    def rimetti_l_ordine_di_prima(self):
+        """Ordine di prima: rimette l'ordine di prima dell'ultimo Ordina,
+        Inverti o Mescola, con gli stessi oggetti Brano, cosi' la coda, il
+        mazzo e la storia della riproduzione casuale li ritrovano. I brani
+        aggiunti dopo restano in fondo, quelli tolti non tornano. L'ordine di
+        prima poi si dimentica. Vero se l'ordine e' cambiato."""
+        prima, self.ordine_di_prima = self.ordine_di_prima, None
+        if prima is None:
+            return False
+        ci_sono = {id(b) for b in self.brani}
+        tornano = [b for b in prima if id(b) in ci_sono]
+        rimessi = {id(b) for b in tornano}
+        nuovi = tornano + [b for b in self.brani if id(b) not in rimessi]
+        if _stesso_ordine(nuovi, self.brani):
+            return False
+        self.brani[:] = nuovi
         return True
 
     def togli(self, brano):

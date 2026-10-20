@@ -1,6 +1,6 @@
 # MeTeOra, le prove dei tag: le cinque famiglie, su file veri fatti da libmpv.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/10/2026: nasce con la 1.69.0, tappa 10, punto d.
+# 03/10/2026: nasce con la 1.69.0, tappa 10, punto d. Nella 1.109.0 traccia e disco nello schedario.
 
 """I file delle prove li codifica libmpv, a uscita nulla, da un secondo di
 silenzio: nessun suono. Ogni prova lavora su una copia."""
@@ -419,3 +419,22 @@ def test_tak_dsf_dff_e_l_autore_dei_speex():
     commento["author"] = ["Dave McCracken"]
     speex = type("OggSpeex", (), {"tags": commento, "filename": "a.spx"})()
     assert tag.comuni_del_file(speex) == {"titolo": "OLS 2004", "artista": "Dave McCracken"}
+
+
+@pytest.mark.parametrize("estensione", [e for e in FORMATI_DEI_TAG if e != "tta"])
+def test_lo_schedario_tiene_traccia_e_disco_fuori_dai_tag(file_muti, tmp_path, estensione):
+    # Tappa 14 c: dentro un album Ordina va per disco e traccia. Non sono
+    # tag della scheda, dove il filtro cercherebbe anche i numeri. Il TTA
+    # resta fuori: lo schedario apre i TTA con mutagen.File, che non legge
+    # il loro APEv2, e la scheda non ha nemmeno il titolo.
+    percorso = _copia(file_muti, estensione, tmp_path)
+    assert "traccia" not in schedario.leggi_scheda(percorso) and "disco" not in schedario.leggi_scheda(percorso)
+    tag.scrivi(percorso, "traccia", "03/12")
+    tag.scrivi(percorso, "disco", "2/2")
+    scheda = schedario.leggi_scheda(percorso)
+    assert (scheda["traccia"], scheda["disco"]) == (3, 2), estensione
+    assert "traccia" not in scheda["tag"] and "disco" not in scheda["tag"]
+
+
+def test_il_numero_di_traccia_e_disco():
+    assert [schedario._numero_del_tag(t) for t in ("3/12", "03", " 7", "A1", "", None, "2; 4")] == [3, 3, 7, None, None, None, 2]

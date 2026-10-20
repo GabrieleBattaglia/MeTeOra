@@ -1,6 +1,6 @@
 # MeTeOra, le statistiche: ogni sorta di conti, raccolti mentre lo si usa, e la pagina che li racconta.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (UltraCode).
-# 17/10/2026: nasce con la 1.103.0, chiesta da Gabriele: piu' dati ci sono, piu' e' contento. Nella 1.104.0 le righe che elencano voci tengono solo quelle diverse da zero, le percentuali uniformi, gli anni futuri dei tag ignorati, le date sempre con il giorno della settimana, e i brani dello storico tolti dalla pulizia all'avvio o rinominati, con i conti della pulizia nella salute. Nella 1.105.0 i nomi di Dove sono, il comando dell'apostrofo, e del suo suono.
+# 17/10/2026: nasce con la 1.103.0, chiesta da Gabriele: piu' dati ci sono, piu' e' contento. Nella 1.104.0 le righe che elencano voci tengono solo quelle diverse da zero, le percentuali uniformi, gli anni futuri dei tag ignorati, le date sempre con il giorno della settimana, e i brani dello storico tolti dalla pulizia all'avvio o rinominati, con i conti della pulizia nella salute. Nella 1.105.0 i nomi di Dove sono, il comando dell'apostrofo, e del suo suono. Nella 1.109.0 le playlist ordinate, invertite, mescolate e rimesse nell'ordine di prima.
 
 """Le statistiche di MeTeOra (1.103.0).
 
@@ -167,7 +167,9 @@ NOMI_DEGLI_EVENTI = {
     "preferito_aggiunto": "brano messo nei Preferiti", "filtro_messo": "filtro messo", "ricerca_avviata": "ricerca avviata",
     "ricerca_finita": "ricerca finita", "ricerca_fermata": "ricerca fermata", "altri_risultati": "altri risultati mostrati",
     "filtro_tolto": "filtro tolto", "gia_nei_preferiti": "brano già nei Preferiti", "brano_tolto": "brani tolti da una playlist",
-    "cestino": "nel cestino", "brano_spostato": "brano spostato", "saltato_acceso": "brano segnato come saltato",
+    "cestino": "nel cestino", "brano_spostato": "brano spostato", "playlist_ordinata": "playlist ordinata",
+    "ordine_invertito": "ordine di una playlist invertito", "playlist_mescolata": "playlist mescolata",
+    "ordine_ripristinato": "playlist rimessa nell'ordine di prima", "saltato_acceso": "brano segnato come saltato",
     "saltato_spento": "brano non più saltato", "ramo_aperto": "ramo aperto", "ramo_chiuso": "ramo chiuso",
     "file_aperto": "file aperto", "vai_al_brano": "al brano che suona, con F8", "playlist_precedente": "playlist precedente",
     "playlist_successiva": "playlist successiva", "playlist_numero": "playlist con una cifra",
@@ -1464,7 +1466,8 @@ class Pagina:
         altre = max(0, self.e("playlist_creata") - dalla_ricerca - da_cartella)
         return [
             f"Playlist create: {create}; da una cartella {da_cartella}, dai risultati della ricerca {dalla_ricerca}, da una selezione o dal menu {altre}, vuote {self.e('nuova_playlist')}.",
-            f"Playlist rinominate: {self.e('playlist_rinominata')}; eliminate: {self.e('playlist_eliminata')}.",
+            f"Playlist rinominate: {self.e('playlist_rinominata')}; eliminate: {self.e('playlist_eliminata')}; ordinate: {self.e('playlist_ordinata')}; "
+            f"invertite: {self.e('ordine_invertito')}; mescolate: {self.e('playlist_mescolata')}; rimesse nell'ordine di prima: {self.e('ordine_ripristinato')}.",
             f"Brani aggiunti alle playlist: {self.c('brani_aggiunti')}, in {al_plurale(self.c('aggiunte'), 'volta', 'volte')}.",
             f"Brani tolti: {self.c('brani_tolti')}; spostati: {self.e('brano_spostato')}; segnati come saltati: {self.e('saltato_acceso')}, e tornati: {self.e('saltato_spento')}.",
             f"Brani messi nei Preferiti: {self.e('preferito_aggiunto')}; c'erano già: {self.e('gia_nei_preferiti')}.",

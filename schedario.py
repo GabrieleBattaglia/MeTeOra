@@ -1,6 +1,6 @@
 # MeTeOra, lo schedario: durata, dimensione e tag dei file, ricordati fra un avvio e l'altro.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la 1.7.0, per le durate delle playlist (issue 4) e poi per il filtro (issue 2). Nella 1.62.4 le durate da libmpv per i formati che mutagen non conosce, e quella esatta dell'AAC grezzo. Nella 1.66.0 le schede della musica delle console, con i sottobrani. Nella 1.67.0 la scheda segue un file rinominato. Nella 1.69.0 i tag letti con tag.py, anche di WAV, AIFF, WMA e TTA. Nella 1.83.1 le variazioni delle schede, per i totali delle cartelle, e il filo che cede il passo alla finestra. Nella 1.103.0 la copia delle schede per le statistiche. Nella 1.103.1 le durate da una settimana in su non si tengono. Nella 1.104.0 le durate troppo lunghe per il peso di un file campionato non si tengono, togli() leva le schede dei file che mancano, e rinomina() trova la scheda anche con le maiuscole diverse.
+# 30/09/2026: nasce con la 1.7.0, per le durate delle playlist (issue 4) e poi per il filtro (issue 2). Nella 1.62.4 le durate da libmpv per i formati che mutagen non conosce, e quella esatta dell'AAC grezzo. Nella 1.66.0 le schede della musica delle console, con i sottobrani. Nella 1.67.0 la scheda segue un file rinominato. Nella 1.69.0 i tag letti con tag.py, anche di WAV, AIFF, WMA e TTA. Nella 1.83.1 le variazioni delle schede, per i totali delle cartelle, e il filo che cede il passo alla finestra. Nella 1.103.0 la copia delle schede per le statistiche. Nella 1.103.1 le durate da una settimana in su non si tengono. Nella 1.104.0 le durate troppo lunghe per il peso di un file campionato non si tengono, togli() leva le schede dei file che mancano, e rinomina() trova la scheda anche con le maiuscole diverse. Nella 1.109.0 la traccia e il disco, per Ordina.
 
 """Lo schedario dei file.
 
@@ -19,6 +19,7 @@ import json
 import mmap
 import os
 import queue
+import re
 import threading
 import time
 
@@ -57,6 +58,25 @@ TAG = ("titolo", "autore", "album", "genere", "anno")
 INTERVALLO_DEGLI_AVVISI = 1.0
 # Quanto aspetta il filo, a ogni giro, mentre deve cedere il passo.
 PAUSA_PER_CEDERE = 0.005
+
+
+def _numero_del_tag(testo):
+    """Il numero di una traccia o di un disco, come 3 da 3/12 o da 03; None
+    se il testo non comincia con un numero (tappa 14 c)."""
+    cifre = re.match(r"\s*(\d+)", str(testo or ""))
+    return int(cifre.group(1)) if cifre else None
+
+
+def _traccia_e_disco(scheda, traccia, disco):
+    """Traccia e disco nella scheda, fuori dai tag, solo se ci sono: dentro
+    un album Ordina va per disco e traccia (Gabriele, 20 ottobre 2026). Non
+    stanno fra i tag perche' il filtro e la ricerca cercano in tutti i tag,
+    e un termine come 3 troverebbe ogni terza traccia. Le schede lette prima
+    non li hanno, e non si rileggono per questo."""
+    for chiave, testo in (("traccia", traccia), ("disco", disco)):
+        numero = _numero_del_tag(testo)
+        if numero is not None:
+            scheda[chiave] = numero
 
 
 def _anno(testo):
@@ -187,7 +207,7 @@ def _senza_capitoli(percorso, scheda):
 def leggi_scheda(percorso):
     """La scheda di un file: dimensione, data di modifica, durata in secondi
     (None se non si sa), tag, e per i SID e le console il numero dei
-    sottobrani."""
+    sottobrani; dalla tappa 14 c anche traccia e disco, quando il file li ha."""
     stato = os.stat(percorso)
     scheda = {"dim": stato.st_size, "mod": stato.st_mtime, "durata": None, "tag": {}, "sottobrani": None, "durate_sid": None}
     if formati.ha_sottobrani(percorso):
@@ -233,6 +253,7 @@ def leggi_scheda(percorso):
         scheda["tag"] = {"titolo": comuni.get("titolo"), "autore": comuni.get("artista"), "album": comuni.get("album"),
             "genere": comuni.get("genere"), "anno": _anno(anno) if anno else None}
         scheda["tag"] = {k: v for k, v in scheda["tag"].items() if v}
+        _traccia_e_disco(scheda, comuni.get("traccia"), comuni.get("disco"))
         # Il segno della lettura dei tag con tag.py: le schede di prima della
         # 1.69.0 dei formati che la modalita' easy non leggeva si rifanno.
         scheda["tag_v"] = VERSIONE_DEI_TAG
@@ -254,6 +275,7 @@ def leggi_scheda(percorso):
         scheda["tag"] = {"titolo": primo("title"), "autore": primo("artist"), "album": primo("album"), "genere": primo("genre"),
             "anno": _anno(anno) if anno else None}
         scheda["tag"] = {k: v for k, v in scheda["tag"].items() if v}
+        _traccia_e_disco(scheda, primo("tracknumber"), primo("discnumber"))
     return scheda
 
 

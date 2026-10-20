@@ -1,6 +1,6 @@
 # MeTeOra, le prove della finestra principale, sul desktop nascosto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono.
+# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola.
 
 import ctypes
 import datetime
@@ -552,11 +552,11 @@ def test_filtro_nella_plancia_e_nella_riproduzione(finestra, suoni_annotati, mon
     assert finestra.coda.successivo() is None
     # Il menu della playlist ha il filtro, e Togli il filtro quando c'è.
     voci = dict(finestra._voci_del_menu(finestra._dati(nodo)))
-    assert list(voci) == ["Riproduci", "Filtro", "Togli il filtro", "Rinomina", "Elimina", "Leggi i dettagli"]
+    assert list(voci) == ["Riproduci", "Filtro", "Togli il filtro", "Rinomina", "Ordina", "Mescola", "Elimina", "Leggi i dettagli"]
     voci["Togli il filtro"]()
     assert _ultima(finestra).startswith("Filtro di Playlist svuotato")
     assert pl.filtro == ""
-    assert [n for n, _a in finestra._voci_del_menu(finestra._dati(finestra.nodo_preferiti))] == ["Riproduci", "Filtro", "Leggi i dettagli"]
+    assert [n for n, _a in finestra._voci_del_menu(finestra._dati(finestra.nodo_preferiti))] == ["Riproduci", "Filtro", "Ordina", "Mescola", "Leggi i dettagli"]
     from playlist import Archivio
 
     finestra._imposta_filtro(pl, "jazz")
@@ -7012,3 +7012,202 @@ def test_riga_di_avvio_con_i_nomi_delle_liste(finestra, monkeypatch, suoni_annot
     assert riga(aperti, aperti.brani[1]) == r"In riproduzione: C:\m\b.mp3, 2 di 2, file aperti."
     aperto = Playlist("file aperto", [Brano(r"C:\m\a.mp3")], cartella="")
     assert riga(aperto, aperto.brani[0]) == r"In riproduzione: C:\m\a.mp3, file aperto."
+
+
+# Ordina e Mescola nel menu della playlist e dei Preferiti (tappa 14 c).
+
+
+def _playlist_con_le_schede(finestra, nome, voci):
+    """Una playlist dell'archivio con brani in C:\\m, che non c'e', e le loro
+    schede finte: voci sono coppie (nome del file, scheda o None). Le schede
+    si mettono dopo che lo schedario ha finito di cercare i file, cosi' non
+    le toglie."""
+    finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n, _s in voci], nome=nome)
+    finestra.schedario.aspetta()
+    pl = finestra.archivio.playlist[-1]
+    for brano, (_n, scheda) in zip(pl.brani, voci, strict=True):
+        if scheda is not None:
+            finestra.schedario.schede[brano.percorso] = {"dim": 1, "mod": 0, "durata": None, "sottobrani": None, "durate_sid": None, **scheda}
+    return pl
+
+
+def _ordine(pl):
+    return [b.nome_del_file for b in pl.brani]
+
+
+def _voci_di(finestra, nodo):
+    return dict(finestra._voci_del_menu(finestra._dati(nodo)))
+
+
+def test_ordina_inverti_mescola_e_l_ordine_di_prima(finestra, monkeypatch, suoni_annotati):
+    pl = _playlist_con_le_schede(finestra, "Rock", [("d.mp3", {"tag": {"autore": "Queen"}}), ("c.mp3", {"tag": {"autore": "Abba"}}),
+        ("b.mp3", {"tag": {}}), ("a.mp3", {"tag": {"autore": "The Beatles"}}), ("e.mp3", None)])
+    chiesti = []
+    monkeypatch.setattr(finestra.schedario, "chiedi", lambda percorsi: chiesti.append(list(percorsi)) or 0)
+    nodo = finestra._nodo_della_playlist(pl)
+    finestra._seleziona(nodo)
+    voci = _voci_di(finestra, nodo)
+    # Il posto del piano 3.10, e Ordina e' l'unico sottomenu del menu della playlist.
+    assert list(voci) == ["Riproduci", "Filtro", "Rinomina", "Ordina", "Mescola", "Elimina", "Leggi i dettagli"]
+    assert [n for n, _a in voci["Ordina"]] == ["Per nome del file", "Per percorso", "Per titolo", "Per autore", "Per album", "Per anno", "Per durata",
+        "Inverti l'ordine"]
+    dict(voci["Ordina"])["Per autore"]()
+    # Il brano senza autore e quello che lo schedario non ha ancora letto
+    # vanno in fondo, ma la riga li conta a parte.
+    non_letto = "1 senza autore e 1 non ancora letto dallo schedario in fondo. Quando lo schedario l'ha letto, un nuovo Ordina lo mette al suo posto."
+    assert _ultima(finestra) == f"Rock ordinata per autore: 5 brani, {non_letto}" and suoni_annotati[-1] == "playlist_ordinata"
+    assert _ordine(pl) == ["c.mp3", "d.mp3", "a.mp3", "b.mp3", "e.mp3"]
+    # La scheda che manca si chiede allo schedario, senza aspettarla.
+    assert chiesti == [[os.path.join(r"C:\m", "e.mp3")]]
+    # Il fuoco resta sulla playlist, e l'ordine si salva subito.
+    assert finestra.albero.GetItemText(finestra._voce_corrente()).startswith("Rock, brani: 5")
+    from playlist import Archivio
+
+    di_nuovo = Archivio(finestra.archivio.percorso)
+    di_nuovo.carica()
+    assert [b.nome_del_file for b in di_nuovo.playlist[0].brani] == ["c.mp3", "d.mp3", "a.mp3", "b.mp3", "e.mp3"]
+    # Dopo un riordino il sottomenu ha Ordine di prima, prima di Inverti l'ordine.
+    sottomenu = dict(_voci_di(finestra, finestra._nodo_della_playlist(pl))["Ordina"])
+    assert list(sottomenu)[-2:] == ["Ordine di prima", "Inverti l'ordine"]
+    # Lo stesso ordine non salva niente e lascia l'ordine di prima com'era.
+    prima = pl.ordine_di_prima
+    sottomenu["Per autore"]()
+    assert _ultima(finestra) == f"Rock è già ordinata per autore, {non_letto}" and suoni_annotati[-1] == "nessun_altro_brano"
+    assert pl.ordine_di_prima is prima
+    sottomenu["Inverti l'ordine"]()
+    assert _ultima(finestra) == "Rock in ordine inverso: 5 brani." and suoni_annotati[-1] == "ordine_invertito"
+    assert _ordine(pl) == ["e.mp3", "b.mp3", "a.mp3", "d.mp3", "c.mp3"]
+    dict(_voci_di(finestra, finestra._nodo_della_playlist(pl))["Ordina"])["Ordine di prima"]()
+    assert _ultima(finestra) == "Rock di nuovo nell'ordine di prima: 5 brani." and suoni_annotati[-1] == "ordine_ripristinato"
+    assert _ordine(pl) == ["c.mp3", "d.mp3", "a.mp3", "b.mp3", "e.mp3"]
+    # Usato, Ordine di prima sparisce fino al prossimo riordino.
+    assert "Ordine di prima" not in dict(_voci_di(finestra, finestra._nodo_della_playlist(pl))["Ordina"])
+    finestra._mescola_a_caso = lambda brani: brani.sort(key=lambda b: b.percorso)
+    _voci_di(finestra, finestra._nodo_della_playlist(pl))["Mescola"]()
+    assert _ultima(finestra) == "Rock mescolata: 5 brani." and suoni_annotati[-1] == "playlist_mescolata"
+    assert _ordine(pl) == ["a.mp3", "b.mp3", "c.mp3", "d.mp3", "e.mp3"]
+    finestra._mescola(pl)
+    assert _ultima(finestra) == "Mescolando, l'ordine di Rock è venuto uguale a prima: niente cambia." and suoni_annotati[-1] == "nessun_altro_brano"
+    # Le statistiche contano le playlist ordinate, invertite, mescolate e rimesse.
+    eventi = finestra._statistiche.dati["eventi"]
+    assert [eventi.get(e) for e in ("playlist_ordinata", "ordine_invertito", "playlist_mescolata", "ordine_ripristinato")] == [1, 1, 1, 1]
+
+
+def test_la_riga_di_ordina_conta_a_parte_i_non_ancora_letti():
+    in_fondo = modulo.Finestra._in_fondo
+    assert in_fondo("autore", 0, 0, 340) == ("", "")
+    assert in_fondo("autore", 12, 0, 340) == (", 12 senza autore in fondo", "")
+    assert in_fondo("album", 340, 0, 340) == (", tutti senza album, in ordine di percorso", "")
+    avviso = " Quando lo schedario li ha letti, un nuovo Ordina li mette al loro posto."
+    assert in_fondo("autore", 212, 200, 340) == (", 12 senza autore e 200 non ancora letti dallo schedario in fondo", avviso)
+    assert in_fondo("autore", 200, 200, 340) == (", 200 non ancora letti dallo schedario in fondo", avviso)
+    assert in_fondo("album", 340, 340, 340) == (", tutti non ancora letti dallo schedario, in ordine di percorso", avviso)
+    assert in_fondo("album", 340, 200, 340) == (", 140 senza album e 200 non ancora letti dallo schedario, tutti in ordine di percorso", avviso)
+
+
+def test_ordina_e_mescola_nei_preferiti_e_con_pochi_brani(finestra, suoni_annotati):
+    voci = _voci_di(finestra, finestra.nodo_preferiti)
+    assert list(voci) == ["Riproduci", "Filtro", "Ordina", "Mescola", "Leggi i dettagli"]
+    voci["Mescola"]()
+    assert _ultima(finestra) == "Nei Preferiti non ci sono brani: niente da mescolare." and suoni_annotati[-1] == "non_disponibile"
+    finestra.archivio.preferiti.brani.append(Brano(r"C:\m\z.mp3"))
+    finestra._ordina(finestra.archivio.preferiti, "nome")
+    assert _ultima(finestra) == "Nei Preferiti c'è un brano solo: niente da ordinare."
+    finestra.archivio.preferiti.brani.append(Brano(r"C:\m\a.mp3"))
+    finestra._ordina(finestra.archivio.preferiti, "nome")
+    assert _ultima(finestra) == "Preferiti ordinati per nome del file: 2 brani." and suoni_annotati[-1] == "playlist_ordinata"
+    assert finestra._voce_corrente() == finestra.nodo_preferiti
+    finestra._ordina(finestra.archivio.preferiti, "nome")
+    assert _ultima(finestra) == "I Preferiti sono già ordinati per nome del file."
+    finestra._inverti(finestra.archivio.preferiti)
+    assert _ultima(finestra) == "Preferiti in ordine inverso: 2 brani."
+    pl = _playlist_con_le_schede(finestra, "Sola", [("x.mp3", None)])
+    finestra._inverti(pl)
+    assert _ultima(finestra) == "In Sola c'è un brano solo: niente da invertire." and suoni_annotati[-1] == "non_disponibile"
+    # Il cruscotto della playlist e dei Preferiti dice le voci nuove.
+    assert all("Ordina" in modulo.TASTI_DEL_CONTESTO[tipo][1] and "Mescola" in modulo.TASTI_DEL_CONTESTO[tipo][1] for tipo in ("playlist", "preferiti"))
+
+
+def test_ordina_e_mescola_la_playlist_che_suona(finestra, monkeypatch, suoni_annotati):
+    suonati = _finto_motore(finestra, monkeypatch)
+    pl = _playlist_con_le_schede(finestra, "Rock", [(n, None) for n in ("d.mp3", "c.mp3", "b.mp3", "a.mp3")])
+    a, b, c, d = pl.brani[3], pl.brani[2], pl.brani[1], pl.brani[0]
+    finestra._suona(pl, c)
+    quanti = len(suonati)
+    finestra._ordina(pl, "nome")
+    # Il brano continua a suonare, al suo posto nell'ordine nuovo, e
+    # l'avanzamento riparte da li'.
+    assert _ultima(finestra) == "Rock ordinata per nome del file: 4 brani; quello in riproduzione ora è il 3 di 4."
+    assert finestra.coda.corrente is c and len(suonati) == quanti and finestra.coda.successivo() is d
+    # Con Mescola il brano in riproduzione va in cima, e gli altri dopo.
+    finestra._mescola_a_caso = lambda brani: brani.reverse()
+    finestra._mescola(pl)
+    assert _ultima(finestra) == "Rock mescolata: 4 brani; quello in riproduzione ora è in cima."
+    assert pl.brani == [c, d, b, a] and finestra.coda.successivo() is d
+    # Un loop A-B si toglie; con il solo punto A resta.
+    finestra.coda.loop_playlist, finestra.coda.punto_a, finestra.coda.punto_b = pl, d, b
+    finestra._inverti(pl)
+    assert _ultima(finestra) == "Rock in ordine inverso: 4 brani; quello in riproduzione ora è il 4 di 4. Il loop A-B è tolto: fra A e B sarebbero finiti altri brani."
+    assert finestra.coda.loop_playlist is None and pl.brani == [a, b, d, c]
+    finestra.coda.loop_playlist, finestra.coda.punto_a = pl, d
+    finestra._ordina(pl, "percorso")
+    assert finestra.coda.loop_playlist is pl and finestra.coda.punto_a is d and "loop" not in _ultima(finestra)
+    # Resta anche il loop con A e B sullo stesso brano, che non copre altri brani.
+    finestra.coda.punto_b = d
+    finestra._inverti(pl)
+    assert _ultima(finestra) == "Rock in ordine inverso: 4 brani; quello in riproduzione ora è il 2 di 4."
+    assert finestra.coda.loop_playlist is pl and finestra.coda.punto_a is d and finestra.coda.punto_b is d
+    finestra._ordina(pl, "percorso")
+    assert finestra.coda.punto_b is d and "loop" not in _ultima(finestra) and pl.brani == [a, b, c, d]
+    # Con il filtro, la riga conta i nascosti e il posto come la plancia.
+    pl.filtro = "-d.mp3"
+    finestra._mescola_a_caso = lambda brani: None
+    finestra._inverti(pl)
+    assert _ultima(finestra) == "Rock in ordine inverso: 4 brani, anche quello nascosto dal filtro; quello in riproduzione ora è il 1 di 3 col filtro."
+    # Fermo, il brano non si dice piu'.
+    finestra.motore._in_corso = None
+    finestra._ordina(pl, "percorso")
+    assert _ultima(finestra) == "Rock ordinata per percorso: 4 brani, anche quello nascosto dal filtro."
+    # Nessuna scheda ancora letta: la riga lo dice, e non li chiama senza album.
+    finestra._ordina(pl, "album")
+    assert _ultima(finestra) == ("Rock è già ordinata per album, tutti non ancora letti dallo schedario, in ordine di percorso. "
+        "Quando lo schedario li ha letti, un nuovo Ordina li mette al loro posto.")
+    finestra.schedario.aspetta()
+    # Nessun brano con il dato, come Per album su una raccolta di SID.
+    for brano in pl.brani:
+        finestra.schedario.schede[brano.percorso] = {"dim": 1, "mod": 0, "durata": None, "tag": {"autore": "Abba"}, "sottobrani": None, "durate_sid": None}
+    finestra._ordina(pl, "album")
+    assert _ultima(finestra) == "Rock è già ordinata per album, tutti senza album, in ordine di percorso."
+
+
+def test_ordina_tiene_aperti_il_sid_e_il_brano_con_i_marker(finestra, monkeypatch, suoni_annotati):
+    # Dopo un riordino i brani aperti dentro la playlist restano aperti: un
+    # SID che suona un sottobrano, con l'avanzamento deciso dalla plancia,
+    # passa poi al sottobrano dopo, non al brano dopo il SID. Il SID non c'e'
+    # sul disco: la sua intestazione e la cartella senza database delle
+    # durate si mettono in memoria.
+    import songlengths
+
+    suonati = _finto_motore(finestra, monkeypatch)
+    sid = os.path.join(r"C:\m", "s.sid")
+    monkeypatch.setitem(songlengths._intestazioni, sid, {"titolo": "S", "autore": "X", "copyright": "", "sottobrani": 3, "iniziale": 1})
+    monkeypatch.setitem(songlengths._database_della_cartella, r"C:\m", None)
+    pl = _playlist_con_le_schede(finestra, "Rock", [("d.mp3", None), ("s.sid", None), ("c.mp3", None)])
+    d, s, c = pl.brani
+    finestra.marcatori.aggiungi(finestra._chiave_dei_marker(c.percorso), 0.5, c.percorso)
+    finestra.albero.Expand(finestra.nodo_playlist)
+    nodo = finestra._nodo_della_playlist(pl)
+    finestra.albero.Expand(nodo)
+    for voce in finestra._figli(nodo):
+        if finestra._dati(voce)["brano"] is not d:
+            finestra.albero.Expand(voce)
+    finestra._seleziona(nodo)
+    finestra._suona(pl, s, sottobrano=2)
+    finestra._ordina(pl, "nome")
+    nodo = finestra._nodo_della_playlist(pl)
+    voci = list(finestra._figli(nodo))
+    assert [finestra._dati(v)["brano"] for v in voci] == [c, d, s]
+    assert [finestra.albero.IsExpanded(v) for v in voci] == [True, False, True]
+    assert finestra._voce_corrente() == nodo
+    finestra._brano_finito()
+    assert suonati[-1] == ("s.sid", 3)

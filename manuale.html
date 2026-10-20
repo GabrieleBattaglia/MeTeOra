@@ -107,6 +107,7 @@ kbd {
 <li><a href="#ramo-playlist">Il ramo Playlist</a></li>
 <li><a href="#etichetta-playlist">L'etichetta di una playlist</a></li>
 <li><a href="#menu-playlist">Il menu di una playlist</a></li>
+<li><a href="#ordina-mescola">Ordina e Mescola</a></li>
 <li><a href="#brani-playlist">I brani di una playlist</a></li>
 <li><a href="#creare-playlist">Creare e riempire le playlist</a></li>
 <li><a href="#j-k-cifre">J, K e le cifre</a></li>
@@ -654,7 +655,7 @@ kbd {
 <li>X sui Preferiti li suona dal primo brano; se sono vuoti, la console ricorda che F4 ci mette il brano selezionato.</li>
 <li>Canc su un brano dei Preferiti lo toglie; Canc sui Preferiti dice che non si eliminano.</li>
 <li>La barra verticale, sui Preferiti o su un loro brano, apre il loro filtro.</li>
-<li>Il menu dei Preferiti, con Invio, il tasto Applicazioni o la barra spaziatrice, ha Riproduci, Filtro, Togli il filtro, se un filtro c'è, e Leggi i dettagli.</li>
+<li>Il menu dei Preferiti, con Invio, il tasto Applicazioni o la barra spaziatrice, ha Riproduci, Filtro, Togli il filtro, se un filtro c'è, Ordina, Mescola e Leggi i dettagli. Ordina e Mescola cambiano l'ordine dei Preferiti come quello di una playlist, e li spiega il capitolo Le playlist.</li>
 <li>Il menu di un brano dei Preferiti è quello dei brani delle playlist, descritto nel capitolo Le playlist.</li>
 </ul>
 <h3 id="esempi-preferiti">Esempi</h3>
@@ -685,9 +686,29 @@ kbd {
 <li>Filtro: apre il campo del filtro, come la barra verticale. Il capitolo La ricerca e il filtro lo spiega.</li>
 <li>Togli il filtro, che c'è solo quando un filtro c'è: lo svuota, e tornano tutti i brani.</li>
 <li>Rinomina: chiede il nuovo nome, con quello di adesso già selezionato. Un nome che un'altra playlist ha già, senza badare alle maiuscole, non si accetta, e la console lo dice; un campo vuoto, o lo stesso nome, lasciano tutto com'è.</li>
+<li>Ordina: un sottomenu, l'unico di questo menu, con i sette criteri per mettere in ordine i brani, poi, dopo un riordino, Ordine di prima, e in fondo Inverti l'ordine. Lo spiega il capitolo qui sotto, Ordina e Mescola.</li>
+<li>Mescola: mette i brani in un ordine a caso, e lo salva; anche questa voce la spiega il capitolo qui sotto.</li>
 <li>Elimina: chiede conferma, con No come risposta predefinita, e ricorda che i file restano sul disco; il fuoco va sulla playlist vicina. Lo stesso fa Canc sulla playlist.</li>
 <li>Leggi i dettagli, come F11 sulla playlist: quanti brani, quanto occupano sul disco, i tipi, la durata, il più lungo e il più corto, quanti sono saltati, quanti mancano sul disco, con il primo che manca, e se c'è un filtro quanti brani lo passano. Lo stesso vale per i Preferiti, per i Risultati e per i loro rami; sul ramo Playlist, F11 dice quante playlist ci sono, quanti brani in tutto, e una riga per playlist con i brani e la durata.</li>
 </ul>
+<h3 id="ordina-mescola">Ordina e Mescola</h3>
+<p>Ordina e Mescola, nel menu di una playlist o dei Preferiti, cambiano l'ordine dei brani e lo salvano subito, come Sposta. Lavorano su tutta la playlist, anche sui brani che il filtro nasconde: quelli che si vedono restano comunque in ordine fra loro. Non chiedono conferma, non fanno partire niente e il fuoco resta sulla playlist, con i rami aperti che restano aperti, anche un SID aperto sui suoi sottobrani o un brano aperto sui marker; i brani saltati si spostano come gli altri e restano saltati. Ordinare è un'azione che si fa una volta, non una proprietà della playlist: i brani aggiunti dopo vanno in fondo, come sempre, e per metterli in ordine si ordina di nuovo.</p>
+<p>Il sottomenu Ordina ha sette criteri, ognuno in un verso solo:</p>
+<ul>
+<li>Per nome del file: il nome con l'estensione, come lo mostra la plancia, dalla A alla Z; a parità di nome decide la cartella.</li>
+<li>Per percorso: unità per unità e cartella per cartella, come Crea playlist da qui, con i file di una cartella prima delle sue sottocartelle; un sottobrano messo in playlist come brano a sé va dopo il suo file.</li>
+<li>Per titolo: il tag del titolo, poi l'autore; il nome del file non fa da titolo.</li>
+<li>Per autore: l'autore, poi l'album, e dentro l'album disco e traccia.</li>
+<li>Per album: l'album, e dentro l'album disco e traccia.</li>
+<li>Per anno: dal più vecchio, poi l'autore e l'album.</li>
+<li>Per durata: dal più corto, con la durata che mostra la plancia: per un SID o un file delle console con più sottobrani, il loro totale. Il comando t del filtro guarda invece il sottobrano iniziale, e una lista ordinata per durata può non combaciare con quello che t lascia passare.</li>
+</ul>
+<p>I testi si confrontano senza badare alle maiuscole e agli accenti, come nel filtro, e i numeri contano per il loro valore: Traccia 2 viene prima di Traccia 10. Non ci sono regole sugli articoli: The Beatles va sotto la T. Le cartelle di Questo PC, invece, non contano i numeri per valore: su una playlist fatta con Crea playlist da qui, Per percorso può spostare qualche brano, dove i numeri non hanno gli zeri davanti. Un album sta in una cartella: lo stesso nome in due cartelle, come due Greatest Hits di autori diversi, fa due album. Dentro un album si va per disco e traccia, se tutti i suoi brani hanno il numero di traccia, e un disco che manca conta come il primo; altrimenti si va per nome del file. Lo schedario tiene disco e traccia dei file che legge da questa versione in poi; quelli letti prima li prendono quando il file cambia, per esempio dopo una modifica dei tag, e fino ad allora il loro album va per nome del file.</p>
+<p>I brani senza il dato, cioè senza quel tag o senza una durata nota, vanno in fondo, in ordine di percorso, e la console dice quanti sono, per esempio: Rock ordinata per autore: 340 brani, 12 senza autore in fondo. Un titolo o un autore &lt;?&gt;, che nei SID della HVSC vuol dire sconosciuto, conta come un dato che manca, come nelle statistiche. In fondo vanno anche i brani che lo schedario non ha ancora letto, ma la console li conta a parte, per esempio: 12 senza autore e 200 non ancora letti dallo schedario in fondo. Le loro schede si chiedono allo schedario, senza aspettarle, e la console avverte che un nuovo Ordina, quando sono letti, li mette al loro posto. I SID hanno solo titolo, autore e anno, e i tracker e i MIDI nessun tag: Per album manda in fondo tutti i SID, i tracker e i MIDI, e Per titolo, Per autore e Per anno i tracker e i MIDI; se il dato non ce l'ha nessun brano, la console dice, per esempio, tutti senza album, in ordine di percorso. Se la lista è già nell'ordine scelto, la console lo dice e non cambia niente.</p>
+<p>In fondo al sottomenu, Inverti l'ordine rovescia la lista così com'è, anche un ordine fatto a mano con Sposta; i brani senza il dato, che stavano in fondo, finiscono in cima.</p>
+<p>Mescola mette i brani in un ordine a caso, in cui ogni ordine è ugualmente probabile, senza badare agli autori. Cambia l'ordine salvato della playlist, mentre la riproduzione casuale, con Maiuscolo con N, la lascia com'è e sceglie a caso solo cosa suonare. Dopo Mescola, J, K e le cifre suonano il nuovo primo brano.</p>
+<p>Dopo un Ordina, un Inverti l'ordine o un Mescola, nel sottomenu Ordina compare Ordine di prima, subito prima di Inverti l'ordine: rimette l'ordine che c'era prima di quel riordino, con in fondo i brani aggiunti nel frattempo e senza quelli tolti, e poi sparisce. MeTeOra se lo ricorda per ogni playlist finché resta aperto, e un nuovo riordino lo sostituisce.</p>
+<p>Con la playlist che suona, o in pausa, il brano continua: con Ordina e Inverti l'ordine va al suo posto nell'ordine nuovo, con Mescola va in cima e gli altri dopo di lui. La console dice il suo posto nuovo, e l'avanzamento riparte da lì: i brani finiti prima di lui si sentono con Z o con la ripetizione della lista. Un loop A-B sulla playlist si toglie, e la console lo dice, perché fra A e B finirebbero altri brani; Ordine di prima non lo rimette. Restano il loop con il solo punto A e quello con A e B sullo stesso brano, che non coprono altri brani. Se la playlist ha un filtro, la console dice anche quanti brani nascosti si sono spostati, e il posto del brano che suona fra quelli che si vedono. Con meno di due brani, Ordina, Inverti l'ordine e Mescola dicono che non c'è niente da fare.</p>
 <h3 id="brani-playlist">I brani di una playlist</h3>
 <p>Aperta con freccia destra, una playlist mostra i suoi brani: il nome del file con l'estensione, poi la durata quando si conosce, e dopo, quando servono, le indicazioni: quanti marker ha, saltato, punto A del loop, punto B del loop, in riproduzione. Un sottobrano messo in una playlist come brano a sé ha il nome del file e il numero del sottobrano, per esempio Commando.sid, sottobrano 3 di 5. Un SID o un file delle console con più sottobrani dice quanti sono e quanto durano in tutto, ed è un ramo, come un brano con dei marker: freccia destra mostra i sottobrani, o i marker.</p>
 <h4>Il menu di un brano</h4>
@@ -738,6 +759,20 @@ kbd {
 <li>Apri la playlist con freccia destra e scendi fino al brano.</li>
 <li>Premi Invio, scegli Sposta in cima e premi Invio.</li>
 <li>La console dice che il brano ora è il 1 della playlist, e il fuoco resta su di lui.</li>
+</ol>
+<h4>Ordinare una playlist per autore</h4>
+<ol>
+<li>Porta il fuoco sulla playlist e premi Invio: si apre il suo menu.</li>
+<li>Scendi su Ordina e apri il sottomenu con freccia destra.</li>
+<li>Scegli Per autore e premi Invio.</li>
+<li>La console dice quanti brani ha la playlist e quanti, senza autore, sono andati in fondo; il fuoco resta sulla playlist.</li>
+<li>Se l'ordine di prima andava meglio, riapri il menu: nel sottomenu Ordina c'è Ordine di prima, che lo rimette.</li>
+</ol>
+<h4>Mescolare una playlist</h4>
+<ol>
+<li>Porta il fuoco sulla playlist e premi Invio.</li>
+<li>Scegli Mescola e premi Invio: la console dice, per esempio, Rock mescolata: 340 brani.</li>
+<li>Premi X: la playlist suona dal suo nuovo primo brano, e poi va avanti nell'ordine mescolato.</li>
 </ol>
 <h4>Suonare la terza playlist</h4>
 <ol>
@@ -958,6 +993,7 @@ kbd {
 <h3 id="casuale">La riproduzione casuale</h3>
 <p>Maiuscolo con N accende e spegne la riproduzione casuale. Accesa, quando un brano finisce da solo il seguente si sceglie a caso, fra quelli che l'avanzamento automatico potrebbe suonare: le voci suonabili che si vedono nella plancia, oppure la lista, il loop o la selezione da cui si suona, mai lo stesso brano due volte di fila.</p>
 <p>Accesa, anche B sceglie a caso, con lo stesso modello e lo stesso mazzo, e Z torna indietro ai brani suonati, uno alla volta, come in Winamp: la riproduzione casuale si ricorda la strada fatta. Dopo che Z è tornata indietro, B e la fine di un brano ripercorrono in avanti la stessa strada, e solo arrivati in fondo si torna a scegliere a caso. Un brano scelto da te, con X, N, J, K o le cifre, va in fondo alla strada, e quella che c'era dopo di lui si dimentica. Al primo brano della strada Z lo dice. Riaccendere o spegnere la riproduzione casuale fa ricominciare la strada da ciò che suona; spenta, Z e B tornano in ordine.</p>
+<p>La riproduzione casuale non cambia l'ordine della playlist: sceglie soltanto il brano da suonare. Per mescolare davvero l'ordine salvato c'è Mescola, nel menu della playlist, spiegato nel capitolo Le playlist.</p>
 <p>Come si sceglie lo decide il modello, fra le impostazioni:</p>
 <ul>
 <li>casualità totale: ogni volta un brano qualsiasi, mai lo stesso due volte di fila;</li>

@@ -1,6 +1,6 @@
 # MeTeOra, le prove delle statistiche: l'orologio, la vita dei brani, il file, l'azzeramento e la pagina.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (UltraCode).
-# 17/10/2026: nasce con la 1.103.0. Nella 1.104.0 le prove delle righe-elenco senza le voci a zero, delle percentuali, degli anni futuri, delle date con il giorno della settimana, della pulizia all'avvio e dei brani rinominati. Nella 1.105.0 quella dei nomi di tutti gli eventi, con Dove sono.
+# 17/10/2026: nasce con la 1.103.0. Nella 1.104.0 le prove delle righe-elenco senza le voci a zero, delle percentuali, degli anni futuri, delle date con il giorno della settimana, della pulizia all'avvio e dei brani rinominati. Nella 1.105.0 quella dei nomi di tutti gli eventi, con Dove sono. Nella 1.109.0 la riga delle playlist con Ordina e Mescola.
 
 import datetime
 import json
@@ -582,3 +582,14 @@ def test_ogni_evento_ha_il_suo_nome():
     import suoni
 
     assert set(statistiche.NOMI_DEGLI_EVENTI) == set(suoni.EVENTI)
+
+
+def test_la_riga_delle_playlist_dice_ordinate_invertite_mescolate_e_rimesse(tmp_path):
+    # Tappa 14 c: i quattro eventi nuovi hanno un nome e stanno nella riga delle playlist.
+    s, _o = _nuove(tmp_path)
+    for evento, volte in (("playlist_ordinata", 3), ("ordine_invertito", 1), ("playlist_mescolata", 2), ("ordine_ripristinato", 1)):
+        assert evento in statistiche.NOMI_DEGLI_EVENTI
+        for _ in range(volte):
+            s.evento(evento)
+    assert ("Playlist rinominate: 0; eliminate: 0; ordinate: 3; invertite: 1; mescolate: 2; rimesse nell'ordine di prima: 1."
+        in _pagina(s).le_playlist())

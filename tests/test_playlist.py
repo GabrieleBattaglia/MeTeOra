@@ -1,5 +1,6 @@
 # MeTeOra, le prove del modello delle playlist.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
+# Nella 1.109.0 le prove di Ordina, Inverti l'ordine, Mescola e Ordine di prima.
 
 import json
 import os
@@ -164,3 +165,163 @@ def test_l_archivio_toglie_i_file_spariti_e_tiene_le_playlist_vuote(tmp_path):
     di_nuovo.carica()
     assert [[b.percorso for b in pl.brani] for pl in di_nuovo.playlist] == [[r"C:\m\b.flac"], []]
     assert [b.percorso for b in di_nuovo.preferiti.brani] == [r"C:\m\c.ogg"] and di_nuovo.percorsi() == {r"C:\m\b.flac", r"C:\m\c.ogg"}
+
+
+# Ordina, Inverti l'ordine, Mescola e Ordine di prima (tappa 14 c).
+
+
+def _scheda(durata=None, traccia=None, disco=None, **tag):
+    scheda = {"dim": 1, "mod": 0, "durata": durata, "tag": tag, "sottobrani": None, "durate_sid": None}
+    if traccia is not None:
+        scheda["traccia"] = traccia
+    if disco is not None:
+        scheda["disco"] = disco
+    return scheda
+
+
+def _con_le_schede(*voci):
+    """(playlist, scheda_di) da coppie (percorso o Brano, scheda o None)."""
+    brani = [v if isinstance(v, Brano) else Brano(v) for v, _s in voci]
+    schede = {id(b): s for b, (_v, s) in zip(brani, voci, strict=True)}
+    return Playlist("Rock", brani), lambda b: schede[id(b)]
+
+
+def _nomi(pl):
+    return [b.percorso + (f" {b.sottobrano}" if b.sottobrano else "") for b in pl.brani]
+
+
+def test_la_chiave_naturale_conta_i_numeri_e_ignora_maiuscole_e_accenti():
+    from playlist import chiave_naturale
+
+    assert sorted(["Traccia 10", "traccia 2", "Traccia 1"], key=chiave_naturale) == ["Traccia 1", "traccia 2", "Traccia 10"]
+    assert chiave_naturale("Città")[0] == chiave_naturale("CITTA")[0]
+    # Nessuna regola sugli articoli; fra 2 e 02 decide il testo, sempre allo stesso modo.
+    assert sorted(["The Beatles", "Abba", "Queen"], key=chiave_naturale) == ["Abba", "Queen", "The Beatles"]
+    assert sorted(["a 2", "a 02"], key=chiave_naturale) == sorted(["a 02", "a 2"], key=chiave_naturale)
+
+
+def test_per_percorso_come_crea_playlist_da_qui():
+    pl, scheda_di = _con_le_schede(*((p, None) for p in (r"C:\m\b\1.mp3", r"C:\m\a 10.mp3", r"E:\x.mp3", r"C:\m\a\x.mp3", r"C:\m\a 2.mp3")),
+        (Brano(r"C:\m\Z.sid", sottobrano=3), None), (r"c:/m/z.sid", None), (Brano(r"C:\m\z.sid", sottobrano=2), None))
+    assert pl.ordina("percorso", scheda_di) == (True, 0)
+    # I file della cartella prima delle sottocartelle, i numeri per valore,
+    # e i sottobrani dopo il loro file.
+    assert _nomi(pl) == [r"C:\m\a 2.mp3", r"C:\m\a 10.mp3", r"c:/m/z.sid", r"C:\m\z.sid 2", r"C:\m\Z.sid 3", r"C:\m\a\x.mp3", r"C:\m\b\1.mp3", r"E:\x.mp3"]
+    assert pl.ordina("percorso", scheda_di) == (False, 0)
+
+
+def test_per_nome_del_file_poi_la_cartella():
+    pl, scheda_di = _con_le_schede((r"C:\x\b.mp3", None), (r"C:\z\A.mp3", None), (r"C:\a\b.mp3", None), (r"C:\a\b 10.mp3", None), (r"C:\a\b 9.mp3", None))
+    pl.ordina("nome", scheda_di)
+    assert _nomi(pl) == [r"C:\z\A.mp3", r"C:\a\b 9.mp3", r"C:\a\b 10.mp3", r"C:\a\b.mp3", r"C:\x\b.mp3"]
+
+
+def test_per_autore_con_gli_album_per_traccia_e_i_senza_autore_in_fondo():
+    pl, scheda_di = _con_le_schede(
+        (r"C:\m\senza.mp3", _scheda(titolo="Niente autore")),
+        (r"C:\q\Hits\03.mp3", _scheda(autore="Queen", album="Greatest Hits", traccia=3)),
+        (r"C:\a\Hits\b.mp3", _scheda(autore="abba", album="Greatest Hits", traccia=1, disco=2)),
+        (r"C:\q\Hits\10.mp3", _scheda(autore="Queen", album="Greatest Hits", traccia=1)),
+        (r"C:\a\Hits\a.mp3", _scheda(autore="ABBA", album="Greatest Hits", traccia=5, disco=1)),
+        (r"C:\a\Hits\c.mp3", _scheda(autore="Abba", album="Greatest Hits", traccia=2, disco=1)),
+        # Un album con una scheda vecchia, senza traccia, va per percorso.
+        (r"C:\a\Arrival\2.mp3", _scheda(autore="Abba", album="Arrival", traccia=1)),
+        (r"C:\a\Arrival\1.mp3", _scheda(autore="Abba", album="Arrival")),
+        (r"C:\a\sciolto.mp3", _scheda(autore="Abba")),
+        (r"C:\m\mai letto.mp3", None))
+    assert pl.ordina("autore", scheda_di) == (True, 2)
+    assert _nomi(pl) == [r"C:\a\Arrival\1.mp3", r"C:\a\Arrival\2.mp3", r"C:\a\Hits\c.mp3", r"C:\a\Hits\a.mp3", r"C:\a\Hits\b.mp3",
+        r"C:\a\sciolto.mp3", r"C:\q\Hits\10.mp3", r"C:\q\Hits\03.mp3", r"C:\m\mai letto.mp3", r"C:\m\senza.mp3"]
+
+
+def test_per_album_lo_stesso_nome_in_due_cartelle_sono_due_album():
+    pl, scheda_di = _con_le_schede(
+        (r"C:\q\Hits\x.mp3", _scheda(album="Greatest Hits", traccia=1)),
+        (r"C:\a\Hits\y.mp3", _scheda(album="greatest hits", traccia=2)),
+        (r"C:\a\Hits\z.mp3", _scheda(album="Greatest Hits", traccia=1)),
+        (r"C:\m\nessuno.mp3", _scheda(autore="Abba")))
+    assert pl.ordina("album", scheda_di) == (True, 1)
+    assert _nomi(pl) == [r"C:\a\Hits\z.mp3", r"C:\a\Hits\y.mp3", r"C:\q\Hits\x.mp3", r"C:\m\nessuno.mp3"]
+
+
+def test_per_titolo_non_usa_il_nome_del_file():
+    pl, scheda_di = _con_le_schede((r"C:\m\a.mp3", _scheda()), (r"C:\m\z.mp3", _scheda(titolo="Brano 10", autore="B")),
+        (r"C:\m\y.mp3", _scheda(titolo="brano 2")), (r"C:\m\x.mp3", _scheda(titolo="Brano 10", autore="A")))
+    assert pl.ordina("titolo", scheda_di) == (True, 1)
+    assert _nomi(pl) == [r"C:\m\y.mp3", r"C:\m\x.mp3", r"C:\m\z.mp3", r"C:\m\a.mp3"]
+
+
+def test_il_segnaposto_della_hvsc_e_un_dato_che_manca():
+    # <?> e' il titolo o l'autore che la HVSC non conosce: va in fondo con i
+    # senza dato, e si conta con loro, come nelle statistiche, invece di
+    # passare prima della A.
+    sid = {"dim": 1, "mod": 0, "durata": None, "sottobrani": 1, "durate_sid": None}
+    pl, scheda_di = _con_le_schede((r"C:\h\Zorro.sid", {**sid, "tag": {"titolo": "Zorro", "autore": "Rob Hubbard"}}),
+        (r"C:\h\Anon.sid", {**sid, "tag": {"titolo": "<?>", "autore": " <?> "}}), (r"C:\h\Bdash.sid", {**sid, "tag": {"titolo": "Boulder Dash", "autore": "Peter Liepa"}}),
+        (r"C:\h\Senza.sid", {**sid, "tag": {}}))
+    assert pl.ordina("autore", scheda_di) == (True, 2)
+    assert _nomi(pl) == [r"C:\h\Bdash.sid", r"C:\h\Zorro.sid", r"C:\h\Anon.sid", r"C:\h\Senza.sid"]
+    assert pl.ordina("titolo", scheda_di) == (False, 2)
+    # Anche dopo il criterio: l'autore <?> va dopo quelli che l'autore ce l'hanno.
+    pl, scheda_di = _con_le_schede((r"C:\h\a.sid", {**sid, "tag": {"titolo": "Commando", "autore": "<?>"}}),
+        (r"C:\h\b.sid", {**sid, "tag": {"titolo": "Commando", "autore": "Rob Hubbard"}}))
+    assert pl.ordina("titolo", scheda_di) == (True, 0)
+    assert _nomi(pl) == [r"C:\h\b.sid", r"C:\h\a.sid"]
+
+
+def test_per_anno_dal_piu_vecchio():
+    pl, scheda_di = _con_le_schede((r"C:\m\a.mp3", _scheda(anno=1999, autore="B")), (r"C:\m\b.mp3", _scheda(anno=1985)),
+        (r"C:\m\c.mp3", _scheda(anno=1999, autore="A")), (r"C:\m\d.mp3", _scheda(anno="1970")))
+    assert pl.ordina("anno", scheda_di) == (True, 1)
+    assert _nomi(pl) == [r"C:\m\b.mp3", r"C:\m\c.mp3", r"C:\m\a.mp3", r"C:\m\d.mp3"]
+
+
+def test_per_durata_come_la_mostra_la_plancia():
+    sid = {"dim": 1, "mod": 0, "durata": 10.0, "tag": {}, "sottobrani": 3, "durate_sid": [10.0, 20.0, 30.0]}
+    pl, scheda_di = _con_le_schede((r"C:\m\Lungo.sid", sid), (r"C:\m\canzone.mp3", _scheda(durata=30.5)), (Brano(r"C:\m\Lungo.sid", sottobrano=2), sid),
+        (r"C:\m\ignota.mp3", _scheda()), (r"C:\m\Corto.sid", {**sid, "sottobrani": 1, "durate_sid": [5.0]}))
+    assert pl.ordina("durata", scheda_di) == (True, 1)
+    # Il SID con tre sottobrani vale il totale, il sottobrano a se' il suo.
+    assert _nomi(pl) == [r"C:\m\Corto.sid", r"C:\m\Lungo.sid 2", r"C:\m\canzone.mp3", r"C:\m\Lungo.sid", r"C:\m\ignota.mp3"]
+
+
+def test_l_ordine_e_stabile_e_tiene_saltati_e_doppioni():
+    pl, scheda_di = _con_le_schede((r"C:\m\b.mp3", None), (r"C:\m\a.mp3", None), (r"C:\m\b.mp3", None))
+    primo_b, a, secondo_b = pl.brani
+    secondo_b.saltato = True
+    pl.ordina("percorso", scheda_di)
+    assert pl.brani == [a, primo_b, secondo_b] and secondo_b.saltato
+
+
+def test_inverti_mescola_e_l_ordine_di_prima_con_gli_stessi_brani():
+    pl = _pl(4)
+    brani, lista = list(pl.brani), pl.brani
+    assert pl.ordine_di_prima is None
+    assert pl.inverti()
+    assert pl.brani is lista and pl.brani == brani[::-1] and pl.ordine_di_prima == brani
+    # Mescola: il brano in cima e gli altri mescolati, con il mescolamento dato.
+    assert pl.mescola(lambda altri: altri.sort(key=lambda b: b.percorso), in_cima=brani[2])
+    assert pl.brani == [brani[2], brani[0], brani[1], brani[3]] and pl.ordine_di_prima == brani[::-1]
+    # Lo stesso ordine non cambia niente, nemmeno l'ordine di prima.
+    assert not pl.mescola(lambda altri: altri.sort(key=lambda b: b.percorso), in_cima=brani[2])
+    assert pl.ordine_di_prima == brani[::-1]
+    # Un brano aggiunto dopo resta in fondo, uno tolto non torna.
+    nuovo = Brano(r"C:\m\nuovo.mp3")
+    pl.brani.append(nuovo)
+    pl.togli(brani[0])
+    assert pl.rimetti_l_ordine_di_prima()
+    assert pl.brani is lista and pl.brani == [brani[3], brani[2], brani[1], nuovo]
+    assert all(any(b is c for c in [*brani, nuovo]) for b in pl.brani)
+    # Poi l'ordine di prima si dimentica.
+    assert pl.ordine_di_prima is None and not pl.rimetti_l_ordine_di_prima()
+    # L'ordine di prima non si salva.
+    assert "ordine_di_prima" not in json.dumps(pl.come_dati())
+
+
+def test_mescola_senza_in_cima_e_con_un_brano_che_non_c_e():
+    from playlist import mescolati
+
+    pl = _pl(3)
+    assert mescolati(pl.brani, lambda altri: altri.reverse()) == pl.brani[::-1]
+    assert mescolati(pl.brani, lambda altri: altri.reverse(), in_cima=Brano("x.mp3")) == pl.brani[::-1]
+    assert mescolati(pl.brani, lambda altri: altri.reverse(), in_cima=pl.brani[1]) == [pl.brani[1], pl.brani[2], pl.brani[0]]

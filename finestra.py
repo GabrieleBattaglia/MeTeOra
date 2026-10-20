@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano.
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -89,7 +89,7 @@ from filtro import COMMENTO, ErroreFiltro, Filtro, modello_della_console
 from impostazioni import Impostazioni
 from marcatori import Marcatori
 from motore import VOLUME_MASSIMO, durata_del_sottobrano, sottobrano_risolto
-from playlist import Archivio, Brano, Coda, Playlist
+from playlist import CRITERI, Archivio, Brano, Coda, Playlist
 from ricerca import AlberoDeiRisultati, NonRisponde, Ricerca, errore_di_rete, in_rete, leggi_in_rete, senza_annidati
 from schedario import Schedario, credibile
 from valori import AREE, ErroreValore, leggi_tempo, leggi_tempo_nel_brano, secondi_da_leggere, tempo
@@ -275,9 +275,11 @@ TASTI_DEL_CONTESTO = {
     "risultati": ("i Risultati della ricerca", "Invio, Applicazioni o Spazio: menu con Riproduci, Salva come playlist, Nuova ricerca, che cerca in tutto MeTeOra, e Ferma la ricerca."),
     "altri": ("la voce che mostra altri risultati", "Invio mostra i risultati seguenti."),
     "gruppo_risultati": ("un ramo dei Risultati", "Freccia destra lo apre: i risultati stanno come stavano, sotto la loro playlist o lungo il percorso della loro cartella. Invio, Applicazioni o Spazio: menu con Salva come playlist."),
-    "preferiti": ("i Preferiti", "Invio, Applicazioni o Spazio: menu con Riproduci, Filtro e, se c'è un filtro, Togli il filtro. Barra verticale: il filtro. Canc su un loro brano lo toglie dai Preferiti."),
+    "preferiti": ("i Preferiti", "Invio, Applicazioni o Spazio: menu con Riproduci, Filtro e, se c'è un filtro, Togli il filtro; Ordina, un sottomenu con i criteri, poi, dopo un riordino, Ordine di prima, e in fondo Inverti l'ordine; e Mescola. "
+        "Barra verticale: il filtro. Canc su un loro brano lo toglie dai Preferiti."),
     "radice_playlist": ("il ramo Playlist", "Invio, Applicazioni o Spazio: menu con Nuova playlist."),
-    "playlist": ("una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Filtro, Togli il filtro se c'è un filtro, Rinomina ed Elimina. Barra verticale: il filtro. Canc elimina la playlist, dopo una conferma."),
+    "playlist": ("una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Filtro, Togli il filtro se c'è un filtro, Rinomina, Ordina, Mescola ed Elimina. "
+        "Ordina è un sottomenu con i criteri, poi, dopo un riordino, Ordine di prima, e in fondo Inverti l'ordine. Barra verticale: il filtro. Canc elimina la playlist, dopo una conferma."),
     "brano": ("un brano di una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Sposta su, giù, in cima e in fondo, Saltato, Togli dalla playlist, Aggiungi ai preferiti, Rinomina file, Leggi i tag e Tag per i formati che li hanno, e Manda nel cestino. "
         "Canc toglie il brano dalla playlist, Maiuscolo con Canc manda il file nel cestino. Un SID o un file delle console con più sottobrani, o un brano con dei marker, si apre con freccia destra."),
     "pc": ("Questo PC", "Freccia destra mostra le unità. Invio, Applicazioni o Spazio: menu con Aggiorna."),
@@ -2661,10 +2663,13 @@ class Finestra(wx.Frame):
 
     def _popola_playlist(self, seleziona=None):
         """Ricostruisce il ramo Playlist dall'archivio. Tiene aperte le
-        playlist che lo erano, e se la selezione stava nel ramo la rimette
-        sulla stessa voce, o su seleziona quando e' dato (una playlist o un
-        brano). I brani di una playlist si caricano quando la si apre."""
+        playlist che lo erano e, dalla 1.109.0, i brani e i sottobrani
+        aperti dentro di loro e nei Preferiti; e se la selezione stava nel
+        ramo la rimette sulla stessa voce, o su seleziona quando e' dato (una
+        playlist o un brano). I brani di una playlist si caricano quando la
+        si apre."""
         aperte = set()
+        brani_aperti = self._brani_aperti()
         selezionato = None
         voce_selezionata = self._voce_corrente()
         dentro = False
@@ -2698,8 +2703,8 @@ class Finestra(wx.Frame):
             dati = self._dati(voce_selezionata) or {}
             dentro = True
             selezionato = "nuova_playlist" if dati.get("comando") == "nuova_playlist" else (dati.get("brano") or dati.get("playlist"))
-        # Un sottobrano o un marker col fuoco si ritrova dentro il suo brano,
-        # che rinasce chiuso (tappa 9).
+        # Un sottobrano o un marker col fuoco si ritrova dentro il suo brano
+        # (tappa 9), che dalla 1.109.0 rinasce aperto, come gli altri.
         interno = None
         if seleziona is None and dentro and (self._dati(voce_selezionata) or {}).get("tipo") in ("sottobrano", "marker"):
             interno = dict(self._dati(voce_selezionata))
@@ -2719,6 +2724,7 @@ class Finestra(wx.Frame):
             da_selezionare = self.nodo_preferiti
         if preferiti_aperti or (isinstance(selezionato, Brano) and preferiti.indice(selezionato) is not None):
             self.albero.Expand(self.nodo_preferiti)
+            self._riapri_i_brani(self.nodo_preferiti, brani_aperti)
             if isinstance(selezionato, Brano):
                 da_selezionare = next((v for v in self._figli(self.nodo_preferiti) if self._dati(v).get("brano") is selezionato), da_selezionare)
         self.albero.DeleteChildren(self.nodo_playlist)
@@ -2731,6 +2737,7 @@ class Finestra(wx.Frame):
                 aperte.add(id(pl))
             if id(pl) in aperte:
                 self.albero.Expand(nodo)
+                self._riapri_i_brani(nodo, brani_aperti)
                 if isinstance(selezionato, Brano):
                     da_selezionare = next((v for v in self._figli(nodo) if self._dati(v).get("brano") is selezionato), da_selezionare)
         comando = self.albero.AppendItem(self.nodo_playlist, "Nuova playlist", data={"tipo": "comando", "comando": "nuova_playlist"})
@@ -2755,6 +2762,42 @@ class Finestra(wx.Frame):
             fuoco = [corrente] if fuoco_selezionato and corrente.IsOk() else []
             # In una volta sola: anche migliaia di voci costano una passata.
             self._imposta_la_selezione([*fuori, *ritrovate, *fuoco])
+
+    def _brani_aperti(self):
+        """Prima di ricostruire il ramo Playlist: gli id dei brani aperti
+        nelle playlist aperte e nei Preferiti, e le coppie (id del brano,
+        numero) dei loro sottobrani aperti, quelli con i marker. Un SID aperto
+        che rinascesse chiuso farebbe saltare all'avanzamento della plancia i
+        sottobrani rimasti, per esempio dopo un Ordina (1.109.0)."""
+        aperti = set()
+        for radice in (self.nodo_preferiti, *self._figli(self.nodo_playlist)):
+            if not self.albero.IsExpanded(radice):
+                continue
+            for voce in self._figli(radice):
+                dati = self._dati(voce) or {}
+                if dati.get("tipo") != "brano" or not self.albero.IsExpanded(voce):
+                    continue
+                aperti.add(id(dati["brano"]))
+                for figlio in self._figli(voce):
+                    sotto = self._dati(figlio) or {}
+                    if sotto.get("tipo") == "sottobrano" and self.albero.IsExpanded(figlio):
+                        aperti.add((id(dati["brano"]), sotto["numero"]))
+        return aperti
+
+    def _riapri_i_brani(self, nodo, aperti):
+        """Dopo la ricostruzione, nella playlist nodo appena riaperta, riapre i
+        brani e i sottobrani che erano aperti; aperti viene da _brani_aperti."""
+        if not aperti:
+            return
+        for voce in self._figli(nodo):
+            dati = self._dati(voce) or {}
+            if dati.get("tipo") != "brano" or id(dati["brano"]) not in aperti or not self.albero.ItemHasChildren(voce):
+                continue
+            self.albero.Expand(voce)
+            for figlio in self._figli(voce):
+                sotto = self._dati(figlio) or {}
+                if sotto.get("tipo") == "sottobrano" and (id(dati["brano"]), sotto["numero"]) in aperti and self.albero.ItemHasChildren(figlio):
+                    self.albero.Expand(figlio)
 
     def _in_espansione(self, evento):
         voce = evento.GetItem()
@@ -3157,8 +3200,14 @@ class Finestra(wx.Frame):
             voci = [("Riproduci", lambda: self._riproduci_playlist(pl)), ("Filtro", lambda: self._modifica_filtro(pl))]
             if pl.filtro:
                 voci.append(("Togli il filtro", lambda: self._imposta_filtro(pl, "")))
-            if pl is not self.archivio.preferiti:
-                voci += [("Rinomina", lambda: self._rinomina(pl)), ("Elimina", lambda: self._elimina_playlist(pl))]
+            # Il posto di Ordina e Mescola e' quello del punto 3.10 del piano;
+            # i Preferiti non si rinominano e non si eliminano (tappa 14 c).
+            preferiti = pl is self.archivio.preferiti
+            if not preferiti:
+                voci.append(("Rinomina", lambda: self._rinomina(pl)))
+            voci += [("Ordina", self._voci_dell_ordine(pl)), ("Mescola", lambda: self._mescola(pl))]
+            if not preferiti:
+                voci.append(("Elimina", lambda: self._elimina_playlist(pl)))
             return [*voci, dettagli_della_voce]
         if tipo == "brano":
             pl, brano = dati["playlist"], dati["brano"]
@@ -4425,6 +4474,174 @@ class Finestra(wx.Frame):
         self._popola_playlist(seleziona=brano)
         i = pl.indice(brano)
         self._riscontro("brano_spostato", f"{brano.nome} ora è il {i + 1} di {len(pl.brani)}.")
+
+    # Ordina e Mescola, nel menu della playlist e dei Preferiti (tappa 14 c,
+    # decisa da Gabriele il 20 ottobre 2026). Si riordina tutta la playlist,
+    # anche i brani che il filtro nasconde; niente riproduzione, niente
+    # conferme, il fuoco resta sulla playlist e si salva subito, come Sposta.
+
+    def _voci_dell_ordine(self, pl):
+        """Il sottomenu Ordina: i sette criteri; Ordine di prima, solo dopo
+        un Ordina, un Inverti l'ordine o un Mescola; e in fondo Inverti
+        l'ordine."""
+        voci = [(etichetta, lambda c=criterio: self._ordina(pl, c)) for criterio, (etichetta, _dato) in CRITERI.items()]
+        if pl.ordine_di_prima is not None:
+            voci.append(("Ordine di prima", lambda: self._ordine_di_prima(pl)))
+        voci.append(("Inverti l'ordine", lambda: self._inverti(pl)))
+        return voci
+
+    def _nomi_per_l_ordine(self, pl):
+        """Le forme del nome nelle righe di Ordina e Mescola: (soggetto con
+        il verbo essere, nome breve, finale degli aggettivi, nome con la
+        preposizione in). Rock e' una playlist, i Preferiti sono loro."""
+        if pl is self.archivio.preferiti:
+            return "I Preferiti sono", "Preferiti", "i", "Nei Preferiti"
+        return f"{pl.nome} è", pl.nome, "a", f"In {pl.nome}"
+
+    def _troppo_pochi(self, pl, verbo):
+        """Con meno di due brani non c'e' niente da riordinare: lo dice, e
+        torna vero."""
+        if len(pl.brani) >= 2:
+            return False
+        dove = self._nomi_per_l_ordine(pl)[3]
+        quanti = "non ci sono brani" if not pl.brani else "c'è un brano solo"
+        self._riscontro("non_disponibile", f"{dove} {quanti}: niente da {verbo}.")
+        return True
+
+    def _che_suona_in(self, pl):
+        """Il brano di pl che suona o e' in pausa, o None."""
+        corrente = self.coda.corrente
+        if self.motore.in_corso and self.coda.playlist is pl and corrente is not None and pl.indice(corrente) is not None:
+            return corrente
+        return None
+
+    def _posto_come_la_plancia(self, pl, brano):
+        """Il posto del brano, come il 57 di 340: con un filtro, se il brano
+        lo passa, fra i brani che la plancia mostra, e lo dice."""
+        if pl.filtro and self._ammesso(pl, brano):
+            visibili = [b for b in pl.brani if self._ammesso(pl, b)]
+            return f"il {next(i for i, b in enumerate(visibili) if b is brano) + 1} di {len(visibili)} col filtro"
+        return f"il {pl.indice(brano) + 1} di {len(pl.brani)}"
+
+    def _ordina(self, pl, criterio):
+        """Una voce di Ordina: i brani senza il dato vanno in fondo, in ordine
+        di percorso, e la console dice quanti sono, con a parte quelli che lo
+        schedario non ha ancora letto; le loro schede si chiedono allo
+        schedario, senza aspettarle, e un nuovo Ordina li sistema."""
+        etichetta, dato = CRITERI[criterio]
+        come = etichetta[0].lower() + etichetta[1:]
+        if self._troppo_pochi(pl, "ordinare"):
+            return
+        soggetto, nome, finale, _dove = self._nomi_per_l_ordine(pl)
+        # Le schede che mancano si annotano mentre si ordina: lo schedario le
+        # aggiunge da un altro filo, e il conto deve essere quello dell'ordine.
+        non_letti = []
+
+        def scheda_di(brano):
+            scheda = self.schedario.scheda(brano.percorso)
+            if scheda is None:
+                non_letti.append(brano.percorso)
+            return scheda
+
+        cambiata, senza = pl.ordina(criterio, scheda_di)
+        if non_letti:
+            self.schedario.chiedi(non_letti)
+        in_fondo, avviso = self._in_fondo(dato, senza, len(non_letti), len(pl.brani))
+        if not cambiata:
+            # Come Sposta con il brano gia' li': non si salva niente, e
+            # l'ordine di prima resta quello che era.
+            self._riscontro("nessun_altro_brano", f"{soggetto} già ordinat{finale} {come}{in_fondo}.{avviso}")
+            return
+        self._dopo_il_riordino(pl, "playlist_ordinata", f"{nome} ordinat{finale} {come}", in_fondo, avviso=avviso)
+
+    @staticmethod
+    def _in_fondo(dato, senza, non_letti, totale):
+        """(il pezzo della riga di Ordina sui brani andati in fondo, l'avviso
+        da mettere dopo). I brani che lo schedario non ha ancora letto stanno
+        in fondo con quelli senza il dato, ma si contano a parte: il dato forse
+        ce l'hanno, e un nuovo Ordina, quando sono letti, li mette a posto."""
+        if not senza:
+            return "", ""
+        mancanti = senza - non_letti
+        if not non_letti:
+            if senza == totale:
+                # Come Per album su una raccolta di SID, che l'album non l'hanno.
+                return f", tutti senza {dato}, in ordine di percorso", ""
+            return f", {mancanti} senza {dato} in fondo", ""
+        letti = "non ancora letto dallo schedario" if non_letti == 1 else "non ancora letti dallo schedario"
+        avviso = " Quando lo schedario l'ha letto, un nuovo Ordina lo mette al suo posto." if non_letti == 1 else \
+            " Quando lo schedario li ha letti, un nuovo Ordina li mette al loro posto."
+        if non_letti == totale:
+            return f", tutti {letti}, in ordine di percorso", avviso
+        parti = ([f"{mancanti} senza {dato}"] if mancanti else []) + [f"{non_letti} {letti}"]
+        dove = ", tutti in ordine di percorso" if senza == totale else " in fondo"
+        return f", {' e '.join(parti)}{dove}", avviso
+
+    def _inverti(self, pl):
+        """Inverti l'ordine: la lista rovesciata com'e', anche un ordine fatto
+        a mano; i brani senza il dato, che stavano in fondo, vanno in cima."""
+        if self._troppo_pochi(pl, "invertire"):
+            return
+        soggetto, nome, _finale, _dove = self._nomi_per_l_ordine(pl)
+        if not pl.inverti():
+            self._riscontro("nessun_altro_brano", f"{soggetto} uguale anche al contrario.")
+            return
+        self._dopo_il_riordino(pl, "ordine_invertito", f"{nome} in ordine inverso")
+
+    def _mescola(self, pl):
+        """Mescola: ogni ordine ugualmente probabile, con random.shuffle, senza
+        distribuire gli autori. Se la playlist suona, o e' in pausa, il brano in
+        riproduzione va in cima e gli altri dopo di lui (Gabriele). Cambia
+        l'ordine salvato, non la riproduzione casuale, che ha il suo mazzo."""
+        if self._troppo_pochi(pl, "mescolare"):
+            return
+        _soggetto, nome, finale, _dove = self._nomi_per_l_ordine(pl)
+        suona = self._che_suona_in(pl)
+        if not pl.mescola(self._mescola_a_caso, in_cima=suona):
+            di_chi = "dei Preferiti" if pl is self.archivio.preferiti else f"di {pl.nome}"
+            self._riscontro("nessun_altro_brano", f"Mescolando, l'ordine {di_chi} è venuto uguale a prima: niente cambia.")
+            return
+        self._dopo_il_riordino(pl, "playlist_mescolata", f"{nome} mescolat{finale}", in_cima=suona is not None)
+
+    # Il mescolamento di Mescola, che le prove sostituiscono, come _a_caso.
+    _mescola_a_caso = staticmethod(random.shuffle)
+
+    def _ordine_di_prima(self, pl):
+        """Ordine di prima: l'ordine di prima dell'ultimo Ordina, Inverti
+        l'ordine o Mescola, con gli stessi brani; quelli aggiunti dopo restano
+        in fondo. Poi la voce sparisce, fino al prossimo riordino."""
+        soggetto, nome, _finale, _dove = self._nomi_per_l_ordine(pl)
+        if not pl.rimetti_l_ordine_di_prima():
+            self._riscontro("nessun_altro_brano", f"{soggetto} già nell'ordine di prima.")
+            return
+        self._dopo_il_riordino(pl, "ordine_ripristinato", f"{nome} di nuovo nell'ordine di prima")
+
+    def _dopo_il_riordino(self, pl, evento, testa, dettaglio="", in_cima=False, avviso=""):
+        """Dopo un riordino che ha cambiato l'ordine: salva; toglie il loop
+        A-B della playlist, perche' fra A e B finirebbero altri brani (un loop
+        con il solo punto A, o con A e B sullo stesso brano, resta); ricostruisce
+        il ramo, con il fuoco che resta sulla playlist; e lo dice, con i brani
+        nascosti dal filtro e il posto nuovo del brano che suona, e poi
+        l'avviso, se c'e'. Il brano che suona continua, e l'avanzamento
+        riparte dal suo posto nuovo."""
+        self._salva_archivio()
+        coda = self.coda
+        senza_loop = coda.loop_playlist is pl and coda.punto_b is not None and coda.punto_b is not coda.punto_a
+        if senza_loop:
+            coda.togli_loop()
+        self._popola_playlist(seleziona=pl)
+        testo = f"{testa}: {brani_al_plurale(len(pl.brani))}"
+        nascosti = sum(1 for b in pl.brani if not self._ammesso(pl, b)) if pl.filtro else 0
+        if nascosti:
+            testo += ", anche quello nascosto dal filtro" if nascosti == 1 else f", anche i {nascosti} nascosti dal filtro"
+        testo += dettaglio
+        suona = self._che_suona_in(pl)
+        if suona is not None:
+            testo += "; quello in riproduzione ora è in cima" if in_cima else f"; quello in riproduzione ora è {self._posto_come_la_plancia(pl, suona)}"
+        testo += "." + avviso
+        if senza_loop:
+            testo += " Il loop A-B è tolto: fra A e B sarebbero finiti altri brani."
+        self._riscontro(evento, testo)
 
     def _salta(self, pl, brano):
         brano.saltato = not brano.saltato

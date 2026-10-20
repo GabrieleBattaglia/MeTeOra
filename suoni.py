@@ -1,6 +1,6 @@
 # MeTeOra, gli effetti sonori: un suono per ogni azione, con Acusticator.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.51.0 i suoni delle impostazioni, della console salvata, della finestra dei marcatori, della sua ricerca e della scheda audio. Nella 1.55.0 quelli di velocita', tono, equalizzatore e dissolvenza. Nella 1.58.0 i suoni al volo dell'equalizzatore, e il loop con i soffi rimasti liberi. Nella 1.59.0 l'acceso e lo spento della riproduzione casuale. Nella 1.63.0 i suoni del video. Nella 1.64.0 quelli di Questa rete. Nella 1.65.0 quelli dello scaricamento. Nella 1.66.36 l'annullamento, il ramo aggiornato e il video nascosto, e la playlist creata con dei brani ha un suono solo. Nella 1.67.0 il file rinominato. Nella 1.69.0 i suoni dei tag. Nella 1.75.0 il suono dell'invito a offrire un caffe'. Nella 1.84.0 quello dell'aggiornamento accettato. Nella 1.86.0 i tasti rapidi spenti e accesi. Nella 1.93.0 i capitoli. Nella 1.103.0 i suoni delle statistiche, nella collezione dalla V206 di GBUtils. Nella 1.104.0 quelli della pulizia all'avvio, dalla V207. Nella 1.105.0 quello di Dove sono, dalla V208.
+# 30/09/2026: nasce con la tappa 1. Nella 1.51.0 i suoni delle impostazioni, della console salvata, della finestra dei marcatori, della sua ricerca e della scheda audio. Nella 1.55.0 quelli di velocita', tono, equalizzatore e dissolvenza. Nella 1.58.0 i suoni al volo dell'equalizzatore, e il loop con i soffi rimasti liberi. Nella 1.59.0 l'acceso e lo spento della riproduzione casuale. Nella 1.63.0 i suoni del video. Nella 1.64.0 quelli di Questa rete. Nella 1.65.0 quelli dello scaricamento. Nella 1.66.36 l'annullamento, il ramo aggiornato e il video nascosto, e la playlist creata con dei brani ha un suono solo. Nella 1.67.0 il file rinominato. Nella 1.69.0 i suoni dei tag. Nella 1.75.0 il suono dell'invito a offrire un caffe'. Nella 1.84.0 quello dell'aggiornamento accettato. Nella 1.86.0 i tasti rapidi spenti e accesi. Nella 1.93.0 i capitoli. Nella 1.103.0 i suoni delle statistiche, nella collezione dalla V206 di GBUtils. Nella 1.104.0 quelli della pulizia all'avvio, dalla V207. Nella 1.105.0 quello di Dove sono, dalla V208. Nella 1.109.0 quelli di Ordina, Inverti l'ordine, Mescola e Ordine di prima.
 
 """La mappa degli eventi di MeTeOra sui preset della collezione di GBUtils.
 
@@ -105,6 +105,16 @@ EVENTI = {
     "brano_tolto": "espelli",
     "cestino": "morto",
     "brano_spostato": "scudisciata",
+    # Ordina e Mescola nel menu della playlist (tappa 14 c): una famiglia di
+    # onda triangolare sulle stesse quattro note, sol, la, si e do. Ordina le
+    # fa salire in fila, da sinistra a destra, fino al do; Inverti l'ordine le
+    # fa scendere, da destra a sinistra; Mescola le butta in disordine fra i
+    # due lati; Ordine di prima torna indietro con una scivolata e si posa due
+    # volte sul sol, da dove la fila era partita.
+    "playlist_ordinata": "meteora_playlist_ordinata",
+    "ordine_invertito": "meteora_ordine_invertito",
+    "playlist_mescolata": "meteora_playlist_mescolata",
+    "ordine_ripristinato": "meteora_ordine_di_prima",
     "saltato_acceso": "salto_del_gioco_1",
     "saltato_spento": "salto_del_gioco_10",
     # I rami della plancia aperti e chiusi con le frecce.

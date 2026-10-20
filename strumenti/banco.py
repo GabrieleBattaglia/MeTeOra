@@ -1,6 +1,6 @@
 # MeTeOra, il banco del collaudo: MeTeOra vero su un desktop di Windows nascosto, con una copia dei dati, pilotato da una tastiera simulata.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 19/10/2026: nasce con la 1.104.0, dal banco con cui ClaudIA ha collaudato le statistiche della 1.103; sul desktop nascosto, come preferisce Gabriele. Nella 1.105.0 la sessione di Dove sono, l'opzione --solo, la sintesi finta e la pipe dell'istanza con il numero del processo.
+# 19/10/2026: nasce con la 1.104.0, dal banco con cui ClaudIA ha collaudato le statistiche della 1.103; sul desktop nascosto, come preferisce Gabriele. Nella 1.105.0 la sessione di Dove sono, l'opzione --solo, la sintesi finta e la pipe dell'istanza con il numero del processo. Nella 1.109.0 la sessione ordina, con --ordina.
 
 """Il banco del collaudo.
 
@@ -10,6 +10,7 @@ Uso, dalla cartella di MeTeOra:
   python strumenti\\banco.py --video V   in piu' Maiuscolo con F7 con la finestra del video V davanti
   python strumenti\\banco.py --solo S    la sola sessione S, per quelle che non dipendono dalle altre,
                                         come dove_sono
+  python strumenti\\banco.py --ordina    solo la sessione ordina, partendo senza dati
 
 Con --video la finestra del video di MeTeOra si apre e prende i tasti, ma
 libmpv, che disegna in un suo filo nato sul desktop di partenza, li' non puo'
@@ -39,6 +40,10 @@ tastiera_simulata e guarda cosa succede dentro la finestra. Le sessioni:
   riga che va alla sintesi e al braille, dove si riscrive subito anche lei;
   ripetizione, casuale, velocita', tono e sintesi partono da quelli normali,
   qualunque cosa dica la copia dei dati.
+La sessione ordina (tappa 14 c) gira solo con --ordina: Ordina, Inverti
+l'ordine, Mescola e Ordine di prima su una playlist aperta di cinquemila
+brani, con i tempi, e Mescola sulla playlist che suona con la dissolvenza
+accesa, quando il brano seguente e' gia' preparato.
 Alla fine un riassunto, una riga per ogni controllo non riuscito; l'uscita
 vale 1 se ce n'e' almeno uno. La cartella di prova resta solo in quel caso.
 """
@@ -64,9 +69,15 @@ RADICE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ISTANZA = "meteora_banco"
 FILE_DELLE_STATISTICHE = "MeTeOra - Statistiche.json"
 SESSIONI = ("principale", "riavvio", "dopo_il_crash", "controllo", "dove_sono")
+# Le sessioni che girano solo quando si chiedono (tappa 14 c).
+SESSIONI_A_PARTE = ("ordina",)
 # Quanto puo' durare ogni sessione, in secondi: la pulizia sulla copia dei
 # dati veri guarda anche la rete.
-DURATE_MASSIME = {"principale": 1200, "riavvio": 900, "dopo_il_crash": 1200, "controllo": 900, "dove_sono": 900}
+DURATE_MASSIME = {"principale": 1200, "riavvio": 900, "dopo_il_crash": 1200, "controllo": 900, "dove_sono": 900, "ordina": 600}
+# I brani della playlist grande della sessione ordina, e quanto puo' durare al
+# massimo ogni riordino, in secondi.
+BRANI_DELLA_PLAYLIST_GRANDE = 5000
+DURATA_DEL_RIORDINO = 5.0
 # Quanto aspettare la fine della pulizia all'avvio, in secondi.
 ATTESA_DELLA_PULIZIA = 900
 
@@ -882,8 +893,89 @@ def scenario_dove_sono():
     premi("esc")
 
 
+def scenario_ordina():
+    """Ordina e Mescola (tappa 14 c): i tempi su una playlist grande e aperta,
+    e Mescola sulla playlist che suona con il seguente gia' preparato dalla
+    dissolvenza. Le voci del menu si chiamano dal filo della finestra, come
+    le sceglierebbe il menu."""
+    import random
+
+    f = S.finestra
+    aspetta_la_pulizia()
+    # I brani della playlist grande non ci sono: conta il rinfresco della
+    # plancia, non il disco.
+    grande = os.path.join(S.dati, "playlist grande")
+    percorsi = [os.path.join(grande, f"cartella {i % 50}", f"brano {i}.mp3") for i in range(BRANI_DELLA_PLAYLIST_GRANDE)]
+
+    def prepara():
+        f._aggiungi(None, percorsi, nome="Grande")
+        pl = f.archivio.playlist[-1]
+        f.albero.Expand(f.nodo_playlist)
+        f.albero.Expand(f._nodo_della_playlist(pl))
+        f._seleziona(f._nodo_della_playlist(pl))
+        return pl
+
+    pl = nel_filo(prepara, attesa=300)
+    # Un mescolamento sempre uguale, per tempi confrontabili fra due corse.
+    f._mescola_a_caso = random.Random(14).shuffle  # noqa: S311 - non e' crittografia
+    tempi = {}
+    for nome, azione in (("Per percorso", lambda: f._ordina(pl, "percorso")), ("Per nome del file", lambda: f._ordina(pl, "nome")),
+            ("Per autore", lambda: f._ordina(pl, "autore")), ("Inverti l'ordine", lambda: f._inverti(pl)), ("Mescola", lambda: f._mescola(pl)),
+            ("Ordine di prima", lambda: f._ordine_di_prima(pl))):
+        def misura(azione=azione):
+            inizio = time.perf_counter()
+            azione()
+            return time.perf_counter() - inizio
+
+        tempi[nome] = round(nel_filo(misura, attesa=300), 3)
+    S.extra["tempi"] = tempi
+    S.verifica("ordina", f"Ogni riordino di {BRANI_DELLA_PLAYLIST_GRANDE} brani, con la playlist aperta, sotto {DURATA_DEL_RIORDINO} secondi",
+        all(t < DURATA_DEL_RIORDINO for t in tempi.values()), tempi)
+
+    def stato_della_plancia():
+        nodo = f._nodo_della_playlist(pl)
+        figli = [f.albero.GetItemText(v).split(",")[0] for v in f._figli(nodo)]
+        return f.albero.IsExpanded(nodo), figli[:3], [b.nome_del_file for b in pl.brani[:3]], f.albero.GetItemText(f._voce_corrente())
+
+    aperta, nella_plancia, nella_lista, fuoco = nel_filo(stato_della_plancia)
+    S.verifica("ordina", "La playlist resta aperta, nella plancia nell'ordine nuovo, e il fuoco resta su di lei", aperta and nella_plancia == nella_lista
+        and fuoco.startswith("Grande"), f"{nella_plancia} {nella_lista} {fuoco}")
+    righe = [r for r in S.console if r[1].startswith("Grande")]
+    S.verifica("ordina", "Una riga per ogni riordino", len(righe) == len(tempi), [r[1] for r in righe])
+
+    # La dissolvenza: il seguente preparato prima di Mescola non deve suonare.
+    cartella = _cartella_dei_brani()
+    wav = [fai_un_wav(os.path.join(cartella, f"{nome}.wav"), 12) for nome in ("a", "b", "c", "d")]
+
+    def suona_con_la_dissolvenza():
+        f.impostazioni["dissolvenza"].update(accesa=True, secondi=2.0)
+        f._applica_la_dissolvenza()
+        f._aggiungi(None, wav, nome="Dissolvenza")
+        dissolvenza = f.archivio.playlist[-1]
+        f._suona(dissolvenza, dissolvenza.brani[0])
+        return dissolvenza
+
+    dissolvenza = nel_filo(suona_con_la_dissolvenza)
+    preparato = aspetta(lambda: f._preparato is not None, attesa=20, passo=0.05)
+    nome_preparato = nel_filo(lambda: os.path.basename(f._preparato[1].percorso) if f._preparato else None)
+    S.verifica("ordina", "La dissolvenza prepara il seguente, b.wav", preparato and nome_preparato == "b.wav", nome_preparato)
+    f._mescola_a_caso = lambda brani: brani.reverse()
+    segno = time.monotonic()
+    nel_filo(lambda: f._mescola(dissolvenza))
+    ordine = nel_filo(lambda: [b.nome_del_file for b in dissolvenza.brani])
+    S.verifica("ordina", "Mescola mette in cima il brano che suona", ordine == ["a.wav", "d.wav", "c.wav", "b.wav"]
+        and S.console_da(segno)[-1:] == ["Dissolvenza mescolata: 4 brani; quello in riproduzione ora è in cima."], f"{ordine} {S.console_da(segno)}")
+    entrato = aspetta(lambda: f.coda.corrente is not None and f.coda.corrente.nome_del_file != "a.wav", attesa=20, passo=0.05)
+    aspetta(lambda: os.path.basename(f.motore.in_corso or "") == f.coda.corrente.nome_del_file, attesa=3, passo=0.05)
+    dopo = nel_filo(lambda: (f.coda.corrente.nome_del_file, os.path.basename(f.motore.in_corso or "")))
+    S.extra["dissolvenza"] = {"preparato": nome_preparato, "ordine": ordine, "dopo": dopo}
+    S.verifica("ordina", "Al passaggio entra il seguente dell'ordine nuovo, d.wav, non quello preparato prima", entrato and dopo == ("d.wav", "d.wav"), dopo)
+    premi("v")
+    premi("esc")
+
+
 SCENARI = {"principale": scenario_principale, "riavvio": scenario_riavvio, "dopo_il_crash": scenario_dopo_il_crash, "controllo": scenario_controllo,
-    "dove_sono": scenario_dove_sono}
+    "dove_sono": scenario_dove_sono, "ordina": scenario_ordina}
 
 
 # Il banco intero: le sessioni una dopo l'altra, ognuna nel suo processo.
@@ -953,6 +1045,17 @@ def banco(vuoti, video, solo=None):
     return base, esiti, _riassunto(esiti, sessioni)
 
 
+def banco_a_parte(nome):
+    """Una sessione a parte, come ordina, partendo senza dati."""
+    base = tempfile.mkdtemp(prefix="meteora_banco_")
+    dati, esiti = os.path.join(base, "dati"), os.path.join(base, "esiti")
+    os.makedirs(dati)
+    os.makedirs(esiti)
+    print(f"Banco del collaudo, sessione {nome}: dati di prova in {dati}", flush=True)
+    _aspetta_il_processo(_lancia(nome, dati, esiti, None, True), nome)
+    return base, esiti, _riassunto(esiti, (nome,))
+
+
 def _riassunto(esiti, sessioni=SESSIONI):
     """Il riassunto per la console e il display braille: una riga per
     sessione, una per ogni controllo non riuscito, una per ogni apertura."""
@@ -973,6 +1076,9 @@ def _riassunto(esiti, sessioni=SESSIONI):
         for a in esito["aperture"]:
             print(f"  Statistiche {a['da']}: {a['secondi']} s dal tasto, {a.get('dentro')} s dentro MeTeOra, "
                 f"finestra ferma al massimo {round(a['risposta_piu_lenta'] * 1000)} ms.")
+        tempi = esito["extra"].get("tempi")
+        if tempi:
+            print("  Tempi: " + "; ".join(f"{voce} {secondi} s" for voce, secondi in tempi.items()) + ".")
         falliti += len(no)
     return falliti
 
@@ -982,14 +1088,18 @@ def main():
     parser.add_argument("--vuoti", action="store_true", help="parte senza i dati di questa cartella")
     parser.add_argument("--video", help="un video per Maiuscolo con F7 con la sua finestra davanti")
     parser.add_argument("--solo", choices=SESSIONI, help="la sola sessione data, per quelle che non dipendono dalle altre, come dove_sono")
-    parser.add_argument("--sessione", choices=SESSIONI, help=argparse.SUPPRESS)
+    parser.add_argument("--ordina", action="store_true", help="solo la sessione di Ordina e Mescola, partendo senza dati")
+    parser.add_argument("--sessione", choices=SESSIONI + SESSIONI_A_PARTE, help=argparse.SUPPRESS)
     parser.add_argument("--dati", help=argparse.SUPPRESS)
     parser.add_argument("--esito", help=argparse.SUPPRESS)
     argomenti = parser.parse_args()
     if argomenti.sessione:
         sessione(argomenti.sessione, argomenti.dati, argomenti.esito, argomenti.video, argomenti.vuoti)
         return 0
-    base, _esiti, falliti = banco(argomenti.vuoti, argomenti.video, argomenti.solo)
+    if argomenti.ordina:
+        base, _esiti, falliti = banco_a_parte("ordina")
+    else:
+        base, _esiti, falliti = banco(argomenti.vuoti, argomenti.video, argomenti.solo)
     if falliti:
         print(f"Controlli non riusciti: {falliti}. I dati e i registri restano in {base}.")
         return 1
