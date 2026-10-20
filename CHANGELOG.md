@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.113.4] - 2026-10-21
+
+- Correzione delle prove (issue 27): quella del filtro del tempo cadeva sempre lanciata da sola e passava nel file intero. Dopo l'apertura del brano e dopo ogni catena riscritta mpv manda l'evento AUDIO_RECONFIG, e se intanto il tono è cambiato al volo il motore riscrive la catena, come deve; al primo brano del processo la prima ricerca del karaoke tiene occupato il filo degli eventi per circa 30 ms, e quegli eventi arrivavano dopo il cambio di tono. Ora la prova aspetta che mpv abbia aperto l'uscita e che il motore abbia visto gli eventi già mandati, invece di contare sui tempi; il motore resta com'era. La stessa attesa sostituisce le pause fisse nella prova del tono cambiato al volo, che con il processo occupato cadeva per lo stesso motivo.
+
 ## [1.113.3] - 2026-10-20
 
 - Correzione, nelle impostazioni la voce Barra dei comandi per il mouse, con una risposta che non è né sì né no, diceva nell'errore il nome dell'Inseguimento della plancia, per esempio Inseguimento della plancia: forse non è né sì né no; ora dice il suo, come Riproduzione casuale, Video e Sottotitoli letti (issue 26). Il difetto c'era dalla 1.87.0. Anche l'Inseguimento della plancia ora passa il suo nome, invece di avere quello giusto per caso. Una prova nuova scrive nella Barra dei comandi una risposta sbagliata e una vuota.

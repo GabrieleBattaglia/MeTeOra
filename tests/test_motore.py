@@ -1,6 +1,6 @@
 # MeTeOra, le prove del motore: due lettori, velocita', tono, equalizzatore, dissolvenza e fine brano senza attese.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.55.0 (tappa 4, issue 15).
+# 01/10/2026: nasce con la 1.55.0 (tappa 4, issue 15). Nella 1.113.4 le prove del filtro del tempo e del tono cambiato al volo aspettano che il motore abbia visto gli eventi di mpv, invece dei tempi (issue 27).
 
 """Le prove del motore vero, senza suoni.
 
@@ -55,6 +55,19 @@ def _aspetta(condizione, secondi=5):
             return True
         time.sleep(0.005)
     return condizione()
+
+
+def _eventi_visti(lettore, secondi=60):
+    """Aspetta che il motore abbia visto tutti gli eventi che mpv ha gia'
+    mandato al lettore: la risposta a un comando che non cambia niente arriva
+    nello stesso filo degli eventi, dietro di loro (issue 27). Di solito in
+    pochi millesimi; ma al primo brano del processo la prima ricerca del
+    karaoke tiene quel filo, e con altri fili Python occupati anche per
+    decine di secondi: per questo il limite e' largo."""
+    risposte = []
+    lettore.mpv.command_async("expand-text", "", callback=lambda errore, _esito: risposte.append(errore))
+    assert _aspetta(lambda: risposte, secondi), f"mpv non ha risposto all'expand-text entro {secondi} secondi"
+    assert risposte == [None]
 
 
 class _Avvisi:
@@ -457,15 +470,25 @@ def test_il_filtro_del_tempo_cambia_lasciando_il_normale(crea, tmp_path):
     m = crea()
     m.suona(rumore, in_pausa=True)
     lettore = m._attivo
-    assert _aspetta(lambda: lettore.pronto)
+    # L'apertura finisce dopo FILE_LOADED, quando mpv apre l'uscita e manda
+    # l'ultimo AUDIO_RECONFIG.
+    assert _aspetta(lambda: lettore.pronto and lettore.mpv.current_ao)
     assert "scaletempo2" in str(lettore.mpv.af) and "rubberband" not in str(lettore.mpv.af)
     m.velocita = 1.05
     assert _aspetta(lambda: "rubberband" in str(lettore.mpv.af) and "scaletempo2" not in str(lettore.mpv.af))
-    # Fra due velocita' diverse dal normale la catena non si riscrive.
+    # Fra due velocita' diverse dal normale la catena non si riscrive. Prima
+    # il motore deve aver visto gli AUDIO_RECONFIG dell'apertura e della
+    # riscrittura: arrivati dopo il tono cambiato al volo, la riscriverebbero,
+    # come deve. Al primo brano del processo arrivavano tardi, perche' dopo
+    # FILE_LOADED la prima ricerca del karaoke tiene il filo degli eventi per
+    # circa 30 ms, e la prova da sola cadeva sempre (issue 27).
+    _eventi_visti(lettore)
     scritta = lettore.af_scritto
     m.velocita = 1.1
     m.tono = 3
-    time.sleep(0.2)
+    # La risposta all'af-command del tono arriva al motore prima di quella di
+    # _eventi_visti: se fosse un errore, la catena sarebbe gia' riscritta.
+    _eventi_visti(lettore)
     assert lettore.af_scritto == scritta
     m.tono = 0
     m.velocita = 1.0
@@ -516,14 +539,18 @@ def test_il_tono_cambia_al_volo(crea, tmp_path):
     m.tono = 1
     m.suona(seno, in_pausa=True)
     lettore = m._attivo
-    assert _aspetta(lambda: lettore.pronto and "rubberband" in str(lettore.mpv.af))
     # Appena aperto il brano mpv riapre l'uscita ancora un paio di volte, e a
-    # ogni riapertura il motore riscrive la catena se e' cambiata al volo: si
-    # aspetta che si assesti.
-    time.sleep(0.3)
+    # ogni riapertura il motore riscrive la catena se e' cambiata al volo:
+    # prima del tono nuovo il motore deve aver visto quegli AUDIO_RECONFIG,
+    # che con il processo occupato arrivavano dopo i 300 ms che la prova
+    # aspettava (issue 27). Anche sul file, a uscita aperta, mpv li ha gia'
+    # mandati tutti.
+    assert _aspetta(lambda: lettore.pronto and "rubberband" in str(lettore.mpv.af) and lettore.mpv.current_ao)
+    _eventi_visti(lettore)
     scritta = lettore.af_scritto
     m.tono = 12
-    time.sleep(0.2)
+    # La risposta all'af-command arriva prima di quella di _eventi_visti.
+    _eventi_visti(lettore)
     assert lettore.af_scritto == scritta
     m.pausa(False)
     x = _uscito_alla_fine(m, uscita)
