@@ -1,6 +1,6 @@
 # MeTeOra, il banco del collaudo: MeTeOra vero su un desktop di Windows nascosto, con una copia dei dati, pilotato da una tastiera simulata.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 19/10/2026: nasce con la 1.104.0, dal banco con cui ClaudIA ha collaudato le statistiche della 1.103; sul desktop nascosto, come preferisce Gabriele. Nella 1.105.0 la sessione di Dove sono, l'opzione --solo, la sintesi finta e la pipe dell'istanza con il numero del processo. Nella 1.109.0 la sessione ordina, con --ordina. Nella 1.110.0 la sessione della durata residua, e al_normale in comune con Dove sono. Nella 1.111.0 il banco della plancia, con --plancia: lo stato della selezione letto come lo legge NVDA (issue 21). Nella 1.112.0 la sessione dischi, per la protezione dei dischi nella pulizia all'avvio, con Riconosci questo disco e la Sentinella; poi la conferma con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 la sessione dell'importazione delle playlist, a parte, con --importazione.
+# 19/10/2026: nasce con la 1.104.0, dal banco con cui ClaudIA ha collaudato le statistiche della 1.103; sul desktop nascosto, come preferisce Gabriele. Nella 1.105.0 la sessione di Dove sono, l'opzione --solo, la sintesi finta e la pipe dell'istanza con il numero del processo. Nella 1.109.0 la sessione ordina, con --ordina. Nella 1.110.0 la sessione della durata residua, e al_normale in comune con Dove sono. Nella 1.111.0 il banco della plancia, con --plancia: lo stato della selezione letto come lo legge NVDA (issue 21). Nella 1.112.0 la sessione dischi, per la protezione dei dischi nella pulizia all'avvio, con Riconosci questo disco e la Sentinella; poi la conferma con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 la sessione dell'importazione delle playlist, a parte, con --importazione. Nella 1.113.5 la sessione dopo il crash resta oltre il minuto solo per il file del crash: le statistiche si scrivono al piu' ogni mezz'ora.
 
 """Il banco del collaudo.
 
@@ -33,8 +33,8 @@ tastiera_simulata e guarda cosa succede dentro la finestra. Le sessioni:
   del file cancellato; poi il banco la chiude a forza, come il Task Manager,
   nel primo minuto;
 - dopo_il_crash: la chiusura non regolare contata, senza l'errore grave; resta
-  aperta oltre il minuto, per il salvataggio e lo svuotamento del file del
-  crash, ed esce con Esc;
+  aperta oltre il minuto, per lo svuotamento del file del crash, ed esce con
+  Esc;
 - controllo: le chiusure regolari e gli avvii contati;
 - dove_sono: l'apostrofo, il tasto vero della tastiera italiana, con niente
   in corso e con due file che suonano, dalla plancia e dalla console, in
@@ -288,7 +288,7 @@ def _apri_meteora():
     f.ascolto_delle_copie = istanza.Ascolto(lambda percorsi: wx.CallAfter(f.apri_dall_esterno, percorsi, "copia"))
     f.dopo_l_avvio()
     # Il salvataggio subito, prima di ogni altro: quello della fine della
-    # pulizia e quello del minuto passano dal ciclo di wx, che non gira ancora.
+    # pulizia e quelli dell'orologio passano dal ciclo di wx, che non gira ancora.
     if f._statistiche._scrittura is not None:
         f._statistiche._scrittura.join(10)
     with contextlib.suppress(OSError, ValueError), open(os.path.join(S.dati, FILE_STATISTICHE), encoding="utf-8") as fl:

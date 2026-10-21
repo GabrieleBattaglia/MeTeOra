@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.113.5] - 2026-10-21
+
+- Le statistiche si scrivono sul disco solo quando serve, chiesto da Gabriele per non stancare il disco: all'avvio, alla fine della pulizia all'avvio, quando si rinomina un file, all'azzeramento e all'uscita, come prima; in mezzo solo se è cambiato qualcosa di vero, cioè un ascolto, un brano, un tasto, un evento, un conto o un record, e al più ogni mezz'ora. Prima il file intero, che con tanti brani pesa qualche MB, si riscriveva ogni minuto, anche con MeTeOra fermo, perché il tempo della sessione cambia sempre. Il tempo che passa con MeTeOra fermo o dentro la stessa pausa resta in memoria e non conta come cambiamento; la pagina delle statistiche lo mostra comunque, perché legge dalla memoria. Un crollo, o una chiusura dal Task Manager, perde al più l'ultima mezz'ora, e l'ora della chiusura non regolare è quella dell'ultimo salvataggio. Il file del crash si svuota ancora ogni minuto.
+- Il manuale lo dice nel capitolo Le statistiche e fra i file dei dati.
+
 ## [1.113.4] - 2026-10-21
 
 Pubblicata il 21 ottobre 2026, con l'installatore e lo zip: la terza release, che porta agli utenti tutto quello che è venuto dopo la 1.99.0, dal suono più fedele della 1.102.2 alla tappa 14 del piano. Per scelta di Gabriele, stavolta senza il passaggio da VirusTotal.

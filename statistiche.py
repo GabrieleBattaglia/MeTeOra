@@ -1,6 +1,6 @@
 # MeTeOra, le statistiche: ogni sorta di conti, raccolti mentre lo si usa, e la pagina che li racconta.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (UltraCode).
-# 17/10/2026: nasce con la 1.103.0, chiesta da Gabriele: piu' dati ci sono, piu' e' contento. Nella 1.104.0 le righe che elencano voci tengono solo quelle diverse da zero, le percentuali uniformi, gli anni futuri dei tag ignorati, le date sempre con il giorno della settimana, e i brani dello storico tolti dalla pulizia all'avvio o rinominati, con i conti della pulizia nella salute. Nella 1.105.0 i nomi di Dove sono, il comando dell'apostrofo, e del suo suono. Nella 1.109.0 le playlist ordinate, invertite, mescolate e rimesse nell'ordine di prima. Nella 1.110.0 quelli della durata residua, Maiuscolo con l'apostrofo. Nella 1.112.0, nella salute, anche le unita' saltate dalla pulizia perche' usate da dischi diversi o perche' il disco che rispondeva non si riconosceva, i dischi riconosciuti a mano e le lettere rese contese dalla Sentinella. Nella 1.113.0 le playlist importate da un M3U o da un PLS, riaperte e rilette.
+# 17/10/2026: nasce con la 1.103.0, chiesta da Gabriele: piu' dati ci sono, piu' e' contento. Nella 1.104.0 le righe che elencano voci tengono solo quelle diverse da zero, le percentuali uniformi, gli anni futuri dei tag ignorati, le date sempre con il giorno della settimana, e i brani dello storico tolti dalla pulizia all'avvio o rinominati, con i conti della pulizia nella salute. Nella 1.105.0 i nomi di Dove sono, il comando dell'apostrofo, e del suo suono. Nella 1.109.0 le playlist ordinate, invertite, mescolate e rimesse nell'ordine di prima. Nella 1.110.0 quelli della durata residua, Maiuscolo con l'apostrofo. Nella 1.112.0, nella salute, anche le unita' saltate dalla pulizia perche' usate da dischi diversi o perche' il disco che rispondeva non si riconosceva, i dischi riconosciuti a mano e le lettere rese contese dalla Sentinella. Nella 1.113.0 le playlist importate da un M3U o da un PLS, riaperte e rilette. Nella 1.113.5 il campo modificate, perche' la finestra scriva il file solo quando qualcosa e' cambiato davvero.
 
 """Le statistiche di MeTeOra (1.103.0).
 
@@ -523,6 +523,11 @@ class Statistiche:
         self._pausa = 0.0
         # La versione di MeTeOra di questa sessione, che l'azzeramento tiene.
         self._versione = None
+        # Vero se da quando il file si e' scritto e' cambiato qualcosa di vero:
+        # un ascolto, un brano, un tasto, un evento, un conto o un record. Il
+        # tempo che passa con MeTeOra fermo o in pausa non conta: la finestra
+        # scrive il file solo se e' vero (1.113.5).
+        self.modificate = False
         # La scrittura in disparte, e il lucchetto che ne fa una alla volta.
         self._scrittura = None
         self._lucchetto = threading.Lock()
@@ -559,6 +564,7 @@ class Statistiche:
         return dati
 
     def _testo(self):
+        self.modificate = False
         self.dati["salvato"] = self._iso()
         return json.dumps(self.dati, ensure_ascii=False, separators=(",", ":"))
 
@@ -600,6 +606,7 @@ class Statistiche:
     def avvio(self, versione, versione_di_prima=None):
         """Un avvio di MeTeOra. Se la sessione di prima non si e' chiusa, e'
         una chiusura non regolare, all'ora dell'ultimo salvataggio."""
+        self.modificate = True
         d = self.dati
         if d["sessione_aperta"]:
             self.conta("chiusure_non_regolari")
@@ -615,6 +622,7 @@ class Statistiche:
     def chiusura(self):
         """L'uscita regolare: l'ultimo passo dell'orologio, il brano in corso,
         la sessione piu' breve."""
+        self.modificate = True
         if self._stato is not None:
             self.scatta(self._stato)
         self._chiudi_il_brano("chiusura")
@@ -625,6 +633,7 @@ class Statistiche:
     def azzera(self):
         """Tutto da capo, da adesso: restano la data della prima raccolta e il
         numero degli azzeramenti. La sessione di adesso conta come la prima."""
+        self.modificate = True
         vecchie = self.dati
         self.dati = _vuote(self._iso())
         self.dati["prima_raccolta"] = vecchie["prima_raccolta"]
@@ -642,29 +651,36 @@ class Statistiche:
     # I conti.
 
     def conta(self, nome, quanto=1):
+        self.modificate = True
         _piu(self.dati["conti"], nome, quanto)
 
     def evento(self, nome):
+        self.modificate = True
         _piu(self.dati["eventi"], nome)
 
     def tasto(self, nome):
+        self.modificate = True
         _piu(self.dati["tasti"], nome)
         self.sessione["tasti"] += 1
         self._massimo("tasti_in_una_sessione", self.sessione["tasti"], quando=self.sessione["inizio"])
 
     def senza_comando(self, nome):
+        self.modificate = True
         _piu(self.dati["senza_comando"], nome)
 
     def impostazione(self, chiave):
         """Invio su una voce della finestra delle impostazioni."""
+        self.modificate = True
         _piu(self.dati["impostazioni"], chiave)
 
     def banda(self, indice):
+        self.modificate = True
         if 0 <= indice < len(self.dati["bande"]):
             self.dati["bande"][indice] += 1
 
     def massimo(self, nome, valore, cosa=None):
         """Un record da tenere se e' il piu' alto, con cio' di cui parla."""
+        self.modificate = True
         self._massimo(nome, valore, **({"cosa": cosa} if cosa else {}))
 
     def _massimo(self, nome, valore, quando=None, **altro):
@@ -744,6 +760,7 @@ class Statistiche:
             self._chiudi_la_filata()
             return
         self._fermo_di_fila = 0.0
+        self.modificate = True
         _piu(tempi, "play", dt)
         _piu(giorno, "play", dt)
         self.dati["ore"][quando.hour] = round(self.dati["ore"][quando.hour] + dt, 3)
@@ -809,6 +826,7 @@ class Statistiche:
     def brano_avviato(self, percorso, sottobrano=None, modo="play", a_caso=False):
         """Un brano e' partito: modo e' l'evento del suo annuncio. Il brano di
         prima, se non e' finito, e' lasciato."""
+        self.modificate = True
         self._chiudi_il_brano("lasciato")
         quando = self._ora()
         _piu(self._formato(formati.estensione(percorso)), "avvii")
@@ -835,6 +853,7 @@ class Statistiche:
         if brano is None:
             return
         self._brano = None
+        self.modificate = True
         _piu(self._formato(formati.estensione(brano["percorso"])), "finiti")
         _piu(self._del_brano(brano["percorso"]), "finiti")
         self.conta("finiti")
@@ -845,10 +864,12 @@ class Statistiche:
 
     def brano_fermato(self):
         """Lo stop, con V o con il timer: il brano in corso e' lasciato."""
+        self.modificate = True
         self._chiudi_il_brano("lasciato")
 
     def brano_in_errore(self, percorso):
         """Un brano che non si suona."""
+        self.modificate = True
         percorso = percorso or (self._brano or {}).get("percorso") or ""
         _piu(self._formato(formati.estensione(percorso)), "errori")
         self.conta("errori_di_riproduzione")
@@ -869,6 +890,7 @@ class Statistiche:
             self.conta("lasciati_subito")
 
     def marker_messo(self, percorso):
+        self.modificate = True
         _piu(self._del_brano(percorso), "marker")
         _piu(self._giorno(self._ora()), "marker")
 
@@ -903,6 +925,8 @@ class Statistiche:
             if normalizzato in mancanti and normalizzato not in salvi:
                 del brani[percorso]
                 tolti += 1
+        if tolti:
+            self.modificate = True
         return tolti
 
     def rinomina_brano(self, vecchio, nuovo):
@@ -937,6 +961,7 @@ class Statistiche:
         for percorso in vecchie + nuove:
             voce = _unisci(voce, brani.pop(percorso))
         brani[nuovo] = voce
+        self.modificate = True
         return True
 
     # La pagina.

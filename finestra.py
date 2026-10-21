@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26).
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita.
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -109,10 +109,14 @@ FILE_DISCHI = "MeTeOra - Dischi.json"
 # lo schedario no, perche' si rifa' da solo rileggendo i file; dalla
 # 1.112.0 anche i dischi.
 FILE_CON_LE_COPIE = (FILE_PLAYLIST, FILE_MARCATORI, FILE_IMPOSTAZIONI, FILE_POSIZIONI, FILE_STATISTICHE, FILE_DISCHI)
-# Ogni quanti millisecondi scatta l'orologio delle statistiche, e ogni quanti
-# scatti si scrive il loro file (1.103.0).
+# Ogni quanti millisecondi scatta l'orologio delle statistiche, e quanti scatti
+# fanno il giro del minuto (1.103.0). Dalla 1.113.5 il loro file si scrive
+# all'avvio, a fine pulizia, alla rinomina, all'azzeramento e all'uscita, e in
+# mezzo solo se sono cambiate davvero e al piu' ogni tanti minuti: meno
+# scritture sul disco, e un crollo perde al piu' quei minuti (Gabriele).
 GIRO_DELLE_STATISTICHE = 1000
-GIRI_PER_SALVARE_LE_STATISTICHE = 60
+GIRI_IN_UN_MINUTO = 60
+MINUTI_FRA_I_SALVATAGGI_DELLE_STATISTICHE = 30
 # Ogni quanti millisecondi si guarda il punto del file lungo che suona, e
 # ogni quanti giri si scrive il file delle posizioni (1.92.0).
 GIRO_DELLE_POSIZIONI = 5000
@@ -1065,9 +1069,11 @@ class Finestra(wx.Frame):
         self._orologio_delle_posizioni.Start(GIRO_DELLE_POSIZIONI)
         self.marcatori.carica()
         # L'orologio delle statistiche (1.103.0): ogni secondo da' lo stato
-        # di adesso, e ogni minuto scrive il file, in disparte. La scheda
-        # audio automatica si chiede a Windows una volta al minuto.
+        # di adesso; ogni minuto guarda se e' ora di scrivere il file, in
+        # disparte (1.113.5). La scheda audio automatica si chiede a Windows
+        # una volta al minuto.
         self._giri_delle_statistiche = 0
+        self._minuti_dal_salvataggio_delle_statistiche = 0
         self._statistiche_non_salvate = False
         self._scheda_per_le_statistiche = None
         self._inizio_della_ricerca = None
@@ -6520,23 +6526,29 @@ class Finestra(wx.Frame):
             self._statistiche.scatta(self._stato_per_le_statistiche())
 
     def _giro_delle_statistiche(self, _evento):
-        """Ogni GIRO_DELLE_STATISTICHE un passo; ogni GIRI_PER_SALVARE_LE_STATISTICHE
-        la scheda audio di adesso e il file, scritto in disparte. Un
-        salvataggio che non riesce lo si dice una volta sola. Con il
-        salvataggio, il file del crash si svuota: le eccezioni che le
-        librerie gestiscono da se' passano nel registro degli errori, e alla
-        riapertura dopo una chiusura a forza non sembrano un crash (1.104.0)."""
+        """Ogni GIRO_DELLE_STATISTICHE un passo; a ogni giro del minuto la
+        scheda audio di adesso, e il file del crash che si svuota: le
+        eccezioni che le librerie gestiscono da se' passano nel registro degli
+        errori, e alla riapertura dopo una chiusura a forza non sembrano un
+        crash (1.104.0). Il file delle statistiche, scritto in disparte, solo
+        se sono cambiate davvero e se dall'ultimo salvataggio sono passati
+        MINUTI_FRA_I_SALVATAGGI_DELLE_STATISTICHE minuti: con MeTeOra fermo
+        non si scrive niente (1.113.5). Un salvataggio che non riesce lo si
+        dice una volta sola."""
         if self._chiusa:
             return
         self._scatto_delle_statistiche()
         self._giri_delle_statistiche += 1
-        if self._giri_delle_statistiche % GIRI_PER_SALVARE_LE_STATISTICHE == 1:
+        if self._giri_delle_statistiche % GIRI_IN_UN_MINUTO == 1:
             self._aggiorna_la_scheda_delle_statistiche()
-        if self._giri_delle_statistiche % GIRI_PER_SALVARE_LE_STATISTICHE == 0:
-            self._salva_le_statistiche_in_disparte()
+        if self._giri_delle_statistiche % GIRI_IN_UN_MINUTO == 0:
+            self._minuti_dal_salvataggio_delle_statistiche += 1
+            if self._statistiche.modificate and self._minuti_dal_salvataggio_delle_statistiche >= MINUTI_FRA_I_SALVATAGGI_DELLE_STATISTICHE:
+                self._salva_le_statistiche_in_disparte()
             registro.sopravvissuto()
 
     def _salva_le_statistiche_in_disparte(self):
+        self._minuti_dal_salvataggio_delle_statistiche = 0
         self._statistiche.salva_in_disparte(lambda e: wx.CallAfter(self._statistiche_non_salvate_in_disparte, e))
 
     def _statistiche_non_salvate_in_disparte(self, errore):

@@ -1,6 +1,6 @@
 # MeTeOra, le prove della finestra principale, sul desktop nascosto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21). Nella 1.112.0 quelle dei dischi della pulizia, anche del loro file che non si legge, e la prova della pulizia che toglie i file spariti non fa piu' leggere allo schedario i file finti; poi Riconosci questo disco, la riga che lo indica e la Sentinella che guarda i dischi dei file usati; infine la domanda di Riconosci questo disco con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 quelle dell'importazione delle playlist M3U, M3U8 e PLS. Nella 1.113.1 quella dell'etichetta di un file delle console con un sottobrano senza durata (issue 24). Nella 1.113.3 quella della Barra dei comandi per il mouse, che nell'errore dice il suo nome (issue 26).
+# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21). Nella 1.112.0 quelle dei dischi della pulizia, anche del loro file che non si legge, e la prova della pulizia che toglie i file spariti non fa piu' leggere allo schedario i file finti; poi Riconosci questo disco, la riga che lo indica e la Sentinella che guarda i dischi dei file usati; infine la domanda di Riconosci questo disco con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 quelle dell'importazione delle playlist M3U, M3U8 e PLS. Nella 1.113.1 quella dell'etichetta di un file delle console con un sottobrano senza durata (issue 24). Nella 1.113.3 quella della Barra dei comandi per il mouse, che nell'errore dice il suo nome (issue 26). Nella 1.113.5 quelle delle statistiche scritte solo se cambiate, al piu' ogni mezz'ora.
 
 import contextlib
 import ctypes
@@ -6892,11 +6892,41 @@ def test_l_istruzione_delle_sezioni_non_conta_le_righe():
 def test_ogni_minuto_si_svuota_il_file_del_crash(finestra, monkeypatch):
     svuotati = []
     monkeypatch.setattr(modulo.registro, "sopravvissuto", lambda: svuotati.append(True) or 0)
-    finestra._giri_delle_statistiche = modulo.GIRI_PER_SALVARE_LE_STATISTICHE - 2
+    finestra._giri_delle_statistiche = modulo.GIRI_IN_UN_MINUTO - 2
     finestra._giro_delle_statistiche(None)
     assert svuotati == []
     finestra._giro_delle_statistiche(None)
     assert svuotati == [True]
+
+
+def test_le_statistiche_si_scrivono_solo_se_cambiate_al_piu_ogni_mezz_ora(finestra, monkeypatch):
+    # 1.113.5, chiesto da Gabriele per il disco: con MeTeOra fermo il file non
+    # si scrive; cambiate, si scrive al piu' ogni MINUTI_FRA_I_SALVATAGGI_DELLE_STATISTICHE.
+    scritture = []
+    monkeypatch.setattr(modulo.registro, "sopravvissuto", lambda: 0)
+    monkeypatch.setattr(finestra._statistiche, "salva_in_disparte", lambda al_guasto=None: scritture.append(True))
+
+    def minuti(quanti):
+        for _ in range(quanti):
+            finestra._giri_delle_statistiche = modulo.GIRI_IN_UN_MINUTO - 1
+            finestra._giro_delle_statistiche(None)
+
+    mezz_ora = modulo.MINUTI_FRA_I_SALVATAGGI_DELLE_STATISTICHE
+    finestra._statistiche.modificate = False
+    finestra._minuti_dal_salvataggio_delle_statistiche = 0
+    # Fermo per piu' di mezz'ora: il tempo passa, ma niente di vero cambia.
+    minuti(mezz_ora + 10)
+    assert scritture == [] and not finestra._statistiche.modificate
+    # Un conto cambia: dopo piu' di mezz'ora senza scrivere, si scrive al
+    # giro del minuto dopo, e i minuti ripartono.
+    finestra._statistiche.conta("aperti_col_trascinamento")
+    minuti(1)
+    assert scritture == [True] and finestra._minuti_dal_salvataggio_delle_statistiche == 0
+    # Ancora cambiate: non prima di un'altra mezz'ora.
+    minuti(mezz_ora - 1)
+    assert scritture == [True]
+    minuti(1)
+    assert scritture == [True, True]
 
 
 # La pulizia all'avvio e le statistiche salvate subito (1.104.0).

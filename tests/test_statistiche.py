@@ -1,6 +1,6 @@
 # MeTeOra, le prove delle statistiche: l'orologio, la vita dei brani, il file, l'azzeramento e la pagina.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (UltraCode).
-# 17/10/2026: nasce con la 1.103.0. Nella 1.104.0 le prove delle righe-elenco senza le voci a zero, delle percentuali, degli anni futuri, delle date con il giorno della settimana, della pulizia all'avvio e dei brani rinominati. Nella 1.105.0 quella dei nomi di tutti gli eventi, con Dove sono. Nella 1.109.0 la riga delle playlist con Ordina e Mescola. Nella 1.110.0 la durata residua in fondo agli eventi. Nella 1.112.0 la riga delle pulizie con le unita' usate da dischi diversi o con un disco che non si riconosceva, e la riga dei dischi riconosciuti a mano e delle lettere rese contese dalla Sentinella. Nella 1.113.0 la prova che ogni evento dei suoni ha il suo nome.
+# 17/10/2026: nasce con la 1.103.0. Nella 1.104.0 le prove delle righe-elenco senza le voci a zero, delle percentuali, degli anni futuri, delle date con il giorno della settimana, della pulizia all'avvio e dei brani rinominati. Nella 1.105.0 quella dei nomi di tutti gli eventi, con Dove sono. Nella 1.109.0 la riga delle playlist con Ordina e Mescola. Nella 1.110.0 la durata residua in fondo agli eventi. Nella 1.112.0 la riga delle pulizie con le unita' usate da dischi diversi o con un disco che non si riconosceva, e la riga dei dischi riconosciuti a mano e delle lettere rese contese dalla Sentinella. Nella 1.113.0 la prova che ogni evento dei suoni ha il suo nome. Nella 1.113.5 quelle delle statistiche scritte solo se cambiate, al piu' ogni mezz'ora.
 
 import datetime
 import json
@@ -628,3 +628,29 @@ def test_ogni_evento_dei_suoni_ha_il_suo_nome():
     # di quelli che MeTeOra conosce sarebbe sbagliato (1.113.0).
     assert statistiche.NOMI_DEGLI_EVENTI["playlist_gia_importata"] == "playlist importata arrivata di nuovo"
     assert statistiche.NOMI_DEGLI_EVENTI["playlist_riletta"] == "playlist riletta dal suo file"
+
+
+def test_le_statistiche_sanno_se_sono_cambiate(tmp_path):
+    # 1.113.5: il tempo che passa con MeTeOra fermo o dentro la stessa pausa
+    # non le cambia; l'ascolto, una pausa nuova, un tasto, un evento o un brano
+    # si'. Scritte, tornano non cambiate.
+    s, o = _nuove(tmp_path)
+    assert not s.modificate
+    s.avvio("1.113.5")
+    assert s.modificate
+    s.salva()
+    assert not s.modificate
+    _passi(s, o, {"stato": "fermo"}, 120)
+    assert not s.modificate
+    _passi(s, o, {"stato": "pausa"}, 2)
+    assert s.modificate
+    s.salva()
+    _passi(s, o, {"stato": "pausa"}, 60)
+    assert not s.modificate
+    _passi(s, o, _suona(), 2)
+    assert s.modificate
+    for cambia in (lambda: s.tasto("X"), lambda: s.evento("play"), lambda: s.brano_avviato("E:\\musica\\b.mp3"), lambda: s.massimo("volume_piu_alto", 300)):
+        s.salva()
+        assert not s.modificate
+        cambia()
+        assert s.modificate
