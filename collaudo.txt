@@ -1,10 +1,5 @@
 Collaudo di MeTeOra dalla 1.105.0 alla 1.113.4, con NVDA: restano le voci da leggere e da sentire; il resto l'ha provato ClaudIA il 20 ottobre 2026, con pytest e con strumenti\banco.py sul desktop nascosto. La 1.105.1 e le correzioni dalla 1.113.1 non hanno voci tue. Prima git pull in MeTeOra e in GBUtils: serve GBUtils V212. Sulle altre macchine, dopo il pull e prima di MeTeOra, python pulisci_i_dati.py, che chiede una S e cancella per sempre i dati vecchi. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta. Scrivi le note sulla riga della voce; le voci superate si cancellano.
 1.111.0, NVDA e lo stato della selezione nella plancia (issue 21), prima di tutto: in NVDA apri Preferenze, Impostazioni, categoria Generale, metti Livello di logging su input/output, conferma con Sì la domanda Livello di log ad alto rischio, e riavvia NVDA, così il log riparte di sicuro; poi apri MeTeOra.
-1.111.0: in una playlist con qualche brano scendi e sali con le frecce semplici, poi Inizio e Fine: NVDA legge le voci come prima, con la posizione e il livello, e non dice mai non selezionato?
-1.111.0: con le stesse frecce, Inizio e Fine, sul display braille le voci si leggono come prima, senza niente di nuovo?
-1.111.0: da un brano scendi con Ctrl e freccia giù: sul brano d'arrivo NVDA dice non selezionato dopo il nome?
-1.111.0: sullo stesso brano, sul display braille compare nsel, o quale altra abbreviazione?
-1.111.0: lì premi Ctrl con la barra spaziatrice: NVDA dice solo selezionato, senza rileggere la voce?
 1.111.0: ripremi Ctrl con la barra spaziatrice: NVDA dice solo non selezionato?
 1.111.0: con Maiuscolo e freccia giù allarga la selezione di due brani, poi torna su con Ctrl e freccia su fino a uscirne: sui brani selezionati NVDA tace, e sul primo fuori dice non selezionato?
 1.111.0: da un brano premi Ctrl con Fine, che porta il fuoco su Impostazioni dicendo non selezionato, poi freccia giù, che non va oltre: NVDA dice selezionato?
@@ -16,7 +11,6 @@ Collaudo di MeTeOra dalla 1.105.0 alla 1.113.4, con NVDA: restano le voci da leg
 1.111.0: con la voce ancora su no, Ctrl con la barra spaziatrice non fa dire niente a NVDA? Poi rimetti la voce su sì.
 1.111.0: esci con Esc mentre NVDA legge ancora la plancia, e riapri MeTeOra; fallo due o tre volte: alla riapertura nessun avviso di errore grave?
 1.111.0, alla fine: dimmi che hai finito, così leggo nvda.log; poi rimetti il Livello di logging di NVDA com'era, cioè disattivato.
-verifica.
 1.112.0, la protezione dei dischi, con due chiavette che prendono la stessa lettera: infila la prima, avvia MeTeOra, suona un suo file e mettilo nei Preferiti con F4, poi esci con Esc.
 Riavvia con la stessa chiavetta: la riga della fine della pulizia non dice Saltata con la lettera della chiavetta. Così la pulizia impara il suo disco. Esci con Esc.
 Togli la chiavetta, infila l'altra e riavvia: in fondo alla riga della fine della pulizia c'è Saltata, la lettera, usata da dischi diversi, poi la sua voce resta, se della prima chiavetta MeTeOra conosce un file solo, o le sue, il numero, voci restano, e in fondo Per riconoscere il disco di adesso, Riconosci questo disco nel menu della lettera in Questo PC.
