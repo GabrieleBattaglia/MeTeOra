@@ -1,59 +1,4 @@
 Collaudo di MeTeOra dalla 1.105.0 alla 1.113.4, con NVDA: restano le voci da leggere e da sentire; il resto l'ha provato ClaudIA il 20 ottobre 2026, con pytest e con strumenti\banco.py sul desktop nascosto. La 1.105.1 e le correzioni dalla 1.113.1 non hanno voci tue. Prima git pull in MeTeOra e in GBUtils: serve GBUtils V212. Sulle altre macchine, dopo il pull e prima di MeTeOra, python pulisci_i_dati.py, che chiede una S e cancella per sempre i dati vecchi. Avvio: python meteora.py dalla cartella E:\git\mine\MeTeOra; chiudi prima la copia aperta. Scrivi le note sulla riga della voce; le voci superate si cancellano.
-1.112.0, la pulizia con la protezione dei dischi, qui sul gigante: avvia MeTeOra e in Questo PC suona E:\git\tmp\prova-pulizia\Prova della pulizia.wav, poi mettilo nei Preferiti con F4 ed esci con Esc.
-Riapri MeTeOra con il file ancora al suo posto: dopo il suono della partenza, la scopa che va verso destra e la riga Pulizia all'avvio: controllo e il numero delle voci; poi le tre note che tornano al centro e la riga Pulizia finita: c'è ancora tutto, senza Saltata. Così la pulizia impara il disco di E:; se il file fosse già spostato, E: diventerebbe contesa, e per pulirla servirebbe Riconosci questo disco. Esci con Esc e dimmelo: io sposto il file.
-Riapri MeTeOra: la scopa, la riga del controllo, poi le tre note e la riga che dice che 1 file è sparito e da dove l'ha tolto, Preferiti compresi.
-Le righe della pulizia si capiscono con NVDA e con il display braille?
-Dove sono, 1.105.0, il suono: in Acu_Maker cerca dove_sono e ascolta meteora_dove_sono, una scivolata che scende da sinistra, una che risale verso il centro e un'eco piano a destra; poi fallo suonare in MeTeOra con l'apostrofo.
-Dove sono, il suono in MeTeOra: si riconosce?
-Dove sono, il suono in MeTeOra: il volume sta con gli altri effetti?
-Dove sono, il suono in MeTeOra: non lo confondi con F8 o con F11?
-Dove sono, con NVDA: mentre suona un brano di una playlist, scorri la plancia e premi l'apostrofo.
-Dove sono, con NVDA, dalla plancia: NVDA dice la riga, con tempo, brano, lista e quello che c'è di particolare?
-Dove sono, con NVDA, dalla plancia: il fuoco resta sulla voce?
-Dove sono, con NVDA, dalla plancia: l'ordine e le parole si capiscono al primo ascolto?
-Dove sono, con NVDA, dalla plancia: NVDA la dice una volta sola?
-Dove sono, con NVDA, dalla plancia: premi l'apostrofo due volte di seguito, svelto; NVDA lascia a metà la prima riga e dice la seconda?
-Dove sono senza musica: ferma con V, resta nella plancia e premi l'apostrofo.
-Dove sono senza musica: NVDA dice Non sta suonando niente, e la frase arriva anche alla barra braille?
-Dove sono con la voce di Windows: nelle impostazioni metti Sintesi di sottotitoli e karaoke su la voce di Windows, SAPI5; fai suonare un brano e premi l'apostrofo tre volte di seguito, svelto.
-Dove sono con la voce di Windows: la voce lascia ogni riga a metà e dice per intero solo l'ultima, senza le tre righe in fila?
-Dove sono con la voce di Windows, finito: rimetti Sintesi di sottotitoli e karaoke su automatica.
-Dove sono dalla console: premi F6 e poi l'apostrofo, due volte.
-Dove sono dalla console: NVDA dice la riga, senza leggerla una seconda volta per il cursore?
-Dove sono dalla console: con le frecce trovi una riga sola, riscritta?
-Dove sono sul display braille, con Celle della barra braille a 0: la riga arriva alla barra e la leggi tutta?
-Dove sono sul display braille, se ti va, con Celle della barra braille a 40: la riga arriva a blocchi che si leggono bene?
-Dove sono sul display braille, con le celle a 40: premi l'apostrofo due volte di seguito; la barra passa subito alla riga nuova, senza finire i blocchi di quella vecchia?
-Dove sono sul display braille, se ti va, con Dove vanno sottotitoli e karaoke su solo al braille: la riga arriva alla barra e la voce tace?
-Dove sono dal video: con un video nella sua finestra, premi l'apostrofo.
-Dove sono dal video: NVDA dice la riga?
-Dove sono dal video: il video resta davanti?
-1.109.0, Ordina e Mescola, prima di tutto: dopo il git pull in GBUtils la collezione deve avere i quattro suoni nuovi, che in Acu_Maker si trovano cercando meteora_.
-1.109.0: in Acu_Maker ascolta meteora_playlist_ordinata, meteora_ordine_invertito, meteora_playlist_mescolata e meteora_ordine_di_prima: le stesse quattro note che salgono, scendono, si mescolano e tornano indietro. Si riconoscono fra loro, e da Sposta, dalla N e dalle statistiche?
-1.109.0: in MeTeOra il volume dei quattro suoni sta con gli altri effetti?
-1.109.0, su una tua playlist grande: Invio, Ordina. NVDA dice Ordina come sottomenu, e freccia destra lo apre con le voci lette una per una?
-1.109.0, sempre lì scegli Per autore: la riga della console si legge bene con NVDA e sul display braille, compreso il conto di quelli senza autore in fondo?
-1.109.0: con Crea playlist da qui fai una playlist da una cartella grande che MeTeOra non ha mai letto, e scegli subito Per autore: se lo schedario non ha ancora finito, la riga conta a parte i brani non ancora letti e dice che un nuovo Ordina li mette al loro posto. Ti sembra chiara?
-1.109.0, su una playlist di SID scegli Per album: i SID non hanno l'album, e la riga dice tutti senza album, in ordine di percorso. Ti sembra chiara, o sembra un difetto?
-Durata residua, 1.110.0, il suono: in Acu_Maker cerca durata_residua e ascolta meteora_durata_residua, due tocchi che scendono dal centro verso destra e una scivolata di un'ottava giù; poi fallo suonare in MeTeOra con Maiuscolo e l'apostrofo.
-Durata residua, il suono in MeTeOra: si riconosce?
-Durata residua, il suono in MeTeOra: il volume sta con gli altri effetti?
-Durata residua, il suono in MeTeOra: non lo confondi con quello di Dove sono, l'apostrofo senza Maiuscolo?
-Durata residua, con NVDA: apri una playlist nella plancia, suonane un brano, scorri la plancia e premi Maiuscolo con l'apostrofo.
-Durata residua, con NVDA: NVDA dice la riga, con mancante, totale, trascorso, percentuale, ora di fine e lista?
-Durata residua, con NVDA: NVDA la dice una volta sola?
-Durata residua senza musica: ferma con V, resta nella plancia e premi Maiuscolo con l'apostrofo.
-Durata residua senza musica: NVDA dice Non sta suonando niente, e la frase arriva anche alla barra braille?
-Durata residua con la voce di Windows: metti Sintesi di sottotitoli e karaoke su la voce di Windows, SAPI5, premi Maiuscolo con l'apostrofo tre volte di seguito, svelto, poi rimetti la sintesi su automatica.
-Durata residua con la voce di Windows: la voce lascia ogni riga a metà e dice per intero solo l'ultima?
-Durata residua, con NVDA: l'ordine e le parole si capiscono al primo ascolto?
-Durata residua, con NVDA: il totale ti torna con quello che la plancia dice della playlist?
-Durata residua, con NVDA: apri un'altra playlist sotto quella che suona e premi di nuovo; il mancante cresce, e la riga dice i brani in tutto?
-Durata residua, con NVDA: con la riproduzione casuale accesa, Maiuscolo con N, la riga del mazzo, suonati e nel mazzo restano, si capisce?
-Durata residua dalla console: premi F6 e poi Maiuscolo con l'apostrofo, due volte; NVDA dice la riga senza rileggerla per il cursore?
-Durata residua sul display braille, con Celle della barra braille a 0: la riga arriva alla barra e la leggi tutta?
-Durata residua sul display braille, se ti va, con le celle a 40: premi Maiuscolo con l'apostrofo due volte di seguito; la barra passa subito alla riga nuova?
-Durata residua, con NVDA: alza la velocità con D e premi Maiuscolo con l'apostrofo; nella riga Mancano, alla velocità sono, in tutto, capisci al primo ascolto che il tempo vero è quello di ciò che manca, e non del totale?
 1.111.0, NVDA e lo stato della selezione nella plancia (issue 21), prima di tutto: in NVDA apri Preferenze, Impostazioni, categoria Generale, metti Livello di logging su input/output, conferma con Sì la domanda Livello di log ad alto rischio, e riavvia NVDA, così il log riparte di sicuro; poi apri MeTeOra.
 1.111.0: in una playlist con qualche brano scendi e sali con le frecce semplici, poi Inizio e Fine: NVDA legge le voci come prima, con la posizione e il livello, e non dice mai non selezionato?
 1.111.0: con le stesse frecce, Inizio e Fine, sul display braille le voci si leggono come prima, senza niente di nuovo?
@@ -71,6 +16,7 @@ Durata residua, con NVDA: alza la velocità con D e premi Maiuscolo con l'apostr
 1.111.0: con la voce ancora su no, Ctrl con la barra spaziatrice non fa dire niente a NVDA? Poi rimetti la voce su sì.
 1.111.0: esci con Esc mentre NVDA legge ancora la plancia, e riapri MeTeOra; fallo due o tre volte: alla riapertura nessun avviso di errore grave?
 1.111.0, alla fine: dimmi che hai finito, così leggo nvda.log; poi rimetti il Livello di logging di NVDA com'era, cioè disattivato.
+verifica.
 1.112.0, la protezione dei dischi, con due chiavette che prendono la stessa lettera: infila la prima, avvia MeTeOra, suona un suo file e mettilo nei Preferiti con F4, poi esci con Esc.
 Riavvia con la stessa chiavetta: la riga della fine della pulizia non dice Saltata con la lettera della chiavetta. Così la pulizia impara il suo disco. Esci con Esc.
 Togli la chiavetta, infila l'altra e riavvia: in fondo alla riga della fine della pulizia c'è Saltata, la lettera, usata da dischi diversi, poi la sua voce resta, se della prima chiavetta MeTeOra conosce un file solo, o le sue, il numero, voci restano, e in fondo Per riconoscere il disco di adesso, Riconosci questo disco nel menu della lettera in Questo PC.
