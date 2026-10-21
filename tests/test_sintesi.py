@@ -1,30 +1,32 @@
 # MeTeOra, le prove della sintesi dei sottotitoli.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/10/2026: nasce con la tappa 7. Nella 1.105.0 la prova della voce interrotta, per Dove sono.
+# 03/10/2026: nasce con la tappa 7. Nella 1.105.0 la prova della voce interrotta, per Dove sono. Nella 1.113.6 le uscite stanno in GBsintesi di GBUtils, i nomi qui.
 
 """Le uscite sono finte, dal conftest: nessuna prova parla."""
+
+import GBsintesi
 
 import sintesi
 
 # La _crea vera: il conftest la sostituisce in ogni prova.
-_CREA_VERA = sintesi._crea
+_CREA_VERA = GBsintesi._crea
 
 
 def test_disponibili_e_automatica(sintesi_finta):
-    assert sintesi.disponibili() == ["nvda", "sapi5"]
-    voce = sintesi.Sintesi()
-    assert voce.scelta(sintesi.AUTOMATICA) == "nvda"
+    assert GBsintesi.disponibili() == ["nvda", "sapi5"]
+    voce = GBsintesi.Sintesi()
+    assert voce.scelta(GBsintesi.AUTOMATICA) == "nvda"
     sintesi_finta.attive["jaws"] = True
     sintesi_finta.attive["nvda"] = False
-    assert voce.scelta(sintesi.AUTOMATICA) == "jaws"
+    assert voce.scelta(GBsintesi.AUTOMATICA) == "jaws"
     sintesi_finta.attive["jaws"] = False
-    assert voce.scelta(sintesi.AUTOMATICA) == "sapi5"
+    assert voce.scelta(GBsintesi.AUTOMATICA) == "sapi5"
     sintesi_finta.presenti.discard("sapi5")
-    assert sintesi.Sintesi().scelta(sintesi.AUTOMATICA) is None
+    assert GBsintesi.Sintesi().scelta(GBsintesi.AUTOMATICA) is None
 
 
 def test_dici_con_la_scelta_e_senza_uscite(sintesi_finta):
-    voce = sintesi.Sintesi()
+    voce = GBsintesi.Sintesi()
     assert voce.dici("uno") is True and voce.dici("due", "sapi5") is True
     assert sintesi_finta.detti == [("nvda", "uno"), ("sapi5", "due")]
     # Una scelta che non risponde non dice niente, e non ricade su altre.
@@ -33,7 +35,7 @@ def test_dici_con_la_scelta_e_senza_uscite(sintesi_finta):
 
 
 def test_un_uscita_che_si_rompe_non_ferma_niente(sintesi_finta, monkeypatch):
-    voce = sintesi.Sintesi()
+    voce = GBsintesi.Sintesi()
     rotta = voce._uscita("nvda")
 
     def errore(_testo, interrupt=False):
@@ -46,22 +48,22 @@ def test_un_uscita_che_si_rompe_non_ferma_niente(sintesi_finta, monkeypatch):
 
 
 def test_i_nomi_da_leggere():
-    assert sintesi.nome(sintesi.AUTOMATICA) == "automatica"
+    assert sintesi.nome(GBsintesi.AUTOMATICA) == "automatica"
     assert sintesi.nome("nvda") == "NVDA" and sintesi.nome("sapi5") == "la voce di Windows, SAPI5"
 
 
 def test_dove_vanno_i_testi(sintesi_finta):
     # 1.82.0: voce e braille, uno per uno; la voce di Windows il braille non ce l'ha.
-    voce = sintesi.Sintesi()
+    voce = GBsintesi.Sintesi()
     assert voce.dici("uno") and voce.dici("due", dove="sintesi") and voce.dici("tre", dove="braille")
     assert sintesi_finta.detti == [("nvda", "uno"), ("nvda", "due")] and sintesi_finta.braille == [("nvda", "uno"), ("nvda", "tre")]
     assert voce.dici("quattro", "sapi5", "braille") and sintesi_finta.braille[-1] == ("nvda", "tre")
-    assert set(sintesi.DESTINAZIONI) == {"entrambi", "sintesi", "braille"}
+    assert set(sintesi.DESTINAZIONI) == set(GBsintesi.DESTINAZIONI) == {"entrambi", "sintesi", "braille"}
 
 
 def test_dici_puo_interrompere_la_voce(sintesi_finta):
     # 1.105.0: Dove sono interrompe la voce, i sottotitoli no.
-    voce = sintesi.Sintesi()
+    voce = GBsintesi.Sintesi()
     assert voce.dici("uno") and voce.dici("due", interrompi=True) and voce.dici("tre", "sapi5", "sintesi", interrompi=True)
     assert sintesi_finta.detti == [("nvda", "uno"), ("nvda", "due"), ("sapi5", "tre")]
     assert sintesi_finta.interrotti == [("nvda", "due"), ("sapi5", "tre")]
@@ -83,7 +85,7 @@ def test_la_voce_di_windows_si_apre_anche_senza_l_elenco_delle_voci(monkeypatch)
     def rotto(_nome):
         raise RuntimeError("elenco delle voci non letto")
 
-    monkeypatch.setattr(sintesi.importlib, "import_module", rotto)
+    monkeypatch.setattr(GBsintesi.importlib, "import_module", rotto)
     monkeypatch.setattr(win32com.client, "Dispatch", lambda nome: Voce() if nome == "SAPI.SpVoice" else None)
     voce = _CREA_VERA("sapi5")
     assert type(voce).__name__ == "_VoceDiWindows" and voce.is_active() and voce.braille("x") is False

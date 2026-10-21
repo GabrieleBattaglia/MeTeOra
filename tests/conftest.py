@@ -153,7 +153,7 @@ def sintesi_finta(monkeypatch):
     piacere."""
     import types
 
-    import sintesi
+    import GBsintesi
 
     stato = types.SimpleNamespace(detti=[], interrotti=[], braille=[], presenti={"nvda", "jaws", "sapi5"}, attive={"nvda": True, "jaws": False})
 
@@ -174,7 +174,7 @@ def sintesi_finta(monkeypatch):
             if self.chiave != "sapi5":
                 stato.braille.append((self.chiave, testo))
 
-    monkeypatch.setattr(sintesi, "_crea", lambda chiave: Finta(chiave) if chiave in stato.presenti else None)
+    monkeypatch.setattr(GBsintesi, "_crea", lambda chiave: Finta(chiave) if chiave in stato.presenti else None)
     return stato
 
 

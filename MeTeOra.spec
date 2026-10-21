@@ -44,7 +44,7 @@ def _dentro(voce):
 
 datas = [voce for voce in datas if _dentro(voce)]
 
-# Le uscite della sintesi si aprono per nome (sintesi.py, importlib), e i
+# Le uscite della sintesi si aprono per nome (GBsintesi.py di GBUtils, importlib), e i
 # moduli di winrt del riconoscimento dei caratteri si importano dentro le
 # funzioni di ocr.py.
 hiddenimports = collect_submodules("accessible_output2.outputs") + [

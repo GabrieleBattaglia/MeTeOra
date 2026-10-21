@@ -1,147 +1,27 @@
-# MeTeOra, la sintesi dei sottotitoli: gli screen reader e la voce di Windows, con accessible_output2.
+# MeTeOra, i nomi della sintesi dei sottotitoli: le uscite e le destinazioni, come si leggono all'utente.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/10/2026: nasce con la tappa 7, per i sottotitoli letti. Nella 1.82.0 dove vanno i testi, alla voce, al braille o a tutti e due, chiamati uno per uno. Nella 1.83.3 la voce di Windows aperta da MeTeOra quando accessible_output2 non ci riesce. Nella 1.85.0 fuori ZDSR, Dolphin, System Access e PC-Talker. Nella 1.105.0 dici puo' interrompere la voce che sta parlando, per Dove sono.
+# 03/10/2026: nasce con la tappa 7, per i sottotitoli letti. Nella 1.82.0 dove vanno i testi, alla voce, al braille o a tutti e due, chiamati uno per uno. Nella 1.83.3 la voce di Windows aperta da MeTeOra quando accessible_output2 non ci riesce. Nella 1.85.0 fuori ZDSR, Dolphin, System Access e PC-Talker. Nella 1.105.0 dici puo' interrompere la voce che sta parlando, per Dove sono. Nella 1.113.6 le uscite, la voce di Windows e la barra braille a blocchi passano in GBsintesi di GBUtils V213, che serve anche a MESS: qui restano le parole da leggere.
 
-"""Le uscite a cui MeTeOra manda i sottotitoli letti (tappa 7).
+"""I nomi delle uscite e delle destinazioni della sintesi dei sottotitoli.
 
-accessible_output2 parla con gli screen reader e con la voce di Windows:
-voce e display braille, dove lo screen reader li ha. Le impostazioni
-scelgono un'uscita, oppure l'automatica: il primo screen reader attivo,
-nell'ordine di USCITE, e se non ce n'e' nessuno la voce di Windows.
-Un'uscita che non si apre, o che sparisce, non ferma niente: dici
-restituisce falso, e i sottotitoli restano nella console.
+Le uscite, la scelta automatica, la voce di Windows di ripiego e la barra
+braille a blocchi stanno in GBsintesi di GBUtils, che non scrive frasi: le
+parole che l'utente legge le da' MeTeOra, qui.
 """
 
-import contextlib
-import importlib
+from GBsintesi import AUTOMATICA
 
-AUTOMATICA = "automatica"
-# Le uscite, nell'ordine della scelta automatica: chiave salvata nelle
-# impostazioni, (modulo di accessible_output2, classe, nome da leggere).
-# ZDSR, Dolphin, System Access e PC-Talker non ci sono piu' (1.85.0): le loro
-# DLL sono proprietarie, senza un permesso di ridistribuirle, e restano fuori
-# dal pacchetto; Dolphin e System Access, poi, hanno solo DLL a 32 bit, che
-# MeTeOra a 64 bit non potrebbe comunque caricare (decisione di Gabriele).
-USCITE = {
-    "nvda": ("nvda", "NVDA", "NVDA"),
-    "jaws": ("jaws", "Jaws", "JAWS"),
-    "sapi5": ("sapi5", "SAPI5", "la voce di Windows, SAPI5"),
+# Le uscite di GBsintesi.USCITE, con il nome da leggere.
+NOMI = {
+    "nvda": "NVDA",
+    "jaws": "JAWS",
+    "sapi5": "la voce di Windows, SAPI5",
 }
-VOCE_DI_SISTEMA = "sapi5"
-# Dove vanno i testi letti, sottotitoli e karaoke (1.82.0): le chiavi delle
-# impostazioni e le loro righe.
+# Dove vanno i testi letti, sottotitoli e karaoke (1.82.0): le chiavi di
+# GBsintesi.DESTINAZIONI, salvate nelle impostazioni, e le loro righe.
 DESTINAZIONI = {"entrambi": "alla sintesi e al braille", "sintesi": "solo alla sintesi", "braille": "solo al braille"}
-# Le uscite che hanno il braille, in accessible_output2: con le altre il
-# braille non arriva.
-CON_IL_BRAILLE = frozenset({"nvda", "jaws"})
-
-
-class _VoceDiWindows:
-    """La voce di Windows, SAPI5, aperta da MeTeOra senza leggere l'elenco
-    delle voci installate: accessible_output2 lo legge all'apertura, e su
-    certi Windows, con una voce registrata male, l'elenco fallisce e
-    l'uscita non si apriva, lasciando chi non ha uno screen reader senza la
-    voce di ripiego (1.83.3, sul PC di Gabriele)."""
-
-    def __init__(self):
-        import win32com.client
-
-        self._voce = win32com.client.Dispatch("SAPI.SpVoice")
-
-    def speak(self, testo, interrupt=False):
-        # SVSFlagsAsync, e con interrupt SVSFPurgeBeforeSpeak.
-        self._voce.Speak(testo, 1 | (2 if interrupt else 0))
-
-    def braille(self, _testo):
-        return False
-
-    def is_active(self):
-        return True
-
-
-def _crea(chiave):
-    """L'uscita, o None se non si apre: accessible_output2 solleva errori
-    suoi e di COM, e una libreria che manca non deve fermare MeTeOra. La
-    voce di Windows che accessible_output2 non apre la apre MeTeOra."""
-    modulo, classe, _nome = USCITE[chiave]
-    try:
-        return getattr(importlib.import_module(f"accessible_output2.outputs.{modulo}"), classe)()
-    except Exception:  # noqa: BLE001 - qualunque errore vuol dire che quell'uscita non c'e'
-        if chiave != VOCE_DI_SISTEMA:
-            return None
-    if chiave == VOCE_DI_SISTEMA:
-        try:
-            return _VoceDiWindows()
-        except Exception:  # noqa: BLE001 - nemmeno SAPI risponde
-            return None
-    return None
-
-
-def _attiva(chiave, uscita):
-    """Vero se l'uscita si puo' usare adesso: uno screen reader in funzione,
-    o la voce di Windows che si e' aperta."""
-    if uscita is None:
-        return False
-    if chiave == VOCE_DI_SISTEMA:
-        return True
-    with contextlib.suppress(Exception):
-        return bool(uscita.is_active())
-    return False
 
 
 def nome(chiave):
     """Il nome da leggere di una scelta delle impostazioni."""
-    return "automatica" if chiave == AUTOMATICA else USCITE[chiave][2]
-
-
-def disponibili():
-    """Le chiavi delle uscite che si possono usare adesso, nell'ordine di USCITE."""
-    return [chiave for chiave in USCITE if _attiva(chiave, _crea(chiave))]
-
-
-class Sintesi:
-    """Manda i testi all'uscita scelta, aprendola alla prima richiesta e
-    tenendola aperta. Da usare sempre dallo stesso filo: la voce di Windows
-    passa da COM."""
-
-    def __init__(self):
-        self._aperte = {}
-
-    def _uscita(self, chiave):
-        if chiave not in self._aperte:
-            self._aperte[chiave] = _crea(chiave)
-        return self._aperte[chiave]
-
-    def scelta(self, chiave):
-        """La chiave dell'uscita che si userebbe adesso per la scelta data, o
-        None se non ce n'e': per l'automatica, il primo screen reader attivo
-        e poi la voce di Windows."""
-        if chiave != AUTOMATICA:
-            return chiave if chiave in USCITE and _attiva(chiave, self._uscita(chiave)) else None
-        return next((c for c in USCITE if _attiva(c, self._uscita(c))), None)
-
-    def dici(self, testo, chiave=AUTOMATICA, dove="entrambi", interrompi=False):
-        """Dice il testo con l'uscita scelta, senza interrompere quello che
-        sta dicendo, o con interrompi lasciandolo a meta': alla voce, al
-        braille o a tutti e due, come dice dove, una chiave di DESTINAZIONI.
-        Interrompe Dove sono, la cui riga nuova prende il posto della vecchia
-        anche a voce: la voce di Windows, che da sola non interrompe, accodava
-        le pressioni ravvicinate (1.105.0). Il braille ce l'hanno solo le uscite di
-        CON_IL_BRAILLE. Falso se nessuna uscita risponde. Voce e braille si chiamano
-        uno per uno: output di accessible_output2, con NVDA, dopo averli
-        fatti tutti e due solleva un errore, perche' le funzioni di NVDA non
-        restituiscono niente, e l'uscita si buttava e si riapriva a ogni
-        sottotitolo (1.82.0)."""
-        effettiva = self.scelta(chiave)
-        if effettiva is None:
-            return False
-        uscita = self._uscita(effettiva)
-        try:
-            if dove in ("entrambi", "sintesi"):
-                uscita.speak(testo, interrupt=interrompi)
-            if dove in ("entrambi", "braille"):
-                uscita.braille(testo)
-        except Exception:  # noqa: BLE001 - uno screen reader chiuso nel frattempo
-            self._aperte.pop(effettiva, None)
-            return False
-        return True
+    return "automatica" if chiave == AUTOMATICA else NOMI[chiave]

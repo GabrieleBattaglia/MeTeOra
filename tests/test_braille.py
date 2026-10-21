@@ -1,22 +1,22 @@
 # MeTeOra, le prove della barra braille a blocchi: la divisione nelle celle e la coda con il tempo minimo.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.83.0. Nella 1.105.0 la prova del testo superato che si toglie dalla fila, per Dove sono.
+# 04/10/2026: nasce con la 1.83.0. Nella 1.105.0 la prova del testo superato che si toglie dalla fila, per Dove sono. Nella 1.113.6 la barra sta in GBsintesi di GBUtils.
 
 """L'orologio e le attese sono finti: le prove non aspettano niente."""
 
-import braille
+import GBsintesi
 
 
 def test_i_blocchi_fra_le_parole():
-    assert braille.blocchi("  Ciao   a tutti ", 0) == ["Ciao a tutti"]
-    assert braille.blocchi("", 40) == []
-    assert braille.blocchi("Ciao a tutti", 40) == ["Ciao a tutti"]
+    assert GBsintesi.blocchi("  Ciao   a tutti ", 0) == ["Ciao a tutti"]
+    assert GBsintesi.blocchi("", 40) == []
+    assert GBsintesi.blocchi("Ciao a tutti", 40) == ["Ciao a tutti"]
     testo = "Partir effacer sur le Gange la douleur pouvoir parler à un ange"
-    pezzi = braille.blocchi(testo, 20)
+    pezzi = GBsintesi.blocchi(testo, 20)
     assert pezzi == ["Partir effacer sur", "le Gange la douleur", "pouvoir parler à un", "ange"]
     assert all(len(p) <= 20 for p in pezzi) and " ".join(pezzi) == testo
     # Una parola piu' lunga della barra si spezza dove la barra finisce.
-    assert braille.blocchi("Supercalifragilistichespiralidoso e basta", 12) == ["Supercalifra", "gilistichesp", "iralidoso e", "basta"]
+    assert GBsintesi.blocchi("Supercalifragilistichespiralidoso e basta", 12) == ["Supercalifra", "gilistichesp", "iralidoso e", "basta"]
 
 
 class _Tempo:
@@ -56,7 +56,7 @@ class _Tempo:
 
 def _coda():
     tempo, mostrati = _Tempo(), []
-    coda = braille.Coda(lambda blocco: mostrati.append((round(tempo.ora - 100, 3), blocco)), tempo.pianifica, tempo)
+    coda = GBsintesi.Coda(lambda blocco: mostrati.append((round(tempo.ora - 100, 3), blocco)), tempo.pianifica, tempo)
     return coda, tempo, mostrati
 
 
@@ -105,9 +105,9 @@ def test_un_testo_nuovo_aspetta_solo_il_minimo():
     coda.aggiungi("uno due tre quattro", celle=8, minimo=1.0, durata=60.0)
     tempo.avanza(4.5)
     assert mostrati[-1] == (4.5, "uno due")
-    tempo.avanza(braille.DURATA_MASSIMA)
+    tempo.avanza(GBsintesi.DURATA_MASSIMA)
     assert [b for _t, b in mostrati[-3:]] == ["uno due", "tre", "quattro"]
-    assert mostrati[-2][0] < 4.5 + braille.DURATA_MASSIMA
+    assert mostrati[-2][0] < 4.5 + GBsintesi.DURATA_MASSIMA
 
 
 def test_un_testo_in_ritardo_usa_solo_il_minimo_e_svuota():
@@ -160,4 +160,4 @@ def test_un_testo_superato_si_toglie_dalla_fila():
     assert mostrati[-1] == (13.5, "Sottotitolo")
     tempo.avanza(0.1)
     assert mostrati[-1] == (15.5, "1:27 di 4:56,")
-    assert braille.Coda(print, tempo.pianifica, tempo).aggiungi("   ") is None
+    assert GBsintesi.Coda(print, tempo.pianifica, tempo).aggiungi("   ") is None

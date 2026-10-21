@@ -5470,10 +5470,10 @@ def test_i_crediti_dicono_licenza_garanzia_e_sorgenti(finestra):
 
 def test_restano_le_uscite_libere():
     # 1.85.0: ZDSR, Dolphin, System Access e PC-Talker hanno DLL proprietarie, fuori dal pacchetto.
-    import sintesi
+    import GBsintesi
 
-    assert list(sintesi.USCITE) == ["nvda", "jaws", "sapi5"]
-    assert {"nvda", "jaws"} == sintesi.CON_IL_BRAILLE
+    assert list(GBsintesi.USCITE) == ["nvda", "jaws", "sapi5"]
+    assert {"nvda", "jaws"} == GBsintesi.CON_IL_BRAILLE
 
 
 def test_una_cartella_di_rete_parziale_resta_da_riaprire(finestra, monkeypatch, tmp_path):
@@ -7927,7 +7927,7 @@ def test_dove_sono_segue_le_impostazioni_dei_sottotitoli(finestra, monkeypatch, 
     _dove_sono(finestra)
     assert sintesi_finta.detti[-1] == ("jaws", riga)
     sintesi_finta.presenti.clear()
-    finestra._sintesi = modulo.sintesi.Sintesi()
+    finestra._sintesi = modulo.GBsintesi.Sintesi()
     detti = len(sintesi_finta.detti)
     assert _dove_sono(finestra) == riga and len(sintesi_finta.detti) == detti
 
@@ -7938,7 +7938,7 @@ def test_dove_sono_si_riscrive_anche_sulla_barra(finestra, monkeypatch, sintesi_
     nuova arriva subito, come la riga riscritta nella console. Un testo dei
     sottotitoli in fila resta. L'orologio della coda e' fermo e le sue attese
     non scadono mai: nessun blocco passa da solo."""
-    finestra._braille = modulo.braille.Coda(finestra._mostra_in_braille, lambda _secondi, _funzione: types.SimpleNamespace(Stop=lambda: None), lambda: 0.0)
+    finestra._braille = modulo.GBsintesi.Coda(finestra._mostra_in_braille, lambda _secondi, _funzione: types.SimpleNamespace(Stop=lambda: None), lambda: 0.0)
     finestra._aggiungi(None, [r"C:\m\a.mp3"])
     pl = finestra.archivio.playlist[0]
     stato = _in_corso_per_dove_sono(finestra, monkeypatch, pl, pl.brani[0])
@@ -8648,7 +8648,7 @@ def test_durata_residua_si_riscrive_anche_sulla_barra(finestra, monkeypatch, sin
     """Come Dove sono: sulla barra la riga nuova prende il posto della sua di
     prima, e non tocca quella di Dove sono. L'orologio della coda del braille
     e' fermo e le sue attese non scadono mai."""
-    finestra._braille = modulo.braille.Coda(finestra._mostra_in_braille, lambda _secondi, _funzione: types.SimpleNamespace(Stop=lambda: None), lambda: 0.0)
+    finestra._braille = modulo.GBsintesi.Coda(finestra._mostra_in_braille, lambda _secondi, _funzione: types.SimpleNamespace(Stop=lambda: None), lambda: 0.0)
     _pl, _chiesti, lettore = _cinque_brani(finestra, monkeypatch)
     finestra.impostazioni.update(destinazione="braille", celle_braille=20)
     _durata_residua(finestra)
@@ -8671,9 +8671,9 @@ def test_durata_residua_si_riscrive_anche_sulla_barra(finestra, monkeypatch, sin
     # 1.110.0).
     finestra.motore._in_corso = None
     assert _durata_residua(finestra) == "Non sta suonando niente."
-    assert modulo.braille.blocchi("Non sta suonando niente.", 20) == ["Non sta suonando", "niente."]
+    assert modulo.GBsintesi.blocchi("Non sta suonando niente.", 20) == ["Non sta suonando", "niente."]
     assert sintesi_finta.braille[-1] == ("nvda", "0:51 di 4:59,")
-    assert finestra._braille.in_fila == con_dove_sono - len(modulo.braille.blocchi(riga, 20)) + 2
+    assert finestra._braille.in_fila == con_dove_sono - len(modulo.GBsintesi.blocchi(riga, 20)) + 2
 
 
 def test_durata_residua_interrompe_la_voce(finestra, monkeypatch, sintesi_finta):

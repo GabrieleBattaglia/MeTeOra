@@ -20,9 +20,10 @@ import json
 import math
 import os
 
+from GBsintesi import DESTINAZIONI
+from GBsintesi import USCITE as USCITE_DELLA_SINTESI
+
 from karaoke import MODI as MODI_DEL_KARAOKE
-from sintesi import DESTINAZIONI
-from sintesi import USCITE as USCITE_DELLA_SINTESI
 from valori import (
     ANTICIPO_MASSIMO_DEL_KARAOKE,
     AREE,
@@ -89,7 +90,7 @@ PREDEFINITE = {
     "video": False,
     "sottotitoli": False,
     "sintesi": "automatica",
-    # Dove vanno sottotitoli e karaoke, una chiave di sintesi.DESTINAZIONI; il
+    # Dove vanno sottotitoli e karaoke, una chiave di GBsintesi.DESTINAZIONI; il
     # testo del karaoke per riga o per strofa; e quanti millesimi prima del
     # canto arriva (1.82.0).
     "destinazione": "entrambi",

@@ -200,7 +200,7 @@ def _prepara_i_moduli():
     # La sintesi dei sottotitoli, e di Dove sono, annota soltanto: quella
     # vera parlerebbe con NVDA anche dal desktop nascosto. NVDA e' attivo,
     # cosi' l'automatica sceglie lui, come sul PC di Gabriele.
-    import sintesi
+    import GBsintesi
 
     class SintesiFinta:
         def __init__(self, chiave):
@@ -220,7 +220,7 @@ def _prepara_i_moduli():
             S.extra.setdefault("braille", []).append([self.chiave, testo])
             S.nota("braille", self.chiave, testo)
 
-    sintesi._crea = SintesiFinta
+    GBsintesi._crea = SintesiFinta
 
 
 def _apri_meteora():

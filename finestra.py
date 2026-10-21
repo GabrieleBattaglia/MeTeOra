@@ -48,11 +48,11 @@ import warnings
 from ctypes import wintypes
 from html.parser import HTMLParser
 
+import GBsintesi
 import wx
 
 import accessibilita
 import associazioni
-import braille
 import dettagli
 import formati
 import importazione
@@ -1007,10 +1007,10 @@ class Finestra(wx.Frame):
         self._orologio_della_sfumatura = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self._passo_della_sfumatura, self._orologio_della_sfumatura)
         self._inizio_della_sfumatura = None
-        self._sintesi = sintesi.Sintesi()
+        self._sintesi = GBsintesi.Sintesi()
         # La barra braille a blocchi (1.83.0): i testi letti in fila, con il
         # tempo minimo di lettura; le attese sono di wx, nel filo della finestra.
-        self._braille = braille.Coda(self._mostra_in_braille, lambda secondi, funzione: wx.CallLater(max(1, round(secondi * 1000)), funzione))
+        self._braille = GBsintesi.Coda(self._mostra_in_braille, lambda secondi, funzione: wx.CallLater(max(1, round(secondi * 1000)), funzione))
         # Il numero dell'ultima riga di Dove sono nella coda del braille: la
         # riga dopo ne prende il posto, come nella console (tappa 14 b).
         self._dove_sono_in_braille = None
@@ -7564,15 +7564,15 @@ class Finestra(wx.Frame):
 
     def _sintesi_da_leggere(self):
         scelta = self.impostazioni["sintesi"]
-        if scelta != sintesi.AUTOMATICA:
+        if scelta != GBsintesi.AUTOMATICA:
             return sintesi.nome(scelta)
-        effettiva = self._sintesi.scelta(sintesi.AUTOMATICA)
+        effettiva = self._sintesi.scelta(GBsintesi.AUTOMATICA)
         return f"automatica, adesso {sintesi.nome(effettiva)}" if effettiva else "automatica, adesso nessuna"
 
     def _scegli_la_sintesi(self, genitore):
         """La sintesi dei sottotitoli, da una lista: l'automatica e le uscite
         che si possono usare adesso."""
-        chiavi = [sintesi.AUTOMATICA, *sintesi.disponibili()]
+        chiavi = [GBsintesi.AUTOMATICA, *GBsintesi.disponibili()]
         attuale = self.impostazioni["sintesi"]
         if attuale not in chiavi:
             # Una scelta di prima che ora non risponde resta in fondo, e lo dice.
@@ -7591,9 +7591,9 @@ class Finestra(wx.Frame):
         self._riscontro("impostazione_cambiata", f"{nome}: {self._sintesi_da_leggere()}.")
 
     def _riga_della_sintesi(self, chiave):
-        if chiave == sintesi.AUTOMATICA:
+        if chiave == GBsintesi.AUTOMATICA:
             return "Automatica: lo screen reader attivo, altrimenti la voce di Windows"
-        if chiave in sintesi.USCITE and self._sintesi.scelta(chiave) is None:
+        if chiave in GBsintesi.USCITE and self._sintesi.scelta(chiave) is None:
             return f"{sintesi.nome(chiave)}, che adesso non risponde"
         return sintesi.nome(chiave)[0].upper() + sintesi.nome(chiave)[1:]
 
@@ -7799,7 +7799,7 @@ class Finestra(wx.Frame):
         l'uscita in uso non ce l'ha."""
         frase = f"Sottotitoli e karaoke ora vanno {sintesi.DESTINAZIONI[chiave]}."
         effettiva = self._sintesi.scelta(self.impostazioni["sintesi"])
-        if chiave != "sintesi" and effettiva is not None and effettiva not in sintesi.CON_IL_BRAILLE:
+        if chiave != "sintesi" and effettiva is not None and effettiva not in GBsintesi.CON_IL_BRAILLE:
             frase += f" Con {sintesi.nome(effettiva)}, il braille non arriva: ce l'hanno NVDA e JAWS."
         return frase
 
