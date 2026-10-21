@@ -5,6 +5,7 @@ Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 ## [1.113.4] - 2026-10-21
 
 - Correzione delle prove (issue 27): quella del filtro del tempo cadeva sempre lanciata da sola e passava nel file intero. Dopo l'apertura del brano e dopo ogni catena riscritta mpv manda l'evento AUDIO_RECONFIG, e se intanto il tono è cambiato al volo il motore riscrive la catena, come deve; al primo brano del processo la prima ricerca del karaoke tiene occupato il filo degli eventi per circa 30 ms, e quegli eventi arrivavano dopo il cambio di tono. Ora la prova aspetta che mpv abbia aperto l'uscita e che il motore abbia visto gli eventi già mandati, invece di contare sui tempi; il motore resta com'era. La stessa attesa sostituisce le pause fisse nella prova del tono cambiato al volo, che con il processo occupato cadeva per lo stesso motivo.
+- La cartella licenze dice la 1.113.4 e GBUtils V212, con il suo commit.
 
 ## [1.113.3] - 2026-10-20
 
