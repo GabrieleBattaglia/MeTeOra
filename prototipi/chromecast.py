@@ -1,26 +1,30 @@
-# MeTeOra, prototipi: il Chromecast e le due strade della tappa 15 b, da misurare a casa.
+# MeTeOra, prototipi: il Chromecast e le strade della tappa 15 b, da misurare a casa.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 22/10/2026: nasce con la tappa 15 b del piano, prima di toccare il programma.
+# 22/10/2026: nasce con la tappa 15 b del piano, prima di toccare il programma; poi ricerca, server e connessione passano a trasmissione.py, la parte comune.
 
-"""Il prototipo del Chromecast: trova gli apparecchi, prova le due strade e
+"""Il prototipo del Chromecast: trova gli apparecchi, prova le strade e
 misura quanto tardano.
 
-Le due strade, dal piano:
-  A, mandare il brano: un piccolo server sul PC da' il file, il Chromecast lo
-     scarica e lo suona da se', e il prototipo fa da telecomando. Un formato
-     che il Chromecast non legge si converte prima in FLAC con libmpv, che
-     lo fa in un attimo: provato in ufficio, 20 secondi in 0,09 secondi.
+Le strade, dal piano:
+  A, mandare il brano: il server di trasmissione.py da' il file, il
+     Chromecast lo scarica e lo suona da se', e il prototipo fa da
+     telecomando.
+  A convertita: come A, ma il brano si converte prima in FLAC con libmpv,
+     che lo fa in un attimo: provato in ufficio, 20 secondi in 0,09 secondi.
+     E' la strada per i formati che il Chromecast non legge.
   B, trasmettere l'uscita: il brano, reso in memoria da libmpv come lo
      suonerebbe MeTeOra, va al Chromecast come un flusso WAV senza fine, al
      ritmo dell'orologio, come una radio; pausa e salti li fa il PC.
+Ricerca, server e connessione sono quelli di trasmissione.py, la parte
+comune che MeTeOra usera': provando il prototipo si prova anche lei.
 Le misure sono due. Quella dell'apparecchio, solo per la strada A: quanto
 passa fra il comando e la risposta del Chromecast. Quella dell'orecchio, per
-tutte e due: dopo ogni comando si preme Spazio appena se ne sente l'effetto,
-e al tempo si tolgono i riflessi, misurati prima con cinque bip del PC.
+tutte: dopo ogni comando si preme Spazio appena se ne sente l'effetto, e al
+tempo si tolgono i riflessi, misurati prima con cinque bip del PC.
 Il dettaglio va in coda a prototipi/chromecast_misure.txt, con la data e la
 macchina, anche le richieste che il Chromecast fa al server; a schermo solo
 i riassunti.
-Serve pychromecast: python -m pip install pychromecast. La prima volta che il
+Serve pychromecast, che sta in requirements.txt. La prima volta che il
 server parte Windows chiede il permesso del firewall: va dato per le reti
 private, o il Chromecast non arriva al PC.
 Uso: python prototipi/chromecast.py [--anticipo SECONDI] [--porta NUMERO]
@@ -30,17 +34,19 @@ secondo di partenza: piu' e' grande, piu' tardano i comandi.
 
 import argparse
 import datetime
-import http.server
 import os
 import random
 import socket
 import statistics
+import struct
 import tempfile
 import threading
 import time
-import urllib.parse
 
 import ambiente  # noqa: F401
+
+# isort: split
+import trasmissione
 
 QUI = os.path.dirname(os.path.abspath(__file__))
 FILE_DELLE_MISURE = os.path.join(QUI, "chromecast_misure.txt")
@@ -60,16 +66,7 @@ MASSIMO_DELLA_STRADA_B = 300
 # ascolta per dire che suona davvero.
 ATTESA_DELLA_PARTENZA = 10.0
 ASCOLTO_DELLA_PROVA = 3.0
-# I tipi che il server dichiara. Quelli che il Chromecast dice di leggere
-# sono MP3, AAC, FLAC, Ogg con Vorbis o Opus, WAV e WebM; gli altri si provano
-# lo stesso, per saperlo dalla prova e non dalla documentazione.
-TIPI = {
-    ".mp3": "audio/mpeg", ".flac": "audio/flac", ".ogg": "audio/ogg", ".oga": "audio/ogg", ".opus": "audio/ogg",
-    ".wav": "audio/wav", ".m4a": "audio/mp4", ".mp4": "audio/mp4", ".aac": "audio/aac", ".webm": "audio/webm",
-    ".mka": "audio/x-matroska", ".wma": "audio/x-ms-wma", ".ape": "audio/x-ape", ".wv": "audio/x-wavpack",
-    ".mpc": "audio/x-musepack", ".aiff": "audio/aiff", ".aif": "audio/aiff", ".dsf": "audio/x-dsf", ".tta": "audio/x-tta",
-}
-NOMI_DEI_TIPI = {"audio": "solo audio", "group": "gruppo", "cast": "audio e video"}
+NOMI_DEI_TIPI = {trasmissione.TIPO_SOLO_AUDIO: "solo audio", trasmissione.TIPO_GRUPPO: "gruppo", trasmissione.TIPO_AUDIO_E_VIDEO: "audio e video"}
 
 
 class Registro:
@@ -115,13 +112,13 @@ def svuota_la_tastiera():
         pass
 
 
-# Il server: i file della strada A e il flusso della strada B.
+# La strada B: il flusso.
 
 class Flusso:
-    """La strada B: il brano in memoria, s16 stereo a 44100, mandato come un
-    WAV senza fine al ritmo dell'orologio, con anticipo secondi di vantaggio.
-    In pausa si manda silenzio, perche' un flusso che si ferma il Chromecast
-    lo chiude. Una connessione nuova prende il posto della vecchia."""
+    """Il brano in memoria, s16 stereo a 44100, mandato come un WAV senza fine
+    al ritmo dell'orologio, con anticipo secondi di vantaggio. In pausa si
+    manda silenzio, perche' un flusso che si ferma il Chromecast lo chiude.
+    Una connessione nuova prende il posto della vecchia."""
 
     def __init__(self, pcm, anticipo):
         self.pcm = pcm
@@ -134,9 +131,7 @@ class Flusso:
 
     @staticmethod
     def intestazione():
-        # Le dimensioni al massimo: per chi legge il WAV non finisce mai.
-        import struct
-
+        # Le dimensioni al massimo: per chi legge, il WAV non finisce mai.
         senza_fine = 0xFFFFFFFF
         return (b"RIFF" + struct.pack("<I", senza_fine) + b"WAVE" + b"fmt " + struct.pack("<IHHIIHH", 16, 1, CANALI, FREQUENZA,
                 FREQUENZA * BYTE_PER_FRAME, BYTE_PER_FRAME, BYTE_PER_CAMPIONE * 8) + b"data" + struct.pack("<I", senza_fine))
@@ -179,197 +174,68 @@ class Flusso:
             self.posizione = max(0, min(self.frame, self.posizione + int(secondi * FREQUENZA)))
 
 
-class Gestore(http.server.BaseHTTPRequestHandler):
-    """/file/<numero><estensione> per la strada A, /flusso.wav per la B."""
-
-    def log_message(self, formato, *argomenti):
-        self.server.registro.scrivi(f"Server, {self.client_address[0]}: {formato % argomenti}")
-
-    def do_HEAD(self):
-        self._rispondi(solo_intestazioni=True)
-
-    def do_GET(self):
-        self._rispondi(solo_intestazioni=False)
-
-    def _rispondi(self, solo_intestazioni):
-        percorso = urllib.parse.urlparse(self.path).path
-        intervallo = self.headers.get("Range")
-        if intervallo:
-            self.server.registro.scrivi(f"Server, chiesto {self.command} {percorso} con Range {intervallo}.")
-        try:
-            if percorso == "/flusso.wav" and self.server.flusso is not None:
-                self._manda_il_flusso(solo_intestazioni)
-                return
-            if percorso.startswith("/file/"):
-                numero = os.path.splitext(percorso[len("/file/"):])[0]
-                if numero in self.server.file_serviti:
-                    self._manda_il_file(self.server.file_serviti[numero], solo_intestazioni, intervallo)
-                    return
-            self.send_error(404)
-        except (ConnectionError, OSError):
-            # Il Chromecast chiude le connessioni quando ha letto quanto gli
-            # serve, o quando cambia brano: e' normale.
-            pass
-
-    def _intestazioni_comuni(self, tipo):
-        self.send_header("Content-Type", tipo)
-        self.send_header("Access-Control-Allow-Origin", "*")
-
-    def _manda_il_file(self, percorso, solo_intestazioni, intervallo):
-        dimensione = os.path.getsize(percorso)
-        inizio, fine, parziale = 0, dimensione - 1, False
-        if intervallo and intervallo.startswith("bytes="):
-            da, _, a = intervallo[len("bytes="):].split(",")[0].strip().partition("-")
-            if da:
-                inizio = int(da)
-                fine = min(int(a), dimensione - 1) if a else dimensione - 1
-            elif a:
-                inizio = max(0, dimensione - int(a))
-            parziale = True
-            if inizio > fine:
-                self.send_response(416)
-                self.send_header("Content-Range", f"bytes */{dimensione}")
-                self.end_headers()
-                return
-        self.send_response(206 if parziale else 200)
-        self._intestazioni_comuni(TIPI.get(os.path.splitext(percorso)[1].lower(), "application/octet-stream"))
-        self.send_header("Accept-Ranges", "bytes")
-        self.send_header("Content-Length", str(fine - inizio + 1))
-        if parziale:
-            self.send_header("Content-Range", f"bytes {inizio}-{fine}/{dimensione}")
-        self.end_headers()
-        if solo_intestazioni:
-            return
-        restano = fine - inizio + 1
-        with open(percorso, "rb") as f:
-            f.seek(inizio)
-            while restano > 0:
-                pezzo = f.read(min(65536, restano))
-                if not pezzo:
-                    break
-                self.wfile.write(pezzo)
-                restano -= len(pezzo)
-
-    def _manda_il_flusso(self, solo_intestazioni):
-        self.send_response(200)
-        self._intestazioni_comuni("audio/wav")
-        self.send_header("Cache-Control", "no-cache")
-        self.end_headers()
-        if not solo_intestazioni:
-            self.server.flusso.servi(self.wfile)
-
-
-def avvia_il_server(indirizzo, porta, registro):
-    server = http.server.ThreadingHTTPServer((indirizzo, porta), Gestore)
-    server.registro = registro
-    server.file_serviti = {}
-    server.flusso = None
-    threading.Thread(target=server.serve_forever, name="Server del Chromecast", daemon=True).start()
-    return server
-
-
-def indirizzo_verso(host):
-    """L'indirizzo di questo PC sulla rete del Chromecast."""
-    prova = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    try:
-        prova.connect((host, 8009))
-        return prova.getsockname()[0]
-    finally:
-        prova.close()
-
-
 # Gli apparecchi.
 
-def cerca(registro):
-    """Gli apparecchi Cast della rete, in ATTESA_DELLA_RICERCA secondi, e il
-    browser che li tiene aggiornati."""
-    import pychromecast
-    import zeroconf
-
-    trovati = []
-    partenza = time.perf_counter()
-
-    def aggiunto(uuid, _servizio):
-        trovati.append((uuid, time.perf_counter() - partenza))
-
-    zc = zeroconf.Zeroconf()
-    browser = pychromecast.discovery.CastBrowser(pychromecast.discovery.SimpleCastListener(aggiunto), zc)
-    browser.start_discovery()
-    dice(f"Cerco gli apparecchi Cast per {ATTESA_DELLA_RICERCA:.0f} secondi.")
-    time.sleep(ATTESA_DELLA_RICERCA)
-    apparecchi = []
-    for uuid, quando in trovati:
-        info = browser.devices.get(uuid)
-        if info is None:
-            continue
-        apparecchi.append(info)
-        registro.scrivi(f"Trovato dopo {quando:.2f} s: {info.friendly_name}, {info.model_name}, {info.manufacturer}, {nome_del_tipo(info)}, {info.host}:{info.port}.")
-        registro.misura("ricerca, primo avviso di ogni apparecchio", quando)
-    # Prima gli apparecchi, poi i gruppi di Google Home.
-    apparecchi.sort(key=lambda i: (i.cast_type == "group", (i.friendly_name or "").lower()))
-    return apparecchi, browser
-
-
-def nome_del_tipo(info):
+def nome_del_tipo(voce):
     """Il tipo da leggere; la ricerca a volte non lo sa ancora, e lo dice la
     connessione."""
-    return NOMI_DEI_TIPI.get(info.cast_type, info.cast_type or "tipo non ancora noto")
+    return NOMI_DEI_TIPI.get(voce["tipo"], voce["tipo"] or "tipo non ancora noto")
 
 
-class Apparecchio:
-    """La connessione a un apparecchio, con gli stati che manda."""
+def cerca(registro):
+    """La ricerca di trasmissione.py, avviata, e gli apparecchi visti in
+    ATTESA_DELLA_RICERCA secondi, con il tempo in cui si e' visto ciascuno."""
+    partenza = time.perf_counter()
+    visti = {}
+    ricerca = None
 
-    def __init__(self, info, zc, registro):
-        import pychromecast
-        from pychromecast.controllers.media import MediaStatusListener
+    def al_cambio():
+        for voce in ricerca.apparecchi():
+            visti.setdefault(voce["uuid"], time.perf_counter() - partenza)
 
-        self.info = info
-        self.registro = registro
+    ricerca = trasmissione.Ricerca(al_cambio=al_cambio)
+    ricerca.avvia()
+    dice(f"Cerco gli apparecchi Cast per {ATTESA_DELLA_RICERCA:.0f} secondi.")
+    time.sleep(ATTESA_DELLA_RICERCA)
+    apparecchi = ricerca.apparecchi()
+    for voce in apparecchi:
+        quando = visti.get(voce["uuid"])
+        registro.scrivi(f"Trovato dopo {quando if quando is not None else '?'} s: {voce['nome']}, {voce['modello']}, {voce['produttore']}, "
+                        f"{nome_del_tipo(voce)}, {voce['indirizzo']}:{voce['porta']}.")
+        if quando is not None:
+            registro.misura("ricerca, primo avviso di ogni apparecchio", quando)
+    return apparecchi, ricerca
+
+
+class Collegato:
+    """L'apparecchio di trasmissione.py, con gli stati annotati e l'istante
+    in cui arrivano, per misurare."""
+
+    def __init__(self, ricerca, voce, registro):
         self.stati = []
-        self.errori = []
+        self.registro = registro
         partenza = time.perf_counter()
-        self.cast = pychromecast.get_chromecast_from_cast_info(info, zc)
-        self.cast.wait(timeout=20)
+        self.apparecchio = ricerca.connetti(voce["uuid"], allo_stato=self._stato)
         registro.misura("connessione", time.perf_counter() - partenza)
-        self.mc = self.cast.media_controller
-        apparecchio = self
 
-        class Ascolto(MediaStatusListener):
-            def new_media_status(self, status):
-                apparecchio.stati.append((time.perf_counter(), status.player_state, status.current_time, status.idle_reason))
-                registro.scrivi(f"Stato: {status.player_state}, a {status.current_time}, motivo {status.idle_reason}.")
-
-            def load_media_failed(self, queue_item_id, error_code):
-                apparecchio.errori.append((time.perf_counter(), error_code))
-                registro.scrivi(f"Caricamento non riuscito: elemento {queue_item_id}, errore {error_code}.")
-
-        self.mc.register_status_listener(Ascolto())
-
-    def volume(self):
-        stato = self.cast.status
-        return stato.volume_level if stato else None
+    def _stato(self, stato):
+        self.stati.append((time.perf_counter(), stato))
+        self.registro.scrivi(f"Stato: {stato}.")
 
     def aspetta(self, da, voluti, limite):
-        """I secondi da da al primo stato fra voluti, o None. Si ferma prima
-        se arriva un errore di caricamento o un IDLE per errore."""
+        """I secondi da da al primo stato fra voluti, o None; si ferma prima
+        se l'apparecchio si ferma per un errore."""
         fine = time.perf_counter() + limite
         while time.perf_counter() < fine:
-            for quando, stato, _tempo, motivo in list(self.stati):
-                if quando >= da and stato in voluti:
+            for quando, stato in list(self.stati):
+                if quando < da:
+                    continue
+                if stato["stato"] in voluti:
                     return quando - da
-                if quando >= da and stato == "IDLE" and motivo == "ERROR":
+                if stato["stato"] == trasmissione.FERMO and stato["motivo"] == "ERROR":
                     return None
-            if any(quando >= da for quando, _codice in self.errori):
-                return None
             time.sleep(0.02)
         return None
-
-    def chiudi(self):
-        try:
-            self.cast.quit_app()
-        except Exception as e:  # noqa: BLE001 - si sta chiudendo: lo si annota soltanto
-            self.registro.scrivi(f"Chiusura dell'app del Chromecast non riuscita: {e}.")
-        self.cast.disconnect(timeout=5)
 
 
 # Le misure.
@@ -418,7 +284,7 @@ def ascolta(registro, nome, partenza, riflessi):
 GUIDA_DEI_COMANDI = "P pausa e ripresa, A indietro e D avanti di 10 secondi, meno e piu' il volume, X basta."
 
 
-def telecomando(apparecchio, registro, riflessi, strada, comandi):
+def telecomando(registro, riflessi, strada, comandi):
     """I comandi di una strada, ciascuno misurato con l'orecchio, e per la
     strada A anche con la risposta dell'apparecchio. comandi e' un dizionario
     tasto -> funzione che restituisce il nome del comando."""
@@ -446,9 +312,7 @@ def telecomando(apparecchio, registro, riflessi, strada, comandi):
 
 
 def volume_di(apparecchio, delta):
-    attuale = apparecchio.volume() or 0.0
-    nuovo = max(0.0, min(1.0, attuale + delta))
-    apparecchio.cast.set_volume(nuovo)
+    apparecchio.volume = (apparecchio.volume or 0.0) + delta
     return f"volume {'su' if delta > 0 else 'giu'}"
 
 
@@ -478,9 +342,10 @@ def converti_in_flac(percorso, cartella, registro):
     return uscita
 
 
-def strada_a(apparecchio, server, base, registro, riflessi, cartella=None):
+def strada_a(collegato, server, registro, riflessi, cartella=None):
     """Manda un brano scelto e lo comanda; con cartella, prima lo converte in
     FLAC li' dentro."""
+    apparecchio = collegato.apparecchio
     percorso = input("Percorso del brano da mandare: ").strip().strip('"')
     if not os.path.isfile(percorso):
         dice("Il file non c'e'.")
@@ -494,82 +359,78 @@ def strada_a(apparecchio, server, base, registro, riflessi, cartella=None):
             return
         dice(f"Convertito in {registro.misure['conversione in FLAC'][-1]:.1f} s.")
         percorso, strada = convertito, "A convertita"
-    numero = str(len(server.file_serviti) + 1)
-    estensione = os.path.splitext(percorso)[1].lower()
-    server.file_serviti[numero] = percorso
-    indirizzo = f"{base}/file/{numero}{estensione}"
-    registro.scrivi(f"Strada {strada}: {percorso}, servito come {indirizzo}, tipo {TIPI.get(estensione, 'application/octet-stream')}.")
+    indirizzo = server.pubblica_file(percorso)
+    registro.scrivi(f"Strada {strada}: {percorso}, servito come {indirizzo}, tipo {trasmissione.tipo_di(percorso)}.")
     svuota_la_tastiera()
     partenza = time.perf_counter()
-    apparecchio.mc.play_media(indirizzo, TIPI.get(estensione, "application/octet-stream"), title=os.path.basename(percorso), stream_type="BUFFERED")
+    apparecchio.suona(indirizzo, trasmissione.tipo_di(percorso), titolo=os.path.basename(percorso))
     dice("Mandato: premi Spazio appena senti la musica.")
     ascolta(registro, f"strada {strada}, orecchio, avvio", partenza, riflessi)
-    avvio = apparecchio.aspetta(partenza, ("PLAYING",), ATTESA_DELLA_PARTENZA)
+    avvio = collegato.aspetta(partenza, (trasmissione.IN_RIPRODUZIONE,), ATTESA_DELLA_PARTENZA)
     if avvio is None:
         dice("Il Chromecast non dice di suonare: il file forse non lo legge. Guarda il file delle misure.")
         return
     registro.misura(f"strada {strada}, avvio riferito dall'apparecchio", avvio)
 
     def pausa_o_ripresa():
-        if apparecchio.mc.status.player_state == "PAUSED":
-            apparecchio.mc.play()
+        stato = apparecchio.stato
+        if stato and stato["stato"] == trasmissione.IN_PAUSA:
+            apparecchio.riprendi()
             return "ripresa"
-        apparecchio.mc.pause()
+        apparecchio.pausa()
         return "pausa"
 
     def salto(secondi):
-        apparecchio.mc.update_status()
-        posizione = apparecchio.mc.status.adjusted_current_time or 0.0
-        apparecchio.mc.seek(max(0.0, posizione + secondi))
+        apparecchio.vai_a((apparecchio.posizione or 0.0) + secondi)
         return "avanti" if secondi > 0 else "indietro"
 
-    telecomando(apparecchio, registro, riflessi, strada, {
+    telecomando(registro, riflessi, strada, {
         "p": pausa_o_ripresa, "a": lambda: salto(-SECONDI_DEL_SALTO), "d": lambda: salto(SECONDI_DEL_SALTO),
         "-": lambda: volume_di(apparecchio, -PASSO_DEL_VOLUME), "+": lambda: volume_di(apparecchio, PASSO_DEL_VOLUME),
     })
-    apparecchio.mc.stop()
+    apparecchio.ferma()
 
 
 def file_per_estensione(cartella, limite=20000):
-    """Un file per ogni estensione di TIPI, il primo che si trova, guardando
-    al piu' limite file."""
+    """Un file per ogni estensione di trasmissione.TIPI, il primo che si
+    trova, guardando al piu' limite file."""
     scelti, visti = {}, 0
     for radice, _cartelle, nomi in os.walk(cartella):
         for nome in sorted(nomi):
             estensione = os.path.splitext(nome)[1].lower()
-            if estensione in TIPI and estensione not in scelti:
+            if estensione in trasmissione.TIPI and estensione not in scelti:
                 scelti[estensione] = os.path.join(radice, nome)
             visti += 1
-            if visti >= limite or len(scelti) == len(TIPI):
+            if visti >= limite or len(scelti) == len(trasmissione.TIPI):
                 return scelti
     return scelti
 
 
-def suona_per_prova(apparecchio, server, base, percorso):
+def suona_per_prova(collegato, server, percorso):
     """Manda un file, aspetta che suoni e lo ascolta qualche secondo: vero e
     i secondi della partenza se la posizione e' andata avanti, falso e il
     motivo se no."""
-    numero = str(len(server.file_serviti) + 1)
-    estensione = os.path.splitext(percorso)[1].lower()
-    server.file_serviti[numero] = percorso
+    apparecchio = collegato.apparecchio
     partenza = time.perf_counter()
-    apparecchio.mc.play_media(f"{base}/file/{numero}{estensione}", TIPI[estensione], title=os.path.basename(percorso), stream_type="BUFFERED")
-    avvio = apparecchio.aspetta(partenza, ("PLAYING",), ATTESA_DELLA_PARTENZA)
+    apparecchio.suona(server.pubblica_file(percorso), trasmissione.tipo_di(percorso), titolo=os.path.basename(percorso))
+    avvio = collegato.aspetta(partenza, (trasmissione.IN_RIPRODUZIONE,), ATTESA_DELLA_PARTENZA)
     if avvio is None:
         esito = (False, "non suona")
     else:
         time.sleep(ASCOLTO_DELLA_PROVA)
-        apparecchio.mc.update_status()
-        time.sleep(0.5)
-        stato = apparecchio.mc.status
-        va = stato.player_state == "PLAYING" and (stato.current_time or 0) > 1
-        esito = (True, f"partito in {avvio:.2f} s") if va else (False, f"parte ma si ferma ({stato.player_state})")
-    apparecchio.mc.stop()
-    apparecchio.aspetta(time.perf_counter(), ("IDLE",), 5)
+        richiesta = time.perf_counter()
+        apparecchio.aggiorna()
+        collegato.aspetta(richiesta, (trasmissione.IN_RIPRODUZIONE, trasmissione.IN_PAUSA, trasmissione.IN_CARICAMENTO, trasmissione.FERMO), 2)
+        stato = apparecchio.stato or {}
+        va = stato.get("stato") == trasmissione.IN_RIPRODUZIONE and (stato.get("posizione") or 0) > 1
+        esito = (True, f"partito in {avvio:.2f} s") if va else (False, f"parte ma si ferma ({stato.get('stato')})")
+    fermo = time.perf_counter()
+    apparecchio.ferma()
+    collegato.aspetta(fermo, (trasmissione.FERMO,), 5)
     return esito
 
 
-def prova_dei_formati(apparecchio, server, base, registro, cartella_temporanea):
+def prova_dei_formati(collegato, server, registro, cartella_temporanea):
     """Un file per estensione: si manda e si ascolta qualche secondo; se non
     suona, si riprova convertito in FLAC."""
     cartella = input("Cartella della musica da cui prendere un file per formato: ").strip().strip('"')
@@ -580,16 +441,17 @@ def prova_dei_formati(apparecchio, server, base, registro, cartella_temporanea):
     dice(f"Formati trovati: {len(scelti)}. Ognuno suona qualche secondo.")
     esiti = []
     for estensione, percorso in sorted(scelti.items()):
-        va, come = suona_per_prova(apparecchio, server, base, percorso)
+        va, come = suona_per_prova(collegato, server, percorso)
         esito = f"suona, {come}" if va else come
         if not va:
             convertito = converti_in_flac(percorso, cartella_temporanea, registro)
             if convertito is None:
                 esito += ", e non si converte"
             else:
-                va, come = suona_per_prova(apparecchio, server, base, convertito)
+                va, come = suona_per_prova(collegato, server, convertito)
                 esito += f"; convertito in FLAC in {registro.misure['conversione in FLAC'][-1]:.1f} s suona, {come}" if va else f"; convertito in FLAC {come}"
-        riga = f"{estensione[1:].upper()}: {esito}, {os.path.basename(percorso)}."
+        atteso = "lo legge da se'" if trasmissione.legge_da_se(percorso) else "da convertire"
+        riga = f"{estensione[1:].upper()}, per Google {atteso}: {esito}, {os.path.basename(percorso)}."
         esiti.append(riga)
         registro.scrivi(f"Formato, {riga}")
         dice(riga)
@@ -605,8 +467,8 @@ def rendi_in_memoria(percorso, massimo):
 
     with tempfile.TemporaryDirectory() as cartella:
         uscita = os.path.join(cartella, "resa.raw")
-        lettore = mpv.MPV(**{**OPZIONI_DI_BASE, "ao": "pcm", "vo": "null", "video": "no", "ao_pcm_file": uscita, "ao_pcm_waveheader": False,
-                             "audio_format": "s16", "audio_samplerate": FREQUENZA, "audio_channels": "stereo", "end": str(massimo)})
+        lettore = mpv.MPV(**{**OPZIONI_DI_BASE, "ao": "pcm", "ao_pcm_file": uscita, "ao_pcm_waveheader": False, "audio_format": "s16",
+                             "audio_samplerate": FREQUENZA, "audio_channels": "stereo", "end": str(massimo)})
         try:
             lettore.play(percorso)
             lettore.wait_for_playback(timeout=120)
@@ -616,8 +478,9 @@ def rendi_in_memoria(percorso, massimo):
             return f.read()
 
 
-def strada_b(apparecchio, server, base, registro, riflessi, anticipo):
+def strada_b(collegato, server, registro, riflessi, anticipo):
     """Rende un brano in memoria e lo trasmette come flusso continuo."""
+    apparecchio = collegato.apparecchio
     percorso = input("Percorso del brano da trasmettere: ").strip().strip('"')
     if not os.path.isfile(percorso):
         dice("Il file non c'e'.")
@@ -630,33 +493,33 @@ def strada_b(apparecchio, server, base, registro, riflessi, anticipo):
         dice("libmpv non ha reso niente: il file forse non si apre.")
         return
     registro.scrivi(f"Strada B: {percorso}, {secondi:.1f} s resi in {time.perf_counter() - partenza:.1f} s, anticipo {anticipo} s.")
-    server.flusso = Flusso(pcm, anticipo)
+    flusso = Flusso(pcm, anticipo)
+    indirizzo = server.pubblica_flusso("uscita.wav", flusso.servi, "audio/wav")
     svuota_la_tastiera()
     partenza = time.perf_counter()
-    apparecchio.mc.play_media(f"{base}/flusso.wav", "audio/wav", title=f"MeTeOra, {os.path.basename(percorso)}", stream_type="LIVE")
+    apparecchio.suona(indirizzo, "audio/wav", titolo=f"MeTeOra, {os.path.basename(percorso)}", in_diretta=True)
     dice("Trasmesso: premi Spazio appena senti la musica.")
     ascolta(registro, "strada B, orecchio, avvio", partenza, riflessi)
-    avvio = apparecchio.aspetta(partenza, ("PLAYING",), ATTESA_DELLA_PARTENZA)
+    avvio = collegato.aspetta(partenza, (trasmissione.IN_RIPRODUZIONE,), ATTESA_DELLA_PARTENZA)
     if avvio is None:
         dice("Il Chromecast non dice di suonare il flusso. Guarda il file delle misure.")
     else:
         registro.misura("strada B, avvio riferito dall'apparecchio", avvio)
 
     def salto(secondi):
-        server.flusso.salta(secondi)
+        flusso.salta(secondi)
         return "avanti" if secondi > 0 else "indietro"
 
-    telecomando(apparecchio, registro, riflessi, "B", {
-        "p": server.flusso.pausa_o_ripresa, "a": lambda: salto(-SECONDI_DEL_SALTO), "d": lambda: salto(SECONDI_DEL_SALTO),
+    telecomando(registro, riflessi, "B", {
+        "p": flusso.pausa_o_ripresa, "a": lambda: salto(-SECONDI_DEL_SALTO), "d": lambda: salto(SECONDI_DEL_SALTO),
         "-": lambda: volume_di(apparecchio, -PASSO_DEL_VOLUME), "+": lambda: volume_di(apparecchio, PASSO_DEL_VOLUME),
     })
-    apparecchio.mc.stop()
-    server.flusso = None
+    apparecchio.ferma()
 
 
 def scegli(apparecchi):
-    for numero, info in enumerate(apparecchi, 1):
-        dice(f"{numero}. {info.friendly_name}, {info.model_name}, {nome_del_tipo(info)}, {info.host}.")
+    for numero, voce in enumerate(apparecchi, 1):
+        dice(f"{numero}. {voce['nome']}, {voce['modello']}, {nome_del_tipo(voce)}, {voce['indirizzo']}.")
     risposta = input("Numero dell'apparecchio, Invio per nessuno: ").strip()
     if risposta.isdigit() and 1 <= int(risposta) <= len(apparecchi):
         return apparecchi[int(risposta) - 1]
@@ -668,38 +531,34 @@ def principale():
     parametri.add_argument("--anticipo", type=float, default=0.5, help="i secondi di vantaggio del flusso della strada B")
     parametri.add_argument("--porta", type=int, default=PORTA, help="la porta del server sul PC")
     argomenti = parametri.parse_args()
-    from importlib.util import find_spec
-
-    if find_spec("pychromecast") is None:
-        dice("Manca pychromecast: installalo con python -m pip install pychromecast e rilancia il prototipo.")
+    if not trasmissione.disponibile():
+        dice("Manca pychromecast: installalo con python -m pip install -r requirements.txt e rilancia il prototipo.")
         return
-    registro = Registro()
     from importlib.metadata import version
 
+    registro = Registro()
     registro.scrivi(f"pychromecast {version('pychromecast')}, anticipo {argomenti.anticipo} s, porta {argomenti.porta}.")
-    apparecchi, browser = cerca(registro)
+    apparecchi, ricerca = cerca(registro)
     if not apparecchi:
         dice("Nessun apparecchio Cast sulla rete. Controlla che il PC e gli speaker siano sulla stessa rete, non quella degli ospiti.")
-        browser.stop_discovery()
+        ricerca.ferma()
         return
     dice(f"Apparecchi trovati: {len(apparecchi)}.")
-    apparecchio = server = None
+    collegato = server = None
     riflessi = 0.25
-    # I file convertiti in FLAC, che spariscono all'uscita.
-    # Un file ancora aperto dal server non deve fermare l'uscita.
+    # I file convertiti in FLAC, che spariscono all'uscita; un file ancora
+    # aperto dal server non deve fermare l'uscita.
     conversioni = tempfile.TemporaryDirectory(prefix="meteora_chromecast_", ignore_cleanup_errors=True)
     try:
-        info = scegli(apparecchi)
-        if info is None:
+        voce = scegli(apparecchi)
+        if voce is None:
             return
-        dice(f"Mi collego a {info.friendly_name}.")
-        apparecchio = Apparecchio(info, browser.zc, registro)
-        indirizzo = indirizzo_verso(info.host)
-        server = avvia_il_server(indirizzo, argomenti.porta, registro)
-        base = f"http://{indirizzo}:{argomenti.porta}"
-        registro.scrivi(f"Apparecchio: {info.friendly_name}, {info.model_name}; server su {base}; volume {apparecchio.volume()}.")
-        volume = apparecchio.volume()
-        dice(f"Collegata a {info.friendly_name}, volume {round(volume * 100) if volume is not None else '?'}. Il server e' su {base}.")
+        dice(f"Mi collego a {voce['nome']}.")
+        collegato = Collegato(ricerca, voce, registro)
+        server = trasmissione.Server(trasmissione.indirizzo_verso(voce["indirizzo"]), argomenti.porta, al_registro=lambda t: registro.scrivi(f"Server, {t}"))
+        volume = collegato.apparecchio.volume
+        registro.scrivi(f"Apparecchio: {voce['nome']}, {voce['modello']}, tipo {collegato.apparecchio.tipo}; server su {server.base}; volume {volume}.")
+        dice(f"Collegata a {voce['nome']}, volume {round(volume * 100) if volume is not None else '?'}. Il server e' su {server.base}.")
         while True:
             scelta = tasto("\rR riflessi, A manda il brano, C manda convertito in FLAC, F formati, B trasmetti l'uscita, Q esci.\r")
             scelta = scelta.lower() if isinstance(scelta, str) else scelta
@@ -709,22 +568,22 @@ def principale():
                 if scelta == "r":
                     riflessi = misura_i_riflessi(registro)
                 elif scelta == "a":
-                    strada_a(apparecchio, server, base, registro, riflessi)
+                    strada_a(collegato, server, registro, riflessi)
                 elif scelta == "c":
-                    strada_a(apparecchio, server, base, registro, riflessi, cartella=conversioni.name)
+                    strada_a(collegato, server, registro, riflessi, cartella=conversioni.name)
                 elif scelta == "f":
-                    prova_dei_formati(apparecchio, server, base, registro, conversioni.name)
+                    prova_dei_formati(collegato, server, registro, conversioni.name)
                 elif scelta == "b":
-                    strada_b(apparecchio, server, base, registro, riflessi, argomenti.anticipo)
+                    strada_b(collegato, server, registro, riflessi, argomenti.anticipo)
             except Exception as e:  # noqa: BLE001 - nel collaudo un guasto si annota e si va avanti, invece di perdere la sessione
                 registro.scrivi(f"Guasto nella scelta {scelta!r}: {e!r}.")
                 dice(f"Non riuscito: {e}. Il dettaglio e' nel file delle misure.")
     finally:
-        if apparecchio is not None:
-            apparecchio.chiudi()
+        if collegato is not None:
+            collegato.apparecchio.chiudi()
         if server is not None:
-            server.shutdown()
-        browser.stop_discovery()
+            server.ferma()
+        ricerca.ferma()
         conversioni.cleanup()
         righe = registro.riassunto()
         for riga in righe:
