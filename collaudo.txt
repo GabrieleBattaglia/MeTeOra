@@ -1,0 +1,22 @@
+Collaudo di MeTeOra 1.116.0: le cuffie e gli altoparlanti Bluetooth, tappa 15 a del piano.
+Prima: MeTeOra aperto dalla cartella del progetto, con un brano lungo pronto da suonare.
+Prima: le cuffie Bluetooth associate a Windows, ma spente.
+Prima: in Impostazioni, Scheda audio su Automatica.
+Passo 1: con il brano che suona, accendi le cuffie e aspetta che Windows le connetta.
+Domanda 1: circa due secondi dopo la console dice La scheda audio di Windows ora è, con il nome delle cuffie e un suono nuovo, e musica ed effetti arrivano in cuffia?
+Passo 2: apri Impostazioni, Scheda audio.
+Domanda 2: le cuffie sono nella lista? Se hanno il microfono, compaiono anche come vivavoce, con l'avviso suona come un telefono? Scrivi qui il nome esatto delle due righe.
+Passo 3: scegli le cuffie con WASAPI, nella riga che non dice vivavoce.
+Passo 4: con il brano che suona, spegni le cuffie.
+Domanda 3: il brano continua sugli altoparlanti da dove era, al più un secondo prima, e la console dice La scheda audio scelta non c'è più, con il suo suono?
+Domanda 4: fra le cuffie spente e la musica negli altoparlanti c'è un buco? Quanto lungo, a orecchio?
+Passo 5: riaccendi le cuffie.
+Domanda 5: la console dice che la scheda scelta è tornata, con un suono diverso da quello del passo 4, e musica ed effetti tornano in cuffia?
+Passo 6: metti in pausa con C, spegni le cuffie e riprendi con C.
+Domanda 6: il brano riparte dal punto giusto, sugli altoparlanti?
+Passo 7: allontanati con le cuffie accese finché il segnale si perde, poi torna vicino.
+Domanda 7: succede come ai passi 4 e 5?
+Passo 8: sul PC gigante, che ha le uscite ASIO, dopo i passi precedenti apri Scheda audio.
+Domanda 8: le uscite ASIO ci sono ancora nella lista? Se mancano, scrivilo: vuol dire che la rilettura di PortAudio le perde.
+Domanda 9: i tre suoni nuovi, scheda di Windows cambiata, scheda sparita e scheda tornata, si distinguono bene e ti piacciono?
+Esito:

@@ -1,6 +1,6 @@
 # MeTeOra, le schede audio: su quale uscita suonano musica ed effetti.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.51.0, tappa 3, piano 5.8.9: la scheda audio in uso fra le impostazioni.
+# 01/10/2026: nasce con la 1.51.0, tappa 3, piano 5.8.9: la scheda audio in uso fra le impostazioni. Nella 1.116.0 le schede arrivate dopo l'avvio, come le cuffie Bluetooth, rileggendo PortAudio con GBUtils V216, e l'avviso sul vivavoce.
 
 """La scheda audio, una voce sola per la musica e per gli effetti.
 
@@ -21,6 +21,14 @@ Un fatto verificato da ricordare: se si legge l'elenco delle uscite di mpv
 prima che sounddevice sia importato per la prima volta, PortAudio perde le
 uscite ASIO. Per questo l'elenco di GBUtils si chiede sempre prima di
 quello di mpv.
+Dalla 1.116.0 le schede che arrivano dopo l'avvio. PortAudio conta le
+uscite una volta sola, quando parte, e delle cuffie Bluetooth connesse a
+MeTeOra aperto non le vedeva; mpv invece le vede subito. Quando i due
+elenchi non vanno d'accordo, PortAudio si rilegge con
+rileggi_dispositivi_audio di GBUtils, che chiude e riapre il mixer degli
+effetti. Non si rilegge a ogni occasione: se la causa delle uscite ASIO
+perse e' l'apertura di PortAudio dopo mpv, una rilettura le perderebbe di
+nuovo, e la prova su una macchina con ASIO va ancora fatta.
 Funzioni senza finestre e senza suono: chi le usa scrive in console.
 """
 
@@ -36,6 +44,14 @@ AUTOMATICA_MPV = "auto"
 # MME taglia i nomi dei dispositivi a 31 caratteri: solo un nome lungo
 # esattamente cosi' puo' essere l'inizio di un nome di mpv.
 LUNGHEZZA_DEI_NOMI_MME = 31
+# L'interfaccia con cui PortAudio vede le stesse schede di mpv, con gli
+# stessi nomi interi: e' su queste che i due elenchi si confrontano.
+INTERFACCIA_DI_MPV = "Windows WASAPI"
+# Le cuffie Bluetooth con il microfono compaiono due volte: come cuffie,
+# in stereo, e come vivavoce, che Windows apre per le telefonate e suona
+# come un telefono. Il vivavoce si riconosce dal nome che gli da' il
+# driver, per esempio "Hands-Free AG Audio", in minuscolo.
+NOMI_DEL_VIVAVOCE = ("hands-free", "handsfree", "vivavoce")
 
 _A_CAPO = re.compile(r"[\r\n]+")
 
@@ -75,15 +91,25 @@ def _millisecondi(latenza):
     return f"{numero} ms"
 
 
+def e_vivavoce(dispositivo):
+    """Vero se il nome e' quello del vivavoce di cuffie Bluetooth."""
+    nome = _ripulito(dispositivo).lower()
+    return any(parola in nome for parola in NOMI_DEL_VIVAVOCE)
+
+
 def etichetta(uscita):
     """La riga che si legge nella lista: "Altoparlanti (Realtek(R) Audio),
     WASAPI, 3 ms"; per le interfacce esclusive, come ASIO, in coda
-    l'avviso che possono zittire NVDA."""
+    l'avviso che possono zittire NVDA, e per il vivavoce delle cuffie
+    Bluetooth l'avviso che suona come un telefono."""
     parti = [uscita["dispositivo"], uscita.get("breve") or (uscita.get("interfaccia") or "").replace("Windows ", "")]
     if uscita.get("latenza") is not None:
         parti.append(_millisecondi(uscita["latenza"]))
-    testo = ", ".join(parti)
-    return f"{testo}, esclusiva: può zittire NVDA" if uscita.get("esclusiva") else testo
+    if uscita.get("esclusiva"):
+        parti.append("esclusiva: può zittire NVDA")
+    if e_vivavoce(uscita["dispositivo"]):
+        parti.append("vivavoce: suona come un telefono")
+    return ", ".join(parti)
 
 
 def da_salvare(uscita):
@@ -170,6 +196,35 @@ def dispositivo_di_mpv(nome, elenco_mpv):
     return None
 
 
+def da_rileggere(motore):
+    """Vero se PortAudio e mpv non vedono le stesse schede: le uscite WASAPI
+    di GBUtils e quelle di mpv, confrontate per nome. Di solito vuol dire
+    che una scheda e' arrivata o se n'e' andata dopo l'avvio, e che
+    l'elenco di GBUtils e' vecchio. Non apre niente."""
+    portaudio = {u["dispositivo"] for u in _tutte() if u["interfaccia"] == INTERFACCIA_DI_MPV}
+    di_mpv = {_ripulito(voce.get("description")) for voce in motore.dispositivi() if str(voce.get("name", "")).startswith(PREFISSO_MPV)}
+    return portaudio != di_mpv
+
+
+def rileggi():
+    """Rilegge le uscite di PortAudio, con rileggi_dispositivi_audio di
+    GBUtils: chiude il mixer degli effetti, che si riapre al suono seguente
+    sulla stessa scheda, ritrovata per nome, o, se non c'e' piu', su quella
+    che sceglie da se'. Restituisce il suo esito. Nelle prove si
+    sostituisce."""
+    from GBUtils import rileggi_dispositivi_audio
+
+    return rileggi_dispositivi_audio()
+
+
+def rileggi_se_serve(motore):
+    """Rilegge PortAudio solo se da_rileggere lo chiede: vero se l'ha fatto."""
+    if not da_rileggere(motore):
+        return False
+    rileggi()
+    return True
+
+
 def applica(scelta, motore, avvio=False):
     """Applica la scelta salvata, {"dispositivo", "interfaccia"}, o vuota
     per l'automatica: gli effetti con Acusticator.setup(device=indice), la
@@ -212,6 +267,10 @@ def applica(scelta, motore, avvio=False):
         # int(): GBUtils riconosce l'indice solo come intero di Python.
         Acusticator.setup(device=int(uscita["indice"]))
     nome_mpv = nome_mpv or AUTOMATICA_MPV
-    motore.dispositivo = nome_mpv
+    # La stessa uscita non si riscrive: mpv la riaprirebbe, e la musica
+    # avrebbe un buco per niente, per esempio quando le schede si rileggono
+    # perche' ne e' arrivata un'altra (1.116.0).
+    if motore.dispositivo != nome_mpv:
+        motore.dispositivo = nome_mpv
     return {"uscita": uscita, "dispositivo": uscita["dispositivo"] if uscita else None, "interfaccia": uscita["interfaccia"] if uscita else None,
             "automatica": automatico, "mancante": mancante, "musica": automatico or nome_mpv != AUTOMATICA_MPV, "mpv": nome_mpv}

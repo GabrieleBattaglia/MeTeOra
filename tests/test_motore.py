@@ -1,6 +1,6 @@
 # MeTeOra, le prove del motore: due lettori, velocita', tono, equalizzatore, dissolvenza e fine brano senza attese.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.55.0 (tappa 4, issue 15). Nella 1.113.4 le prove del filtro del tempo e del tono cambiato al volo aspettano che il motore abbia visto gli eventi di mpv, invece dei tempi (issue 27).
+# 01/10/2026: nasce con la 1.55.0 (tappa 4, issue 15). Nella 1.113.4 le prove del filtro del tempo e del tono cambiato al volo aspettano che il motore abbia visto gli eventi di mpv, invece dei tempi (issue 27). Nella 1.116.0 alle_uscite e l'uscita che non si apre piu'.
 
 """Le prove del motore vero, senza suoni.
 
@@ -614,6 +614,39 @@ def test_errore_e_fine_del_brano(crea, avvisi, tmp_path):
     assert m.in_corso is None and m.posizione is None
 
 
+def test_alle_uscite_solo_quando_l_elenco_cambia(crea, avvisi):
+    m = crea(alle_uscite=avvisi("alle_uscite"))
+    # La prima lettura di mpv arriva appena ci si iscrive, e non e' un cambio.
+    assert _aspetta(lambda: m._uscite_viste is not None)
+    assert "alle_uscite" not in avvisi.nomi()
+    vere = m.dispositivi()
+    m._uscite_cambiate("audio-device-list", vere)
+    assert "alle_uscite" not in avvisi.nomi()
+    m._uscite_cambiate("audio-device-list", [*vere, {"name": "wasapi/{cuffie}", "description": "Cuffie (WH-1000XM4)"}])
+    assert avvisi.nomi().count("alle_uscite") == 1
+    m._uscite_cambiate("audio-device-list", vere)
+    assert avvisi.nomi().count("alle_uscite") == 2
+    # Senza alle_uscite il motore non si iscrive.
+    assert crea()._uscite_viste is None
+
+
+@pytest.mark.parametrize("persa", [True, False])
+def test_l_uscita_che_non_si_apre(crea, avvisi, tmp_path, persa):
+    # Un'uscita WASAPI che non esiste: mpv non apre niente, quindi non si
+    # sente niente, e chiude il brano con l'errore dell'uscita, come quando
+    # si spengono le cuffie scelte per nome.
+    altri = {"all_uscita_persa": avvisi("all_uscita_persa")} if persa else {}
+    m = crea(ao="wasapi", **altri)
+    m.dispositivo = "wasapi/{00000000-0000-0000-0000-000000000000}"
+    brano = _silenzio(tmp_path / "brano.wav", 3)
+    m.suona(brano)
+    # Senza all_uscita_persa e' un errore come gli altri.
+    atteso = "all_uscita_persa" if persa else "all_errore"
+    assert _aspetta(lambda: avvisi.nomi() == [atteso])
+    assert avvisi.righe[0][2] == ((brano, None) if persa else (brano,))
+    assert m.in_corso is None
+
+
 def test_pausa_stop_e_seek(crea, tmp_path):
     brano = _silenzio(tmp_path / "brano.wav", 6)
     m = crea()
@@ -1060,7 +1093,7 @@ class _Evento:
 
     def __init__(self, voce, motivo=0):
         self.event_id = type("Id", (), {"value": modulo.mpv.MpvEventID.END_FILE})()
-        self.data = type("Fine", (), {"reason": motivo, "playlist_entry_id": voce})()
+        self.data = type("Fine", (), {"reason": motivo, "error": 0, "playlist_entry_id": voce})()
 
 
 def test_conta_solo_la_fine_del_brano_attivo(crea, avvisi, tmp_path):

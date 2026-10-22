@@ -1,6 +1,6 @@
 # MeTeOra, le prove delle schede audio: elenco, etichette, ritrovamento in mpv, applicazione della scelta.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.51.0, piano 5.8.9.
+# 01/10/2026: nasce con la 1.51.0, piano 5.8.9. Nella 1.116.0 il vivavoce, i due elenchi confrontati, la rilettura e l'uscita di mpv non riscritta.
 
 """Le prove di schede_audio, con GBUtils e mpv sostituiti.
 
@@ -99,6 +99,7 @@ class _MotoreFinto:
     def __init__(self, gb, dispositivo="auto"):
         self._gb = gb
         self._dispositivo = dispositivo
+        self.elenco_mpv = [dict(v) for v in ELENCO_MPV]
 
     @property
     def dispositivo(self):
@@ -111,7 +112,7 @@ class _MotoreFinto:
 
     def dispositivi(self):
         self._gb.chiamate.append("elenco_mpv")
-        return [dict(v) for v in ELENCO_MPV]
+        return [dict(v) for v in self.elenco_mpv]
 
 
 @pytest.fixture
@@ -154,6 +155,40 @@ def test_etichette(gb):
     assert schede_audio.etichetta({**voce, "latenza": 0.54}) == "Scheda, WASAPI, 0.5 ms"
     # Senza latenza e senza nome breve: l'interfaccia senza Windows, e niente millesimi.
     assert schede_audio.etichetta({"indice": 1, "dispositivo": "Scheda", "interfaccia": "Windows WASAPI", "latenza": None}) == "Scheda, WASAPI"
+
+
+def test_etichette_del_vivavoce(gb):
+    voce = {"indice": 1, "dispositivo": "Auricolare (WH-1000XM4 Hands-Free AG Audio)", "interfaccia": "Windows WASAPI", "breve": "WASAPI",
+            "latenza": 3.0, "esclusiva": False}
+    assert schede_audio.etichetta(voce) == "Auricolare (WH-1000XM4 Hands-Free AG Audio), WASAPI, 3 ms, vivavoce: suona come un telefono"
+    # Il nome che WDM-KS da' al vivavoce di un telefono, con l'a capo dentro.
+    assert schede_audio.e_vivavoce("Output (@System32\\drivers\\bthhfenum.sys,#4;%1 Hands-Free HF Audio%0\r\n;(iPhone))")
+    assert schede_audio.e_vivavoce("Vivavoce (Jabra)")
+    assert not schede_audio.e_vivavoce("Cuffie (WH-1000XM4)") and not schede_audio.e_vivavoce(None)
+    # Esclusiva e vivavoce insieme: prima l'esclusiva.
+    esclusiva = schede_audio.etichetta({**voce, "breve": "ASIO", "esclusiva": True})
+    assert esclusiva.endswith(", 3 ms, esclusiva: può zittire NVDA, vivavoce: suona come un telefono")
+
+
+def test_da_rileggere_e_rileggi_se_serve(gb, riletture_annotate):
+    motore = _MotoreFinto(gb)
+    # Le uscite WASAPI dei due elenchi sono le stesse: niente da rileggere.
+    # L'elenco di GBUtils prima di quello di mpv, o PortAudio perde ASIO.
+    assert not schede_audio.da_rileggere(motore)
+    assert gb.chiamate == ["elenco", "elenco_mpv"]
+    assert not schede_audio.rileggi_se_serve(motore) and riletture_annotate == []
+    # Delle cuffie che mpv vede e PortAudio no: sono arrivate dopo l'avvio.
+    motore.elenco_mpv.append({"name": "wasapi/{e}", "description": "Cuffie (WH-1000XM4)"})
+    assert schede_audio.da_rileggere(motore)
+    assert schede_audio.rileggi_se_serve(motore) and riletture_annotate == [True]
+    # Una scheda che PortAudio ha ancora e mpv non piu'.
+    motore.elenco_mpv = [v for v in ELENCO_MPV if v["description"] != STEAM]
+    assert schede_audio.da_rileggere(motore)
+    # Le uscite degli altri driver di mpv, come openal, non contano.
+    motore.elenco_mpv = [*ELENCO_MPV, {"name": "openal/Cuffie", "description": "Cuffie (WH-1000XM4)"}]
+    assert not schede_audio.da_rileggere(motore)
+    # rileggi restituisce l'esito di GBUtils.
+    assert schede_audio.rileggi() == {"prima": 0, "dopo": 0, "arrivate": [], "sparite": [], "mixer": None}
 
 
 def test_ritrova_e_da_salvare(gb):
@@ -273,12 +308,22 @@ def test_applica_l_automatica_durante_la_sessione(gb):
     assert gb.chiamate == ["scegli", "elenco", ("setup", 18), ("mpv", "auto")]
     assert esito == {"uscita": _uscita(18), "dispositivo": ALTOPARLANTI, "interfaccia": "Windows WASAPI", "automatica": True, "mancante": False,
                      "musica": True, "mpv": "auto"}
-    # Se l'automatica non trova niente, il mixer non si tocca.
+    # Se l'automatica non trova niente, il mixer non si tocca; e la musica,
+    # gia' su auto, non si riscrive (1.116.0).
     gb.chiamate.clear()
     gb.scelta = (None, None)
     esito = schede_audio.applica(None, motore)
-    assert gb.chiamate == ["scegli", ("mpv", "auto")]
+    assert gb.chiamate == ["scegli"]
     assert esito["uscita"] is None and esito["dispositivo"] is None and esito["automatica"] and esito["mpv"] == "auto"
+
+
+def test_applica_non_riscrive_la_stessa_uscita(gb):
+    # mpv riaprirebbe l'uscita, e la musica avrebbe un buco per niente
+    # (1.116.0): succede quando le schede si rileggono per un'altra arrivata.
+    motore = _MotoreFinto(gb, "wasapi/{b}")
+    esito = schede_audio.applica({"dispositivo": DIGITALE, "interfaccia": "Windows WASAPI"}, motore)
+    assert gb.chiamate == ["elenco", "elenco_mpv", ("setup", 19)]
+    assert esito["mpv"] == "wasapi/{b}" and esito["musica"] and motore.dispositivo == "wasapi/{b}"
 
 
 def test_applica_l_automatica_all_avvio_non_tocca_niente(gb):

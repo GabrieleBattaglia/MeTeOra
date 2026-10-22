@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde.
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -481,6 +481,11 @@ SILENZIO_DI_PROVA = 441
 # della finestra delle impostazioni: si usa l'automatica, e la scelta resta.
 SCHEDA_MANCANTE = "non c'è"
 SCHEDA_CHE_NON_SI_APRE = "non si apre"
+# Quanto si aspetta dopo l'ultimo cambio delle uscite audio, prima di
+# rileggerle (1.116.0), in millesimi: connettendo delle cuffie Bluetooth
+# Windows aggiunge l'uscita e poi ne fa la predefinita, e gli avvisi
+# arrivano a grappoli.
+ATTESA_DELLE_USCITE = 2000
 
 
 def durata_lunga(secondi):
@@ -891,6 +896,13 @@ class Finestra(wx.Frame):
             errore_archivio = e
         from motore import Motore
 
+        # Le uscite audio che cambiano (1.116.0): l'attesa prima di
+        # rileggerle, se un brano si e' fermato perche' la sua uscita non si
+        # apriva piu', e il punto da cui farlo ripartire, che l'orologio
+        # delle statistiche annota ogni secondo.
+        self._attesa_delle_uscite = None
+        self._uscita_persa = False
+        self._punto_di_ripresa = None
         # Gli avvisi del motore arrivano dai suoi fili: wx.CallAfter li porta
         # nel filo della finestra.
         self.motore = Motore(alla_fine=lambda: wx.CallAfter(self._brano_finito),
@@ -899,7 +911,8 @@ class Finestra(wx.Frame):
             al_passaggio=lambda percorso, sottobrano: wx.CallAfter(self._passaggio, percorso, sottobrano),
             al_caricamento=lambda: wx.CallAfter(self._aggiorna_il_video),
             ai_sottotitoli=lambda testo: wx.CallAfter(self._sottotitolo, testo), ai_sottotitoli_a_immagini=self._sottotitolo_a_immagini,
-            al_salto=self._testo_superato)
+            al_salto=self._testo_superato, alle_uscite=lambda: wx.CallAfter(self._uscite_cambiate),
+            all_uscita_persa=lambda percorso, sottobrano: wx.CallAfter(self._uscita_persa_dal_motore, percorso, sottobrano))
         # Velocita', tono, equalizzatore e dissolvenza salvati valgono per tutti
         # i brani, dal primo.
         self._applica_la_riproduzione()
@@ -6538,6 +6551,7 @@ class Finestra(wx.Frame):
         if self._chiusa:
             return
         self._scatto_delle_statistiche()
+        self._annota_il_punto_di_ripresa()
         self._giri_delle_statistiche += 1
         if self._giri_delle_statistiche % GIRI_IN_UN_MINUTO == 1:
             self._aggiorna_la_scheda_delle_statistiche()
@@ -6546,6 +6560,12 @@ class Finestra(wx.Frame):
             if self._statistiche.modificate and self._minuti_dal_salvataggio_delle_statistiche >= MINUTI_FRA_I_SALVATAGGI_DELLE_STATISTICHE:
                 self._salva_le_statistiche_in_disparte()
             registro.sopravvissuto()
+
+    def _annota_il_punto_di_ripresa(self):
+        """Il brano in corso e il suo punto, ogni secondo: se la sua uscita
+        audio si perde, riparte da qui (1.116.0)."""
+        percorso = self.motore.in_corso
+        self._punto_di_ripresa = (percorso, self.motore.sottobrano, self.motore.posizione) if percorso else None
 
     def _salva_le_statistiche_in_disparte(self):
         self._minuti_dal_salvataggio_delle_statistiche = 0
@@ -7180,6 +7200,106 @@ class Finestra(wx.Frame):
             self._avviso_all_avvio("errore", f"La scheda audio scelta, {scelta['dispositivo']}, non c'è: uso quella automatica{dove}.")
         elif not esito["musica"]:
             self._avviso_all_avvio("errore", f"La musica non ritrova la scheda audio {esito['dispositivo']} e suona sulla scheda di Windows.")
+
+    # Le schede che arrivano e se ne vanno (1.116.0): cuffie Bluetooth
+    # connesse, spente o uscite di portata, schede USB inserite e tolte.
+
+    def _uscite_cambiate(self):
+        """mpv dice che le sue uscite audio sono cambiate: si rileggono dopo
+        ATTESA_DELLE_USCITE dall'ultimo avviso."""
+        if self._chiusa:
+            return
+        if self._attesa_delle_uscite is not None:
+            self._attesa_delle_uscite.Stop()
+        self._attesa_delle_uscite = wx.CallLater(ATTESA_DELLE_USCITE, self._rileggi_le_uscite)
+
+    def _uscita_persa_dal_motore(self, percorso, sottobrano):
+        """Il brano si e' fermato perche' mpv non apre piu' la sua uscita: di
+        solito la scheda scelta se n'e' andata, come delle cuffie Bluetooth
+        spente, e mpv, provato, chiude il brano e non lo riprende neanche con
+        un'uscita buona. La musica passa subito alla scheda di Windows e il
+        brano riparte dal punto annotato, al piu' un secondo prima, anche in
+        pausa se era in pausa; poi le schede si rileggono come a ogni cambio,
+        e la console lo dice. Se gia' suonava sulla scheda di Windows, e'
+        un errore come gli altri."""
+        if self._chiusa:
+            return
+        if self.motore.dispositivo == schede_audio.AUTOMATICA_MPV:
+            self._brano_in_errore(percorso)
+            return
+        self._uscente = self._preparato = None
+        self._uscita_persa = True
+        self.motore.dispositivo = schede_audio.AUTOMATICA_MPV
+        punto = self._punto_di_ripresa
+        inizio = punto[2] if punto and punto[:2] == (percorso, sottobrano) else None
+        self.motore.suona(percorso, sottobrano, inizio=inizio, in_pausa=self.motore.in_pausa)
+        self._uscite_cambiate()
+
+    def _rileggi_le_uscite(self):
+        """Le uscite audio sono cambiate. PortAudio si rilegge, perche' da
+        solo non vede le schede arrivate dopo l'avvio, e la scelta si applica
+        di nuovo. Una scheda scelta che se ne va lascia il posto
+        all'automatica, come all'avvio, e la scelta salvata resta: quando
+        torna, musica ed effetti ci rientrano da soli. Una scheda che c'e' ma
+        non si apre, per gli effetti o per la musica, resta da parte fino al
+        prossimo cambio, cosi' non si riprova senza fine. Con l'automatica gli
+        effetti seguono la scheda di Windows, come la musica gia' fa da se'.
+        La console parla solo quando cambia la scheda su cui si suona."""
+        self._attesa_delle_uscite = None
+        if self._chiusa:
+            return
+        scelta = self.impostazioni["scheda_audio"]
+        uscita_persa, self._uscita_persa = self._uscita_persa, False
+        prima = None
+        with contextlib.suppress(Exception):
+            prima = schede_audio.in_uso()
+        try:
+            schede_audio.rileggi()
+        except Exception as e:  # noqa: BLE001 - PortAudio fallisce in molti modi, e lo dice la console
+            self._avviso_delle_uscite("errore", f"Le schede audio sono cambiate, ma non riesco a rileggerle: {e}.")
+            return
+        in_disparte = self._scheda_in_disparte
+        esito, errore = self._applica_la_scheda(scelta)
+        evento = testo = None
+        if errore is None and scelta and not esito["mancante"] and (uscita_persa or not self._effetti_si_aprono()):
+            self._scheda_in_disparte = SCHEDA_CHE_NON_SI_APRE
+            esito, errore = self._applica_la_scheda({})
+            if in_disparte != SCHEDA_CHE_NON_SI_APRE:
+                evento, testo = "errore", f"La scheda audio scelta, {scelta['dispositivo']}, non si apre: uso quella automatica{self._dove_suona(esito)}."
+        elif errore is None and scelta and esito["mancante"]:
+            self._scheda_in_disparte = SCHEDA_MANCANTE
+            if in_disparte != SCHEDA_MANCANTE:
+                evento, testo = "scheda_sparita", f"La scheda audio scelta, {scelta['dispositivo']}, non c'è più: uso quella automatica{self._dove_suona(esito)}."
+        elif errore is None and scelta:
+            self._scheda_in_disparte = None
+            if in_disparte is not None:
+                evento = "scheda_tornata"
+                if esito["musica"]:
+                    testo = f"La scheda audio scelta, {scelta['dispositivo']}, è tornata: musica ed effetti suonano di nuovo lì."
+                else:
+                    testo = f"La scheda audio scelta, {scelta['dispositivo']}, è tornata per gli effetti; la musica non la ritrova e resta sulla scheda di Windows."
+        if errore is not None:
+            self._avviso_delle_uscite("errore", f"Le schede audio sono cambiate, e non riesco a usare la scheda {scelta.get('dispositivo', 'automatica')}: {errore}.")
+            return
+        automatica = not scelta or self._scheda_in_disparte is not None
+        cambiata = prima is not None and esito["dispositivo"] and (prima["dispositivo"], prima["interfaccia"]) != (esito["dispositivo"], esito["interfaccia"])
+        if testo is None and automatica and cambiata:
+            evento, testo = "scheda_di_windows", f"La scheda audio di Windows ora è {self._nome_della_scheda(esito['dispositivo'], esito['interfaccia'])}: musica ed effetti suonano lì."
+        self._aggiorna_la_scheda_delle_statistiche()
+        if testo:
+            self._avviso_delle_uscite(evento, testo)
+
+    def _dove_suona(self, esito):
+        """La coda ", scheda, interfaccia" con l'automatica scelta da applica,
+        o niente se non si sa."""
+        return f", {self._nome_della_scheda(esito['dispositivo'], esito['interfaccia'])}" if esito and esito["dispositivo"] else ""
+
+    def _avviso_delle_uscite(self, evento, testo):
+        """La riga subito, il suono dopo l'ultimo effetto, senza toccare la
+        domanda in corso: il cambio arriva da fuori, anche mentre si scrive in
+        un campo."""
+        self.scrivi(testo)
+        self._dopo_il_suono(self._suono, evento)
 
     # Il video e i sottotitoli, tappa 7.
 
@@ -7838,6 +7958,9 @@ class Finestra(wx.Frame):
         scelta automatica, poi le uscite in ordine di latenza."""
         scelta = self.impostazioni["scheda_audio"]
         try:
+            # Una scheda arrivata dopo l'avvio, se l'avviso di mpv non e' ancora
+            # arrivato o e' andato perso (1.116.0).
+            schede_audio.rileggi_se_serve(self.motore)
             elenco = schede_audio.uscite()
             # La scelta automatica: con l'automatica in uso e' la scheda del
             # mixer, senza aprire niente; altrimenti la si rifa' per provarla.

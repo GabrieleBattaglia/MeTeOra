@@ -2,6 +2,15 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.116.0] - 2026-10-22
+
+Tre novità per le cuffie e gli altoparlanti Bluetooth, chieste da Gabriele: le schede che arrivano e se ne vanno mentre MeTeOra è aperto.
+
+- Le schede arrivate dopo l'avvio: PortAudio, su cui suonano gli effetti e da cui viene la lista di Scheda audio, conta le uscite una volta sola, quando MeTeOra parte, e delle cuffie connesse dopo non comparivano. Ora mpv avvisa quando le sue uscite cambiano, e due secondi dopo l'ultimo avviso, perché Windows aggiunge l'uscita e poi ne fa la predefinita, MeTeOra rilegge PortAudio con rileggi_dispositivi_audio di GBUtils V216 e applica di nuovo la scelta. La lista di Scheda audio, quando si apre, rilegge PortAudio se le sue uscite e quelle di mpv non sono le stesse. La scheda scelta che se ne va, per esempio delle cuffie spente, lascia il posto all'automatica e la console lo dice; la scelta resta, e quando la scheda torna musica ed effetti ci rientrano da soli, e la console lo dice. Con la scelta Automatica anche gli effetti seguono la scheda di Windows, come la musica faceva già, e la console dice quando cambia. Tre suoni nuovi nella collezione di GBUtils V217: meteora_scheda_sparita e meteora_scheda_tornata, gemelli opposti, e meteora_scheda_di_windows. La stessa uscita di mpv non si riscrive più, perché mpv la riaprirebbe con un buco nella musica.
+- Il brano che riparte quando la sua uscita si perde: provato con un'uscita che non esiste, mpv chiude il brano con l'errore dell'uscita e non lo riprende neanche con un'uscita buona, ed è quello che succede spegnendo le cuffie scelte per nome. Ora il motore lo distingue dagli errori del file, la musica passa subito alla scheda di Windows e il brano riparte dal punto in cui era, al più un secondo prima, anche in pausa; non conta come brano in errore. Una scheda che c'è ma che la musica non apre resta da parte fino al prossimo cambio delle schede, così non si riprova senza fine.
+- Il vivavoce: le cuffie Bluetooth con il microfono compaiono due volte, come cuffie in stereo e come vivavoce, che suona come un telefono; nella lista di Scheda audio la riga del vivavoce ora lo dice.
+- Il manuale spiega le cuffie Bluetooth nella voce Scheda audio, con l'esempio Ascoltare con le cuffie Bluetooth e due messaggi nuovi fra gli altri messaggi d'errore.
+
 ## [1.113.6] - 2026-10-21
 
 - La voce dei sottotitoli e la barra braille a blocchi passano in GBsintesi, un modulo nuovo di GBUtils V213, perché le usa anche MESS per leggere la cronaca della partita dal vivo: decisione di Gabriele. Per chi usa MeTeOra non cambia niente: stesse uscite, stessa scelta automatica, stessi blocchi e stesso tempo minimo di lettura. In MeTeOra restano i nomi da leggere, in sintesi.py, e braille.py non c'è più.

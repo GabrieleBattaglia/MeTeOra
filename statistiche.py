@@ -1,6 +1,6 @@
 # MeTeOra, le statistiche: ogni sorta di conti, raccolti mentre lo si usa, e la pagina che li racconta.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (UltraCode).
-# 17/10/2026: nasce con la 1.103.0, chiesta da Gabriele: piu' dati ci sono, piu' e' contento. Nella 1.104.0 le righe che elencano voci tengono solo quelle diverse da zero, le percentuali uniformi, gli anni futuri dei tag ignorati, le date sempre con il giorno della settimana, e i brani dello storico tolti dalla pulizia all'avvio o rinominati, con i conti della pulizia nella salute. Nella 1.105.0 i nomi di Dove sono, il comando dell'apostrofo, e del suo suono. Nella 1.109.0 le playlist ordinate, invertite, mescolate e rimesse nell'ordine di prima. Nella 1.110.0 quelli della durata residua, Maiuscolo con l'apostrofo. Nella 1.112.0, nella salute, anche le unita' saltate dalla pulizia perche' usate da dischi diversi o perche' il disco che rispondeva non si riconosceva, i dischi riconosciuti a mano e le lettere rese contese dalla Sentinella. Nella 1.113.0 le playlist importate da un M3U o da un PLS, riaperte e rilette. Nella 1.113.5 il campo modificate, perche' la finestra scriva il file solo quando qualcosa e' cambiato davvero.
+# 17/10/2026: nasce con la 1.103.0, chiesta da Gabriele: piu' dati ci sono, piu' e' contento. Nella 1.104.0 le righe che elencano voci tengono solo quelle diverse da zero, le percentuali uniformi, gli anni futuri dei tag ignorati, le date sempre con il giorno della settimana, e i brani dello storico tolti dalla pulizia all'avvio o rinominati, con i conti della pulizia nella salute. Nella 1.105.0 i nomi di Dove sono, il comando dell'apostrofo, e del suo suono. Nella 1.109.0 le playlist ordinate, invertite, mescolate e rimesse nell'ordine di prima. Nella 1.110.0 quelli della durata residua, Maiuscolo con l'apostrofo. Nella 1.112.0, nella salute, anche le unita' saltate dalla pulizia perche' usate da dischi diversi o perche' il disco che rispondeva non si riconosceva, i dischi riconosciuti a mano e le lettere rese contese dalla Sentinella. Nella 1.113.0 le playlist importate da un M3U o da un PLS, riaperte e rilette. Nella 1.113.5 il campo modificate, perche' la finestra scriva il file solo quando qualcosa e' cambiato davvero. Nella 1.116.0 i nomi delle schede audio che se ne vanno e tornano.
 
 """Le statistiche di MeTeOra (1.103.0).
 
@@ -185,7 +185,8 @@ NOMI_DEGLI_EVENTI = {
     "marker_tolti_tutti": "tutti i marker del brano tolti", "marker_eliminato": "marker eliminati",
     "risali": "risalita con Backspace", "risali_all_antenato": "risalita all'antenato", "apri_tutto": "ramo aperto con F10",
     "impostazioni": "impostazioni aperte", "impostazione_cambiata": "impostazione cambiata", "console_salvata": "console salvata",
-    "scheda_audio": "scheda audio cambiata", "marcatori": "finestra dei marcatori aperta",
+    "scheda_audio": "scheda audio cambiata", "scheda_sparita": "scheda audio scelta sparita", "scheda_tornata": "scheda audio scelta tornata",
+    "scheda_di_windows": "scheda audio di Windows cambiata", "marcatori": "finestra dei marcatori aperta",
     "marcatori_esportati": "marcatori esportati", "marcatori_importati": "marcatori importati",
     "marcatori_cancellati": "tutti i marcatori cancellati", "trovato_nei_marcatori": "trovato nei marcatori",
     "ripartito_nei_marcatori": "ricerca nei marcatori ripartita dall'inizio", "non_trovato_nei_marcatori": "non trovato nei marcatori",

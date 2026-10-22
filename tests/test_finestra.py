@@ -1,6 +1,6 @@
 # MeTeOra, le prove della finestra principale, sul desktop nascosto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21). Nella 1.112.0 quelle dei dischi della pulizia, anche del loro file che non si legge, e la prova della pulizia che toglie i file spariti non fa piu' leggere allo schedario i file finti; poi Riconosci questo disco, la riga che lo indica e la Sentinella che guarda i dischi dei file usati; infine la domanda di Riconosci questo disco con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 quelle dell'importazione delle playlist M3U, M3U8 e PLS. Nella 1.113.1 quella dell'etichetta di un file delle console con un sottobrano senza durata (issue 24). Nella 1.113.3 quella della Barra dei comandi per il mouse, che nell'errore dice il suo nome (issue 26). Nella 1.113.5 quelle delle statistiche scritte solo se cambiate, al piu' ogni mezz'ora.
+# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21). Nella 1.112.0 quelle dei dischi della pulizia, anche del loro file che non si legge, e la prova della pulizia che toglie i file spariti non fa piu' leggere allo schedario i file finti; poi Riconosci questo disco, la riga che lo indica e la Sentinella che guarda i dischi dei file usati; infine la domanda di Riconosci questo disco con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 quelle dell'importazione delle playlist M3U, M3U8 e PLS. Nella 1.113.1 quella dell'etichetta di un file delle console con un sottobrano senza durata (issue 24). Nella 1.113.3 quella della Barra dei comandi per il mouse, che nell'errore dice il suo nome (issue 26). Nella 1.113.5 quelle delle statistiche scritte solo se cambiate, al piu' ogni mezz'ora. Nella 1.116.0 quelle delle schede audio che vanno e tornano, e del brano che riparte quando la sua uscita si perde.
 
 import contextlib
 import ctypes
@@ -3471,6 +3471,157 @@ def test_scheda_audio_all_avvio_che_non_si_apre(app, tmp_path, monkeypatch, suon
 
 
 # Velocita', tono, equalizzatore e dissolvenza, 1.55.0 (tappa 4, issue 15).
+
+
+CUFFIE = {"indice": 25, "dispositivo": "Cuffie (WH-1000XM4)", "interfaccia": "Windows WASAPI", "breve": "WASAPI", "latenza": 3.0, "esclusiva": False}
+
+
+def _uscite_finte(finestra, monkeypatch, esiti, in_uso=AUTOMATICA):
+    """applica e in_uso sostituiti: applica risponde con gli esiti in fila e
+    annota le scelte; in_uso dice la scheda degli effetti prima della
+    rilettura, e si cambia scrivendo stato["in_uso"]."""
+    import GBUtils
+
+    stato = {"in_uso": in_uso, "applicate": []}
+
+    def applica(scelta, motore, avvio=False):
+        assert motore is finestra.motore and not avvio
+        stato["applicate"].append(dict(scelta))
+        return esiti.pop(0)
+
+    monkeypatch.setattr(modulo.schede_audio, "applica", applica)
+    monkeypatch.setattr(modulo.schede_audio, "in_uso", lambda elenco=None: stato["in_uso"])
+    stato["prova"] = _ProvaFinta()
+    monkeypatch.setattr(GBUtils.Acusticator, "riproduci", stato["prova"])
+    return stato
+
+
+def test_la_scheda_scelta_va_e_torna(finestra, monkeypatch, suoni_annotati, riletture_annotate):
+    scelta = {"dispositivo": CUFFIE["dispositivo"], "interfaccia": "Windows WASAPI"}
+    finestra.impostazioni["scheda_audio"] = scelta
+    finestra._scheda_in_disparte = None
+    esiti = [_esito(AUTOMATICA, automatica=True, mancante=True), _esito(AUTOMATICA, automatica=True, mancante=True), _esito(CUFFIE)]
+    stato = _uscite_finte(finestra, monkeypatch, esiti, in_uso=CUFFIE)
+    # Le cuffie si spengono: PortAudio si rilegge, si passa all'automatica, e
+    # la scelta salvata resta.
+    finestra._rileggi_le_uscite()
+    assert riletture_annotate == [True] and stato["applicate"] == [scelta]
+    assert finestra._scheda_in_disparte == modulo.SCHEDA_MANCANTE and finestra.impostazioni["scheda_audio"] == scelta
+    assert suoni_annotati[-1] == "scheda_sparita"
+    assert _ultima(finestra) == "La scheda audio scelta, Cuffie (WH-1000XM4), non c'è più: uso quella automatica, Altoparlanti (Realtek(R) Audio), WASAPI."
+    assert finestra._riga_dell_impostazione("scheda_audio") == "Scheda audio: Cuffie (WH-1000XM4), WASAPI, non c'è: uso quella automatica"
+    # Un altro cambio mentre mancano ancora: la console non lo ripete.
+    righe = len(finestra._righe)
+    stato["in_uso"] = AUTOMATICA
+    finestra._rileggi_le_uscite()
+    assert len(finestra._righe) == righe and finestra._scheda_in_disparte == modulo.SCHEDA_MANCANTE
+    # Le cuffie tornano: musica ed effetti ci rientrano, provate come all'avvio.
+    finestra._rileggi_le_uscite()
+    assert finestra._scheda_in_disparte is None and stato["prova"].prove == [(modulo.SILENZIO_DI_PROVA, 2)]
+    assert suoni_annotati[-1] == "scheda_tornata"
+    assert _ultima(finestra) == "La scheda audio scelta, Cuffie (WH-1000XM4), è tornata: musica ed effetti suonano di nuovo lì."
+    assert finestra._scheda_per_le_statistiche == "Cuffie (WH-1000XM4), WASAPI"
+    assert riletture_annotate == [True] * 3
+
+
+def test_la_scheda_scelta_che_c_e_ma_non_si_apre(finestra, monkeypatch, suoni_annotati):
+    scelta = {"dispositivo": CUFFIE["dispositivo"], "interfaccia": "Windows WASAPI"}
+    finestra.impostazioni["scheda_audio"] = scelta
+    finestra._scheda_in_disparte = None
+    esiti = [_esito(CUFFIE), _esito(AUTOMATICA, automatica=True), _esito(CUFFIE)]
+    stato = _uscite_finte(finestra, monkeypatch, esiti, in_uso=CUFFIE)
+    # Il motore ha perso l'uscita, ma la scheda c'e' ancora: la musica non la
+    # apre, e fino al prossimo cambio si resta sull'automatica.
+    finestra._uscita_persa = True
+    finestra._rileggi_le_uscite()
+    assert stato["applicate"] == [scelta, {}] and not finestra._uscita_persa
+    assert finestra._scheda_in_disparte == modulo.SCHEDA_CHE_NON_SI_APRE
+    assert suoni_annotati[-1] == "errore"
+    assert _ultima(finestra) == "La scheda audio scelta, Cuffie (WH-1000XM4), non si apre: uso quella automatica, Altoparlanti (Realtek(R) Audio), WASAPI."
+    # Al cambio seguente si riprova, e questa volta si apre.
+    finestra._rileggi_le_uscite()
+    assert finestra._scheda_in_disparte is None and suoni_annotati[-1] == "scheda_tornata"
+
+
+def test_l_automatica_segue_la_scheda_di_windows(finestra, monkeypatch, suoni_annotati, riletture_annotate):
+    finestra.impostazioni["scheda_audio"] = {}
+    stato = _uscite_finte(finestra, monkeypatch, [_esito(CUFFIE, automatica=True), _esito(CUFFIE, automatica=True)])
+    finestra._rileggi_le_uscite()
+    assert stato["applicate"] == [{}] and stato["prova"].prove == []
+    assert suoni_annotati[-1] == "scheda_di_windows"
+    assert _ultima(finestra) == "La scheda audio di Windows ora è Cuffie (WH-1000XM4), WASAPI: musica ed effetti suonano lì."
+    # La stessa scheda di prima: niente da dire.
+    righe, suonati = len(finestra._righe), len(suoni_annotati)
+    stato["in_uso"] = CUFFIE
+    finestra._rileggi_le_uscite()
+    assert len(finestra._righe) == righe and len(suoni_annotati) == suonati and riletture_annotate == [True, True]
+
+
+def test_le_schede_che_non_si_rileggono(finestra, monkeypatch, suoni_annotati):
+    import GBUtils
+
+    def guasta():
+        raise OSError("PortAudio non risponde")
+
+    monkeypatch.setattr(GBUtils, "rileggi_dispositivi_audio", guasta)
+    finestra._rileggi_le_uscite()
+    assert suoni_annotati[-1] == "errore"
+    assert _ultima(finestra) == "Le schede audio sono cambiate, ma non riesco a rileggerle: PortAudio non risponde."
+
+
+def test_i_cambi_delle_uscite_si_aspettano(finestra):
+    # Gli avvisi arrivano a grappoli: si rilegge una volta sola, dopo l'ultimo.
+    finestra._uscite_cambiate()
+    prima = finestra._attesa_delle_uscite
+    finestra._uscite_cambiate()
+    try:
+        assert prima is not finestra._attesa_delle_uscite and not prima.IsRunning() and finestra._attesa_delle_uscite.IsRunning()
+    finally:
+        finestra._attesa_delle_uscite.Stop()
+
+
+def test_l_uscita_persa_fa_ripartire_il_brano(finestra, monkeypatch):
+    suonati, errori, cambi = [], [], []
+    monkeypatch.setattr(finestra.motore, "suona", lambda percorso, sottobrano=None, inizio=None, in_pausa=False, **_altro:
+                        suonati.append((percorso, sottobrano, inizio, in_pausa)))
+    monkeypatch.setattr(finestra, "_brano_in_errore", errori.append)
+    monkeypatch.setattr(finestra, "_uscite_cambiate", lambda: cambi.append(True))
+    brano = os.path.join(r"C:\m", "lungo.mp3")
+    finestra.motore.dispositivo = "wasapi/{cuffie}"
+    finestra._punto_di_ripresa = (brano, None, 42.5)
+    # Le cuffie si spengono: la musica passa alla scheda di Windows, e il
+    # brano riparte dal punto annotato.
+    finestra._uscita_persa_dal_motore(brano, None)
+    assert finestra.motore.dispositivo == "auto" and finestra._uscita_persa
+    assert suonati == [(brano, None, 42.5, False)] and cambi == [True] and errori == []
+    # Un punto di un altro brano non vale: si riparte da capo.
+    finestra.motore.dispositivo = "wasapi/{cuffie}"
+    finestra._uscita_persa_dal_motore(os.path.join(r"C:\m", "altro.mp3"), None)
+    assert suonati[-1] == (os.path.join(r"C:\m", "altro.mp3"), None, None, False)
+    # Gia' sulla scheda di Windows: e' un errore come gli altri.
+    finestra._uscita_persa_dal_motore(brano, None)
+    assert errori == [brano] and len(suonati) == 2
+
+
+def test_il_punto_di_ripresa(finestra, monkeypatch):
+    finestra._annota_il_punto_di_ripresa()
+    assert finestra._punto_di_ripresa is None
+    brano = os.path.join(r"C:\m", "lungo.mp3")
+    finestra.motore._in_corso = brano
+    monkeypatch.setattr(type(finestra.motore), "posizione", property(lambda _m: 12.5))
+    finestra._annota_il_punto_di_ripresa()
+    assert finestra._punto_di_ripresa == (brano, None, 12.5)
+    finestra.motore._in_corso = None
+
+
+def test_la_scelta_della_scheda_rilegge_se_serve(finestra, monkeypatch):
+    chieste = []
+    monkeypatch.setattr(modulo.schede_audio, "rileggi_se_serve", lambda motore: chieste.append(motore) or False)
+    monkeypatch.setattr(modulo.schede_audio, "uscite", lambda: [AUTOMATICA])
+    monkeypatch.setattr(modulo.schede_audio, "in_uso", lambda elenco=None: AUTOMATICA)
+    monkeypatch.setattr(modulo, "FinestraScelta", _SceltaFinta(None))
+    finestra._cambia_impostazione("scheda_audio", _ListaFinta())
+    assert chieste == [finestra.motore] and _ultima(finestra) == "Scheda audio non cambiata."
 
 
 def test_velocita_e_tono_coi_tasti(finestra, suoni_annotati):

@@ -5,6 +5,7 @@
 # 04/10/2026, 1.75.0: il browser vietato e Donazione muta, per l'invito a offrire un caffe'.
 # 20/10/2026, 1.105.0: la sintesi finta annota anche i testi che interrompono la voce, per Dove sono.
 # 20/10/2026, 1.112.0: la Sentinella dei dischi non chiede niente ai dischi veri, e il MachineGuid non si legge.
+# 22/10/2026, 1.116.0: PortAudio non si rilegge davvero, e le riletture si annotano.
 
 """Le regole comuni delle prove.
 
@@ -103,6 +104,23 @@ def donazione_muta(monkeypatch):
     import GBUtils
 
     monkeypatch.setattr(GBUtils, "Donazione", lambda *argomenti, **opzioni: None)
+
+
+@pytest.fixture(autouse=True)
+def riletture_annotate(monkeypatch):
+    """rileggi_dispositivi_audio di GBUtils chiude il mixer e riapre
+    PortAudio: nelle prove si annota soltanto, e risponde che niente e'
+    cambiato (1.116.0). La lista delle riletture e' il valore della fixture."""
+    import GBUtils
+
+    riletture = []
+
+    def rileggi():
+        riletture.append(True)
+        return {"prima": 0, "dopo": 0, "arrivate": [], "sparite": [], "mixer": None}
+
+    monkeypatch.setattr(GBUtils, "rileggi_dispositivi_audio", rileggi)
+    return riletture
 
 
 @pytest.fixture(autouse=True)

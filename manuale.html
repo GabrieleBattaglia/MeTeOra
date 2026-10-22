@@ -1481,6 +1481,8 @@ kbd {
 <p>La scheda su cui suonano la musica e gli effetti, una sola per tutti e due. Invio apre una lista: in cima Automatica, con la scheda che MeTeOra sceglie da sola, cioè la più pronta fra quelle che portano alla scheda che Windows usa già; poi tutte le uscite, dalla più pronta alla più lenta, ciascuna con il dispositivo, l'interfaccia e la latenza in millesimi di secondo. Le uscite ASIO prendono la scheda tutta per sé e possono zittire NVDA, e la loro riga lo dice.</p>
 <p>Il suono della scheda nuova arriva già da lei; se gli effetti non riescono ad aprirla, MeTeOra torna alla scelta automatica, e la console lo dice. La prova dell'apertura si fa anche con il volume degli effetti a zero. La musica cerca la stessa scheda per nome: se non la ritrova, per esempio con ASIO, suona sulla scheda di Windows, e la console lo dice.</p>
 <p>Se all'avvio la scheda scelta non c'è, per esempio perché le cuffie sono staccate, o c'è ma gli effetti non riescono ad aprirla, per esempio perché un altro programma la tiene tutta per sé, MeTeOra usa quella automatica e lo dice, con il suono dell'errore; la scelta resta, per quando la scheda torna, e la sua riga dice che intanto suona l'automatica.</p>
+<p>Le cuffie e gli altoparlanti Bluetooth, una volta associati e connessi a Windows, sono schede come le altre, e compaiono nella lista anche se li connetti con MeTeOra già aperto. Le cuffie con il microfono compaiono due volte: come cuffie, in stereo, e come vivavoce, che Windows apre per le telefonate e che suona come un telefono; la riga del vivavoce lo dice.</p>
+<p>Anche mentre suona, MeTeOra si accorge delle schede che arrivano e se ne vanno. Se la scheda scelta se ne va, per esempio perché spegni le cuffie o ti allontani troppo, musica ed effetti passano alla scheda automatica, il brano riparte da dove era, al più un secondo prima, e la console lo dice con il suo suono. La scelta resta: quando la scheda torna, MeTeOra ci rientra da solo e lo dice, con un altro suono. Con la scelta Automatica musica ed effetti seguono la scheda di Windows, e quando Windows passa a un'altra scheda, per esempio alle cuffie appena connesse, la console lo dice con un terzo suono. Il Bluetooth aggiunge di suo un ritardo, di solito da 150 a 250 millesimi di secondo: nella musica non si nota, negli effetti dei tasti sì.</p>
 <h4>Salto indietro di Q e Salto avanti di E</h4>
 <p>Di quanti secondi saltano Q ed E, almeno un decimo, anche con i decimali, con il punto o la virgola, o come minuti e secondi, anche con le ore: per esempio 2.5, 90 o 1:30. Minuti e secondi vanno fino a 59. Non c'è un massimo. Un valore sotto il decimo di secondo qui si porta a 0.1, e la console lo dice, mentre Maiuscolo con Q e Maiuscolo con E lo rifiutano; per il resto sono gli stessi valori. Di partenza sono 10 secondi.</p>
 <h4>Velocità</h4>
@@ -1568,6 +1570,13 @@ kbd {
 <li>Nella finestra delle impostazioni scendi fino a Scheda audio e premi Invio: si apre la lista delle uscite.</li>
 <li>Scegli con le frecce l'uscita, per esempio le cuffie con WASAPI, e premi Invio.</li>
 <li>Il suono della scheda arriva già dalle cuffie, e la console dice la scheda scelta; se non si apre, MeTeOra torna all'automatica e lo dice.</li>
+</ol>
+<h4>Ascoltare con le cuffie Bluetooth</h4>
+<ol>
+<li>Associa e connetti le cuffie dalle impostazioni del Bluetooth di Windows; MeTeOra può essere già aperto.</li>
+<li>Con la scheda Automatica non serve altro: quando Windows passa alle cuffie, la console lo dice, e musica ed effetti suonano lì.</li>
+<li>Per ascoltare sempre in cuffia, anche quando Windows sceglie un'altra scheda, scegli le cuffie in Scheda audio, con WASAPI, nella riga che non dice vivavoce.</li>
+<li>Se spegni le cuffie, il brano continua sulla scheda automatica; quando le riaccendi, torna in cuffia.</li>
 </ol>
 <h2 id="campi-domande-liste">I campi, le domande e le liste</h2>
 <p>Quando un comando ha bisogno di sapere qualcosa, MeTeOra apre un campo, una domanda o una lista, con il suono della domanda. Ognuno ha i suoi tasti, sempre gli stessi.</p>
@@ -1671,6 +1680,8 @@ kbd {
 <li>Non riesco a leggere i tag, o MeTeOra non sa scrivere i tag, con il nome del file: il file è rovinato, o il suo formato non ha tag che MeTeOra conosca.</li>
 <li>FluidSynth non si scarica, o FluidR3 GM non si scarica, con il motivo: di solito la rete; si riprova dalle impostazioni, con Banco dei suoni MIDI.</li>
 <li>Che adesso non risponde, nella lista Sintesi di sottotitoli e karaoke: la sintesi scelta non c'è più, per esempio perché lo screen reader è chiuso.</li>
+<li>Le schede audio sono cambiate, ma non riesco a rileggerle, con il motivo: una scheda è arrivata o se n'è andata, e Windows non ha lasciato rileggere l'elenco; se gli effetti tacciono, riavvia MeTeOra.</li>
+<li>La scheda audio scelta non si apre, durante l'ascolto: la scheda c'è, ma la musica o gli effetti non riescono ad aprirla, per esempio perché un altro programma la tiene tutta per sé; fino al prossimo cambio delle schede suona quella automatica.</li>
 </ul>
 <h3 id="esempi-problemi">Esempi</h3>
 <h4>Riferire un problema interno</h4>
