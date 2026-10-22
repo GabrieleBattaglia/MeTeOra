@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.116.1] - 2026-10-22
+
+- Correzione, statistiche: con la scheda audio scelta che non c'è, o che non si apre, il tempo d'ascolto andava lo stesso a lei, mentre si suonava sulla scheda automatica. Ora va alla scheda che suona davvero, Automatica con il suo nome, come quando l'automatica è scelta. Il difetto c'era dalla 1.103.0 per la scheda che mancava all'avvio; con le cuffie Bluetooth, che dalla 1.116.0 se ne vanno e tornano durante l'ascolto, sarebbe capitato spesso. Trovato da ClaudIA rileggendo le statistiche delle schede su domanda di Gabriele.
+
 ## [1.116.0] - 2026-10-22
 
 Tre novità per le cuffie e gli altoparlanti Bluetooth, chieste da Gabriele: le schede che arrivano e se ne vanno mentre MeTeOra è aperto.
