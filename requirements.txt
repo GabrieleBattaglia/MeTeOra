@@ -12,4 +12,6 @@ winrt-Windows.Storage.Streams
 winrt-Windows.Globalization
 winrt-Windows.Foundation
 winrt-Windows.Foundation.Collections
+# Il prototipo del Chromecast, tappa 15 b del piano (22 ottobre 2026).
+pychromecast
 pytest

@@ -20,3 +20,25 @@ Passo 8: sul PC gigante, che ha le uscite ASIO, dopo i passi precedenti apri Sch
 Domanda 8: le uscite ASIO ci sono ancora nella lista? Se mancano, scrivilo: vuol dire che la rilettura di PortAudio le perde.
 Domanda 9: i tre suoni nuovi, scheda di Windows cambiata, scheda sparita e scheda tornata, si distinguono bene e ti piacciono?
 Esito:
+Collaudo del prototipo del Chromecast, tappa 15 b del piano: a casa, sul PC gigante.
+Prima: dalla cartella del progetto, python -m pip install -r requirements.txt, che porta anche pychromecast.
+Prima: gli speaker Google e la Ambeo accesi, configurati in Google Home e sulla stessa rete Wi-Fi del PC; in Windows la rete di casa impostata come privata.
+Passo 1: dalla cartella del progetto, python prototipi\chromecast.py.
+Domanda 1: l'elenco dice tutti gli speaker, la Ambeo e i gruppi di Google Home? Scrivi quali mancano.
+Passo 2: scegli uno speaker con il suo numero; se Windows chiede il permesso del firewall, concedilo per le reti private.
+Passo 3: premi R e fai la misura dei riflessi, con Spazio a ogni bip del PC.
+Passo 4: premi F e dai la cartella della musica: il prototipo prova un file per formato, e quello che non suona lo riprova convertito in FLAC.
+Domanda 2: la prova arriva in fondo? Qualche formato ti sorprende?
+Passo 5: premi A e dai un brano MP3 o FLAC; poi prova P, A, D, meno e più, premendo Spazio appena senti l'effetto di ciascuno, e X per finire.
+Domanda 3: la musica parte, e i comandi fanno quello che dicono?
+Passo 6: premi C e dai un file che il Chromecast non legge, per esempio un APE o un WavPack: prima si converte in FLAC, poi suona.
+Domanda 4: suona? L'attesa della conversione ti pesa?
+Passo 7: premi B e dai lo stesso brano del passo 5: arriva come un flusso continuo; prova gli stessi comandi.
+Domanda 5: il flusso suona senza interruzioni? Pausa e salti come vanno, rispetto al passo 5?
+Passo 8: esci con Q e rifai il passo 7 con un altro anticipo: python prototipi\chromecast.py --anticipo 0.2, e poi con --anticipo 1.
+Domanda 6: con l'anticipo diverso cambia qualcosa? Il suono si interrompe?
+Passo 9: se in Google Home hai un gruppo di speaker, rifai i passi 5 e 7 scegliendo il gruppo.
+Domanda 7: suonano tutti gli speaker del gruppo, e insieme?
+Passo 10: esci con Q e fai salvare in git prototipi\chromecast_misure.txt, che ha tutte le misure, così ClaudIA le legge alla prossima sessione.
+Domanda 8: quale strada ti piace di più: A, A convertita o B?
+Esito:
