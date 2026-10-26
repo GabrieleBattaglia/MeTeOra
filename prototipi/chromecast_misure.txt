@@ -1,0 +1,48 @@
+22:14:34 Sessione del 24/10/2026 alle 22:14 su GabryBat.
+22:14:34 pychromecast 14.0.10, anticipo 0.5 s, porta 8765.
+22:14:43 Trovato dopo 0.8826458000112325 s: Bagno, Google Nest Mini, Google Inc., solo audio, 192.168.1.49:8009.
+22:14:43 Misura, ricerca, primo avviso di ogni apparecchio: 0.883 s.
+22:14:43 Trovato dopo 0.8916105999960564 s: Camera, Google Home Mini, Google Inc., solo audio, 192.168.1.147:8009.
+22:14:43 Misura, ricerca, primo avviso di ogni apparecchio: 0.892 s.
+22:14:43 Trovato dopo 0.8875948000058997 s: Camera 2, Google Nest Hub, Google Inc., audio e video, 192.168.1.109:8009.
+22:14:43 Misura, ricerca, primo avviso di ogni apparecchio: 0.888 s.
+22:14:43 Trovato dopo 0.9703699000237975 s: Corridoio, Google Home Mini, Google Inc., solo audio, 192.168.1.33:8009.
+22:14:43 Misura, ricerca, primo avviso di ogni apparecchio: 0.970 s.
+22:14:43 Trovato dopo 0.8872062000154983 s: Cucina, Google Home Speaker, , tipo non ancora noto, 192.168.1.72:8009.
+22:14:43 Misura, ricerca, primo avviso di ogni apparecchio: 0.887 s.
+22:14:43 Trovato dopo 0.970595000020694 s: GabryBar, AMBEO Soundbar Plus, , tipo non ancora noto, 192.168.1.172:8009.
+22:14:43 Misura, ricerca, primo avviso di ogni apparecchio: 0.971 s.
+22:14:43 Trovato dopo 0.9702098999987356 s: Salotto, Google Home, Google Inc., solo audio, 192.168.1.86:8009.
+22:14:43 Misura, ricerca, primo avviso di ogni apparecchio: 0.970 s.
+22:14:43 Trovato dopo 0.9704721000161953 s: ovunque, Google Cast Group, Google Inc., gruppo, 192.168.1.33:32230.
+22:14:43 Misura, ricerca, primo avviso di ogni apparecchio: 0.970 s.
+22:16:10 Misura, connessione: 0.043 s.
+22:16:10 Apparecchio: GabryBar, AMBEO Soundbar Plus, tipo audio; server su http://192.168.1.171:8765; volume 0.6499999761581421.
+22:17:56 Misura, riflessi: 0.390 s.
+22:18:44 Riassunto, ricerca, primo avviso di ogni apparecchio: 8 misure, mediana 0.93 s, da 0.88 a 0.97.
+22:18:44 Riassunto, connessione: 0.04 s.
+22:18:44 Riassunto, riflessi: 0.39 s.
+22:19:01 Sessione del 24/10/2026 alle 22:19 su GabryBat.
+22:19:01 pychromecast 14.0.10, anticipo 0.5 s, porta 8765.
+22:19:09 Trovato dopo 0.3673904999741353 s: Bagno, Google Nest Mini, Google Inc., solo audio, 192.168.1.49:8009.
+22:19:09 Misura, ricerca, primo avviso di ogni apparecchio: 0.367 s.
+22:19:09 Trovato dopo 0.4172610999958124 s: Camera, Google Home Mini, Google Inc., solo audio, 192.168.1.147:8009.
+22:19:09 Misura, ricerca, primo avviso di ogni apparecchio: 0.417 s.
+22:19:09 Trovato dopo 0.3944580999959726 s: Camera 2, Google Nest Hub, Google Inc., audio e video, 192.168.1.109:8009.
+22:19:09 Misura, ricerca, primo avviso di ogni apparecchio: 0.394 s.
+22:19:09 Trovato dopo 0.505926299985731 s: Corridoio, Google Home Mini, Google Inc., solo audio, 192.168.1.33:8009.
+22:19:09 Misura, ricerca, primo avviso di ogni apparecchio: 0.506 s.
+22:19:09 Trovato dopo 0.3748617999954149 s: Cucina, Google Home Speaker, , tipo non ancora noto, 192.168.1.72:8009.
+22:19:09 Misura, ricerca, primo avviso di ogni apparecchio: 0.375 s.
+22:19:09 Trovato dopo 0.519464799988782 s: GabryBar, AMBEO Soundbar Plus, , tipo non ancora noto, 192.168.1.172:8009.
+22:19:09 Misura, ricerca, primo avviso di ogni apparecchio: 0.519 s.
+22:19:09 Trovato dopo 0.5003843999875244 s: Salotto, Google Home, Google Inc., solo audio, 192.168.1.86:8009.
+22:19:09 Misura, ricerca, primo avviso di ogni apparecchio: 0.500 s.
+22:19:09 Trovato dopo 0.5060482999833766 s: ovunque, Google Cast Group, Google Inc., gruppo, 192.168.1.33:32230.
+22:19:09 Misura, ricerca, primo avviso di ogni apparecchio: 0.506 s.
+22:19:20 Misura, connessione: 0.094 s.
+22:19:20 Apparecchio: Salotto, Google Home, tipo audio; server su http://192.168.1.171:8765; volume 0.4767214059829712.
+22:19:44 Misura, riflessi: 0.301 s.
+22:19:50 Riassunto, ricerca, primo avviso di ogni apparecchio: 8 misure, mediana 0.46 s, da 0.37 a 0.52.
+22:19:50 Riassunto, connessione: 0.09 s.
+22:19:50 Riassunto, riflessi: 0.30 s.
