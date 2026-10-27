@@ -595,8 +595,10 @@ def test_gli_eventi_della_pulizia_e_dei_dischi_sono_in_fondo():
 
 
 def test_ogni_evento_ha_il_suo_nome():
-    """Ogni suono di MeTeOra ha un nome nelle statistiche, e ogni nome un suono."""
-    assert set(statistiche.NOMI_DEGLI_EVENTI) == set(suoni.EVENTI)
+    """Ogni suono di MeTeOra ha un nome nelle statistiche, e ogni nome un
+    suono, della collezione o fatto al volo."""
+    assert set(statistiche.NOMI_DEGLI_EVENTI) == set(suoni.EVENTI) | set(suoni.EVENTI_AL_VOLO)
+    assert not set(suoni.EVENTI) & set(suoni.EVENTI_AL_VOLO)
 
 
 def test_la_riga_delle_playlist_dice_ordinate_invertite_mescolate_e_rimesse(tmp_path):

@@ -1,6 +1,6 @@
 # MeTeOra, gli effetti sonori: un suono per ogni azione, con Acusticator.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.51.0 i suoni delle impostazioni, della console salvata, della finestra dei marcatori, della sua ricerca e della scheda audio. Nella 1.55.0 quelli di velocita', tono, equalizzatore e dissolvenza. Nella 1.58.0 i suoni al volo dell'equalizzatore, e il loop con i soffi rimasti liberi. Nella 1.59.0 l'acceso e lo spento della riproduzione casuale. Nella 1.63.0 i suoni del video. Nella 1.64.0 quelli di Questa rete. Nella 1.65.0 quelli dello scaricamento. Nella 1.66.36 l'annullamento, il ramo aggiornato e il video nascosto, e la playlist creata con dei brani ha un suono solo. Nella 1.67.0 il file rinominato. Nella 1.69.0 i suoni dei tag. Nella 1.75.0 il suono dell'invito a offrire un caffe'. Nella 1.84.0 quello dell'aggiornamento accettato. Nella 1.86.0 i tasti rapidi spenti e accesi. Nella 1.93.0 i capitoli. Nella 1.103.0 i suoni delle statistiche, nella collezione dalla V206 di GBUtils. Nella 1.104.0 quelli della pulizia all'avvio, dalla V207. Nella 1.105.0 quello di Dove sono, dalla V208. Nella 1.109.0 quelli di Ordina, Inverti l'ordine, Mescola e Ordine di prima. Nella 1.110.0 quello della durata residua, dalla V209. Nella 1.112.0 quello di Riconosci questo disco e quello della Sentinella che rende contesa una lettera. Nella 1.113.0 quelli della playlist importata che c'e' gia' e di quella riletta dal suo file. Nella 1.116.0 quelli delle schede audio che se ne vanno e tornano, dalla V217.
+# 30/09/2026: nasce con la tappa 1. Nella 1.51.0 i suoni delle impostazioni, della console salvata, della finestra dei marcatori, della sua ricerca e della scheda audio. Nella 1.55.0 quelli di velocita', tono, equalizzatore e dissolvenza. Nella 1.58.0 i suoni al volo dell'equalizzatore, e il loop con i soffi rimasti liberi. Nella 1.59.0 l'acceso e lo spento della riproduzione casuale. Nella 1.63.0 i suoni del video. Nella 1.64.0 quelli di Questa rete. Nella 1.65.0 quelli dello scaricamento. Nella 1.66.36 l'annullamento, il ramo aggiornato e il video nascosto, e la playlist creata con dei brani ha un suono solo. Nella 1.67.0 il file rinominato. Nella 1.69.0 i suoni dei tag. Nella 1.75.0 il suono dell'invito a offrire un caffe'. Nella 1.84.0 quello dell'aggiornamento accettato. Nella 1.86.0 i tasti rapidi spenti e accesi. Nella 1.93.0 i capitoli. Nella 1.103.0 i suoni delle statistiche, nella collezione dalla V206 di GBUtils. Nella 1.104.0 quelli della pulizia all'avvio, dalla V207. Nella 1.105.0 quello di Dove sono, dalla V208. Nella 1.109.0 quelli di Ordina, Inverti l'ordine, Mescola e Ordine di prima. Nella 1.110.0 quello della durata residua, dalla V209. Nella 1.112.0 quello di Riconosci questo disco e quello della Sentinella che rende contesa una lettera. Nella 1.113.0 quelli della playlist importata che c'e' gia' e di quella riletta dal suo file. Nella 1.116.0 quelli delle schede audio che se ne vanno e tornano, dalla V217. Nella 1.116.2 i suoni di piu' e meno fatti al volo, a frequenze, come quelli dell'equalizzatore.
 
 """La mappa degli eventi di MeTeOra sui preset della collezione di GBUtils.
 
@@ -75,8 +75,6 @@ EVENTI = {
     "vai_a_tempo": "salto",
     "passo_di_salto": "controllo_ok",
     "passo_del_volume": "convalida0",
-    "volume_su": "salita_ideale",
-    "volume_giu": "discesa_ideale",
     "volume_al_limite": "Coccodrillino",
     "muto_acceso": "colpo_d_impatto_3",
     "muto_spento": "colpo_d_impatto_7",
@@ -269,6 +267,10 @@ EVENTI = {
     # colpetti a una porta che si conosce, e risponde qualcun altro.
     "disco_diverso": "meteora_disco_diverso",
 }
+# Gli eventi che le statistiche contano senza un preset della collezione: il
+# loro suono si fa al volo. Piu' e meno del volume dalla 1.116.2; prima
+# suonavano salita_ideale e discesa_ideale, che restano nella collezione.
+EVENTI_AL_VOLO = ("volume_su", "volume_giu")
 
 
 # Il beep dei livelli della plancia: sinusoide di 150 ms, attacco e rilascio
@@ -328,6 +330,28 @@ def banda(indice, volume=0.5):
 def guadagno(db, volume=0.5):
     """Il suono del guadagno di una banda, in dB."""
     return _al_volo(["f4", 0.05, 0.0, volume, "p", 0.04, 0.0, 0.0, frequenza_del_guadagno(db), 0.09, 0.0, volume], 3, volume, ADSR_DEL_GUADAGNO)
+
+
+# I suoni del volume, fatti al volo come quelli dell'equalizzatore (Gabriele,
+# 27 ottobre 2026): un riferimento a 3000 Hz, che vale il volume 100, una
+# pausa, e una seconda frequenza che dice a orecchio il volume nuovo, in
+# proporzione: 120 Hz al volume 0, 3000 Hz al 100, e cosi' via fino agli
+# 8760 Hz del volume massimo, 300. Sinusoide, per non somigliare al guadagno
+# di O e P, a onda triangolare; tempi e inviluppo sono i suoi.
+FREQUENZA_DEL_VOLUME_PIENO = 3000.0
+FREQUENZA_DEL_VOLUME_ZERO = 120.0
+
+
+def frequenza_del_volume(valore):
+    """La frequenza che dice il volume della musica, da 0 a 300."""
+    return FREQUENZA_DEL_VOLUME_ZERO + (FREQUENZA_DEL_VOLUME_PIENO - FREQUENZA_DEL_VOLUME_ZERO) * valore / 100
+
+
+def volume_della_musica(valore, volume=0.5):
+    """Il suono di piu' e meno: il riferimento del volume 100 e poi il volume
+    valore. volume e' quello degli effetti, come per gli altri suoni."""
+    return _al_volo([FREQUENZA_DEL_VOLUME_PIENO, 0.05, 0.0, volume, "p", 0.04, 0.0, 0.0, frequenza_del_volume(valore), 0.09, 0.0, volume], 1, volume,
+                    ADSR_DEL_GUADAGNO)
 
 
 def _al_volo(score, kind, volume, adsr):

@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.116.2] - 2026-10-27
+
+- Meno e più suonano il volume a orecchio, come O e P dicono il guadagno di una banda, chiesto da Gabriele: un riferimento a 3000 Hz, che vale il volume 100, una pausa, e una seconda nota che dice il volume nuovo, in proporzione, da 120 Hz al volume 0 fino agli 8760 Hz del volume 300. Sinusoide, per distinguerla dal guadagno, a onda triangolare. Il suono si fa al volo con Acusticator, e le statistiche contano volume su e volume giù come prima; il limite, già al massimo o al minimo, ha ancora il suo suono. I due preset di prima, salita_ideale e discesa_ideale, restano nella collezione di GBUtils V237 per le altre applicazioni, senza la firma di MeTeOra.
+- Il manuale lo dice nel capitolo del volume.
+
 ## [1.116.1] - 2026-10-22
 
 - Correzione, statistiche: con la scheda audio scelta che non c'è, o che non si apre, il tempo d'ascolto andava lo stesso a lei, mentre si suonava sulla scheda automatica. Ora va alla scheda che suona davvero, Automatica con il suo nome, come quando l'automatica è scelta. Il difetto c'era dalla 1.103.0 per la scheda che mancava all'avvio; con le cuffie Bluetooth, che dalla 1.116.0 se ne vanno e tornano durante l'ascolto, sarebbe capitato spesso. Trovato da ClaudIA rileggendo le statistiche delle schede su domanda di Gabriele.

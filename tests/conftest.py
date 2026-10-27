@@ -6,6 +6,7 @@
 # 20/10/2026, 1.105.0: la sintesi finta annota anche i testi che interrompono la voce, per Dove sono.
 # 20/10/2026, 1.112.0: la Sentinella dei dischi non chiede niente ai dischi veri, e il MachineGuid non si legge.
 # 22/10/2026, 1.116.0: PortAudio non si rilegge davvero, e le riletture si annotano.
+# 27/10/2026, 1.116.2: si annotano anche i suoni del volume, fatti al volo.
 
 """Le regole comuni delle prove.
 
@@ -152,12 +153,14 @@ def livelli_annotati(monkeypatch):
 def equalizzatore_annotato(monkeypatch):
     """I suoni dell'equalizzatore fatti al volo, U e I per la banda e O e P
     per il guadagno, finiscono in una lista: ("banda", indice) o
-    ("guadagno", dB)."""
+    ("guadagno", dB); dalla 1.116.2 anche quelli di piu' e meno, come
+    ("volume", volume nuovo)."""
     import suoni
 
     suonati = []
     monkeypatch.setattr(suoni, "banda", lambda indice, volume=0.5: suonati.append(("banda", indice)) or True)
     monkeypatch.setattr(suoni, "guadagno", lambda db, volume=0.5: suonati.append(("guadagno", db)) or True)
+    monkeypatch.setattr(suoni, "volume_della_musica", lambda valore, volume=0.5: suonati.append(("volume", valore)) or True)
     return suonati
 
 

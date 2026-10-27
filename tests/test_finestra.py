@@ -1,6 +1,6 @@
 # MeTeOra, le prove della finestra principale, sul desktop nascosto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21). Nella 1.112.0 quelle dei dischi della pulizia, anche del loro file che non si legge, e la prova della pulizia che toglie i file spariti non fa piu' leggere allo schedario i file finti; poi Riconosci questo disco, la riga che lo indica e la Sentinella che guarda i dischi dei file usati; infine la domanda di Riconosci questo disco con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 quelle dell'importazione delle playlist M3U, M3U8 e PLS. Nella 1.113.1 quella dell'etichetta di un file delle console con un sottobrano senza durata (issue 24). Nella 1.113.3 quella della Barra dei comandi per il mouse, che nell'errore dice il suo nome (issue 26). Nella 1.113.5 quelle delle statistiche scritte solo se cambiate, al piu' ogni mezz'ora. Nella 1.116.0 quelle delle schede audio che vanno e tornano, e del brano che riparte quando la sua uscita si perde. Nella 1.116.1 quella della scheda delle statistiche con la scelta che manca.
+# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21). Nella 1.112.0 quelle dei dischi della pulizia, anche del loro file che non si legge, e la prova della pulizia che toglie i file spariti non fa piu' leggere allo schedario i file finti; poi Riconosci questo disco, la riga che lo indica e la Sentinella che guarda i dischi dei file usati; infine la domanda di Riconosci questo disco con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 quelle dell'importazione delle playlist M3U, M3U8 e PLS. Nella 1.113.1 quella dell'etichetta di un file delle console con un sottobrano senza durata (issue 24). Nella 1.113.3 quella della Barra dei comandi per il mouse, che nell'errore dice il suo nome (issue 26). Nella 1.113.5 quelle delle statistiche scritte solo se cambiate, al piu' ogni mezz'ora. Nella 1.116.0 quelle delle schede audio che vanno e tornano, e del brano che riparte quando la sua uscita si perde. Nella 1.116.1 quella della scheda delle statistiche con la scelta che manca. Nella 1.116.2 quella dei suoni di piu' e meno fatti al volo.
 
 import contextlib
 import ctypes
@@ -129,16 +129,23 @@ def test_senza_niente_in_corso(finestra, suoni_annotati):
     assert _ultima(finestra) == "Non c'è una playlist in riproduzione."
 
 
-def test_volume_e_muto(finestra):
+def test_volume_e_muto(finestra, suoni_annotati, equalizzatore_annotato):
     finestra.motore.volume = 95
     _tasto(finestra, "+")
     assert _ultima(finestra) == "Volume 100."
     _tasto(finestra, "+")
     assert _ultima(finestra) == "Volume 105, amplificato oltre il 100."
+    _tasto(finestra, "-")
+    assert _ultima(finestra) == "Volume 100."
     finestra.motore.volume = 298
     _tasto(finestra, "+")
     _tasto(finestra, "+")
     assert _ultima(finestra) == "Volume già al massimo, 300."
+    # Piu' e meno suonano al volo il volume nuovo (1.116.2), e le statistiche
+    # li contano come prima; il limite ha ancora il suo preset.
+    assert equalizzatore_annotato == [("volume", 100), ("volume", 105), ("volume", 100), ("volume", 300)]
+    assert suoni_annotati[-1] == "volume_al_limite"
+    assert finestra._statistiche.dati["eventi"]["volume_su"] == 3 and finestra._statistiche.dati["eventi"]["volume_giu"] == 1
     _tasto(finestra, "m")
     assert _ultima(finestra) == "Muto."
     _tasto(finestra, "m")

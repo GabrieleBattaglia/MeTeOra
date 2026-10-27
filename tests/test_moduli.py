@@ -18,6 +18,7 @@ from impostazioni import PREDEFINITE, Impostazioni
 HVSC = r"E:\C64Music"
 # Il suona vero, preso all'import: nelle prove una fixture lo sostituisce.
 _SUONA_VERO = suoni.suona
+_VOLUME_VERO = suoni.volume_della_musica
 
 
 def test_formati():
@@ -81,6 +82,28 @@ def test_ogni_evento_suona_diverso():
             assert kind != 2, f"{preset} e' a onda quadra"
     uguali = [nomi for nomi in contenuti.values() if len(nomi) > 1]
     assert not uguali, f"preset che suonano uguali: {uguali}"
+
+
+def test_il_suono_del_volume_a_frequenze(monkeypatch):
+    import GBUtils
+
+    # 120 Hz al volume 0, 3000 al 100, in proporzione fino al 300 (Gabriele,
+    # 27 ottobre 2026).
+    assert suoni.frequenza_del_volume(0) == 120
+    assert suoni.frequenza_del_volume(100) == 3000
+    assert suoni.frequenza_del_volume(50) == 1560
+    assert suoni.frequenza_del_volume(300) == 8760
+    suonati = []
+    monkeypatch.setattr(GBUtils, "Acusticator", lambda score, kind=1, adsr=None: suonati.append((score, kind, adsr)))
+    monkeypatch.setattr(suoni, "_FINE_DELL_ULTIMO", [0.0])
+    assert _VOLUME_VERO(80, volume=0.4)
+    score, kind, adsr = suonati[0]
+    # Prima il riferimento del volume 100, poi una pausa e il volume nuovo.
+    assert score == [3000.0, 0.05, 0.0, 0.4, "p", 0.04, 0.0, 0.0, suoni.frequenza_del_volume(80), 0.09, 0.0, 0.4]
+    assert kind == 1 and adsr == suoni.ADSR_DEL_GUADAGNO
+    assert abs(suoni.attesa() - 0.18) < 0.05
+    # A volume degli effetti zero tace.
+    assert not _VOLUME_VERO(80, volume=0) and len(suonati) == 1
 
 
 def test_suona_fissa_l_attesa_sulla_durata_del_preset(monkeypatch):
