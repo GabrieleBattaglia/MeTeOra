@@ -46,3 +46,52 @@
 22:19:50 Riassunto, ricerca, primo avviso di ogni apparecchio: 8 misure, mediana 0.46 s, da 0.37 a 0.52.
 22:19:50 Riassunto, connessione: 0.09 s.
 22:19:50 Riassunto, riflessi: 0.30 s.
+07:53:05 Sessione del 29/10/2026 alle 07:53 su GabryBat.
+07:53:05 pychromecast 14.0.10, anticipo 0.5 s, porta 8765.
+07:53:14 Trovato dopo 0.5023055999990902 s: Bagno, Google Nest Mini, Google Inc., solo audio, 192.168.1.49:8009.
+07:53:14 Misura, ricerca, primo avviso di ogni apparecchio: 0.502 s.
+07:53:14 Trovato dopo 0.5108466000019689 s: Camera, Google Home Mini, Google Inc., solo audio, 192.168.1.147:8009.
+07:53:14 Misura, ricerca, primo avviso di ogni apparecchio: 0.511 s.
+07:53:14 Trovato dopo 0.6337042000013753 s: Camera 2, Google Nest Hub, Google Inc., audio e video, 192.168.1.109:8009.
+07:53:14 Misura, ricerca, primo avviso di ogni apparecchio: 0.634 s.
+07:53:14 Trovato dopo 0.6426967000006698 s: Camera TV, Chromecast, Google Inc., audio e video, 192.168.1.68:8009.
+07:53:14 Misura, ricerca, primo avviso di ogni apparecchio: 0.643 s.
+07:53:14 Trovato dopo 0.6474103000000468 s: Corridoio, Google Home Mini, Google Inc., solo audio, 192.168.1.33:8009.
+07:53:14 Misura, ricerca, primo avviso di ogni apparecchio: 0.647 s.
+07:53:14 Trovato dopo 0.502153499997803 s: Cucina, Google Home Speaker, , tipo non ancora noto, 192.168.1.71:8009.
+07:53:14 Misura, ricerca, primo avviso di ogni apparecchio: 0.502 s.
+07:53:14 Trovato dopo 0.6395015000016429 s: GabryBar, AMBEO Soundbar Plus, , tipo non ancora noto, 192.168.1.172:8009.
+07:53:14 Misura, ricerca, primo avviso di ogni apparecchio: 0.640 s.
+07:53:14 Trovato dopo 0.6369043000013335 s: Salotto, Google Home, Google Inc., solo audio, 192.168.1.86:8009.
+07:53:14 Misura, ricerca, primo avviso di ogni apparecchio: 0.637 s.
+07:53:14 Trovato dopo 0.6474852000028477 s: ovunque, Google Cast Group, Google Inc., gruppo, 192.168.1.33:32230.
+07:53:14 Misura, ricerca, primo avviso di ogni apparecchio: 0.647 s.
+07:53:29 Misura, connessione: 0.361 s.
+07:53:29 Apparecchio: GabryBar, AMBEO Soundbar Plus, tipo None; server su http://192.168.1.171:8765; volume 0.6499999761581421.
+07:54:41 Strada A: E:\Audio\AudioDescritti\Ascoltati\A Mano Disarmata.mp3, servito come http://192.168.1.171:8765/file/1.mp3, tipo audio/mpeg.
+07:54:43 Stato: {'stato': 'UNKNOWN', 'posizione': 0.0, 'durata': None, 'motivo': None}.
+07:54:43 Stato: {'stato': 'IDLE', 'posizione': 0, 'durata': None, 'motivo': None}.
+07:54:43 Server, 192.168.1.172: "GET /file/1.mp3 HTTP/1.1" 200 -
+07:54:43 Stato: {'stato': 'PLAYING', 'posizione': 0, 'durata': 6419.2522, 'motivo': None}.
+07:55:11 strada A, orecchio, avvio: nessuna risposta dell'orecchio (None).
+07:55:11 Misura, strada A, avvio riferito dall'apparecchio: 1.732 s.
+07:55:38 Stato: {'stato': 'PAUSED', 'posizione': 55.032978, 'durata': 6419.2522, 'motivo': None}.
+07:55:38 Misura, strada A, risposta dell'apparecchio, pausa: 0.091 s.
+07:55:40 strada A, orecchio, pausa: nessuna risposta dell'orecchio ('p').
+07:55:44 Misura, strada A, risposta dell'apparecchio, volume su: 0.035 s.
+07:55:46 strada A, orecchio, volume su: nessuna risposta dell'orecchio ('+').
+07:55:49 Misura, strada A, risposta dell'apparecchio, volume giu: 0.016 s.
+07:55:50 strada A, orecchio, volume giu: nessuna risposta dell'orecchio ('p').
+07:55:53 Stato: {'stato': 'PLAYING', 'posizione': 65.032978, 'durata': 6419.2522, 'motivo': None}.
+07:55:53 Stato: {'stato': 'PLAYING', 'posizione': 65.032978, 'durata': 6419.2522, 'motivo': None}.
+07:55:53 Misura, strada A, risposta dell'apparecchio, avanti: 0.025 s.
+07:55:56 strada A, orecchio, avanti: nessuna risposta dell'orecchio ('p').
+07:55:58 Stato: {'stato': 'IDLE', 'posizione': 0, 'durata': 6419.2522, 'motivo': 'CANCELLED'}.
+07:55:59 Stato: {'stato': 'UNKNOWN', 'posizione': 0.0, 'durata': None, 'motivo': None}.
+07:55:59 Riassunto, ricerca, primo avviso di ogni apparecchio: 9 misure, mediana 0.64 s, da 0.50 a 0.65.
+07:55:59 Riassunto, connessione: 0.36 s.
+07:55:59 Riassunto, strada A, avvio riferito dall'apparecchio: 1.73 s.
+07:55:59 Riassunto, strada A, risposta dell'apparecchio, pausa: 0.09 s.
+07:55:59 Riassunto, strada A, risposta dell'apparecchio, volume su: 0.04 s.
+07:55:59 Riassunto, strada A, risposta dell'apparecchio, volume giu: 0.02 s.
+07:55:59 Riassunto, strada A, risposta dell'apparecchio, avanti: 0.03 s.
