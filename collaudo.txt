@@ -30,8 +30,3 @@ Passo 2: scegli uno speaker con il suo numero; se Windows chiede il permesso del
 Passo 3: premi R e fai la misura dei riflessi, con Spazio a ogni bip del PC.
 * E qui abbiamo i problemi. Ho provato 2 dispositivi e in entrambi i casi i beep uscivano dalle casse del pc. Però il dispositivo si era connesso, mi aveva letto nome e volume correttamente.
 Il resto delle prove per ora non hanno senso.
-Collaudo di MeTeOra 1.116.2: i suoni di più e meno, a frequenze.
-Passo 1: con un brano che suona, premi meno fino a un volume basso, poi più fino oltre il 100.
-Domanda 1: senti prima la nota fissa e poi quella del volume, più bassa sotto il 100 e più alta oltre?
-Domanda 2: il suono ti piace, o va cambiato qualcosa, come l'onda, la durata o la scala?
-Esito:
