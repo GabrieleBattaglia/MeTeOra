@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39)
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -382,6 +382,9 @@ MIDI_DA_PREPARARE = "I MIDI restano da preparare: si può fare anche dalle impos
 # Da quanti secondi d'attesa in su la console dice che il SID, il MIDI o il
 # brano della console si prepara.
 ATTESA_DA_DIRE = 1.5
+# Quanto si aspetta, al piu', che il motore riapra in pausa il brano fermo per
+# un comando che si muove nel brano (issue 39, 1.116.3).
+ATTESA_DEL_RISVEGLIO = 3.0
 
 
 # I rapporti dell'immagine di Maiuscolo con F6, a giro: il valore per mpv e
@@ -922,6 +925,9 @@ class Finestra(wx.Frame):
         # ricontrollare. None fuori da un passaggio preparato.
         self._uscente = None
         self._preparato = None
+        # Il brano fermo ricaricato in pausa da un comando (issue 39): conta
+        # come avviato quando X lo fa ripartire.
+        self._risvegliato = None
         # La scelta della riproduzione casuale, come (cio' che suona, il
         # seguente scelto): vedi _seguente_casuale.
         self._casuale_ricordato = None
@@ -1612,7 +1618,7 @@ class Finestra(wx.Frame):
     def _vai_al_capitolo(self, passo):
         """Virgola e punto: il capitolo prima o dopo. La virgola, oltre i primi
         RITORNO_AL_CAPITOLO secondi del capitolo, torna al suo inizio."""
-        if self._niente_in_corso():
+        if self._niente_in_corso(risveglia=True):
             return
         elenco = self._capitoli_in_corso()
         if not elenco:
@@ -5175,6 +5181,7 @@ class Finestra(wx.Frame):
         entrare sfumando, se qualcosa si sente; un seguente preparato non
         conta piu'. Con sfuma_lo_stesso sfuma anche ripartendo con il brano
         in corso, come X da capo."""
+        self._risvegliato = None
         if formati.e_midi(brano.percorso) and not self._midi_pronti():
             self._prepara_i_midi(lambda: self._suona(pl, brano, evento, sottobrano, inizio, sfuma_lo_stesso))
             return
@@ -5774,11 +5781,41 @@ class Finestra(wx.Frame):
             brani = brani[limiti[0]:limiti[1] + 1]
         return sum(1 for b in brani if not b.saltato and self.coda.ammesso(pl, b))
 
-    def _niente_in_corso(self):
-        if self.motore.in_corso:
+    def _niente_in_corso(self, risveglia=False):
+        """Vero, con il riscontro, se non c'e' un brano caricato. Con risveglia
+        il brano fermo si ricarica in pausa, con _risveglia_il_fermo."""
+        if self.motore.in_corso or (risveglia and self._risveglia_il_fermo()):
             return False
         self._riscontro("niente_da_suonare", "Non sta suonando niente.")
         return True
+
+    def _risveglia_il_fermo(self):
+        """Issue 39 (1.116.3): da fermi, con un brano corrente, i comandi che si
+        muovono nel brano o che lo raccontano, come Q, E, R, Y e Dove sono, lo
+        ricaricano in pausa dove sta la testina, che dopo lo stop e'
+        l'inizio, come X lo farebbe ripartire; poi rispondono come in pausa.
+        Aspetta che il motore lo apra, al piu' ATTESA_DEL_RISVEGLIO secondi,
+        senza far girare gli eventi della finestra. Il brano conta come
+        avviato quando X lo fa ripartire, non qui. Vero se ora c'e' un brano
+        caricato."""
+        if self.motore.in_corso:
+            return True
+        corrente = self.coda.corrente
+        # Un MIDI senza il banco dei suoni pronto andrebbe in errore, e
+        # l'errore fa partire il brano dopo.
+        if corrente is None or (formati.e_midi(corrente.percorso) and not self._midi_pronti()):
+            return False
+        self._sentinella.guarda(corrente.percorso)
+        # Un video ricaricato in pausa apre la sua finestra con X, come alla
+        # ripresa dell'avvio.
+        self._video_in_attesa = corrente.percorso
+        self.motore.suona(corrente.percorso, inizio=0.0, in_pausa=True)
+        self._risvegliato = corrente.percorso
+        fine = time.monotonic() + ATTESA_DEL_RISVEGLIO
+        while self.motore.posizione is None and self.motore.in_corso and time.monotonic() < fine:
+            time.sleep(0.01)
+        self._aggiorna_etichette()
+        return bool(self.motore.in_corso)
 
     def _comando_play(self):
         if len(self._voci_selezionate()) > 1:
@@ -5808,6 +5845,7 @@ class Finestra(wx.Frame):
             self._riproduci_cartella(dati["percorso"])
             return
         if self.motore.in_corso and self.motore.in_pausa:
+            self._conta_la_ripartenza()
             self.motore.pausa(False, sfumando=True)
             self._riscontro("ripresa", self._frase_della_ripresa())
             self._riprende_il_video()
@@ -5912,8 +5950,17 @@ class Finestra(wx.Frame):
             posizione = self.motore.posizione
             self._riscontro("pausa", f"Pausa a {tempo(posizione)}." if posizione is not None else "Pausa.")
         else:
+            self._conta_la_ripartenza()
             self._riscontro("ripresa", self._frase_della_ripresa())
             self._riprende_il_video()
+
+    def _conta_la_ripartenza(self):
+        """Un brano ricaricato da fermo per un comando (issue 39), che X o C
+        fanno ripartire: per le statistiche parte adesso, come avrebbe fatto
+        X dopo lo stop."""
+        if self._risvegliato is not None and self._risvegliato == self.motore.in_corso:
+            self._statistiche.brano_avviato(self.motore.in_corso, self.motore.sottobrano if self.motore.sottobrani else None)
+        self._risvegliato = None
 
     def _frase_della_ripresa(self):
         posizione = self.motore.posizione
@@ -5945,6 +5992,7 @@ class Finestra(wx.Frame):
         self._statistiche.brano_fermato()
         self._ferma_la_sfumatura()
         self._uscente = self._preparato = None
+        self._risvegliato = None
         selezione = getattr(self.coda.playlist, "selezione", False)
         if selezione:
             # La playlist invisibile della selezione vive fino allo stop.
@@ -6154,7 +6202,7 @@ class Finestra(wx.Frame):
         self._suona(dati["playlist"], dati["brano"], "casuale", dati.get("numero"))
 
     def _salto(self, secondi, evento):
-        if self._niente_in_corso():
+        if self._niente_in_corso(risveglia=True):
             return
         prima = self.motore.posizione or 0
         durata = self.motore.durata
@@ -6208,7 +6256,7 @@ class Finestra(wx.Frame):
         self._chiedi_secondi("passo_avanti", "avanti")
 
     def _comando_vai_a_tempo(self):
-        if self._niente_in_corso():
+        if self._niente_in_corso(risveglia=True):
             return
         self._domanda()
         durata = self.motore.durata
@@ -7665,7 +7713,7 @@ class Finestra(wx.Frame):
 
     def _comando_traccia_audio(self):
         """Maiuscolo con F3: la traccia audio del brano, a giro."""
-        if self._niente_in_corso():
+        if self._niente_in_corso(risveglia=True):
             return
         tracce = self.motore.tracce()
         audio = tracce["audio"] if tracce else []
@@ -8283,9 +8331,12 @@ class Finestra(wx.Frame):
         k = self._chiave_della_voce(dati)
         return self.marcatori.elenco(k) if k else []
 
-    def _contesto_dei_marker(self, senza_brano):
+    def _contesto_dei_marker(self, senza_brano, risveglia=False):
         """(chiave, percorso, durata, sottobrano) di cio' che suona, o None
-        con il riscontro senza_brano se non suona niente."""
+        con il riscontro senza_brano se non suona niente. Con risveglia il
+        brano fermo si ricarica in pausa (issue 39)."""
+        if risveglia:
+            self._risveglia_il_fermo()
         percorso = self.motore.in_corso
         if not percorso:
             self._riscontro("niente_da_suonare", f"Non sta suonando niente: {senza_brano}")
@@ -8323,7 +8374,7 @@ class Finestra(wx.Frame):
         self._riscontro("marker_messo", f"Marker {marker['nome']} a {durata_lunga(marker['tempo'])}.")
 
     def _salta_al_marker(self, verso):
-        contesto = self._contesto_dei_marker("R e Y saltano fra i marker del brano che suona.")
+        contesto = self._contesto_dei_marker("R e Y saltano fra i marker del brano che suona.", risveglia=True)
         if contesto is None:
             return
         k = contesto[0]
@@ -8593,7 +8644,8 @@ class Finestra(wx.Frame):
 
     def _vai_al_brano(self):
         corrente = self.coda.corrente
-        if not corrente or not self.motore.in_corso:
+        # Anche da fermi, il brano corrente (issue 39).
+        if not corrente:
             self._riscontro("niente_da_suonare", "Non sta suonando niente.")
             return
         voce = self._trova_voce_che_suona()
@@ -8617,6 +8669,8 @@ class Finestra(wx.Frame):
         come la riga. Durante una dissolvenza parla del brano che entra,
         quello della coda."""
         brano = self.coda.corrente
+        if brano is not None:
+            self._risveglia_il_fermo()
         if not brano or not self.motore.in_corso:
             testo = "Non sta suonando niente."
             self._riscontro("niente_da_suonare", testo)
@@ -8765,6 +8819,8 @@ class Finestra(wx.Frame):
         come F8, ma la frase va anche alla sintesi e al braille, come in Dove
         sono."""
         pl, brano = self._brano_che_suona()
+        if brano is not None and pl is not None:
+            self._risveglia_il_fermo()
         if brano is None or pl is None or not self.motore.in_corso:
             testo = "Non sta suonando niente."
             self._riscontro("niente_da_suonare", testo)

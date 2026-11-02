@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [1.116.3] - 2026-11-03
+
+- I comandi da fermi, issue 39: in pausa rispondevano già tutti, ma dopo lo stop molti dicevano Non sta suonando niente, anche se MeTeOra sa qual è il brano e che X lo farebbe ripartire dall'inizio. Ora Q, E, W, R, Y, la virgola e il punto dei capitoli, l'apostrofo, Maiuscolo con l'apostrofo e Maiuscolo con F3 rimettono il brano corrente in pausa all'inizio, dove sta la testina dopo lo stop, e poi rispondono come in pausa: per esempio, da fermi, E dice Avanti a 0:10 di 4:56, e X o C ripartono da lì. F8 porta la selezione sul brano fermo senza ricaricarlo. T resta per il brano caricato, perché un marker all'inizio non servirebbe. Il brano ricaricato conta come avviato, nelle statistiche, solo quando X o C lo fanno ripartire. Un MIDI con il banco dei suoni non ancora pronto non si ricarica, e un video ricaricato apre la sua finestra con X, come alla ripresa dell'avvio.
+- Il manuale lo dice nei tasti di V, in Dove sono e nella durata residua.
+
 ## [1.116.2] - 2026-10-27
 
 - Meno e più suonano il volume a orecchio, come O e P dicono il guadagno di una banda, chiesto da Gabriele: un riferimento a 3000 Hz, che vale il volume 100, una pausa, e una seconda nota che dice il volume nuovo, in proporzione, da 120 Hz al volume 0 fino agli 8760 Hz del volume 300. Sinusoide, per distinguerla dal guadagno, a onda triangolare. Il suono si fa al volo con Acusticator, e le statistiche contano volume su e volume giù come prima; il limite, già al massimo o al minimo, ha ancora il suo suono. I due preset di prima, salita_ideale e discesa_ideale, restano nella collezione di GBUtils V237 per le altre applicazioni, senza la firma di MeTeOra.

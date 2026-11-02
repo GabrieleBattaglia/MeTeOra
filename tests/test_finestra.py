@@ -1,6 +1,6 @@
 # MeTeOra, le prove della finestra principale, sul desktop nascosto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21). Nella 1.112.0 quelle dei dischi della pulizia, anche del loro file che non si legge, e la prova della pulizia che toglie i file spariti non fa piu' leggere allo schedario i file finti; poi Riconosci questo disco, la riga che lo indica e la Sentinella che guarda i dischi dei file usati; infine la domanda di Riconosci questo disco con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 quelle dell'importazione delle playlist M3U, M3U8 e PLS. Nella 1.113.1 quella dell'etichetta di un file delle console con un sottobrano senza durata (issue 24). Nella 1.113.3 quella della Barra dei comandi per il mouse, che nell'errore dice il suo nome (issue 26). Nella 1.113.5 quelle delle statistiche scritte solo se cambiate, al piu' ogni mezz'ora. Nella 1.116.0 quelle delle schede audio che vanno e tornano, e del brano che riparte quando la sua uscita si perde. Nella 1.116.1 quella della scheda delle statistiche con la scelta che manca. Nella 1.116.2 quella dei suoni di piu' e meno fatti al volo.
+# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21). Nella 1.112.0 quelle dei dischi della pulizia, anche del loro file che non si legge, e la prova della pulizia che toglie i file spariti non fa piu' leggere allo schedario i file finti; poi Riconosci questo disco, la riga che lo indica e la Sentinella che guarda i dischi dei file usati; infine la domanda di Riconosci questo disco con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 quelle dell'importazione delle playlist M3U, M3U8 e PLS. Nella 1.113.1 quella dell'etichetta di un file delle console con un sottobrano senza durata (issue 24). Nella 1.113.3 quella della Barra dei comandi per il mouse, che nell'errore dice il suo nome (issue 26). Nella 1.113.5 quelle delle statistiche scritte solo se cambiate, al piu' ogni mezz'ora. Nella 1.116.0 quelle delle schede audio che vanno e tornano, e del brano che riparte quando la sua uscita si perde. Nella 1.116.1 quella della scheda delle statistiche con la scelta che manca. Nella 1.116.2 quella dei suoni di piu' e meno fatti al volo. Nella 1.116.3 quella dei comandi da fermi (issue 39).
 
 import contextlib
 import ctypes
@@ -1766,6 +1766,57 @@ def _wav(percorso, secondi=3):
         f.writeframes(b"\0\0" * 8000 * secondi)
 
 
+def test_i_comandi_da_fermi(finestra, tmp_path):
+    # Issue 39 (1.116.3): da fermi, con un brano corrente, i comandi che si
+    # muovono nel brano lo ricaricano in pausa all'inizio, dove X lo farebbe
+    # ripartire, e rispondono come in pausa.
+    brano = tmp_path / "canzone.wav"
+    _wav(brano, 30)
+    finestra._suona_file(str(brano), str(tmp_path))
+    assert _aspetta(lambda: (finestra.motore.posizione or 0) > 0.2)
+    _tasto(finestra, "v")
+    assert finestra.motore.in_corso is None
+    avvii = finestra._statistiche.sessione["brani"]
+    _tasto(finestra, "e")
+    assert _ultima(finestra) == "Avanti a 0:10 di 0:30."
+    assert finestra.motore.in_corso == str(brano) and finestra.motore.in_pausa
+    _tasto(finestra, "q")
+    assert _ultima(finestra) == "Indietro a 0:00 di 0:30."
+    # R e Y, la virgola, Dove sono e F8 rispondono anche loro da fermi.
+    _tasto(finestra, "v")
+    _tasto(finestra, "r")
+    assert _ultima(finestra) == "Questo brano non ha marker: T ne mette uno dove sei."
+    _tasto(finestra, "v")
+    _tasto(finestra, ",")
+    assert _ultima(finestra) == "canzone.wav non ha capitoli."
+    _tasto(finestra, "v")
+    _tasto(finestra, "'")
+    assert _ultima(finestra).startswith("0:00 di 0:30") and "in pausa" in _ultima(finestra)
+    _tasto(finestra, "v")
+    # F8 cerca il brano fermo nella plancia, dove la cartella temporanea
+    # della prova non c'e', senza ricaricarlo.
+    _tasto(finestra, codice=wx.WXK_F8)
+    assert _ultima(finestra).startswith("canzone.wav non è nella plancia")
+    assert finestra.motore.in_corso is None
+    # Il brano ricaricato conta come avviato solo quando riparte, qui con C.
+    _tasto(finestra, "e")
+    assert finestra._statistiche.sessione["brani"] == avvii
+    _tasto(finestra, "c")
+    assert _ultima(finestra).startswith("Riprende") and not finestra.motore.in_pausa
+    assert finestra._statistiche.sessione["brani"] == avvii + 1
+    _tasto(finestra, "c")
+    _tasto(finestra, "c")
+    assert finestra._statistiche.sessione["brani"] == avvii + 1
+    # T resta per il brano caricato: un marker all'inizio non servirebbe.
+    _tasto(finestra, "v")
+    _tasto(finestra, "t")
+    assert _ultima(finestra) == "Non sta suonando niente: i marker si mettono nel brano che suona."
+    # Senza un brano corrente non c'e' niente da ricaricare.
+    finestra.coda.imposta(None, None)
+    _tasto(finestra, "e")
+    assert _ultima(finestra) == "Non sta suonando niente."
+
+
 def test_ripresa_all_avvio_in_pausa(app, tmp_path):
     from finestra import Finestra
 
@@ -2394,8 +2445,11 @@ def test_marker_correzioni_della_revisione(finestra, tmp_path, suoni_annotati):
     assert _ultima(finestra) == "Eliminati 2 marker."
     assert finestra.albero.IsExpanded(altro)
     assert finestra._voce_corrente() == voce
-    # Senza brano in corso, i messaggi dicono cosa fare.
+    # Senza brano in corso, i messaggi dicono cosa fare; da fermi, con un
+    # brano corrente, R lo ricaricherebbe in pausa (issue 39), e allora la
+    # coda si svuota.
     finestra.motore.stop()
+    finestra.coda.imposta(None, None)
     assert _premi(finestra, "r").startswith("Non sta suonando niente: R e Y saltano")
     assert _premi(finestra, "t", maiuscolo=True).endswith("si tolgono con Canc sulla loro voce nella plancia.")
 
@@ -8841,7 +8895,10 @@ def test_durata_residua_si_riscrive_anche_sulla_barra(finestra, monkeypatch, sin
     # in fila dopo Dove sono, che resta sulla barra: via i blocchi della riga,
     # dentro i due della frase, Non sta suonando e niente (ritocco della
     # 1.110.0).
+    # Senza un brano corrente: con il brano fermo, dalla 1.116.3, la durata
+    # residua lo ricarica in pausa (issue 39).
     finestra.motore._in_corso = None
+    finestra.coda.imposta(None, None)
     assert _durata_residua(finestra) == "Non sta suonando niente."
     assert modulo.GBsintesi.blocchi("Non sta suonando niente.", 20) == ["Non sta suonando", "niente."]
     assert sintesi_finta.braille[-1] == ("nvda", "0:51 di 4:59,")
@@ -8858,7 +8915,10 @@ def test_durata_residua_interrompe_la_voce(finestra, monkeypatch, sintesi_finta)
     lettore["posizione"] = 51.0
     dopo = _durata_residua(finestra)
     assert prima != dopo and sintesi_finta.interrotti == [("sapi5", prima), ("sapi5", dopo)]
+    # Senza un brano corrente: con il brano fermo, dalla 1.116.3, la durata
+    # residua lo ricarica in pausa (issue 39).
     finestra.motore._in_corso = None
+    finestra.coda.imposta(None, None)
     assert _durata_residua(finestra) == "Non sta suonando niente."
     assert sintesi_finta.interrotti[2:] == [("sapi5", "Non sta suonando niente.")]
 
