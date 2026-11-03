@@ -1,8 +1,0 @@
-Collaudo di MeTeOra 2.0.2: gli interruttori dei tasti funzione con la regola della issue 38.
-Ctrl con F12 spegne i tasti rapidi, Maiuscolo con F12 li riaccende; F12 da solo scrive la guida rapida.
-Ctrl con F8 sgancia l'inseguimento, Maiuscolo con F8 lo aggancia; F8 da solo porta al brano che suona.
-Ctrl con F1 spegne il video, Maiuscolo con F1 lo accende; F1 da solo apre il manuale.
-Con un video che suona, Esc nasconde la sua finestra e Maiuscolo con F1 la riapre.
-Maiuscolo con F5 porta il video a schermo intero, Ctrl con F5 lo rimette in finestra; F5 da solo porta alla plancia.
-Premuto due volte, ogni interruttore la seconda volta dice Già così e non cambia niente.
-Nelle impostazioni: Salto indietro di Ctrl+Q, Salto avanti di Maiuscolo+Q, Sottotitoli letti (D), e Video, Inseguimento e Riproduzione casuale con Ctrl e Maiuscolo fra parentesi.
