@@ -6663,10 +6663,10 @@ class _TVITEMW(ctypes.Structure):
                 ("cChildren", ctypes.c_int), ("lParam", ctypes.c_void_p)]
 
 
-def test_la_plancia_non_manda_fuochi_sulla_voce_di_prima(finestra):
-    # 1.98.0, il problema di Andrea: con wx.TR_MULTIPLE ogni freccia mandava
-    # a NVDA un fuoco anche sulla voce di prima, e NVDA a volte leggeva quella.
-    # Qui ci si aggancia agli stessi eventi che riceve NVDA.
+@contextlib.contextmanager
+def _fuochi_nella_plancia(finestra):
+    """I fuochi che la plancia manda, come li riceve NVDA: la lista dei nomi
+    delle voci, e pompa, che li fa arrivare."""
     from ctypes import wintypes
 
     user32 = ctypes.WinDLL("user32", use_last_error=True)
@@ -6676,10 +6676,6 @@ def test_la_plancia_non_manda_fuochi_sulla_voce_di_prima(finestra):
     user32.SetWinEventHook.restype = wintypes.HANDLE
     user32.SetWinEventHook.argtypes = [wintypes.DWORD, wintypes.DWORD, wintypes.HMODULE, procedura, wintypes.DWORD, wintypes.DWORD, wintypes.DWORD]
     user32.UnhookWinEvent.argtypes = [wintypes.HANDLE]
-    rock, = _playlist_di_prova(finestra, ("a.mp3", "b.mp3", "c.mp3", "d.mp3"))
-    finestra.Show()
-    finestra.albero.SetFocus()
-    finestra._seleziona(_voce_di(finestra, rock, "a.mp3"))
     hwnd = finestra.albero.GetHandle()
     fuochi = []
 
@@ -6706,6 +6702,22 @@ def test_la_plancia_non_manda_fuochi_sulla_voce_di_prima(finestra):
     try:
         pompa()
         fuochi.clear()
+        yield fuochi, pompa
+    finally:
+        user32.UnhookWinEvent(aggancio)
+
+
+def test_la_plancia_non_manda_fuochi_sulla_voce_di_prima(finestra):
+    # 1.98.0, il problema di Andrea: con wx.TR_MULTIPLE ogni freccia mandava
+    # a NVDA un fuoco anche sulla voce di prima, e NVDA a volte leggeva quella.
+    # Qui ci si aggancia agli stessi eventi che riceve NVDA.
+    user32 = ctypes.WinDLL("user32", use_last_error=True)
+    rock, = _playlist_di_prova(finestra, ("a.mp3", "b.mp3", "c.mp3", "d.mp3"))
+    finestra.Show()
+    finestra.albero.SetFocus()
+    finestra._seleziona(_voce_di(finestra, rock, "a.mp3"))
+    hwnd = finestra.albero.GetHandle()
+    with _fuochi_nella_plancia(finestra) as (fuochi, pompa):
         # La freccia giu' vera, con il bit dei tasti estesi: la muove Windows.
         user32.SendMessageW(hwnd, 0x0100, 0x28, 0x01500001)
         user32.SendMessageW(hwnd, 0x0101, 0x28, 0xC1500001)
@@ -6723,8 +6735,36 @@ def test_la_plancia_non_manda_fuochi_sulla_voce_di_prima(finestra):
         finestra._seleziona(_voce_di(finestra, rock, "a.mp3"))
         pompa()
         assert fuochi and set(fuochi) == {"a.mp3"}
-    finally:
-        user32.UnhookWinEvent(aggancio)
+
+
+def test_il_rinfresco_dei_preferiti_non_porta_il_fuoco_su_playlist(finestra):
+    # Issue 29 (2.0.6): a fine pulizia all'avvio, con il fuoco sulla voce dei
+    # Preferiti, il loro rinfresco portava per un attimo la selezione su
+    # Playlist, e NVDA diceva Playlist, non selezionato, prima di tornare.
+    import pulizia
+
+    _playlist_di_prova(finestra, ("a.mp3", "b.mp3"))
+    preferiti = finestra.archivio.preferiti
+    preferiti.brani[:] = [Brano(os.path.join(r"C:\m", f"{n}.mp3")) for n in ("x", "y", "z")]
+    finestra._popola_playlist()
+    finestra.Show()
+    finestra.albero.SetFocus()
+    finestra._seleziona(finestra.nodo_preferiti)
+    with _fuochi_nella_plancia(finestra) as (fuochi, pompa):
+        # Come a fine pulizia: un file sparito si toglie dai Preferiti.
+        assert finestra._togli_i_brani_spariti({pulizia.norm(os.path.join(r"C:\m", "z.mp3"))}) == 1
+        pompa()
+        assert fuochi == [] and finestra._voce_corrente() == finestra.nodo_preferiti
+        # Con il fuoco su un brano dei Preferiti, il passaggio e' sulla loro
+        # voce, che resta, e mai su Playlist.
+        finestra.albero.Expand(finestra.nodo_preferiti)
+        finestra._seleziona(_voce_di(finestra, finestra.nodo_preferiti, "y.mp3"))
+        pompa()
+        fuochi.clear()
+        assert finestra._togli_i_brani_spariti({pulizia.norm(os.path.join(r"C:\m", "x.mp3"))}) == 1
+        pompa()
+        assert not any(f.startswith("Playlist") for f in fuochi), fuochi
+        assert finestra.albero.GetItemText(finestra._voce_corrente()).startswith("y.mp3")
 
 
 def _clic(finestra, voce, ctrl=False, maiuscolo=False):

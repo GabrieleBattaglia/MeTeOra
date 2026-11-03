@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [2.0.6] - 2026-11-03
+
+- Il fuoco su Playlist a fine pulizia, issue 29: all'avvio, con il fuoco sulla voce dei Preferiti, quando la pulizia toglieva un brano sparito NVDA diceva Playlist, non selezionato, e poi tornava sui Preferiti. Il rinfresco dei Preferiti spostava per un attimo la selezione su Playlist, per non lasciarla su voci che stavano per sparire; ma la voce dei Preferiti resta, e spariscono solo i suoi brani. Ora con il fuoco sui Preferiti la selezione non si muove, e a NVDA non arriva nessun fuoco; con il fuoco su un brano dei Preferiti il passaggio è sulla loro voce, non più su Playlist. Lo vede una prova agganciata agli stessi eventi che riceve NVDA.
+
 ## [2.0.5] - 2026-11-03
 
 - Le prove della sfumatura che cadevano di rado sotto carico, issue 28: la pausa e la ripresa sfumando controllavano il calo appena la voce toccava 80, ma il calo si chiude anche un passo dopo; il brano corto guardava la voce subito dopo la fine della sfumatura, che si toglie un attimo prima; la prova del volume oltre 100 aspettava un tempo fisso. Ora aspettano lo stato atteso, con un limite di tempo, e la catena si guarda dopo gli eventi di mpv. La caduta si è vista una volta su ottanta corse con dieci processi insieme; dopo la correzione, nessuna su centosessanta, e nessuna in venti corse del file intero. Solo le prove: MeTeOra non cambia.
