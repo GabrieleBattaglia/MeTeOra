@@ -1,0 +1,4 @@
+Collaudo di MeTeOra 2.6.4: sullo speaker Cast, i sottobrani dei SID vanno avanti in ordine.
+Con GabryBar, apri Outrun Europa nella plancia, fai suonare il sottobrano 4 e lascialo finire da solo: parte il 5 di 27, non il primo.
+Ripetilo con un sottobrano che non hai ancora ascoltato in questa sessione, e fai caso all'attesa fra la fine di uno e l'inizio del seguente: se resta lunga, scrivi qui più o meno quanti secondi.
+Poi passa da un sottobrano all'altro con B, e confronta l'attesa con quella del passaggio da solo.

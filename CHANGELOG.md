@@ -2,6 +2,13 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [2.6.4] - 2026-11-03
+
+Una correzione, trovata da Gabriele ascoltando con GabryBar i 27 sottobrani di Outrun Europa.
+
+- Sullo speaker Cast, finito da solo un sottobrano di un SID o della musica delle console, invece del seguente ripartiva il primo, dopo un lungo silenzio. Il lettore dello speaker, a fine brano, cancellava il numero del sottobrano, mentre il motore sul PC lo tiene: la finestra cercava nella plancia il sottobrano che non c'era più, ripiegava sul SID e la voce dopo il SID aperto è il suo primo sottobrano. Il silenzio era la conversione in FLAC di quel primo sottobrano, quasi tre minuti di musica resi in 15 secondi. Ora il sottobrano resta, come sul PC, anche dopo un errore; lo stesso valeva per la ripetizione del brano e per il seguente dopo un errore. Difetto nato con la 1.119.0.
+- Dentro: due prove nuove, del lettore lontano e della plancia con lo speaker, e lo speaker finto delle prove che tiene il sottobrano come quello vero.
+
 ## [2.6.3] - 2026-11-03
 
 Una correzione dal collaudo della 2.6.0, sulla domanda di Gabriele: con lo speaker, come si va oltre il volume 100?

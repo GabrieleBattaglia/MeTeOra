@@ -1,6 +1,6 @@
 # MeTeOra, il lettore lontano: uno speaker Cast al posto della scheda audio, con la strada A e la conversione in FLAC.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/11/2026: nasce con la 1.117.0, tappa 15 b del piano.
+# 03/11/2026: nasce con la 1.117.0, tappa 15 b del piano. Nella 2.6.4 il sottobrano resta a fine brano, come nel motore.
 
 """Il lettore che suona su un apparecchio Cast, per il motore.
 
@@ -252,7 +252,8 @@ class LettoreLontano:
             if generazione != self._generazione or self.percorso is None:
                 return
             percorso = self.percorso
-            self.percorso = self.sottobrano = self.sottobrani = None
+            # Il sottobrano resta, come a fine brano.
+            self.percorso = None
             self._indirizzo = None
             self._pronto = False
         if self._all_errore is not None:
@@ -296,7 +297,10 @@ class LettoreLontano:
         if stato["stato"] != trasmissione.FERMO or (not self._pronto and motivo != "ERROR"):
             return None
         percorso = self.percorso
-        self.percorso = self.sottobrano = self.sottobrani = None
+        # Il sottobrano resta, come nel motore sul PC: la finestra ci trova il
+        # seguente, il 5 dopo il 4. Cancellato, la plancia ripartiva dal primo
+        # sottobrano del SID (Gabriele, con GabryBar, 2.6.4).
+        self.percorso = None
         self._indirizzo = None
         self._pronto = False
         if motivo == "ERROR":

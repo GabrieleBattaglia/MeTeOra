@@ -190,6 +190,17 @@ def test_la_conversione(banco):
     lettore.suona(r"C:\m\musica.sid", sottobrano=2, sottobrani=12)
     assert banco.aspetta_suona(3) and banco.conversioni[-1] == (r"C:\m\musica.sid", 2)
     assert lettore.sottobrano == 2 and lettore.sottobrani == 12
+    # A fine brano il sottobrano resta, come nel motore: la finestra ci trova
+    # il seguente, e non riparte dal primo (2.6.4). Lo stop lo cancella.
+    indirizzo = apparecchio.chiamate[-1][1]
+    banco.stato(trasmissione.IN_RIPRODUZIONE, indirizzo, durata=97.0)
+    banco.stato(trasmissione.FERMO, indirizzo, motivo="FINISHED")
+    assert banco.avvisi[-1] == "fine" and lettore.percorso is None
+    assert lettore.sottobrano == 2 and lettore.sottobrani == 12
+    lettore.suona(r"C:\m\musica.sid", sottobrano=3, sottobrani=12)
+    assert banco.aspetta_suona(4) and lettore.sottobrano == 3
+    lettore.stop()
+    assert lettore.sottobrano is None and lettore.sottobrani is None
 
 
 def test_una_conversione_finita_tardi_non_suona(tmp_path):
@@ -219,6 +230,13 @@ def test_gli_errori(tmp_path):
             break
         threading.Event().wait(0.01)
     assert ("errore", "rovinato.ape") in banco.avvisi and banco.lettore.percorso is None
+    # Anche dopo un errore il sottobrano resta, per il seguente.
+    banco.lettore.suona("rovinato.sid", sottobrano=4, sottobrani=27)
+    for _ in range(500):
+        if ("errore", "rovinato.sid") in banco.avvisi:
+            break
+        threading.Event().wait(0.01)
+    assert ("errore", "rovinato.sid") in banco.avvisi and banco.lettore.percorso is None and banco.lettore.sottobrano == 4
     # Lo speaker che non carica il brano: errore anche prima di averlo.
     banco.lettore.suona("brano.mp3")
     banco.allo_stato({"stato": trasmissione.FERMO, "posizione": None, "durata": None, "motivo": "ERROR", "codice": 104})

@@ -3915,12 +3915,18 @@ class _SpeakerFinto:
     def suona(self, percorso, sottobrano=None, sottobrani=None, inizio=None, in_pausa=False, midi_reso=False):
         self.chiamate.append(("suona", os.path.basename(percorso), inizio, in_pausa))
         self.percorso, self.in_pausa, self.posizione = percorso, in_pausa, inizio or 0.0
+        self.sottobrano, self.sottobrani = sottobrano, sottobrani
 
     def pausa(self, valore=None):
         self.in_pausa = (not self.in_pausa) if valore is None else valore
         return self.in_pausa
 
     def stop(self):
+        self.percorso = self.sottobrano = self.sottobrani = None
+
+    def finisce(self):
+        """Il brano finito sullo speaker, come lo lascia il lettore lontano:
+        il percorso se ne va, il sottobrano resta (2.6.4)."""
         self.percorso = None
 
     def salta(self, secondi):
@@ -3971,6 +3977,33 @@ def test_la_lista_delle_destinazioni_con_gli_speaker(finestra, monkeypatch):
     monkeypatch.setattr(modulo, "FinestraScelta", scelta)
     finestra._cambia_impostazione("scheda_audio", _ListaFinta())
     assert scelta.aperture[0][2] == 4 and _ultima(finestra) == "Scheda audio non cambiata."
+
+
+@pytest.mark.skipif(not os.path.isfile(TURBO_OUTRUN), reason="serve la collezione HVSC")
+def test_sullo_speaker_il_sottobrano_seguente(finestra, tmp_path):
+    # Con GabryBar, finito il sottobrano 4 ripartiva il primo: il lettore
+    # lontano cancellava il sottobrano a fine brano, e la plancia trovava il
+    # SID invece del 4 (Gabriele, 2.6.4).
+    import shutil
+
+    cartella = tmp_path / "sid"
+    cartella.mkdir()
+    shutil.copy(TURBO_OUTRUN, cartella)
+    finestra.albero.Expand(finestra.nodo_pc)
+    nodo = finestra.albero.AppendItem(finestra.nodo_pc, "sid", data={"tipo": "cartella", "percorso": str(cartella), "caricato": False})
+    finestra.albero.SetItemHasChildren(nodo, True)
+    finestra.albero.Expand(nodo)
+    voce_file = next(finestra._figli(nodo))
+    finestra.albero.Expand(voce_file)
+    speaker = _SpeakerFinto()
+    finestra._speaker_collegato(_CUCINA, speaker, True, None)
+    finestra._seleziona(list(finestra._figli(voce_file))[3])
+    _premi(finestra, "x")
+    assert speaker.chiamate[-1][1] == "Turbo_Outrun.sid" and speaker.sottobrano == 4
+    speaker.finisce()
+    finestra._brano_finito()
+    assert speaker.chiamate[-1][1] == "Turbo_Outrun.sid" and speaker.sottobrano == 5
+    assert _etichette(finestra, voce_file)[4].endswith(", in riproduzione")
 
 
 def test_lo_speaker_cast(finestra, monkeypatch, tmp_path, suoni_annotati, equalizzatore_annotato, sintesi_finta):
