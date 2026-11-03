@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [2.0.4] - 2026-11-03
+
+- L'installatore sopra un MeTeOra aggiornato da solo, issue 35, trovata rivedendo quello di MESS, che nasce da qui: l'aggiornamento automatico lascia in _internal il manifesto della sua versione, e l'installatore, che non toglieva niente, lo lasciava lì; al primo avvio pulisci_residui cancellava allora proprio i file nuovi che quel manifesto non elenca, e MeTeOra poteva non partire. Ora l'installatore toglie prima _internal e _internal_vecchio, come già faceva la disinstallazione; i dati dell'utente stanno accanto all'eseguibile e restano. Provato compilando l'installatore.
+
 ## [2.0.3] - 2026-11-03
 
 - L'istanza unica, issue 36, trovata lavorando a quella di MESS, che nasce da qui: all'uscita l'ascolto chiudeva il suo Listener prima di sbloccare il filo che lo usava, e di rado un'istanza della pipe restava aperta fino alla fine del processo, così che nello stesso processo nessuno poteva più ascoltare con quel nome. Ora prima si sblocca il filo, anche più volte, finché non è finito, e solo dopo si chiude il Listener: mille cicli di apertura e chiusura senza una pipe occupata. Nell'uso conta poco, perché l'ascolto si ferma all'uscita; conta per le prove e per i banchi.

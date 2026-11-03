@@ -1,6 +1,6 @@
 ; MeTeOra, l'installatore con Inno Setup 6 (1.97.0).
 ; Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-; 05/10/2026: nasce con la prima release, scelto da Gabriele. Nella 1.113.0 la disinstallazione toglie anche il ProgID delle playlist.
+; 05/10/2026: nasce con la prima release, scelto da Gabriele. Nella 1.113.0 la disinstallazione toglie anche il ProgID delle playlist. Nella 2.0.4 l'installazione toglie prima _internal (issue 35).
 ;
 ; Si compila con python setup_maker.py, dopo la compilazione di PyInstaller e
 ; zip_maker.py: lo script passa la versione di version.py.
@@ -56,6 +56,15 @@ Name: "italiano"; MessagesFile: "compiler:Languages\Italian.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+
+[InstallDelete]
+; Prima di installare, via le cartelle del programma lasciate da una versione
+; precedente (issue 35). Un MeTeOra aggiornato da solo ha in _internal il
+; manifesto dello zip: se restasse, al primo avvio pulisci_residui
+; cancellerebbe tutti i file nuovi che quel manifesto non elenca. I dati
+; dell'utente stanno fuori da _internal, accanto all'eseguibile, e restano.
+Type: filesandordirs; Name: "{app}\_internal"
+Type: filesandordirs; Name: "{app}\_internal_vecchio"
 
 [Files]
 ; Il pacchetto a cartella di PyInstaller, senza i dati che una prova avesse

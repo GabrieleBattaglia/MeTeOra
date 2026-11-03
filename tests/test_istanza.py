@@ -1,6 +1,6 @@
 # MeTeOra, le prove dell'istanza unica e delle associazioni dei formati: pipe di prova e registro finto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.91.0. Nella 1.113.0 le associazioni delle playlist M3U e PLS. Nella 2.0.3 ferma che libera la pipe (issue 36).
+# 04/10/2026: nasce con la 1.91.0. Nella 1.113.0 le associazioni delle playlist M3U e PLS. Nella 2.0.3 ferma che libera la pipe (issue 36). Nella 2.0.4 InstallDelete dell'installatore (issue 35).
 
 """La pipe ha un nome solo per la prova, mai quello del MeTeOra che magari e'
 aperto; il registro di Windows e' finto, in memoria: niente di vero si tocca."""
@@ -233,3 +233,15 @@ def test_la_versione_in_app_installate():
     with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "MeTeOra.iss"), encoding="utf-8") as f:
         app_id = next(r for r in f.read().splitlines() if r.startswith("AppId="))
     assert installazione.CHIAVE.endswith("\\" + app_id[len("AppId={"):] + "_is1")
+
+
+def test_l_installatore_toglie_prima_la_cartella_interna():
+    # Issue 35 (2.0.4): installando sopra un MeTeOra aggiornato da solo, il
+    # manifesto vecchio in _internal farebbe cancellare a pulisci_residui i
+    # file nuovi; l'installatore toglie prima _internal, come la
+    # disinstallazione, e mai i dati, che stanno accanto all'eseguibile.
+    with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "MeTeOra.iss"), encoding="utf-8") as f:
+        righe = [r.strip() for r in f.read().splitlines()]
+    inizio = righe.index("[InstallDelete]")
+    sezione = [r for r in righe[inizio + 1:righe.index("[Files]")] if r and not r.startswith(";")]
+    assert sezione == ['Type: filesandordirs; Name: "{app}\\_internal"', 'Type: filesandordirs; Name: "{app}\\_internal_vecchio"']
