@@ -4,6 +4,8 @@ Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
 ## [2.6.6] - 2026-11-03
 
+Pubblicata il 3 novembre 2026, con l'installatore e lo zip: la quarta release, che porta agli utenti tutto quello che è venuto dopo la 1.113.4, dalle cuffie Bluetooth della 1.116.0 agli speaker Cast della 1.119.0, la nuova mappa dei tasti della 2.0.0, le voci del PUB, il segnalibro e i sostenitori. Per scelta di Gabriele, senza il passaggio da VirusTotal.
+
 Una correzione, trovata da Gabriele dopo il collaudo della 2.6.5.
 
 - Maiuscolo con H e F8, con un SID o un file delle console chiuso nella plancia, si fermavano sul file invece di arrivare al sottobrano: Maiuscolo con H faceva suonare il sottobrano del segnalibro, ma la selezione restava sul suo SID, e F8 arrivava al sottobrano che suona solo se i sottobrani erano già aperti. Ora tutti e due aprono i sottobrani e portano la selezione e il fuoco sul sottobrano, e con il ramo del SID aperto, finito il sottobrano, si va avanti con il seguente. L'inseguimento, Maiuscolo con F8, e la selezione all'avvio restano invece sul SID quando i suoi sottobrani sono chiusi: aprirli da soli cambierebbe l'ordine in cui si va avanti, che segue i rami aperti. Il manuale lo dice nella guida rapida e nella sezione su F8.
