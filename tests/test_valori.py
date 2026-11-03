@@ -647,6 +647,8 @@ def test_carica_i_valori_buoni(tmp_path):
         "ripresa": {"percorso": "x"}, "righe_della_console": 100, "caratteri": {"p": 6, "t": 72}, "colori_testo": {"c": [0, 100, 50]},
         "colori_sfondo": {"p": [31, 31, 31], "c": [100, 100, 100], "t": [0, 0, 0]},
         "scheda_audio": {"dispositivo": "Altoparlanti (Realtek(R) Audio)", "interfaccia": "Windows WASAPI"},
+        "segnalibro": {"percorso": r"E:\libri\uno.mp3", "posizione": 75.5, "durata": 600.0, "sottobrano": None, "lista": "cartella",
+            "nome": r"E:\libri", "indice": -1},
         "velocita": 1.05, "tono": -3, "bande": [0, 2, -12, 12, 0, 0, 1], "dissolvenza": {"accesa": True, "secondi": 2.5}}
     imp = _caricate(tmp_path, buoni)
     assert dict(imp) == buoni
