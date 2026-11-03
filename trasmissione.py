@@ -1,6 +1,6 @@
 # MeTeOra, la trasmissione agli apparecchi Cast: la parte comune a tutte le strade del Chromecast.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 22/10/2026: nasce con la tappa 15 b del piano, prima che Gabriele scelga la strada: il programma ancora non lo usa.
+# 22/10/2026: nasce con la tappa 15 b del piano, prima che Gabriele scelga la strada: il programma ancora non lo usa. Nella 1.117.0 la usa lontano.py: il brano in pausa, l'indirizzo negli stati, il muto, la connessione che non risponde e quella che cade.
 
 """Gli apparecchi Cast: Chromecast, speaker Google, soundbar e televisori con
 Chromecast integrato, e i gruppi di altoparlanti di Google Home.
@@ -139,14 +139,14 @@ class Ricerca:
         voci.sort(key=lambda v: (v["tipo"] == TIPO_GRUPPO, v["nome"].lower(), str(v["uuid"])))
         return voci
 
-    def connetti(self, uuid, allo_stato=None, attesa=ATTESA_DELLA_CONNESSIONE):
+    def connetti(self, uuid, allo_stato=None, attesa=ATTESA_DELLA_CONNESSIONE, al_distacco=None):
         """La connessione all'apparecchio uuid, gia' pronta, o LookupError se
-        la ricerca non lo conosce piu'."""
+        la ricerca non lo conosce piu'; vedi Apparecchio per gli avvisi."""
         browser = self._browser
         info = browser.devices.get(uuid) if browser is not None else None
         if info is None:
             raise LookupError(f"apparecchio {uuid} non trovato")
-        return Apparecchio(info, browser.zc, allo_stato, attesa)
+        return Apparecchio(info, browser.zc, allo_stato, attesa, al_distacco)
 
     def _cambio(self, _uuid, _servizio):
         if self._al_cambio is not None:
@@ -163,13 +163,19 @@ class Apparecchio:
     """La connessione a un apparecchio, con il telecomando del suo lettore.
     allo_stato(stato) arriva dal filo di pychromecast a ogni stato nuovo: un
     dizionario con stato (IN_RIPRODUZIONE, IN_PAUSA, IN_CARICAMENTO, FERMO),
-    posizione e durata in secondi, o None, e motivo, per esempio FINISHED o
-    ERROR quando e' fermo; con un caricamento non riuscito lo stato e' FERMO,
-    il motivo ERROR e in piu' c'e' codice."""
+    posizione e durata in secondi, o None, motivo, per esempio FINISHED o
+    ERROR quando e' fermo, e indirizzo, quello del brano a cui lo stato si
+    riferisce, o None se l'apparecchio non lo dice; con un caricamento non
+    riuscito lo stato e' FERMO, il motivo ERROR e in piu' c'e' codice.
+    al_distacco(stato) arriva quando la connessione si perde o non si
+    riprende, con lo stato di pychromecast, per esempio LOST o FAILED:
+    l'apparecchio si e' spento o e' uscito dalla rete. Un apparecchio che
+    entro attesa secondi non risponde solleva ConnectionError."""
 
-    def __init__(self, info, zeroconf, allo_stato=None, attesa=ATTESA_DELLA_CONNESSIONE):
+    def __init__(self, info, zeroconf, allo_stato=None, attesa=ATTESA_DELLA_CONNESSIONE, al_distacco=None):
         import pychromecast
         from pychromecast.controllers.media import MediaStatusListener
+        from pychromecast.socket_client import ConnectionStatusListener
 
         self.nome = info.friendly_name or ""
         self.modello = info.model_name or ""
@@ -178,18 +184,30 @@ class Apparecchio:
         self._ultimo = None
         self._cast = pychromecast.get_chromecast_from_cast_info(info, zeroconf)
         self._cast.wait(timeout=attesa)
+        if self._cast.status is None:
+            # wait torna anche allo scadere, senza dire niente.
+            with contextlib.suppress(Exception):
+                self._cast.disconnect(timeout=1)
+            raise ConnectionError(f"{self.nome} non risponde")
         self._mc = self._cast.media_controller
         apparecchio = self
 
         class _Ascolto(MediaStatusListener):
             def new_media_status(self, status):
                 apparecchio._nuovo_stato({"stato": status.player_state, "posizione": status.current_time, "durata": status.duration,
-                                          "motivo": status.idle_reason})
+                                          "motivo": status.idle_reason, "indirizzo": getattr(status, "content_id", None)})
 
             def load_media_failed(self, queue_item_id, error_code):
                 apparecchio._nuovo_stato({"stato": FERMO, "posizione": None, "durata": None, "motivo": "ERROR", "codice": error_code})
 
         self._mc.register_status_listener(_Ascolto())
+
+        class _Connessione(ConnectionStatusListener):
+            def new_connection_status(self, status):
+                if al_distacco is not None and status.status in ("LOST", "FAILED", "FAILED_RESOLVE"):
+                    al_distacco(status.status)
+
+        self._cast.register_connection_listener(_Connessione())
 
     def _nuovo_stato(self, stato):
         self._ultimo = stato
@@ -214,11 +232,12 @@ class Apparecchio:
         stato = self._mc.status
         return stato.adjusted_current_time if stato is not None else None
 
-    def suona(self, indirizzo, tipo, titolo=None, inizio=None, in_diretta=False):
+    def suona(self, indirizzo, tipo, titolo=None, inizio=None, in_diretta=False, in_pausa=False):
         """Fa suonare all'apparecchio cio' che sta a indirizzo, dai secondi
         inizio se dati. in_diretta per un flusso senza fine, come una radio:
-        l'apparecchio non ci salta dentro."""
-        self._mc.play_media(indirizzo, tipo, title=titolo, current_time=inizio, stream_type="LIVE" if in_diretta else "BUFFERED")
+        l'apparecchio non ci salta dentro. in_pausa carica il brano senza
+        farlo partire."""
+        self._mc.play_media(indirizzo, tipo, title=titolo, current_time=inizio, stream_type="LIVE" if in_diretta else "BUFFERED", autoplay=not in_pausa)
 
     def pausa(self):
         self._mc.pause()
@@ -242,11 +261,23 @@ class Apparecchio:
     def volume(self, valore):
         self._cast.set_volume(max(0.0, min(1.0, float(valore))))
 
-    def chiudi(self):
+    @property
+    def muto(self):
+        """Vero se l'apparecchio e' muto, None se non si sa."""
+        stato = self._cast.status
+        return stato.volume_muted if stato is not None else None
+
+    @muto.setter
+    def muto(self, valore):
+        self._cast.set_volume_muted(bool(valore))
+
+    def chiudi(self, lascia_l_app=False):
         """Ferma il lettore e chiude l'app dell'apparecchio, che torna libero
-        per gli altri, poi chiude la connessione. Un apparecchio che non
-        risponde piu' non ferma la chiusura."""
-        for passo in (self._mc.stop, self._cast.quit_app):
+        per gli altri, poi chiude la connessione. Con lascia_l_app si stacca
+        soltanto: sull'apparecchio puo' suonare altro, mandato da fuori, che
+        non va spento. Un apparecchio che non risponde piu' non ferma la
+        chiusura."""
+        for passo in () if lascia_l_app else (self._mc.stop, self._cast.quit_app):
             # Si sta chiudendo: un apparecchio sparito non ha piu' niente da dire.
             with contextlib.suppress(Exception):
                 passo()

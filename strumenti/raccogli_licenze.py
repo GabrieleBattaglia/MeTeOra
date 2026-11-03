@@ -1,6 +1,6 @@
 # MeTeOra, utilita': raccoglie nella cartella licenze i testi delle licenze dei componenti e i loro sorgenti esatti.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.85.0, per la prima release. Nella 1.85.2 i testi scaricati da scarica_licenze.py. Nella 1.97.9 PortAudio, e la cartella da rifare a ogni release. Nella 1.99.0 il caricatore di Vulkan di scorta.
+# 04/10/2026: nasce con la 1.85.0, per la prima release. Nella 1.85.2 i testi scaricati da scarica_licenze.py. Nella 1.97.9 PortAudio, e la cartella da rifare a ogni release. Nella 1.99.0 il caricatore di Vulkan di scorta. Nella 1.119.0 i pacchetti degli speaker Cast, e i file di licenza fuori dalla cartella del pacchetto saltati.
 
 """Prepara la cartella licenze, che il pacchetto porta accanto all'eseguibile.
 
@@ -76,6 +76,11 @@ PYTHON = [
     ("certifi", "i certificati per requests", "MPL-2.0"),
     ("platformdirs", "le cartelle di sistema", "MIT"),
     ("typing_extensions", "per i pacchetti qui sopra", "PSF-2.0"),
+    ("pychromecast", "gli speaker Cast: la ricerca, la connessione e i comandi", "MIT"),
+    ("zeroconf", "la ricerca degli speaker Cast sulla rete, per pychromecast", "LGPL-2.1-or-later"),
+    ("protobuf", "i messaggi degli speaker Cast, per pychromecast", "BSD-3-Clause"),
+    ("casttube", "per pychromecast", "MIT"),
+    ("ifaddr", "le schede di rete, per zeroconf", "MIT"),
     ("pyinstaller", "il pacchetto, con il suo avviatore", "GPL-2.0-or-later WITH Bootloader-exception"),
 ]
 # I moduli winrt del riconoscimento dei caratteri, con winrt-runtime.
@@ -158,6 +163,10 @@ def file_di_licenza(distribuzione):
     for voce in distribuzione.files or ():
         testo = str(voce).replace("\\", "/")
         if not any(chiave in testo.upper() for chiave in FILE_DI_LICENZA):
+            continue
+        # Un file fuori dalla cartella del pacchetto, come il ../../LICENSE di
+        # casttube, finirebbe sopra la licenza di MeTeOra (1.119.0).
+        if testo.startswith("../"):
             continue
         # Nei dist-info si toglie la cartella; gli altri tengono il percorso.
         relativo = testo.split(".dist-info/", 1)[1].removeprefix("licenses/") if ".dist-info/" in testo else testo

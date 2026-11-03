@@ -1,6 +1,6 @@
 # MeTeOra, le prove della trasmissione agli apparecchi Cast: formati, ricerca, connessione e server.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 22/10/2026: nasce con trasmissione.py, tappa 15 b del piano.
+# 22/10/2026: nasce con trasmissione.py, tappa 15 b del piano. Nella 1.117.0 il brano in pausa, l'indirizzo negli stati e il muto.
 
 """Le prove di trasmissione, senza apparecchi e senza rete.
 
@@ -18,6 +18,10 @@ import pytest
 
 import trasmissione
 
+# La funzione vera: il conftest la sostituisce, perche' la finestra non cerchi
+# gli speaker nelle prove.
+_DISPONIBILE_VERO = trasmissione.disponibile
+
 
 def test_formati():
     assert trasmissione.tipo_di(r"C:\m\Brano.FLAC") == "audio/flac"
@@ -32,9 +36,9 @@ def test_formati():
 def test_disponibile(monkeypatch):
     import importlib.util
 
-    assert trasmissione.disponibile()
+    assert _DISPONIBILE_VERO()
     monkeypatch.setattr(importlib.util, "find_spec", lambda nome: None)
-    assert not trasmissione.disponibile()
+    assert not _DISPONIBILE_VERO()
 
 
 def test_indirizzo_verso():
@@ -145,7 +149,7 @@ class _LettoreFinto:
 class _CastFinto:
     def __init__(self):
         self.media_controller = _LettoreFinto()
-        self.status = types.SimpleNamespace(volume_level=0.4)
+        self.status = types.SimpleNamespace(volume_level=0.4, volume_muted=False)
         self.chiamate = []
 
     def wait(self, timeout=None):
@@ -154,11 +158,33 @@ class _CastFinto:
     def set_volume(self, valore):
         self.chiamate.append(("volume", valore))
 
+    def set_volume_muted(self, valore):
+        self.chiamate.append(("muto", valore))
+
     def quit_app(self):
         self.chiamate.append("quit_app")
 
     def disconnect(self, timeout=None):
         self.chiamate.append("disconnect")
+
+    def register_connection_listener(self, ascolto):
+        self.connessione = ascolto
+
+
+def test_l_apparecchio_che_non_risponde(browser_finto, monkeypatch):
+    import pychromecast
+
+    cast = _CastFinto()
+    cast.status = None
+    monkeypatch.setattr(pychromecast, "get_chromecast_from_cast_info", lambda info, zc: cast)
+    ricerca = trasmissione.Ricerca()
+    ricerca.avvia()
+    spento = _info("Bagno")
+    browser_finto.ultimo.aggiungi(spento)
+    with pytest.raises(ConnectionError):
+        ricerca.connetti(spento.uuid, attesa=0.1)
+    assert cast.chiamate[-1] == "disconnect"
+    ricerca.ferma()
 
 
 def test_apparecchio(browser_finto, monkeypatch):
@@ -171,15 +197,15 @@ def test_apparecchio(browser_finto, monkeypatch):
     ricerca.avvia()
     ambeo = _info("Ambeo", trasmissione.TIPO_AUDIO_E_VIDEO, "AMBEO Soundbar Plus")
     browser_finto.ultimo.aggiungi(ambeo)
-    stati = []
-    apparecchio = ricerca.connetti(ambeo.uuid, allo_stato=stati.append, attesa=3)
+    stati, distacchi = [], []
+    apparecchio = ricerca.connetti(ambeo.uuid, allo_stato=stati.append, attesa=3, al_distacco=distacchi.append)
     assert chieste == [(ambeo, "zeroconf finto")] and cast.chiamate == [("wait", 3)]
     assert (apparecchio.nome, apparecchio.modello, apparecchio.tipo) == ("Ambeo", "AMBEO Soundbar Plus", trasmissione.TIPO_AUDIO_E_VIDEO)
     lettore = cast.media_controller
     # I comandi arrivano al lettore dell'apparecchio.
     apparecchio.suona("http://pc/file/1.flac", "audio/flac", titolo="Brano")
     apparecchio.suona("http://pc/flusso/uscita.wav", "audio/wav", inizio=None, in_diretta=True)
-    apparecchio.suona("http://pc/file/1.flac", "audio/flac", inizio=42.0)
+    apparecchio.suona("http://pc/file/1.flac", "audio/flac", inizio=42.0, in_pausa=True)
     apparecchio.pausa()
     apparecchio.riprendi()
     apparecchio.vai_a(-5)
@@ -187,9 +213,9 @@ def test_apparecchio(browser_finto, monkeypatch):
     apparecchio.aggiorna()
     apparecchio.ferma()
     assert lettore.chiamate == [
-        ("play_media", "http://pc/file/1.flac", "audio/flac", {"title": "Brano", "current_time": None, "stream_type": "BUFFERED"}),
-        ("play_media", "http://pc/flusso/uscita.wav", "audio/wav", {"title": None, "current_time": None, "stream_type": "LIVE"}),
-        ("play_media", "http://pc/file/1.flac", "audio/flac", {"title": None, "current_time": 42.0, "stream_type": "BUFFERED"}),
+        ("play_media", "http://pc/file/1.flac", "audio/flac", {"title": "Brano", "current_time": None, "stream_type": "BUFFERED", "autoplay": True}),
+        ("play_media", "http://pc/flusso/uscita.wav", "audio/wav", {"title": None, "current_time": None, "stream_type": "LIVE", "autoplay": True}),
+        ("play_media", "http://pc/file/1.flac", "audio/flac", {"title": None, "current_time": 42.0, "stream_type": "BUFFERED", "autoplay": False}),
         "pause", "play", ("seek", 0.0), ("seek", 30.0), "update_status", "stop",
     ]
     assert apparecchio.posizione == 12.5
@@ -198,13 +224,25 @@ def test_apparecchio(browser_finto, monkeypatch):
     apparecchio.volume = 1.7
     apparecchio.volume = -1
     assert cast.chiamate[-2:] == [("volume", 1.0), ("volume", 0.0)]
+    assert apparecchio.muto is False
+    apparecchio.muto = 1
+    assert cast.chiamate[-1] == ("muto", True)
     # Gli stati del lettore arrivano come dizionari, anche il caricamento non riuscito.
     assert apparecchio.stato is None
-    lettore.ascolto.new_media_status(types.SimpleNamespace(player_state="PLAYING", current_time=3.0, duration=180.0, idle_reason=None))
+    lettore.ascolto.new_media_status(types.SimpleNamespace(player_state="PLAYING", current_time=3.0, duration=180.0, idle_reason=None,
+                                                           content_id="http://pc/file/1.flac"))
     lettore.ascolto.load_media_failed(1, 104)
-    assert stati == [{"stato": "PLAYING", "posizione": 3.0, "durata": 180.0, "motivo": None},
+    assert stati == [{"stato": "PLAYING", "posizione": 3.0, "durata": 180.0, "motivo": None, "indirizzo": "http://pc/file/1.flac"},
                      {"stato": trasmissione.FERMO, "posizione": None, "durata": None, "motivo": "ERROR", "codice": 104}]
     assert apparecchio.stato == stati[-1]
+    # La connessione che cade: solo gli stati che vogliono dire perduta.
+    for stato in ("CONNECTING", "CONNECTED", "LOST", "FAILED"):
+        cast.connessione.new_connection_status(types.SimpleNamespace(status=stato))
+    assert distacchi == ["LOST", "FAILED"]
+    # Staccarsi senza spegnere cio' che suona, mandato da fuori.
+    quanti = len(cast.chiamate)
+    apparecchio.chiudi(lascia_l_app=True)
+    assert cast.chiamate[quanti:] == ["disconnect"]
     # La chiusura arriva in fondo anche con un apparecchio che non risponde piu'.
     lettore.stop = lambda: (_ for _ in ()).throw(OSError("sparito"))
     apparecchio.chiudi()

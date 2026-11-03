@@ -1,6 +1,6 @@
 # MeTeOra, le prove del motore: due lettori, velocita', tono, equalizzatore, dissolvenza e fine brano senza attese.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.55.0 (tappa 4, issue 15). Nella 1.113.4 le prove del filtro del tempo e del tono cambiato al volo aspettano che il motore abbia visto gli eventi di mpv, invece dei tempi (issue 27). Nella 1.116.0 alle_uscite e l'uscita che non si apre piu'.
+# 01/10/2026: nasce con la 1.55.0 (tappa 4, issue 15). Nella 1.113.4 le prove del filtro del tempo e del tono cambiato al volo aspettano che il motore abbia visto gli eventi di mpv, invece dei tempi (issue 27). Nella 1.116.0 alle_uscite e l'uscita che non si apre piu'. Nella 1.117.0 il lettore lontano e la conversione in FLAC.
 
 """Le prove del motore vero, senza suoni.
 
@@ -1523,3 +1523,74 @@ def test_a_volume_pieno_toglie_l_attenuazione(crea, tmp_path):
     m.attenuazione = 0.125
     m.suona(primo, a_volume_pieno=True)
     assert m.attenuazione == 1.0 and m._sfumatura is not None and m._sfumatura.ampiezza == pytest.approx(0.125)
+
+
+class _LontanoFinto:
+    """Il lettore lontano come lo vede il motore: annota i comandi."""
+
+    def __init__(self):
+        self.chiamate = []
+        self.percorso = self.sottobrano = self.sottobrani = None
+        self.in_pausa = False
+        self.posizione = 42.0
+        self.durata = 180.0
+
+    def suona(self, percorso, sottobrano=None, sottobrani=None, inizio=None, in_pausa=False, midi_reso=False):
+        self.chiamate.append(("suona", percorso, sottobrano, inizio, in_pausa, midi_reso))
+        self.percorso, self.sottobrano, self.sottobrani, self.in_pausa = percorso, sottobrano, sottobrani, in_pausa
+
+    def pausa(self, valore=None):
+        self.in_pausa = (not self.in_pausa) if valore is None else valore
+        self.chiamate.append(("pausa", valore))
+        return self.in_pausa
+
+    def stop(self):
+        self.chiamate.append(("stop",))
+        self.percorso = None
+
+    def salta(self, secondi):
+        self.chiamate.append(("salta", secondi))
+
+    def vai_a(self, secondi):
+        self.chiamate.append(("vai_a", secondi))
+
+    def chiudi(self, attendi=True):
+        self.chiamate.append(("chiudi", attendi))
+
+
+def test_il_lettore_lontano(crea, avvisi, tmp_path):
+    m = crea(al_salto=avvisi("al_salto"))
+    lontano = _LontanoFinto()
+    m.usa_il_lontano(lontano)
+    assert m.lontano is lontano and m.in_corso is None
+    brano = _silenzio(tmp_path / "brano.wav", 2)
+    m.suona(brano, inizio=10.0, in_pausa=True)
+    # Il brano va al lettore lontano, e i lettori del PC restano fermi.
+    assert lontano.chiamate == [("suona", brano, None, 10.0, True, False)]
+    assert m.in_corso == brano and m.in_pausa and m.posizione == 42.0 and m.durata == 180.0
+    assert m._lettori[0].percorso is None and m._lettori[1].percorso is None
+    assert m.pausa() is False and lontano.chiamate[-1] == ("pausa", None)
+    m.salta(-10)
+    m.vai_a(30)
+    assert lontano.chiamate[-2:] == [("salta", -10), ("vai_a", 30)]
+    # Niente dissolvenza, tracce, capitoli e attese dei SID con lo speaker.
+    assert m.prepara(brano) is False and m.capitoli() == [] and m.attesa_del_sid(60) == 0.0
+    assert m.tracce() == {"video": False, "audio": [], "sub": []}
+    m.stop()
+    assert lontano.chiamate[-1] == ("stop",) and m.in_corso is None and m.tracce() is None
+    # Lo stop di usa_il_lontano, suona, i due salti e lo stop.
+    assert avvisi.nomi().count("al_salto") == 5
+    # Tornando al PC il lettore lontano si chiude.
+    m.usa_il_lontano(None)
+    assert lontano.chiamate[-1] == ("chiudi", False) and m.lontano is None
+
+
+def test_converti_in_flac(crea, tmp_path):
+    m = crea()
+    brano = _seno(tmp_path / "brano.wav", 3)
+    uscita = tmp_path / "brano.flac"
+    assert m.converti_in_flac(brano, None, str(uscita))
+    assert uscita.read_bytes()[:4] == b"fLaC"
+    # Un file che non c'e' non si converte.
+    assert not m.converti_in_flac(str(tmp_path / "non_ce.wav"), None, str(tmp_path / "vuoto.flac"))
+

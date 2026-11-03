@@ -7,6 +7,7 @@
 # 20/10/2026, 1.112.0: la Sentinella dei dischi non chiede niente ai dischi veri, e il MachineGuid non si legge.
 # 22/10/2026, 1.116.0: PortAudio non si rilegge davvero, e le riletture si annotano.
 # 27/10/2026, 1.116.2: si annotano anche i suoni del volume, fatti al volo.
+# 03/11/2026, 1.119.0: la ricerca degli speaker Cast non parte, come se pychromecast non ci fosse.
 
 """Le regole comuni delle prove.
 
@@ -105,6 +106,16 @@ def donazione_muta(monkeypatch):
     import GBUtils
 
     monkeypatch.setattr(GBUtils, "Donazione", lambda *argomenti, **opzioni: None)
+
+
+@pytest.fixture(autouse=True)
+def speaker_non_cercati(monkeypatch):
+    """La finestra, all'avvio, cerca gli speaker Cast con mDNS: nelle prove
+    pychromecast fa finta di mancare, e niente va sulla rete di casa. Le
+    prove degli speaker mettono la loro ricerca finta (1.119.0)."""
+    import trasmissione
+
+    monkeypatch.setattr(trasmissione, "disponibile", lambda: False)
 
 
 @pytest.fixture(autouse=True)

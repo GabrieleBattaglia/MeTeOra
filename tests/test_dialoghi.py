@@ -1,6 +1,6 @@
 # MeTeOra, le prove dei dialoghi: impostazioni, scelta da una lista e marcatori, costruiti veri e mai mostrati.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8). Nella 1.103.0 la finestra delle statistiche.
+# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8). Nella 1.103.0 la finestra delle statistiche. Nella 1.119.0 quella della scelta con il filtro.
 
 """I dialoghi veri, sul desktop nascosto e senza ShowModal: si leggono le
 righe e i nomi, e i tasti arrivano come eventi di wx mandati direttamente
@@ -215,6 +215,35 @@ def test_finestra_della_scelta(genitore, monkeypatch):
     dialogo = dialoghi.FinestraScelta(genitore, "Prova", ["uno", "due"], 9)
     try:
         assert dialogo.GetSelection() == 1
+    finally:
+        dialogo.Destroy()
+
+
+def test_la_scelta_con_il_filtro(genitore, monkeypatch):
+    # La lista delle destinazioni, con il filtro come le impostazioni (1.119.0).
+    voci = ["Automatica", "Altoparlanti (Realtek(R) Audio), WASAPI, 3 ms", "Cucina, speaker Cast, Google Home Speaker", "ovunque, gruppo Cast"]
+    dialogo = dialoghi.FinestraScelta(genitore, "Scheda audio", voci, 2, con_filtro=True)
+    try:
+        assert dialogo.filtro.GetName() == "Filtro delle righe"
+        assert "Scheda audio. Invio conferma, Esc annulla, Maiuscolo con Tab va al filtro." in _etichette(dialogo)
+        assert dialogo.GetSelection() == 2
+        dialogo.filtro.SetValue("cast")
+        # La scelta resta selezionata, e GetSelection dice sempre l'indice fra tutte le voci.
+        assert dialogo.lista.GetStrings() == voci[2:] and dialogo.GetSelection() == 2
+        dialogo.lista.SetSelection(1)
+        dialogo._ricorda_la_scelta()
+        assert dialogo.GetSelection() == 3
+        dialogo.filtro.SetValue("REALTEK")
+        assert dialogo.lista.GetStrings() == [voci[1]] and dialogo.GetSelection() == 1
+        # Senza righe una lo dice, e Invio non conferma niente.
+        dialogo.filtro.SetValue("bagno")
+        assert dialogo.lista.GetStrings() == ["Nessuna riga contiene bagno."] and dialogo.GetSelection() == -1
+        finiti = []
+        monkeypatch.setattr(dialogo, "EndModal", finiti.append)
+        _tasto(dialogo, dialogo.lista)
+        assert finiti == []
+        dialogo.filtro.SetValue("")
+        assert dialogo.lista.GetStrings() == voci and dialogo.GetSelection() == 3
     finally:
         dialogo.Destroy()
 

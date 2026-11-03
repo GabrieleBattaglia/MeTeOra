@@ -1,6 +1,6 @@
 # MeTeOra, i dialoghi: il campo da una riga, la domanda con Si' e No, la finestra delle impostazioni, la scelta da una lista, la finestra dei marcatori, l'invito a offrire un caffe' e le statistiche.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); DialogoTesto arriva da finestra.py. Nella 1.66.36 la domanda con Sì e No, che si chiude con Esc. Nella 1.75.0 l'invito a offrire un caffe', come in Tornello. Nella 1.81.0 il filtro delle impostazioni. Nella 1.84.0 la proposta dell'aggiornamento. Nella 1.103.0 la finestra delle statistiche.
+# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); DialogoTesto arriva da finestra.py. Nella 1.66.36 la domanda con Sì e No, che si chiude con Esc. Nella 1.75.0 l'invito a offrire un caffe', come in Tornello. Nella 1.81.0 il filtro delle impostazioni. Nella 1.84.0 la proposta dell'aggiornamento. Nella 1.103.0 la finestra delle statistiche. Nella 1.119.0 la scelta da una lista con il filtro, per le destinazioni.
 
 """I dialoghi di MeTeOra, fuori dalla finestra principale.
 
@@ -431,15 +431,31 @@ class FinestraImpostazioni(wx.Dialog):
 class FinestraScelta(wx.Dialog):
     """Una scelta da una lista: voci sono le righe, scelta l'indice di
     partenza. Invio o Conferma confermano, Esc o Annulla annullano; la riga
-    scelta la dice GetSelection."""
+    scelta la dice GetSelection, come indice delle voci.
+    Con con_filtro, prima della lista, con Maiuscolo e Tab, il filtro, come
+    quello delle impostazioni (1.119.0): restano le righe che contengono il
+    testo scritto, senza badare a maiuscole e accenti, e GetSelection dice
+    sempre l'indice fra tutte le voci, o -1 se il filtro non ne lascia
+    nessuna."""
 
-    def __init__(self, genitore, titolo, voci, scelta=0):
+    def __init__(self, genitore, titolo, voci, scelta=0, con_filtro=False):
         from GBwx import STILE_ADATTABILE, adatta_finestra, pannello_scorrevole
 
         super().__init__(genitore, title=titolo, style=STILE_ADATTABILE)
+        self._voci = list(voci)
+        # Gli indici delle voci mostrate, nell'ordine della lista.
+        self._visibili = list(range(len(self._voci)))
         pannello = pannello_scorrevole(self)
         sizer = wx.BoxSizer(wx.VERTICAL)
-        etichetta = wx.StaticText(pannello, label=f"{titolo}. Invio conferma, Esc annulla.")
+        # Come nelle impostazioni, l'ordine di creazione e' quello del Tab e
+        # da' i nomi a NVDA: il filtro, poi le istruzioni, poi la lista.
+        self.filtro = None
+        if con_filtro:
+            etichetta_del_filtro = wx.StaticText(pannello, label="Filtro delle righe:")
+            self.filtro = wx.TextCtrl(pannello)
+            self.filtro.SetName("Filtro delle righe")
+        istruzioni = f"{titolo}. Invio conferma, Esc annulla" + (", Maiuscolo con Tab va al filtro." if con_filtro else ".")
+        etichetta = wx.StaticText(pannello, label=istruzioni)
         self.lista = wx.ListBox(pannello, choices=list(voci), style=wx.LB_SINGLE)
         self.lista.SetName(titolo)
         self.lista.SetMinSize(wx.Size(-1, self.lista.GetCharHeight() * (min(len(voci), 16) + 2)))
@@ -450,6 +466,12 @@ class FinestraScelta(wx.Dialog):
         pulsanti.AddButton(wx.Button(pannello, wx.ID_CANCEL, "Annulla"))
         pulsanti.Realize()
         sizer.Add(etichetta, 0, wx.ALL, 5)
+        if con_filtro:
+            riga_del_filtro = wx.BoxSizer(wx.HORIZONTAL)
+            riga_del_filtro.Add(etichetta_del_filtro, 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 5)
+            riga_del_filtro.Add(self.filtro, 1)
+            sizer.Add(riga_del_filtro, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
+            self.filtro.Bind(wx.EVT_TEXT, lambda _evento: self._filtra())
         sizer.Add(self.lista, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
         sizer.Add(pulsanti, 0, wx.ALL | wx.ALIGN_RIGHT, 5)
         pannello.SetSizer(sizer)
@@ -458,16 +480,43 @@ class FinestraScelta(wx.Dialog):
         self.lista.Bind(wx.EVT_LISTBOX_DCLICK, lambda _evento: self.EndModal(wx.ID_OK))
         if voci:
             self.lista.SetSelection(max(0, min(scelta, len(voci) - 1)))
+        self._scelta = self.lista.GetSelection()
+        self.lista.Bind(wx.EVT_LISTBOX, lambda _evento: self._ricorda_la_scelta())
         self.lista.SetFocus()
 
     def _tasto(self, evento):
         if evento.GetEventObject() is self.lista and _premuto_invio(evento):
-            self.EndModal(wx.ID_OK)
+            if self.GetSelection() >= 0:
+                self.EndModal(wx.ID_OK)
+            return
+        if self.filtro is not None and evento.GetEventObject() is self.filtro and _premuto_invio(evento):
+            self.lista.SetFocus()
             return
         evento.Skip()
 
+    def _ricorda_la_scelta(self):
+        indice = self.lista.GetSelection()
+        if 0 <= indice < len(self._visibili):
+            self._scelta = self._visibili[indice]
+
+    def _filtra(self):
+        """Il testo del filtro e' cambiato: la lista mostra le righe che lo
+        contengono, con selezionata la scelta, se c'e', altrimenti la prima;
+        senza righe, una lo dice, perche' una lista vuota per NVDA non dice
+        niente."""
+        scritto = " ".join(self.filtro.GetValue().split())
+        cercato = normale(scritto)
+        self._visibili = [i for i, voce in enumerate(self._voci) if cercato in normale(voce)]
+        if self._visibili:
+            self.lista.Set([self._voci[i] for i in self._visibili])
+            self.lista.SetSelection(self._visibili.index(self._scelta) if self._scelta in self._visibili else 0)
+        else:
+            self.lista.Set([f"Nessuna riga contiene {scritto}."])
+            self.lista.SetSelection(0)
+
     def GetSelection(self):
-        return self.lista.GetSelection()
+        indice = self.lista.GetSelection()
+        return self._visibili[indice] if 0 <= indice < len(self._visibili) else -1
 
 
 def riga_del_marcatore(voce, marker):

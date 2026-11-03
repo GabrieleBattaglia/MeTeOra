@@ -1,6 +1,6 @@
 # MeTeOra, le prove della finestra principale, sul desktop nascosto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21). Nella 1.112.0 quelle dei dischi della pulizia, anche del loro file che non si legge, e la prova della pulizia che toglie i file spariti non fa piu' leggere allo schedario i file finti; poi Riconosci questo disco, la riga che lo indica e la Sentinella che guarda i dischi dei file usati; infine la domanda di Riconosci questo disco con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 quelle dell'importazione delle playlist M3U, M3U8 e PLS. Nella 1.113.1 quella dell'etichetta di un file delle console con un sottobrano senza durata (issue 24). Nella 1.113.3 quella della Barra dei comandi per il mouse, che nell'errore dice il suo nome (issue 26). Nella 1.113.5 quelle delle statistiche scritte solo se cambiate, al piu' ogni mezz'ora. Nella 1.116.0 quelle delle schede audio che vanno e tornano, e del brano che riparte quando la sua uscita si perde. Nella 1.116.1 quella della scheda delle statistiche con la scelta che manca. Nella 1.116.2 quella dei suoni di piu' e meno fatti al volo. Nella 1.116.3 quella dei comandi da fermi (issue 39).
+# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21). Nella 1.112.0 quelle dei dischi della pulizia, anche del loro file che non si legge, e la prova della pulizia che toglie i file spariti non fa piu' leggere allo schedario i file finti; poi Riconosci questo disco, la riga che lo indica e la Sentinella che guarda i dischi dei file usati; infine la domanda di Riconosci questo disco con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 quelle dell'importazione delle playlist M3U, M3U8 e PLS. Nella 1.113.1 quella dell'etichetta di un file delle console con un sottobrano senza durata (issue 24). Nella 1.113.3 quella della Barra dei comandi per il mouse, che nell'errore dice il suo nome (issue 26). Nella 1.113.5 quelle delle statistiche scritte solo se cambiate, al piu' ogni mezz'ora. Nella 1.116.0 quelle delle schede audio che vanno e tornano, e del brano che riparte quando la sua uscita si perde. Nella 1.116.1 quella della scheda delle statistiche con la scelta che manca. Nella 1.116.2 quella dei suoni di piu' e meno fatti al volo. Nella 1.116.3 quella dei comandi da fermi (issue 39). Nella 1.119.0 quelle degli speaker Cast e della lista delle destinazioni.
 
 import contextlib
 import ctypes
@@ -3293,9 +3293,12 @@ class _SceltaFinta:
     def __init__(self, indice):
         self.indice = indice
         self.aperture = []
+        # Se ogni apertura aveva il filtro (1.119.0).
+        self.filtri = []
 
-    def __call__(self, genitore, titolo, voci, scelta):
+    def __call__(self, genitore, titolo, voci, scelta, con_filtro=False):
         self.aperture.append((titolo, list(voci), scelta))
+        self.filtri.append(con_filtro)
         return self
 
     def __enter__(self):
@@ -3697,6 +3700,151 @@ def test_la_scelta_della_scheda_rilegge_se_serve(finestra, monkeypatch):
     monkeypatch.setattr(modulo, "FinestraScelta", _SceltaFinta(None))
     finestra._cambia_impostazione("scheda_audio", _ListaFinta())
     assert chieste == [finestra.motore] and _ultima(finestra) == "Scheda audio non cambiata."
+
+
+class _SpeakerFinto:
+    """Il lettore lontano come lo vedono la finestra e il motore: annota i
+    comandi, e il volume va da 0 a 100."""
+
+    nome = "Cucina"
+
+    def __init__(self):
+        self.chiamate = []
+        self.percorso = self.sottobrano = self.sottobrani = None
+        self.in_pausa = False
+        self.posizione = None
+        self.durata = 30.0
+        self.volume = 40
+        self.muto = False
+
+    def suona(self, percorso, sottobrano=None, sottobrani=None, inizio=None, in_pausa=False, midi_reso=False):
+        self.chiamate.append(("suona", os.path.basename(percorso), inizio, in_pausa))
+        self.percorso, self.in_pausa, self.posizione = percorso, in_pausa, inizio or 0.0
+
+    def pausa(self, valore=None):
+        self.in_pausa = (not self.in_pausa) if valore is None else valore
+        return self.in_pausa
+
+    def stop(self):
+        self.percorso = None
+
+    def salta(self, secondi):
+        self.chiamate.append(("salta", secondi))
+
+    def vai_a(self, secondi):
+        self.chiamate.append(("vai_a", secondi))
+
+    def chiudi(self, attendi=True):
+        self.chiamate.append(("chiudi", attendi))
+
+
+_CUCINA = {"uuid": "6d9b1c3e", "nome": "Cucina", "modello": "Google Home Speaker", "produttore": "Google Inc.", "tipo": "audio",
+           "indirizzo": "192.168.1.72", "porta": 8009}
+_OVUNQUE = {"uuid": "a1b2", "nome": "ovunque", "modello": "Google Cast Group", "produttore": "Google Inc.", "tipo": "group",
+            "indirizzo": "192.168.1.33", "porta": 32230}
+
+
+class _RicercaCastFinta:
+    def __init__(self, apparecchi):
+        self.elenco = apparecchi
+
+    def apparecchi(self):
+        return [dict(v) for v in self.elenco]
+
+    def ferma(self):
+        pass
+
+
+def test_la_lista_delle_destinazioni_con_gli_speaker(finestra, monkeypatch):
+    # Una lista sola, con il filtro: schede del PC e speaker Cast (1.119.0).
+    import GBUtils
+
+    monkeypatch.setattr(modulo.schede_audio, "uscite", lambda: [AUTOMATICA, ASIO])
+    monkeypatch.setattr(modulo.schede_audio, "in_uso", lambda elenco=None: AUTOMATICA)
+    monkeypatch.setattr(GBUtils.Acusticator, "riproduci", _ProvaFinta())
+    finestra._ricerca_cast = _RicercaCastFinta([_CUCINA, _OVUNQUE])
+    collegati = []
+    monkeypatch.setattr(finestra, "_collega_lo_speaker", lambda voce, salva=False, genitore=None: collegati.append((voce["nome"], salva)))
+    scelta = _SceltaFinta(3)
+    monkeypatch.setattr(modulo, "FinestraScelta", scelta)
+    finestra._cambia_impostazione("scheda_audio", _ListaFinta())
+    assert scelta.aperture[0][1][3:] == ["Cucina, speaker Cast, Google Home Speaker", "ovunque, gruppo Cast"]
+    assert scelta.filtri == [True] and collegati == [("Cucina", True)]
+    # Con lo speaker scelto, la lista parte da lui.
+    finestra.impostazioni["scheda_audio"] = {"cast": "a1b2", "nome": "ovunque", "pc": {}}
+    scelta = _SceltaFinta(None)
+    monkeypatch.setattr(modulo, "FinestraScelta", scelta)
+    finestra._cambia_impostazione("scheda_audio", _ListaFinta())
+    assert scelta.aperture[0][2] == 4 and _ultima(finestra) == "Scheda audio non cambiata."
+
+
+def test_lo_speaker_cast(finestra, monkeypatch, tmp_path, suoni_annotati, equalizzatore_annotato):
+    brano = tmp_path / "canzone.wav"
+    _wav(brano, 30)
+    finestra._suona_file(str(brano), str(tmp_path))
+    assert _aspetta(lambda: (finestra.motore.posizione or 0) > 0.2)
+    speaker = _SpeakerFinto()
+    finestra._speaker_collegato(_CUCINA, speaker, True, None)
+    # La musica passa allo speaker da dove era, e la scelta si salva con la
+    # scheda del PC, che resta per gli effetti.
+    assert finestra.motore.lontano is speaker and speaker.chiamate[0][:2] == ("suona", "canzone.wav") and speaker.chiamate[0][2] > 0.1
+    assert finestra.impostazioni["scheda_audio"] == {"cast": "6d9b1c3e", "nome": "Cucina", "pc": {}}
+    assert _ultima(finestra) == ("Suono su Cucina, speaker Cast, Google Home Speaker. Gli effetti restano sul PC; "
+                                 "dissolvenza, equalizzatore, velocità e tono sullo speaker non valgono.")
+    assert suoni_annotati[-1] == "scheda_audio" and finestra._statistiche.dati["conti"]["speaker_scelti"] == 1
+    assert finestra._scheda_per_le_statistiche == "Speaker Cucina"
+    assert finestra._riga_dell_impostazione("scheda_audio") == "Scheda audio: Cucina, speaker Cast"
+    # Meno e piu' cambiano il volume dello speaker, da 0 a 100.
+    _tasto(finestra, "+")
+    assert speaker.volume == 45 and _ultima(finestra) == "Volume di Cucina 45." and equalizzatore_annotato[-1] == ("volume", 45)
+    speaker.volume = 100
+    _tasto(finestra, "+")
+    assert _ultima(finestra) == "Volume di Cucina già al massimo, 100."
+    # Velocita', tono, equalizzatore e dissolvenza sullo speaker non valgono.
+    for carattere, cosa in (("a", "La velocità"), ("f", "Il tono"), ("o", "L'equalizzatore"), ("u", "L'equalizzatore"), ("l", "La dissolvenza")):
+        _tasto(finestra, carattere)
+        assert _ultima(finestra) == f"{cosa} su Cucina non vale: vale sulle schede del PC."
+    assert finestra.impostazioni["velocita"] == 1.0 and not finestra.impostazioni["dissolvenza"]["accesa"]
+    _tasto(finestra, "m")
+    assert speaker.muto and _ultima(finestra) == "Muto su Cucina."
+    _tasto(finestra, "m")
+    assert _ultima(finestra) == "Audio di nuovo acceso su Cucina, volume 100."
+    # Lo speaker che non risponde: la musica torna sul PC da dove era.
+    speaker.posizione = 12.0
+    finestra._speaker_perso(OSError("spento"))
+    assert finestra.motore.lontano is None and finestra.motore.in_corso == str(brano) and speaker.chiamate[-1] == ("chiudi", False)
+    assert _ultima(finestra) == "Lo speaker Cucina non risponde più: suono sul PC, da dove eri."
+    assert suoni_annotati[-1] == "scheda_sparita" and finestra._speaker_atteso == "6d9b1c3e"
+    assert _aspetta(lambda: abs((finestra.motore.posizione or 0) - 12) < 1.5)
+    # Quando torna la musica ci rientra, e l'assenza conta per il primato.
+    altro = _SpeakerFinto()
+    finestra._speaker_collegato(_CUCINA, altro, False, None)
+    assert finestra.motore.lontano is altro and finestra._speaker_atteso is None
+    assert _ultima(finestra) == "Lo speaker Cucina è tornato: la musica suona di nuovo lì." and suoni_annotati[-1] == "scheda_tornata"
+    assert "assenza_della_scelta" in finestra._statistiche.dati["record"]
+    # Una scheda del PC scelta dalla lista riporta la musica sul PC.
+    _uscite_finte(finestra, monkeypatch, [_esito(AUTOMATICA, automatica=True)])
+    finestra._usa_la_scheda({}, _ListaFinta())
+    assert finestra.motore.lontano is None and finestra.motore.in_corso == str(brano) and altro.chiamate[-1] == ("chiudi", False)
+    assert finestra.impostazioni["scheda_audio"] == {}
+
+
+def test_lo_speaker_atteso_all_avvio(finestra, monkeypatch):
+    # Lo speaker scelto che all'avvio non c'e': si suona sul PC, e quando
+    # la ricerca lo vede ci si collega (1.119.0).
+    finestra.impostazioni["scheda_audio"] = {"cast": "6d9b1c3e", "nome": "Cucina", "pc": {}}
+    finestra._speaker_atteso = "6d9b1c3e"
+    finestra._speaker_non_ancora_arrivato()
+    assert _ultima(finestra) == "Lo speaker scelto, Cucina, non c'è: suono sul PC finché non compare."
+    assert finestra._riga_dell_impostazione("scheda_audio") == "Scheda audio: Cucina, speaker Cast, non c'è: uso il PC"
+    collegati = []
+    monkeypatch.setattr(finestra, "_collega_lo_speaker", lambda voce, salva=False, genitore=None: collegati.append((voce["nome"], salva)))
+    finestra._ricerca_cast = _RicercaCastFinta([_OVUNQUE])
+    finestra._apparecchi_cambiati()
+    assert collegati == []
+    finestra._ricerca_cast.elenco.append(_CUCINA)
+    finestra._apparecchi_cambiati()
+    assert collegati == [("Cucina", False)]
 
 
 def test_velocita_e_tono_coi_tasti(finestra, suoni_annotati):

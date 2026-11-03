@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39)
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31)
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -40,7 +40,9 @@ import math
 import os
 import random
 import re
+import shutil
 import sys
+import tempfile
 import threading
 import time
 import traceback
@@ -57,6 +59,7 @@ import dettagli
 import formati
 import importazione
 import karaoke
+import lontano
 import marcatori
 import midi
 import ocr
@@ -73,6 +76,7 @@ import sottotitoli_ocr
 import statistiche
 import suoni
 import tag
+import trasmissione
 import valori
 import version
 from barra import BarraDeiComandi
@@ -385,6 +389,18 @@ ATTESA_DA_DIRE = 1.5
 # Quanto si aspetta, al piu', che il motore riapra in pausa il brano fermo per
 # un comando che si muove nel brano (issue 39, 1.116.3).
 ATTESA_DEL_RISVEGLIO = 3.0
+# All'avvio, quanto si aspetta lo speaker Cast scelto prima di dire che non
+# c'e', in millesimi: di solito la ricerca lo trova in meno di un secondo.
+ATTESA_DELLO_SPEAKER = 4000
+
+
+def riga_dello_speaker(voce):
+    """La riga di uno speaker Cast nella lista delle destinazioni, da una
+    voce di trasmissione.Ricerca.apparecchi: "Cucina, speaker Cast, Google
+    Home Speaker"; un gruppo di Google Home "ovunque, gruppo Cast"."""
+    if voce["tipo"] == trasmissione.TIPO_GRUPPO:
+        return f"{voce['nome']}, gruppo Cast"
+    return f"{voce['nome']}, speaker Cast, {voce['modello']}" if voce["modello"] else f"{voce['nome']}, speaker Cast"
 
 
 # I rapporti dell'immagine di Maiuscolo con F6, a giro: il valore per mpv e
@@ -906,6 +922,16 @@ class Finestra(wx.Frame):
         self._attesa_delle_uscite = None
         self._uscita_persa = False
         self._punto_di_ripresa = None
+        # Gli speaker Cast (1.119.0): la ricerca, accesa solo se c'e'
+        # pychromecast; lo speaker scelto che si aspetta, all'avvio o dopo
+        # che e' sparito, e quello che si sta collegando, per uuid; da quando
+        # la scelta e' assente, per il primato delle statistiche; la cartella
+        # delle conversioni in FLAC, che sparisce all'uscita.
+        self._ricerca_cast = None
+        self._speaker_atteso = None
+        self._speaker_in_collegamento = None
+        self._assenza_dal = None
+        self._conversioni = None
         # Gli avvisi del motore arrivano dai suoi fili: wx.CallAfter li porta
         # nel filo della finestra.
         self.motore = Motore(alla_fine=lambda: wx.CallAfter(self._brano_finito),
@@ -6277,6 +6303,9 @@ class Finestra(wx.Frame):
         self._avvisa_l_attesa_del_sid(secondi)
 
     def _volume(self, passo):
+        if self.motore.lontano is not None:
+            self._volume_dello_speaker(passo)
+            return
         attuale = self.motore.volume
         nuovo = max(0, min(VOLUME_MASSIMO, attuale + passo))
         if nuovo == attuale:
@@ -6291,6 +6320,24 @@ class Finestra(wx.Frame):
         self._conta_l_evento("volume_su" if passo > 0 else "volume_giu")
         suoni.volume_della_musica(nuovo, self.impostazioni["volume_effetti"])
         self.scrivi(f"Volume {nuovo}{amplificato}.", "volume")
+
+    def _volume_dello_speaker(self, passo):
+        """Meno e piu' con uno speaker Cast: il suo volume, da 0 a 100, senza
+        amplificazione (1.119.0)."""
+        lettore = self.motore.lontano
+        attuale = lettore.volume
+        if attuale is None:
+            self._riscontro("errore", f"Il volume di {lettore.nome} non si legge.")
+            return
+        nuovo = max(0, min(100, attuale + passo))
+        if nuovo == attuale:
+            self._riscontro("volume_al_limite", f"Volume di {lettore.nome} già al {'massimo' if passo > 0 else 'minimo'}, {attuale}.", "volume")
+            return
+        lettore.volume = nuovo
+        self._domanda_viva = None
+        self._conta_l_evento("volume_su" if passo > 0 else "volume_giu")
+        suoni.volume_della_musica(nuovo, self.impostazioni["volume_effetti"])
+        self.scrivi(f"Volume di {lettore.nome} {nuovo}.", "volume")
 
     def _comando_volume_su(self):
         self._volume(self.impostazioni["passo_volume"])
@@ -6318,6 +6365,14 @@ class Finestra(wx.Frame):
         self._riscontro("passo_del_volume", " ".join([f"Più e meno ora cambiano il volume di {passo}.", *correzioni]), "passo_del_volume")
 
     def _comando_muto(self):
+        lettore = self.motore.lontano
+        if lettore is not None:
+            lettore.muto = not lettore.muto
+            if lettore.muto:
+                self._riscontro("muto_acceso", f"Muto su {lettore.nome}.", "volume")
+            else:
+                self._riscontro("muto_spento", f"Audio di nuovo acceso su {lettore.nome}, volume {lettore.volume}.", "volume")
+            return
         self.motore.muto = not self.motore.muto
         if self.motore.muto:
             self._riscontro("muto_acceso", "Muto.", "volume")
@@ -6379,6 +6434,8 @@ class Finestra(wx.Frame):
     def _velocita(self, nuova, evento):
         """Porta la velocita' a nuova, nei limiti; ai limiti lo dice con il
         suono suo."""
+        if self._vale_solo_sul_pc("La velocità"):
+            return
         attuale = self.impostazioni["velocita"]
         nuova = max(valori.VELOCITA_MINIMA, min(valori.VELOCITA_MASSIMA, round(nuova, 2)))
         if nuova == attuale and evento != "velocita_normale":
@@ -6402,6 +6459,8 @@ class Finestra(wx.Frame):
     def _tono(self, nuovo, evento):
         """Porta il tono a nuovo semitoni, nei limiti; ai limiti lo dice con il
         suono suo."""
+        if self._vale_solo_sul_pc("Il tono"):
+            return
         attuale = self.impostazioni["tono"]
         nuovo = max(-valori.TONO_MASSIMO, min(valori.TONO_MASSIMO, nuovo))
         if nuovo == attuale and evento != "tono_normale":
@@ -6432,6 +6491,8 @@ class Finestra(wx.Frame):
     def _scegli_la_banda(self, passo):
         """U e I: la banda prima o dopo; si fermano alla prima e all'ultima. Il
         suono, fatto al volo, dice la banda con una nota della scala."""
+        if self._vale_solo_sul_pc("L'equalizzatore"):
+            return
         nuova = self._banda + passo
         if not 0 <= nuova < len(valori.FREQUENZE_DELLE_BANDE):
             self._riscontro("banda_al_limite", self._riga_della_banda(". È la prima" if passo < 0 else ". È l'ultima"), "banda")
@@ -6455,6 +6516,8 @@ class Finestra(wx.Frame):
     def _guadagno(self, passo):
         """O e P: la banda scelta giu' o su di un dB; ai limiti lo dicono. Il
         suono, fatto al volo, dice il guadagno con l'altezza della nota."""
+        if self._vale_solo_sul_pc("L'equalizzatore"):
+            return
         bande = list(self.impostazioni["bande"])
         nuovo = max(-valori.GUADAGNO_MASSIMO, min(valori.GUADAGNO_MASSIMO, bande[self._banda] + passo))
         if nuovo == bande[self._banda]:
@@ -6473,17 +6536,23 @@ class Finestra(wx.Frame):
         self._guadagno(-1)
 
     def _comando_azzera_la_banda(self):
+        if self._vale_solo_sul_pc("L'equalizzatore"):
+            return
         bande = list(self.impostazioni["bande"])
         bande[self._banda] = 0
         self._metti_le_bande(bande)
         self._riscontro("banda_azzerata", self._riga_della_banda(", azzerata"), "banda")
 
     def _comando_azzera_le_bande(self):
+        if self._vale_solo_sul_pc("L'equalizzatore"):
+            return
         self._metti_le_bande([0] * len(valori.FREQUENZE_DELLE_BANDE))
         self._riscontro("bande_azzerate", "Equalizzatore azzerato, tutte a 0 dB.", "banda")
 
     def _comando_dissolvenza(self):
         """L: accende e spegne la dissolvenza; la durata resta."""
+        if self._vale_solo_sul_pc("La dissolvenza"):
+            return
         dissolvenza = self.impostazioni["dissolvenza"]
         dissolvenza["accesa"] = not dissolvenza["accesa"]
         self._applica_la_dissolvenza()
@@ -6515,6 +6584,8 @@ class Finestra(wx.Frame):
     def _comando_durata_della_dissolvenza(self):
         """Maiuscolo con L: chiede la durata della dissolvenza in secondi. La
         dissolvenza resta accesa o spenta com'era."""
+        if self._vale_solo_sul_pc("La dissolvenza"):
+            return
         self._domanda()
         dissolvenza = self.impostazioni["dissolvenza"]
         attuale = dissolvenza["secondi"]
@@ -6642,7 +6713,10 @@ class Finestra(wx.Frame):
         automatica, chiesta senza aprire niente. Una scheda scelta che
         manca, o che non si apre, non conta: intanto si suona
         sull'automatica, ed e' lei che prende il tempo (1.116.1)."""
-        scelta = self.impostazioni["scheda_audio"]
+        if self.motore.lontano is not None:
+            self._scheda_per_le_statistiche = f"Speaker {self.motore.lontano.nome}"
+            return
+        scelta = self._scelta_del_pc()
         if scelta and not self._scheda_in_disparte:
             self._scheda_per_le_statistiche = self._nome_della_scheda(scelta["dispositivo"], scelta["interfaccia"])
             return
@@ -7191,7 +7265,11 @@ class Finestra(wx.Frame):
         _scheda_in_disparte dice se la scheda scelta manca o non si apre; la
         console, che ancora non c'e', lo dira' con
         _scrivi_la_scheda_all_avvio."""
-        scelta = self.impostazioni["scheda_audio"]
+        scelta = self._scelta_del_pc()
+        speaker = self._speaker_scelto()
+        if speaker is not None:
+            # Si suona sul PC finche' lo speaker non compare (1.119.0).
+            self._speaker_atteso = speaker["cast"]
         esito, errore = self._applica_la_scheda(scelta, avvio=True)
         # Perche' la scheda scelta non e' quella in uso, o None.
         self._scheda_in_disparte = None
@@ -7233,6 +7311,12 @@ class Finestra(wx.Frame):
         return f"Automatica ({nome})" if nome else "Automatica"
 
     def _scheda_da_leggere(self):
+        speaker = self._speaker_scelto()
+        if speaker is not None:
+            lettore = self.motore.lontano
+            if lettore is not None:
+                return f"{lettore.nome}, speaker Cast"
+            return f"{speaker['nome']}, speaker Cast, non c'è: uso il PC"
         scelta = self.impostazioni["scheda_audio"]
         if scelta:
             nome = self._nome_della_scheda(scelta["dispositivo"], scelta["interfaccia"])
@@ -7245,7 +7329,7 @@ class Finestra(wx.Frame):
         return f"Automatica ({self._nome_della_scheda(uscita['dispositivo'], uscita['interfaccia'])})" if uscita else "Automatica"
 
     def _scrivi_la_scheda_all_avvio(self, esito, errore):
-        scelta = self.impostazioni["scheda_audio"]
+        scelta = self._scelta_del_pc()
         if self._scheda_in_disparte == SCHEDA_CHE_NON_SI_APRE:
             # Con il suono dell'errore: senza, gli effetti tacerebbero per
             # tutta la sessione senza dire perche'.
@@ -7289,6 +7373,7 @@ class Finestra(wx.Frame):
             return
         self._uscente = self._preparato = None
         self._uscita_persa = True
+        self._statistiche.conta("brani_ripresi_dopo_l_uscita_persa")
         self.motore.dispositivo = schede_audio.AUTOMATICA_MPV
         punto = self._punto_di_ripresa
         inizio = punto[2] if punto and punto[:2] == (percorso, sottobrano) else None
@@ -7308,7 +7393,7 @@ class Finestra(wx.Frame):
         self._attesa_delle_uscite = None
         if self._chiusa:
             return
-        scelta = self.impostazioni["scheda_audio"]
+        scelta = self._scelta_del_pc()
         uscita_persa, self._uscita_persa = self._uscita_persa, False
         prima = None
         with contextlib.suppress(Exception):
@@ -7346,8 +7431,25 @@ class Finestra(wx.Frame):
         if testo is None and automatica and cambiata:
             evento, testo = "scheda_di_windows", f"La scheda audio di Windows ora è {self._nome_della_scheda(esito['dispositivo'], esito['interfaccia'])}: musica ed effetti suonano lì."
         self._aggiorna_la_scheda_delle_statistiche()
+        if evento == "scheda_sparita":
+            self._comincia_l_assenza()
+        elif evento == "scheda_tornata":
+            self._finisce_l_assenza()
         if testo:
             self._avviso_delle_uscite(evento, testo)
+
+    def _comincia_l_assenza(self):
+        """La scelta, scheda o speaker, se n'e' andata: per il primato delle
+        statistiche, da quando (issue 31)."""
+        if self._assenza_dal is None:
+            self._assenza_dal = (time.monotonic(), datetime.datetime.now().isoformat(timespec="seconds"))
+
+    def _finisce_l_assenza(self):
+        """La scelta e' tornata: l'assenza conta per il primato."""
+        if self._assenza_dal is not None:
+            inizio, quando = self._assenza_dal
+            self._assenza_dal = None
+            self._statistiche.assenza_della_scelta(time.monotonic() - inizio, quando)
 
     def _dove_suona(self, esito):
         """La coda ", scheda, interfaccia" con l'automatica scelta da applica,
@@ -8014,9 +8116,11 @@ class Finestra(wx.Frame):
         self._riscontro("impostazione_cambiata", f"La riproduzione casuale ora va con il modello {valori.MODELLI_CASUALI[chiavi[indice]]}.")
 
     def _scegli_la_scheda_audio(self, genitore):
-        """La scelta della scheda audio, una per musica ed effetti: in cima la
-        scelta automatica, poi le uscite in ordine di latenza."""
-        scelta = self.impostazioni["scheda_audio"]
+        """La scelta della destinazione, una lista sola con il filtro: in cima
+        la scelta automatica, poi le schede del PC in ordine di latenza, che
+        valgono per musica ed effetti, poi gli speaker e i gruppi Cast che la
+        ricerca vede, che valgono per la musica (1.119.0)."""
+        scelta = self._scelta_del_pc()
         try:
             # Una scheda arrivata dopo l'avvio, se l'avviso di mpv non e' ancora
             # arrivato o e' andato perso (1.116.0).
@@ -8028,21 +8132,34 @@ class Finestra(wx.Frame):
         except Exception as e:  # noqa: BLE001 - PortAudio fallisce in molti modi, e lo dice la console
             self._riscontro("errore", f"Non riesco a leggere le schede audio: {e}.")
             return
-        righe = [f"Automatica: {schede_audio.etichetta(automatica)}" if automatica else "Automatica", *(schede_audio.etichetta(u) for u in elenco)]
+        apparecchi = self._ricerca_cast.apparecchi() if self._ricerca_cast is not None else []
+        righe = [f"Automatica: {schede_audio.etichetta(automatica)}" if automatica else "Automatica", *(schede_audio.etichetta(u) for u in elenco),
+                 *(riga_dello_speaker(voce) for voce in apparecchi)]
         attuale = schede_audio.ritrova(scelta, elenco)
+        indice = elenco.index(attuale) + 1 if attuale is not None else 0
+        speaker = self._speaker_scelto()
+        if speaker is not None:
+            indice = next((len(elenco) + 1 + i for i, voce in enumerate(apparecchi) if str(voce["uuid"]) == speaker["cast"]), indice)
         self._domanda()
-        with FinestraScelta(genitore, "Scheda audio", righe, elenco.index(attuale) + 1 if attuale is not None else 0) as dialogo:
-            if dialogo.ShowModal() != wx.ID_OK:
+        with FinestraScelta(genitore, "Scheda audio", righe, indice, con_filtro=True) as dialogo:
+            if dialogo.ShowModal() != wx.ID_OK or dialogo.GetSelection() < 0:
                 self._annullato("Scheda audio non cambiata.")
                 return
             indice = dialogo.GetSelection()
+        if indice > len(elenco):
+            self._collega_lo_speaker(apparecchi[indice - len(elenco) - 1], salva=True, genitore=genitore)
+            return
         self._usa_la_scheda(schede_audio.da_salvare(elenco[indice - 1]) if indice > 0 else {}, genitore)
 
     def _usa_la_scheda(self, nuova, genitore):
         """Applica la scheda scelta e la salva; il suono della scheda arriva
         gia' da quella nuova. Se gli effetti non riescono ad aprirla si torna
         all'automatica, e la console lo dice. La prova d'apertura vale anche
-        con il volume degli effetti a zero."""
+        con il volume degli effetti a zero. Con uno speaker Cast in uso, la
+        musica torna sul PC da dove era (1.119.0)."""
+        self._speaker_atteso = None
+        if self.motore.lontano is not None:
+            self._passa_a(None)
         esito, errore = self._applica_la_scheda(nuova)
         aperta = errore is None and self._effetti_si_aprono()
         evento = None
@@ -8068,11 +8185,191 @@ class Finestra(wx.Frame):
         self.impostazioni["scheda_audio"] = nuova
         self._scheda_in_disparte = None
         self._salva_impostazioni()
+        self._aggiorna_la_scheda_delle_statistiche()
         genitore.aggiorna("scheda_audio", self._riga_dell_impostazione("scheda_audio"))
         if evento:
             self._riscontro(evento, testo)
         else:
             self.scrivi(testo)
+
+    # Gli speaker Cast (tappa 15 b, 1.119.0): la strada A con conversione,
+    # con lontano.py e trasmissione.py.
+
+    def _scelta_del_pc(self):
+        """La scheda del PC della scelta salvata: per uno speaker Cast quella
+        che la scelta tiene con se', per gli effetti e per quando lo speaker
+        manca; altrimenti la scelta stessa."""
+        scelta = self.impostazioni["scheda_audio"]
+        return scelta.get("pc", {}) if "cast" in scelta else scelta
+
+    def _speaker_scelto(self):
+        """La scelta salvata se e' uno speaker Cast, {"cast", "nome", "pc"},
+        o None."""
+        scelta = self.impostazioni["scheda_audio"]
+        return scelta if "cast" in scelta else None
+
+    def _avvia_la_ricerca_cast(self):
+        """La ricerca degli speaker, accesa all'avvio se c'e' pychromecast. Se
+        lo speaker scelto non arriva entro ATTESA_DELLO_SPEAKER, la console
+        lo dice."""
+        speaker = self._speaker_scelto()
+        if not trasmissione.disponibile():
+            if speaker is not None:
+                self._avviso_delle_uscite("errore", f"Lo speaker scelto, {speaker['nome']}, non si può usare: manca pychromecast. Suono sul PC.")
+            return
+        self._ricerca_cast = trasmissione.Ricerca(al_cambio=lambda: wx.CallAfter(self._apparecchi_cambiati))
+        self._ricerca_cast.avvia()
+        if speaker is not None:
+            wx.CallLater(ATTESA_DELLO_SPEAKER, self._speaker_non_ancora_arrivato)
+
+    def _speaker_non_ancora_arrivato(self):
+        speaker = self._speaker_scelto()
+        if self._chiusa or speaker is None or self.motore.lontano is not None or self._speaker_atteso is None:
+            return
+        self._comincia_l_assenza()
+        self._avviso_delle_uscite("scheda_sparita", f"Lo speaker scelto, {speaker['nome']}, non c'è: suono sul PC finché non compare.")
+
+    def _apparecchi_cambiati(self):
+        """La ricerca ha visto arrivare, andare o cambiare un apparecchio: se
+        e' lo speaker che si aspetta, ci si collega."""
+        if self._chiusa or self._ricerca_cast is None or self._speaker_atteso is None or self._speaker_in_collegamento is not None:
+            return
+        voce = next((v for v in self._ricerca_cast.apparecchi() if str(v["uuid"]) == self._speaker_atteso), None)
+        if voce is not None:
+            self._collega_lo_speaker(voce)
+
+    def _cartella_delle_conversioni(self):
+        if self._conversioni is None:
+            self._conversioni = tempfile.mkdtemp(prefix="meteora_speaker_")
+        return self._conversioni
+
+    def _collega_lo_speaker(self, voce, salva=False, genitore=None):
+        """Si collega allo speaker in disparte, perche' puo' volerci un po';
+        la scelta si salva, con salva, quando il collegamento riesce."""
+        if self._speaker_in_collegamento is not None or self._ricerca_cast is None:
+            return
+        self._speaker_in_collegamento = voce["uuid"]
+        if salva:
+            self.scrivi(f"Mi collego a {voce['nome']}.", "scheda_audio")
+        ricerca, cartella, converti = self._ricerca_cast, self._cartella_delle_conversioni(), self.motore.converti_in_flac
+        avvisi = {
+            "alla_fine": lambda: wx.CallAfter(self._brano_finito),
+            "all_errore": lambda percorso: wx.CallAfter(self._brano_in_errore, percorso),
+            "al_caricamento": lambda: wx.CallAfter(self._aggiorna_il_video),
+            "alla_conversione": lambda percorso: wx.CallAfter(self._conversione_per_lo_speaker, percorso),
+            "all_interruzione": lambda: wx.CallAfter(self._speaker_interrotto),
+            "al_guasto": lambda errore: wx.CallAfter(self._speaker_perso, errore),
+        }
+
+        def collega():
+            try:
+                server = trasmissione.Server(trasmissione.indirizzo_verso(voce["indirizzo"]), 0)
+                try:
+                    lettore = lontano.LettoreLontano(lambda allo_stato, al_distacco: ricerca.connetti(voce["uuid"], allo_stato, al_distacco=al_distacco),
+                                                     server, cartella, converti, **avvisi)
+                except Exception:
+                    server.ferma()
+                    raise
+            except Exception as errore:  # noqa: BLE001 - la rete e lo speaker falliscono in molti modi, e lo dice la console
+                wx.CallAfter(self._speaker_non_collegato, voce, errore, salva)
+                return
+            wx.CallAfter(self._speaker_collegato, voce, lettore, salva, genitore)
+
+        threading.Thread(target=collega, name="MeTeOra, collegamento allo speaker", daemon=True).start()
+
+    def _speaker_collegato(self, voce, lettore, salva, genitore):
+        """Il collegamento e' riuscito: la musica passa allo speaker da dove
+        era, gli effetti restano sul PC."""
+        self._speaker_in_collegamento = None
+        if self._chiusa:
+            lettore.chiudi(attendi=False)
+            return
+        tornato = self._speaker_atteso is not None and not salva and self._assenza_dal is not None
+        self._speaker_atteso = None
+        self._passa_a(lettore)
+        if salva:
+            self.impostazioni["scheda_audio"] = {"cast": str(voce["uuid"]), "nome": voce["nome"], "pc": self._scelta_del_pc()}
+            self._salva_impostazioni()
+            self._statistiche.conta("speaker_scelti")
+            if genitore:
+                genitore.aggiorna("scheda_audio", self._riga_dell_impostazione("scheda_audio"))
+        self._aggiorna_la_scheda_delle_statistiche()
+        if tornato:
+            self._finisce_l_assenza()
+            self._avviso_delle_uscite("scheda_tornata", f"Lo speaker {voce['nome']} è tornato: la musica suona di nuovo lì.")
+            return
+        testo = (f"Suono su {voce['nome']}, {riga_dello_speaker(voce).split(', ', 1)[1]}. Gli effetti restano sul PC; "
+                 "dissolvenza, equalizzatore, velocità e tono sullo speaker non valgono.")
+        if salva:
+            self._riscontro("scheda_audio", testo)
+        else:
+            self._finisce_l_assenza()
+            self._avviso_delle_uscite("scheda_audio", testo)
+
+    def _speaker_non_collegato(self, voce, errore, salva):
+        self._speaker_in_collegamento = None
+        if self._chiusa:
+            return
+        if salva:
+            self._riscontro("errore", f"Non riesco a collegarmi a {voce['nome']}: {errore}.")
+        # Uno speaker atteso che non risponde si riprova al prossimo cambio
+        # della ricerca.
+
+    def _passa_a(self, lettore):
+        """La musica passa al lettore lontano dato, o con None al PC, dal
+        punto in cui era e in pausa se lo era."""
+        percorso = self.motore.in_corso
+        posizione = self.motore.posizione
+        punto = self._punto_di_ripresa
+        if posizione is None and punto and punto[0] == percorso:
+            posizione = punto[2]
+        in_pausa = self.motore.in_pausa
+        sottobrano = self.motore.sottobrano if self.motore.sottobrani else None
+        self._uscente = self._preparato = None
+        self.motore.usa_il_lontano(lettore)
+        if percorso:
+            self.motore.suona(percorso, sottobrano, inizio=posizione, in_pausa=in_pausa)
+        self._aggiorna_la_scheda_delle_statistiche()
+
+    def _speaker_perso(self, errore):
+        """Lo speaker non risponde piu': la musica torna sul PC da dove era, e
+        quando lo speaker ricompare la ricerca lo riprende."""
+        lettore = self.motore.lontano
+        if self._chiusa or lettore is None:
+            return
+        nome = lettore.nome
+        speaker = self._speaker_scelto()
+        self._passa_a(None)
+        self._speaker_atteso = speaker["cast"] if speaker is not None else None
+        self._comincia_l_assenza()
+        self._avviso_delle_uscite("scheda_sparita", f"Lo speaker {nome} non risponde più: suono sul PC, da dove eri.")
+        registro.scrivi(f"Lo speaker {nome} non risponde: {errore!r}")
+
+    def _speaker_interrotto(self):
+        """Sullo speaker e' partito altro, per esempio dal telefono: MeTeOra
+        si ferma, e la playlist non va avanti."""
+        lettore = self.motore.lontano
+        if self._chiusa or lettore is None:
+            return
+        self._uscente = self._preparato = None
+        self._aggiorna_etichette()
+        self._riscontro("stop", f"Su {lettore.nome} suona altro, mandato da fuori: MeTeOra si ferma. X riparte da qui.")
+
+    def _conversione_per_lo_speaker(self, percorso):
+        lettore = self.motore.lontano
+        if self._chiusa or lettore is None:
+            return
+        self.scrivi(f"Converto {os.path.basename(percorso)} in FLAC per {lettore.nome}: un attimo.", "conversione")
+
+    def _vale_solo_sul_pc(self, cosa):
+        """Vero, e la console lo dice, se suona uno speaker Cast: dissolvenza,
+        equalizzatore, velocita' e tono sullo speaker non valgono, e tornano
+        con una scheda del PC (decisione di Gabriele del 29 ottobre 2026)."""
+        lettore = self.motore.lontano
+        if lettore is None:
+            return False
+        self._riscontro("non_disponibile", f"{cosa} su {lettore.nome} non vale: vale sulle schede del PC.")
+        return True
 
     # Salva console, piano 5.8.6.
 
@@ -9557,6 +9854,7 @@ class Finestra(wx.Frame):
         la sessione aperta: anche una chiusura a forza nel primo minuto conta
         come non regolare. Poi, dopo i suoni dell'avvio, la pulizia."""
         self._salva_le_statistiche_in_disparte()
+        self._avvia_la_ricerca_cast()
         self._dopo_il_suono(self._comincia_la_pulizia)
 
     # La pulizia all'avvio (Gabriele, 19 ottobre 2026, 1.104.0).
@@ -9917,6 +10215,10 @@ class Finestra(wx.Frame):
         self._braille.svuota()
         if self._ricerca is not None:
             self._ricerca.ferma()
+        if self._ricerca_cast is not None:
+            # La ricerca chiude il suo zeroconf: in disparte, come lo speaker,
+            # che il motore chiude con se'.
+            threading.Thread(target=self._ricerca_cast.ferma, daemon=True).start()
         self.impostazioni["ripresa"] = self._stato_da_riprendere()
         self._orologio_delle_posizioni.Stop()
         self._orologio_delle_statistiche.Stop()
@@ -9956,6 +10258,8 @@ class Finestra(wx.Frame):
         self._statistiche.conta("salvataggi_non_riusciti", len(non_salvati))
         self._salva_all_uscita(self._statistiche.salva, "le statistiche", non_salvati)
         self.motore.chiudi()
+        if self._conversioni is not None:
+            shutil.rmtree(self._conversioni, ignore_errors=True)
         if non_salvati:
             # La console sta per sparire: lo dice una finestra, prima di
             # chiudere (tappa 9).

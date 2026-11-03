@@ -1,6 +1,6 @@
 # MeTeOra, le statistiche: ogni sorta di conti, raccolti mentre lo si usa, e la pagina che li racconta.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (UltraCode).
-# 17/10/2026: nasce con la 1.103.0, chiesta da Gabriele: piu' dati ci sono, piu' e' contento. Nella 1.104.0 le righe che elencano voci tengono solo quelle diverse da zero, le percentuali uniformi, gli anni futuri dei tag ignorati, le date sempre con il giorno della settimana, e i brani dello storico tolti dalla pulizia all'avvio o rinominati, con i conti della pulizia nella salute. Nella 1.105.0 i nomi di Dove sono, il comando dell'apostrofo, e del suo suono. Nella 1.109.0 le playlist ordinate, invertite, mescolate e rimesse nell'ordine di prima. Nella 1.110.0 quelli della durata residua, Maiuscolo con l'apostrofo. Nella 1.112.0, nella salute, anche le unita' saltate dalla pulizia perche' usate da dischi diversi o perche' il disco che rispondeva non si riconosceva, i dischi riconosciuti a mano e le lettere rese contese dalla Sentinella. Nella 1.113.0 le playlist importate da un M3U o da un PLS, riaperte e rilette. Nella 1.113.5 il campo modificate, perche' la finestra scriva il file solo quando qualcosa e' cambiato davvero. Nella 1.116.0 i nomi delle schede audio che se ne vanno e tornano.
+# 17/10/2026: nasce con la 1.103.0, chiesta da Gabriele: piu' dati ci sono, piu' e' contento. Nella 1.104.0 le righe che elencano voci tengono solo quelle diverse da zero, le percentuali uniformi, gli anni futuri dei tag ignorati, le date sempre con il giorno della settimana, e i brani dello storico tolti dalla pulizia all'avvio o rinominati, con i conti della pulizia nella salute. Nella 1.105.0 i nomi di Dove sono, il comando dell'apostrofo, e del suo suono. Nella 1.109.0 le playlist ordinate, invertite, mescolate e rimesse nell'ordine di prima. Nella 1.110.0 quelli della durata residua, Maiuscolo con l'apostrofo. Nella 1.112.0, nella salute, anche le unita' saltate dalla pulizia perche' usate da dischi diversi o perche' il disco che rispondeva non si riconosceva, i dischi riconosciuti a mano e le lettere rese contese dalla Sentinella. Nella 1.113.0 le playlist importate da un M3U o da un PLS, riaperte e rilette. Nella 1.113.5 il campo modificate, perche' la finestra scriva il file solo quando qualcosa e' cambiato davvero. Nella 1.116.0 i nomi delle schede audio che se ne vanno e tornano. Nella 1.119.0 le uscite: la scelta che va e torna, i brani ripresi, gli speaker Cast e l'assenza piu' lunga (issue 31).
 
 """Le statistiche di MeTeOra (1.103.0).
 
@@ -679,6 +679,12 @@ class Statistiche:
         if 0 <= indice < len(self.dati["bande"]):
             self.dati["bande"][indice] += 1
 
+    def assenza_della_scelta(self, secondi, quando):
+        """La scheda o lo speaker scelti sono tornati dopo secondi di assenza,
+        cominciata a quando: il primato della piu' lunga (issue 31)."""
+        self.modificate = True
+        self._massimo("assenza_della_scelta", round(secondi, 3), quando=quando)
+
     def massimo(self, nome, valore, cosa=None):
         """Un record da tenere se e' il piu' alto, con cio' di cui parla."""
         self.modificate = True
@@ -1240,6 +1246,16 @@ class Pagina:
             righe.append("Schede audio: " + "; ".join(f"{nome}, {percentuale(secondi, self.play)}" for nome, secondi in schede) + ".")
         return righe
 
+    def _riga_delle_uscite(self):
+        """Le schede e gli speaker che vanno e tornano (issue 31, 1.119.0)."""
+        riga = (f"Uscite: la scelta sparita {al_plurale(self.e('scheda_sparita'), 'volta', 'volte')} e tornata {al_plurale(self.e('scheda_tornata'), 'volta', 'volte')}; "
+                f"la scheda di Windows cambiata da sola {al_plurale(self.e('scheda_di_windows'), 'volta', 'volte')}; "
+                f"brani ripresi dopo un'uscita persa: {self.c('brani_ripresi_dopo_l_uscita_persa')}; speaker Cast scelti: {self.c('speaker_scelti')}")
+        assenza = self.d["record"].get("assenza_della_scelta")
+        if assenza:
+            riga += f"; l'assenza più lunga della scelta: {durata(assenza['valore'])}, cominciata {data_e_ora(assenza['quando'])}"
+        return riga + "."
+
     # 7.
 
     def i_brani(self):
@@ -1644,6 +1660,7 @@ class Pagina:
             f"Finestra delle impostazioni aperta: {al_plurale(self.e('impostazioni'), 'volta', 'volte')}; impostazioni cambiate: {self.e('impostazione_cambiata')}.",
             riga + ".",
             f"Scheda audio cambiata: {al_plurale(self.e('scheda_audio'), 'volta', 'volte')}.",
+            self._riga_delle_uscite(),
             f"Percorsi di rete aggiunti: {self.e('percorso_aggiunto')}; tolti: {self.e('percorso_tolto')}; ricerche dei computer della rete: {self.c('ricerche_della_rete')}.",
             f"Banco dei suoni MIDI scelto: {al_plurale(self.c('banchi_scelti'), 'volta', 'volte')}; scaricamenti avviati: {self.e('scaricamento_avviato')}, finiti: {self.e('scaricamento_finito')}.",
             f"Aggiornamenti proposti: {self.e('aggiornamento')}.",

@@ -654,6 +654,13 @@ def test_carica_i_valori_buoni(tmp_path):
     assert _caricate(tmp_path, {"volume": 0, "passo_volume": 1, "volume_effetti": 0})["volume_effetti"] == 0.0
 
 
+def test_carica_lo_speaker_cast(tmp_path):
+    # Uno speaker Cast, con la scheda del PC per gli effetti (1.119.0).
+    for scelta in ({"cast": "3f1c", "nome": "Cucina", "pc": {}},
+                   {"cast": "3f1c", "nome": "Cucina", "pc": {"dispositivo": "Altoparlanti (Realtek(R) Audio)", "interfaccia": "Windows WASAPI"}}):
+        assert _caricate(tmp_path, {"scheda_audio": scelta})["scheda_audio"] == scelta
+
+
 def test_carica_i_limiti_della_tappa_4(tmp_path):
     """I limiti stessi passano; la velocita' scritta intera diventa float."""
     limiti = {"velocita": 0.5, "tono": 12, "bande": [-12, 12, -12, 12, -12, 12, -12], "dissolvenza": {"accesa": False, "secondi": 15}}
@@ -679,6 +686,9 @@ def test_carica_i_limiti_della_tappa_4(tmp_path):
     ("scheda_audio", {"dispositivo": "x"}), ("scheda_audio", {"dispositivo": "x", "interfaccia": 3}),
     ("scheda_audio", {"dispositivo": "", "interfaccia": "Windows WASAPI"}), ("scheda_audio", {"dispositivo": "x", "interfaccia": "y", "altro": 1}),
     ("scheda_audio", []), ("scheda_audio", "auto"), ("scheda_audio", None),
+    ("scheda_audio", {"cast": "", "nome": "Cucina", "pc": {}}), ("scheda_audio", {"cast": "1", "nome": "Cucina"}),
+    ("scheda_audio", {"cast": "1", "nome": "Cucina", "pc": {"dispositivo": "x"}}),
+    ("scheda_audio", {"cast": "1", "nome": "Cucina", "pc": {"cast": "2", "nome": "Bagno", "pc": {}}}),
     ("velocita", 0.45), ("velocita", 2.05), ("velocita", 0), ("velocita", -1.0), ("velocita", True), ("velocita", "1.05"), ("velocita", None),
     ("tono", 13), ("tono", -13), ("tono", 2.0), ("tono", True), ("tono", "+2"),
     ("bande", [0] * 6), ("bande", [0] * 8), ("bande", []), ("bande", [13, 0, 0, 0, 0, 0, 0]), ("bande", [0, 0, 0, 0, 0, 0, -13]),

@@ -1,6 +1,6 @@
 # MeTeOra, le prove delle statistiche: l'orologio, la vita dei brani, il file, l'azzeramento e la pagina.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (UltraCode).
-# 17/10/2026: nasce con la 1.103.0. Nella 1.104.0 le prove delle righe-elenco senza le voci a zero, delle percentuali, degli anni futuri, delle date con il giorno della settimana, della pulizia all'avvio e dei brani rinominati. Nella 1.105.0 quella dei nomi di tutti gli eventi, con Dove sono. Nella 1.109.0 la riga delle playlist con Ordina e Mescola. Nella 1.110.0 la durata residua in fondo agli eventi. Nella 1.112.0 la riga delle pulizie con le unita' usate da dischi diversi o con un disco che non si riconosceva, e la riga dei dischi riconosciuti a mano e delle lettere rese contese dalla Sentinella. Nella 1.113.0 la prova che ogni evento dei suoni ha il suo nome. Nella 1.113.5 quelle delle statistiche scritte solo se cambiate, al piu' ogni mezz'ora.
+# 17/10/2026: nasce con la 1.103.0. Nella 1.104.0 le prove delle righe-elenco senza le voci a zero, delle percentuali, degli anni futuri, delle date con il giorno della settimana, della pulizia all'avvio e dei brani rinominati. Nella 1.105.0 quella dei nomi di tutti gli eventi, con Dove sono. Nella 1.109.0 la riga delle playlist con Ordina e Mescola. Nella 1.110.0 la durata residua in fondo agli eventi. Nella 1.112.0 la riga delle pulizie con le unita' usate da dischi diversi o con un disco che non si riconosceva, e la riga dei dischi riconosciuti a mano e delle lettere rese contese dalla Sentinella. Nella 1.113.0 la prova che ogni evento dei suoni ha il suo nome. Nella 1.113.5 quelle delle statistiche scritte solo se cambiate, al piu' ogni mezz'ora. Nella 1.119.0 quella della riga delle uscite (issue 31).
 
 import datetime
 import json
@@ -529,6 +529,24 @@ def test_un_brano_rinominato_porta_la_sua_voce(tmp_path, monkeypatch):
     # Solo le maiuscole cambiate: la stessa voce, con il nome nuovo.
     assert s.rinomina_brano("E:\\c64\\UNO.sid", "E:\\C64\\Uno.sid") and list(s.dati["brani"]) == ["E:\\C64\\Uno.sid"]
     assert s.dati["brani"]["E:\\C64\\Uno.sid"]["volte"] == 5
+
+
+def test_la_riga_delle_uscite(tmp_path):
+    # Issue 31 (1.119.0): le schede e gli speaker che vanno e tornano.
+    s, _o = _nuove(tmp_path)
+    assert ("Uscite: la scelta sparita 0 volte e tornata 0 volte; la scheda di Windows cambiata da sola 0 volte; "
+            "brani ripresi dopo un'uscita persa: 0; speaker Cast scelti: 0.") in _pagina(s).le_impostazioni()
+    for evento in ("scheda_sparita", "scheda_sparita", "scheda_tornata", "scheda_di_windows"):
+        s.evento(evento)
+    s.conta("brani_ripresi_dopo_l_uscita_persa")
+    s.conta("speaker_scelti", 2)
+    s.assenza_della_scelta(65.4, "2026-11-03T21:04:00")
+    s.assenza_della_scelta(30.0, "2026-11-03T22:00:00")
+    assert s.dati["record"]["assenza_della_scelta"] == {"valore": 65.4, "quando": "2026-11-03T21:04:00"}
+    riga = next(r for r in _pagina(s).le_impostazioni() if r.startswith("Uscite:"))
+    assert riga == ("Uscite: la scelta sparita 2 volte e tornata 1 volta; la scheda di Windows cambiata da sola 1 volta; "
+                    "brani ripresi dopo un'uscita persa: 1; speaker Cast scelti: 2; "
+                    "l'assenza più lunga della scelta: 1 minuto e 5 secondi, cominciata martedì 3 novembre 2026 alle 21:04.")
 
 
 def test_la_riga_delle_pulizie(tmp_path):

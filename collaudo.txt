@@ -1,0 +1,37 @@
+Collaudo di MeTeOra 1.116.3, issue 39: i comandi da fermi.
+Prima: MeTeOra aperto dalla cartella del progetto, con un brano lungo.
+Passo 1: suona il brano, poi fermalo con V.
+Passo 2: premi E, poi Q, poi l'apostrofo, poi R.
+Domanda 1: ogni tasto risponde come in pausa, e il brano resta in pausa all'inizio, pronto per X?
+Passo 3: premi X.
+Domanda 2: il brano riparte dal punto in cui ti avevano portato i tasti?
+Esito:
+Collaudo di MeTeOra 1.119.0: gli speaker Cast.
+Prima: dalla cartella del progetto, python -m pip install -r requirements.txt, poi MeTeOra con un brano MP3 o FLAC che suona.
+Passo 1: apri Impostazioni, Scheda audio. Con Maiuscolo e Tab vai al filtro e scrivi cast.
+Domanda 1: restano solo gli speaker e i gruppi, con il loro tipo, e Invio sul filtro riporta alla lista?
+Passo 2: scegli Salotto con Invio. Se Windows chiede il permesso del firewall, concedilo per le reti private.
+Domanda 2: la console dice Mi collego e poi Suono su Salotto, e la musica passa allo speaker da dove era, con gli effetti dei tasti sul PC?
+Passo 3: prova C, X, Q, E, R, Y, e meno e più.
+Domanda 3: pausa, salti e volume dello speaker rispondono? Meno e più dicono Volume di Salotto con il numero e il suono del volume?
+Passo 4: premi A, F, O e L.
+Domanda 4: ognuno dice che sullo speaker non vale?
+Passo 5: lascia finire il brano.
+Domanda 5: parte il seguente della playlist, sempre sullo speaker?
+Passo 6: suona un file che il Chromecast non legge, per esempio un APE, un SID o un MIDI.
+Domanda 6: la console dice Converto e poi suona? Quanto aspetti?
+Passo 7: con la musica sullo speaker, staccagli la corrente.
+Domanda 7: dopo qualche secondo la console dice che lo speaker non risponde più, e la musica torna sul PC da dove era?
+Passo 8: riattacca la corrente e aspetta che lo speaker si riaccenda.
+Domanda 8: la console dice che lo speaker è tornato, e la musica ci rientra?
+Passo 9: chiudi MeTeOra con la scelta su Salotto e riaprilo.
+Domanda 9: all'avvio la musica passa da sola su Salotto in pochi secondi?
+Passo 10: scegli il gruppo ovunque.
+Domanda 10: suonano tutti gli speaker del gruppo, insieme?
+Passo 11: mentre MeTeOra suona su uno speaker, manda dal telefono un'altra musica allo stesso speaker.
+Domanda 11: MeTeOra dice che sullo speaker suona altro e si ferma, senza spegnere la musica del telefono?
+Passo 12: in Scheda audio scegli Automatica.
+Domanda 12: la musica torna sul PC da dove era?
+Passo 13: apri le statistiche con Maiuscolo e F7 e cerca la riga Uscite.
+Domanda 13: la riga conta le schede e gli speaker che sono andati e tornati, e c'è il primato dell'assenza più lunga?
+Esito:

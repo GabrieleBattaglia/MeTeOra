@@ -128,7 +128,9 @@ PREDEFINITE = {
     # La scheda audio di musica ed effetti: {"dispositivo": nome, "interfaccia":
     # nome intero di PortAudio, per esempio "Windows WASAPI"}. Si salvano i
     # nomi e non l'indice, che cambia fra un avvio e l'altro; il dizionario
-    # vuoto e' la scelta automatica.
+    # vuoto e' la scelta automatica. Dalla 1.119.0 anche uno speaker Cast:
+    # {"cast": uuid, "nome": nome, "pc": la scheda del PC, come sopra}, che
+    # vale per gli effetti e per quando lo speaker manca.
     "scheda_audio": {},
     # La velocita' di riproduzione, 1 la normale, e il tono in semitoni
     # interi, 0 il normale: valgono per tutti i brani (tappa 4).
@@ -172,9 +174,13 @@ def _colori_validi(valore):
 
 def _scheda_valida(valore):
     """Il dizionario vuoto, oppure i due nomi, non vuoti, del dispositivo e
-    dell'interfaccia."""
+    dell'interfaccia; o uno speaker Cast, con il suo uuid, il nome e la
+    scheda del PC, valida a sua volta e non uno speaker (1.119.0)."""
     if not isinstance(valore, dict):
         return False
+    if set(valore) == {"cast", "nome", "pc"}:
+        return (all(isinstance(valore[k], str) and valore[k] for k in ("cast", "nome")) and isinstance(valore["pc"], dict)
+                and "cast" not in valore["pc"] and _scheda_valida(valore["pc"]))
     return not valore or (set(valore) == {"dispositivo", "interfaccia"} and all(isinstance(nome, str) and nome for nome in valore.values()))
 
 

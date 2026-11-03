@@ -1,6 +1,6 @@
 # MeTeOra, il motore di riproduzione: libmpv, e i SID in tempo reale.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7). Nella 1.65.0 i MIDI resi da FluidSynth (tappa 8). Nella 1.66.0 la musica delle console con libgme. Nella 1.67.0 il file lasciato o rinominato per Rinomina file. Nella 1.82.0 il testo del karaoke come traccia in memoria, senza i .lrc caricati da mpv, e due sottotitoli uguali di fila detti tutti e due. Nella 1.83.0 il tempo che resta al sottotitolo, per la barra braille a blocchi. Nella 1.83.3 la durata vera di Musepack e DSF, da mutagen. Nella 1.93.0 i capitoli che libmpv vede. Nella 1.95.0 l'attenuazione, per la sfumatura del timer di spegnimento. Nella 1.96.0 il volume uniforme con ReplayGain. Nella 1.96.11 suona con a_volume_pieno. Nella 1.102.2 (issue 22) il ricampionamento con soxr, le bande compensate, il preamplificatore nella catena e il volume oltre 100 con il limitatore. Nella 1.102.3 rubberband quando velocita' o tono sono cambiati, con il tono fatto da lui (issue 20). Nella 1.116.0 alle_uscite, quando cambiano le uscite audio di mpv, e all_uscita_persa, quando il brano si ferma perche' l'uscita non si apre piu'.
+# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7). Nella 1.65.0 i MIDI resi da FluidSynth (tappa 8). Nella 1.66.0 la musica delle console con libgme. Nella 1.67.0 il file lasciato o rinominato per Rinomina file. Nella 1.82.0 il testo del karaoke come traccia in memoria, senza i .lrc caricati da mpv, e due sottotitoli uguali di fila detti tutti e due. Nella 1.83.0 il tempo che resta al sottotitolo, per la barra braille a blocchi. Nella 1.83.3 la durata vera di Musepack e DSF, da mutagen. Nella 1.93.0 i capitoli che libmpv vede. Nella 1.95.0 l'attenuazione, per la sfumatura del timer di spegnimento. Nella 1.96.0 il volume uniforme con ReplayGain. Nella 1.96.11 suona con a_volume_pieno. Nella 1.102.2 (issue 22) il ricampionamento con soxr, le bande compensate, il preamplificatore nella catena e il volume oltre 100 con il limitatore. Nella 1.102.3 rubberband quando velocita' o tono sono cambiati, con il tono fatto da lui (issue 20). Nella 1.116.0 alle_uscite, quando cambiano le uscite audio di mpv, e all_uscita_persa, quando il brano si ferma perche' l'uscita non si apre piu'. Nella 1.117.0 il lettore lontano, uno speaker Cast al posto delle schede, e converti_in_flac.
 
 """Due lettori libmpv per tutti i formati.
 
@@ -124,6 +124,9 @@ ANTICIPO_DEL_SEGUENTE = 1.5
 MARGINE_DI_FINE = 0.5
 # Ogni quanti secondi il sorvegliante guarda la dissolvenza.
 PASSO_DEL_SORVEGLIANTE = 0.02
+# Quanto si aspetta, al piu', una conversione in FLAC per uno speaker Cast:
+# un brano lungo, o un SID che si rende da capo, puo' volerci un po'.
+ATTESA_DELLA_CONVERSIONE = 600.0
 _FINE_NORMALE = mpv.MpvEventEndFile.EOF
 _FINE_PER_ERRORE = mpv.MpvEventEndFile.ERROR
 # L'errore con cui mpv chiude il brano quando non riesce ad aprire l'uscita
@@ -607,6 +610,9 @@ class Motore:
         self._muto = False
         self._pausa = False
         self._dispositivo = "auto"
+        # Il lettore lontano, uno speaker Cast scelto al posto delle schede
+        # del PC (1.117.0): finche' c'e', i comandi del brano vanno a lui.
+        self._lontano = None
         self._velocita = 1.0
         self._tono = 0
         self._bande = [0] * len(valori.FREQUENZE_DELLE_BANDE)
@@ -751,10 +757,59 @@ class Motore:
 
     # Il brano in corso.
 
+    # Il lettore lontano (1.117.0).
+
+    @property
+    def lontano(self):
+        """Il lettore lontano in uso, un lontano.LettoreLontano, o None
+        quando si suona sulle schede del PC."""
+        return self._lontano
+
+    def usa_il_lontano(self, lettore):
+        """Passa al lettore lontano dato, o con None alle schede del PC. Il
+        brano in corso si ferma, e quello lontano di prima si chiude: chi
+        cambia lo fa ripartire dove serve, con suona."""
+        self.stop()
+        with self._blocco:
+            prima, self._lontano = self._lontano, lettore
+        if prima is not None and prima is not lettore:
+            prima.chiudi(attendi=False)
+
+    def converti_in_flac(self, percorso, sottobrano, uscita):
+        """Scrive in uscita il brano in FLAC, con libmpv in modo codifica, per
+        uno speaker Cast che non lo legge da se': anche i SID, i MIDI e la
+        musica delle console, con i protocolli dei lettori, e di un video
+        solo l'audio. Senza filtri: con il Chromecast equalizzatore,
+        velocita' e tono non valgono. Blocca finche' non ha finito, al piu'
+        ATTESA_DELLA_CONVERSIONE secondi; vero se il file c'e' e non e'
+        vuoto."""
+        brano = _Brano(percorso, sottobrano, None, self._banco_midi)
+        banco = self._banco_midi
+        finito = threading.Event()
+
+        def apri_midi(uri):
+            secondi, percorso_del_midi = uri[len("midi://"):].split("/", 1)
+            return midi.apri_flusso(percorso_del_midi, banco, float(secondi))
+
+        lettore = mpv.MPV(**{**OPZIONI_DI_BASE, "o": uscita, "of": "flac", "oac": "flac"})
+        try:
+            lettore.register_stream_protocol("sid", _apri_sid)
+            lettore.register_stream_protocol("chip", _apri_chip)
+            lettore.register_stream_protocol("midi", apri_midi)
+            lettore.register_event_callback(lambda evento: finito.set() if evento.event_id.value == mpv.MpvEventID.END_FILE else None)
+            opzioni = ",".join(f"{chiave}={valore}" for chiave, valore in brano.opzioni.items())
+            lettore.command("loadfile", brano.indirizzo, "replace", "-1", opzioni)
+            finito.wait(ATTESA_DELLA_CONVERSIONE)
+        finally:
+            lettore.terminate()
+        return os.path.isfile(uscita) and os.path.getsize(uscita) > 0
+
     @property
     def in_corso(self):
         """Il file caricato, anche se in pausa; None dopo stop, a fine brano
-        o dopo un errore."""
+        o dopo un errore. Con uno speaker Cast, quello del lettore lontano."""
+        if self._lontano is not None:
+            return self._lontano.percorso
         return self._attivo.percorso
 
     @property
@@ -770,6 +825,8 @@ class Motore:
     @property
     def sottobrano(self):
         """Il sottobrano che suona, per i SID e le console; None per gli altri file."""
+        if self._lontano is not None:
+            return self._lontano.sottobrano
         return self._attivo.sottobrano
 
     @sottobrano.setter
@@ -779,6 +836,8 @@ class Motore:
     @property
     def sottobrani(self):
         """Quanti sottobrani ha il SID che suona; None per gli altri file."""
+        if self._lontano is not None:
+            return self._lontano.sottobrani
         return self._attivo.sottobrani
 
     @sottobrani.setter
@@ -807,6 +866,9 @@ class Motore:
         if self._al_salto is not None:
             self._al_salto()
         brano = _Brano(percorso, sottobrano, inizio, self._banco_midi)
+        if self._lontano is not None:
+            self._lontano.suona(percorso, brano.sottobrano, brano.sottobrani, inizio, in_pausa, midi_reso=brano.indirizzo.startswith("midi://"))
+            return
         with self._blocco:
             if self._chiuso:
                 return
@@ -862,7 +924,10 @@ class Motore:
         sull'altro lettore, in pausa e a volume zero, ed entrera' da solo
         quando manca la durata della dissolvenza alla fine di quello in
         corso. Vale solo con la dissolvenza accesa, un brano in corso e
-        nessuna sfumatura in corso; torna vero se il brano e' stato preso."""
+        nessuna sfumatura in corso; torna vero se il brano e' stato preso.
+        Con uno speaker Cast la dissolvenza non vale: niente seguente."""
+        if self._lontano is not None:
+            return False
         brano = _Brano(percorso, sottobrano, banco_midi=self._banco_midi)
         with self._blocco:
             attivo = self._attivo
@@ -881,6 +946,8 @@ class Motore:
 
     @property
     def in_pausa(self):
+        if self._lontano is not None:
+            return self._lontano.in_pausa
         return self._pausa
 
     def pausa(self, valore=None, sfumando=False):
@@ -891,6 +958,8 @@ class Motore:
         silenzio, e la ripresa riparte dal silenzio e risale; in_pausa dice
         subito il nuovo stato. Una ripresa durante la discesa risale dal
         punto in cui era arrivata."""
+        if self._lontano is not None:
+            return self._lontano.pausa(valore)
         with self._blocco:
             nuova = (not self._pausa) if valore is None else bool(valore)
             attivo = self._attivo
@@ -924,9 +993,13 @@ class Motore:
         Con sfumando e la dissolvenza accesa, fuori da una sfumatura e con un
         brano che si sente, il brano si spegne piano sull'altro lettore,
         come coda, e il motore e' subito libero: in_corso vale None, e un
-        brano avviato intanto parte senza aspettare la coda."""
+        brano avviato intanto parte senza aspettare la coda. Con uno speaker
+        Cast si ferma lui, senza sfumare."""
         if self._al_salto is not None:
             self._al_salto()
+        if self._lontano is not None:
+            self._lontano.stop()
+            return
         with self._blocco:
             attivo = self._attivo
             si_sente = attivo.percorso is not None and attivo.pronto and not attivo.finito and not self._pausa
@@ -1017,6 +1090,12 @@ class Motore:
     def _seek(self, secondi, riferimento):
         if self._al_salto is not None:
             self._al_salto()
+        if self._lontano is not None:
+            if riferimento == "relative":
+                self._lontano.salta(secondi)
+            else:
+                self._lontano.vai_a(secondi)
+            return
         # Un salto chiude la sfumatura: chi esce si ferma, chi entra torna a
         # piena voce. La catena si riscrive prima: il seek perde i guadagni
         # dati al volo.
@@ -1278,7 +1357,9 @@ class Motore:
         """Le tracce del brano in corso: {"video": vero se ne ha una,
         "audio": [...], "sub": [...]}, ciascuna come la da' track-list di
         mpv (id, selected, title, lang, codec...). None se non c'e' un brano
-        aperto."""
+        aperto. Con uno speaker Cast nessuna: va solo l'audio."""
+        if self._lontano is not None:
+            return {"video": False, "audio": [], "sub": []} if self._lontano.percorso else None
         with self._blocco:
             lettore = self._attivo
             if lettore.percorso is None or not lettore.pronto:
@@ -1299,6 +1380,8 @@ class Motore:
     def scegli_traccia(self, tipo, numero):
         """tipo "aid" o "sid": la traccia audio o dei sottotitoli del brano in
         corso, per numero, o "no" per nessuna."""
+        if self._lontano is not None:
+            return
         with self._blocco:
             self._attivo.imposta(tipo, numero)
 
@@ -1314,6 +1397,8 @@ class Motore:
         perche' il punto dato sia reso; zero per gli altri brani. Un SID
         appena caricato, che mpv non ha ancora aperto, si stima dall'inizio
         (tappa 5, 1.62.0)."""
+        if self._lontano is not None:
+            return 0.0
         with self._blocco:
             lettore = self._attivo
             reso = lettore.sottobrano is not None or (self._banco_midi and formati.e_midi(lettore.percorso or ""))
@@ -1341,6 +1426,8 @@ class Motore:
     @property
     def posizione(self):
         """I secondi del brano in corso, o None se non c'e' o non e' ancora aperto."""
+        if self._lontano is not None:
+            return self._lontano.posizione
         lettore = self._attivo
         if not lettore.pronto or lettore.finito:
             return None
@@ -1349,6 +1436,8 @@ class Motore:
     @property
     def durata(self):
         """La durata del brano in corso, o None se non c'e' o non si sa ancora."""
+        if self._lontano is not None:
+            return self._lontano.durata
         lettore = self._attivo
         if not lettore.pronto or lettore.finito:
             return None
@@ -1357,6 +1446,8 @@ class Motore:
     def capitoli(self):
         """I capitoli del brano in corso come li vede libmpv: [(secondi,
         titolo)], vuota se non ne ha (1.93.0)."""
+        if self._lontano is not None:
+            return []
         lettore = self._attivo
         if not lettore.pronto or lettore.finito:
             return []
@@ -1589,11 +1680,17 @@ class Motore:
             self._cambiato()
 
     def chiudi(self):
-        """Ferma il sorvegliante e chiude tutti e due i lettori, sempre."""
+        """Ferma il sorvegliante e chiude tutti e due i lettori, sempre, e il
+        lettore lontano, se c'e'."""
         with self._blocco:
             if self._chiuso:
                 return
             self._chiuso = True
+            lontano, self._lontano = self._lontano, None
+        if lontano is not None:
+            with contextlib.suppress(Exception):
+                lontano.chiudi(attendi=False)
+        with self._blocco:
             self._riposo.set()
             self._sveglia.notify_all()
         try:
