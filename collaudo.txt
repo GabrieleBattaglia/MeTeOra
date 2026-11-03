@@ -1,4 +1,4 @@
-Collaudo di MeTeOra 2.6.4: sullo speaker Cast, i sottobrani dei SID vanno avanti in ordine.
-Con GabryBar, apri Outrun Europa nella plancia, fai suonare il sottobrano 4 e lascialo finire da solo: parte il 5 di 27, non il primo.
-Ripetilo con un sottobrano che non hai ancora ascoltato in questa sessione, e fai caso all'attesa fra la fine di uno e l'inizio del seguente: se resta lunga, scrivi qui più o meno quanti secondi.
-Poi passa da un sottobrano all'altro con B, e confronta l'attesa con quella del passaggio da solo.
+No. C'è qualcosa che non va. Indaga ancora.
+Se lascio che sottobrano 4 termini, ora parte correttamente il 5 ma dopo un silenzio mostruoso, anche 30 secondi.
+Se passo da un sottobrano all'altro con z o b, il passaggio impiega forse 1 o massimo 2 secondi.
+Qui c'è per forza un problema.
