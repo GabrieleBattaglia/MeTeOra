@@ -26,8 +26,8 @@ la console (F6), dove scorrono i riscontri di ogni azione; il cruscotto
 I tasti a lettera valgono in tutta la finestra e li intercetta EVT_CHAR_HOOK,
 prima dei controlli: per questo l'albero non ha la ricerca per iniziale. Un
 carattere senza comando lo dice, con il suo suono, e all'albero non arriva.
-Maiuscolo con F12 li spegne e li riaccende (1.86.0): spenti, lettere, cifre e
-segni vanno ai controlli, e l'albero cerca la voce per iniziale.
+Ctrl con F12 li spegne e Maiuscolo con F12 li riaccende (1.86.0, 2.0.2): spenti,
+lettere, cifre e segni vanno ai controlli, e l'albero cerca la voce per iniziale.
 Il brano in riproduzione e la voce selezionata sono due cose distinte: la
 riproduzione non sposta mai la selezione; lo fa F8, su richiesta.
 """
@@ -165,7 +165,9 @@ PAGINA_DEI_RISULTATI = 1000
 # riporta il valore del suo controllo, con i limiti; con Ctrl va indietro,
 # abbassa o spegne; con Maiuscolo va avanti, alza o accende; con Ctrl e
 # Maiuscolo torna al valore predefinito; con Alt va al massimo e con Ctrl e
-# Alt al minimo.
+# Alt al minimo. Gli interruttori dei tasti funzione seguono la stessa
+# regola, Ctrl spegne e Maiuscolo accende, mentre il tasto da solo resta al
+# suo comando (Gabriele, collaudo della 2.0.0).
 SOLO = wx.MOD_NONE
 CTRL = wx.MOD_CONTROL
 MAIUSCOLO = wx.MOD_SHIFT
@@ -399,20 +401,20 @@ TASTI_COMUNI = [
     "O il suo guadagno, di un dB, e Ctrl e Maiuscolo insieme la azzerano; P tutte le bande, e Ctrl e Maiuscolo insieme le azzerano.",
     "L la dissolvenza incrociata, con cui sfumano i cambi di brano, lo stop, la pausa, X da capo e i marker: Ctrl la spegne, Maiuscolo la accende. "
     "K la sua durata, di mezzo secondo alla volta.",
-    "Il video: Maiuscolo con F1 lo accende e lo spegne, Maiuscolo con F5 lo schermo intero. D i sottotitoli letti, G la traccia audio, I il rapporto dell'immagine: "
+    "Il video: Ctrl con F1 lo spegne, Maiuscolo con F1 lo accende; Ctrl con F5 lo rimette in finestra, Maiuscolo con F5 a schermo intero. D i sottotitoli letti, G la traccia audio, I il rapporto dell'immagine: "
     "Ctrl e Maiuscolo il precedente e il seguente, Alt l'ultimo, Ctrl e Alt il primo, che per i sottotitoli è spenti.",
     "J la playlist: Ctrl e Maiuscolo aprono e suonano la precedente e la successiva, Alt l'ultima, Ctrl e Alt la prima; le cifre da 1 a 0 le prime dieci playlist.",
     "Nella plancia Backspace chiude il ramo in cui sei e risale di un livello, Maiuscolo con Backspace risale di colpo all'unità o alla playlist, Preferiti compresi, e chiude i rami al suo interno.",
     "T mette un marker dove sei, o rinomina quello su cui sei; Maiuscolo con T li toglie tutti. Y il marker su cui sei o quello prima: Ctrl e Maiuscolo il precedente e il successivo, "
     "Alt l'ultimo, Ctrl e Alt il primo. R quanti marker ha il brano: Ctrl e Maiuscolo tolgono quelli prima e quelli dopo. Maiuscolo con le cifre da 1 a 0 va ai primi dieci marker del brano della plancia.",
-    "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, Maiuscolo con F7 le statistiche, F8 porta la selezione e il fuoco della plancia sul brano in riproduzione e Maiuscolo con F8 ce la tiene agganciata, "
+    "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, Maiuscolo con F7 le statistiche, F8 porta la selezione e il fuoco della plancia sul brano in riproduzione, Maiuscolo con F8 ce la tiene agganciata e Ctrl con F8 la sgancia, "
     "F9 chiude e F10 apre tutto il ramo col fuoco, Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta, tranne Questo PC e Questa rete; "
     "F11 legge i tag del brano selezionato, o i dettagli di una cartella, di un'unità o di una playlist, e Maiuscolo con F11 apre il menu dei tag.",
     "Barra rovesciata: nella console cerca nella console, altrove nel ramo della plancia in cui sei, e da Apri file, Statistiche o Impostazioni in tutto MeTeOra; Ctrl con la barra rovesciata cerca in tutto MeTeOra, anche dalla console. "
     "Barra verticale: il filtro della playlist o dei Preferiti in cui sta la plancia, anche dalla console.",
     "F1 apre il manuale nel browser; F12 scrive nella console la guida rapida dei tasti, F2 le novità e F3 i crediti, sempre nella console. Esc esce salvando tutto.",
-    "Maiuscolo con F12 spegne e riaccende i tasti rapidi a carattere: spenti, lettere, cifre e segni vanno alla plancia, che salta alla voce che comincia con ciò che scrivi; "
-    "i tasti funzione, Esc e le combinazioni con Ctrl e con Alt restano.",
+    "Ctrl con F12 spegne i tasti rapidi a carattere e Maiuscolo con F12 li riaccende: spenti, lettere, cifre e segni vanno alla plancia, che salta alla voce che comincia con ciò che scrivi; "
+    "i tasti funzione, Esc e le combinazioni con Ctrl e con Alt restano. Gli interruttori dei tasti funzione seguono la regola: Ctrl spegne, Maiuscolo accende, il tasto da solo fa il suo lavoro.",
 ]
 # Le righe del cruscotto proprie di ogni tipo di voce della plancia.
 TASTI_DEL_CONTESTO = {
@@ -560,17 +562,17 @@ VOCI_DELLE_IMPOSTAZIONI = {
     "volume_effetti": ("Volume degli effetti", "cambiato"),
     "replaygain": ("Volume uniforme (ReplayGain)", "cambiato"),
     "scheda_audio": ("Scheda audio", "cambiata"),
-    "passo_indietro": ("Salto indietro di Q", "cambiato"),
-    "passo_avanti": ("Salto avanti di E", "cambiato"),
+    "passo_indietro": ("Salto indietro di Ctrl+Q", "cambiato"),
+    "passo_avanti": ("Salto avanti di Maiuscolo+Q", "cambiato"),
     "velocita": ("Velocità", "cambiata"),
     "tono": ("Tono", "cambiato"),
     "bande": ("Equalizzatore", "cambiato"),
     "dissolvenza": ("Dissolvenza", "cambiata"),
-    "casuale": ("Riproduzione casuale (Maiuscolo+N)", "cambiata"),
+    "casuale": ("Riproduzione casuale (Ctrl+N, Maiuscolo+N)", "cambiata"),
     "modello_casuale": ("Modello della riproduzione casuale", "cambiato"),
     "ripetizione": ("Ripetizione (Maiuscolo+V)", "cambiata"),
-    "video": ("Video (Maiuscolo+F1)", "cambiato"),
-    "sottotitoli": ("Sottotitoli letti (Maiuscolo+F2)", "cambiati"),
+    "video": ("Video (Ctrl+F1, Maiuscolo+F1)", "cambiato"),
+    "sottotitoli": ("Sottotitoli letti (D)", "cambiati"),
     "sintesi": ("Sintesi di sottotitoli e karaoke", "cambiata"),
     "destinazione": ("Dove vanno sottotitoli e karaoke", "cambiato"),
     "karaoke": ("Testo del karaoke", "cambiato"),
@@ -578,7 +580,7 @@ VOCI_DELLE_IMPOSTAZIONI = {
     "celle_braille": ("Celle della barra braille", "cambiate"),
     "lettura_minima": ("Tempo minimo di lettura in braille", "cambiato"),
     "banco_midi": ("Banco dei suoni MIDI", "cambiato"),
-    "insegui": ("Inseguimento della plancia (Maiuscolo+F8)", "cambiato"),
+    "insegui": ("Inseguimento della plancia (Ctrl+F8, Maiuscolo+F8)", "cambiato"),
     "ripresa_oltre": ("Punto lasciato dei file lunghi", "cambiato"),
     "caratteri": ("Dimensioni dei caratteri", "cambiate"),
     "colori_testo": ("Colori dei caratteri", "cambiati"),
@@ -1325,7 +1327,7 @@ class Finestra(wx.Frame):
         if prima != version.VERSION:
             self.impostazioni["versione"] = version.VERSION
             self._salva_impostazioni()
-        # I tasti rapidi a carattere, che Maiuscolo con F12 spegne e riaccende:
+        # I tasti rapidi a carattere, che Ctrl con F12 spegne e Maiuscolo con F12 riaccende:
         # a ogni avvio sono accesi (Gabriele, 1.86.0).
         self._tasti_rapidi = True
         fuori_dal_normale = self._riproduzione_fuori_dal_normale()
@@ -1987,9 +1989,6 @@ class Finestra(wx.Frame):
             # Le statistiche, da tutta la finestra (Gabriele, 1.103.0).
             self._comando_statistiche()
             return True
-        if modificatori == wx.MOD_SHIFT and codice == wx.WXK_F8:
-            self._aggancia()
-            return True
         if modificatori == wx.MOD_SHIFT and codice == wx.WXK_F9:
             self._chiudi_la_plancia()
             return True
@@ -2001,14 +2000,16 @@ class Finestra(wx.Frame):
         if modificatori == wx.MOD_SHIFT and codice == wx.WXK_F11:
             self._comando_modifica_i_tag()
             return True
-        if modificatori == wx.MOD_SHIFT and codice == wx.WXK_F12:
-            self._alterna_i_tasti_rapidi()
-            return True
-        # Sottotitoli, traccia audio e rapporto dell'immagine sono passati a
-        # D, G e I, senza giro (issue 38).
-        tasti_del_video = {wx.WXK_F1: self._comando_video, wx.WXK_F5: self._comando_schermo_intero}
-        if modificatori == wx.MOD_SHIFT and codice in tasti_del_video:
-            tasti_del_video[codice]()
+        # Gli interruttori, con la regola della issue 38: Ctrl spegne,
+        # Maiuscolo accende, e il tasto da solo resta al suo comando
+        # (Gabriele, collaudo della 2.0.0). Sottotitoli, traccia audio e
+        # rapporto dell'immagine sono passati a D, G e I.
+        interruttori = {
+            wx.WXK_F1: self._metti_il_video, wx.WXK_F5: self._metti_lo_schermo_intero,
+            wx.WXK_F8: self._metti_l_inseguimento, wx.WXK_F12: self._metti_i_tasti_rapidi,
+        }
+        if modificatori in (wx.MOD_CONTROL, wx.MOD_SHIFT) and codice in interruttori:
+            interruttori[codice](modificatori == wx.MOD_SHIFT)
             return True
         if modificatori == wx.MOD_CONTROL and (evento.GetUnicodeKey() in (ord("\\"), 0x1C) or codice == ord("\\")):
             # Ctrl con la barra rovesciata: la ricerca in tutto MeTeOra (1.71.0).
@@ -2067,18 +2068,21 @@ class Finestra(wx.Frame):
         self._riscontro("non_disponibile", f"{'Maiuscolo+' if maiuscolo else 'Il tasto '}{nome} non ha un comando.")
         return True
 
-    def _alterna_i_tasti_rapidi(self):
-        """Maiuscolo con F12 (Gabriele, 4 ottobre 2026, 1.86.0): spegne e
-        riaccende i tasti rapidi a carattere, lettere, cifre e segni, anche con
-        il Maiuscolo. Spenti, vanno ai controlli: nella plancia l'albero di
-        Windows salta alla voce che comincia con cio' che si scrive, utile in un
-        ramo grande. I tasti funzione, Esc e Ctrl con la barra rovesciata
-        restano; a ogni avvio i tasti rapidi sono accesi."""
-        self._tasti_rapidi = not self._tasti_rapidi
-        if self._tasti_rapidi:
-            self._riscontro("tasti_accesi", "Tasti rapidi accesi.")
-        else:
-            self._riscontro("tasti_spenti", "Tasti rapidi spenti: le lettere cercano nella plancia per iniziale. Maiuscolo con F12 li riaccende.")
+    def _metti_i_tasti_rapidi(self, accesi):
+        """Ctrl con F12 spegne i tasti rapidi a carattere, lettere, cifre e
+        segni, anche con il Maiuscolo, e Maiuscolo con F12 li riaccende
+        (Gabriele, 1.86.0; dalla 2.0.2 non piu' a giro). Spenti, vanno ai
+        controlli: nella plancia l'albero di Windows salta alla voce che
+        comincia con cio' che si scrive, utile in un ramo grande. I tasti
+        funzione, Esc e Ctrl con la barra rovesciata restano; a ogni avvio i
+        tasti rapidi sono accesi."""
+        evento = "tasti_accesi" if accesi else "tasti_spenti"
+        frase = "Tasti rapidi accesi." if accesi else "Tasti rapidi spenti: le lettere cercano nella plancia per iniziale. Maiuscolo con F12 li riaccende."
+        if self._tasti_rapidi == accesi:
+            self._riscontro(evento, f"Già così. {frase}")
+            return
+        self._tasti_rapidi = accesi
+        self._riscontro(evento, frase)
         # Il cruscotto in cui si e' gia' dice subito lo stato nuovo.
         if self.cruscotto.HasFocus():
             self._rinfresca_cruscotto()
@@ -7509,7 +7513,7 @@ class Finestra(wx.Frame):
         if chiave == "video":
             return (lambda testo: valori.leggi_si_no(testo, "Video")), [
                 "Con il video acceso, quando parte un brano con il video si apre la sua finestra, sopra MeTeOra; allo stop sparisce. Spento, dei video si sente solo l'audio.",
-                "Scrivi sì per accenderlo, no per spegnerlo; valgono anche s, n, 1, 0, acceso e spento. Anche Maiuscolo con F1 lo accende e lo spegne.",
+                "Scrivi sì per accenderlo, no per spegnerlo; valgono anche s, n, 1, 0, acceso e spento. Anche Maiuscolo con F1 lo accende, e Ctrl con F1 lo spegne.",
                 f"Adesso è {'acceso' if imp['video'] else 'spento'}.", REGOLA_DEL_DOLLARO], "sì" if imp["video"] else "no"
         if chiave == "sottotitoli":
             return (lambda testo: valori.leggi_si_no(testo, "Sottotitoli letti")), [
@@ -7533,7 +7537,7 @@ class Finestra(wx.Frame):
         if chiave == "insegui":
             return (lambda testo: valori.leggi_si_no(testo, "Inseguimento della plancia")), [
                 "Con l'inseguimento agganciato, a ogni cambio di brano la selezione della plancia va da sola su ciò che suona, senza spostare il fuoco.",
-                "Scrivi sì per agganciarlo, no per sganciarlo; valgono anche s, n, 1, 0, acceso e spento. Anche Maiuscolo+F8 lo aggancia e lo sgancia.",
+                "Scrivi sì per agganciarlo, no per sganciarlo; valgono anche s, n, 1, 0, acceso e spento. Anche Maiuscolo con F8 lo aggancia, e Ctrl con F8 lo sgancia.",
                 f"Adesso è {'agganciato' if imp['insegui'] else 'sganciato'}.", REGOLA_DEL_DOLLARO], "sì" if imp["insegui"] else "no"
         if chiave == "caratteri":
             caratteri = imp["caratteri"]
@@ -8060,15 +8064,21 @@ class Finestra(wx.Frame):
         if not self._chiusa:
             self._sintesi.dici(blocco, self.impostazioni["sintesi"], "braille")
 
-    def _comando_video(self):
-        """Maiuscolo con F1: il video acceso o spento."""
-        acceso = not self.impostazioni["video"]
+    def _metti_il_video(self, acceso):
+        """Ctrl con F1 spegne il video, Maiuscolo con F1 lo accende (2.0.2,
+        prima a giro); a video acceso, Maiuscolo con F1 riapre la finestra
+        nascosta con Esc per il brano in corso."""
+        evento = "video_acceso" if acceso else "video_spento"
+        nascosto = acceso and self._video_nascosto_per is not None and self._video_nascosto_per == self.motore.in_corso
+        if self.impostazioni["video"] == acceso and not nascosto:
+            self._riscontro(evento, f"Già così. {_frase_del_video(acceso)}")
+            return
         self.impostazioni["video"] = acceso
         self._video_nascosto_per = None
         self._salva_impostazioni()
         if not acceso:
             self._spegni_il_video()
-        self._riscontro("video_acceso" if acceso else "video_spento", _frase_del_video(acceso))
+        self._riscontro(evento, _frase_del_video(acceso))
         self._aggiorna_il_video()
 
     def _posti_dei_sottotitoli(self):
@@ -8330,15 +8340,18 @@ class Finestra(wx.Frame):
         self.motore.scegli_traccia("aid", str(audio[indice]["id"]))
         self._riscontro("traccia_audio", f"Traccia audio {_descrivi_traccia(audio[indice], indice, len(audio))}.", "traccia_audio")
 
-    def _comando_schermo_intero(self):
-        """Maiuscolo con F5: la finestra del video a schermo intero, o di nuovo in finestra."""
+    def _metti_lo_schermo_intero(self, intero):
+        """Maiuscolo con F5 mette la finestra del video a schermo intero, Ctrl
+        con F5 la riporta in finestra, come Esc (2.0.2, prima a giro)."""
         if self._video is None or not self._video.IsShown():
             self._riscontro("non_disponibile", "La finestra del video non è aperta.")
             return
-        if self._video.schermo_intero():
-            self._riscontro("schermo_intero", "Video a schermo intero.")
-        else:
-            self._riscontro("schermo_in_finestra", "Video in finestra.")
+        evento, frase = ("schermo_intero", "Video a schermo intero.") if intero else ("schermo_in_finestra", "Video in finestra.")
+        if self._video.IsFullScreen() == intero:
+            self._riscontro(evento, f"Già così. {frase}")
+            return
+        self._video.schermo_intero(intero)
+        self._riscontro(evento, frase)
 
     def _comando_rapporto(self):
         """I (issue 38): il rapporto dell'immagine, fra quanti."""
@@ -9998,15 +10011,21 @@ class Finestra(wx.Frame):
             self.albero.EnsureVisible(voce)
             self._seleziona(voce)
 
-    def _aggancia(self):
-        self.impostazioni["insegui"] = not self.impostazioni["insegui"]
-        self._salva_impostazioni()
-        if self.impostazioni["insegui"]:
-            self._riscontro("insegui_acceso", "Inseguimento agganciato: la selezione della plancia segue il brano che suona.")
-            if self.motore.in_corso:
-                self._insegui()
+    def _metti_l_inseguimento(self, agganciato):
+        """Maiuscolo con F8 aggancia la selezione della plancia al brano che
+        suona, Ctrl con F8 la sgancia (2.0.2, prima a giro)."""
+        if agganciato:
+            evento, frase = "insegui_acceso", "Inseguimento agganciato: la selezione della plancia segue il brano che suona."
         else:
-            self._riscontro("insegui_spento", "Inseguimento sganciato: la selezione resta dove la lasci.")
+            evento, frase = "insegui_spento", "Inseguimento sganciato: la selezione resta dove la lasci."
+        if self.impostazioni["insegui"] == agganciato:
+            self._riscontro(evento, f"Già così. {frase}")
+            return
+        self.impostazioni["insegui"] = agganciato
+        self._salva_impostazioni()
+        self._riscontro(evento, frase)
+        if agganciato and self.motore.in_corso:
+            self._insegui()
 
     # F9 e F10.
 

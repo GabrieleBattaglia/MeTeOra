@@ -180,7 +180,7 @@ EVENTI = {
     "domanda": "campanellino",
     # L'aggiornamento accettato, che si scarica (1.84.0): un portamento che sale.
     "aggiornamento": "super_salita",
-    # Maiuscolo con F12, i tasti rapidi a carattere (1.86.0): due note che
+    # Ctrl e Maiuscolo con F12, i tasti rapidi a carattere (1.86.0): due note che
     # scendono quando si spengono, tre che salgono quando si riaccendono.
     "tasti_spenti": "meditimer_cronometro_pausa",
     "tasti_accesi": "meditimer_cronometro_ripreso",

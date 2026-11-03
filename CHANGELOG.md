@@ -2,6 +2,13 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [2.0.2] - 2026-11-03
+
+Due correzioni dal collaudo della 2.0.0 di Gabriele.
+
+- Gli interruttori dei tasti funzione seguono la regola della issue 38, come voleva Gabriele: Ctrl spegne, Maiuscolo accende, e il tasto da solo resta al suo comando. Prima Maiuscolo con F1, F5, F8 e F12 accendevano e spegnevano a giro. Ora Ctrl con F1 spegne il video e Maiuscolo con F1 lo accende, o riapre la finestra che Esc ha nascosto per il brano in corso; Ctrl con F5 rimette il video in finestra, come Esc, e Maiuscolo con F5 lo porta a schermo intero; Ctrl con F8 sgancia l'inseguimento e Maiuscolo con F8 lo aggancia; Ctrl con F12 spegne i tasti rapidi e Maiuscolo con F12 li riaccende. F1, F5, F8 e F12 da soli restano il manuale, la plancia, il brano che suona e la guida rapida. Su un interruttore già com'era la console dice Già così, come per la dissolvenza e la casuale. La regola lo dice anche nella guida rapida, e le statistiche contano i tasti nuovi e l'inseguimento sganciato.
+- I rimandi rimasti alla mappa di prima: nelle impostazioni le voci Salto indietro di Ctrl+Q e Salto avanti di Maiuscolo+Q, che si chiamavano ancora di Q e di E, e Sottotitoli letti (D), che diceva ancora Maiuscolo+F2; nel manuale la velocità di A e il tono di F, che citavano ancora A, S e D e F, G e H, il volume con Ctrl e Maiuscolo con M al posto di meno e più, e Maiuscolo con N che accende la casuale senza più spegnerla.
+
 ## [2.0.0] - 2026-11-03
 
 La nuova mappa della tastiera, issue 38, voluta da Gabriele per dare più logica alle combinazioni e liberare tasti per le funzioni future. Cambiano quasi tutti i tasti a lettera: Z, X, C, V e B, il cuore del lettore, restano come prima, con i loro modificatori.

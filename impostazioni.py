@@ -61,7 +61,8 @@ PREDEFINITE = {
     "passo_indietro": 10.0,
     "passo_avanti": 10.0,
     "volume_effetti": 0.5,
-    # Maiuscolo+F8: la selezione della plancia segue il brano che suona.
+    # Maiuscolo con F8 la aggancia, Ctrl con F8 la sgancia: la selezione della
+    # plancia segue il brano che suona.
     "insegui": False,
     # I file piu' lunghi di tanti minuti riprendono dal punto lasciato
     # (1.92.0): 0 mai.
@@ -87,8 +88,8 @@ PREDEFINITE = {
     # Il volume uniforme con ReplayGain, una chiave di valori.VOLUMI_UNIFORMI:
     # spento di partenza (1.96.0).
     "replaygain": "spento",
-    # Il video (tappa 7): Maiuscolo con F1 lo accende e lo spegne, Maiuscolo
-    # con F2 i sottotitoli letti; la sintesi a cui vanno, una chiave di
+    # Il video (tappa 7): Maiuscolo con F1 lo accende e Ctrl con F1 lo spegne;
+    # D i sottotitoli letti; la sintesi a cui vanno, una chiave di
     # sintesi.USCITE o l'automatica.
     "video": False,
     "sottotitoli": False,

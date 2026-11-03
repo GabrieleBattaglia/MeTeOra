@@ -739,7 +739,7 @@ def test_avanzamento_nei_sottobrani_aperti(finestra, monkeypatch, tmp_path):
     assert suonati[-1] == ("zeta.mp3", None)
 
 
-def test_maiuscolo_f8_aggancia_la_selezione(finestra, monkeypatch, suoni_annotati):
+def test_maiuscolo_f8_aggancia_e_ctrl_f8_sgancia_la_selezione(finestra, monkeypatch, suoni_annotati):
     _finto_motore(finestra, monkeypatch)
     finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n in ("a.mp3", "b.mp3")])
     pl = finestra.archivio.playlist[0]
@@ -747,9 +747,13 @@ def test_maiuscolo_f8_aggancia_la_selezione(finestra, monkeypatch, suoni_annotat
     _tasto(finestra, codice=wx.WXK_F8, maiuscolo=True)
     assert finestra.impostazioni["insegui"] is True
     assert suoni_annotati[-1] == "insegui_acceso"
+    # Maiuscolo aggancia soltanto, Ctrl sgancia (collaudo della 2.0.0).
+    _tasto(finestra, codice=wx.WXK_F8, maiuscolo=True)
+    assert finestra.impostazioni["insegui"] is True
+    assert _ultima(finestra) == "Già così. Inseguimento agganciato: la selezione della plancia segue il brano che suona."
     finestra._suona(pl, pl.brani[1])
     assert finestra.albero.GetItemText(finestra._voce_corrente()) == "b.mp3, in riproduzione"
-    _tasto(finestra, codice=wx.WXK_F8, maiuscolo=True)
+    _tasto(finestra, codice=wx.WXK_F8, ctrl=True)
     assert finestra.impostazioni["insegui"] is False
     finestra._seleziona(finestra.nodo_pc)
     finestra._suona(pl, pl.brani[0])
@@ -2846,17 +2850,17 @@ def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_an
         ("volume_effetti", "Volume degli effetti: 50%"),
         ("replaygain", "Volume uniforme (ReplayGain): spento"),
         ("scheda_audio", "Scheda audio: Automatica (Altoparlanti (Realtek(R) Audio), WASAPI)"),
-        ("passo_indietro", "Salto indietro di Q: 10 secondi"),
-        ("passo_avanti", "Salto avanti di E: 10 secondi"),
+        ("passo_indietro", "Salto indietro di Ctrl+Q: 10 secondi"),
+        ("passo_avanti", "Salto avanti di Maiuscolo+Q: 10 secondi"),
         ("velocita", "Velocità: 1"),
         ("tono", "Tono: 0 semitoni"),
         ("bande", "Equalizzatore: piatto, tutte le bande a 0 dB"),
         ("dissolvenza", "Dissolvenza: spenta, 4 secondi"),
-        ("casuale", "Riproduzione casuale (Maiuscolo+N): no"),
+        ("casuale", "Riproduzione casuale (Ctrl+N, Maiuscolo+N): no"),
         ("modello_casuale", "Modello della riproduzione casuale: una volta per brano, poi ricomincia"),
         ("ripetizione", "Ripetizione (Maiuscolo+V): spenta"),
-        ("video", "Video (Maiuscolo+F1): no"),
-        ("sottotitoli", "Sottotitoli letti (Maiuscolo+F2): no"),
+        ("video", "Video (Ctrl+F1, Maiuscolo+F1): no"),
+        ("sottotitoli", "Sottotitoli letti (D): no"),
         ("sintesi", "Sintesi di sottotitoli e karaoke: automatica, adesso NVDA"),
         ("destinazione", "Dove vanno sottotitoli e karaoke: alla sintesi e al braille"),
         ("karaoke", "Testo del karaoke: per riga"),
@@ -2864,7 +2868,7 @@ def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_an
         ("celle_braille", "Celle della barra braille: 0, il testo intero"),
         ("lettura_minima", "Tempo minimo di lettura in braille: 2000 ms"),
         ("banco_midi", "Banco dei suoni MIDI: nessuno, si sceglie al primo MIDI"),
-        ("insegui", "Inseguimento della plancia (Maiuscolo+F8): no"),
+        ("insegui", "Inseguimento della plancia (Ctrl+F8, Maiuscolo+F8): no"),
         ("ripresa_oltre", "Punto lasciato dei file lunghi: oltre 10 minuti"),
         ("caratteri", "Dimensioni dei caratteri: quelle di Windows"),
         ("colori_testo", "Colori dei caratteri: quelli di Windows"),
@@ -2930,10 +2934,10 @@ def test_impostazioni_valori_buoni_corretti_e_sbagliati(finestra, monkeypatch, s
     assert _ultima(finestra) == "Gli effetti sonori ora suonano al 35%."
     # I salti di Q ed E, anche con la virgola, almeno di un decimo.
     _campo, lista = _cambia(finestra, monkeypatch, "passo_indietro", "2,5")
-    assert finestra.impostazioni["passo_indietro"] == 2.5 and lista.righe["passo_indietro"] == "Salto indietro di Q: 2.5 secondi"
+    assert finestra.impostazioni["passo_indietro"] == 2.5 and lista.righe["passo_indietro"] == "Salto indietro di Ctrl+Q: 2.5 secondi"
     _cambia(finestra, monkeypatch, "passo_avanti", "0.05")
     assert finestra.impostazioni["passo_avanti"] == 0.1
-    assert _ultima(finestra) == "Il salto avanti ora è di 0.1 secondi. Salto avanti di E: 0.05 è sotto il minimo, ho messo 0.1."
+    assert _ultima(finestra) == "Il salto avanti ora è di 0.1 secondi. Salto avanti di Maiuscolo+Q: 0.05 è sotto il minimo, ho messo 0.1."
     campo, _lista = _cambia(finestra, monkeypatch, "passo_indietro", "1:30")
     assert campo.aperture[0]["testo"] == "2.5" and finestra.impostazioni["passo_indietro"] == 90
     salvate = _salvate(finestra)
@@ -2948,7 +2952,7 @@ def test_impostazioni_inseguimento(finestra, monkeypatch, suoni_annotati):
     assert [a["testo"] for a in campo.aperture] == ["no", "forse"]
     assert campo.aperture[1]["titolo"].startswith("Inseguimento della plancia: forse non è né sì né no; scrivi sì o no.")
     assert finestra.impostazioni["insegui"] is True and _salvate(finestra)["insegui"] is True and inseguiti == [True]
-    assert lista.righe["insegui"] == "Inseguimento della plancia (Maiuscolo+F8): sì"
+    assert lista.righe["insegui"] == "Inseguimento della plancia (Ctrl+F8, Maiuscolo+F8): sì"
     assert _ultima(finestra) == "Inseguimento agganciato: la selezione della plancia segue il brano che suona."
     _cambia(finestra, monkeypatch, "insegui", "spento")
     assert finestra.impostazioni["insegui"] is False and inseguiti == [True]
@@ -2983,7 +2987,7 @@ def test_impostazioni_riproduzione_casuale(finestra, monkeypatch, suoni_annotati
     assert campo.aperture[1]["titolo"].startswith("Riproduzione casuale: forse non è né sì né no; scrivi sì o no.")
     assert "Adesso è spenta." in campo.aperture[0]["istruzioni"]
     assert finestra.impostazioni["casuale"] is True and _salvate(finestra)["casuale"] is True
-    assert lista.righe["casuale"] == "Riproduzione casuale (Maiuscolo+N): sì"
+    assert lista.righe["casuale"] == "Riproduzione casuale (Ctrl+N, Maiuscolo+N): sì"
     assert _ultima(finestra) == "Riproduzione casuale accesa: una volta per brano, poi ricomincia."
     _cambia(finestra, monkeypatch, "casuale", "no")
     assert finestra.impostazioni["casuale"] is False
@@ -4433,7 +4437,7 @@ def test_il_video_aspetta_la_chiusura_dei_dialoghi_e_la_ripresa(finestra, monkey
     finestra._nascondi_il_video()
 
 
-def test_maiuscolo_f1_accende_il_video_e_la_finestra_si_apre_e_si_chiude(finestra, monkeypatch, suoni_annotati):
+def test_maiuscolo_f1_accende_il_video_e_ctrl_f1_lo_spegne(finestra, monkeypatch, suoni_annotati):
     stato, chiamate = _video_finto(finestra, monkeypatch, _tracce())
     _tasto(finestra, codice=wx.WXK_F1, maiuscolo=True)
     assert finestra.impostazioni["video"] is True and _salvate(finestra)["video"] is True
@@ -4442,6 +4446,10 @@ def test_maiuscolo_f1_accende_il_video_e_la_finestra_si_apre_e_si_chiude(finestr
     video = finestra._video
     assert video is not None and video.IsShown() and video.GetTitle() == "film.mkv, video, MeTeOra"
     assert chiamate[0] == ("video", video.finestre())
+    # Maiuscolo accende soltanto, Ctrl spegne (collaudo della 2.0.0).
+    _tasto(finestra, codice=wx.WXK_F1, maiuscolo=True)
+    assert finestra.impostazioni["video"] is True and video.IsShown()
+    assert _ultima(finestra) == "Già così. Video acceso: i video si vedono in una finestra sopra MeTeOra."
     # Un brano senza video la chiude; uno con il video la riapre, senza ridare
     # al motore le finestre.
     stato["tracce"] = _tracce(video=False)
@@ -4460,7 +4468,7 @@ def test_maiuscolo_f1_accende_il_video_e_la_finestra_si_apre_e_si_chiude(finestr
     assert not video.IsShown()
     # Spento, il motore smette di disegnare, e dei video si sente l'audio.
     stato["in_corso"] = r"C:\m\film.mkv"
-    _tasto(finestra, codice=wx.WXK_F1, maiuscolo=True)
+    _tasto(finestra, codice=wx.WXK_F1, ctrl=True)
     assert finestra.impostazioni["video"] is False and chiamate[-1] == ("video", None)
     assert suoni_annotati[-1] == "video_spento" and not video.IsShown()
     assert _ultima(finestra) == "Video spento: dei video si sente solo l'audio."
@@ -4477,6 +4485,11 @@ def test_esc_nella_finestra_del_video_la_nasconde_per_quel_brano(finestra, monke
     assert not video.IsShown() and not finestra._chiusa
     # Per lo stesso brano non si riapre; per il brano dopo si'.
     finestra._aggiorna_il_video()
+    assert not video.IsShown()
+    # Maiuscolo con F1, a video acceso, la riapre (2.0.2); e di nuovo Esc.
+    _tasto(finestra, codice=wx.WXK_F1, maiuscolo=True)
+    assert video.IsShown() and _ultima(finestra) == "Video acceso: i video si vedono in una finestra sopra MeTeOra."
+    video._tasto(evento)
     assert not video.IsShown()
     stato["in_corso"] = r"C:\m\altro.mkv"
     finestra._aggiorna_il_video()
@@ -4562,7 +4575,7 @@ def test_g_sceglie_la_traccia_audio_senza_giro(finestra, monkeypatch, suoni_anno
     assert _ultima(finestra) == "Non sta suonando niente."
 
 
-def test_maiuscolo_f5_e_f6_schermo_intero_e_rapporto(finestra, monkeypatch, suoni_annotati):
+def test_f5_schermo_intero_e_i_il_rapporto(finestra, monkeypatch, suoni_annotati):
     _stato, chiamate = _video_finto(finestra, monkeypatch, _tracce())
     _tasto(finestra, codice=wx.WXK_F5, maiuscolo=True)
     assert _ultima(finestra) == "La finestra del video non è aperta." and suoni_annotati[-1] == "non_disponibile"
@@ -4570,8 +4583,19 @@ def test_maiuscolo_f5_e_f6_schermo_intero_e_rapporto(finestra, monkeypatch, suon
     finestra._aggiorna_il_video()
     _tasto(finestra, codice=wx.WXK_F5, maiuscolo=True)
     assert finestra._video.IsFullScreen() and suoni_annotati[-1] == "schermo_intero"
+    # Maiuscolo mette lo schermo intero, Ctrl lo toglie (collaudo della 2.0.0).
     _tasto(finestra, codice=wx.WXK_F5, maiuscolo=True)
+    assert finestra._video.IsFullScreen() and _ultima(finestra) == "Già così. Video a schermo intero."
+    _tasto(finestra, codice=wx.WXK_F5, ctrl=True)
     assert not finestra._video.IsFullScreen() and suoni_annotati[-1] == "schermo_in_finestra" and _ultima(finestra) == "Video in finestra."
+    _tasto(finestra, codice=wx.WXK_F5, ctrl=True)
+    assert not finestra._video.IsFullScreen() and _ultima(finestra) == "Già così. Video in finestra."
+    # Esc a schermo intero lo toglie, come Ctrl con F5.
+    _tasto(finestra, codice=wx.WXK_F5, maiuscolo=True)
+    esc = wx.KeyEvent(wx.wxEVT_CHAR_HOOK)
+    esc.SetKeyCode(wx.WXK_ESCAPE)
+    finestra._video._tasto(esc)
+    assert finestra._video.IsShown() and not finestra._video.IsFullScreen() and _ultima(finestra) == "Video in finestra."
     # Il rapporto dell'immagine con I, senza giro (issue 38).
     for _ in range(3):
         _tasto(finestra, "i", maiuscolo=True)
@@ -4593,11 +4617,11 @@ def test_impostazioni_video_sottotitoli_e_sintesi(finestra, monkeypatch, suoni_a
     _stato, chiamate = _video_finto(finestra, monkeypatch, _tracce())
     _campo, lista = _cambia(finestra, monkeypatch, "video", "sì")
     assert finestra.impostazioni["video"] is True and finestra._video.IsShown()
-    assert lista.righe["video"] == "Video (Maiuscolo+F1): sì"
+    assert lista.righe["video"] == "Video (Ctrl+F1, Maiuscolo+F1): sì"
     _cambia(finestra, monkeypatch, "video", "no")
     assert chiamate[-1] == ("video", None) and not finestra._video.IsShown()
     _campo, lista = _cambia(finestra, monkeypatch, "sottotitoli", "acceso")
-    assert finestra.impostazioni["sottotitoli"] is True and lista.righe["sottotitoli"] == "Sottotitoli letti (Maiuscolo+F2): sì"
+    assert finestra.impostazioni["sottotitoli"] is True and lista.righe["sottotitoli"] == "Sottotitoli letti (D): sì"
     # La sintesi: l'automatica e le uscite che rispondono adesso.
     scelta = _SceltaFinta(2)
     monkeypatch.setattr(modulo, "FinestraScelta", scelta)
@@ -6068,13 +6092,18 @@ def test_f11_in_rete_aspetta_come_la_plancia(finestra, monkeypatch, tmp_path):
     assert attese == [modulo.questa_rete.ATTESA_IN_SOTTOFONDO] * 2 and modulo.questa_rete.ATTESA_IN_SOTTOFONDO == 8.0
 
 
-def test_maiuscolo_f12_spegne_e_riaccende_i_tasti_rapidi(finestra, suoni_annotati):
+def test_ctrl_f12_spegne_e_maiuscolo_f12_riaccende_i_tasti_rapidi(finestra, suoni_annotati):
     # 1.86.0 (Gabriele): spenti, lettere, cifre e segni vanno ai controlli; i
     # tasti funzione restano; a ogni avvio sono accesi.
     assert finestra._tasti_rapidi is True
+    # Maiuscolo con F12 accende soltanto, Ctrl con F12 spegne (collaudo della 2.0.0).
     _tasto(finestra, codice=wx.WXK_F12, maiuscolo=True)
+    assert finestra._tasti_rapidi is True and _ultima(finestra) == "Già così. Tasti rapidi accesi."
+    _tasto(finestra, codice=wx.WXK_F12, ctrl=True)
     assert finestra._tasti_rapidi is False and suoni_annotati[-1] == "tasti_spenti"
     assert _ultima(finestra) == "Tasti rapidi spenti: le lettere cercano nella plancia per iniziale. Maiuscolo con F12 li riaccende."
+    _tasto(finestra, codice=wx.WXK_F12, ctrl=True)
+    assert finestra._tasti_rapidi is False and _ultima(finestra).startswith("Già così. Tasti rapidi spenti")
     righe, suonati = len(finestra._righe), len(suoni_annotati)
     finestra._fuoco_nella_plancia = lambda: True
     for carattere, maiuscolo in (("x", False), ("b", True), ("1", False), ("\\", False), ("[", False)):

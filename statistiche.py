@@ -153,7 +153,8 @@ DESCRIZIONI_DEI_TASTI = {
     "F7": "al cruscotto", "F8": "al brano che suona", "F9": "chiude il ramo", "F10": "apre il ramo", "F11": "tag e dettagli",
     "F12": "la guida rapida", "Esc": "esce", "Maiuscolo con F1": "il video", "Maiuscolo con F2": "i sottotitoli",
     "Maiuscolo con F3": "la traccia audio", "Maiuscolo con F5": "lo schermo intero", "Maiuscolo con F6": "il rapporto dell'immagine",
-    "Maiuscolo con F7": "le statistiche", "Maiuscolo con F8": "l'inseguimento", "Maiuscolo con F9": "chiude tutta la plancia",
+    "Maiuscolo con F7": "le statistiche", "Maiuscolo con F8": "l'inseguimento",
+    "Ctrl con F1": "spegne il video", "Ctrl con F5": "il video in finestra", "Ctrl con F8": "sgancia l'inseguimento", "Ctrl con F12": "spegne i tasti rapidi", "Maiuscolo con F9": "chiude tutta la plancia",
     "Maiuscolo con F10": "apre tutta la plancia", "Maiuscolo con F11": "il menu dei tag", "Maiuscolo con F12": "i tasti rapidi",
     "Ctrl con barra rovesciata": "la ricerca in tutto MeTeOra", "Backspace": "risale", "Maiuscolo con Backspace": "risale all'antenato",
     "Barra spaziatrice": "il menu", "Invio": "il menu, o il comando", "Applicazioni": "il menu", "Canc": "toglie",
@@ -1584,7 +1585,7 @@ class Pagina:
         video = sum(int(v.get("avvii", 0)) for e, v in self.d["formati"].items() if famiglia(f"x{e}") == "video")
         return [
             f"Video avviati: {video}.",
-            f"Immagine accesa e spenta, con Maiuscolo e F1: accesa {self.e('video_acceso')}, spenta {self.e('video_spento')}.",
+            f"Immagine accesa con Maiuscolo e F1 e spenta con Ctrl e F1: accesa {self.e('video_acceso')}, spenta {self.e('video_spento')}.",
             f"Schermo intero: {al_plurale(self.e('schermo_intero'), 'volta', 'volte')}, per {durata(self.t('schermo_intero'))}.",
             f"Finestra del video nascosta: {self.e('video_nascosto')}.",
             f"Tracce audio cambiate: {self.e('traccia_audio')}; rapporto dell'immagine cambiato: {self.e('rapporto')}.",
@@ -1638,11 +1639,11 @@ class Pagina:
         righe.append(riga + ".")
         righe += [
             f"Rami aperti: {self.e('ramo_aperto')}; chiusi: {self.e('ramo_chiuso')}.",
-            f"F8, al brano che suona: {self.e('vai_al_brano')}; inseguimento acceso con Maiuscolo e F8: {self.e('insegui_acceso')}.",
+            f"F8, al brano che suona: {self.e('vai_al_brano')}; inseguimento acceso con Maiuscolo e F8: {self.e('insegui_acceso')}, spento con Ctrl e F8: {self.e('insegui_spento')}.",
             f"F9 e F10 sul ramo: {self.e('chiudi_tutto')} e {self.e('apri_tutto')}; Maiuscolo con F9 e F10 su tutta la plancia: {self.e('chiudi_la_plancia')} e {self.e('apri_la_plancia')}.",
             f"Backspace, risali: {self.e('risali')}; Maiuscolo con Backspace, all'antenato: {self.e('risali_all_antenato')}.",
             f"Menu aperti: {self.e('menu')}.",
-            f"Tasti rapidi spenti con Maiuscolo e F12: {self.e('tasti_spenti')}.",
+            f"Tasti rapidi spenti con Ctrl e F12: {self.e('tasti_spenti')}.",
             f"Clic sulla barra dei comandi: {self.c('clic_sulla_barra')}.",
         ]
         return righe

@@ -1,12 +1,13 @@
 # MeTeOra, la finestra del video: due pannelli per i due lettori, e la barra dei comandi con la linea del tempo per chi vede.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/10/2026: nasce con la tappa 7. Nella 1.66.36 Esc a schermo intero ha il riscontro di Maiuscolo con F5. Nella 1.88.0 la barra dei comandi con la linea del tempo, al posto del cursore.
+# 03/10/2026: nasce con la tappa 7. Nella 1.66.36 Esc a schermo intero ha il riscontro di Maiuscolo con F5. Nella 1.88.0 la barra dei comandi con la linea del tempo, al posto del cursore. Nella 2.0.2 lo schermo intero messo o tolto, non piu' a giro.
 
 """La finestra del video (tappa 7, piano 5.5).
 
 Si apre sopra la finestra principale, grande come lei, quando parte un
 brano con il video e il video e' acceso (Maiuscolo con F1); chi guarda puo'
-spostarla, ridimensionarla o metterla a schermo intero (Maiuscolo con F5).
+spostarla, ridimensionarla o metterla a schermo intero (Maiuscolo con F5, e
+Ctrl con F5 la rimette in finestra).
 Dentro ci sono due pannelli, uno per ciascun lettore del motore: libmpv
 disegna in quello del lettore che suona, e con la dissolvenza la finestra
 mostra quello che entra.
@@ -98,16 +99,16 @@ class FinestraVideo(wx.Frame):
         self.barra.ferma()
         self.Hide()
 
-    def schermo_intero(self):
-        """Mette e toglie lo schermo intero; vero se adesso e' a schermo intero."""
-        self.ShowFullScreen(not self.IsFullScreen())
-        return self.IsFullScreen()
+    def schermo_intero(self, intero):
+        """Mette lo schermo intero, con intero vero, o lo toglie."""
+        if self.IsFullScreen() != intero:
+            self.ShowFullScreen(intero)
 
     def _tasto(self, evento):
         if evento.GetKeyCode() == wx.WXK_ESCAPE and evento.GetModifiers() == wx.MOD_NONE:
             if self.IsFullScreen():
-                # Come Maiuscolo con F5, con il suo suono e la sua riga.
-                self._principale._comando_schermo_intero()
+                # Come Ctrl con F5, con il suo suono e la sua riga.
+                self._principale._metti_lo_schermo_intero(False)
             else:
                 self._nascondi()
             return
