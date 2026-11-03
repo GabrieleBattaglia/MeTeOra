@@ -233,7 +233,7 @@ def test_la_pagina_ha_tutte_le_sezioni_e_i_tag(tmp_path):
     assert "Per ora: ore 10: 100.0%." in testo and "Per giorno della settimana: domenica 100.0%." in testo
     assert "Per fascia: mattina, dalle 6: 100.0%." in testo and "Per mese: novembre 2026, 2 minuti." in testo
     assert not any(r.startswith(("Video:", "MIDI:", "Audio, MP3")) for r in righe)
-    assert "Marker eliminati: 3." in testo and "Prima del punto, con Maiuscolo e R: 3, in 0 volte." in testo
+    assert "Marker eliminati: 3." in testo and "Prima del punto, con Ctrl e R: 3, in 0 volte." in testo
     assert "1. Freccia giù: 1.\n2. X, suona: 1." in testo and "Frecce: 1; freccia giù 1." in testo
     assert "Tasti senza comando: 1; il più frequente: U accentata, 1 volta." in testo
     assert "la più usata: Volume degli effetti, 1 volta" in testo

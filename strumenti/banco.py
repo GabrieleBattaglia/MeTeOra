@@ -881,6 +881,9 @@ def scenario_dove_sono():
         corrente = f.coda.corrente
         return bool(f.motore.in_corso) and corrente is not None and os.path.basename(corrente.percorso) == nome and f.motore.posizione is not None
 
+    # Dalla 1.116.3 (issue 39) il brano fermo risponde come in pausa: niente
+    # in corso vuol dire senza un brano corrente.
+    nel_filo(lambda: f.coda.imposta(None, None))
     riga, suonati = premi_l_apostrofo()
     S.verifica(voce, "Senza niente in corso, la frase e il suono di F8", riga == "Non sta suonando niente." and suonati == ["niente_da_suonare"], (riga, suonati))
     S.verifica(voce, "La frase va anche alla sintesi, interrompendo la voce, e al braille", S.extra.get("interrotti", [])[-1:] == [["nvda", riga]]
@@ -919,10 +922,11 @@ def scenario_dove_sono():
     riga, _suonati = premi_l_apostrofo()
     S.verifica(voce, "In pausa, in fondo alla riga", bool(modello.match(riga)) and riga.endswith(", file aperti, in pausa."), riga)
     premi("c")
-    premi("d")
+    # La velocita' su e di nuovo normale, con la mappa della 2.0.0 (issue 38).
+    premi("a", maiuscolo=True)
     riga, _suonati = premi_l_apostrofo()
     S.verifica(voce, "La velocita' cambiata, con il punto", riga.endswith(", file aperti, velocità 1.05."), riga)
-    premi("s")
+    premi("a", ctrl=True, maiuscolo=True)
     # Il secondo file.
     premi("b")
     S.verifica(voce, "B passa a dove due.wav", aspetta(lambda: suona("dove due.wav"), attesa=15))
@@ -935,7 +939,7 @@ def scenario_dove_sono():
         (riga, suonati))
     premi("v")
     riga, _suonati = premi_l_apostrofo()
-    S.verifica(voce, "Dopo lo stop, come F8", riga == "Non sta suonando niente.", riga)
+    S.verifica(voce, "Dopo lo stop, il brano in pausa all'inizio (issue 39)", riga.startswith("0:00 di ") and riga.endswith(", in pausa."), riga)
     premi("f5")
     S.nota("chiudo MeTeOra con Esc")
     premi("esc")
@@ -1073,6 +1077,7 @@ def scenario_durata_residua():
         adesso = datetime.datetime.now()
         return {(adesso + datetime.timedelta(seconds=secondi + scarto)).strftime("%H:%M") for scarto in (-60, 0, 60)}
 
+    nel_filo(lambda: f.coda.imposta(None, None))
     riga, suonati = premi_il_tasto()
     S.verifica(voce, "Senza niente in corso, la frase e il suono di F8", riga == "Non sta suonando niente." and suonati == ["niente_da_suonare"], (riga, suonati))
     S.verifica(voce, "La frase va anche alla sintesi, interrompendo la voce, e al braille", S.extra.get("interrotti", [])[-1:] == [["nvda", riga]]
@@ -1137,10 +1142,10 @@ def scenario_durata_residua():
     riga, _suonati = premi_il_tasto()
     S.verifica(voce, "In pausa, senza l'ora di fine", numeri(riga, "1:30") is not None and ", in pausa, brano 1 di 3, " in riga and "finisce" not in riga, riga)
     premi("c")
-    premi("d")
+    premi("a", maiuscolo=True)
     riga, _suonati = premi_il_tasto()
     S.verifica(voce, "La velocita' cambiata, con il tempo vero di ascolto", numeri(riga, "1:30") is not None and ", alla velocità 1.05 sono " in riga, riga)
-    premi("s")
+    premi("a", ctrl=True, maiuscolo=True)
     # Un brano mai letto: si conta a parte, lo schedario lo rilegge, e
     # ripremendo il tasto il conto si completa.
     tre = prima.brani[2]
@@ -1204,7 +1209,7 @@ def scenario_durata_residua():
         and riga.endswith(f", brano 1 di 2, playlist {seconda.nome}, con i rami aperti della plancia, 3002 brani in tutto."), riga)
     premi("v")
     riga, _suonati = premi_il_tasto()
-    S.verifica(voce, "Dopo lo stop, come F8", riga == "Non sta suonando niente.", riga)
+    S.verifica(voce, "Dopo lo stop, il brano in pausa all'inizio (issue 39)", "trascorsi 0:00, 0.0% ascoltato, in pausa," in riga, riga)
     premi("f5")
     S.nota("chiudo MeTeOra con Esc")
     premi("esc")

@@ -80,7 +80,7 @@ class LettoreLontano:
         self._convertiti = {}
         # Il volume chiesto per ultimo, e quando: per un attimo vale lui,
         # finche' l'apparecchio non manda il suo stato nuovo, cosi' le
-        # pressioni ravvicinate di piu' e meno non si perdono.
+        # pressioni ravvicinate del volume non si perdono.
         self._volume_chiesto = None
         self._quando_chiesto = 0.0
         self.apparecchio = connetti(self._stato, self._distacco)

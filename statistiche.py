@@ -125,6 +125,27 @@ DESCRIZIONI_DEI_COMANDI = {
     "banda_precedente": "banda precedente", "banda_successiva": "banda successiva", "banda_giu": "banda giù", "banda_su": "banda su",
     "azzera_la_banda": "azzera la banda", "azzera_le_bande": "azzera le bande", "dissolvenza": "dissolvenza",
     "durata_della_dissolvenza": "durata della dissolvenza", "dove_sono": "dove sono", "durata_residua": "durata residua",
+    # I comandi della nuova mappa, issue 38 (2.0.0).
+    "posizione": "il punto del brano", "verso_la_fine": "gli ultimi secondi", "all_inizio": "l'inizio del brano",
+    "passi_dei_salti": "i passi dei salti", "passi_predefiniti": "salti predefiniti", "marker_attuale": "il marker",
+    "ultimo_marker": "ultimo marker", "primo_marker": "primo marker", "conta_i_marker": "quanti marker", "velocita": "la velocità",
+    "velocita_massima": "velocità massima", "velocita_minima": "velocità minima", "timer_attuale": "il timer", "togli_il_timer": "toglie il timer",
+    "timer_a_fine_brano": "timer a fine brano", "sottotitoli": "i sottotitoli", "sottotitoli_precedenti": "sottotitoli precedenti",
+    "sottotitoli_successivi": "sottotitoli successivi", "ultimi_sottotitoli": "ultimi sottotitoli", "sottotitoli_spenti": "sottotitoli spenti",
+    "tono": "il tono", "tono_massimo": "tono massimo", "tono_minimo": "tono minimo", "traccia_audio": "la traccia audio",
+    "traccia_audio_precedente": "traccia audio precedente", "traccia_audio_successiva": "traccia audio successiva",
+    "ultima_traccia_audio": "ultima traccia audio", "prima_traccia_audio": "prima traccia audio", "rapporto": "il rapporto dell'immagine",
+    "rapporto_precedente": "rapporto precedente", "rapporto_successivo": "rapporto successivo", "rapporto_del_video": "rapporto del video",
+    "ultimo_rapporto": "ultimo rapporto", "primo_rapporto": "primo rapporto", "banda": "la banda", "ultima_banda": "ultima banda",
+    "prima_banda": "prima banda", "guadagno": "il guadagno", "guadagno_massimo": "guadagno massimo", "guadagno_minimo": "guadagno minimo",
+    "curva": "tutte le bande", "playlist": "la playlist", "ultima_playlist": "ultima playlist", "prima_playlist": "prima playlist",
+    "dissolvenza_piu_breve": "dissolvenza più breve", "dissolvenza_piu_lunga": "dissolvenza più lunga", "durata_predefinita": "dissolvenza predefinita",
+    "dissolvenza_massima": "dissolvenza massima", "dissolvenza_minima": "dissolvenza minima", "spegni_la_dissolvenza": "spegne la dissolvenza",
+    "accendi_la_dissolvenza": "accende la dissolvenza", "spegni_la_casuale": "spegne la casuale", "accendi_la_casuale": "accende la casuale",
+    "volume": "il volume", "volume_di_prima": "volume di prima", "volume_massimo": "volume massimo", "volume_minimo": "volume a zero",
+    "capitolo": "il capitolo", "ultimo_capitolo": "ultimo capitolo", "primo_capitolo": "primo capitolo", "passo_volume_giu": "passo del volume giù",
+    "passo_volume_su": "passo del volume su", "passo_volume_predefinito": "passo del volume predefinito", "passo_volume_massimo": "passo del volume massimo",
+    "passo_volume_minimo": "passo del volume minimo",
 }
 # Le descrizioni degli altri tasti, per nome.
 DESCRIZIONI_DEI_TASTI = {
@@ -1491,12 +1512,12 @@ class Pagina:
             f"Marker rinominati: {self.e('marker_rinominato')}.",
             f"Marker eliminati: {self.marker_eliminati()}.",
             f"Uno per uno, con Canc o dal menu: {self.c('marker_tolti_uno')}.",
-            f"Prima del punto, con Maiuscolo e R: {self.c('marker_tolti_prima')}, in {al_plurale(self.e('marker_tolti_prima'), 'volta', 'volte')}.",
-            f"Dopo il punto, con Maiuscolo e Y: {self.c('marker_tolti_dopo')}, in {al_plurale(self.e('marker_tolti_dopo'), 'volta', 'volte')}.",
+            f"Prima del punto, con Ctrl e R: {self.c('marker_tolti_prima')}, in {al_plurale(self.e('marker_tolti_prima'), 'volta', 'volte')}.",
+            f"Dopo il punto, con Maiuscolo e R: {self.c('marker_tolti_dopo')}, in {al_plurale(self.e('marker_tolti_dopo'), 'volta', 'volte')}.",
             f"Tutti quelli del brano, con Maiuscolo e T: {self.c('marker_tolti_tutti')}, in {al_plurale(self.e('marker_tolti_tutti'), 'volta', 'volte')}.",
             f"Con la selezione multipla della plancia: {self.c('marker_tolti_selezione')}.",
             f"Dalla finestra dei marcatori: {self.c('marker_tolti_finestra')}.",
-            f"Salti ai marker: con R e Y {self.e('marker_indietro') + self.e('marker_avanti')}; con Maiuscolo e le cifre {self.c('marker_con_le_cifre')}; "
+            f"Salti ai marker: con Y {self.e('marker_indietro') + self.e('marker_avanti')}; con Maiuscolo e le cifre {self.c('marker_con_le_cifre')}; "
                 f"dalla plancia, con Vai al marker o X {max(0, self.c('vai_al_marker') - self.c('marker_con_le_cifre'))}.",
             f"Finestra dei marcatori aperta: {al_plurale(self.e('marcatori'), 'volta', 'volte')}; esportazioni {self.e('marcatori_esportati')}; "
                 f"importazioni {self.e('marcatori_importati')}; cancellazioni di tutto {self.e('marcatori_cancellati')}.",

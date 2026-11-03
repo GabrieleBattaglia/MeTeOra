@@ -2,6 +2,19 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [2.0.0] - 2026-11-03
+
+La nuova mappa della tastiera, issue 38, voluta da Gabriele per dare più logica alle combinazioni e liberare tasti per le funzioni future. Cambiano quasi tutti i tasti a lettera: Z, X, C, V e B, il cuore del lettore, restano come prima, con i loro modificatori.
+
+- Una regola sola per i tasti a lettera: il tasto da solo dice il valore del suo controllo, con i limiti entro cui si muove, per esempio Velocità 1.05, da 0.5 a 2, o Traccia audio 3 di 4, inglese; lo scrive nella console e lo manda alla sintesi e al braille dei sottotitoli, come Dove sono, senza spostare il fuoco. Ctrl va indietro, abbassa o spegne; Maiuscolo va avanti, alza o accende; Ctrl e Maiuscolo tornano al valore predefinito; Alt va al massimo, o all'ultimo; Ctrl e Alt al minimo, o al primo. Le coppie e le triplette di tasti diventano un tasto solo, e i giri spariscono: arrivati in fondo ci si ferma, e lo si sente.
+- Q il punto del brano, con Ctrl e Maiuscolo i salti, Alt gli ultimi secondi e Ctrl e Alt l'inizio; E i passi dei salti. M il volume, con Ctrl e Alt lo zero, che fa da muto, e Ctrl e Maiuscolo il volume di prima del massimo o dello zero, ricordato anche alla riapertura; il punto il passo del volume. La virgola i capitoli. A la velocità, F il tono. U la banda dell'equalizzatore, O il suo guadagno, P tutte le bande. L la dissolvenza, K la sua durata, a mezzo secondo alla volta. N la riproduzione casuale, e Alt con N un brano a caso. S il timer, con Ctrl lo toglie e con Alt alla fine del brano. J le playlist. Y i marker, con Alt l'ultimo come Gabriele proponeva nella issue; R quanti sono, e con Ctrl e Maiuscolo li toglie prima e dopo il punto. D i sottotitoli letti, G la traccia audio, I il rapporto dell'immagine, che lasciano Maiuscolo con F2, F3 e F6.
+- Restano come prima T e Maiuscolo con T, W, l'apostrofo e Maiuscolo con l'apostrofo, le cifre e Maiuscolo con le cifre, la barra rovesciata e la barra verticale, i tasti funzione. Restano liberi H, meno, più e la E accentata.
+- Ctrl e Alt sono anche AltGr: con E, che scrive l'euro, e con N, che avvia NVDA, non sono comandi. Le combinazioni con Ctrl e Alt fuori dalla regola restano a Windows, come Ctrl con C per copiare, e valgono anche con i tasti rapidi spenti, perché non scrivono.
+- I rapporti dei tasti da soli non hanno un suono: parlano; la riga nella console riscrive quella della stessa famiglia. Ai limiti, dove una famiglia non aveva un suono suo, suona quello del brano che non c'è.
+- La barra delle applicazioni scrive i tasti nuovi; il suo Muto porta il volume a zero e lo riporta.
+- Il manuale: la guida rapida ha la regola in cima e i tasti nuovi, e i capitoli e gli esempi li usano; anche il cruscotto, le istruzioni delle impostazioni e le statistiche. Le statistiche contano i tasti con i nomi nuovi, Ctrl e Maiuscolo con A per esempio; i conti di prima restano sotto i nomi di prima.
+- Dentro: la tabella TASTI con i modificatori, carattere_del_tasto che legge le lettere dal codice del tasto anche con Ctrl, la regola dei segni del Maiuscolo per il punto interrogativo, i due punti e il punto e virgola; i comandi divisi in comandi più piccoli, uno per modificatore, e _riporta per i tasti da soli; la nuova impostazione volume_di_prima.
+
 ## [1.119.0] - 2026-11-03
 
 Tre novità, la tappa 15 b del piano: gli speaker Cast, decisi da Gabriele dopo il collaudo del prototipo.

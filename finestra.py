@@ -92,7 +92,7 @@ from dialoghi import (
     FinestraStatistiche,
 )
 from filtro import COMMENTO, ErroreFiltro, Filtro, modello_della_console
-from impostazioni import Impostazioni
+from impostazioni import PREDEFINITE, Impostazioni
 from marcatori import Marcatori
 from motore import DURATA_SID_PREDEFINITA, VOLUME_MASSIMO, durata_del_sottobrano, sottobrano_risolto
 from playlist import CRITERI, Archivio, Brano, Coda, Playlist
@@ -161,77 +161,164 @@ RITARDO_DELL_AVVIO = 0.4
 # Quanti risultati della ricerca si mostrano alla volta.
 PAGINA_DEI_RISULTATI = 1000
 
-# I tasti a lettera: (carattere, maiuscolo) -> comando.
+# I modificatori dei tasti a carattere, issue 38 (2.0.0): da solo il tasto
+# riporta il valore del suo controllo, con i limiti; con Ctrl va indietro,
+# abbassa o spegne; con Maiuscolo va avanti, alza o accende; con Ctrl e
+# Maiuscolo torna al valore predefinito; con Alt va al massimo e con Ctrl e
+# Alt al minimo.
+SOLO = wx.MOD_NONE
+CTRL = wx.MOD_CONTROL
+MAIUSCOLO = wx.MOD_SHIFT
+CTRL_MAIUSCOLO = wx.MOD_CONTROL | wx.MOD_SHIFT
+ALT = wx.MOD_ALT
+CTRL_ALT = wx.MOD_CONTROL | wx.MOD_ALT
+# I tasti a carattere: (carattere, modificatori) -> comando, una famiglia per
+# tasto dove la regola si applica. Ctrl con Alt e' anche AltGr: resta libero
+# sui tasti che con AltGr scrivono un segno, come E per l'euro, e su N, che
+# con Ctrl e Alt avvia NVDA (Gabriele, 3 novembre 2026). Le combinazioni con
+# Ctrl e Alt che non sono qui vanno a Windows, come Ctrl con C per copiare.
 TASTI = {
-    ("z", False): "precedente",
-    ("x", False): "play",
-    ("j", False): "playlist_precedente",
-    ("k", False): "playlist_successiva",
-    ("x", True): "loop",
-    ("c", False): "pausa",
-    ("v", False): "stop",
+    # Il cuore del lettore resta com'era, anche con i modificatori: Z, X, C,
+    # V e B (Gabriele, 3 novembre 2026).
+    ("z", SOLO): "precedente",
+    ("x", SOLO): "play",
+    ("x", MAIUSCOLO): "loop",
+    ("c", SOLO): "pausa",
+    ("v", SOLO): "stop",
     # La ripetizione a giro (Gabriele, 1.94.0).
-    ("v", True): "ripetizione",
-    # Il timer di spegnimento (Gabriele, 1.95.0).
-    ("s", True): "timer",
-    ("b", False): "successivo",
-    ("n", False): "casuale",
-    ("n", True): "riproduzione_casuale",
-    ("m", False): "muto",
-    ("q", False): "indietro",
-    ("e", False): "avanti",
-    ("q", True): "passo_indietro",
-    ("e", True): "passo_avanti",
-    ("w", False): "vai_a_tempo",
-    # I capitoli degli audiolibri e dei film (Gabriele, 1.93.0).
-    (",", False): "capitolo_precedente",
-    (".", False): "capitolo_successivo",
+    ("v", MAIUSCOLO): "ripetizione",
+    ("b", SOLO): "successivo",
+    ("w", SOLO): "vai_a_tempo",
     # Dove sono: tempo, brano e lista di cio' che suona (Gabriele, tappa 14 b).
-    ("'", False): "dove_sono",
+    ("'", SOLO): "dove_sono",
     # La durata residua, Maiuscolo con l'apostrofo: il punto interrogativo
-    # della tastiera italiana, che come la barra verticale puo' arrivare in un
-    # modo o nell'altro (Gabriele, tappa 14 d).
-    ("'", True): "durata_residua",
-    ("?", False): "durata_residua",
-    ("?", True): "durata_residua",
-    ("+", False): "volume_su",
-    ("-", False): "volume_giu",
-    ("\\", False): "ricerca",
-    # La barra verticale: Maiuscolo con la barra rovesciata nella tastiera
-    # italiana, che a seconda di Windows arriva in un modo o nell'altro.
-    ("\\", True): "filtro",
-    ("|", False): "filtro",
-    ("|", True): "filtro",
-    ("m", True): "passo_volume",
-    # I marker, issue 12.
-    ("t", False): "marker",
-    ("r", False): "marker_precedente",
-    ("y", False): "marker_successivo",
-    ("t", True): "togli_i_marker",
-    ("r", True): "togli_i_marker_prima",
-    ("y", True): "togli_i_marker_dopo",
-    # Velocita', tono, equalizzatore e dissolvenza, tappa 4 (issue 15). La E
-    # accentata arriva come e' anche con il Maiuscolo: Windows da' il tasto,
-    # non la e acuta che il Maiuscolo scriverebbe.
-    ("a", False): "velocita_giu",
-    ("s", False): "velocita_normale",
-    ("d", False): "velocita_su",
-    # Come A e D per la velocita': a sinistra si scende, a destra si sale
-    # (Gabriele, collaudo della 1.55.2).
-    ("f", False): "tono_giu",
-    ("g", False): "tono_normale",
-    ("h", False): "tono_su",
-    ("u", False): "banda_precedente",
-    ("i", False): "banda_successiva",
-    # Anche qui a sinistra si scende e a destra si sale: O abbassa la banda,
-    # P la alza (Gabriele, collaudo della 1.60.0).
-    ("o", False): "banda_giu",
-    ("p", False): "banda_su",
-    ("è", False): "azzera_la_banda",
-    ("è", True): "azzera_le_bande",
-    ("l", False): "dissolvenza",
-    ("l", True): "durata_della_dissolvenza",
+    # della tastiera italiana (Gabriele, tappa 14 d).
+    ("'", MAIUSCOLO): "durata_residua",
+    ("\\", SOLO): "ricerca",
+    # La barra verticale: Maiuscolo con la barra rovesciata.
+    ("\\", MAIUSCOLO): "filtro",
+    # T mette un marker o lo rinomina, Maiuscolo con T li toglie tutti (issue 12).
+    ("t", SOLO): "marker",
+    ("t", MAIUSCOLO): "togli_i_marker",
+    # Q, il punto del brano: un salto indietro e avanti, gli ultimi secondi e l'inizio.
+    ("q", SOLO): "posizione",
+    ("q", CTRL): "indietro",
+    ("q", MAIUSCOLO): "avanti",
+    ("q", ALT): "verso_la_fine",
+    ("q", CTRL_ALT): "all_inizio",
+    # E, accanto a Q: i passi dei suoi salti.
+    ("e", SOLO): "passi_dei_salti",
+    ("e", CTRL): "passo_indietro",
+    ("e", MAIUSCOLO): "passo_avanti",
+    ("e", CTRL_MAIUSCOLO): "passi_predefiniti",
+    # R, accanto a T: quanti marker, e toglierli prima e dopo il punto.
+    ("r", SOLO): "conta_i_marker",
+    ("r", CTRL): "togli_i_marker_prima",
+    ("r", MAIUSCOLO): "togli_i_marker_dopo",
+    # Y, i marker del brano: con Alt l'ultimo, come Gabriele propone nella issue.
+    ("y", SOLO): "marker_attuale",
+    ("y", CTRL): "marker_precedente",
+    ("y", MAIUSCOLO): "marker_successivo",
+    ("y", ALT): "ultimo_marker",
+    ("y", CTRL_ALT): "primo_marker",
+    # A, la velocita'.
+    ("a", SOLO): "velocita",
+    ("a", CTRL): "velocita_giu",
+    ("a", MAIUSCOLO): "velocita_su",
+    ("a", CTRL_MAIUSCOLO): "velocita_normale",
+    ("a", ALT): "velocita_massima",
+    ("a", CTRL_ALT): "velocita_minima",
+    # S, il timer di spegnimento (Gabriele, 1.95.0).
+    ("s", SOLO): "timer_attuale",
+    ("s", CTRL): "togli_il_timer",
+    ("s", MAIUSCOLO): "timer",
+    ("s", ALT): "timer_a_fine_brano",
+    # D, G e I, il video: sottotitoli letti, traccia audio e rapporto
+    # dell'immagine, senza i giri di Maiuscolo con F2, F3 e F6.
+    ("d", SOLO): "sottotitoli",
+    ("d", CTRL): "sottotitoli_precedenti",
+    ("d", MAIUSCOLO): "sottotitoli_successivi",
+    ("d", ALT): "ultimi_sottotitoli",
+    ("d", CTRL_ALT): "sottotitoli_spenti",
+    # F, il tono, di un semitono.
+    ("f", SOLO): "tono",
+    ("f", CTRL): "tono_giu",
+    ("f", MAIUSCOLO): "tono_su",
+    ("f", CTRL_MAIUSCOLO): "tono_normale",
+    ("f", ALT): "tono_massimo",
+    ("f", CTRL_ALT): "tono_minimo",
+    ("g", SOLO): "traccia_audio",
+    ("g", CTRL): "traccia_audio_precedente",
+    ("g", MAIUSCOLO): "traccia_audio_successiva",
+    ("g", ALT): "ultima_traccia_audio",
+    ("g", CTRL_ALT): "prima_traccia_audio",
+    ("i", SOLO): "rapporto",
+    ("i", CTRL): "rapporto_precedente",
+    ("i", MAIUSCOLO): "rapporto_successivo",
+    ("i", CTRL_MAIUSCOLO): "rapporto_del_video",
+    ("i", ALT): "ultimo_rapporto",
+    ("i", CTRL_ALT): "primo_rapporto",
+    # U, la banda scelta dell'equalizzatore; O, accanto, il suo guadagno; P,
+    # accanto ancora, tutte le bande.
+    ("u", SOLO): "banda",
+    ("u", CTRL): "banda_precedente",
+    ("u", MAIUSCOLO): "banda_successiva",
+    ("u", ALT): "ultima_banda",
+    ("u", CTRL_ALT): "prima_banda",
+    ("o", SOLO): "guadagno",
+    ("o", CTRL): "banda_giu",
+    ("o", MAIUSCOLO): "banda_su",
+    ("o", CTRL_MAIUSCOLO): "azzera_la_banda",
+    ("o", ALT): "guadagno_massimo",
+    ("o", CTRL_ALT): "guadagno_minimo",
+    ("p", SOLO): "curva",
+    ("p", CTRL_MAIUSCOLO): "azzera_le_bande",
+    # J, le playlist, che si aprono e suonano.
+    ("j", SOLO): "playlist",
+    ("j", CTRL): "playlist_precedente",
+    ("j", MAIUSCOLO): "playlist_successiva",
+    ("j", ALT): "ultima_playlist",
+    ("j", CTRL_ALT): "prima_playlist",
+    # K, accanto a L: la durata della dissolvenza.
+    ("k", SOLO): "durata_della_dissolvenza",
+    ("k", CTRL): "dissolvenza_piu_breve",
+    ("k", MAIUSCOLO): "dissolvenza_piu_lunga",
+    ("k", CTRL_MAIUSCOLO): "durata_predefinita",
+    ("k", ALT): "dissolvenza_massima",
+    ("k", CTRL_ALT): "dissolvenza_minima",
+    ("l", SOLO): "dissolvenza",
+    ("l", CTRL): "spegni_la_dissolvenza",
+    ("l", MAIUSCOLO): "accendi_la_dissolvenza",
+    # N, la riproduzione casuale; Alt con N suona subito un brano a caso.
+    ("n", SOLO): "riproduzione_casuale",
+    ("n", CTRL): "spegni_la_casuale",
+    ("n", MAIUSCOLO): "accendi_la_casuale",
+    ("n", ALT): "casuale",
+    # M, il volume: con Ctrl e Alt a zero, che fa da muto, e con Ctrl e
+    # Maiuscolo quello di prima del massimo o dello zero (Gabriele, 3 novembre 2026).
+    ("m", SOLO): "volume",
+    ("m", CTRL): "volume_giu",
+    ("m", MAIUSCOLO): "volume_su",
+    ("m", CTRL_MAIUSCOLO): "volume_di_prima",
+    ("m", ALT): "volume_massimo",
+    ("m", CTRL_ALT): "volume_minimo",
+    # La virgola, accanto a M: i capitoli degli audiolibri e dei film (1.93.0).
+    (",", SOLO): "capitolo",
+    (",", CTRL): "capitolo_precedente",
+    (",", MAIUSCOLO): "capitolo_successivo",
+    (",", ALT): "ultimo_capitolo",
+    (",", CTRL_ALT): "primo_capitolo",
+    # Il punto: il passo del volume.
+    (".", SOLO): "passo_volume",
+    (".", CTRL): "passo_volume_giu",
+    (".", MAIUSCOLO): "passo_volume_su",
+    (".", CTRL_MAIUSCOLO): "passo_volume_predefinito",
+    (".", ALT): "passo_volume_massimo",
+    (".", CTRL_ALT): "passo_volume_minimo",
 }
+# I segni che la tastiera italiana scrive con il Maiuscolo, e che Windows puo'
+# dare al posto del loro tasto: valgono come il tasto con il Maiuscolo.
+SEGNI_COL_MAIUSCOLO = {"?": "'", "|": "\\", ":": ".", ";": ","}
 # I segni sopra le cifre nella tastiera italiana: Maiuscolo con 1 e' il punto
 # esclamativo, e cosi' via fino a Maiuscolo con 0, l'uguale.
 CIFRE_COL_MAIUSCOLO = {"!": 1, '"': 2, "£": 3, "$": 4, "%": 5, "&": 6, "/": 7, "(": 8, ")": 9, "=": 10}
@@ -258,33 +345,66 @@ NOMI_DEI_TASTI = {
 SEGNI_DELLE_STATISTICHE = {"\\": "barra rovesciata", "|": "barra verticale", "-": "meno"}
 
 
-def nome_del_carattere(carattere, maiuscolo):
-    """Il nome di un tasto a carattere nelle statistiche: X, Maiuscolo con N, più."""
+def nome_del_carattere(carattere, modificatori=SOLO):
+    """Il nome di un tasto a carattere nelle statistiche: X, Maiuscolo con N,
+    Ctrl e Maiuscolo con A, più."""
     if carattere.isalpha() and carattere not in NOMI_DEI_SEGNI:
         nome = carattere.upper()
     else:
         nome = SEGNI_DELLE_STATISTICHE.get(carattere) or NOMI_DEI_SEGNI.get(carattere, carattere)
-    return f"Maiuscolo con {nome}" if maiuscolo else nome
+    prefisso = [n for bit, n in ((wx.MOD_CONTROL, "Ctrl"), (wx.MOD_ALT, "Alt"), (wx.MOD_SHIFT, "Maiuscolo")) if modificatori & bit]
+    return f"{' e '.join(prefisso)} con {nome}" if prefisso else nome
+
+
+def carattere_del_tasto(evento):
+    """(carattere, modificatori) di un tasto che scrive un carattere, con il
+    carattere minuscolo, anche con Ctrl e Alt; None per gli altri tasti. Le
+    lettere vengono dal codice del tasto, che con Ctrl non cambia; la barra
+    rovesciata con Ctrl puo' arrivare come 0x1C; i segni del Maiuscolo, come
+    il punto interrogativo, valgono come il loro tasto con il Maiuscolo."""
+    modificatori = evento.GetModifiers()
+    codice = evento.GetKeyCode()
+    if ord("A") <= codice <= ord("Z"):
+        return chr(codice).lower(), modificatori
+    unicode = evento.GetUnicodeKey()
+    if unicode == 0x1C:
+        return "\\", modificatori
+    if unicode == wx.WXK_NONE or unicode <= 32 or not chr(unicode).isprintable():
+        return None
+    carattere = chr(unicode).lower()
+    if carattere in SEGNI_COL_MAIUSCOLO:
+        return SEGNI_COL_MAIUSCOLO[carattere], modificatori | wx.MOD_SHIFT
+    return carattere, modificatori
 
 
 TASTI_COMUNI = [
-    "X suona la voce selezionata, riprende dalla pausa o fa ripartire da capo il brano che suona già; C pausa, V stop, Z e B brano precedente e successivo, N brano a caso, "
-    "Maiuscolo con N la riproduzione casuale, con cui B sceglie a caso e Z torna ai brani suonati prima; "
-    "Maiuscolo con V la ripetizione, a giro: del brano, della lista, spenta. Maiuscolo con S il timer di spegnimento, fra tanti minuti o alla fine del brano.",
+    "La regola dei tasti a lettera: il tasto da solo dice il valore del suo controllo, con i limiti, nella console e alla sintesi e al braille dei sottotitoli; "
+    "con Ctrl va indietro, abbassa o spegne; con Maiuscolo va avanti, alza o accende; con Ctrl e Maiuscolo torna al valore predefinito; con Alt va al massimo, con Ctrl e Alt al minimo.",
+    "X suona la voce selezionata, riprende dalla pausa o fa ripartire da capo il brano che suona già; C pausa, V stop, Z e B brano precedente e successivo. "
+    "Maiuscolo con V la ripetizione, a giro: del brano, della lista, spenta. Maiuscolo con X, a giro: punto A del loop sul brano selezionato, poi punto B, poi toglie il loop.",
+    "N la riproduzione casuale: Ctrl la spegne, Maiuscolo la accende, e con lei B sceglie a caso e Z torna ai brani suonati prima; Alt con N suona subito un brano a caso. "
+    "S il timer di spegnimento: Ctrl lo toglie, Maiuscolo lo chiede in minuti, Alt lo mette alla fine del brano.",
     "L'apostrofo dice dove sei: il tempo del brano che suona, il suo nome, il posto nella lista e quello che c'è di particolare, come la pausa; "
     "lo scrive nella console e lo manda alla sintesi e al braille dei sottotitoli, senza spostare il fuoco.",
     "Maiuscolo con l'apostrofo dice la durata residua: quanto manca e quanto è passato di ciò che suonerà, anche nei rami aperti dopo nella plancia, "
     "la percentuale ascoltata e l'ora in cui finisce; anche lei va nella console, alla sintesi e al braille dei sottotitoli.",
-    "Q ed E indietro e avanti nel brano, Maiuscolo con Q ed E ne cambiano i secondi, W va a un tempo, più e meno volume, Maiuscolo con M il passo del volume, M muto.",
-    "Virgola e punto vanno al capitolo precedente e successivo, negli audiolibri e nei film che ne hanno; la virgola, oltre i primi secondi di un capitolo, torna al suo inizio.",
-    "A e D rallentano e accelerano, S torna alla velocità normale; F e H abbassano e alzano il tono di un semitono, G lo riporta al normale.",
-    "U e I scelgono la banda dell'equalizzatore, O e P la abbassano e la alzano di un dB, È la azzera, Maiuscolo con È le azzera tutte.",
-    "L accende e spegne la dissolvenza incrociata: con lei sfumano i cambi di brano, lo stop, la pausa, X da capo e i marker; Maiuscolo con L ne chiede la durata.",
-    "Maiuscolo con X, a giro: punto A del loop sul brano selezionato, poi punto B, poi toglie il loop.",
-    "Il video, con Maiuscolo e i tasti funzione: F1 lo accende e lo spegne, F2 sceglie i sottotitoli letti a giro, F3 la traccia audio a giro, F5 lo schermo intero, F6 il rapporto dell'immagine a giro.",
-    "J e K aprono e suonano la playlist precedente e successiva, le cifre da 1 a 0 le prime dieci playlist.",
+    "Q il punto del brano: Ctrl e Maiuscolo indietro e avanti di un salto, Alt agli ultimi secondi, Ctrl e Alt all'inizio. "
+    "E i passi dei salti: Ctrl e Maiuscolo chiedono quello indietro e quello avanti, Ctrl e Maiuscolo insieme li riportano ai predefiniti. W va a un tempo.",
+    "M il volume: Ctrl e Maiuscolo lo abbassano e lo alzano di un passo, Alt lo porta al massimo, Ctrl e Alt a zero, che fa da muto, "
+    "e Ctrl e Maiuscolo insieme lo riportano a quello di prima del massimo o dello zero. Il punto: il passo del volume.",
+    "La virgola, i capitoli degli audiolibri e dei film: Ctrl e Maiuscolo il precedente e il successivo, Alt l'ultimo, Ctrl e Alt il primo; "
+    "Ctrl con la virgola, oltre i primi secondi di un capitolo, torna al suo inizio.",
+    "A la velocità, F il tono, di un semitono: Ctrl abbassa, Maiuscolo alza, Ctrl e Maiuscolo insieme tornano al normale, Alt al massimo, Ctrl e Alt al minimo.",
+    "U la banda dell'equalizzatore: Ctrl e Maiuscolo la precedente e la seguente, Alt l'ultima, Ctrl e Alt la prima. "
+    "O il suo guadagno, di un dB, e Ctrl e Maiuscolo insieme la azzerano; P tutte le bande, e Ctrl e Maiuscolo insieme le azzerano.",
+    "L la dissolvenza incrociata, con cui sfumano i cambi di brano, lo stop, la pausa, X da capo e i marker: Ctrl la spegne, Maiuscolo la accende. "
+    "K la sua durata, di mezzo secondo alla volta.",
+    "Il video: Maiuscolo con F1 lo accende e lo spegne, Maiuscolo con F5 lo schermo intero. D i sottotitoli letti, G la traccia audio, I il rapporto dell'immagine: "
+    "Ctrl e Maiuscolo il precedente e il seguente, Alt l'ultimo, Ctrl e Alt il primo, che per i sottotitoli è spenti.",
+    "J la playlist: Ctrl e Maiuscolo aprono e suonano la precedente e la successiva, Alt l'ultima, Ctrl e Alt la prima; le cifre da 1 a 0 le prime dieci playlist.",
     "Nella plancia Backspace chiude il ramo in cui sei e risale di un livello, Maiuscolo con Backspace risale di colpo all'unità o alla playlist, Preferiti compresi, e chiude i rami al suo interno.",
-    "T mette un marker dove sei, o rinomina quello su cui sei; R e Y vanno al marker precedente e successivo; Maiuscolo con R, Y e T tolgono i marker prima, dopo e tutti; Maiuscolo con le cifre da 1 a 0 va ai primi dieci marker del brano della plancia.",
+    "T mette un marker dove sei, o rinomina quello su cui sei; Maiuscolo con T li toglie tutti. Y il marker su cui sei o quello prima: Ctrl e Maiuscolo il precedente e il successivo, "
+    "Alt l'ultimo, Ctrl e Alt il primo. R quanti marker ha il brano: Ctrl e Maiuscolo tolgono quelli prima e quelli dopo. Maiuscolo con le cifre da 1 a 0 va ai primi dieci marker del brano della plancia.",
     "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, Maiuscolo con F7 le statistiche, F8 porta la selezione e il fuoco della plancia sul brano in riproduzione e Maiuscolo con F8 ce la tiene agganciata, "
     "F9 chiude e F10 apre tutto il ramo col fuoco, Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta, tranne Questo PC e Questa rete; "
     "F11 legge i tag del brano selezionato, o i dettagli di una cartella, di un'unità o di una playlist, e Maiuscolo con F11 apre il menu dei tag.",
@@ -292,7 +412,7 @@ TASTI_COMUNI = [
     "Barra verticale: il filtro della playlist o dei Preferiti in cui sta la plancia, anche dalla console.",
     "F1 apre il manuale nel browser; F12 scrive nella console la guida rapida dei tasti, F2 le novità e F3 i crediti, sempre nella console. Esc esce salvando tutto.",
     "Maiuscolo con F12 spegne e riaccende i tasti rapidi a carattere: spenti, lettere, cifre e segni vanno alla plancia, che salta alla voce che comincia con ciò che scrivi; "
-    "i tasti funzione, Esc e Ctrl con la barra rovesciata restano.",
+    "i tasti funzione, Esc e le combinazioni con Ctrl e con Alt restano.",
 ]
 # Le righe del cruscotto proprie di ogni tipo di voce della plancia.
 TASTI_DEL_CONTESTO = {
@@ -318,7 +438,7 @@ TASTI_DEL_CONTESTO = {
     "file": ("un file", "Invio, Applicazioni o Spazio: menu con Riproduci, Aggiungi alla playlist, Aggiungi ai preferiti, Rinomina file, Leggi i tag e Tag per i formati che li hanno, e Manda nel cestino. "
         "Maiuscolo con Canc manda il file nel cestino. Un SID o un file delle console con più sottobrani, o un file con dei marker, si apre con freccia destra."),
     "sottobrano": ("un sottobrano di un SID o di un file delle console", "Invio, Applicazioni o Spazio: menu con Riproduci, Aggiungi alla playlist e Aggiungi ai preferiti. Se ha dei marker, freccia destra li mostra."),
-    "capitolo": ("un capitolo", "X, Invio, Applicazioni o Spazio suonano il file da questo capitolo. Virgola e punto, mentre suona, vanno al capitolo precedente e successivo."),
+    "capitolo": ("un capitolo", "X, Invio, Applicazioni o Spazio suonano il file da questo capitolo. Ctrl e Maiuscolo con la virgola, mentre suona, vanno al capitolo precedente e successivo."),
     "marker": ("un marker", "Invio rinomina il marker, Canc lo elimina, X fa come sul suo brano. Applicazioni o Spazio: menu con Vai al marker, che suona il brano da lì, Rinomina ed Elimina."),
     "comando": ("un comando", "Invio esegue il comando."),
 }
@@ -350,6 +470,8 @@ def _frase_della_casuale(accesa, modello):
 # Il timer di spegnimento (1.95.0): i minuti proposti la prima volta, e la
 # sfumatura quando scade, in secondi, a passi in millesimi.
 TIMER_PROPOSTO = 30
+# Il passo di Ctrl e Maiuscolo con K, la durata della dissolvenza (issue 38).
+PASSO_DELLA_DISSOLVENZA = 0.5
 SFUMATURA_DEL_TIMER = 20.0
 PASSO_DELLA_SFUMATURA = 100
 FRASI_DEL_VOLUME_UNIFORME = {
@@ -403,7 +525,7 @@ def riga_dello_speaker(voce):
     return f"{voce['nome']}, speaker Cast, {voce['modello']}" if voce["modello"] else f"{voce['nome']}, speaker Cast"
 
 
-# I rapporti dell'immagine di Maiuscolo con F6, a giro: il valore per mpv e
+# I rapporti dell'immagine di I, dal primo all'ultimo (issue 38): il valore per mpv e
 # il nome da leggere. -1 e' quello del file.
 RAPPORTI = (("-1", "quello del video"), ("16:9", "16:9"), ("4:3", "4:3"), ("2.33:1", "21:9"))
 # I nomi delle lingue piu' comuni nelle tracce, dai codici di tre lettere.
@@ -1058,10 +1180,14 @@ class Finestra(wx.Frame):
         self._braille = GBsintesi.Coda(self._mostra_in_braille, lambda secondi, funzione: wx.CallLater(max(1, round(secondi * 1000)), funzione))
         # Il numero dell'ultima riga di Dove sono nella coda del braille: la
         # riga dopo ne prende il posto, come nella console (tappa 14 b).
-        self._dove_sono_in_braille = None
+        # Il rapporto dei tasti da soli e di Dove sono sulla barra braille: il
+        # nuovo prende il posto di quello di prima (issue 38).
+        self._rapporto_in_braille = None
+        # Il volume dello speaker Cast a cui Ctrl e Maiuscolo con M riportano.
+        self._volume_di_prima_dello_speaker = None
         # Lo stesso per la riga della durata residua (tappa 14 d).
         self._durata_residua_in_braille = None
-        # La banda dell'equalizzatore scelta con U e I, contata da zero: si
+        # La banda dell'equalizzatore scelta con U, contata da zero: si
         # parte dalla prima, quella dei 60 Hz.
         self._banda = 0
         # La scheda audio scelta, appena c'e' il motore; con la scelta
@@ -1431,7 +1557,7 @@ class Finestra(wx.Frame):
 
     def _conta_l_evento(self, evento):
         """L'evento nelle statistiche, e un passo dell'orologio; anche per gli
-        eventi che suonano al volo, come piu' e meno (1.116.2)."""
+        eventi che suonano al volo, come il volume (1.116.2)."""
         self._statistiche.evento(evento)
         self._scatto_delle_statistiche()
 
@@ -1635,6 +1761,43 @@ class Finestra(wx.Frame):
             elenco = [tuple(capitolo) for capitolo in scheda.get("capitoli") or []]
         return elenco
 
+    def _comando_capitolo(self):
+        """La virgola (issue 38): il capitolo in cui si e', fra quanti."""
+        if self._niente_in_corso(risveglia=True):
+            return
+        elenco = self._capitoli_in_corso()
+        if not elenco:
+            self._riporta(f"{os.path.basename(self.motore.in_corso)} non ha capitoli.", "capitolo")
+            return
+        indice = capitolo_attuale(elenco, self.motore.posizione or 0.0)
+        secondi, titolo = elenco[indice]
+        self._riporta(f"{frase_del_capitolo(indice + 1, len(elenco), titolo, secondi)}.", "capitolo")
+
+    def _comando_primo_capitolo(self):
+        self._al_capitolo_estremo(ultimo=False)
+
+    def _comando_ultimo_capitolo(self):
+        self._al_capitolo_estremo(ultimo=True)
+
+    def _al_capitolo_estremo(self, ultimo):
+        """Alt con la virgola l'ultimo capitolo, Ctrl e Alt con la virgola il
+        primo, o l'inizio del primo, come Ctrl con la virgola."""
+        if self._niente_in_corso(risveglia=True):
+            return
+        elenco = self._capitoli_in_corso()
+        if not elenco:
+            self._riscontro("non_disponibile", f"{os.path.basename(self.motore.in_corso)} non ha capitoli.")
+            return
+        posizione = self.motore.posizione or 0.0
+        attuale = capitolo_attuale(elenco, posizione)
+        indice = len(elenco) - 1 if ultimo else 0
+        if attuale == indice and (ultimo or posizione - elenco[0][0] <= RITORNO_AL_CAPITOLO):
+            self._riscontro("nessun_altro_brano", "Sei già nell'ultimo capitolo." if ultimo else "È il primo capitolo.")
+            return
+        secondi, titolo = elenco[indice]
+        self.motore.vai_a(secondi)
+        self._riscontro("capitolo_successivo" if ultimo else "capitolo_precedente", f"{frase_del_capitolo(indice + 1, len(elenco), titolo, secondi)}.")
+
     def _comando_capitolo_precedente(self):
         self._vai_al_capitolo(-1)
 
@@ -1642,7 +1805,7 @@ class Finestra(wx.Frame):
         self._vai_al_capitolo(1)
 
     def _vai_al_capitolo(self, passo):
-        """Virgola e punto: il capitolo prima o dopo. La virgola, oltre i primi
+        """Ctrl e Maiuscolo con la virgola: il capitolo prima o dopo. Ctrl con la virgola, oltre i primi
         RITORNO_AL_CAPITOLO secondi del capitolo, torna al suo inizio."""
         if self._niente_in_corso(risveglia=True):
             return
@@ -1841,8 +2004,9 @@ class Finestra(wx.Frame):
         if modificatori == wx.MOD_SHIFT and codice == wx.WXK_F12:
             self._alterna_i_tasti_rapidi()
             return True
-        tasti_del_video = {wx.WXK_F1: self._comando_video, wx.WXK_F2: self._comando_sottotitoli, wx.WXK_F3: self._comando_traccia_audio,
-            wx.WXK_F5: self._comando_schermo_intero, wx.WXK_F6: self._comando_rapporto}
+        # Sottotitoli, traccia audio e rapporto dell'immagine sono passati a
+        # D, G e I, senza giro (issue 38).
+        tasti_del_video = {wx.WXK_F1: self._comando_video, wx.WXK_F5: self._comando_schermo_intero}
         if modificatori == wx.MOD_SHIFT and codice in tasti_del_video:
             tasti_del_video[codice]()
             return True
@@ -1850,16 +2014,27 @@ class Finestra(wx.Frame):
             # Ctrl con la barra rovesciata: la ricerca in tutto MeTeOra (1.71.0).
             self._ricerca_globale()
             return True
-        # Il tastierino numerico resta a NVDA, e Ctrl e Alt ai comandi di Windows.
-        if modificatori not in (wx.MOD_NONE, wx.MOD_SHIFT) or wx.WXK_NUMPAD0 <= codice <= wx.WXK_NUMPAD_DIVIDE:
+        # Il tastierino numerico resta a NVDA.
+        if wx.WXK_NUMPAD0 <= codice <= wx.WXK_NUMPAD_DIVIDE:
             evento.Skip()
             return False
-        unicode = evento.GetUnicodeKey()
+        tasto = carattere_del_tasto(evento)
         # Canc arriva con il codice 127, come Invio, Tab ed Esc con i loro:
         # non sono caratteri da scrivere, e vanno ai controlli.
-        if unicode == wx.WXK_NONE or unicode <= 32 or not chr(unicode).isprintable():
+        if tasto is None:
             evento.Skip()
             return False
+        carattere, modificatori = tasto
+        if modificatori not in (SOLO, MAIUSCOLO):
+            # Ctrl e Alt (issue 38): le famiglie dei tasti a lettera, anche
+            # con i tasti rapidi spenti, perche' non scrivono; le altre
+            # combinazioni restano a Windows.
+            comando = TASTI.get((carattere, modificatori))
+            if comando is None:
+                evento.Skip()
+                return False
+            getattr(self, f"_comando_{comando}")()
+            return True
         if not self._tasti_rapidi:
             # Tasti rapidi spenti (1.86.0): nella plancia il carattere va
             # all'albero, che cerca la voce per iniziale. Altrove, nella
@@ -1872,8 +2047,7 @@ class Finestra(wx.Frame):
             self._riscontro("non_disponibile", "Tasti rapidi spenti: le lettere cercano solo nella plancia, F5. Maiuscolo con F12 li riaccende.",
                 "tasti_spenti")
             return True
-        carattere = chr(unicode).lower()
-        maiuscolo = modificatori == wx.MOD_SHIFT
+        maiuscolo = modificatori == MAIUSCOLO
         if carattere.isdigit() and not maiuscolo:
             self._playlist_numero(int(carattere) or 10)
             return True
@@ -1882,14 +2056,13 @@ class Finestra(wx.Frame):
         if maiuscolo and (carattere.isdigit() or carattere in CIFRE_COL_MAIUSCOLO):
             self._marker_numero((int(carattere) or 10) if carattere.isdigit() else CIFRE_COL_MAIUSCOLO[carattere])
             return True
-        comando = TASTI.get((carattere, maiuscolo))
+        comando = TASTI.get((carattere, modificatori))
         if comando:
             getattr(self, f"_comando_{comando}")()
             return True
         # Un tasto senza comando lo dice, e non arriva all'albero, che ne
         # farebbe la sua ricerca per iniziale spostando il fuoco (tappa 9).
-        segno = chr(unicode)
-        nome = NOMI_DEI_SEGNI.get(segno.lower(), segno.upper() if segno.isalpha() else segno)
+        nome = NOMI_DEI_SEGNI.get(carattere, carattere.upper() if carattere.isalpha() else carattere)
         self._statistiche.senza_comando(f"{'Maiuscolo con ' if maiuscolo else ''}{nome}")
         self._riscontro("non_disponibile", f"{'Maiuscolo+' if maiuscolo else 'Il tasto '}{nome} non ha un comando.")
         return True
@@ -3070,7 +3243,7 @@ class Finestra(wx.Frame):
 
     def _aperta_una_voce(self, evento):
         """Un ramo aperto con la freccia destra ha il suo suono, ogni volta e
-        per ogni ramo. I rami che aprono i comandi, come F10, J e K, no:
+        per ogni ramo. I rami che aprono i comandi, come F10 e J, no:
         quei comandi hanno gia' il loro."""
         evento.Skip()
         if self._freccia_nell_albero:
@@ -5935,6 +6108,31 @@ class Finestra(wx.Frame):
     def _comando_playlist_successiva(self):
         self._playlist_vicina(1)
 
+    def _comando_playlist(self):
+        """J (issue 38): la playlist della plancia, o quella che suona, e il
+        suo posto fra le playlist salvate."""
+        playlist = self.archivio.playlist
+        attuale = self._playlist_selezionata()
+        if not playlist:
+            testo = "Non ci sono playlist salvate."
+        elif attuale is None:
+            testo = f"La plancia non è in una playlist; ne hai {len(playlist)}."
+        else:
+            testo = f"Playlist {playlist.index(attuale) + 1} di {len(playlist)}, {attuale.nome}."
+        self._riporta(testo, "playlist")
+
+    def _comando_prima_playlist(self):
+        if not self.archivio.playlist:
+            self._riscontro("niente_da_suonare", "Non ci sono playlist salvate.")
+            return
+        self._playlist_numero(1)
+
+    def _comando_ultima_playlist(self):
+        if not self.archivio.playlist:
+            self._riscontro("niente_da_suonare", "Non ci sono playlist salvate.")
+            return
+        self._playlist_numero(len(self.archivio.playlist))
+
     def _playlist_numero(self, numero):
         if numero > len(self.archivio.playlist):
             self._riscontro("nessun_altro_brano", f"Non c'è la playlist numero {numero}: ne hai {len(self.archivio.playlist)}.")
@@ -6072,6 +6270,23 @@ class Finestra(wx.Frame):
             frase = f"Timer impostato: la riproduzione si ferma fra {_minuti(scelta)}, alle {self._ora_del_timer()}."
         self._riscontro("timer_impostato", " ".join([frase, *correzioni]))
 
+    def _comando_timer_attuale(self):
+        """S (issue 38): il timer di spegnimento, con i suoi limiti."""
+        self._riporta(f"{self._frase_del_timer()} Il timer va da 1 a {valori.TIMER_MASSIMO} minuti, o alla fine del brano.", "timer")
+
+    def _comando_togli_il_timer(self):
+        """Ctrl con S: toglie il timer, anche mentre la musica sfuma."""
+        c_era = self._timer_scade is not None or self._timer_a_fine_brano or self._inizio_della_sfumatura is not None
+        self._togli_il_timer()
+        self._riscontro("timer_tolto", "Timer tolto." if c_era else "Non c'era un timer da togliere.")
+
+    def _comando_timer_a_fine_brano(self):
+        """Alt con S: il timer alla fine del brano, al posto di quello che c'era."""
+        self._togli_il_timer()
+        self._timer_a_fine_brano = True
+        self._statistiche.conta("timer_a_fine_brano")
+        self._riscontro("timer_impostato", "Timer impostato: la riproduzione si ferma alla fine del brano.")
+
     def _riprendi_il_timer(self, sfumato):
         """Dopo la domanda lasciata com'era: la sfumatura riprende dal punto
         in cui era, sfumato secondi, e la sveglia dalla sua scadenza, anche
@@ -6207,7 +6422,7 @@ class Finestra(wx.Frame):
         self._suona(pl, brano, "successivo", numero)
 
     def _comando_casuale(self, scelta=random.choice):
-        """N: a caso fra le voci suonabili che si vedono nella plancia, se cio'
+        """Alt con N: a caso fra le voci suonabili che si vedono nella plancia, se cio'
         che suona si vede; altrimenti a caso nella sua lista."""
         if not self.coda.playlist:
             self._riscontro("niente_da_suonare", "Non c'è una playlist in riproduzione.")
@@ -6281,6 +6496,49 @@ class Finestra(wx.Frame):
     def _comando_passo_avanti(self):
         self._chiedi_secondi("passo_avanti", "avanti")
 
+    def _comando_posizione(self):
+        """Q (issue 38): il punto del brano, 1:23 di 4:56, mancano 3:33."""
+        if self._niente_in_corso(risveglia=True):
+            return
+        posizione, durata = self.motore.posizione, self.motore.durata
+        if self.coda.corrente is not None:
+            testo = self._tempo_di_dove_sono(self.coda.corrente)
+        elif posizione is not None and durata is not None:
+            testo = f"{tempo(posizione)} di {tempo(durata)}"
+        else:
+            testo = "il tempo non si sa ancora"
+        self._riporta(f"{testo[0].upper()}{testo[1:]}.", "salto")
+
+    def _comando_verso_la_fine(self):
+        """Alt con Q: un salto avanti prima della fine, per sentirne gli
+        ultimi secondi."""
+        if self._niente_in_corso(risveglia=True):
+            return
+        durata = self.motore.durata
+        if durata is None:
+            self._riscontro("non_disponibile", "La durata del brano non si sa ancora: Alt con Q non sa dove sia la fine.")
+            return
+        self._salto(max(0, durata - self.impostazioni["passo_avanti"]) - (self.motore.posizione or 0), "avanti")
+
+    def _comando_all_inizio(self):
+        """Ctrl e Alt con Q: l'inizio del brano, senza farlo ripartire."""
+        if self._niente_in_corso(risveglia=True):
+            return
+        self._salto(-(self.motore.posizione or 0), "indietro")
+
+    def _comando_passi_dei_salti(self):
+        """E (issue 38): i passi dei salti di Ctrl e Maiuscolo con Q."""
+        imp = self.impostazioni
+        self._riporta(f"Salto indietro di {valori.scrivi_durata(imp['passo_indietro'])}, avanti di {valori.scrivi_durata(imp['passo_avanti'])}; "
+            f"da {valori.scrivi_durata(valori.SECONDI_MINIMI)} in su, e il predefinito è di {valori.scrivi_durata(PREDEFINITE['passo_avanti'])}.", "passo_di_salto")
+
+    def _comando_passi_predefiniti(self):
+        """Ctrl e Maiuscolo con E: i due passi dei salti tornano ai predefiniti."""
+        for chiave in ("passo_indietro", "passo_avanti"):
+            self.impostazioni[chiave] = PREDEFINITE[chiave]
+        self._salva_impostazioni()
+        self._riscontro("passo_di_salto", f"I salti indietro e avanti sono di nuovo di {valori.scrivi_durata(PREDEFINITE['passo_avanti'])}.", "passo_di_salto")
+
     def _comando_vai_a_tempo(self):
         if self._niente_in_corso(risveglia=True):
             return
@@ -6303,41 +6561,60 @@ class Finestra(wx.Frame):
         self._avvisa_l_attesa_del_sid(secondi)
 
     def _volume(self, passo):
-        if self.motore.lontano is not None:
-            self._volume_dello_speaker(passo)
-            return
-        attuale = self.motore.volume
-        nuovo = max(0, min(VOLUME_MASSIMO, attuale + passo))
-        if nuovo == attuale:
-            self._riscontro("volume_al_limite", f"Volume già al {'massimo' if passo > 0 else 'minimo'}, {attuale}.", "volume")
-            return
-        self.motore.volume = nuovo
-        self.impostazioni["volume"] = nuovo
-        amplificato = ", amplificato oltre il 100" if nuovo > 100 else ""
-        # Il suono, fatto al volo, dice il volume nuovo con la sua frequenza,
-        # dopo il riferimento del volume 100 (1.116.2).
-        self._domanda_viva = None
-        self._conta_l_evento("volume_su" if passo > 0 else "volume_giu")
-        suoni.volume_della_musica(nuovo, self.impostazioni["volume_effetti"])
-        self.scrivi(f"Volume {nuovo}{amplificato}.", "volume")
-
-    def _volume_dello_speaker(self, passo):
-        """Meno e piu' con uno speaker Cast: il suo volume, da 0 a 100, senza
-        amplificazione (1.119.0)."""
-        lettore = self.motore.lontano
-        attuale = lettore.volume
+        """Ctrl e Maiuscolo con M: il volume giu' o su di un passo."""
+        attuale = self._volume_attuale()
         if attuale is None:
-            self._riscontro("errore", f"Il volume di {lettore.nome} non si legge.")
+            self._riscontro("errore", f"Il volume di {self.motore.lontano.nome} non si legge.")
             return
-        nuovo = max(0, min(100, attuale + passo))
+        self._porta_il_volume(attuale + passo, passo)
+
+    def _volume_attuale(self):
+        """Il volume di adesso: quello dello speaker Cast, se la musica e'
+        sua, che puo' non leggersi, altrimenti quello del motore."""
+        lettore = self.motore.lontano
+        return lettore.volume if lettore is not None else self.motore.volume
+
+    def _porta_il_volume(self, nuovo, verso):
+        """Porta il volume a nuovo, nei limiti: sul PC da 0 a 300, su uno
+        speaker Cast da 0 a 100, senza amplificazione (1.119.0). verso, piu'
+        o meno di zero, dice quale limite e' gia' raggiunto. Il suono, fatto
+        al volo, dice il volume nuovo con la sua frequenza, dopo il
+        riferimento del volume 100 (1.116.2)."""
+        lettore = self.motore.lontano
+        massimo, di = (VOLUME_MASSIMO, "") if lettore is None else (100, f" di {lettore.nome}")
+        attuale = self._volume_attuale()
+        if attuale is None:
+            self._riscontro("errore", f"Il volume{di} non si legge.")
+            return
+        nuovo = max(0, min(massimo, nuovo))
         if nuovo == attuale:
-            self._riscontro("volume_al_limite", f"Volume di {lettore.nome} già al {'massimo' if passo > 0 else 'minimo'}, {attuale}.", "volume")
+            limite = "al massimo, " if nuovo == massimo and verso > 0 else "al minimo, " if nuovo == 0 and verso < 0 else "a "
+            self._riscontro("volume_al_limite", f"Volume{di} già {limite}{attuale}.", "volume")
             return
-        lettore.volume = nuovo
+        if lettore is not None:
+            lettore.volume = nuovo
+        else:
+            self.motore.volume = nuovo
+            self.impostazioni["volume"] = nuovo
+        amplificato = ", amplificato oltre il 100" if nuovo > 100 else ""
         self._domanda_viva = None
-        self._conta_l_evento("volume_su" if passo > 0 else "volume_giu")
+        self._conta_l_evento("volume_su" if nuovo > attuale else "volume_giu")
         suoni.volume_della_musica(nuovo, self.impostazioni["volume_effetti"])
-        self.scrivi(f"Volume di {lettore.nome} {nuovo}.", "volume")
+        self.scrivi(f"Volume{di} {nuovo}{amplificato}.", "volume")
+
+    def _comando_volume(self):
+        """M (issue 38): il volume, con i suoi limiti, e quello a cui Ctrl e
+        Maiuscolo con M lo riportano, se c'e'."""
+        lettore = self.motore.lontano
+        massimo, di = (VOLUME_MASSIMO, "") if lettore is None else (100, f" di {lettore.nome}")
+        volume = self._volume_attuale()
+        if volume is None:
+            self._riporta(f"Il volume{di} non si legge.", "volume")
+            return
+        amplificato = ", amplificato oltre il 100" if volume > 100 else ""
+        prima = self._volume_di_prima()
+        di_prima = f" Ctrl e Maiuscolo con M lo riportano a {prima}." if prima is not None else ""
+        self._riporta(f"Volume{di} {volume}{amplificato}, da 0 a {massimo}.{di_prima}", "volume")
 
     def _comando_volume_su(self):
         self._volume(self.impostazioni["passo_volume"])
@@ -6345,39 +6622,91 @@ class Finestra(wx.Frame):
     def _comando_volume_giu(self):
         self._volume(-self.impostazioni["passo_volume"])
 
-    def _comando_passo_volume(self):
-        self._domanda()
-        attuale = self.impostazioni["passo_volume"]
-        with DialogoTesto(self, "Di quanto cambiano il volume più e meno? Da 1 a 50.", "Passo del volume", str(attuale)) as dialogo:
-            if dialogo.ShowModal() != wx.ID_OK:
-                self._annullato("Passo del volume non cambiato.")
-                return
-            testo = dialogo.GetValue()
-        # La lettura delle impostazioni: un numero fuori dai limiti va al
-        # limite, e lo si dice (tappa 9).
-        try:
-            passo, correzioni = valori.leggi_passo_volume(testo)
-        except ErroreValore as e:
-            self._riscontro("errore", f"{e} Il passo resta {attuale}.")
+    def _comando_volume_massimo(self):
+        """Alt con M: il volume al massimo, 300 sul PC e 100 sullo speaker."""
+        self._volume_estremo(VOLUME_MASSIMO if self.motore.lontano is None else 100, 1)
+
+    def _comando_volume_minimo(self):
+        """Ctrl e Alt con M: il volume a zero, che fa da muto (Gabriele, 3
+        novembre 2026)."""
+        self._volume_estremo(0, -1)
+
+    def _volume_estremo(self, nuovo, verso):
+        """Al massimo o a zero: il volume di prima si ricorda, per Ctrl e
+        Maiuscolo con M, se non era gia' al massimo o a zero; cosi' dallo
+        zero al massimo resta quello da cui si era partiti."""
+        attuale = self._volume_attuale()
+        massimo = VOLUME_MASSIMO if self.motore.lontano is None else 100
+        if attuale is not None and 0 < attuale < massimo and attuale != nuovo:
+            self._ricorda_il_volume(attuale)
+        self._porta_il_volume(nuovo, verso)
+
+    def _comando_volume_di_prima(self):
+        """Ctrl e Maiuscolo con M (Gabriele, 3 novembre 2026): il volume di
+        prima che Alt o Ctrl e Alt con M lo portassero al massimo o a zero;
+        dallo zero, toglie il muto."""
+        prima = self._volume_di_prima()
+        attuale = self._volume_attuale()
+        if prima is None:
+            self._riscontro("volume_al_limite", f"Il volume non è stato portato al massimo o a zero: resta {attuale}.", "volume")
             return
-        self.impostazioni["passo_volume"] = passo
-        self._salva_impostazioni()
-        self._riscontro("passo_del_volume", " ".join([f"Più e meno ora cambiano il volume di {passo}.", *correzioni]), "passo_del_volume")
+        self._ricorda_il_volume(None)
+        self._porta_il_volume(prima, 1 if attuale is None or prima >= attuale else -1)
+
+    def _volume_di_prima(self):
+        """Il volume a cui Ctrl e Maiuscolo con M riportano, o None. Quello
+        del PC sta nelle impostazioni, perche' lo zero dura anche dopo una
+        chiusura; quello dello speaker vale finche' MeTeOra resta aperto."""
+        if self.motore.lontano is not None:
+            return self._volume_di_prima_dello_speaker
+        prima = self.impostazioni["volume_di_prima"]
+        return None if prima < 0 else prima
+
+    def _ricorda_il_volume(self, volume):
+        if self.motore.lontano is not None:
+            self._volume_di_prima_dello_speaker = volume
+        else:
+            self.impostazioni["volume_di_prima"] = -1 if volume is None else volume
 
     def _comando_muto(self):
-        lettore = self.motore.lontano
-        if lettore is not None:
-            lettore.muto = not lettore.muto
-            if lettore.muto:
-                self._riscontro("muto_acceso", f"Muto su {lettore.nome}.", "volume")
-            else:
-                self._riscontro("muto_spento", f"Audio di nuovo acceso su {lettore.nome}, volume {lettore.volume}.", "volume")
-            return
-        self.motore.muto = not self.motore.muto
-        if self.motore.muto:
-            self._riscontro("muto_acceso", "Muto.", "volume")
+        """Il pulsante Muto della barra delle applicazioni: il volume a zero,
+        come Ctrl e Alt con M, e dallo zero quello di prima, come Ctrl e
+        Maiuscolo con M."""
+        if self._volume_attuale() == 0 and self._volume_di_prima() is not None:
+            self._comando_volume_di_prima()
         else:
-            self._riscontro("muto_spento", f"Audio di nuovo acceso, volume {self.motore.volume}.", "volume")
+            self._comando_volume_minimo()
+
+    def _comando_passo_volume(self):
+        """Il punto (issue 38): il passo di Ctrl e Maiuscolo con M."""
+        self._riporta(f"Passo del volume {self.impostazioni['passo_volume']}, da {valori.PASSO_VOLUME_MINIMO} a {valori.PASSO_VOLUME_MASSIMO}; "
+            f"il predefinito è {PREDEFINITE['passo_volume']}.", "passo_del_volume")
+
+    def _porta_il_passo_del_volume(self, nuovo, verso):
+        attuale = self.impostazioni["passo_volume"]
+        nuovo = max(valori.PASSO_VOLUME_MINIMO, min(valori.PASSO_VOLUME_MASSIMO, nuovo))
+        if nuovo == attuale:
+            limite = "al massimo, " if nuovo == valori.PASSO_VOLUME_MASSIMO and verso > 0 else "al minimo, " if nuovo == valori.PASSO_VOLUME_MINIMO and verso < 0 else ""
+            self._riscontro("volume_al_limite", f"Passo del volume già {limite}{attuale}.", "passo_del_volume")
+            return
+        self.impostazioni["passo_volume"] = nuovo
+        self._salva_impostazioni()
+        self._riscontro("passo_del_volume", f"Passo del volume {nuovo}: Ctrl e Maiuscolo con M cambiano il volume di {nuovo}.", "passo_del_volume")
+
+    def _comando_passo_volume_giu(self):
+        self._porta_il_passo_del_volume(self.impostazioni["passo_volume"] - 1, -1)
+
+    def _comando_passo_volume_su(self):
+        self._porta_il_passo_del_volume(self.impostazioni["passo_volume"] + 1, 1)
+
+    def _comando_passo_volume_predefinito(self):
+        self._porta_il_passo_del_volume(PREDEFINITE["passo_volume"], 0)
+
+    def _comando_passo_volume_massimo(self):
+        self._porta_il_passo_del_volume(valori.PASSO_VOLUME_MASSIMO, 1)
+
+    def _comando_passo_volume_minimo(self):
+        self._porta_il_passo_del_volume(valori.PASSO_VOLUME_MINIMO, -1)
 
     # Velocita', tono, equalizzatore e dissolvenza, tappa 4 (issue 15): valgono
     # per tutti i brani, e ogni cambio si salva subito. Le righe della console
@@ -6416,11 +6745,11 @@ class Finestra(wx.Frame):
         vuota se lo sono."""
         velocita, tono = self.impostazioni["velocita"], self.impostazioni["tono"]
         if velocita != 1 and tono:
-            return f"Velocità {valori.scrivi_velocita(velocita)} e tono {valori.scrivi_tono(tono)}: S e G li riportano al normale."
+            return f"Velocità {valori.scrivi_velocita(velocita)} e tono {valori.scrivi_tono(tono)}: Ctrl e Maiuscolo con A e con F li riportano al normale."
         if velocita != 1:
-            return f"Velocità {valori.scrivi_velocita(velocita)}: S la riporta al normale."
+            return f"Velocità {valori.scrivi_velocita(velocita)}: Ctrl e Maiuscolo con A la riportano al normale."
         if tono:
-            return f"Tono {valori.scrivi_tono(tono)}: G lo riporta al normale."
+            return f"Tono {valori.scrivi_tono(tono)}: Ctrl e Maiuscolo con F lo riportano al normale."
         return ""
 
     @staticmethod
@@ -6456,6 +6785,17 @@ class Finestra(wx.Frame):
     def _comando_velocita_normale(self):
         self._velocita(1.0, "velocita_normale")
 
+    def _comando_velocita_massima(self):
+        self._velocita(valori.VELOCITA_MASSIMA, "velocita_su")
+
+    def _comando_velocita_minima(self):
+        self._velocita(valori.VELOCITA_MINIMA, "velocita_giu")
+
+    def _comando_velocita(self):
+        """A (issue 38): la velocita', con i suoi limiti."""
+        self._riporta(f"{self._riga_della_velocita(self.impostazioni['velocita'])[:-1]}, da {valori.scrivi_velocita(valori.VELOCITA_MINIMA)} "
+            f"a {valori.scrivi_velocita(valori.VELOCITA_MASSIMA)}.", "velocita")
+
     def _tono(self, nuovo, evento):
         """Porta il tono a nuovo semitoni, nei limiti; ai limiti lo dice con il
         suono suo."""
@@ -6481,6 +6821,17 @@ class Finestra(wx.Frame):
     def _comando_tono_normale(self):
         self._tono(0, "tono_normale")
 
+    def _comando_tono_massimo(self):
+        self._tono(valori.TONO_MASSIMO, "tono_su")
+
+    def _comando_tono_minimo(self):
+        self._tono(-valori.TONO_MASSIMO, "tono_giu")
+
+    def _comando_tono(self):
+        """F (issue 38): il tono, con i suoi limiti."""
+        self._riporta(f"{self._riga_del_tono(self.impostazioni['tono'])[:-1]}, da {valori.scrivi_tono(-valori.TONO_MASSIMO)} "
+            f"a {valori.scrivi_tono(valori.TONO_MASSIMO)}.", "tono")
+
     def _riga_della_banda(self, aggiunta=""):
         """La riga della banda scelta: Banda 3, 400 Hz: +2 dB. La maiuscola
         non viene da capitalize, che scriverebbe hz."""
@@ -6489,17 +6840,48 @@ class Finestra(wx.Frame):
         return f"{nome[0].upper()}{nome[1:]}: {guadagno}{aggiunta}."
 
     def _scegli_la_banda(self, passo):
-        """U e I: la banda prima o dopo; si fermano alla prima e all'ultima. Il
-        suono, fatto al volo, dice la banda con una nota della scala."""
+        """Ctrl e Maiuscolo con U: la banda prima o dopo."""
+        self._alla_banda(self._banda + passo, passo)
+
+    def _alla_banda(self, nuova, verso):
+        """La banda nuova, contata da zero; si ferma alla prima e all'ultima,
+        e lo dice. Il suono, fatto al volo, dice la banda con una nota della
+        scala."""
         if self._vale_solo_sul_pc("L'equalizzatore"):
             return
-        nuova = self._banda + passo
-        if not 0 <= nuova < len(valori.FREQUENZE_DELLE_BANDE):
-            self._riscontro("banda_al_limite", self._riga_della_banda(". È la prima" if passo < 0 else ". È l'ultima"), "banda")
+        nuova = max(0, min(len(valori.FREQUENZE_DELLE_BANDE) - 1, nuova))
+        if nuova == self._banda:
+            self._riscontro("banda_al_limite", self._riga_della_banda(". È la prima" if verso < 0 else ". È l'ultima"), "banda")
             return
         self._banda = nuova
         suoni.banda(nuova, self.impostazioni["volume_effetti"])
         self.scrivi(self._riga_della_banda(), "banda")
+
+    def _comando_prima_banda(self):
+        self._alla_banda(0, -1)
+
+    def _comando_ultima_banda(self):
+        self._alla_banda(len(valori.FREQUENZE_DELLE_BANDE) - 1, 1)
+
+    def _comando_banda(self):
+        """U (issue 38): la banda scelta, fra quante, e il suo guadagno."""
+        frequenza = valori.FREQUENZE_DELLE_BANDE[self._banda]
+        guadagno = valori.scrivi_guadagno(self.impostazioni["bande"][self._banda])
+        self._riporta(f"Banda {self._banda + 1} di {len(valori.FREQUENZE_DELLE_BANDE)}, {frequenza} Hz: {guadagno}.", "banda")
+
+    def _comando_guadagno(self):
+        """O (issue 38): il guadagno della banda scelta, con i suoi limiti."""
+        limiti = f", da {valori.scrivi_guadagno(-valori.GUADAGNO_MASSIMO)} a {valori.scrivi_guadagno(valori.GUADAGNO_MASSIMO)}"
+        self._riporta(self._riga_della_banda(limiti), "banda")
+
+    def _comando_curva(self):
+        """P (issue 38): i guadagni di tutte le bande, dalla piu' bassa."""
+        bande = self.impostazioni["bande"]
+        if not any(bande):
+            self._riporta(f"Equalizzatore piatto: tutte le {len(bande)} bande a 0 dB.", "banda")
+            return
+        curva = ", ".join(f"{frequenza} Hz {valori.scrivi_guadagno(guadagno)}" for frequenza, guadagno in zip(valori.FREQUENZE_DELLE_BANDE, bande, strict=True))
+        self._riporta(f"Equalizzatore: {curva}.", "banda")
 
     def _comando_banda_precedente(self):
         self._scegli_la_banda(-1)
@@ -6514,20 +6896,30 @@ class Finestra(wx.Frame):
         self._salva_impostazioni()
 
     def _guadagno(self, passo):
-        """O e P: la banda scelta giu' o su di un dB; ai limiti lo dicono. Il
+        """Ctrl e Maiuscolo con O: la banda scelta giu' o su di un dB."""
+        self._porta_il_guadagno(self.impostazioni["bande"][self._banda] + passo, passo)
+
+    def _porta_il_guadagno(self, nuovo, verso):
+        """Il guadagno della banda scelta a nuovo, nei limiti, che dice. Il
         suono, fatto al volo, dice il guadagno con l'altezza della nota."""
         if self._vale_solo_sul_pc("L'equalizzatore"):
             return
         bande = list(self.impostazioni["bande"])
-        nuovo = max(-valori.GUADAGNO_MASSIMO, min(valori.GUADAGNO_MASSIMO, bande[self._banda] + passo))
+        nuovo = max(-valori.GUADAGNO_MASSIMO, min(valori.GUADAGNO_MASSIMO, nuovo))
         if nuovo == bande[self._banda]:
-            self._riscontro("guadagno_al_limite", self._riga_della_banda(", il massimo" if passo > 0 else ", il minimo"), "banda")
+            self._riscontro("guadagno_al_limite", self._riga_della_banda(", il massimo" if verso > 0 else ", il minimo"), "banda")
             return
         bande[self._banda] = nuovo
         self._metti_le_bande(bande)
         self._statistiche.banda(self._banda)
         suoni.guadagno(nuovo, self.impostazioni["volume_effetti"])
         self.scrivi(self._riga_della_banda(), "banda")
+
+    def _comando_guadagno_massimo(self):
+        self._porta_il_guadagno(valori.GUADAGNO_MASSIMO, 1)
+
+    def _comando_guadagno_minimo(self):
+        self._porta_il_guadagno(-valori.GUADAGNO_MASSIMO, -1)
 
     def _comando_banda_su(self):
         self._guadagno(1)
@@ -6550,26 +6942,53 @@ class Finestra(wx.Frame):
         self._riscontro("bande_azzerate", "Equalizzatore azzerato, tutte a 0 dB.", "banda")
 
     def _comando_dissolvenza(self):
-        """L: accende e spegne la dissolvenza; la durata resta."""
+        """L (issue 38): la dissolvenza, accesa o spenta, e la sua durata."""
+        self._riporta(f"Dissolvenza {valori.scrivi_dissolvenza(self.impostazioni['dissolvenza'])}.", "dissolvenza")
+
+    def _metti_la_dissolvenza(self, accesa):
+        """Ctrl con L la spegne, Maiuscolo con L la accende; la durata resta."""
         if self._vale_solo_sul_pc("La dissolvenza"):
             return
         dissolvenza = self.impostazioni["dissolvenza"]
-        dissolvenza["accesa"] = not dissolvenza["accesa"]
+        evento = "dissolvenza_accesa" if accesa else "dissolvenza_spenta"
+        if dissolvenza["accesa"] == accesa:
+            self._riscontro(evento, f"La dissolvenza è già {valori.scrivi_dissolvenza(dissolvenza)}.", "dissolvenza")
+            return
+        dissolvenza["accesa"] = accesa
         self._applica_la_dissolvenza()
         self._salva_impostazioni()
-        evento = "dissolvenza_accesa" if dissolvenza["accesa"] else "dissolvenza_spenta"
         self._riscontro(evento, f"Dissolvenza {valori.scrivi_dissolvenza(dissolvenza)}.", "dissolvenza")
 
+    def _comando_spegni_la_dissolvenza(self):
+        self._metti_la_dissolvenza(False)
+
+    def _comando_accendi_la_dissolvenza(self):
+        self._metti_la_dissolvenza(True)
+
     def _comando_riproduzione_casuale(self):
-        """Maiuscolo con N: accende e spegne la riproduzione casuale (issue
-        17): a caso il brano che segue quando uno finisce da solo, e dalla
-        1.74.0 anche B, mentre Z torna ai brani suonati prima."""
-        accesa = not self.impostazioni["casuale"]
+        """N (issue 38): la riproduzione casuale, accesa o spenta, e il suo modello."""
+        self._riporta(_frase_della_casuale(self.impostazioni["casuale"], self.impostazioni["modello_casuale"]), "casuale")
+
+    def _metti_la_casuale(self, accesa):
+        """Ctrl con N spegne la riproduzione casuale, Maiuscolo con N la
+        accende (issue 17): a caso il brano che segue quando uno finisce da
+        solo, e dalla 1.74.0 anche B, mentre Z torna ai brani suonati prima."""
+        evento = "casuale_acceso" if accesa else "casuale_spento"
+        frase = _frase_della_casuale(accesa, self.impostazioni["modello_casuale"])
+        if self.impostazioni["casuale"] == accesa:
+            self._riscontro(evento, f"Già così. {frase}")
+            return
         self.impostazioni["casuale"] = accesa
         self._ricomincia_il_mazzo()
         self._azzera_la_storia()
         self._salva_impostazioni()
-        self._riscontro("casuale_acceso" if accesa else "casuale_spento", _frase_della_casuale(accesa, self.impostazioni["modello_casuale"]))
+        self._riscontro(evento, frase)
+
+    def _comando_spegni_la_casuale(self):
+        self._metti_la_casuale(False)
+
+    def _comando_accendi_la_casuale(self):
+        self._metti_la_casuale(True)
 
     def _comando_ripetizione(self):
         """Maiuscolo con V (Gabriele, 1.94.0): la ripetizione a giro, del
@@ -6582,31 +7001,41 @@ class Finestra(wx.Frame):
         self._riscontro(f"ripetizione_{ripetizione}", _frase_della_ripetizione(ripetizione))
 
     def _comando_durata_della_dissolvenza(self):
-        """Maiuscolo con L: chiede la durata della dissolvenza in secondi. La
+        """K (issue 38): la durata della dissolvenza, con i suoi limiti."""
+        dissolvenza = self.impostazioni["dissolvenza"]
+        self._riporta(f"Durata della dissolvenza {valori.scrivi_durata(dissolvenza['secondi'])}, da {valori.scrivi_durata(valori.DISSOLVENZA_MINIMA)} "
+            f"a {valori.scrivi_durata(valori.DISSOLVENZA_MASSIMA)}; la dissolvenza è {'accesa' if dissolvenza['accesa'] else 'spenta'}.", "dissolvenza")
+
+    def _porta_la_dissolvenza(self, secondi, verso):
+        """La durata della dissolvenza a secondi, nei limiti, che dice. La
         dissolvenza resta accesa o spenta com'era."""
         if self._vale_solo_sul_pc("La dissolvenza"):
             return
-        self._domanda()
         dissolvenza = self.impostazioni["dissolvenza"]
-        attuale = dissolvenza["secondi"]
-        da_leggere = valori.scrivi_durata(attuale)
-        # Nel campo e nella domanda i numeri soli, senza la parola secondi.
-        minimo, massimo, numero = (valori.scrivi_durata(s).split()[0] for s in (valori.DISSOLVENZA_MINIMA, valori.DISSOLVENZA_MASSIMA, attuale))
-        with DialogoTesto(self, f"Quanti secondi dura la dissolvenza? Da {minimo} a {massimo}, anche con i decimali, per esempio 2.5.",
-                "Durata della dissolvenza", numero) as dialogo:
-            if dialogo.ShowModal() != wx.ID_OK:
-                self._annullato(f"La durata della dissolvenza resta di {da_leggere}.")
-                return
-            testo = dialogo.GetValue()
-        try:
-            secondi, correzioni = valori.leggi_durata_della_dissolvenza(testo)
-        except ErroreValore as e:
-            self._riscontro("errore", f"{e} La durata resta di {da_leggere}.")
+        secondi = max(valori.DISSOLVENZA_MINIMA, min(valori.DISSOLVENZA_MASSIMA, round(secondi, 3)))
+        if secondi == dissolvenza["secondi"]:
+            limite = "al massimo, " if secondi == valori.DISSOLVENZA_MASSIMA and verso > 0 else "al minimo, " if secondi == valori.DISSOLVENZA_MINIMA and verso < 0 else ""
+            self._riscontro("nessun_altro_brano", f"Durata della dissolvenza già {limite}{valori.scrivi_durata(secondi)}.", "dissolvenza")
             return
         dissolvenza["secondi"] = secondi
         self._applica_la_dissolvenza()
         self._salva_impostazioni()
-        self._riscontro("dissolvenza_durata", " ".join([f"Dissolvenza {valori.scrivi_dissolvenza(dissolvenza)}.", *correzioni]), "dissolvenza")
+        self._riscontro("dissolvenza_durata", f"Dissolvenza {valori.scrivi_dissolvenza(dissolvenza)}.", "dissolvenza")
+
+    def _comando_dissolvenza_piu_breve(self):
+        self._porta_la_dissolvenza(self.impostazioni["dissolvenza"]["secondi"] - PASSO_DELLA_DISSOLVENZA, -1)
+
+    def _comando_dissolvenza_piu_lunga(self):
+        self._porta_la_dissolvenza(self.impostazioni["dissolvenza"]["secondi"] + PASSO_DELLA_DISSOLVENZA, 1)
+
+    def _comando_durata_predefinita(self):
+        self._porta_la_dissolvenza(PREDEFINITE["dissolvenza"]["secondi"], 0)
+
+    def _comando_dissolvenza_massima(self):
+        self._porta_la_dissolvenza(valori.DISSOLVENZA_MASSIMA, 1)
+
+    def _comando_dissolvenza_minima(self):
+        self._porta_la_dissolvenza(valori.DISSOLVENZA_MINIMA, -1)
 
     def _comando_apri_file(self):
         self._domanda()
@@ -6737,23 +7166,15 @@ class Finestra(wx.Frame):
         if codice in _SOLO_MODIFICATORI or evento.IsAutoRepeat():
             return None
         modificatori = evento.GetModifiers()
-        unicode = evento.GetUnicodeKey()
         if codice in NOMI_DEI_TASTI:
             nome = NOMI_DEI_TASTI[codice]
-        elif modificatori in (wx.MOD_NONE, wx.MOD_SHIFT) and unicode not in (wx.WXK_NONE, 0) and unicode > 32 and chr(unicode).isprintable():
-            carattere = chr(unicode).lower()
-            maiuscolo = modificatori == wx.MOD_SHIFT
-            if maiuscolo and carattere in CIFRE_COL_MAIUSCOLO:
+        elif (tasto := carattere_del_tasto(evento)) is not None:
+            # Il punto interrogativo e' Maiuscolo con l'apostrofo, comunque
+            # arrivi: la durata residua ha un nome solo (tappa 14 d).
+            carattere, modificatori = tasto
+            if modificatori == MAIUSCOLO and carattere in CIFRE_COL_MAIUSCOLO:
                 carattere = str(CIFRE_COL_MAIUSCOLO[carattere] % 10)
-            if carattere == "?":
-                # Il punto interrogativo e' Maiuscolo con l'apostrofo, comunque
-                # arrivi: la durata residua ha un nome solo (tappa 14 d).
-                carattere, maiuscolo = "'", True
-            return nome_del_carattere(carattere, maiuscolo)
-        elif unicode in (ord("\\"), 0x1C):
-            nome = "barra rovesciata"
-        elif unicode not in (wx.WXK_NONE, 0) and unicode > 32 and chr(unicode).isprintable():
-            nome = chr(unicode).upper()
+            return nome_del_carattere(carattere, modificatori)
         else:
             nome = "Altro tasto"
         prefisso = [n for bit, n in ((wx.MOD_CONTROL, "Ctrl"), (wx.MOD_ALT, "Alt"), (wx.MOD_SHIFT, "Maiuscolo")) if modificatori & bit]
@@ -6761,7 +7182,7 @@ class Finestra(wx.Frame):
 
     def _comandi_dei_tasti(self):
         """Il comando di ogni tasto a carattere, per il nome che ha nelle statistiche."""
-        return {nome_del_carattere(carattere, maiuscolo): comando for (carattere, maiuscolo), comando in TASTI.items()}
+        return {nome_del_carattere(carattere, modificatori): comando for (carattere, modificatori), comando in TASTI.items()}
 
     def _conta_la_ricerca(self, dove):
         """La ricerca finita, una volta sola: i risultati, e i record."""
@@ -7027,12 +7448,12 @@ class Finestra(wx.Frame):
         if chiave == "volume":
             return valori.leggi_volume_musica, [
                 "Il volume della musica, da 0 a 300: 100 è il livello originale del file; oltre il 100 amplifica, con un limitatore contro la distorsione, per gli audio registrati troppo bassi.",
-                "Per esempio 80 o 150. Anche più e meno lo cambiano, dalla finestra principale.",
+                "Per esempio 80 o 150. Anche Ctrl e Maiuscolo con M lo cambiano, dalla finestra principale.",
                 f"Adesso è {imp['volume']}.", REGOLA_DEL_DOLLARO], str(imp["volume"])
         if chiave == "passo_volume":
             return valori.leggi_passo_volume, [
-                "Di quanto cambiano il volume più e meno: un numero intero da 1 a 50.",
-                "Per esempio 5. Anche Maiuscolo+M lo cambia, dalla finestra principale.",
+                "Di quanto cambiano il volume Ctrl e Maiuscolo con M: un numero intero da 1 a 50.",
+                "Per esempio 5. Anche Ctrl e Maiuscolo con il punto lo cambiano, dalla finestra principale.",
                 f"Adesso è {imp['passo_volume']}.", REGOLA_DEL_DOLLARO], str(imp["passo_volume"])
         if chiave == "volume_effetti":
             percentuale = round(imp["volume_effetti"] * 100)
@@ -7041,24 +7462,25 @@ class Finestra(wx.Frame):
                 "Per esempio 50, oppure 35%.",
                 f"Adesso è {percentuale}%.", REGOLA_DEL_DOLLARO], str(percentuale)
         if chiave in ("passo_indietro", "passo_avanti"):
-            nome, verso, tasto = VOCI_DELLE_IMPOSTAZIONI[chiave][0], *(("indietro", "Q") if chiave == "passo_indietro" else ("avanti", "E"))
+            nome, verso, tasto, del_passo = VOCI_DELLE_IMPOSTAZIONI[chiave][0], *(("indietro", "Ctrl con Q", "Ctrl con E") if chiave == "passo_indietro"
+                else ("avanti", "Maiuscolo con Q", "Maiuscolo con E"))
             attuale = secondi_da_leggere(imp[chiave])
             return (lambda testo: valori.leggi_secondi(testo, nome)), [
-                f"Di quanti secondi salta {verso} il tasto {tasto}: almeno 0.1, anche con i decimali.",
-                f"Per esempio 10 o 2.5, oppure minuti e secondi come 1:30. Anche Maiuscolo+{tasto} lo cambia, dalla finestra principale.",
+                f"Di quanti secondi salta {verso} {tasto}: almeno 0.1, anche con i decimali.",
+                f"Per esempio 10 o 2.5, oppure minuti e secondi come 1:30. Anche {del_passo} lo cambia, dalla finestra principale.",
                 f"Adesso è di {valori.scrivi_durata(imp[chiave])}.", REGOLA_DEL_DOLLARO], attuale
         if chiave == "velocita":
             minima, massima, passo = (valori.scrivi_velocita(v) for v in (valori.VELOCITA_MINIMA, valori.VELOCITA_MASSIMA, valori.PASSO_VELOCITA))
             return valori.leggi_velocita, [
                 f"La velocità di riproduzione, da {minima} a {massima}: 1 è la normale, meno di 1 rallenta, più di 1 accelera. Il tono non cambia.",
                 f"Va a passi di {passo}: un valore fra due passi va al più vicino. Per esempio 1.05 o 0.9.",
-                "Anche A e D la cambiano, e S la riporta a 1, dalla finestra principale.",
+                "Anche Ctrl e Maiuscolo con A la cambiano, e premuti insieme la riportano a 1, dalla finestra principale.",
                 f"Adesso è {valori.scrivi_velocita(imp['velocita'])}.", REGOLA_DEL_DOLLARO], valori.scrivi_velocita(imp["velocita"])
         if chiave == "tono":
             return valori.leggi_tono, [
                 f"Il tono in semitoni, da -{valori.TONO_MASSIMO} a +{valori.TONO_MASSIMO}: 0 è il normale. La velocità non cambia, e l'equalizzatore segue il tono.",
                 "Per esempio +2 per alzarlo di due semitoni, -3 per abbassarlo di tre.",
-                "Anche F e H lo cambiano, e G lo riporta a 0, dalla finestra principale.",
+                "Anche Ctrl e Maiuscolo con F lo cambiano, e premuti insieme lo riportano a 0, dalla finestra principale.",
                 f"Adesso è di {valori.scrivi_tono(imp['tono'])}.", REGOLA_DEL_DOLLARO], valori.scrivi_tono(imp["tono"]).split()[0]
         if chiave == "bande":
             frequenze = ", ".join(str(f) for f in valori.FREQUENZE_DELLE_BANDE[:-1])
@@ -7068,7 +7490,7 @@ class Finestra(wx.Frame):
                 "Un numero solo vale per tutte le bande, e il campo vuoto le riporta tutte a 0. Per esempio 0 0 +2 0 0 0 -3, oppure 3.",
                 "Contro la saturazione il volume scende da solo quanto la banda più alzata: con una banda sola il suono non satura, "
                 "con più bande vicine alzate, o tutte, sale fino a circa 5.6 dB oltre, e dal volume 80 o 90 in su conviene abbassare il volume.",
-                "Anche U e I scelgono la banda, O e P la abbassano e la alzano, È la azzera e Maiuscolo con È le azzera tutte, dalla finestra principale.",
+                "Anche Ctrl e Maiuscolo con U scelgono la banda, Ctrl e Maiuscolo con O la abbassano e la alzano, e premuti insieme la azzerano; Ctrl e Maiuscolo con P le azzerano tutte, dalla finestra principale.",
                 f"Adesso: {self._bande_da_leggere()}.", REGOLA_DEL_DOLLARO], valori.scrivi_bande(imp["bande"])
         if chiave == "dissolvenza":
             secondi = imp["dissolvenza"]["secondi"]
@@ -7076,13 +7498,13 @@ class Finestra(wx.Frame):
             return (lambda testo: valori.leggi_dissolvenza(testo, secondi)), [
                 "La dissolvenza incrociata: il brano che finisce sfuma mentre il seguente entra. Vale a ogni cambio di brano, da solo o con i tasti.",
                 f"Scrivi no per spegnerla, sì per accenderla, oppure i secondi, da {minima} a {massima}, anche con i decimali, per accenderla con quella durata. Per esempio 4 o 2.5.",
-                "Anche L la accende e la spegne, e Maiuscolo con L ne cambia la durata, dalla finestra principale.",
+                "Anche Maiuscolo con L la accende e Ctrl con L la spegne, e Ctrl e Maiuscolo con K ne cambiano la durata, dalla finestra principale.",
                 f"Adesso è {valori.scrivi_dissolvenza(imp['dissolvenza'])}.", REGOLA_DEL_DOLLARO], valori.scrivi_dissolvenza(imp["dissolvenza"])
         if chiave == "casuale":
             return (lambda testo: valori.leggi_si_no(testo, "Riproduzione casuale")), [
                 "Con la riproduzione casuale accesa, quando un brano finisce da solo il seguente si sceglie a caso, fra quelli che l'avanzamento automatico "
                 "potrebbe suonare: le voci che si vedono nella plancia, oppure la lista, il loop o la selezione da cui si suona. Z, B e gli altri tasti restano come sono.",
-                "Scrivi sì per accenderla, no per spegnerla; valgono anche s, n, 1, 0, acceso e spento. Anche Maiuscolo con N la accende e la spegne.",
+                "Scrivi sì per accenderla, no per spegnerla; valgono anche s, n, 1, 0, acceso e spento. Anche Maiuscolo con N la accende, e Ctrl con N la spegne.",
                 f"Adesso è {'accesa' if imp['casuale'] else 'spenta'}.", REGOLA_DEL_DOLLARO], "sì" if imp["casuale"] else "no"
         if chiave == "video":
             return (lambda testo: valori.leggi_si_no(testo, "Video")), [
@@ -7092,7 +7514,7 @@ class Finestra(wx.Frame):
         if chiave == "sottotitoli":
             return (lambda testo: valori.leggi_si_no(testo, "Sottotitoli letti")), [
                 "Con i sottotitoli letti accesi, ogni sottotitolo dei video va alla sintesi scelta qui sotto e si scrive nella console, anche con il video spento.",
-                "Scrivi sì per accenderli, no per spegnerli; valgono anche s, n, 1, 0, acceso e spento. Maiuscolo con F2 li accende e sceglie la traccia, a giro.",
+                "Scrivi sì per accenderli, no per spegnerli; valgono anche s, n, 1, 0, acceso e spento. Maiuscolo con D li accende e sceglie la traccia seguente, Ctrl con D la precedente.",
                 f"Adesso sono {'accesi' if imp['sottotitoli'] else 'spenti'}.", REGOLA_DEL_DOLLARO], "sì" if imp["sottotitoli"] else "no"
         if chiave == "barra_dei_comandi":
             return (lambda testo: valori.leggi_si_no(testo, "Barra dei comandi per il mouse")), [
@@ -7168,7 +7590,7 @@ class Finestra(wx.Frame):
             self.motore.volume = valore
             return f"Il volume della musica ora è {valore}{', amplificato oltre il 100' if valore > 100 else ''}."
         if chiave == "passo_volume":
-            return f"Più e meno ora cambiano il volume di {valore}."
+            return f"Ctrl e Maiuscolo con M ora cambiano il volume di {valore}."
         if chiave == "volume_effetti":
             return f"Gli effetti sonori ora suonano al {round(valore * 100)}%." if valore else "Gli effetti sonori ora tacciono."
         if chiave in ("passo_indietro", "passo_avanti"):
@@ -7649,45 +8071,96 @@ class Finestra(wx.Frame):
         self._riscontro("video_acceso" if acceso else "video_spento", _frase_del_video(acceso))
         self._aggiorna_il_video()
 
-    def _comando_sottotitoli(self):
-        """Maiuscolo con F2: i sottotitoli letti a giro, spenti, la prima
-        traccia, la seconda e cosi' via, e sui video in fondo i sottotitoli
-        impressi (1.80.0): la traccia del file di una passata non e' un passo
-        a se', e' quello degli impressi. Su un brano senza sottotitoli, e
-        senza impressi da leggere, li accende o li spegne per i brani dopo."""
+    def _posti_dei_sottotitoli(self):
+        """Le scelte fra cui si muove D (issue 38, al posto del giro di
+        Maiuscolo con F2): spenti, poi le tracce dei sottotitoli, poi sui
+        video i sottotitoli impressi (1.80.0), se c'e' il file della passata
+        o si possono leggere; la traccia del file di una passata non e' una
+        scelta a se', e' quella degli impressi. Su un brano senza
+        sottotitoli, e senza impressi, o da fermi: spenti e accesi per i
+        brani dopo. Torna (tracce, passata, sottotitoli, con_gli_impressi,
+        attuale, quante), con attuale contato da zero."""
         tracce = self.motore.tracce() if self.motore.in_corso else None
         passata = _traccia_della_passata(tracce)
         sottotitoli = [t for t in (tracce["sub"] if tracce else []) if t is not passata]
-        # Gli impressi ci sono se c'e' il file della passata, o se si possono leggere.
         con_gli_impressi = bool(tracce and tracce["video"] and (passata is not None or ocr.disponibile()))
         if not sottotitoli and not con_gli_impressi:
-            acceso = not self.impostazioni["sottotitoli"]
+            return tracce, passata, sottotitoli, False, 1 if self.impostazioni["sottotitoli"] else 0, 2
+        quante = 1 + len(sottotitoli) + con_gli_impressi
+        if con_gli_impressi and ((passata is not None and passata.get("selected")) or (self.impostazioni["impressi_scelti"]
+                and self.impostazioni["sottotitoli"] and not any(t.get("selected") for t in sottotitoli))):
+            attuale = quante - 1
+        else:
+            scelta = next((i for i, t in enumerate(sottotitoli) if t.get("selected")), None)
+            attuale = 0 if scelta is None or not self.impostazioni["sottotitoli"] else scelta + 1
+        return tracce, passata, sottotitoli, con_gli_impressi, attuale, quante
+
+    def _frase_dei_sottotitoli(self, tracce, sottotitoli, con_gli_impressi, attuale, quante):
+        """La scelta dei sottotitoli, fra quante, da dire."""
+        if not sottotitoli and not con_gli_impressi:
+            stato = "accesi" if attuale else "spenti"
+            return f"Sottotitoli letti {stato}; {'questo brano non ne ha' if tracce else 'valgono per i brani che ne hanno'}."
+        if attuale == 0:
+            stato = "Sottotitoli letti spenti"
+        elif attuale <= len(sottotitoli):
+            stato = f"Sottotitoli letti, traccia {_descrivi_traccia(sottotitoli[attuale - 1], attuale - 1, len(sottotitoli))}"
+        else:
+            stato = "Sottotitoli impressi"
+        offerta = [al_plurale(len(sottotitoli), "traccia", "tracce")] if sottotitoli else []
+        if con_gli_impressi:
+            offerta.append("gli impressi")
+        return f"{stato}; scelta {attuale + 1} di {quante}: spenti, {' e '.join(offerta)}."
+
+    def _comando_sottotitoli(self):
+        """D (issue 38): i sottotitoli letti, la scelta fra quante."""
+        tracce, _passata, sottotitoli, con_gli_impressi, attuale, quante = self._posti_dei_sottotitoli()
+        self._riporta(self._frase_dei_sottotitoli(tracce, sottotitoli, con_gli_impressi, attuale, quante), "sottotitoli")
+
+    def _comando_sottotitoli_precedenti(self):
+        self._vai_ai_sottotitoli(lambda attuale, _quante: attuale - 1, -1)
+
+    def _comando_sottotitoli_successivi(self):
+        self._vai_ai_sottotitoli(lambda attuale, _quante: attuale + 1, 1)
+
+    def _comando_ultimi_sottotitoli(self):
+        self._vai_ai_sottotitoli(lambda _attuale, quante: quante - 1, 1)
+
+    def _comando_sottotitoli_spenti(self):
+        self._vai_ai_sottotitoli(lambda _attuale, _quante: 0, -1)
+
+    def _vai_ai_sottotitoli(self, scelta, verso):
+        """Ctrl e Maiuscolo con D la scelta prima e dopo, Alt con D l'ultima,
+        Ctrl e Alt con D spenti: scelta(attuale, quante) da' la nuova, che si
+        ferma alla prima e all'ultima. Su un brano senza sottotitoli, e
+        senza impressi da leggere, li accende o li spegne per i brani dopo."""
+        tracce, passata, sottotitoli, con_gli_impressi, attuale, quante = self._posti_dei_sottotitoli()
+        indice = max(0, min(quante - 1, scelta(attuale, quante)))
+        if indice == attuale:
+            dove = "la prima" if indice == 0 else "l'ultima" if indice == quante - 1 else "questa"
+            self._riscontro("nessun_altro_brano", f"È già {dove} scelta. {self._frase_dei_sottotitoli(tracce, sottotitoli, con_gli_impressi, attuale, quante)}",
+                "sottotitoli")
+            return
+        if not sottotitoli and not con_gli_impressi:
+            acceso = indice == 1
             self.impostazioni["impressi_scelti"] = False
             frase = ("Sottotitoli letti accesi; questo brano non ne ha." if tracce else "Sottotitoli letti accesi.") if acceso else "Sottotitoli letti spenti."
+        elif indice == 0:
+            acceso, frase = False, "Sottotitoli letti spenti."
+            self.impostazioni["impressi_scelti"] = False
+            self.motore.scegli_traccia("sid", "no")
+        elif indice <= len(sottotitoli):
+            acceso, frase = True, self._scegli_i_sottotitoli(tracce, sottotitoli[indice - 1], indice - 1, len(sottotitoli))
         else:
-            if (passata is not None and passata.get("selected")) or (self.impostazioni["impressi_scelti"] and self.impostazioni["sottotitoli"]
-                    and tracce["video"] and not any(t.get("selected") for t in sottotitoli)):
-                attuale = len(sottotitoli)
-            else:
-                attuale = next((i for i, t in enumerate(sottotitoli) if t.get("selected")), None)
-            indice = 0 if attuale is None else attuale + 1
-            if indice < len(sottotitoli):
-                acceso, frase = True, self._scegli_i_sottotitoli(tracce, sottotitoli[indice], indice, len(sottotitoli))
-            elif indice == len(sottotitoli) and con_gli_impressi:
-                acceso, frase = True, self._scegli_gli_impressi(tracce, passata)
-            else:
-                acceso, frase = False, "Sottotitoli letti spenti."
-                self.impostazioni["impressi_scelti"] = False
-                self.motore.scegli_traccia("sid", "no")
+            acceso, frase = True, self._scegli_gli_impressi(tracce, passata)
         self.impostazioni["sottotitoli"] = acceso
         self._salva_impostazioni()
-        self._riscontro("sottotitoli_accesi" if acceso else "sottotitoli_spenti", frase)
+        self._riscontro("sottotitoli_accesi" if acceso else "sottotitoli_spenti", frase, "sottotitoli")
         if not acceso:
             self._braille.svuota()
             self._aggiorna_la_lettura(tracce, scelta=None)
 
     def _scegli_i_sottotitoli(self, tracce, traccia, indice, quante):
-        """Una traccia di sottotitoli, scelta con Maiuscolo con F2; se e' fatta
+        """Una traccia di sottotitoli, scelta con D; se e' fatta
         di immagini, la legge il riconoscimento dei caratteri."""
         self.impostazioni["impressi_scelti"] = False
         self.impostazioni["sottotitoli"] = True
@@ -7743,7 +8216,7 @@ class Finestra(wx.Frame):
     def _aggiorna_la_lettura(self, tracce, scelta=_DALLE_TRACCE):
         """La lettura dei sottotitoli fatti di immagini che serve adesso: le
         tracce a immagini, se ne e' scelta una; quelli impressi, se li ha
-        scelti Maiuscolo con F2 e non c'e' una traccia; nessuna altrimenti, o
+        scelti con D e non c'e' una traccia; nessuna altrimenti, o
         se il riconoscimento non c'e'. scelta e' la traccia appena scelta, o
         None per nessuna; senza, la si legge dalle tracce."""
         voluta = None
@@ -7811,10 +8284,36 @@ class Finestra(wx.Frame):
             self._aggiorna_la_lettura(self.motore.tracce(), scelta={"codec": "subrip", "title": TITOLO_DELLA_PASSATA})
             self._riscontro("passata_finita", f"Sottotitoli impressi pronti nel file {os.path.basename(esito)}, accanto al video: da ora si leggono da lì.")
         else:
-            self._riscontro("passata_finita", f"Sottotitoli impressi pronti nel file {os.path.basename(esito)}, accanto al video: Maiuscolo con F2 li sceglie, anche le volte dopo.")
+            self._riscontro("passata_finita", f"Sottotitoli impressi pronti nel file {os.path.basename(esito)}, accanto al video: Alt con D li sceglie, anche le volte dopo.")
 
     def _comando_traccia_audio(self):
-        """Maiuscolo con F3: la traccia audio del brano, a giro."""
+        """G (issue 38): la traccia audio del brano, fra quante."""
+        if self._niente_in_corso(risveglia=True):
+            return
+        tracce = self.motore.tracce()
+        audio = tracce["audio"] if tracce else []
+        if not audio:
+            self._riporta("Questo brano non ha tracce audio da scegliere.", "traccia_audio")
+            return
+        scelta = next((i for i, t in enumerate(audio) if t.get("selected")), 0)
+        self._riporta(f"Traccia audio {_descrivi_traccia(audio[scelta], scelta, len(audio))}.", "traccia_audio")
+
+    def _comando_traccia_audio_precedente(self):
+        self._scegli_la_traccia_audio(lambda attuale, _quante: attuale - 1, -1)
+
+    def _comando_traccia_audio_successiva(self):
+        self._scegli_la_traccia_audio(lambda attuale, _quante: attuale + 1, 1)
+
+    def _comando_ultima_traccia_audio(self):
+        self._scegli_la_traccia_audio(lambda _attuale, quante: quante - 1, 1)
+
+    def _comando_prima_traccia_audio(self):
+        self._scegli_la_traccia_audio(lambda _attuale, _quante: 0, -1)
+
+    def _scegli_la_traccia_audio(self, scelta, verso):
+        """Ctrl e Maiuscolo con G la traccia audio prima e dopo, Alt con G
+        l'ultima, Ctrl e Alt con G la prima, senza giro (issue 38): scelta(attuale,
+        quante) da' la nuova, che si ferma alla prima e all'ultima."""
         if self._niente_in_corso(risveglia=True):
             return
         tracce = self.motore.tracce()
@@ -7822,10 +8321,14 @@ class Finestra(wx.Frame):
         if len(audio) < 2:
             self._riscontro("non_disponibile", "Questo brano ha una traccia audio sola." if audio else "Questo brano non ha tracce audio da scegliere.")
             return
-        scelta = next((i for i, t in enumerate(audio) if t.get("selected")), -1)
-        indice = (scelta + 1) % len(audio)
+        attuale = next((i for i, t in enumerate(audio) if t.get("selected")), 0)
+        indice = max(0, min(len(audio) - 1, scelta(attuale, len(audio))))
+        if indice == attuale:
+            dove = "la prima" if verso < 0 else "l'ultima"
+            self._riscontro("nessun_altro_brano", f"È già {dove} traccia audio: {_descrivi_traccia(audio[indice], indice, len(audio))}.", "traccia_audio")
+            return
         self.motore.scegli_traccia("aid", str(audio[indice]["id"]))
-        self._riscontro("traccia_audio", f"Traccia audio {_descrivi_traccia(audio[indice], indice, len(audio))}.")
+        self._riscontro("traccia_audio", f"Traccia audio {_descrivi_traccia(audio[indice], indice, len(audio))}.", "traccia_audio")
 
     def _comando_schermo_intero(self):
         """Maiuscolo con F5: la finestra del video a schermo intero, o di nuovo in finestra."""
@@ -7838,11 +8341,38 @@ class Finestra(wx.Frame):
             self._riscontro("schermo_in_finestra", "Video in finestra.")
 
     def _comando_rapporto(self):
-        """Maiuscolo con F6: il rapporto dell'immagine, a giro."""
-        self._rapporto = (self._rapporto + 1) % len(RAPPORTI)
-        valore, nome = RAPPORTI[self._rapporto]
-        self.motore.rapporto(valore)
-        self._riscontro("rapporto", f"Rapporto dell'immagine: {nome}.")
+        """I (issue 38): il rapporto dell'immagine, fra quanti."""
+        self._riporta(self._frase_del_rapporto(), "rapporto")
+
+    def _frase_del_rapporto(self):
+        return f"Rapporto dell'immagine: {RAPPORTI[self._rapporto][1]}, {self._rapporto + 1} di {len(RAPPORTI)}."
+
+    def _comando_rapporto_precedente(self):
+        self._scegli_il_rapporto(self._rapporto - 1, -1)
+
+    def _comando_rapporto_successivo(self):
+        self._scegli_il_rapporto(self._rapporto + 1, 1)
+
+    def _comando_rapporto_del_video(self):
+        self._scegli_il_rapporto(0, 0)
+
+    def _comando_ultimo_rapporto(self):
+        self._scegli_il_rapporto(len(RAPPORTI) - 1, 1)
+
+    def _comando_primo_rapporto(self):
+        self._scegli_il_rapporto(0, -1)
+
+    def _scegli_il_rapporto(self, indice, verso):
+        """Il rapporto dell'immagine, senza giro (issue 38): si ferma al primo,
+        quello del video, e all'ultimo."""
+        indice = max(0, min(len(RAPPORTI) - 1, indice))
+        if indice == self._rapporto:
+            dove = "il primo" if verso < 0 else "l'ultimo" if verso > 0 else "questo"
+            self._riscontro("nessun_altro_brano", f"È già {dove}. {self._frase_del_rapporto()}", "rapporto")
+            return
+        self._rapporto = indice
+        self.motore.rapporto(RAPPORTI[indice][0])
+        self._riscontro("rapporto", self._frase_del_rapporto(), "rapporto")
 
     def _sintesi_da_leggere(self):
         scelta = self.impostazioni["sintesi"]
@@ -8671,7 +9201,7 @@ class Finestra(wx.Frame):
         self._riscontro("marker_messo", f"Marker {marker['nome']} a {durata_lunga(marker['tempo'])}.")
 
     def _salta_al_marker(self, verso):
-        contesto = self._contesto_dei_marker("R e Y saltano fra i marker del brano che suona.", risveglia=True)
+        contesto = self._contesto_dei_marker("Ctrl e Maiuscolo con Y saltano fra i marker del brano che suona.", risveglia=True)
         if contesto is None:
             return
         k = contesto[0]
@@ -8692,6 +9222,10 @@ class Finestra(wx.Frame):
                 testo = "È il primo marker." if sopra else "Prima di qui non ci sono marker."
             self._riscontro("nessun_altro_brano", testo)
             return
+        self._al_marker(k, marker, verso)
+
+    def _al_marker(self, k, marker, verso):
+        """Il salto a un marker del brano in corso, con il riscontro."""
         self._vai_nel_brano(marker["tempo"])
         self._riscontro("marker_avanti" if verso > 0 else "marker_indietro", f"{marker['nome']}, {durata_lunga(marker['tempo'])}.")
         self._avvisa_l_attesa_del_sid(marker["tempo"])
@@ -8712,6 +9246,58 @@ class Finestra(wx.Frame):
 
     def _comando_marker_successivo(self):
         self._salta_al_marker(1)
+
+    def _comando_marker_attuale(self):
+        """Y (issue 38): il marker su cui si e', o l'ultimo prima, fra quanti."""
+        contesto = self._contesto_dei_marker("Y dice i marker del brano che suona.", risveglia=True)
+        if contesto is None:
+            return
+        elenco = self.marcatori.elenco(contesto[0])
+        if not elenco:
+            self._riporta("Questo brano non ha marker: T ne mette uno dove sei.", "marker")
+            return
+        posizione = self.motore.posizione or 0.0
+        prima = [m for m in elenco if m["tempo"] <= posizione + marcatori.TOLLERANZA]
+        if not prima:
+            primo = elenco[0]
+            self._riporta(f"Prima di qui non ci sono marker; il brano ne ha {len(elenco)}, il primo è {primo['nome']}, {durata_lunga(primo['tempo'])}.", "marker")
+            return
+        marker = prima[-1]
+        dove = "ci sei sopra" if abs(marker["tempo"] - posizione) <= marcatori.TOLLERANZA else "il più vicino prima di qui"
+        self._riporta(f"Marker {len(prima)} di {len(elenco)}, {marker['nome']}, {durata_lunga(marker['tempo'])}: {dove}.", "marker")
+
+    def _comando_primo_marker(self):
+        self._marker_estremo(ultimo=False)
+
+    def _comando_ultimo_marker(self):
+        self._marker_estremo(ultimo=True)
+
+    def _marker_estremo(self, ultimo):
+        """Alt con Y l'ultimo marker del brano, Ctrl e Alt con Y il primo."""
+        contesto = self._contesto_dei_marker("Alt con Y e Ctrl e Alt con Y vanno all'ultimo e al primo marker del brano che suona.", risveglia=True)
+        if contesto is None:
+            return
+        k = contesto[0]
+        elenco = self.marcatori.elenco(k)
+        if not elenco:
+            self._riscontro("non_disponibile", "Questo brano non ha marker: T ne mette uno dove sei.")
+            return
+        self._al_marker(k, elenco[-1] if ultimo else elenco[0], 1 if ultimo else -1)
+
+    def _comando_conta_i_marker(self):
+        """R (issue 38): quanti marker ha il brano, prima e dopo il punto."""
+        contesto = self._contesto_dei_marker("R conta i marker del brano che suona.", risveglia=True)
+        if contesto is None:
+            return
+        elenco = self.marcatori.elenco(contesto[0])
+        if not elenco:
+            self._riporta("Questo brano non ha marker: T ne mette uno dove sei.", "marker")
+            return
+        posizione = self.motore.posizione or 0.0
+        prima = sum(1 for m in elenco if m["tempo"] < posizione - marcatori.TOLLERANZA)
+        dopo = sum(1 for m in elenco if m["tempo"] > posizione + marcatori.TOLLERANZA)
+        sopra = ", e sei su uno" if len(elenco) - prima - dopo else ""
+        self._riporta(f"Il brano ha {len(elenco)} marker: {prima} prima di qui e {dopo} dopo{sopra}.", "marker")
 
     def _marker_numero(self, numero):
         """Maiuscolo con le cifre da 1 a 0: il marker numero, nell'ordine del
@@ -8747,7 +9333,7 @@ class Finestra(wx.Frame):
         self._vai_al_marker({"playlist": dati["playlist"], "brano": brano, "numero": sottobrano, "marker": elenco[numero - 1]})
 
     def _togli_i_marker(self, quali):
-        contesto = self._contesto_dei_marker("Maiuscolo con R, Y e T tolgono i marker del brano che suona; quelli di un altro brano si tolgono con Canc sulla loro voce nella plancia.")
+        contesto = self._contesto_dei_marker("Ctrl e Maiuscolo con R, e Maiuscolo con T, tolgono i marker del brano che suona; quelli di un altro brano si tolgono con Canc sulla loro voce nella plancia.")
         if contesto is None:
             return
         k = contesto[0]
@@ -8895,7 +9481,7 @@ class Finestra(wx.Frame):
             self._seleziona(figlio)
 
     def _fuoco_sul_marker(self, k, marker):
-        """R e Y: il fuoco della plancia va sul marker raggiunto, aprendo i
+        """Y: il fuoco della plancia va sul marker raggiunto, aprendo i
         rami che servono, se cio' che suona sta nella plancia."""
         voce = self._trova_voce_che_suona()
         if voce is None:
@@ -8982,8 +9568,22 @@ class Finestra(wx.Frame):
         # dopo i nuovi, e i sottotitoli in fila restano. E anche a voce: la
         # voce di Windows, che da sola non interrompe, accodava le pressioni
         # ravvicinate (ritocco della 1.105.0).
-        self._braille.togli(self._dove_sono_in_braille)
-        self._dove_sono_in_braille = self._ai_testi_letti(testo, interrompi=True)
+        self._a_voce_e_in_braille(testo)
+
+    def _a_voce_e_in_braille(self, testo):
+        """Il testo alla sintesi e al braille scelti per sottotitoli e karaoke,
+        al posto del rapporto di prima, se e' ancora in fila o sulla barra."""
+        self._braille.togli(self._rapporto_in_braille)
+        self._rapporto_in_braille = self._ai_testi_letti(testo, interrompi=True)
+
+    def _riporta(self, testo, categoria):
+        """Il tasto da solo, issue 38 (2.0.0): il valore del suo controllo,
+        con i limiti, nella console, dove riscrive la riga della sua famiglia,
+        e alla sintesi e al braille dei sottotitoli, come Dove sono; senza
+        suono, perche' parla, e senza spostare il fuoco."""
+        self._domanda_viva = None
+        self.scrivi(testo, categoria)
+        self._a_voce_e_in_braille(testo)
 
     def _tempo_di_dove_sono(self, brano):
         """1:23 di 4:56, mancano 3:33. Il mancante si conta dai secondi interi
@@ -9554,7 +10154,7 @@ class Finestra(wx.Frame):
     def _apri_ramo(self, voce, con_i_marker=True):
         """Apre la voce e tutti i rami che ha dentro, caricandoli, tutto
         d'un fiato, fino a MASSIMO_DI_RAMI rami e MASSIMO_DI_VOCI voci: serve
-        a J e K, che aprono una playlist per suonarla. Torna (rami aperti,
+        a J, che apre una playlist per suonarla. Torna (rami aperti,
         vero se si e' fermato prima). Senza con_i_marker restano chiusi i
         brani che dentro hanno solo marker."""
         aperti, voci = 0, 0

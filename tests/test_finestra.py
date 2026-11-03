@@ -22,7 +22,7 @@ HVSC = r"E:\C64Music"
 TURBO_OUTRUN = os.path.join(HVSC, r"MUSICIANS\T\Tel_Jeroen\Turbo_Outrun.sid")
 
 
-def _tasto(f, carattere=None, codice=None, maiuscolo=False):
+def _tasto(f, carattere=None, codice=None, maiuscolo=False, ctrl=False, alt=False):
     """Manda alla finestra un tasto come lo manderebbe Windows a EVT_CHAR_HOOK."""
     evento = wx.KeyEvent(wx.wxEVT_CHAR_HOOK)
     if carattere is not None:
@@ -31,6 +31,8 @@ def _tasto(f, carattere=None, codice=None, maiuscolo=False):
     else:
         evento.SetKeyCode(codice)
     evento.SetShiftDown(maiuscolo)
+    evento.SetControlDown(ctrl)
+    evento.SetAltDown(alt)
     evento.SetEventObject(f)
     f._tasto(evento)
 
@@ -93,13 +95,20 @@ def test_tasti_liberi_e_numpad(finestra, suoni_annotati):
     # all'albero (tappa 9); il tastierino resta a NVDA, in silenzio.
     assert _premi(finestra, "ò") == "Il tasto o accentata non ha un comando." and suoni_annotati[-1] == "non_disponibile"
     assert _premi(finestra, "ì") == "Il tasto i accentata non ha un comando."
-    assert _premi(finestra, "a", maiuscolo=True) == "Maiuscolo+A non ha un comando."
+    assert _premi(finestra, "h", maiuscolo=True) == "Maiuscolo+H non ha un comando."
     # L'apostrofo e' Dove sono dalla 1.105.0, e con il Maiuscolo la durata
     # residua dalla 1.110.0: la i accentata col Maiuscolo resta libera.
     assert _premi(finestra, "ì", maiuscolo=True) == "Maiuscolo+i accentata non ha un comando."
     righe, suonati = len(finestra._righe), len(suoni_annotati)
     _tasto(finestra, codice=wx.WXK_NUMPAD_ADD)
     assert len(finestra._righe) == righe and len(suoni_annotati) == suonati
+    # Ctrl e Alt fuori dalla regola dei tasti a lettera vanno a Windows, come
+    # Ctrl con C per copiare (issue 38).
+    evento = wx.KeyEvent(wx.wxEVT_CHAR_HOOK)
+    evento.SetKeyCode(ord("C"))
+    evento.SetUnicodeKey(ord("C"))
+    evento.SetControlDown(True)
+    assert finestra._esegui_il_tasto(evento) is False and evento.GetSkipped()
     # Canc, con il suo codice 127, va all'albero come prima: non e' un
     # carattere senza comando.
     for maiuscolo in (False, True):
@@ -130,27 +139,42 @@ def test_senza_niente_in_corso(finestra, suoni_annotati):
 
 
 def test_volume_e_muto(finestra, suoni_annotati, equalizzatore_annotato):
+    # Issue 38 (2.0.0): il volume tutto su M; Ctrl e Maiuscolo lo abbassano e lo alzano.
     finestra.motore.volume = 95
-    _tasto(finestra, "+")
+    _tasto(finestra, "m", maiuscolo=True)
     assert _ultima(finestra) == "Volume 100."
-    _tasto(finestra, "+")
+    _tasto(finestra, "m", maiuscolo=True)
     assert _ultima(finestra) == "Volume 105, amplificato oltre il 100."
-    _tasto(finestra, "-")
+    _tasto(finestra, "m", ctrl=True)
     assert _ultima(finestra) == "Volume 100."
     finestra.motore.volume = 298
-    _tasto(finestra, "+")
-    _tasto(finestra, "+")
+    _tasto(finestra, "m", maiuscolo=True)
+    _tasto(finestra, "m", maiuscolo=True)
     assert _ultima(finestra) == "Volume già al massimo, 300."
-    # Piu' e meno suonano al volo il volume nuovo (1.116.2), e le statistiche
-    # li contano come prima; il limite ha ancora il suo preset.
+    # Suonano al volo il volume nuovo (1.116.2), e le statistiche li contano;
+    # il limite ha ancora il suo preset.
     assert equalizzatore_annotato == [("volume", 100), ("volume", 105), ("volume", 100), ("volume", 300)]
     assert suoni_annotati[-1] == "volume_al_limite"
     assert finestra._statistiche.dati["eventi"]["volume_su"] == 3 and finestra._statistiche.dati["eventi"]["volume_giu"] == 1
-    _tasto(finestra, "m")
-    assert _ultima(finestra) == "Muto."
-    _tasto(finestra, "m")
-    assert _ultima(finestra).startswith("Audio di nuovo acceso")
-    assert finestra.impostazioni["volume"] == 300
+    # M da sola lo dice, con i limiti, senza suono.
+    suonati = len(suoni_annotati)
+    assert _premi(finestra, "m") == "Volume 300, amplificato oltre il 100, da 0 a 300."
+    assert len(suoni_annotati) == suonati
+    # Ctrl e Alt con M: lo zero, che fa da muto; Ctrl e Maiuscolo con M il
+    # volume di prima, che dallo zero al massimo resta quello di partenza.
+    finestra.motore.volume = 80
+    assert _premi(finestra, "m", ctrl=True, alt=True) == "Volume 0."
+    assert finestra.impostazioni["volume_di_prima"] == 80
+    assert _premi(finestra, "m") == "Volume 0, da 0 a 300. Ctrl e Maiuscolo con M lo riportano a 80."
+    assert _premi(finestra, "m", alt=True) == "Volume 300, amplificato oltre il 100."
+    assert _premi(finestra, "m", ctrl=True, maiuscolo=True) == "Volume 80."
+    assert finestra.impostazioni["volume_di_prima"] == -1
+    assert _premi(finestra, "m", ctrl=True, maiuscolo=True) == "Il volume non è stato portato al massimo o a zero: resta 80."
+    # Il pulsante Muto della barra: a zero, e di nuovo come prima.
+    finestra._comando_muto()
+    assert _ultima(finestra) == "Volume 0."
+    finestra._comando_muto()
+    assert _ultima(finestra) == "Volume 80." and finestra.impostazioni["volume"] == 80
 
 
 def test_console_tiene_le_ultime_righe_e_il_cursore(finestra):
@@ -236,15 +260,15 @@ def test_cruscotto_ricorda_il_cursore(finestra):
 def test_console_riscrive_la_riga_della_stessa_categoria(finestra):
     finestra.motore.volume = 50
     righe = len(finestra._righe)
-    _tasto(finestra, "+")
-    _tasto(finestra, "+")
-    _tasto(finestra, "-")
+    _tasto(finestra, "m", maiuscolo=True)
+    _tasto(finestra, "m", maiuscolo=True)
+    _tasto(finestra, "m", ctrl=True)
     assert len(finestra._righe) == righe + 1
     assert _ultima(finestra) == "Volume 55."
     testo = finestra.console.GetValue().replace("\r\n", "\n").replace("\r", "\n")
     assert testo.split("\n") == finestra._righe
     finestra.scrivi("altro")
-    _tasto(finestra, "+")
+    _tasto(finestra, "m", maiuscolo=True)
     assert [_senza_ora(r) for r in finestra._righe[-2:]] == ["altro", "Volume 60."]
 
 
@@ -274,8 +298,8 @@ def _voce(f, radice, condizione):
     return next(v for v in f._tutte_le_voci(radice) if condizione(f._dati(v) or {}))
 
 
-def _premi(f, carattere, maiuscolo=False):
-    _tasto(f, carattere, maiuscolo=maiuscolo)
+def _premi(f, carattere, maiuscolo=False, ctrl=False, alt=False):
+    _tasto(f, carattere, maiuscolo=maiuscolo, ctrl=ctrl, alt=alt)
     return _ultima(f)
 
 
@@ -741,12 +765,15 @@ def _nomi(candidati):
     return [os.path.basename(c[1].percorso) for c in candidati]
 
 
-def test_maiuscolo_n_accende_e_spegne_la_riproduzione_casuale(finestra, suoni_annotati):
+def test_maiuscolo_n_accende_e_ctrl_n_spegne_la_riproduzione_casuale(finestra, suoni_annotati):
+    # Issue 38 (2.0.0): Maiuscolo con N accende, Ctrl con N spegne, N da sola lo dice.
     _tasto(finestra, "n", maiuscolo=True)
     assert finestra.impostazioni["casuale"] is True and _salvate(finestra)["casuale"] is True
     assert suoni_annotati[-1] == "casuale_acceso"
     assert _ultima(finestra) == "Riproduzione casuale accesa: una volta per brano, poi ricomincia."
-    _tasto(finestra, "n", maiuscolo=True)
+    assert _premi(finestra, "n", maiuscolo=True) == "Già così. Riproduzione casuale accesa: una volta per brano, poi ricomincia."
+    assert _premi(finestra, "n") == "Riproduzione casuale accesa: una volta per brano, poi ricomincia."
+    _tasto(finestra, "n", ctrl=True)
     assert finestra.impostazioni["casuale"] is False and _salvate(finestra)["casuale"] is False
     assert suoni_annotati[-1] == "casuale_spento"
     assert _ultima(finestra) == "Riproduzione casuale spenta: a fine brano si va avanti in ordine."
@@ -853,12 +880,12 @@ def test_con_il_casuale_b_sceglie_a_caso_e_z_torna_indietro(finestra, monkeypatc
     assert suonati[-1] == ("d.mp3", None)
     # Riaccendere il casuale fa ricominciare la storia da cio' che suona.
     finestra.motore._in_corso = pl.brani[3].percorso
-    _tasto(finestra, "n", maiuscolo=True)
+    _tasto(finestra, "n", ctrl=True)
     _tasto(finestra, "n", maiuscolo=True)
     _tasto(finestra, "z")
     assert _ultima(finestra) == "È il primo brano suonato a caso."
     # A casuale spento Z e B vanno in ordine.
-    _tasto(finestra, "n", maiuscolo=True)
+    _tasto(finestra, "n", ctrl=True)
     _tasto(finestra, "z")
     assert suonati[-1] == ("c.mp3", None)
 
@@ -1112,9 +1139,7 @@ def test_esc_nei_campi_lo_dice_con_il_suo_suono(finestra, monkeypatch, suoni_ann
     finestra._comando_nuova_playlist()
     pl = finestra.archivio.playlist[0]
     for comando, frase in (
-            (lambda: _tasto(finestra, "m", maiuscolo=True), "Passo del volume non cambiato."),
-            (lambda: _tasto(finestra, "q", maiuscolo=True), "Il salto indietro resta di 10 secondi."),
-            (lambda: _tasto(finestra, "l", maiuscolo=True), "La durata della dissolvenza resta di 4 secondi."),
+            (lambda: _tasto(finestra, "e", ctrl=True), "Il salto indietro resta di 10 secondi."),
             (lambda: finestra._rinomina(pl), "Nome della playlist non cambiato."),
             (finestra._comando_apri_file, "Nessun file aperto."),
             (finestra._comando_aggiungi_percorso_di_rete, "Nessun percorso aggiunto."),
@@ -1561,16 +1586,21 @@ def test_f12_senza_guida_lo_dice(finestra, suoni_annotati, monkeypatch):
 
 
 def test_ogni_tasto_e_nella_guida_rapida(finestra):
-    """Ogni tasto a lettera e ogni tasto funzione ha la sua riga nella guida
-    rapida, che comincia con il suo nome."""
+    """Ogni tasto a lettera, con i suoi modificatori, e ogni tasto funzione ha
+    la sua riga nella guida rapida, che comincia con il suo nome."""
     righe = modulo.guida_rapida(finestra._leggi_risorsa("manuale.html"))
-    tasti = [f"F{n}" for n in range(1, 13)] + [f"Maiuscolo con F{n}" for n in (1, 2, 3, 5, 6, 7, 8, 10, 11)] + [
+    tasti = [f"F{n}" for n in range(1, 13)] + [f"Maiuscolo con F{n}" for n in (1, 5, 7, 8, 9, 10, 11, 12)] + [
         "Esc", "Alt con F4", "Tab", "Maiuscolo con Tab", "Barra rovesciata", "Ctrl con la barra rovesciata", "Barra verticale",
-        "Canc", "Maiuscolo con Canc", "Backspace", "Maiuscolo con Backspace", "Meno", "Più", "Cifre da 1 a 0", "Maiuscolo con le cifre da 1 a 0",
+        "Canc", "Maiuscolo con Canc", "Backspace", "Maiuscolo con Backspace", "Cifre da 1 a 0", "Maiuscolo con le cifre da 1 a 0",
         "Apostrofo", "Maiuscolo con l'apostrofo"]
-    for (carattere, maiuscolo), _comando in modulo.TASTI.items():
+    segni = {",": ("Virgola", "la virgola"), ".": ("Punto", "il punto")}
+    for (carattere, modificatori), _comando in modulo.TASTI.items():
         if carattere.isalpha():
-            tasti.append(f"Maiuscolo con {carattere.upper()}" if maiuscolo else carattere.upper())
+            tasti.append(modulo.nome_del_carattere(carattere, modificatori))
+        elif carattere in segni:
+            solo, con = segni[carattere]
+            prefisso = modulo.nome_del_carattere(carattere, modificatori).rsplit(" con ", 1)[0]
+            tasti.append(solo if modificatori == modulo.SOLO else f"{prefisso} con {con}")
     for tasto in tasti:
         assert any(r.startswith(f"{tasto}:") for r in righe), tasto
 
@@ -1736,21 +1766,27 @@ def test_j_k_e_cifre_aprono_e_suonano(finestra, monkeypatch):
     finestra._popola_playlist()
     prima, vuota, _terza = finestra.archivio.playlist
     finestra._seleziona(finestra.nodo_pc)
-    _tasto(finestra, "k")
+    _tasto(finestra, "j", maiuscolo=True)
     assert suonati[-1] == ("a.mp3", None)
     nodo = finestra._nodo_della_playlist(prima)
     assert finestra._voce_corrente() == nodo and finestra.albero.IsExpanded(nodo)
-    _tasto(finestra, "k")
+    _tasto(finestra, "j", maiuscolo=True)
     assert _ultima(finestra) == f"La playlist {vuota.nome} non ha niente da suonare."
     assert finestra._voce_corrente() == finestra._nodo_della_playlist(vuota)
-    _tasto(finestra, "k")
+    _tasto(finestra, "j", maiuscolo=True)
     assert suonati[-1] == ("c.mp3", None)
-    _tasto(finestra, "k")
+    _tasto(finestra, "j", maiuscolo=True)
     assert _ultima(finestra) == "È l'ultima playlist."
-    _tasto(finestra, "j")
-    _tasto(finestra, "j")
+    _tasto(finestra, "j", ctrl=True)
+    _tasto(finestra, "j", ctrl=True)
     assert suonati[-1] == ("a.mp3", None)
     _tasto(finestra, "3")
+    assert suonati[-1] == ("c.mp3", None)
+    # J da sola dice la playlist, Ctrl e Alt la prima, Alt l'ultima (issue 38).
+    assert _premi(finestra, "j") == "Playlist 3 di 3, Terza."
+    _tasto(finestra, "j", ctrl=True, alt=True)
+    assert suonati[-1] == ("a.mp3", None)
+    _tasto(finestra, "j", alt=True)
     assert suonati[-1] == ("c.mp3", None)
     _tasto(finestra, "0")
     assert _ultima(finestra) == "Non c'è la playlist numero 10: ne hai 3."
@@ -1777,10 +1813,10 @@ def test_i_comandi_da_fermi(finestra, tmp_path):
     _tasto(finestra, "v")
     assert finestra.motore.in_corso is None
     avvii = finestra._statistiche.sessione["brani"]
-    _tasto(finestra, "e")
+    _tasto(finestra, "q", maiuscolo=True)
     assert _ultima(finestra) == "Avanti a 0:10 di 0:30."
     assert finestra.motore.in_corso == str(brano) and finestra.motore.in_pausa
-    _tasto(finestra, "q")
+    _tasto(finestra, "q", ctrl=True)
     assert _ultima(finestra) == "Indietro a 0:00 di 0:30."
     # R e Y, la virgola, Dove sono e F8 rispondono anche loro da fermi.
     _tasto(finestra, "v")
@@ -1793,13 +1829,14 @@ def test_i_comandi_da_fermi(finestra, tmp_path):
     _tasto(finestra, "'")
     assert _ultima(finestra).startswith("0:00 di 0:30") and "in pausa" in _ultima(finestra)
     _tasto(finestra, "v")
-    # F8 cerca il brano fermo nella plancia, dove la cartella temporanea
-    # della prova non c'e', senza ricaricarlo.
+    # F8 cerca il brano fermo nella plancia senza ricaricarlo; la cartella
+    # temporanea della prova, a seconda della macchina, la plancia la
+    # raggiunge oppure no.
     _tasto(finestra, codice=wx.WXK_F8)
-    assert _ultima(finestra).startswith("canzone.wav non è nella plancia")
+    assert _ultima(finestra).startswith(("canzone.wav non è nella plancia", "Selezione su canzone.wav"))
     assert finestra.motore.in_corso is None
     # Il brano ricaricato conta come avviato solo quando riparte, qui con C.
-    _tasto(finestra, "e")
+    _tasto(finestra, "q", maiuscolo=True)
     assert finestra._statistiche.sessione["brani"] == avvii
     _tasto(finestra, "c")
     assert _ultima(finestra).startswith("Riprende") and not finestra.motore.in_pausa
@@ -1813,7 +1850,7 @@ def test_i_comandi_da_fermi(finestra, tmp_path):
     assert _ultima(finestra) == "Non sta suonando niente: i marker si mettono nel brano che suona."
     # Senza un brano corrente non c'e' niente da ricaricare.
     finestra.coda.imposta(None, None)
-    _tasto(finestra, "e")
+    _tasto(finestra, "q", maiuscolo=True)
     assert _ultima(finestra) == "Non sta suonando niente."
 
 
@@ -2316,18 +2353,18 @@ def test_marker_t_r_y_e_le_varianti_con_maiuscolo(finestra, monkeypatch, suoni_a
     finestra.albero.Expand(voce)
     assert _etichette(finestra, voce) == ["M1, 0:01", "M2, 0:03.250"]
     # R va al marker prima e porta li' il fuoco della plancia; Y a quello dopo.
-    assert _premi(finestra, "r") == "M1, 0:01."
+    assert _premi(finestra, "y", ctrl=True) == "M1, 0:01."
     assert suoni_annotati[-1] == "marker_indietro"
     assert _aspetta(lambda: abs((finestra.motore.posizione or -1) - 1.0) < 0.002)
     assert finestra.albero.GetItemText(finestra._voce_corrente()) == "M1, 0:01"
-    assert _premi(finestra, "r") == "È il primo marker."
+    assert _premi(finestra, "y", ctrl=True) == "È il primo marker."
     # T sul marker lo rinomina.
     monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("Intro"))
     assert _premi(finestra, "t") == "Il marker M1, a 0:01, ora si chiama Intro."
     assert suoni_annotati[-1] == "marker_rinominato"
     assert finestra.albero.GetItemText(finestra._voce_corrente()) == "Intro, 0:01"
-    assert _premi(finestra, "y") == "M2, 0:03.250."
-    assert _premi(finestra, "y") == "È l'ultimo marker."
+    assert _premi(finestra, "y", maiuscolo=True) == "M2, 0:03.250."
+    assert _premi(finestra, "y", maiuscolo=True) == "È l'ultimo marker."
     # Invio sul marker lo rinomina, Canc lo elimina.
     monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("Ritornello"))
     evento = wx.TreeEvent(wx.wxEVT_TREE_ITEM_ACTIVATED, finestra.albero, finestra._voce_corrente())
@@ -2344,11 +2381,11 @@ def test_marker_t_r_y_e_le_varianti_con_maiuscolo(finestra, monkeypatch, suoni_a
     assert [m["nome"] for m in finestra.marcatori.elenco(finestra._contesto_dei_marker("")[0])] == ["Intro", "M1", "M2"]
     # Fermi su M1: Maiuscolo con R e con Y tolgono gli altri, ma non lui.
     _in_pausa_a(finestra, 2.5)
-    assert _premi(finestra, "r", maiuscolo=True) == "Tolto 1 marker prima di 0:02.500."
+    assert _premi(finestra, "r", ctrl=True) == "Tolto 1 marker prima di 0:02.500."
     assert suoni_annotati[-1] == "marker_tolti_prima"
-    assert _premi(finestra, "y", maiuscolo=True) == "Tolto 1 marker dopo 0:02.500."
+    assert _premi(finestra, "r", maiuscolo=True) == "Tolto 1 marker dopo 0:02.500."
     assert suoni_annotati[-1] == "marker_tolti_dopo"
-    assert _premi(finestra, "y", maiuscolo=True) == "Non ci sono marker da togliere dopo 0:02.500."
+    assert _premi(finestra, "r", maiuscolo=True) == "Non ci sono marker da togliere dopo 0:02.500."
     assert [m["nome"] for m in finestra.marcatori.elenco(finestra._contesto_dei_marker("")[0])] == ["M1"]
     # Maiuscolo con T li toglie tutti, anche quello su cui si e'.
     assert _premi(finestra, "t", maiuscolo=True) == "Tolto 1 marker in tutto il brano."
@@ -2420,9 +2457,9 @@ def test_marker_correzioni_della_revisione(finestra, tmp_path, suoni_annotati):
     marker = list(finestra._figli(voce))
     # Ai capi, fuori da un marker, il messaggio dice com'e'.
     _in_pausa_a(finestra, 0.5)
-    assert _premi(finestra, "r") == "Prima di qui non ci sono marker."
+    assert _premi(finestra, "y", ctrl=True) == "Prima di qui non ci sono marker."
     _in_pausa_a(finestra, 4.0)
-    assert _premi(finestra, "y") == "Dopo di qui non ci sono marker."
+    assert _premi(finestra, "y", maiuscolo=True) == "Dopo di qui non ci sono marker."
     # X su un marker fa come sul suo brano: in pausa lo riprende dal punto.
     finestra._seleziona(marker[2])
     _tasto(finestra, "x")
@@ -2450,7 +2487,7 @@ def test_marker_correzioni_della_revisione(finestra, tmp_path, suoni_annotati):
     # coda si svuota.
     finestra.motore.stop()
     finestra.coda.imposta(None, None)
-    assert _premi(finestra, "r").startswith("Non sta suonando niente: R e Y saltano")
+    assert _premi(finestra, "y", ctrl=True).startswith("Non sta suonando niente: Ctrl e Maiuscolo con Y saltano")
     assert _premi(finestra, "t", maiuscolo=True).endswith("si tolgono con Canc sulla loro voce nella plancia.")
 
 
@@ -2458,9 +2495,9 @@ def test_r_mentre_suona_va_oltre_il_marker_appena_raggiunto(finestra, tmp_path):
     _brano_con_marker(finestra, tmp_path, (2.0, 5.0), secondi=12)
     _in_pausa_a(finestra, 8.0)
     finestra.motore.pausa(False)
-    assert _premi(finestra, "r") == "M2, 0:05."
+    assert _premi(finestra, "y", ctrl=True) == "M2, 0:05."
     assert _aspetta(lambda: (finestra.motore.posizione or 0) > 5.2)
-    assert _premi(finestra, "r") == "M1, 0:02."
+    assert _premi(finestra, "y", ctrl=True) == "M1, 0:02."
     finestra.motore.pausa(True)
 
 
@@ -2877,7 +2914,7 @@ def test_impostazioni_valori_buoni_corretti_e_sbagliati(finestra, monkeypatch, s
     assert finestra.impostazioni["passo_volume"] == 50 and _salvate(finestra)["passo_volume"] == 50
     assert suoni_annotati[-4:] == ["domanda", "errore", "domanda", "impostazione_cambiata"]
     assert _senza_ora(finestra._righe[-2]) == errore
-    assert _ultima(finestra) == "Più e meno ora cambiano il volume di 50. Passo del volume: 70 è oltre il massimo, ho messo 50."
+    assert _ultima(finestra) == "Ctrl e Maiuscolo con M ora cambiano il volume di 50. Passo del volume: 70 è oltre il massimo, ho messo 50."
     # La riga della lista si riscrive mentre il campo e' ancora li'.
     assert lista.righe == {"passo_volume": "Passo del volume: 50"} and lista.a_campo_aperto == [True]
     # Annulla non cambia niente.
@@ -3794,21 +3831,25 @@ def test_lo_speaker_cast(finestra, monkeypatch, tmp_path, suoni_annotati, equali
     assert suoni_annotati[-1] == "scheda_audio" and finestra._statistiche.dati["conti"]["speaker_scelti"] == 1
     assert finestra._scheda_per_le_statistiche == "Speaker Cucina"
     assert finestra._riga_dell_impostazione("scheda_audio") == "Scheda audio: Cucina, speaker Cast"
-    # Meno e piu' cambiano il volume dello speaker, da 0 a 100.
-    _tasto(finestra, "+")
+    # Ctrl e Maiuscolo con M cambiano il volume dello speaker, da 0 a 100.
+    _tasto(finestra, "m", maiuscolo=True)
     assert speaker.volume == 45 and _ultima(finestra) == "Volume di Cucina 45." and equalizzatore_annotato[-1] == ("volume", 45)
     speaker.volume = 100
-    _tasto(finestra, "+")
+    _tasto(finestra, "m", maiuscolo=True)
     assert _ultima(finestra) == "Volume di Cucina già al massimo, 100."
     # Velocita', tono, equalizzatore e dissolvenza sullo speaker non valgono.
     for carattere, cosa in (("a", "La velocità"), ("f", "Il tono"), ("o", "L'equalizzatore"), ("u", "L'equalizzatore"), ("l", "La dissolvenza")):
-        _tasto(finestra, carattere)
+        _tasto(finestra, carattere, maiuscolo=True)
         assert _ultima(finestra) == f"{cosa} su Cucina non vale: vale sulle schede del PC."
     assert finestra.impostazioni["velocita"] == 1.0 and not finestra.impostazioni["dissolvenza"]["accesa"]
-    _tasto(finestra, "m")
-    assert speaker.muto and _ultima(finestra) == "Muto su Cucina."
-    _tasto(finestra, "m")
-    assert _ultima(finestra) == "Audio di nuovo acceso su Cucina, volume 100."
+    # M dice il volume dello speaker; Ctrl e Alt lo portano a zero, Ctrl e
+    # Maiuscolo a quello di prima (issue 38).
+    speaker.volume = 60
+    assert _premi(finestra, "m") == "Volume di Cucina 60, da 0 a 100."
+    _tasto(finestra, "m", ctrl=True, alt=True)
+    assert speaker.volume == 0 and _ultima(finestra) == "Volume di Cucina 0."
+    _tasto(finestra, "m", ctrl=True, maiuscolo=True)
+    assert speaker.volume == 60 and _ultima(finestra) == "Volume di Cucina 60."
     # Lo speaker che non risponde: la musica torna sul PC da dove era.
     speaker.posizione = 12.0
     finestra._speaker_perso(OSError("spento"))
@@ -3849,37 +3890,37 @@ def test_lo_speaker_atteso_all_avvio(finestra, monkeypatch):
 
 def test_velocita_e_tono_coi_tasti(finestra, suoni_annotati):
     righe = len(finestra._righe)
-    assert _premi(finestra, "d") == "Velocità 1.05."
-    assert _premi(finestra, "d") == "Velocità 1.1."
+    assert _premi(finestra, "a", maiuscolo=True) == "Velocità 1.05."
+    assert _premi(finestra, "a", maiuscolo=True) == "Velocità 1.1."
     assert finestra.motore.velocita == 1.1 and finestra.impostazioni["velocita"] == 1.1
     # La riga della velocita' si riscrive: una sola, per il display braille.
     assert len(finestra._righe) == righe + 1
-    assert _premi(finestra, "a") == "Velocità 1.05."
-    assert _premi(finestra, "s") == "Velocità 1, la normale."
+    assert _premi(finestra, "a", ctrl=True) == "Velocità 1.05."
+    assert _premi(finestra, "a", ctrl=True, maiuscolo=True) == "Velocità 1, la normale."
     assert suoni_annotati[-4:] == ["velocita_su", "velocita_su", "velocita_giu", "velocita_normale"]
     assert finestra.motore.velocita == 1.0
     for _ in range(11):
-        _tasto(finestra, "a")
+        _tasto(finestra, "a", ctrl=True)
     assert _ultima(finestra) == "Velocità già al minimo, 0.5." and suoni_annotati[-1] == "velocita_al_limite"
     assert finestra.motore.velocita == 0.5 and _salvate(finestra)["velocita"] == 0.5
     # Una velocita' fuori passo, scritta a mano nel file, arriva al limite.
     finestra.impostazioni["velocita"] = 1.98
-    assert _premi(finestra, "d") == "Velocità 2."
-    assert _premi(finestra, "d") == "Velocità già al massimo, 2."
+    assert _premi(finestra, "a", maiuscolo=True) == "Velocità 2."
+    assert _premi(finestra, "a", maiuscolo=True) == "Velocità già al massimo, 2."
     assert len(finestra._righe) == righe + 1
     # H alza e F abbassa, come D e A per la velocita' (1.58.1).
-    assert _premi(finestra, "h") == "Tono +1 semitono."
-    assert _premi(finestra, "h") == "Tono +2 semitoni."
+    assert _premi(finestra, "f", maiuscolo=True) == "Tono +1 semitono."
+    assert _premi(finestra, "f", maiuscolo=True) == "Tono +2 semitoni."
     assert finestra.motore.tono == 2 and len(finestra._righe) == righe + 2
-    assert _premi(finestra, "f") == "Tono +1 semitono."
-    assert _premi(finestra, "g") == "Tono 0 semitoni, il normale."
+    assert _premi(finestra, "f", ctrl=True) == "Tono +1 semitono."
+    assert _premi(finestra, "f", ctrl=True, maiuscolo=True) == "Tono 0 semitoni, il normale."
     assert suoni_annotati[-4:] == ["tono_su", "tono_su", "tono_giu", "tono_normale"]
     for _ in range(13):
-        _tasto(finestra, "f")
+        _tasto(finestra, "f", ctrl=True)
     assert _ultima(finestra) == "Tono già al minimo, -12 semitoni." and suoni_annotati[-1] == "tono_al_limite"
     assert finestra.motore.tono == -12 and _salvate(finestra)["tono"] == -12
     for _ in range(25):
-        _tasto(finestra, "h")
+        _tasto(finestra, "f", maiuscolo=True)
     assert _ultima(finestra) == "Tono già al massimo, +12 semitoni." and finestra.motore.tono == 12
     # Le righe di stato stanno nei quaranta caratteri del display braille.
     assert all(len(_senza_ora(r)) <= 40 for r in finestra._righe[righe:])
@@ -3888,61 +3929,58 @@ def test_velocita_e_tono_coi_tasti(finestra, suoni_annotati):
 def test_equalizzatore_coi_tasti(finestra, suoni_annotati, equalizzatore_annotato):
     righe = len(finestra._righe)
     # Si parte dalla prima banda, e U li' si ferma.
-    assert _premi(finestra, "u") == "Banda 1, 60 Hz: 0 dB. È la prima."
+    assert _premi(finestra, "u", ctrl=True) == "Banda 1, 60 Hz: 0 dB. È la prima."
     assert suoni_annotati[-1] == "banda_al_limite"
-    assert _premi(finestra, "i") == "Banda 2, 150 Hz: 0 dB."
-    assert _premi(finestra, "i") == "Banda 3, 400 Hz: 0 dB."
-    assert _premi(finestra, "p") == "Banda 3, 400 Hz: +1 dB."
+    assert _premi(finestra, "u", maiuscolo=True) == "Banda 2, 150 Hz: 0 dB."
+    assert _premi(finestra, "u", maiuscolo=True) == "Banda 3, 400 Hz: 0 dB."
+    assert _premi(finestra, "o", maiuscolo=True) == "Banda 3, 400 Hz: +1 dB."
     # I suoni al volo: la banda scelta e il guadagno dato (1.58.0).
     assert equalizzatore_annotato == [("banda", 1), ("banda", 2), ("guadagno", 1)]
     assert finestra.motore.bande == [0, 0, 1, 0, 0, 0, 0]
     for _ in range(12):
-        _tasto(finestra, "p")
+        _tasto(finestra, "o", maiuscolo=True)
     assert _ultima(finestra) == "Banda 3, 400 Hz: +12 dB, il massimo." and suoni_annotati[-1] == "guadagno_al_limite"
-    assert _premi(finestra, "o") == "Banda 3, 400 Hz: +11 dB." and equalizzatore_annotato[-1] == ("guadagno", 11)
+    assert _premi(finestra, "o", ctrl=True) == "Banda 3, 400 Hz: +11 dB." and equalizzatore_annotato[-1] == ("guadagno", 11)
     for _ in range(4):
-        _tasto(finestra, "i")
-    assert _premi(finestra, "i") == "Banda 7, 12000 Hz: 0 dB. È l'ultima."
+        _tasto(finestra, "u", maiuscolo=True)
+    assert _premi(finestra, "u", maiuscolo=True) == "Banda 7, 12000 Hz: 0 dB. È l'ultima."
     for _ in range(13):
-        _tasto(finestra, "o")
+        _tasto(finestra, "o", ctrl=True)
     assert _ultima(finestra) == "Banda 7, 12000 Hz: -12 dB, il minimo."
     assert finestra.motore.bande == [0, 0, 11, 0, 0, 0, -12] and _salvate(finestra)["bande"] == [0, 0, 11, 0, 0, 0, -12]
-    assert _premi(finestra, "u") == "Banda 6, 6000 Hz: 0 dB." and equalizzatore_annotato[-1] == ("banda", 5)
-    _tasto(finestra, "i")
-    assert _premi(finestra, "è") == "Banda 7, 12000 Hz: 0 dB, azzerata." and suoni_annotati[-1] == "banda_azzerata"
+    assert _premi(finestra, "u", ctrl=True) == "Banda 6, 6000 Hz: 0 dB." and equalizzatore_annotato[-1] == ("banda", 5)
+    _tasto(finestra, "u", maiuscolo=True)
+    assert _premi(finestra, "o", ctrl=True, maiuscolo=True) == "Banda 7, 12000 Hz: 0 dB, azzerata." and suoni_annotati[-1] == "banda_azzerata"
     assert finestra.motore.bande == [0, 0, 11, 0, 0, 0, 0]
-    assert _premi(finestra, "è", maiuscolo=True) == "Equalizzatore azzerato, tutte a 0 dB." and suoni_annotati[-1] == "bande_azzerate"
+    assert _premi(finestra, "p", ctrl=True, maiuscolo=True) == "Equalizzatore azzerato, tutte a 0 dB." and suoni_annotati[-1] == "bande_azzerate"
     assert finestra.motore.bande == [0] * 7 and _salvate(finestra)["bande"] == [0] * 7
     # Una riga sola, riscritta, e nei quaranta caratteri.
     assert len(finestra._righe) == righe + 1 and len(_ultima(finestra)) <= 40
 
 
-def test_dissolvenza_coi_tasti(finestra, monkeypatch, suoni_annotati):
+def test_dissolvenza_coi_tasti(finestra, suoni_annotati):
+    # Issue 38 (2.0.0): L la dissolvenza, Maiuscolo la accende e Ctrl la
+    # spegne; K la sua durata, di mezzo secondo alla volta.
     assert finestra.motore.dissolvenza == 0
-    assert _premi(finestra, "l") == "Dissolvenza accesa, 4 secondi."
+    assert _premi(finestra, "l") == "Dissolvenza spenta, 4 secondi."
+    assert _premi(finestra, "l", maiuscolo=True) == "Dissolvenza accesa, 4 secondi."
     assert suoni_annotati[-1] == "dissolvenza_accesa" and finestra.motore.dissolvenza == 4.0
     assert _salvate(finestra)["dissolvenza"] == {"accesa": True, "secondi": 4.0}
-    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("2,5"))
-    assert _premi(finestra, "l", maiuscolo=True) == "Dissolvenza accesa, 2.5 secondi."
-    assert suoni_annotati[-2:] == ["domanda", "dissolvenza_durata"] and finestra.motore.dissolvenza == 2.5
-    # Oltre i limiti si corregge, e la console lo dice.
-    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("20"))
-    assert _premi(finestra, "l", maiuscolo=True) == "Dissolvenza accesa, 15 secondi. Dissolvenza: 20 è oltre il massimo, ho messo 15."
-    assert finestra.motore.dissolvenza == 15
-    # Un testo che non e' un numero di secondi lascia la durata com'era.
-    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("presto"))
-    _tasto(finestra, "l", maiuscolo=True)
-    assert suoni_annotati[-1] == "errore" and _ultima(finestra).startswith("Dissolvenza: presto non è un numero di secondi;")
-    assert _ultima(finestra).endswith("La durata resta di 15 secondi.") and finestra.motore.dissolvenza == 15
-    # Spenta, la durata resta per quando si riaccende; Maiuscolo con L la
-    # cambia senza accenderla.
-    assert _premi(finestra, "l") == "Dissolvenza spenta, 15 secondi."
+    assert _premi(finestra, "l", maiuscolo=True) == "La dissolvenza è già accesa, 4 secondi."
+    assert _premi(finestra, "k", maiuscolo=True) == "Dissolvenza accesa, 4.5 secondi."
+    assert suoni_annotati[-1] == "dissolvenza_durata" and finestra.motore.dissolvenza == 4.5
+    assert _premi(finestra, "k", alt=True) == "Dissolvenza accesa, 15 secondi."
+    assert _premi(finestra, "k", maiuscolo=True) == "Durata della dissolvenza già al massimo, 15 secondi." and suoni_annotati[-1] == "nessun_altro_brano"
+    assert _premi(finestra, "k") == "Durata della dissolvenza 15 secondi, da 0.5 secondi a 15 secondi; la dissolvenza è accesa."
+    assert _premi(finestra, "k", ctrl=True, alt=True) == "Dissolvenza accesa, 0.5 secondi."
+    assert _premi(finestra, "k", ctrl=True) == "Durata della dissolvenza già al minimo, 0.5 secondi."
+    assert _premi(finestra, "k", ctrl=True, maiuscolo=True) == "Dissolvenza accesa, 4 secondi."
+    assert _premi(finestra, "l", ctrl=True) == "Dissolvenza spenta, 4 secondi."
     assert suoni_annotati[-1] == "dissolvenza_spenta" and finestra.motore.dissolvenza == 0
-    monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("3"))
-    assert _premi(finestra, "l", maiuscolo=True) == "Dissolvenza spenta, 3 secondi."
-    assert finestra.motore.dissolvenza == 0
-    assert _salvate(finestra)["dissolvenza"] == {"accesa": False, "secondi": 3.0}
-    assert _premi(finestra, "l") == "Dissolvenza accesa, 3 secondi." and finestra.motore.dissolvenza == 3
+    # La durata cambia anche a dissolvenza spenta, e resta.
+    assert _premi(finestra, "k", ctrl=True) == "Dissolvenza spenta, 3.5 secondi."
+    assert finestra.motore.dissolvenza == 0 and _salvate(finestra)["dissolvenza"] == {"accesa": False, "secondi": 3.5}
+    assert _premi(finestra, "l", maiuscolo=True) == "Dissolvenza accesa, 3.5 secondi." and finestra.motore.dissolvenza == 3.5
 
 
 def test_impostazioni_di_velocita_tono_equalizzatore_e_dissolvenza(finestra, monkeypatch, suoni_annotati):
@@ -3991,7 +4029,7 @@ def test_avvio_con_velocita_tono_equalizzatore_e_dissolvenza_salvati(app, tmp_pa
     f = Finestra(ao="null", cartella_dati=str(tmp_path))
     try:
         assert (f.motore.velocita, f.motore.tono, f.motore.bande, f.motore.dissolvenza) == (1.25, -2, [3, 0, 0, 0, 0, 0, -4], 2.5)
-        assert [_senza_ora(r) for r in f._righe][1] == "Velocità 1.25 e tono -2 semitoni: S e G li riportano al normale."
+        assert [_senza_ora(r) for r in f._righe][1] == "Velocità 1.25 e tono -2 semitoni: Ctrl e Maiuscolo con A e con F li riportano al normale."
         assert f._riga_dell_impostazione("bande") == "Equalizzatore: +3 0 0 0 0 0 -4 dB"
         assert f._riga_dell_impostazione("dissolvenza") == "Dissolvenza: accesa, 2.5 secondi"
         f.Close(force=True)
@@ -4002,7 +4040,7 @@ def test_avvio_con_velocita_tono_equalizzatore_e_dissolvenza_salvati(app, tmp_pa
     f = Finestra(ao="null", cartella_dati=str(tmp_path))
     try:
         assert f.motore.velocita == 1.0 and f.motore.dissolvenza == 0
-        assert [_senza_ora(r) for r in f._righe][1] == "Tono +3 semitoni: G lo riporta al normale."
+        assert [_senza_ora(r) for r in f._righe][1] == "Tono +3 semitoni: Ctrl e Maiuscolo con F lo riportano al normale."
         f.Close(force=True)
     finally:
         f.Destroy()
@@ -4311,11 +4349,11 @@ def test_con_la_dissolvenza_sfumano_stop_pausa_da_capo_e_marker(finestra, monkey
     monkeypatch.setattr(finestra.motore, "pausa", lambda valore=None, sfumando=False: chiamate.append(("pausa", sfumando)) or vera_pausa(valore, sfumando))
     monkeypatch.setattr(finestra.motore, "stop", lambda sfumando=False: chiamate.append(("stop", sfumando)) or vero_stop(sfumando))
     # Spenta: il marker e' un salto netto.
-    _tasto(finestra, "y")
+    _tasto(finestra, "y", maiuscolo=True)
     assert chiamate[-1][0] == "vai_a"
-    _premi(finestra, "l")
+    _premi(finestra, "l", maiuscolo=True)
     assert finestra.motore.dissolvenza > 0
-    _tasto(finestra, "y")
+    _tasto(finestra, "y", maiuscolo=True)
     assert chiamate[-1] == ("suona", 1.0, True)
     # X sul brano che suona lo fa ripartire da capo, sfumando.
     finestra._seleziona(next(finestra._figli(finestra._nodo_della_playlist(pl))))
@@ -4336,7 +4374,7 @@ def test_dopo_un_salto_lontano_la_console_dice_l_attesa_del_sid(finestra, monkey
     monkeypatch.setattr(finestra.motore, "salta", salti.append)
     monkeypatch.setattr(finestra.motore, "vai_a", salti.append)
     monkeypatch.setattr(finestra.motore, "attesa_del_sid", lambda secondi: attese["secondi"])
-    _tasto(finestra, "e")
+    _tasto(finestra, "q", maiuscolo=True)
     assert [_senza_ora(r) for r in finestra._righe[-2:]] == ["Avanti a 0:10 di 3:00.", "Il SID si prepara fino a 0:10: circa 9 secondi."]
     monkeypatch.setattr(modulo, "DialogoTesto", _DialogoFinto("2:48"))
     assert _premi(finestra, "w") == "Il SID si prepara fino a 2:48: circa 9 secondi."
@@ -4445,31 +4483,43 @@ def test_esc_nella_finestra_del_video_la_nasconde_per_quel_brano(finestra, monke
     assert video.IsShown()
     # Gli altri tasti passano alla finestra principale.
     evento = wx.KeyEvent(wx.wxEVT_CHAR_HOOK)
-    evento.SetUnicodeKey(ord("+"))
-    evento.SetKeyCode(ord("+"))
+    evento.SetUnicodeKey(ord("M"))
+    evento.SetKeyCode(ord("M"))
+    evento.SetShiftDown(True)
     volume = finestra.motore.volume
     video._tasto(evento)
     assert finestra.motore.volume > volume
 
 
-def test_maiuscolo_f2_sottotitoli_a_giro(finestra, monkeypatch, suoni_annotati):
+def test_d_sceglie_i_sottotitoli_senza_giro(finestra, monkeypatch, suoni_annotati):
+    # Issue 38 (2.0.0): D al posto del giro di Maiuscolo con F2. Maiuscolo con
+    # D la scelta dopo, Ctrl con D quella prima, Alt con D l'ultima, Ctrl e
+    # Alt con D spenti; ci si ferma alla prima e all'ultima.
     stato, chiamate = _video_finto(finestra, monkeypatch, _tracce(video=False, sottotitoli=2))
-    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    assert _premi(finestra, "d") == "Sottotitoli letti spenti; scelta 1 di 3: spenti, 2 tracce."
+    _tasto(finestra, "d", maiuscolo=True)
     assert chiamate[-1] == ("sid", "1") and finestra.impostazioni["sottotitoli"] is True
     assert _ultima(finestra) == "Sottotitoli letti, traccia 1 di 2, italiano, Traccia 1, subrip." and suoni_annotati[-1] == "sottotitoli_accesi"
     stato["tracce"] = _tracce(video=False, sottotitoli=2, scelto_sub=0)
-    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    _tasto(finestra, "d", maiuscolo=True)
     assert chiamate[-1] == ("sid", "2")
     stato["tracce"] = _tracce(video=False, sottotitoli=2, scelto_sub=1)
-    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    assert _premi(finestra, "d", maiuscolo=True).startswith("È già l'ultima scelta.") and suoni_annotati[-1] == "nessun_altro_brano"
+    assert chiamate[-1] == ("sid", "2")
+    _tasto(finestra, "d", ctrl=True)
+    assert chiamate[-1] == ("sid", "1")
+    _tasto(finestra, "d", ctrl=True, alt=True)
     assert chiamate[-1] == ("sid", "no") and finestra.impostazioni["sottotitoli"] is False
     assert _ultima(finestra) == "Sottotitoli letti spenti." and suoni_annotati[-1] == "sottotitoli_spenti"
     assert _salvate(finestra)["sottotitoli"] is False
-    # Su un brano senza sottotitoli si accendono per i brani dopo.
+    _tasto(finestra, "d", alt=True)
+    assert chiamate[-1] == ("sid", "2")
+    # Su un brano senza sottotitoli li spegne e li accende per i brani dopo.
     stato["tracce"] = _tracce(video=False)
-    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    _tasto(finestra, "d", ctrl=True)
+    assert _ultima(finestra) == "Sottotitoli letti spenti." and finestra.impostazioni["sottotitoli"] is False
+    _tasto(finestra, "d", maiuscolo=True)
     assert _ultima(finestra) == "Sottotitoli letti accesi; questo brano non ne ha." and finestra.impostazioni["sottotitoli"] is True
-    # Accesi, un brano con i sottotitoli prende la prima traccia da solo.
     stato["tracce"] = _tracce(video=False, sottotitoli=1)
     finestra._aggiorna_il_video()
     assert chiamate[-1] == ("sid", "1")
@@ -4491,18 +4541,24 @@ def test_i_sottotitoli_letti_vanno_alla_sintesi_e_nella_console(finestra, sintes
     assert sintesi_finta.detti[-1] == ("jaws", "Terza")
 
 
-def test_maiuscolo_f3_traccia_audio_a_giro(finestra, monkeypatch, suoni_annotati):
+def test_g_sceglie_la_traccia_audio_senza_giro(finestra, monkeypatch, suoni_annotati):
+    # Issue 38 (2.0.0): G al posto del giro di Maiuscolo con F3.
     stato, chiamate = _video_finto(finestra, monkeypatch, _tracce(audio=1))
-    _tasto(finestra, codice=wx.WXK_F3, maiuscolo=True)
+    _tasto(finestra, "g", maiuscolo=True)
     assert _ultima(finestra) == "Questo brano ha una traccia audio sola." and suoni_annotati[-1] == "non_disponibile"
     stato["tracce"] = _tracce(audio=2, scelto_audio=0)
-    _tasto(finestra, codice=wx.WXK_F3, maiuscolo=True)
+    assert _premi(finestra, "g").startswith("Traccia audio 1 di 2")
+    _tasto(finestra, "g", maiuscolo=True)
     assert chiamate[-1] == ("aid", "2") and _ultima(finestra) == "Traccia audio 2 di 2, inglese, aac." and suoni_annotati[-1] == "traccia_audio"
     stato["tracce"] = _tracce(audio=2, scelto_audio=1)
-    _tasto(finestra, codice=wx.WXK_F3, maiuscolo=True)
+    assert _premi(finestra, "g", maiuscolo=True) == "È già l'ultima traccia audio: 2 di 2, inglese, aac." and suoni_annotati[-1] == "nessun_altro_brano"
+    _tasto(finestra, "g", ctrl=True, alt=True)
     assert chiamate[-1] == ("aid", "1")
+    stato["tracce"] = _tracce(audio=2, scelto_audio=0)
+    _tasto(finestra, "g", alt=True)
+    assert chiamate[-1] == ("aid", "2")
     stato["in_corso"] = None
-    _tasto(finestra, codice=wx.WXK_F3, maiuscolo=True)
+    _tasto(finestra, "g", maiuscolo=True)
     assert _ultima(finestra) == "Non sta suonando niente."
 
 
@@ -4516,10 +4572,21 @@ def test_maiuscolo_f5_e_f6_schermo_intero_e_rapporto(finestra, monkeypatch, suon
     assert finestra._video.IsFullScreen() and suoni_annotati[-1] == "schermo_intero"
     _tasto(finestra, codice=wx.WXK_F5, maiuscolo=True)
     assert not finestra._video.IsFullScreen() and suoni_annotati[-1] == "schermo_in_finestra" and _ultima(finestra) == "Video in finestra."
-    for _ in range(4):
-        _tasto(finestra, codice=wx.WXK_F6, maiuscolo=True)
-    assert [c for c in chiamate if c[0] == "rapporto"] == [("rapporto", "16:9"), ("rapporto", "4:3"), ("rapporto", "2.33:1"), ("rapporto", "-1")]
-    assert _ultima(finestra) == "Rapporto dell'immagine: quello del video." and suoni_annotati[-1] == "rapporto"
+    # Il rapporto dell'immagine con I, senza giro (issue 38).
+    for _ in range(3):
+        _tasto(finestra, "i", maiuscolo=True)
+    assert [c for c in chiamate if c[0] == "rapporto"] == [("rapporto", "16:9"), ("rapporto", "4:3"), ("rapporto", "2.33:1")]
+    assert _ultima(finestra) == "Rapporto dell'immagine: 21:9, 4 di 4." and suoni_annotati[-1] == "rapporto"
+    assert _premi(finestra, "i", maiuscolo=True) == "È già l'ultimo. Rapporto dell'immagine: 21:9, 4 di 4."
+    assert _premi(finestra, "i") == "Rapporto dell'immagine: 21:9, 4 di 4."
+    _tasto(finestra, "i", ctrl=True, maiuscolo=True)
+    assert chiamate[-1] == ("rapporto", "-1") and _ultima(finestra) == "Rapporto dell'immagine: quello del video, 1 di 4."
+    _tasto(finestra, "i", alt=True)
+    assert chiamate[-1] == ("rapporto", "2.33:1")
+    _tasto(finestra, "i", ctrl=True)
+    assert chiamate[-1] == ("rapporto", "4:3")
+    _tasto(finestra, "i", ctrl=True, alt=True)
+    assert chiamate[-1] == ("rapporto", "-1")
 
 
 def test_impostazioni_video_sottotitoli_e_sintesi(finestra, monkeypatch, suoni_annotati, sintesi_finta):
@@ -5303,23 +5370,23 @@ def test_maiuscolo_f2_con_le_immagini_e_gli_impressi(finestra, monkeypatch, suon
     tracce["sub"][1].update(codec="dvd_subtitle", lang="eng", title="")
     stato, chiamate = _video_finto(finestra, monkeypatch, tracce)
     video_letto = _ocr_finto(finestra, monkeypatch)
-    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    _tasto(finestra, "d", maiuscolo=True)
     assert chiamate[-1] == ("sid", "1") and finestra._lettura is None
     stato["tracce"] = _tracce(sottotitoli=2, scelto_sub=0)
     stato["tracce"]["sub"][1].update(codec="dvd_subtitle", lang="eng", title="")
-    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    _tasto(finestra, "d", maiuscolo=True)
     assert chiamate[-1] == ("sid", "2") and finestra._lettura.tipo == "immagini" and finestra._lettura.lingua == "en-US"
     assert _ultima(finestra).endswith("È fatta di immagini: la legge il riconoscimento dei caratteri di Windows.") and video_letto[-1] is True
     # Il sottotitolo che comincia arriva alla lettura, che lo legge.
     finestra._sottotitolo_a_immagini()
     stato["tracce"] = _tracce(sottotitoli=2, scelto_sub=1)
     stato["tracce"]["sub"][1].update(codec="dvd_subtitle", lang="eng", title="")
-    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    _tasto(finestra, "d", maiuscolo=True)
     assert chiamate[-1] == ("sid", "no") and finestra.impostazioni["impressi_scelti"] and finestra._lettura.tipo == "impressi"
     assert _ultima(finestra) == "Sottotitoli impressi, letti al volo." and finestra.impostazioni["sottotitoli"] is True
     assert _LetturaFinta.create[0].fermata
     stato["tracce"] = _tracce(sottotitoli=2)
-    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    _tasto(finestra, "d", ctrl=True, alt=True)
     assert _ultima(finestra) == "Sottotitoli letti spenti." and finestra._lettura is None and not finestra.impostazioni["impressi_scelti"]
     assert video_letto[-1] is False and finestra.impostazioni["sottotitoli"] is False
 
@@ -5348,7 +5415,7 @@ def test_gli_impressi_con_la_passata(finestra, monkeypatch, suoni_annotati, tmp_
     monkeypatch.setattr(sottotitoli_ocr, "PassataDegliImpressi", PassataFinta)
     aggiunti = []
     monkeypatch.setattr(finestra.motore, "aggiungi_sottotitoli", lambda percorso, titolo, lingua, scegli=True: aggiunti.append((percorso, titolo, lingua, scegli)))
-    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    _tasto(finestra, "d", maiuscolo=True)
     assert len(passate) == 1 and passate[0].video == stato["in_corso"] and finestra._lettura.tipo == "impressi"
     assert "passata_avviata" in suoni_annotati
     assert _ultima(finestra) == "Sottotitoli impressi, letti al volo mentre la passata li prepara per le volte dopo."
@@ -5364,11 +5431,11 @@ def test_gli_impressi_con_la_passata(finestra, monkeypatch, suoni_annotati, tmp_
     stato["tracce"]["sub"][0]["title"] = "Sottotitoli impressi"
     finestra.impostazioni["sottotitoli"] = False
     finestra.impostazioni["impressi_scelti"] = False
-    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    _tasto(finestra, "d", maiuscolo=True)
     assert chiamate[-1] == ("sid", "1") and _ultima(finestra) == "Sottotitoli impressi, dal file della passata fatta prima." and len(passate) == 1
     stato["tracce"] = _tracce(sottotitoli=1, scelto_sub=0)
     stato["tracce"]["sub"][0]["title"] = "Sottotitoli impressi"
-    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    _tasto(finestra, "d", ctrl=True, alt=True)
     assert _ultima(finestra) == "Sottotitoli letti spenti." and chiamate[-1] == ("sid", "no")
 
 
@@ -5404,19 +5471,19 @@ def test_il_motore_aggiunge_i_file_delle_passate(finestra, tmp_path):
     assert len(comandi) == 1 and avvisi == [1, 1, 1]
 
 
-def test_senza_riconoscimento_il_giro_arriva_a_spenti(finestra, monkeypatch, suoni_annotati):
-    # Revisione 1.80.0: senza il riconoscimento, sui video il passo degli
-    # impressi non c'e', e Maiuscolo con F2 spegne come prima.
+def test_senza_riconoscimento_l_ultima_scelta_e_la_traccia(finestra, monkeypatch, suoni_annotati):
     import ocr
 
     stato, _chiamate = _video_finto(finestra, monkeypatch, _tracce(sottotitoli=1))
     monkeypatch.setattr(ocr, "disponibile", lambda: False)
-    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    _tasto(finestra, "d", maiuscolo=True)
     stato["tracce"] = _tracce(sottotitoli=1, scelto_sub=0)
-    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    # Senza il riconoscimento gli impressi non ci sono: la traccia e' l'ultima scelta.
+    assert _premi(finestra, "d", maiuscolo=True).startswith("È già l'ultima scelta.")
+    _tasto(finestra, "d", ctrl=True)
     assert _ultima(finestra) == "Sottotitoli letti spenti." and finestra.impostazioni["sottotitoli"] is False
     stato["tracce"] = _tracce()
-    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    _tasto(finestra, "d", maiuscolo=True)
     assert _ultima(finestra) == "Sottotitoli letti accesi; questo brano non ne ha."
 
 
@@ -5447,7 +5514,7 @@ def test_la_passata_finita_non_toglie_la_traccia_scelta(finestra, monkeypatch, s
     file_scritto = tmp_path / "film.impressi.it.srt"
     file_scritto.write_text("1\n00:00:01,000 --> 00:00:02,000\nCiao\n", encoding="utf-8")
     finestra._passata_finita(stato["in_corso"], str(file_scritto))
-    assert aggiunti == [False] and "Maiuscolo con F2 li sceglie" in _ultima(finestra)
+    assert aggiunti == [False] and "Alt con D li sceglie" in _ultima(finestra)
     # Una passata che non trova niente non si rifa' nella stessa sessione.
     finestra._passata = types.SimpleNamespace(video=stato["in_corso"], lingua="it-IT", ferma=lambda: None)
     finestra._passata_finita(stato["in_corso"], None)
@@ -5494,10 +5561,10 @@ def test_maiuscolo_f2_sul_testo_del_karaoke(finestra, monkeypatch, suoni_annotat
     tracce = _tracce(video=False, sottotitoli=1)
     tracce["sub"][0].update(title="Testo del karaoke, dal MIDI", lang=None)
     stato, chiamate = _video_finto(finestra, monkeypatch, tracce)
-    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    _tasto(finestra, "d", maiuscolo=True)
     assert chiamate[-1] == ("sid", "1") and _ultima(finestra) == "Testo del karaoke letto, dal MIDI."
     stato["tracce"] = _tracce(video=False, sottotitoli=1, scelto_sub=0)
-    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    _tasto(finestra, "d", ctrl=True, alt=True)
     assert _ultima(finestra) == "Sottotitoli letti spenti."
     # Accesi, il prossimo brano con il testo lo prende da solo.
     stato["tracce"] = tracce
@@ -5606,7 +5673,7 @@ def test_gli_impressi_scelti_non_fermano_il_karaoke(finestra, monkeypatch, suoni
     assert chiamate[-1] == ("sid", "1")
     stato["tracce"] = _tracce(video=False, sottotitoli=1)
     stato["tracce"]["sub"][0].update(title="Testo del karaoke, dal MIDI", lang=None)
-    _tasto(finestra, codice=wx.WXK_F2, maiuscolo=True)
+    _tasto(finestra, "d", maiuscolo=True)
     assert _ultima(finestra) == "Testo del karaoke letto, dal MIDI."
 
 
@@ -6214,24 +6281,31 @@ def test_virgola_e_punto_vanno_ai_capitoli(finestra, monkeypatch, suoni_annotati
     monkeypatch.setattr(type(finestra.motore), "posizione", property(lambda _self: stato["posizione"]))
     monkeypatch.setattr(finestra.motore, "capitoli", lambda: [(0.0, "Uno"), (600.0, "Due"), (1200.0, "")])
     monkeypatch.setattr(finestra.motore, "vai_a", lambda secondi: salti.append(secondi) or stato.update(posizione=secondi))
-    _tasto(finestra, ".")
+    _tasto(finestra, ",", maiuscolo=True)
     assert salti == [1200.0] and suoni_annotati[-1] == "capitolo_successivo" and _ultima(finestra) == "Capitolo 3 di 3, 20:00."
-    _tasto(finestra, ".")
+    _tasto(finestra, ",", maiuscolo=True)
     assert _ultima(finestra) == "È l'ultimo capitolo." and len(salti) == 1
     stato["posizione"] = 1210.0
-    _tasto(finestra, ",")
+    _tasto(finestra, ",", ctrl=True)
     assert salti[-1] == 1200.0 and suoni_annotati[-1] == "capitolo_precedente"
-    _tasto(finestra, ",")
+    _tasto(finestra, ",", ctrl=True)
     assert salti[-1] == 600.0 and _ultima(finestra) == "Capitolo 2 di 3: Due, 10:00."
-    _tasto(finestra, ",")
-    _tasto(finestra, ",")
+    _tasto(finestra, ",", ctrl=True)
+    _tasto(finestra, ",", ctrl=True)
     assert salti[-1] == 0.0 and _ultima(finestra) == "È il primo capitolo."
+    # La virgola da sola dice il capitolo; Alt l'ultimo, Ctrl e Alt il primo (issue 38).
+    assert _premi(finestra, ",").startswith("Capitolo 1 di 3")
+    _tasto(finestra, ",", alt=True)
+    assert salti[-1] == 1200.0 and _ultima(finestra).startswith("Capitolo 3 di 3")
+    assert _premi(finestra, ",", alt=True) == "Sei già nell'ultimo capitolo."
+    _tasto(finestra, ",", ctrl=True, alt=True)
+    assert salti[-1] == 0.0
     # Senza capitoli, lo si dice; e con i capitoli dei tag nello schedario si va lo stesso.
     monkeypatch.setattr(finestra.motore, "capitoli", lambda: [])
-    _tasto(finestra, ".")
+    _tasto(finestra, ",", maiuscolo=True)
     assert _ultima(finestra) == "libro.m4b non ha capitoli."
     finestra.schedario.schede[r"C:\m\libro.m4b"] = {"durata": 1800.0, "capitoli": [[0, "A"], [900, "B"]]}
-    _tasto(finestra, ".")
+    _tasto(finestra, ",", maiuscolo=True)
     assert salti[-1] == 900.0
 
 
@@ -7245,11 +7319,11 @@ def test_le_statistiche_contano_brani_tasti_e_uscita(finestra, monkeypatch, tmp_
     assert set(dati["sorgenti"]) <= {f"playlist {pl.nome}"}
     # V ferma il brano: e' lasciato. I tasti si contano per nome.
     _tasto(finestra, "v")
-    _tasto(finestra, "q")
-    assert dati["conti"]["lasciati"] == 2 and dati["tasti"]["V"] == 1 and dati["tasti"]["Q"] == 1
+    _tasto(finestra, "a", ctrl=True)
+    assert dati["conti"]["lasciati"] == 2 and dati["tasti"]["V"] == 1 and dati["tasti"]["Ctrl con A"] == 1
     # Un tasto senza comando.
-    _tasto(finestra, "k", maiuscolo=True)
-    assert dati["senza_comando"] == {"Maiuscolo con K": 1}
+    _tasto(finestra, "h", maiuscolo=True)
+    assert dati["senza_comando"] == {"Maiuscolo con H": 1}
     finestra.apri_dall_esterno([], "trascinamento")
     assert dati["conti"]["aperti_col_trascinamento"] == 1
     # All'uscita il file si scrive, con la sessione chiusa.
@@ -8331,7 +8405,7 @@ def test_dove_sono_si_riscrive_anche_sulla_barra(finestra, monkeypatch, sintesi_
     # Con la riga solo alla sintesi, la barra non ha niente da togliere.
     finestra.impostazioni["destinazione"] = "sintesi"
     _dove_sono(finestra)
-    assert finestra._dove_sono_in_braille is None
+    assert finestra._rapporto_in_braille is None
 
 
 def test_dove_sono_interrompe_la_voce(finestra, monkeypatch, sintesi_finta):
@@ -9035,7 +9109,7 @@ def test_durata_residua_si_riscrive_anche_sulla_barra(finestra, monkeypatch, sin
     # solo la sua di prima, e sulla barra arriva Dove sono, che resta.
     _tasto(finestra, "'")
     con_dove_sono = finestra._braille.in_fila
-    assert finestra._dove_sono_in_braille is not None and con_dove_sono > in_fila
+    assert finestra._rapporto_in_braille is not None and con_dove_sono > in_fila
     lettore["posizione"] = 52.0
     riga = _durata_residua(finestra)
     assert sintesi_finta.braille[-1] == ("nvda", "0:51 di 4:59,") and finestra._braille.in_fila == con_dove_sono
@@ -9496,3 +9570,97 @@ def test_file_delle_console_senza_durate_da_libgme(finestra, tmp_path):
     finestra._aggiorna_etichette()
     assert _etichette(finestra, nodo) == ["fuori.nsf, 2 sottobrani", "misto.nsf, 3 sottobrani, 1:51 in tutto, 1 senza durata"]
     assert finestra.schedario.scheda(str(cartella / "fuori.nsf"))["durate_sid"] == [None, None]
+
+
+def test_il_carattere_del_tasto(finestra):
+    # Issue 38 (2.0.0): le lettere dal codice del tasto, anche quando con Ctrl
+    # arriva il carattere di controllo; i segni del Maiuscolo come il loro tasto.
+    def tasto(codice, unicode, ctrl=False, maiuscolo=False):
+        evento = wx.KeyEvent(wx.wxEVT_CHAR_HOOK)
+        evento.SetKeyCode(codice)
+        evento.SetUnicodeKey(unicode)
+        evento.SetControlDown(ctrl)
+        evento.SetShiftDown(maiuscolo)
+        return modulo.carattere_del_tasto(evento)
+
+    assert tasto(ord("A"), 1, ctrl=True) == ("a", wx.MOD_CONTROL)
+    assert tasto(wx.WXK_RETURN, 13, ctrl=True) is None
+    assert tasto(ord("\\"), 0x1C, ctrl=True) == ("\\", wx.MOD_CONTROL)
+    assert tasto(ord("?"), ord("?"), maiuscolo=True) == ("'", wx.MOD_SHIFT)
+    assert tasto(ord(":"), ord(":")) == (".", wx.MOD_SHIFT)
+    assert modulo.nome_del_carattere("a", modulo.CTRL_MAIUSCOLO) == "Ctrl e Maiuscolo con A"
+    assert modulo.nome_del_carattere(",", modulo.CTRL_ALT) == "Ctrl e Alt con virgola"
+
+
+def test_i_tasti_da_soli_riportano_con_i_limiti(finestra, suoni_annotati):
+    # Issue 38 (2.0.0): il tasto da solo dice il valore con i limiti, senza
+    # suono; Alt va al massimo e Ctrl con Alt al minimo.
+    suonati = len(suoni_annotati)
+    assert _premi(finestra, "a") == "Velocità 1, la normale, da 0.5 a 2."
+    assert _premi(finestra, "f") == "Tono 0 semitoni, il normale, da -12 semitoni a +12 semitoni."
+    assert _premi(finestra, "u") == "Banda 1 di 7, 60 Hz: 0 dB."
+    assert _premi(finestra, "o") == "Banda 1, 60 Hz: 0 dB, da -12 dB a +12 dB."
+    assert _premi(finestra, "p") == "Equalizzatore piatto: tutte le 7 bande a 0 dB."
+    assert _premi(finestra, ".") == "Passo del volume 5, da 1 a 50; il predefinito è 5."
+    assert _premi(finestra, "e") == "Salto indietro di 10 secondi, avanti di 10 secondi; da 0.1 secondi in su, e il predefinito è di 10 secondi."
+    assert _premi(finestra, "s") == f"Adesso non c'è un timer. Il timer va da 1 a {modulo.valori.TIMER_MASSIMO} minuti, o alla fine del brano."
+    assert _premi(finestra, "n").startswith("Riproduzione casuale spenta")
+    assert len(suoni_annotati) == suonati
+    assert _premi(finestra, "a", alt=True) == "Velocità 2."
+    assert _premi(finestra, "a", ctrl=True, alt=True) == "Velocità 0.5."
+    assert _premi(finestra, "f", alt=True) == "Tono +12 semitoni."
+    assert _premi(finestra, "f", ctrl=True, alt=True) == "Tono -12 semitoni."
+    assert _premi(finestra, "u", alt=True) == "Banda 7, 12000 Hz: 0 dB."
+    assert _premi(finestra, "o", alt=True) == "Banda 7, 12000 Hz: +12 dB."
+    assert _premi(finestra, "o", ctrl=True, alt=True) == "Banda 7, 12000 Hz: -12 dB."
+    assert _premi(finestra, "p").startswith("Equalizzatore: 60 Hz 0 dB, 150 Hz 0 dB,")
+    assert _premi(finestra, "u", ctrl=True, alt=True) == "Banda 1, 60 Hz: 0 dB."
+    # Il passo del volume con il punto.
+    assert _premi(finestra, ".", maiuscolo=True) == "Passo del volume 6: Ctrl e Maiuscolo con M cambiano il volume di 6."
+    assert _premi(finestra, ".", alt=True) == "Passo del volume 50: Ctrl e Maiuscolo con M cambiano il volume di 50."
+    assert _premi(finestra, ".", maiuscolo=True) == "Passo del volume già al massimo, 50."
+    assert _premi(finestra, ".", ctrl=True, maiuscolo=True) == "Passo del volume 5: Ctrl e Maiuscolo con M cambiano il volume di 5."
+    assert _premi(finestra, ".", ctrl=True, alt=True) == "Passo del volume 1: Ctrl e Maiuscolo con M cambiano il volume di 1."
+    # I passi dei salti tornano ai predefiniti.
+    finestra.impostazioni["passo_avanti"] = 3.0
+    assert _premi(finestra, "e", ctrl=True, maiuscolo=True) == "I salti indietro e avanti sono di nuovo di 10 secondi."
+    assert finestra.impostazioni["passo_avanti"] == 10.0
+    # Il timer: Alt alla fine del brano, Ctrl lo toglie.
+    assert _premi(finestra, "s", alt=True) == "Timer impostato: la riproduzione si ferma alla fine del brano."
+    assert _premi(finestra, "s").startswith("Adesso la ferma alla fine del brano.")
+    assert _premi(finestra, "s", ctrl=True) == "Timer tolto." and suoni_annotati[-1] == "timer_tolto"
+    assert _premi(finestra, "s", ctrl=True) == "Non c'era un timer da togliere."
+
+
+def test_y_e_r_dicono_i_marker_e_alt_va_all_ultimo(finestra, tmp_path, suoni_annotati):
+    # Issue 38 (2.0.0): Y dice il marker su cui si e' o quello prima, Alt con Y
+    # va all'ultimo e Ctrl e Alt con Y al primo; R conta i marker prima e dopo.
+    _brano_con_marker(finestra, tmp_path, [1.0, 2.0, 4.0])
+    _in_pausa_a(finestra, 0.5)
+    assert _premi(finestra, "y") == "Prima di qui non ci sono marker; il brano ne ha 3, il primo è M1, 0:01."
+    assert _premi(finestra, "r") == "Il brano ha 3 marker: 0 prima di qui e 3 dopo."
+    assert _premi(finestra, "y", alt=True) == "M3, 0:04."
+    assert suoni_annotati[-1] == "marker_avanti"
+    assert _aspetta(lambda: abs((finestra.motore.posizione or -1) - 4.0) < 0.002)
+    assert _premi(finestra, "y") == "Marker 3 di 3, M3, 0:04: ci sei sopra."
+    assert _premi(finestra, "r") == "Il brano ha 3 marker: 2 prima di qui e 0 dopo, e sei su uno."
+    assert _premi(finestra, "y", ctrl=True, alt=True) == "M1, 0:01."
+    _in_pausa_a(finestra, 3.0)
+    assert _premi(finestra, "y") == "Marker 2 di 3, M2, 0:02: il più vicino prima di qui."
+
+
+def test_q_dice_il_punto_e_va_alla_fine_e_all_inizio(finestra, monkeypatch):
+    # Issue 38 (2.0.0): Q dice il punto del brano; Alt con Q gli ultimi
+    # secondi, un salto avanti prima della fine; Ctrl e Alt con Q l'inizio.
+    salti = []
+    stato = {"posizione": 30.0}
+    monkeypatch.setattr(type(finestra.motore), "in_corso", property(lambda _self: r"C:\m\a.mp3"))
+    monkeypatch.setattr(type(finestra.motore), "posizione", property(lambda _self: stato["posizione"]))
+    monkeypatch.setattr(type(finestra.motore), "durata", property(lambda _self: 180.0))
+    monkeypatch.setattr(finestra.motore, "salta", lambda secondi: salti.append(secondi) or stato.update(posizione=stato["posizione"] + secondi))
+    finestra.coda.imposta(None, Brano(r"C:\m\a.mp3"))
+    assert _premi(finestra, "q") == "0:30 di 3:00, mancano 2:30."
+    assert _premi(finestra, "q", alt=True) == "Avanti a 2:50 di 3:00."
+    assert _premi(finestra, "q", ctrl=True, alt=True) == "Indietro a 0:00 di 3:00."
+    assert salti == [140.0, -170.0]
+

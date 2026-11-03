@@ -64,27 +64,27 @@ FONT_DEI_SIMBOLI = ("Segoe Fluent Icons", "Segoe MDL2 Assets")
 GRUPPI = [
     ("Riproduzione", [
         ("precedente", "\ue892", "Brano precedente", "Z"),
-        ("indietro", "\ueb9e", "Indietro nel brano", "Q"),
+        ("indietro", "\ueb9e", "Indietro nel brano", "Ctrl+Q"),
         ("play", "\ue768", "Suona", "X"),
         ("pausa", "\ue769", "Pausa", "C"),
         ("stop", "\ue71a", "Stop", "V"),
-        ("avanti", "\ueb9d", "Avanti nel brano", "E"),
+        ("avanti", "\ueb9d", "Avanti nel brano", "Maiuscolo+Q"),
         ("successivo", "\ue893", "Brano successivo", "B"),
     ]),
     ("Volume", [
-        ("volume_giu", "\ue993", "Volume giù", "meno"),
-        ("muto", "\ue74f", "Muto", "M"),
-        ("volume_su", "\ue995", "Volume su", "più"),
+        ("volume_giu", "\ue993", "Volume giù", "Ctrl+M"),
+        ("muto", "\ue74f", "Muto", "Ctrl+Alt+M"),
+        ("volume_su", "\ue995", "Volume su", "Maiuscolo+M"),
     ]),
     ("Velocità", [
-        ("velocita_giu", "\ue738", "Più lenta", "A"),
-        ("velocita_normale", "\ue72c", "Velocità normale", "S"),
-        ("velocita_su", "\ue710", "Più veloce", "D"),
+        ("velocita_giu", "\ue738", "Più lenta", "Ctrl+A"),
+        ("velocita_normale", "\ue72c", "Velocità normale", "Ctrl+Maiuscolo+A"),
+        ("velocita_su", "\ue710", "Più veloce", "Maiuscolo+A"),
     ]),
     ("Tono", [
-        ("tono_giu", "\ue738", "Tono più basso", "F"),
-        ("tono_normale", "\ue72c", "Tono normale", "G"),
-        ("tono_su", "\ue710", "Tono più alto", "H"),
+        ("tono_giu", "\ue738", "Tono più basso", "Ctrl+F"),
+        ("tono_normale", "\ue72c", "Tono normale", "Ctrl+Maiuscolo+F"),
+        ("tono_su", "\ue710", "Tono più alto", "Maiuscolo+F"),
     ]),
 ]
 

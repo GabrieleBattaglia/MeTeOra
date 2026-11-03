@@ -54,6 +54,9 @@ from valori import (
 
 PREDEFINITE = {
     "volume": 100,
+    # Il volume a cui Ctrl e Maiuscolo con M riportano, dopo il massimo o lo
+    # zero; -1 se non ce n'e' uno (issue 38).
+    "volume_di_prima": -1,
     "passo_volume": 5,
     "passo_indietro": 10.0,
     "passo_avanti": 10.0,
@@ -202,6 +205,7 @@ def _dissolvenza_valida(valore):
 # I limiti sono quelli di valori.py, gli stessi dei campi della finestra.
 CONTROLLI = {
     "volume": _intero_fra(0, VOLUME_MASSIMO),
+    "volume_di_prima": _intero_fra(-1, VOLUME_MASSIMO),
     "passo_volume": _intero_fra(PASSO_VOLUME_MINIMO, PASSO_VOLUME_MASSIMO),
     "passo_indietro": _numero_fra(SECONDI_MINIMI),
     "passo_avanti": _numero_fra(SECONDI_MINIMI),
