@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [2.0.5] - 2026-11-03
+
+- Le prove della sfumatura che cadevano di rado sotto carico, issue 28: la pausa e la ripresa sfumando controllavano il calo appena la voce toccava 80, ma il calo si chiude anche un passo dopo; il brano corto guardava la voce subito dopo la fine della sfumatura, che si toglie un attimo prima; la prova del volume oltre 100 aspettava un tempo fisso. Ora aspettano lo stato atteso, con un limite di tempo, e la catena si guarda dopo gli eventi di mpv. La caduta si è vista una volta su ottanta corse con dieci processi insieme; dopo la correzione, nessuna su centosessanta, e nessuna in venti corse del file intero. Solo le prove: MeTeOra non cambia.
+
 ## [2.0.4] - 2026-11-03
 
 - L'installatore sopra un MeTeOra aggiornato da solo, issue 35, trovata rivedendo quello di MESS, che nasce da qui: l'aggiornamento automatico lascia in _internal il manifesto della sua versione, e l'installatore, che non toglieva niente, lo lasciava lì; al primo avvio pulisci_residui cancellava allora proprio i file nuovi che quel manifesto non elenca, e MeTeOra poteva non partire. Ora l'installatore toglie prima _internal e _internal_vecchio, come già faceva la disinstallazione; i dati dell'utente stanno accanto all'eseguibile e restano. Provato compilando l'installatore.

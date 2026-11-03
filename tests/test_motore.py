@@ -1,6 +1,6 @@
 # MeTeOra, le prove del motore: due lettori, velocita', tono, equalizzatore, dissolvenza e fine brano senza attese.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.55.0 (tappa 4, issue 15). Nella 1.113.4 le prove del filtro del tempo e del tono cambiato al volo aspettano che il motore abbia visto gli eventi di mpv, invece dei tempi (issue 27). Nella 1.116.0 alle_uscite e l'uscita che non si apre piu'. Nella 1.117.0 il lettore lontano e la conversione in FLAC.
+# 01/10/2026: nasce con la 1.55.0 (tappa 4, issue 15). Nella 1.113.4 le prove del filtro del tempo e del tono cambiato al volo aspettano che il motore abbia visto gli eventi di mpv, invece dei tempi (issue 27). Nella 1.116.0 alle_uscite e l'uscita che non si apre piu'. Nella 1.117.0 il lettore lontano e la conversione in FLAC. Nella 2.0.5 il calo, la sfumatura e la catena del volume oltre 100 aspettati per stato, non per tempo (issue 28).
 
 """Le prove del motore vero, senza suoni.
 
@@ -572,7 +572,8 @@ def test_oltre_cento_il_volume_cambia_al_volo(crea, tmp_path):
                               callback=lambda errore, _esito: risposte.append(errore))
     assert _aspetta(lambda: risposte) and risposte == [None]
     m.volume = 160
-    time.sleep(0.2)
+    # Dopo gli eventi che mpv ha gia' mandato, non dopo un tempo fisso (issue 28).
+    _eventi_visti(lettore)
     assert lettore.af_scritto == scritta
     m.pausa(False)
     x = _uscito_alla_fine(m, uscita)
@@ -815,8 +816,9 @@ def test_brano_corto_dimezza_la_sfumatura(crea, avvisi, tmp_path):
     sfumatura, lettore = m._sfumatura, _lettore_di(m, cortissimo)
     assert _aspetta(lambda: sfumatura.durata is not None)
     assert abs(sfumatura.durata - 0.2) < 0.03
-    assert _aspetta(lambda: m._sfumatura is None)
-    assert lettore.mpv.volume == 80
+    # La sfumatura si toglie un attimo prima che la voce torni piena: si
+    # aspettano tutte e due le cose (issue 28).
+    assert _aspetta(lambda: m._sfumatura is None and lettore.mpv.volume == 80)
 
 
 def test_ripartire_da_capo_non_sfuma(crea, tmp_path):
@@ -1148,12 +1150,14 @@ def test_pausa_e_ripresa_sfumando(crea, avvisi, tmp_path):
     assert not lettore.mpv.pause
     assert _aspetta(lambda: lettore.mpv.volume < 40, 1)
     assert _aspetta(lambda: lettore.mpv.pause, 2)
-    # Fermo in pausa, la voce torna piena: la ripresa la fara' risalire.
-    assert _aspetta(lambda: lettore.mpv.volume == 80, 1) and m._calo is None
+    # Fermo in pausa, la voce torna piena: la ripresa la fara' risalire. Il
+    # calo si chiude anche un passo dopo che la voce e' tornata a 80: si
+    # aspettano tutte e due le cose (issue 28).
+    assert _aspetta(lambda: lettore.mpv.volume == 80 and m._calo is None, 1)
     assert m.pausa(sfumando=True) is False and not m.in_pausa
     assert _aspetta(lambda: not lettore.mpv.pause, 1)
     assert lettore.mpv.volume < 40
-    assert _aspetta(lambda: lettore.mpv.volume == 80, 2) and m._calo is None
+    assert _aspetta(lambda: lettore.mpv.volume == 80 and m._calo is None, 2)
     # Una ripresa durante la discesa risale dal punto in cui era arrivata.
     m.pausa(sfumando=True)
     assert _aspetta(lambda: 20 < lettore.mpv.volume < 70, 1)
