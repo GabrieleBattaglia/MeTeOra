@@ -18,6 +18,11 @@ EVENTI = {
     # L'invito a offrire un caffe' (1.75.0): lo stesso di Tornello e Terminal
     # Beast, firmato anche da MeTeOra nella collezione (GBUtils V192).
     "donazione": "donazione",
+    # Le due voci del PUB, il gruppo di supporto (issue 30, 2.1.0): gli stessi
+    # suoni di MESS, il campanello della porta del pub e la domanda, firmati
+    # anche da MeTeOra nella collezione.
+    "pub_entra": "mess_pub_entra",
+    "pub_aiuto": "mess_pub_aiuto",
     # I dettagli dei contenitori con F11 (1.77.0): le statistiche di
     # meditimer, due note di onda triangolare, firmate anche da MeTeOra
     # nella collezione (GBUtils V193).

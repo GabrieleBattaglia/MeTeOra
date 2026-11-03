@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29)
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30)
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -65,6 +65,7 @@ import midi
 import ocr
 import percorsi
 import posizioni
+import pub
 import pulizia
 import questa_rete
 import questo_pc
@@ -594,6 +595,9 @@ VOCI_DELLE_IMPOSTAZIONI = {
     "associazioni": ("Associazioni dei formati", None),
     "impressi": ("Sottotitoli impressi", "cambiati"),
     "dona": ("Dona per questo progetto", None),
+    # Il PUB, il gruppo di supporto, accanto al dono (issue 30, 2.1.0).
+    "entra_al_pub": ("Entra al PUB (gruppo di supporto)", None),
+    "chiedi_aiuto_al_pub": ("Chiedi aiuto al PUB", None),
 }
 # Come si leggono i sottotitoli impressi nel video, 1.80.0: le righe della scelta.
 MODI_DEGLI_IMPRESSI = {
@@ -7365,6 +7369,8 @@ class Finestra(wx.Frame):
             "associazioni": lambda: "Apri con MeTeOra e app predefinite di Windows" if getattr(sys, "frozen", False) else "solo dal programma compilato",
             "impressi": lambda: MODI_DEGLI_IMPRESSI[imp["impressi"]],
             "dona": lambda: "offri un caffè all'autore, con PayPal",
+            "entra_al_pub": lambda: "prepara la mail che ti iscrive alla lista di supporto",
+            "chiedi_aiuto_al_pub": lambda: "prepara una mail alla lista, con la tua domanda e le informazioni del computer",
         }[chiave]()
         return f"{VOCI_DELLE_IMPOSTAZIONI[chiave][0]}: {valore}"
 
@@ -7406,6 +7412,8 @@ class Finestra(wx.Frame):
             "marcatori": self._finestra_dei_marcatori,
             "importa_marcatori": self._importa_i_marcatori,
             "dona": self._dona,
+            "entra_al_pub": self._entra_al_pub,
+            "chiedi_aiuto_al_pub": self._chiedi_aiuto_al_pub,
             "associazioni": self._associa_i_formati,
             "impressi": self._scegli_come_leggere_gli_impressi,
             "destinazione": self._scegli_la_destinazione,
@@ -9031,6 +9039,47 @@ class Finestra(wx.Frame):
         per l'invito: compare sempre."""
         if self._invito_alla_donazione(genitore) == wx.ID_YES:
             self.scrivi("PayPal si apre nel browser: grazie di cuore!")
+
+    # Il PUB, il gruppo di supporto (issue 30, 2.1.0): indirizzi, informazioni
+    # sul computer e mail da GBUtils, la finestra della mail da GBwx, le parole
+    # da pub.py. La finestra si apre sempre, anche quando il programma di posta
+    # c'e', e senza posta guida un passo alla volta.
+
+    def _entra_al_pub(self, genitore):
+        """Entra al PUB: la mail che iscrive al gruppo di supporto."""
+        self._suono("pub_entra")
+        self._mail_al_pub(genitore, pub.mail_d_iscrizione(), "La mail d'iscrizione al PUB è pronta: spediscila tu.",
+            "Entra al PUB: niente di preparato.")
+
+    def _chiedi_aiuto_al_pub(self, genitore):
+        """Chiedi aiuto al PUB: la mail al gruppo, con l'oggetto che dice la
+        versione, la riga da sostituire con la domanda e le informazioni su
+        MeTeOra, sulla scheda audio e sul computer, che l'utente vede e puo'
+        cancellare prima di spedire."""
+        from GBUtils import informazioni_di_sistema
+
+        self._suono("pub_aiuto")
+        scheda = None
+        with contextlib.suppress(Exception):
+            scheda = self._scheda_da_leggere()
+        mail = pub.mail_d_aiuto(version.VERSION, bool(getattr(sys, "frozen", False)), informazioni_di_sistema(), scheda)
+        self._mail_al_pub(genitore, mail, "La mail d'aiuto al PUB è pronta: scrivi la domanda e spediscila tu.",
+            "Chiedi aiuto al PUB: niente di preparato.")
+
+    def _mail_al_pub(self, genitore, mail, pronta, annullata):
+        """La finestra di GBwx che prepara la mail. La console dice se la mail
+        e' pronta, cioe' aperta nel programma di posta o scritta passo per
+        passo, o se la finestra si e' chiusa prima, con il suono
+        dell'annullamento."""
+        from GBwx import finestra_mail
+
+        riuscita = finestra_mail(genitore, mail["titolo"], mail["destinatario"], mail["oggetto"], mail["corpo"], mail["spiegazione"],
+            mail["passi"], pub.PULSANTI, pub.SENZA_POSTA)
+        if riuscita:
+            self._statistiche.conta("mail_al_pub_pronte")
+            self.scrivi(pronta)
+        else:
+            self._annullato(annullata)
 
     # La finestra dei marcatori e l'importazione, piano 5.8.5 e 5.8.7.
 

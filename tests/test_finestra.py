@@ -2882,6 +2882,8 @@ def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_an
         ("associazioni", "Associazioni dei formati: solo dal programma compilato"),
         ("impressi", "Sottotitoli impressi: letti al volo, mentre il video suona, con circa mezzo secondo di ritardo"),
         ("dona", "Dona per questo progetto: offri un caffè all'autore, con PayPal"),
+        ("entra_al_pub", "Entra al PUB (gruppo di supporto): prepara la mail che ti iscrive alla lista di supporto"),
+        ("chiedi_aiuto_al_pub", "Chiedi aiuto al PUB: prepara una mail alla lista, con la tua domanda e le informazioni del computer"),
     ]
 
 
@@ -5015,6 +5017,55 @@ def test_la_voce_dona_per_questo_progetto(finestra, monkeypatch, suoni_annotati)
     righe = len(finestra._righe)
     finestra._cambia_impostazione("dona", None)
     assert len(finestra._righe) == righe and len(invito.testi) == 2
+
+
+def test_le_voci_del_pub(finestra, monkeypatch, suoni_annotati):
+    # Issue 30 (2.1.0): Entra al PUB e Chiedi aiuto al PUB, accanto a Dona per
+    # questo progetto. La finestra di GBwx e le informazioni del computer
+    # sono finte: niente si apre e niente si legge davvero.
+    import GBUtils
+    import GBwx
+
+    chiamate, esiti = [], [True]
+
+    def finestra_mail(genitore, titolo, destinatario, oggetto, corpo, spiegazione, passi, pulsanti, senza_posta=""):
+        chiamate.append({"titolo": titolo, "destinatario": destinatario, "oggetto": oggetto, "corpo": corpo, "spiegazione": spiegazione,
+            "passi": passi, "pulsanti": pulsanti, "senza_posta": senza_posta})
+        return esiti.pop(0)
+
+    monkeypatch.setattr(GBwx, "finestra_mail", finestra_mail)
+    monkeypatch.setattr(GBUtils, "informazioni_di_sistema", lambda separatore=".": [("windows", "Windows 11 Pro"), ("processore", "Ryzen"),
+        ("nuclei", 32), ("screen_reader", "NVDA 2026.3"), ("scala", None), ("compilato", False)])
+    monkeypatch.setattr(modulo.schede_audio, "in_uso", lambda elenco=None: {"dispositivo": "Cuffie", "interfaccia": "Windows WASAPI"})
+    finestra._cambia_impostazione("entra_al_pub", None)
+    mail = chiamate[-1]
+    assert suoni_annotati[-1] == "pub_entra" and mail["titolo"] == "Entra al PUB, il gruppo di supporto"
+    assert mail["destinatario"] == GBUtils.PUB_ISCRIZIONE and "{programma}" in mail["spiegazione"]
+    assert [testo for _istruzione, testo in mail["passi"]] == [GBUtils.PUB_ISCRIZIONE, None]
+    assert mail["pulsanti"]["apri"] == "&Apri nel programma di posta" and mail["senza_posta"].startswith("Non trovo un programma di posta")
+    assert _ultima(finestra) == "La mail d'iscrizione al PUB è pronta: spediscila tu."
+    # Chiedi aiuto: la versione nell'oggetto, la riga della domanda, il
+    # programma, la scheda audio con l'interfaccia, il computer; le
+    # informazioni che non si leggono restano fuori.
+    esiti.append(False)
+    prima = len(suoni_annotati)
+    finestra._cambia_impostazione("chiedi_aiuto_al_pub", None)
+    mail = chiamate[-1]
+    assert suoni_annotati[prima] == "pub_aiuto"
+    assert mail["destinatario"] == GBUtils.PUB_GRUPPO and mail["oggetto"] == f"Chiedo per MeTeOra {modulo.version.VERSION}"
+    assert mail["corpo"].split("\n") == [
+        "Scrivi qui la tua domanda, al posto di questa riga.",
+        "Informazioni su MeTeOra e sul computer di chi scrive:",
+        f"Programma: MeTeOra {modulo.version.VERSION}, dai sorgenti",
+        "Scheda audio: Automatica (Cuffie, WASAPI)",
+        "Sistema operativo: Windows 11 Pro",
+        "Processore: Ryzen",
+        "Nuclei logici: 32",
+        "Screen reader: NVDA 2026.3",
+    ]
+    assert [testo for _istruzione, testo in mail["passi"]] == [GBUtils.PUB_GRUPPO, mail["oggetto"], mail["corpo"], None]
+    assert _ultima(finestra) == "Chiedi aiuto al PUB: niente di preparato."
+    assert finestra._statistiche.dati["conti"]["mail_al_pub_pronte"] == 1
 
 def test_cartella_vuota_e_cestino(tmp_path):
     # 1.76.0: vuota anche con sottocartelle vuote o i soli file di servizio;

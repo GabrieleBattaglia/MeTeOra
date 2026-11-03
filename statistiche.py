@@ -165,6 +165,7 @@ DESCRIZIONI_DEI_TASTI = {
 # suonato. Un evento senza nome, per esempio uno nuovo, si dice com'e'.
 NOMI_DEGLI_EVENTI = {
     "avvio": "avvio di MeTeOra", "uscita": "uscita da MeTeOra", "donazione": "invito a offrire un caffè",
+    "pub_entra": "Entra al PUB", "pub_aiuto": "Chiedi aiuto al PUB",
     "dettagli": "dettagli di un contenitore, con F11", "chiudi_la_plancia": "tutta la plancia chiusa",
     "apri_la_plancia": "apertura di tutta la plancia", "plancia_aperta": "tutta la plancia aperta",
     "passata_avviata": "passata degli impressi avviata", "passata_finita": "passata degli impressi finita",
@@ -1687,6 +1688,8 @@ class Pagina:
             f"Banco dei suoni MIDI scelto: {al_plurale(self.c('banchi_scelti'), 'volta', 'volte')}; scaricamenti avviati: {self.e('scaricamento_avviato')}, finiti: {self.e('scaricamento_finito')}.",
             f"Aggiornamenti proposti: {self.e('aggiornamento')}.",
             f"Dona per questo progetto aperto: {al_plurale(self.e('donazione'), 'volta', 'volte')}.",
+            f"Entra al PUB aperto: {al_plurale(self.e('pub_entra'), 'volta', 'volte')}; Chiedi aiuto al PUB: "
+            f"{al_plurale(self.e('pub_aiuto'), 'volta', 'volte')}; mail pronte: {self.c('mail_al_pub_pronte')}.",
         ]
 
     # 20.

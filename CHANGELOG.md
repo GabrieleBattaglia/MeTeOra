@@ -2,6 +2,13 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [2.1.0] - 2026-11-03
+
+Una novità, la issue 30, chiesta da Gabriele il 21 ottobre per tutti i programmi del parco che hanno una finestra.
+
+- Le voci del PUB, il gruppo di supporto, nelle impostazioni accanto a Dona per questo progetto. Entra al PUB (gruppo di supporto) prepara la mail che iscrive alla lista; Chiedi aiuto al PUB prepara una mail alla lista, con l'oggetto Chiedo per MeTeOra e la versione, una riga da sostituire con la domanda e sotto le informazioni utili a chi risponde: la versione, compilato o dai sorgenti, la scheda audio con l'interfaccia, Windows, processore, memoria, lingua, screen reader e schermo, senza nomi né percorsi. La finestra si apre sempre: Apri nel programma di posta prepara la bozza, che spedisce l'utente; Passo per passo, o la finestra da sé quando la posta manca, copia negli appunti un campo alla volta, da incollare nella webmail. Ciascuna voce ha il suo suono, gli stessi di MESS, e le statistiche contano le aperture e le mail pronte. Il manuale le spiega nelle impostazioni, e Quando qualcosa va storto rimanda a Chiedi aiuto al PUB.
+- Dentro: pub.py con le parole delle due mail; indirizzi, informazioni sul computer e mail vengono da GBUtils, la finestra da finestra_mail di GBwx, senza riscriverli.
+
 ## [2.0.6] - 2026-11-03
 
 - Il fuoco su Playlist a fine pulizia, issue 29: all'avvio, con il fuoco sulla voce dei Preferiti, quando la pulizia toglieva un brano sparito NVDA diceva Playlist, non selezionato, e poi tornava sui Preferiti. Il rinfresco dei Preferiti spostava per un attimo la selezione su Playlist, per non lasciarla su voci che stavano per sparire; ma la voce dei Preferiti resta, e spariscono solo i suoi brani. Ora con il fuoco sui Preferiti la selezione non si muove, e a NVDA non arriva nessun fuoco; con il fuoco su un brano dei Preferiti il passaggio è sulla loro voce, non più su Playlist. Lo vede una prova agganciata agli stessi eventi che riceve NVDA.
