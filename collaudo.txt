@@ -1,5 +1,0 @@
-Collaudo di MeTeOra 2.6.5: sullo speaker Cast, a fine brano, il seguente parte subito.
-Con GabryBar, fai suonare il sottobrano 4 di Outrun Europa e lascialo finire da solo: parte il 5 in un paio di secondi, non più dopo mezzo minuto.
-Con un sottobrano mai ascoltato in questa sessione si aggiungono i secondi della conversione, che la console dice con Converto: scrivi qui se ti pesano.
-Se hai un MIDI, un APE o un video, lascia finire anche quello: il seguente parte allo stesso modo.
-Lascia finire l'ultimo brano di una lista: la console dice subito che davanti non c'è altro, senza errori.
