@@ -1701,7 +1701,7 @@ def test_ogni_tasto_e_nella_guida_rapida(finestra):
         "Esc", "Alt con F4", "Tab", "Maiuscolo con Tab", "Barra rovesciata", "Ctrl con la barra rovesciata", "Barra verticale",
         "Canc", "Maiuscolo con Canc", "Backspace", "Maiuscolo con Backspace", "Cifre da 1 a 0", "Maiuscolo con le cifre da 1 a 0",
         "Apostrofo", "Maiuscolo con l'apostrofo"]
-    segni = {",": ("Virgola", "la virgola"), ".": ("Punto", "il punto")}
+    segni = {",": ("Virgola", "la virgola"), ".": ("Punto", "il punto"), "+": ("Più", "il più")}
     for (carattere, modificatori), _comando in modulo.TASTI.items():
         if carattere.isalpha():
             tasti.append(modulo.nome_del_carattere(carattere, modificatori))
@@ -2924,6 +2924,28 @@ def _salvate(finestra):
     return salvate
 
 
+def test_il_piu_apre_le_impostazioni(finestra, monkeypatch, suoni_annotati):
+    # Il piu', da solo, da tutta la finestra (Gabriele, 2.6.0).
+    aperte = []
+
+    class Finta:
+        def __init__(self, genitore, voci, al_cambio):
+            aperte.append(genitore)
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_a):
+            return False
+
+        def ShowModal(self):
+            return wx.ID_CANCEL
+
+    monkeypatch.setattr(modulo, "FinestraImpostazioni", Finta)
+    _tasto(finestra, "+")
+    assert aperte == [finestra] and suoni_annotati[-1] == "impostazioni"
+
+
 def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_annotati):
     monkeypatch.setattr(modulo.schede_audio, "in_uso", lambda elenco=None: AUTOMATICA)
     aperte = []
@@ -3478,6 +3500,32 @@ class _ProvaFinta:
         assert not buffer.any(), "la prova deve essere silenzio"
         self.prove.append(buffer.shape)
         return self.aperta
+
+
+def test_ctrl_maiuscolo_x_apre_la_scheda_audio(finestra, monkeypatch, suoni_annotati):
+    # La lista della voce Scheda audio da tutta la finestra, senza la
+    # finestra delle impostazioni (Gabriele, 2.6.0).
+    import GBUtils
+
+    monkeypatch.setattr(modulo.schede_audio, "uscite", lambda: [AUTOMATICA, ASIO])
+    monkeypatch.setattr(modulo.schede_audio, "in_uso", lambda elenco=None: AUTOMATICA)
+    monkeypatch.setattr(modulo.schede_audio, "automatica", lambda: AUTOMATICA)
+    monkeypatch.setattr(modulo.schede_audio, "applica", lambda scelta, motore, avvio=False: _esito(ASIO))
+    monkeypatch.setattr(GBUtils.Acusticator, "riproduci", _ProvaFinta())
+    scelta = _SceltaFinta(2)
+    genitori = []
+
+    def apri(genitore, *argomenti, **opzioni):
+        genitori.append(genitore)
+        return scelta(genitore, *argomenti, **opzioni)
+
+    monkeypatch.setattr(modulo, "FinestraScelta", apri)
+    assert _premi(finestra, "x", maiuscolo=True, ctrl=True) == "Scheda audio: Realtek ASIO, ASIO."
+    assert genitori == [finestra] and scelta.aperture[0][0] == "Scheda audio" and scelta.filtri == [True]
+    assert finestra.impostazioni["scheda_audio"] == {"dispositivo": "Realtek ASIO", "interfaccia": "ASIO"}
+    assert suoni_annotati[-2:] == ["domanda", "scheda_audio"]
+    monkeypatch.setattr(modulo, "FinestraScelta", _SceltaFinta(None))
+    assert _premi(finestra, "x", maiuscolo=True, ctrl=True) == "Scheda audio non cambiata."
 
 
 def test_scheda_audio(finestra, monkeypatch, suoni_annotati):

@@ -186,6 +186,10 @@ TASTI = {
     ("z", SOLO): "precedente",
     ("x", SOLO): "play",
     ("x", MAIUSCOLO): "loop",
+    # Ctrl e Maiuscolo con X: la lista della voce Scheda audio, da tutta la
+    # finestra, con le schede del PC, le cuffie Bluetooth e gli speaker Cast
+    # (Gabriele, 2.6.0).
+    ("x", CTRL_MAIUSCOLO): "scheda_audio",
     ("c", SOLO): "pausa",
     ("v", SOLO): "stop",
     # La ripetizione a giro (Gabriele, 1.94.0).
@@ -325,6 +329,9 @@ TASTI = {
     (".", CTRL_MAIUSCOLO): "passo_volume_predefinito",
     (".", ALT): "passo_volume_massimo",
     (".", CTRL_ALT): "passo_volume_minimo",
+    # Il piu', da solo: la finestra delle impostazioni (Gabriele, 2.6.0). Ctrl
+    # con la virgola, il tasto di tanti programmi, e' il capitolo precedente.
+    ("+", SOLO): "impostazioni",
 }
 # I segni che la tastiera italiana scrive con il Maiuscolo, e che Windows puo'
 # dare al posto del loro tasto: valgono come il tasto con il Maiuscolo.
@@ -422,7 +429,8 @@ TASTI_COMUNI = [
     "F11 legge i tag del brano selezionato, o i dettagli di una cartella, di un'unità o di una playlist, e Maiuscolo con F11 apre il menu dei tag.",
     "Barra rovesciata: nella console cerca nella console, altrove nel ramo della plancia in cui sei, e da Apri file, Statistiche o Impostazioni in tutto MeTeOra; Ctrl con la barra rovesciata cerca in tutto MeTeOra, anche dalla console. "
     "Barra verticale: il filtro della playlist o dei Preferiti in cui sta la plancia, anche dalla console.",
-    "F1 apre il manuale nel browser; F12 scrive nella console la guida rapida dei tasti, F2 le novità e F3 i crediti, sempre nella console. Esc esce salvando tutto.",
+    "F1 apre il manuale nel browser; F12 scrive nella console la guida rapida dei tasti, F2 le novità e F3 i crediti, sempre nella console. Esc esce salvando tutto. "
+    "Il più apre le impostazioni, Ctrl e Maiuscolo con X la lista della scheda audio, con le cuffie Bluetooth e gli speaker Cast.",
     "Ctrl con F12 spegne i tasti rapidi a carattere e Maiuscolo con F12 li riaccende: spenti, lettere, cifre e segni vanno alla plancia, che salta alla voce che comincia con ciò che scrivi; "
     "i tasti funzione, Esc e le combinazioni con Ctrl e con Alt restano. Gli interruttori dei tasti funzione seguono la regola: Ctrl spegne, Maiuscolo accende, il tasto da solo fa il suo lavoro.",
 ]
@@ -7351,7 +7359,8 @@ class Finestra(wx.Frame):
 
     def _comando_impostazioni(self):
         """La finestra delle impostazioni: una lista piatta, una riga per voce;
-        Invio su una voce la cambia, o fa la sua azione."""
+        Invio su una voce la cambia, o fa la sua azione. La apre la voce
+        Impostazioni della plancia, e dalla 2.6.0 il piu' da tutta la finestra."""
         self._suono("impostazioni")
         with FinestraImpostazioni(self, self._voci_delle_impostazioni(), self._cambia_impostazione) as dialogo:
             dialogo.ShowModal()
@@ -8701,11 +8710,18 @@ class Finestra(wx.Frame):
         genitore.aggiorna("modello_casuale", self._riga_dell_impostazione("modello_casuale"))
         self._riscontro("impostazione_cambiata", f"La riproduzione casuale ora va con il modello {valori.MODELLI_CASUALI[chiavi[indice]]}.")
 
+    def _comando_scheda_audio(self):
+        """Ctrl e Maiuscolo con X: la lista della voce Scheda audio, senza
+        passare dalle impostazioni (Gabriele, 2.6.0)."""
+        self._scegli_la_scheda_audio(None)
+
     def _scegli_la_scheda_audio(self, genitore):
         """La scelta della destinazione, una lista sola con il filtro: in cima
         la scelta automatica, poi le schede del PC in ordine di latenza, che
         valgono per musica ed effetti, poi gli speaker e i gruppi Cast che la
-        ricerca vede, che valgono per la musica (1.119.0)."""
+        ricerca vede, che valgono per la musica (1.119.0). genitore e' la
+        finestra delle impostazioni, o None con Ctrl e Maiuscolo con X: la
+        lista si apre allora sulla finestra principale (2.6.0)."""
         scelta = self._scelta_del_pc()
         try:
             # Una scheda arrivata dopo l'avvio, se l'avviso di mpv non e' ancora
@@ -8727,7 +8743,7 @@ class Finestra(wx.Frame):
         if speaker is not None:
             indice = next((len(elenco) + 1 + i for i, voce in enumerate(apparecchi) if str(voce["uuid"]) == speaker["cast"]), indice)
         self._domanda()
-        with FinestraScelta(genitore, "Scheda audio", righe, indice, con_filtro=True) as dialogo:
+        with FinestraScelta(genitore or self, "Scheda audio", righe, indice, con_filtro=True) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK or dialogo.GetSelection() < 0:
                 self._annullato("Scheda audio non cambiata.")
                 return
@@ -8772,7 +8788,8 @@ class Finestra(wx.Frame):
         self._scheda_in_disparte = None
         self._salva_impostazioni()
         self._aggiorna_la_scheda_delle_statistiche()
-        genitore.aggiorna("scheda_audio", self._riga_dell_impostazione("scheda_audio"))
+        if genitore:
+            genitore.aggiorna("scheda_audio", self._riga_dell_impostazione("scheda_audio"))
         if evento:
             self._riscontro(evento, testo)
         else:

@@ -2,6 +2,20 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [2.6.1] - 2026-11-03
+
+Una correzione nel manuale.
+
+- I tasti senza comando, nella guida rapida, avevano per esempio H e Maiuscolo con H, che dalla 2.2.0 sono il segnalibro: ora gli esempi sono Maiuscolo con Z e la o accentata.
+
+## [2.6.0] - 2026-11-03
+
+Due novità, due tasti rapidi chiesti da Gabriele prima del collaudo della 2.4.0.
+
+- Il più, da solo, apre le impostazioni da tutta la finestra, come la voce Impostazioni della plancia. Ctrl con la virgola, la prima proposta di Gabriele, è il capitolo precedente; il più del tastierino numerico resta a NVDA, e con i tasti rapidi spenti, nella plancia, il più va alla ricerca per iniziale come gli altri segni.
+- Ctrl e Maiuscolo con X aprono la lista della voce Scheda audio senza passare dalle impostazioni: le schede del PC, comprese le cuffie Bluetooth connesse, e gli speaker Cast, con il filtro. Valgono anche con i tasti rapidi spenti, come tutte le combinazioni con Ctrl.
+- Il manuale: la guida rapida, la finestra delle impostazioni, la voce Scheda audio e i suoi due esempi; il cruscotto li ricorda fra i tasti comuni, e la classifica dei tasti delle statistiche dà loro un nome.
+
 ## [2.4.0] - 2026-11-03
 
 Due novità, chieste da Gabriele mentre collaudava la 2.2.0.

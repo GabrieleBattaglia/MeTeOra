@@ -128,6 +128,8 @@ DESCRIZIONI_DEI_COMANDI = {
     # I comandi della nuova mappa, issue 38 (2.0.0).
     "segnalibro": "il segnalibro", "vai_al_segnalibro": "al segnalibro", "togli_il_segnalibro": "toglie il segnalibro",
     "metti_il_segnalibro": "mette il segnalibro",
+    # Il piu' e Ctrl e Maiuscolo con X (2.6.0).
+    "impostazioni": "le impostazioni", "scheda_audio": "la scheda audio",
     "posizione": "il punto del brano", "verso_la_fine": "gli ultimi secondi", "all_inizio": "l'inizio del brano",
     "passi_dei_salti": "i passi dei salti", "passi_predefiniti": "salti predefiniti", "marker_attuale": "il marker",
     "ultimo_marker": "ultimo marker", "primo_marker": "primo marker", "conta_i_marker": "quanti marker", "velocita": "la velocità",
