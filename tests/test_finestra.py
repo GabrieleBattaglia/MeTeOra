@@ -5123,19 +5123,22 @@ def test_la_voce_dona_per_questo_progetto(finestra, monkeypatch, suoni_annotati)
     assert len(finestra._righe) == righe and len(invito.testi) == 2
 
 
-def test_le_voci_del_pub(finestra, monkeypatch, suoni_annotati):
+def test_le_voci_del_pub(finestra, monkeypatch, suoni_annotati, tmp_path):
     # Issue 30 (2.1.0): Entra al PUB e Chiedi aiuto al PUB, accanto a Dona per
     # questo progetto. La finestra di GBwx e le informazioni del computer
-    # sono finte: niente si apre e niente si legge davvero.
+    # sono finte: niente si apre e niente si legge davvero. Senza registri
+    # nella cartella del programma, niente casella (2.4.0).
     import GBUtils
     import GBwx
 
     chiamate, esiti = [], [True]
 
-    def finestra_mail(genitore, titolo, destinatario, oggetto, corpo, spiegazione, passi, pulsanti, senza_posta=""):
+    def finestra_mail(genitore, titolo, destinatario, oggetto, corpo, spiegazione, passi, pulsanti, senza_posta="", casella=None):
         chiamate.append({"titolo": titolo, "destinatario": destinatario, "oggetto": oggetto, "corpo": corpo, "spiegazione": spiegazione,
-            "passi": passi, "pulsanti": pulsanti, "senza_posta": senza_posta})
+            "passi": passi, "pulsanti": pulsanti, "senza_posta": senza_posta, "casella": casella})
         return esiti.pop(0)
+
+    monkeypatch.setattr(modulo.percorsi, "cartella_programma", lambda: str(tmp_path))
 
     monkeypatch.setattr(GBwx, "finestra_mail", finestra_mail)
     monkeypatch.setattr(GBUtils, "informazioni_di_sistema", lambda separatore=".": [("windows", "Windows 11 Pro"), ("processore", "Ryzen"),
@@ -5168,8 +5171,47 @@ def test_le_voci_del_pub(finestra, monkeypatch, suoni_annotati):
         "Screen reader: NVDA 2026.3",
     ]
     assert [testo for _istruzione, testo in mail["passi"]] == [GBUtils.PUB_GRUPPO, mail["oggetto"], mail["corpo"], None]
+    assert mail["casella"] is None and "spunta la casella" not in mail["spiegazione"]
     assert _ultima(finestra) == "Chiedi aiuto al PUB: niente di preparato."
     assert finestra._statistiche.dati["conti"]["mail_al_pub_pronte"] == 1
+
+
+def test_chiedi_aiuto_al_pub_con_i_registri(finestra, monkeypatch, tmp_path):
+    # 2.4.0, Gabriele: con i registri degli errori o dei crash accanto al
+    # programma, la casella; spuntata, il file ripulito da allegare, il passo
+    # in piu' e il suo percorso negli appunti dopo Apri.
+    import GBUtils
+    import GBwx
+
+    (tmp_path / "MeTeOra - Errori.log").write_text("Problema in C:\\Users\\Utente\\Music\\a.mp3 su GABRYBAT: l'utente aspetta.\n", encoding="utf-8")
+    (tmp_path / "MeTeOra - Crash precedente.log").write_text("Fatal Python error\n", encoding="utf-8")
+    monkeypatch.setattr(modulo.percorsi, "cartella_programma", lambda: str(tmp_path))
+    monkeypatch.setenv("USERNAME", "Utente")
+    monkeypatch.setenv("COMPUTERNAME", "GabryBat")
+    monkeypatch.setattr(GBUtils, "informazioni_di_sistema", lambda separatore=".": [("windows", "Windows 11 Pro")])
+    monkeypatch.setattr(modulo.schede_audio, "in_uso", lambda elenco=None: None)
+    viste = {}
+
+    def finestra_mail(genitore, titolo, destinatario, oggetto, corpo, spiegazione, passi, pulsanti, senza_posta="", casella=None):
+        viste["spiegazione"], viste["casella"] = spiegazione, casella
+        viste["spuntata"] = casella[1](True)
+        return True
+
+    monkeypatch.setattr(GBwx, "finestra_mail", finestra_mail)
+    finestra._cambia_impostazione("chiedi_aiuto_al_pub", None)
+    etichetta, _cambi = viste["casella"]
+    assert etichetta == "&Includi anche i registri degli errori" and "spunta la casella qui sotto" in viste["spiegazione"]
+    cambi = viste["spuntata"]
+    registri = str(tmp_path / "MeTeOra - Registri per il PUB.txt")
+    assert cambi["appunti"] == registri and len(cambi["passi"]) == 5 and cambi["passi"][3][1] == registri
+    assert cambi["corpo"].endswith("In allegato i registri degli errori di MeTeOra, ripuliti dal nome dell'utente e del computer.")
+    assert "Allega alla mail anche il file MeTeOra - Registri per il PUB.txt" in cambi["spiegazione"]
+    with open(registri, encoding="utf-8") as f:
+        righe = f.read().splitlines()
+    assert righe[0].startswith(f"Registri di MeTeOra {modulo.version.VERSION}, preparati il ")
+    assert righe[1:] == ["Dal registro degli errori, tutto:", "Problema in C:\\Users\\<utente>\\Music\\a.mp3 su <computer>: l'utente aspetta.",
+        "Dal resoconto del crash MeTeOra - Crash precedente.log, tutto:", "Fatal Python error"]
+    assert finestra._statistiche.dati["conti"]["registri_al_pub"] == 1
 
 def test_cartella_vuota_e_cestino(tmp_path):
     # 1.76.0: vuota anche con sottocartelle vuote o i soli file di servizio;
@@ -6086,6 +6128,10 @@ def test_i_crediti_dicono_licenza_garanzia_e_sorgenti(finestra):
     assert "GNU General Public License, versione 3 o, a tua scelta, qualunque versione successiva. È distribuito senza alcuna garanzia." in testo
     assert "nel file LICENSE accanto al programma" in testo and "licenze\\SORGENTI.txt" in testo
     assert "Licenza: GPL 3." not in testo
+    # 2.4.0, Gabriele: i sostenitori, subito dopo gli autori.
+    righe = [_senza_ora(r) for r in finestra._righe]
+    autori = next(i for i, r in enumerate(righe) if r.startswith("Autori: "))
+    assert righe[autori + 1] == "Grazie a chi sostiene MeTeOra con una donazione: Massimo Diana."
 
 
 def test_restano_le_uscite_libere():

@@ -2,6 +2,14 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [2.4.0] - 2026-11-03
+
+Due novità, chieste da Gabriele mentre collaudava la 2.2.0.
+
+- I registri degli errori nella richiesta d'aiuto: Chiedi aiuto al PUB, quando accanto al programma ci sono il registro degli errori o i resoconti dei crash, ha la casella Includi anche i registri degli errori, spenta di partenza. Spuntata, MeTeOra scrive nella sua cartella MeTeOra - Registri per il PUB.txt: la parte finale del registro degli errori, con la sua copia a rotazione, e i resoconti dei crash precedenti, con il nome dell'utente di Windows e quello del computer cambiati in <utente> e <computer>; il nome dell'utente solo nei percorsi, perché può essere una parola comune come Utente, mentre i percorsi dei brani restano. La mail lo dice e chiede di allegarlo: mailto gli allegati non li porta, e dopo Apri il percorso del file è negli appunti, da incollare nella finestra Allega del programma di posta; Passo per passo ha un passo in più che lo copia. La casella si sceglie nella prima schermata e poi sparisce. Le statistiche contano le mail pronte con i registri allegati.
+- I sostenitori nei crediti: F3, subito dopo gli autori, ringrazia chi sostiene MeTeOra con una donazione, per primo Massimo Diana; anche il manuale, nel capitolo Licenze e crediti.
+- Dentro: la casella viene da GBwx 1.2.0, GBUtils V239, che la offre a tutti i programmi con le finestre; in pub.py la ripulitura e il file dei registri; SOSTENITORI in finestra.py, dove Gabriele aggiunge i nomi via via.
+
 ## [2.2.0] - 2026-11-03
 
 Una novità, la issue 37, chiesta da Gabriele: il segnalibro, sulla H, l'ultima lettera libera, con la regola della 2.0.0 come l'ha voluta lui.

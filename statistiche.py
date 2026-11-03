@@ -1694,7 +1694,8 @@ class Pagina:
             f"Aggiornamenti proposti: {self.e('aggiornamento')}.",
             f"Dona per questo progetto aperto: {al_plurale(self.e('donazione'), 'volta', 'volte')}.",
             f"Entra al PUB aperto: {al_plurale(self.e('pub_entra'), 'volta', 'volte')}; Chiedi aiuto al PUB: "
-            f"{al_plurale(self.e('pub_aiuto'), 'volta', 'volte')}; mail pronte: {self.c('mail_al_pub_pronte')}.",
+            f"{al_plurale(self.e('pub_aiuto'), 'volta', 'volte')}; mail pronte: {self.c('mail_al_pub_pronte')}, con i registri allegati: "
+            f"{self.c('registri_al_pub')}.",
         ]
 
     # 20.
