@@ -9646,10 +9646,13 @@ class Finestra(wx.Frame):
 
     # F8.
 
-    def _trova_voce_che_suona(self):
+    def _trova_voce_che_suona(self, fino_al_sottobrano=False):
         """La voce della plancia di cio' che suona, caricando la playlist o
         aprendo le cartelle se serve; None se non c'e', per esempio per un
-        file aperto con Apri file."""
+        file aperto con Apri file. Con fino_al_sottobrano apre anche i
+        sottobrani di un SID chiuso, come vuole F8 (2.6.6); senza, come per
+        l'inseguimento e la ripresa all'avvio, resta sul SID: aprirli da soli
+        cambierebbe il giro, che segue i rami aperti."""
         corrente, pl = self.coda.corrente, self.coda.playlist
         if not pl.temporanea:
             # Una playlist mai aperta non ha ancora i suoi brani nella plancia.
@@ -9666,10 +9669,24 @@ class Finestra(wx.Frame):
             cartella = self._apri_fino_a(os.path.dirname(corrente.percorso))
             if cartella is not None:
                 voce = next((v for v in self._figli(cartella) if (self._dati(v) or {}).get("brano") is corrente), None)
+        if fino_al_sottobrano:
+            return self._apri_fino_al_sottobrano(voce, self.motore.sottobrano)
         # Se i sottobrani del SID sono aperti, la voce e' quella del sottobrano che suona.
         if voce is not None and self.albero.IsExpanded(voce):
             voce = next((v for v in self._figli(voce) if self._dati(v).get("tipo") == "sottobrano" and self._dati(v).get("numero") == self.motore.sottobrano), voce)
         return voce
+
+    def _apri_fino_al_sottobrano(self, voce, numero):
+        """La voce del sottobrano numero, sotto quella del suo SID o file
+        delle console, aprendone i sottobrani se sono chiusi; la voce data se
+        non ne ha, se numero e' None o se non lo trova. Fino alla 2.6.5 F8 e
+        Maiuscolo con H, con i sottobrani chiusi, si fermavano sul file
+        (Gabriele)."""
+        dati = (self._dati(voce) or {}) if voce is not None else {}
+        if numero is None or dati.get("tipo") not in ("brano", "file") or not self._ha_sottobrani(dati["brano"]):
+            return voce
+        self.albero.Expand(voce)
+        return next((v for v in self._figli(voce) if (self._dati(v) or {}).get("tipo") == "sottobrano" and self._dati(v).get("numero") == numero), voce)
 
     def _vai_al_brano(self):
         corrente = self.coda.corrente
@@ -9677,7 +9694,7 @@ class Finestra(wx.Frame):
         if not corrente:
             self._riscontro("niente_da_suonare", "Non sta suonando niente.")
             return
-        voce = self._trova_voce_che_suona()
+        voce = self._trova_voce_che_suona(fino_al_sottobrano=True)
         if voce is None:
             self._riscontro("niente_da_suonare", f"{corrente.nome_del_file} non è nella plancia: è stato aperto con Apri file.")
             return
@@ -9761,7 +9778,8 @@ class Finestra(wx.Frame):
 
     def _comando_vai_al_segnalibro(self):
         """Maiuscolo con H: il fuoco della plancia sul brano del segnalibro,
-        aprendo tutti i suoi contenitori, e il brano suona dal punto segnato,
+        aprendo tutti i suoi contenitori, fino al sottobrano di un SID (2.6.6),
+        e il brano suona dal punto segnato,
         nella lista da cui suonava; se quella non c'e' piu', dalla cartella
         del file."""
         segno = self.impostazioni["segnalibro"]
@@ -9775,6 +9793,7 @@ class Finestra(wx.Frame):
         if brano is None:
             self._riscontro("errore", f"Non ritrovo {os.path.basename(segno['percorso'])} nella sua cartella.")
             return
+        voce = self._apri_fino_al_sottobrano(voce, segno["sottobrano"])
         if voce is not None:
             self.albero.EnsureVisible(voce)
             self._seleziona(voce)

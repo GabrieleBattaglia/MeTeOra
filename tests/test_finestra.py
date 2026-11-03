@@ -749,6 +749,31 @@ def test_maiuscolo_h_torna_al_segnalibro(finestra, monkeypatch, tmp_path, suoni_
     assert _ultima(finestra) == f"Il file del segnalibro non c'è più: {nuovo}." and suoni_annotati[-1] == "errore"
 
 
+@pytest.mark.skipif(not os.path.isfile(TURBO_OUTRUN), reason="serve la collezione HVSC")
+def test_maiuscolo_h_e_f8_arrivano_al_sottobrano(finestra, monkeypatch, tmp_path):
+    # Con un SID chiuso nella plancia, Maiuscolo con H e F8 si fermavano sul
+    # file, il genitore del sottobrano segnato o che suona (Gabriele, 2.6.6).
+    import shutil
+
+    sid = tmp_path / "Turbo_Outrun.sid"
+    shutil.copy(TURBO_OUTRUN, sid)
+    suonati, _punto = _motore_del_segnalibro(finestra, monkeypatch)
+    finestra._aggiungi(None, [str(sid)])
+    pl = finestra.archivio.playlist[0]
+    finestra.impostazioni["segnalibro"] = {"percorso": str(sid), "posizione": 75.0, "durata": 180.0, "sottobrano": 3,
+                                           "lista": "playlist", "nome": pl.nome, "indice": 0}
+    finestra._seleziona(finestra.nodo_pc)
+    _tasto(finestra, "h", maiuscolo=True)
+    assert suonati[-1] == ("Turbo_Outrun.sid", 3, 75.0)
+    assert finestra.albero.GetItemText(finestra._voce_corrente()).startswith("Sottobrano 3 di 12")
+    # F8, con i sottobrani chiusi, arriva anche lui al sottobrano che suona.
+    voce_file = finestra.albero.GetItemParent(finestra._voce_corrente())
+    finestra._seleziona(finestra.nodo_pc)
+    finestra.albero.Collapse(voce_file)
+    _tasto(finestra, codice=wx.WXK_F8)
+    assert finestra.albero.GetItemText(finestra._voce_corrente()).startswith("Sottobrano 3 di 12")
+
+
 def test_il_segnalibro_dalla_cartella(finestra, monkeypatch, tmp_path):
     # Issue 37: un brano suonato da una cartella torna dalla sua cartella,
     # anche se la plancia non la mostra.

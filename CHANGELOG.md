@@ -2,6 +2,13 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [2.6.6] - 2026-11-03
+
+Una correzione, trovata da Gabriele dopo il collaudo della 2.6.5.
+
+- Maiuscolo con H e F8, con un SID o un file delle console chiuso nella plancia, si fermavano sul file invece di arrivare al sottobrano: Maiuscolo con H faceva suonare il sottobrano del segnalibro, ma la selezione restava sul suo SID, e F8 arrivava al sottobrano che suona solo se i sottobrani erano già aperti. Ora tutti e due aprono i sottobrani e portano la selezione e il fuoco sul sottobrano, e con il ramo del SID aperto, finito il sottobrano, si va avanti con il seguente. L'inseguimento, Maiuscolo con F8, e la selezione all'avvio restano invece sul SID quando i suoi sottobrani sono chiusi: aprirli da soli cambierebbe l'ordine in cui si va avanti, che segue i rami aperti. Il manuale lo dice nella guida rapida e nella sezione su F8.
+- Dentro: _apri_fino_al_sottobrano in finestra.py, usata da Maiuscolo con H e da F8; una prova nuova con un SID vero.
+
 ## [2.6.5] - 2026-11-03
 
 Una correzione, dal collaudo della 2.6.4: sullo speaker Cast, fra un sottobrano finito da solo e il seguente, fino a mezzo minuto di silenzio, mentre con B il passaggio dura un secondo o due.

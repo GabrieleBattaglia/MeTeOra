@@ -1,0 +1,5 @@
+Collaudo di MeTeOra 2.6.6: Maiuscolo con H e F8 arrivano al sottobrano di un SID.
+Fai suonare un sottobrano di Outrun Europa, metti il segnalibro con Ctrl e Maiuscolo con H, poi chiudi il ramo del SID con freccia sinistra e sposta il fuoco altrove.
+Maiuscolo con H: i sottobrani si aprono, e il fuoco arriva sul sottobrano del segnalibro, non sul SID.
+Chiudi di nuovo il ramo del SID, sposta il fuoco e premi F8: anche F8 arriva sul sottobrano che suona.
+Dopo Maiuscolo con H, lascia finire il sottobrano: parte il seguente dello stesso SID, perché il suo ramo ora è aperto.
