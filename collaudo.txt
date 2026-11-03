@@ -1,33 +1,5 @@
 Collaudo di MeTeOra 2.2.0, 2.4.0 e 2.6.0: nella 2.2.0 le issue 29, 30 e 37; la 28, la 35 e la 36 le provano la suite e la compilazione dell'installatore.
-Issue 29: togli dal disco un file che sta nei Preferiti, lascia il fuoco sulla voce Preferiti chiusa, chiudi e riapri MeTeOra.
-A fine pulizia NVDA non dice più Playlist, non selezionato: il fuoco resta sui Preferiti, che dicono un brano in meno.
-Issue 30: nelle impostazioni, dopo Dona per questo progetto, Invio su Entra al PUB (gruppo di supporto) apre la finestra con il suono del campanello del pub di MESS.
-Apri nel programma di posta prepara la mail d'iscrizione nel tuo programma di posta; non spedirla, se sei già iscritto.
-Passo per passo copia negli appunti l'indirizzo dell'iscrizione; OK passa al passo 2, e il secondo OK chiude la finestra.
-Invio su Chiedi aiuto al PUB: l'oggetto dice Chiedo per MeTeOra 2.6.1, la versione dai sorgenti, e il testo comincia con la riga della domanda.
-Sotto ci sono le informazioni: il programma dai sorgenti, la scheda audio con l'interfaccia, Windows, processore, memoria, lingua, NVDA e schermo; niente nomi né percorsi.
-Esc prima della fine: la console dice niente di preparato, con il suono dell'annullamento.
-Issue 37: H senza segnalibro dice Nessun segnalibro, alla sintesi e al braille.
-Fai suonare un brano di una playlist, porta il punto oltre il primo minuto e premi Ctrl e Maiuscolo con H: suono nuovo e riga Segnalibro su.
-H dice brano, punto e playlist del segnalibro.
-Suona altro, poi chiudi e riapri MeTeOra: H dice ancora lo stesso segnalibro.
-Porta il fuoco altrove, chiudi i rami della plancia e premi Maiuscolo con H: la plancia si apre fino al brano, il fuoco ci arriva, e il brano suona dal punto segnato.
-La console dice Dal segnalibro, con il tempo; finito quel brano, parte il seguente della stessa playlist.
-Con un brano suonato da una cartella di Questo PC, Maiuscolo con H riapre la cartella fino al file.
-Ctrl con H toglie il segnalibro, con il suo suono; premuto di nuovo dice Nessun segnalibro da togliere.
-Domanda: i tre suoni nuovi del segnalibro, quando lo metti, quando lo togli e quando ci torni, ti vanno bene?
-Collaudo della 2.4.0: i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti.
-Invio su Chiedi aiuto al PUB: dopo il testo, con Tab, c'è la casella Includi anche i registri degli errori, non spuntata.
-Spuntala con la barra spaziatrice: tornando al testo, la spiegazione dice di allegare il file MeTeOra - Registri per il PUB.txt, con la sua cartella.
-Apri nel programma di posta: la bozza finisce con In allegato i registri degli errori, e negli appunti c'è il percorso del file; non spedirla.
-Nella bozza scegli Allega e incolla il percorso: il file si allega.
-Apri il file: al posto del tuo nome utente nei percorsi e del nome del computer ci sono <utente> e <computer>.
-Passo per passo, con la casella spuntata: i passi sono cinque, e il quarto copia negli appunti il percorso del file.
-Dopo Apri, o dopo il primo OK dei passi, la casella non c'è più.
-F3: subito dopo la riga degli autori, Grazie a chi sostiene MeTeOra con una donazione: Massimo Diana.
-Collaudo della 2.6.0: due tasti rapidi nuovi.
-Il più, da solo, nella plancia, nella console e nel cruscotto: si apre la finestra delle impostazioni, con il suo suono.
-Ctrl e Maiuscolo con X, da qualsiasi area: si apre la lista Scheda audio, sulla scheda di adesso, e Maiuscolo con Tab porta al filtro.
-Scegli un'altra scheda con Invio: la console la dice e il suono arriva da lì; poi rimetti quella di prima.
-Esc nella lista: la console dice Scheda audio non cambiata.
-Ctrl con F12, tasti rapidi spenti: Ctrl e Maiuscolo con X apre ancora la lista; il più, nella console, dice che i tasti rapidi sono spenti. Poi Maiuscolo con F12.
+* problema: l riporta lo stato ma cltr+l e shift+l non spengono e accendono.
+
+Verifica che lo stesso problema non sia presente in altri tasti.
+* Richiesta chiarimento sui volumi. Ho selezionato la mia sound bar GabryBar via chromecast. Con i comandi di m arrivo fino al 100% di volume, ma se volessi spingere oltre, come faccio?
