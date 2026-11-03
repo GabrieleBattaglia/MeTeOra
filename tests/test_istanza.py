@@ -1,6 +1,6 @@
 # MeTeOra, le prove dell'istanza unica e delle associazioni dei formati: pipe di prova e registro finto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.91.0. Nella 1.113.0 le associazioni delle playlist M3U e PLS.
+# 04/10/2026: nasce con la 1.91.0. Nella 1.113.0 le associazioni delle playlist M3U e PLS. Nella 2.0.3 ferma che libera la pipe (issue 36).
 
 """La pipe ha un nome solo per la prova, mai quello del MeTeOra che magari e'
 aperto; il registro di Windows e' finto, in memoria: niente di vero si tocca."""
@@ -154,7 +154,10 @@ def test_ferma_non_si_appende():
     ascolto._nome = nome
     ascolto._fermo = False
     ascolto._mutex = None
+    ascolto._ricevi = lambda percorsi: None
     ascolto._ascoltatore = Listener(nome, family="AF_PIPE", authkey=istanza._chiave(nome))
+    ascolto._filo = threading.Thread(target=ascolto._ascolta, daemon=True)
+    ascolto._filo.start()
     in_piu = _winapi.CreateNamedPipe(nome, _winapi.PIPE_ACCESS_DUPLEX | _winapi.FILE_FLAG_OVERLAPPED,
         _winapi.PIPE_TYPE_MESSAGE | _winapi.PIPE_READMODE_MESSAGE | _winapi.PIPE_WAIT, _winapi.PIPE_UNLIMITED_INSTANCES,
         BUFSIZE, BUFSIZE, _winapi.NMPWAIT_WAIT_FOREVER, _winapi.NULL)
@@ -165,6 +168,19 @@ def test_ferma_non_si_appende():
         assert not filo.is_alive()
     finally:
         _winapi.CloseHandle(in_piu)
+
+
+def test_ferma_libera_la_pipe():
+    # Issue 36 (2.0.3): ferma sblocca il filo prima di chiudere il Listener,
+    # e la pipe torna libera subito, ciclo dopo ciclo; con l'ordine di prima
+    # una volta ogni cento o trecento cicli un'istanza restava aperta, e
+    # nello stesso processo nessuno poteva piu' ascoltare con quel nome.
+    nome = _nome_di_prova()
+    for giro in range(20):
+        ascolto = istanza.Ascolto(lambda percorsi: None, nome)
+        assert ascolto.attiva, giro
+        ascolto.ferma()
+        assert not ascolto._filo.is_alive(), giro
 
 
 def _mutex_aperto(nome_del_mutex):

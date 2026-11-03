@@ -1,6 +1,6 @@
 # MeTeOra, l'istanza unica: la seconda copia passa i file alla prima e si chiude.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.91.0, tappa 12 d del piano. Nella 1.96.11 la sveglia dell'ascolto senza stretta di mano. Nella 1.97.0 il mutex che l'installatore riconosce.
+# 04/10/2026: nasce con la 1.91.0, tappa 12 d del piano. Nella 1.96.11 la sveglia dell'ascolto senza stretta di mano. Nella 1.97.0 il mutex che l'installatore riconosce. Nella 2.0.3 ferma sblocca il filo prima di chiudere il Listener (issue 36).
 
 """L'istanza unica di MeTeOra (1.91.0).
 
@@ -31,6 +31,9 @@ from multiprocessing.connection import Client, Listener
 
 # AllowSetForegroundWindow: qualunque processo, cioe' la prima copia.
 _ASFW_ANY = -1
+# Quante volte ferma() sblocca il filo dell'ascolto, a 50 ms l'una, prima di
+# lasciarlo: due secondi al piu' (issue 36).
+LIMITE_DEGLI_SBLOCCHI = 40
 
 
 def nome():
@@ -94,6 +97,7 @@ class Ascolto:
         self._nome = nome_della_pipe or nome()
         self._fermo = False
         self._mutex = None
+        self._filo = None
         try:
             self._ascoltatore = Listener(self._nome, family="AF_PIPE", authkey=_chiave(self._nome))
         except OSError:
@@ -104,7 +108,8 @@ class Ascolto:
                 # Il MeTeOra vero, o quello di un banco con METEORA_ISTANZA;
                 # le prove che danno il nome della pipe non lo tengono.
                 self._mutex = _crea_il_mutex(nome_del_mutex())
-            threading.Thread(target=self._ascolta, name="MeTeOra, istanza unica", daemon=True).start()
+            self._filo = threading.Thread(target=self._ascolta, name="MeTeOra, istanza unica", daemon=True)
+            self._filo.start()
 
     def _ascolta(self):
         while not self._fermo:
@@ -127,11 +132,22 @@ class Ascolto:
             _chiudi_il_mutex(self._mutex)
             self._mutex = None
         if self._ascoltatore is not None:
+            # Prima il filo, poi il Listener (issue 36). Il filo si sblocca
+            # aprendo e chiudendo la pipe, senza la stretta di mano di Client:
+            # se intanto l'ascolto aveva gia' preparato una pipe nuova che
+            # nessuno serve piu', Client ci aspetterebbe la sfida per sempre, e
+            # MeTeOra non si chiuderebbe (1.96.11). Lo si sblocca piu' volte,
+            # finche' non e' finito: se arriva in accept dopo un'apertura,
+            # aspetterebbe la seguente. Solo dopo si chiude il Listener: chiuso
+            # prima, i suoi handle restavano in coda chiusi mentre il filo li
+            # usava, Windows ne riusava i numeri, e un'istanza della pipe
+            # poteva restare aperta fino alla fine del processo, cosi' che
+            # nessuno, nello stesso processo, poteva piu' ascoltare con quel nome.
+            for _ in range(LIMITE_DEGLI_SBLOCCHI):
+                if self._filo is None or not self._filo.is_alive():
+                    break
+                with contextlib.suppress(OSError), open(self._nome, "rb", buffering=0):
+                    pass
+                self._filo.join(0.05)
             with contextlib.suppress(Exception):
                 self._ascoltatore.close()
-            # Sblocca accept aprendo e chiudendo la pipe, senza la stretta di
-            # mano di Client: se intanto l'ascolto aveva gia' preparato una
-            # pipe nuova che nessuno serve piu', Client ci aspetterebbe la
-            # sfida per sempre, e MeTeOra non si chiuderebbe (1.96.11).
-            with contextlib.suppress(OSError), open(self._nome, "rb", buffering=0):
-                pass
