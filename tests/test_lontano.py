@@ -131,6 +131,48 @@ def test_un_brano_che_lo_speaker_legge(banco):
     assert banco.avvisi == ["caricato", "fine"] and lettore.percorso is None
 
 
+def test_la_fine_che_lo_speaker_non_dice(banco, monkeypatch):
+    # GabryBar, alla fine dei FLAC convertiti, resta in caricamento
+    # all'ultimo campione per 23 secondi, poi da' errore: dopo
+    # ATTESA_DELLA_FINE il brano e' finito, sottobrano compreso (2.6.5).
+    monkeypatch.setattr(lontano, "ATTESA_DELLA_FINE", 0.05)
+    lettore = banco.lettore
+    lettore.suona(r"C:\m\musica.sid", sottobrano=4, sottobrani=27)
+    assert banco.aspetta_suona()
+    indirizzo = banco.apparecchio.chiamate[-1][1]
+    banco.stato(trasmissione.IN_RIPRODUZIONE, indirizzo, durata=97.056)
+    # Un caricamento a meta' brano e' un caricamento vero: niente fine.
+    banco.allo_stato({"stato": trasmissione.IN_CARICAMENTO, "posizione": 40.0, "durata": 97.056, "motivo": None, "indirizzo": indirizzo})
+    threading.Event().wait(0.2)
+    assert "fine" not in banco.avvisi and lettore.percorso is not None
+    # All'ultimo campione, e lo speaker non dice altro.
+    banco.allo_stato({"stato": trasmissione.IN_CARICAMENTO, "posizione": 97.056, "durata": 97.056, "motivo": None, "indirizzo": indirizzo})
+    for _ in range(200):
+        if "fine" in banco.avvisi:
+            break
+        threading.Event().wait(0.01)
+    assert banco.avvisi.count("fine") == 1 and lettore.percorso is None and lettore.sottobrano == 4
+    # L'errore che lo speaker manda 23 secondi dopo non conta piu'.
+    banco.stato(trasmissione.FERMO, indirizzo, motivo="ERROR")
+    assert not any(isinstance(a, tuple) and a[0] == "errore" for a in banco.avvisi)
+    # Se lo speaker dice la fine da se', entro l'attesa, la fine e' una sola.
+    lettore.suona("brano.mp3")
+    indirizzo = banco.apparecchio.chiamate[-1][1]
+    banco.stato(trasmissione.IN_RIPRODUZIONE, indirizzo, durata=200.0)
+    banco.allo_stato({"stato": trasmissione.IN_CARICAMENTO, "posizione": 199.9, "durata": 200.0, "motivo": None, "indirizzo": indirizzo})
+    banco.stato(trasmissione.FERMO, indirizzo, motivo="FINISHED")
+    threading.Event().wait(0.2)
+    assert banco.avvisi.count("fine") == 2
+    # E se riparte, per esempio dopo un salto indietro, la fine attesa si toglie.
+    lettore.suona("altro.mp3")
+    indirizzo = banco.apparecchio.chiamate[-1][1]
+    banco.stato(trasmissione.IN_RIPRODUZIONE, indirizzo, durata=200.0)
+    banco.allo_stato({"stato": trasmissione.IN_CARICAMENTO, "posizione": 200.0, "durata": 200.0, "motivo": None, "indirizzo": indirizzo})
+    banco.stato(trasmissione.IN_RIPRODUZIONE, indirizzo, durata=200.0)
+    threading.Event().wait(0.2)
+    assert banco.avvisi.count("fine") == 2 and lettore.percorso == "altro.mp3"
+
+
 def test_i_comandi(banco):
     lettore, apparecchio = banco.lettore, banco.apparecchio
     lettore.suona("brano.flac", in_pausa=True)

@@ -2,6 +2,13 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [2.6.5] - 2026-11-03
+
+Una correzione, dal collaudo della 2.6.4: sullo speaker Cast, fra un sottobrano finito da solo e il seguente, fino a mezzo minuto di silenzio, mentre con B il passaggio dura un secondo o due.
+
+- La causa l'ha trovata una misura dal vivo su GabryBar, una Ambeo Soundbar Plus, con il permesso di Gabriele. Con i brani che MeTeOra le manda convertiti in FLAC, cioè SID, MIDI, musica delle console, APE, WavPack e l'audio dei video, lo speaker suona fino all'ultimo campione, passa in caricamento con la posizione uguale alla durata, resta così 23 secondi e poi chiude il brano con un errore. Un MP3 e un WAV, nella stessa prova, finiscono da soli entro mezzo secondo. Il FLAC è in ordine: 1011 blocchi completi, esattamente i campioni che dichiara. Ora, se lo speaker resta in caricamento all'ultimo campione per più di un secondo, MeTeOra dà il brano per finito e passa al seguente; l'errore che lo speaker manda dopo non conta più. La spiegazione della 2.6.4, il silenzio come tempo della conversione, era incompleta: la conversione aggiunge qualche secondo solo ai brani non ancora ascoltati, il grosso era questa attesa.
+- Dentro: in lontano.py ATTESA_DELLA_FINE e MARGINE_DELLA_FINE, con una prova nuova.
+
 ## [2.6.4] - 2026-11-03
 
 Una correzione, trovata da Gabriele ascoltando con GabryBar i 27 sottobrani di Outrun Europa.

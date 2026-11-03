@@ -1,6 +1,7 @@
 # MeTeOra, il lettore lontano: uno speaker Cast al posto della scheda audio, con la strada A e la conversione in FLAC.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 # 03/11/2026: nasce con la 1.117.0, tappa 15 b del piano. Nella 2.6.4 il sottobrano resta a fine brano, come nel motore.
+# Nella 2.6.5 la fine che lo speaker non dice, fermo in caricamento all'ultimo campione.
 
 """Il lettore che suona su un apparecchio Cast, per il motore.
 
@@ -36,6 +37,15 @@ import trasmissione
 MEMORIA_DEL_VOLUME = 1.0
 # Gli stati che dicono che l'apparecchio ha in mano il brano.
 _SUONA_O_ASPETTA = (trasmissione.IN_RIPRODUZIONE, trasmissione.IN_PAUSA, trasmissione.IN_CARICAMENTO)
+# La fine che lo speaker non dice (2.6.5). Misurato su GabryBar, una Ambeo
+# Soundbar Plus, il 3 novembre 2026: con i FLAC che MeTeOra converte arriva
+# all'ultimo campione, passa in caricamento con la posizione uguale alla
+# durata, resta cosi' 23 secondi e poi chiude il brano con un errore; un MP3
+# e un WAV finiscono da soli, entro mezzo secondo. Se dopo ATTESA_DELLA_FINE
+# secondi lo speaker e' ancora li', il brano e' finito. Vale come fine un
+# caricamento entro MARGINE_DELLA_FINE secondi dalla durata.
+ATTESA_DELLA_FINE = 1.0
+MARGINE_DELLA_FINE = 0.25
 
 
 def da_convertire(percorso, sottobrano=None, midi_reso=False):
@@ -78,6 +88,9 @@ class LettoreLontano:
         # manda un brano che non serve piu'.
         self._generazione = 0
         self._convertiti = {}
+        # La fine attesa, con lo speaker in caricamento all'ultimo campione:
+        # un segno che ogni stato nuovo, ogni brano e lo stop tolgono.
+        self._fine_attesa = None
         # Il volume chiesto per ultimo, e quando: per un attimo vale lui,
         # finche' l'apparecchio non manda il suo stato nuovo, cosi' le
         # pressioni ravvicinate del volume non si perdono.
@@ -143,6 +156,7 @@ class LettoreLontano:
             self.percorso, self.sottobrano, self.sottobrani = percorso, sottobrano, sottobrani
             self._indirizzo = None
             self._pronto = False
+            self._fine_attesa = None
             self._pausa = bool(in_pausa)
             self._durata = None
             chiave = (os.path.normcase(percorso), sottobrano, midi_reso)
@@ -201,6 +215,7 @@ class LettoreLontano:
             self.percorso = self.sottobrano = self.sottobrani = None
             self._indirizzo = None
             self._pronto = False
+            self._fine_attesa = None
             self._pausa = False
         if c_era:
             self._comanda(self.apparecchio.ferma)
@@ -279,17 +294,46 @@ class LettoreLontano:
         if avviso is not None:
             avviso()
 
+    def _all_ultimo_campione(self, posizione):
+        return posizione is not None and bool(self._durata) and posizione >= self._durata - MARGINE_DELLA_FINE
+
+    def _aspetta_la_fine(self):
+        """Lo speaker e' in caricamento all'ultimo campione: se non cambia
+        stato entro ATTESA_DELLA_FINE, il brano e' finito. Sotto il lucchetto."""
+        segno = self._fine_attesa = object()
+        filo = threading.Timer(ATTESA_DELLA_FINE, self._fine_non_detta, args=(segno,))
+        filo.daemon = True
+        filo.start()
+
+    def _fine_non_detta(self, segno):
+        """Lo speaker e' ancora fermo all'ultimo campione: per il lettore il
+        brano e' finito, come con lo stato FINISHED, sottobrano compreso. Se
+        poi lo speaker dice la fine o l'errore, quegli stati non contano
+        piu', perche' il brano non c'e'."""
+        with self._blocco:
+            if self._fine_attesa is not segno or self.percorso is None:
+                return
+            self._fine_attesa = None
+            self.percorso = None
+            self._indirizzo = None
+            self._pronto = False
+        if self._alla_fine is not None:
+            self._alla_fine()
+
     def _stato_del_brano(self, stato):
         """Lo stato del brano pubblicato, sotto il lucchetto: l'avviso da dare
         fuori, o None."""
         if stato.get("durata"):
             self._durata = stato["durata"]
+        self._fine_attesa = None
         if stato["stato"] in _SUONA_O_ASPETTA:
             if stato["stato"] != trasmissione.IN_CARICAMENTO:
                 self._pausa = stato["stato"] == trasmissione.IN_PAUSA
             if not self._pronto:
                 self._pronto = True
                 return self._al_caricamento
+            if stato["stato"] == trasmissione.IN_CARICAMENTO and self._all_ultimo_campione(stato.get("posizione")):
+                self._aspetta_la_fine()
             return None
         motivo = stato.get("motivo")
         # Un FERMO prima che l'apparecchio abbia il brano e' quello del brano
