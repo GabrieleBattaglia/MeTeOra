@@ -495,6 +495,10 @@ def _frase_della_casuale(accesa, modello):
 TIMER_PROPOSTO = 30
 # Il passo di Ctrl e Maiuscolo con K, la durata della dissolvenza (issue 38).
 PASSO_DELLA_DISSOLVENZA = 0.5
+# Le famiglie dei tasti che con uno speaker Cast non valgono: velocita',
+# tono, equalizzatore e dissolvenza. Il tasto da solo, dopo il valore, lo
+# ricorda (Gabriele, collaudo della 2.6.0).
+SOLO_SUL_PC = ("velocita", "tono", "banda", "dissolvenza")
 SFUMATURA_DEL_TIMER = 20.0
 PASSO_DELLA_SFUMATURA = 100
 FRASI_DEL_VOLUME_UNIFORME = {
@@ -6640,7 +6644,10 @@ class Finestra(wx.Frame):
         nuovo = max(0, min(massimo, nuovo))
         if nuovo == attuale:
             limite = "al massimo, " if nuovo == massimo and verso > 0 else "al minimo, " if nuovo == 0 and verso < 0 else "a "
-            self._riscontro("volume_al_limite", f"Volume{di} già {limite}{attuale}.", "volume")
+            # Sullo speaker il 100 e' il suo massimo: lo si dice, perche' sul
+            # PC si va fino a 300 (Gabriele, collaudo della 2.6.0).
+            oltre = " Oltre il 100 si amplifica solo sulle schede del PC." if lettore is not None and nuovo == massimo and verso > 0 else ""
+            self._riscontro("volume_al_limite", f"Volume{di} già {limite}{attuale}.{oltre}", "volume")
             return
         if lettore is not None:
             lettore.volume = nuovo
@@ -8965,13 +8972,17 @@ class Finestra(wx.Frame):
         self.scrivi(f"Converto {os.path.basename(percorso)} in FLAC per {lettore.nome}: un attimo.", "conversione")
 
     def _vale_solo_sul_pc(self, cosa):
-        """Vero, e la console lo dice, se suona uno speaker Cast: dissolvenza,
+        """Vero, e lo dice, se suona uno speaker Cast: dissolvenza,
         equalizzatore, velocita' e tono sullo speaker non valgono, e tornano
-        con una scheda del PC (decisione di Gabriele del 29 ottobre 2026)."""
+        con una scheda del PC (decisione di Gabriele del 29 ottobre 2026).
+        Dalla 2.6.2 il rifiuto va anche alla sintesi e al braille dei
+        sottotitoli, oltre al suono e alla console: nella console, da sola,
+        si perdeva (Gabriele, collaudo della 2.6.0)."""
         lettore = self.motore.lontano
         if lettore is None:
             return False
-        self._riscontro("non_disponibile", f"{cosa} su {lettore.nome} non vale: vale sulle schede del PC.")
+        self._suono("non_disponibile")
+        self._riporta(f"{cosa} su {lettore.nome} non vale: vale sulle schede del PC.", None)
         return True
 
     # Salva console, piano 5.8.6.
@@ -9857,8 +9868,12 @@ class Finestra(wx.Frame):
         """Il tasto da solo, issue 38 (2.0.0): il valore del suo controllo,
         con i limiti, nella console, dove riscrive la riga della sua famiglia,
         e alla sintesi e al braille dei sottotitoli, come Dove sono; senza
-        suono, perche' parla, e senza spostare il fuoco."""
+        suono, perche' parla, e senza spostare il fuoco. Con uno speaker Cast
+        le famiglie di SOLO_SUL_PC dicono anche che li' non valgono (2.6.2)."""
         self._domanda_viva = None
+        lettore = self.motore.lontano
+        if categoria in SOLO_SUL_PC and lettore is not None:
+            testo += f" Su {lettore.nome} non vale: vale sulle schede del PC."
         self.scrivi(testo, categoria)
         self._a_voce_e_in_braille(testo)
 

@@ -3973,7 +3973,7 @@ def test_la_lista_delle_destinazioni_con_gli_speaker(finestra, monkeypatch):
     assert scelta.aperture[0][2] == 4 and _ultima(finestra) == "Scheda audio non cambiata."
 
 
-def test_lo_speaker_cast(finestra, monkeypatch, tmp_path, suoni_annotati, equalizzatore_annotato):
+def test_lo_speaker_cast(finestra, monkeypatch, tmp_path, suoni_annotati, equalizzatore_annotato, sintesi_finta):
     brano = tmp_path / "canzone.wav"
     _wav(brano, 30)
     finestra._suona_file(str(brano), str(tmp_path))
@@ -3994,12 +3994,20 @@ def test_lo_speaker_cast(finestra, monkeypatch, tmp_path, suoni_annotati, equali
     assert speaker.volume == 45 and _ultima(finestra) == "Volume di Cucina 45." and equalizzatore_annotato[-1] == ("volume", 45)
     speaker.volume = 100
     _tasto(finestra, "m", maiuscolo=True)
-    assert _ultima(finestra) == "Volume di Cucina già al massimo, 100."
-    # Velocita', tono, equalizzatore e dissolvenza sullo speaker non valgono.
-    for carattere, cosa in (("a", "La velocità"), ("f", "Il tono"), ("o", "L'equalizzatore"), ("u", "L'equalizzatore"), ("l", "La dissolvenza")):
-        _tasto(finestra, carattere, maiuscolo=True)
-        assert _ultima(finestra) == f"{cosa} su Cucina non vale: vale sulle schede del PC."
+    assert _ultima(finestra) == "Volume di Cucina già al massimo, 100. Oltre il 100 si amplifica solo sulle schede del PC."
+    # Velocita', tono, equalizzatore e dissolvenza sullo speaker non valgono:
+    # lo dicono anche alla sintesi e al braille (collaudo della 2.6.0).
+    for carattere, cosa in (("a", "La velocità"), ("f", "Il tono"), ("o", "L'equalizzatore"), ("u", "L'equalizzatore"), ("l", "La dissolvenza"),
+                            ("k", "La dissolvenza")):
+        for ctrl in (False, True):
+            _tasto(finestra, carattere, maiuscolo=not ctrl, ctrl=ctrl)
+            assert _ultima(finestra) == f"{cosa} su Cucina non vale: vale sulle schede del PC."
+            assert sintesi_finta.detti[-1] == ("nvda", _ultima(finestra)) and suoni_annotati[-1] == "non_disponibile"
     assert finestra.impostazioni["velocita"] == 1.0 and not finestra.impostazioni["dissolvenza"]["accesa"]
+    # I tasti da soli dicono il valore, e che sullo speaker non vale.
+    for carattere in "afuopkl":
+        assert _premi(finestra, carattere).endswith(". Su Cucina non vale: vale sulle schede del PC."), carattere
+    assert "non vale" not in _premi(finestra, "q") and "non vale" not in _premi(finestra, "m")
     # M dice il volume dello speaker; Ctrl e Alt lo portano a zero, Ctrl e
     # Maiuscolo a quello di prima (issue 38).
     speaker.volume = 60

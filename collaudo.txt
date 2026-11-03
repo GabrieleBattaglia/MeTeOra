@@ -1,5 +1,8 @@
-Collaudo di MeTeOra 2.2.0, 2.4.0 e 2.6.0: nella 2.2.0 le issue 29, 30 e 37; la 28, la 35 e la 36 le provano la suite e la compilazione dell'installatore.
-* problema: l riporta lo stato ma cltr+l e shift+l non spengono e accendono.
-
-Verifica che lo stesso problema non sia presente in altri tasti.
-* Richiesta chiarimento sui volumi. Ho selezionato la mia sound bar GabryBar via chromecast. Con i comandi di m arrivo fino al 100% di volume, ma se volessi spingere oltre, come faccio?
+Collaudo di MeTeOra 2.6.2 e 2.6.3: con uno speaker Cast, i tasti che lì non valgono lo dicono a voce, e il volume al massimo spiega il 100.
+Fai suonare un brano e scegli GabryBar con Ctrl e Maiuscolo con X.
+Ctrl con L e Maiuscolo con L: il suono del rifiuto, e la sintesi e il braille dicono La dissolvenza su GabryBar non vale: vale sulle schede del PC.
+Lo stesso con A, F, U, O e K, con Ctrl e con Maiuscolo.
+L da solo dice la dissolvenza e poi Su GabryBar non vale: vale sulle schede del PC; così anche A, F, U, O, P e K da soli.
+Q e M da soli non hanno l'aggiunta.
+Maiuscolo con M fino a 100, poi ancora una volta: Volume di GabryBar già al massimo, 100. Oltre il 100 si amplifica solo sulle schede del PC.
+Torna a una scheda del PC con Ctrl e Maiuscolo con X: Ctrl con L e Maiuscolo con L spengono e accendono la dissolvenza, e L da solo non ha più l'aggiunta.

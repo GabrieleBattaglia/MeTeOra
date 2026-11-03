@@ -2,6 +2,19 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [2.6.3] - 2026-11-03
+
+Una correzione dal collaudo della 2.6.0, sulla domanda di Gabriele: con lo speaker, come si va oltre il volume 100?
+
+- Sullo speaker M cambia il volume dell'apparecchio, e il 100 è il suo massimo; oltre il 100 amplifica solo MeTeOra, sulle schede del PC. Maiuscolo con M, al massimo, ora lo dice: Volume di GabryBar già al massimo, 100. Oltre il 100 si amplifica solo sulle schede del PC. Gabriele ha scelto di non amplificare sullo speaker.
+
+## [2.6.2] - 2026-11-03
+
+Una correzione dal collaudo della 2.6.0: con uno speaker Cast i rifiuti si perdevano nella console.
+
+- Sullo speaker dissolvenza, equalizzatore, velocità e tono restano fuori, come ha deciso Gabriele il 29 ottobre e ha confermato adesso, ma i tasti lo dicono a voce: il rifiuto di L, K, U, O, P, A e F con i modificatori va anche alla sintesi e al braille dei sottotitoli, oltre al suono e alla console, e i tasti da soli, dopo il valore, aggiungono Su, con il nome dello speaker, non vale: vale sulle schede del PC. Gabriele, con GabryBar, aveva sentito solo il suono del rifiuto. Il manuale lo dice nella voce Scheda audio.
+- Dentro: SOLO_SUL_PC in finestra.py, le famiglie che sullo speaker non valgono; il file dei registri per il PUB, che nasce accanto ai dati provando dai sorgenti, fuori da git.
+
 ## [2.6.1] - 2026-11-03
 
 Una correzione nel manuale.
