@@ -1,7 +1,7 @@
-Il codice sorgente dei componenti di MeTeOra 1.113.4.
+Il codice sorgente dei componenti di MeTeOra 2.6.6.
 Il codice sorgente corrispondente di ogni componente incluso nel pacchetto si trova agli indirizzi qui sotto, alla versione esatta. Se uno non fosse più raggiungibile, chiedilo con una segnalazione su https://github.com/GabrieleBattaglia/MeTeOra/issues e lo riceverai.
-MeTeOra 1.113.4, con sidshim.dll e lo script che prepara le librerie (strumenti\prepara_ambiente.py): https://github.com/GabrieleBattaglia/MeTeOra, alla release della versione 1.113.4.
-GBUtils V212: https://github.com/GabrieleBattaglia/GBUtils/tree/ad85114b0474664aeea0c0f18ef5e7ab3e13b81b.
+MeTeOra 2.6.6, con sidshim.dll e lo script che prepara le librerie (strumenti\prepara_ambiente.py): https://github.com/GabrieleBattaglia/MeTeOra, alla release della versione 2.6.6.
+GBUtils V240: https://github.com/GabrieleBattaglia/GBUtils/tree/1f53661f62818cfb6f424d76c0f226f723f12b40.
 libmpv-2.dll, build 20260928 di shinchiro, impronta SHA-256 0d5b9dbecb73e179ef39dc94314ff8905fab926a80f8d60a2367d824b7254e2e:
 mpv: https://github.com/mpv-player/mpv/tree/e470f8986e
 FFmpeg: https://github.com/FFmpeg/FFmpeg/tree/939c2c733
@@ -107,14 +107,14 @@ nvdaControllerClient64.dll, impronta SHA-256 41c1f5df5997e798fcfbf7c8f2589de811e
 Python 3.14.5: https://www.python.org/downloads/release/python-3145/
 python-mpv 1.0.8: https://pypi.org/project/python-mpv/1.0.8/#files
 mutagen 1.48.1: https://pypi.org/project/mutagen/1.48.1/#files
-wxPython 4.3.1: https://pypi.org/project/wxPython/4.3.1/#files
+wxPython 4.3.2: https://pypi.org/project/wxPython/4.3.2/#files
 accessible_output2 0.17: https://pypi.org/project/accessible_output2/0.17/#files
 libloader 1.4.3: https://pypi.org/project/libloader/1.4.3/#files
 platform_utils 1.6.3: https://pypi.org/project/platform_utils/1.6.3/#files
 pywin32 312: https://pypi.org/project/pywin32/312/#files
-numpy 2.5.3: https://pypi.org/project/numpy/2.5.3/#files
+numpy 2.5.4: https://pypi.org/project/numpy/2.5.4/#files
 scipy 1.18.1: https://pypi.org/project/scipy/1.18.1/#files
-pillow 12.3.0: https://pypi.org/project/pillow/12.3.0/#files
+pillow 13.0.0: https://pypi.org/project/pillow/13.0.0/#files
 winrt-runtime 3.2.1: https://pypi.org/project/winrt-runtime/3.2.1/#files
 I moduli winrt: https://github.com/pywinrt/pywinrt
 sounddevice 0.5.6: https://pypi.org/project/sounddevice/0.5.6/#files
@@ -125,8 +125,13 @@ requests 2.34.2: https://pypi.org/project/requests/2.34.2/#files
 urllib3 2.8.0: https://pypi.org/project/urllib3/2.8.0/#files
 idna 3.20: https://pypi.org/project/idna/3.20/#files
 charset_normalizer 3.5.2: https://pypi.org/project/charset_normalizer/3.5.2/#files
-certifi 2026.7.22: https://pypi.org/project/certifi/2026.7.22/#files
-platformdirs 4.12.4: https://pypi.org/project/platformdirs/4.12.4/#files
+certifi 2026.10.19: https://pypi.org/project/certifi/2026.10.19/#files
+platformdirs 4.13.5: https://pypi.org/project/platformdirs/4.13.5/#files
 typing_extensions 4.16.0: https://pypi.org/project/typing_extensions/4.16.0/#files
+pychromecast 14.0.10: https://pypi.org/project/pychromecast/14.0.10/#files
+zeroconf 0.151.5: https://pypi.org/project/zeroconf/0.151.5/#files
+protobuf 7.36.2: https://pypi.org/project/protobuf/7.36.2/#files
+casttube 0.2.1: https://pypi.org/project/casttube/0.2.1/#files
+ifaddr 0.2.0: https://pypi.org/project/ifaddr/0.2.0/#files
 pyinstaller 6.22.3: https://pypi.org/project/pyinstaller/6.22.3/#files
 FluidSynth: https://github.com/FluidSynth/fluidsynth; FluidR3 GM: https://github.com/pianobooster/fluid-soundfont
