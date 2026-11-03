@@ -23,6 +23,10 @@ EVENTI = {
     # anche da MeTeOra nella collezione.
     "pub_entra": "mess_pub_entra",
     "pub_aiuto": "mess_pub_aiuto",
+    # Il segnalibro su H (issue 37, 2.2.0); da solo H parla e non suona.
+    "segnalibro_messo": "meteora_segnalibro_messo",
+    "segnalibro_tolto": "meteora_segnalibro_tolto",
+    "al_segnalibro": "meteora_al_segnalibro",
     # I dettagli dei contenitori con F11 (1.77.0): le statistiche di
     # meditimer, due note di onda triangolare, firmate anche da MeTeOra
     # nella collezione (GBUtils V193).

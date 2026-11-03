@@ -136,6 +136,12 @@ PREDEFINITE = {
     # {"cast": uuid, "nome": nome, "pc": la scheda del PC, come sopra}, che
     # vale per gli effetti e per quando lo speaker manca.
     "scheda_audio": {},
+    # Il segnalibro, su H (issue 37, 2.2.0): il dizionario vuoto se non c'e';
+    # altrimenti il file, il punto e la durata in secondi, il sottobrano, e la
+    # lista da cui suonava: preferiti, playlist con il suo nome, cartella con
+    # le sottocartelle, con la cartella in nome, o disco, cioe' la cartella
+    # del file; indice e' il posto del brano nella playlist, -1 fuori.
+    "segnalibro": {},
     # La velocita' di riproduzione, 1 la normale, e il tono in semitoni
     # interi, 0 il normale: valgono per tutti i brani (tappa 4).
     "velocita": 1.0,
@@ -188,6 +194,21 @@ def _scheda_valida(valore):
     return not valore or (set(valore) == {"dispositivo", "interfaccia"} and all(isinstance(nome, str) and nome for nome in valore.values()))
 
 
+def _segnalibro_valido(valore):
+    """Il dizionario vuoto, oppure il segnalibro con tutte e sole le sue
+    chiavi, ciascuna del suo tipo (issue 37)."""
+    if not isinstance(valore, dict):
+        return False
+    if not valore:
+        return True
+    chiavi = {"percorso", "posizione", "durata", "sottobrano", "lista", "nome", "indice"}
+    numero = _numero_fra(0)
+    return (set(valore) == chiavi and isinstance(valore["percorso"], str) and bool(valore["percorso"]) and numero(valore["posizione"])
+        and (valore["durata"] is None or numero(valore["durata"])) and (valore["sottobrano"] is None or _intero_fra(1)(valore["sottobrano"]))
+        and valore["lista"] in ("preferiti", "playlist", "cartella", "disco") and isinstance(valore["nome"], str)
+        and (valore["lista"] not in ("playlist", "cartella") or bool(valore["nome"])) and _intero_fra(-1)(valore["indice"]))
+
+
 def _bande_valide(valore):
     """Una lista di sette guadagni interi in dB, da -12 a +12, uno per banda."""
     guadagno_valido = _intero_fra(-GUADAGNO_MASSIMO, GUADAGNO_MASSIMO)
@@ -216,6 +237,7 @@ CONTROLLI = {
     "colori_testo": _colori_validi,
     "colori_sfondo": _colori_validi,
     "scheda_audio": _scheda_valida,
+    "segnalibro": _segnalibro_valido,
     "velocita": _numero_fra(VELOCITA_MINIMA, VELOCITA_MASSIMA),
     "tono": _intero_fra(-TONO_MASSIMO, TONO_MASSIMO),
     "bande": _bande_valide,

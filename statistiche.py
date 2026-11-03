@@ -126,6 +126,8 @@ DESCRIZIONI_DEI_COMANDI = {
     "azzera_la_banda": "azzera la banda", "azzera_le_bande": "azzera le bande", "dissolvenza": "dissolvenza",
     "durata_della_dissolvenza": "durata della dissolvenza", "dove_sono": "dove sono", "durata_residua": "durata residua",
     # I comandi della nuova mappa, issue 38 (2.0.0).
+    "segnalibro": "il segnalibro", "vai_al_segnalibro": "al segnalibro", "togli_il_segnalibro": "toglie il segnalibro",
+    "metti_il_segnalibro": "mette il segnalibro",
     "posizione": "il punto del brano", "verso_la_fine": "gli ultimi secondi", "all_inizio": "l'inizio del brano",
     "passi_dei_salti": "i passi dei salti", "passi_predefiniti": "salti predefiniti", "marker_attuale": "il marker",
     "ultimo_marker": "ultimo marker", "primo_marker": "primo marker", "conta_i_marker": "quanti marker", "velocita": "la velocità",
@@ -166,6 +168,7 @@ DESCRIZIONI_DEI_TASTI = {
 NOMI_DEGLI_EVENTI = {
     "avvio": "avvio di MeTeOra", "uscita": "uscita da MeTeOra", "donazione": "invito a offrire un caffè",
     "pub_entra": "Entra al PUB", "pub_aiuto": "Chiedi aiuto al PUB",
+    "segnalibro_messo": "segnalibro messo", "segnalibro_tolto": "segnalibro tolto", "al_segnalibro": "brano ripreso dal segnalibro",
     "dettagli": "dettagli di un contenitore, con F11", "chiudi_la_plancia": "tutta la plancia chiusa",
     "apri_la_plancia": "apertura di tutta la plancia", "plancia_aperta": "tutta la plancia aperta",
     "passata_avviata": "passata degli impressi avviata", "passata_finita": "passata degli impressi finita",
@@ -1523,6 +1526,8 @@ class Pagina:
                 f"dalla plancia, con Vai al marker o X {max(0, self.c('vai_al_marker') - self.c('marker_con_le_cifre'))}.",
             f"Finestra dei marcatori aperta: {al_plurale(self.e('marcatori'), 'volta', 'volte')}; esportazioni {self.e('marcatori_esportati')}; "
                 f"importazioni {self.e('marcatori_importati')}; cancellazioni di tutto {self.e('marcatori_cancellati')}.",
+            f"Segnalibro messo, con Ctrl e Maiuscolo e H: {al_plurale(self.e('segnalibro_messo'), 'volta', 'volte')}; ripreso, con Maiuscolo e H: "
+                f"{al_plurale(self.e('al_segnalibro'), 'volta', 'volte')}; tolto, con Ctrl e H: {al_plurale(self.e('segnalibro_tolto'), 'volta', 'volte')}.",
         ]
         con_marker = sorted(((p, v) for p, v in self.d["brani"].items() if v.get("marker")), key=lambda pv: (-pv[1]["marker"], pv[0]))
         if con_marker:

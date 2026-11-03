@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30)
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37)
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -203,6 +203,13 @@ TASTI = {
     # T mette un marker o lo rinomina, Maiuscolo con T li toglie tutti (issue 12).
     ("t", SOLO): "marker",
     ("t", MAIUSCOLO): "togli_i_marker",
+    # H, il segnalibro, uno per tutto MeTeOra (Gabriele, issue 37, 2.2.0): da
+    # solo lo dice, con Maiuscolo ci va e suona, con Ctrl lo toglie, con Ctrl
+    # e Maiuscolo lo mette dove si e', riscrivendo quello di prima.
+    ("h", SOLO): "segnalibro",
+    ("h", MAIUSCOLO): "vai_al_segnalibro",
+    ("h", CTRL): "togli_il_segnalibro",
+    ("h", CTRL_MAIUSCOLO): "metti_il_segnalibro",
     # Q, il punto del brano: un salto indietro e avanti, gli ultimi secondi e l'inizio.
     ("q", SOLO): "posizione",
     ("q", CTRL): "indietro",
@@ -391,6 +398,8 @@ TASTI_COMUNI = [
     "lo scrive nella console e lo manda alla sintesi e al braille dei sottotitoli, senza spostare il fuoco.",
     "Maiuscolo con l'apostrofo dice la durata residua: quanto manca e quanto è passato di ciò che suonerà, anche nei rami aperti dopo nella plancia, "
     "la percentuale ascoltata e l'ora in cui finisce; anche lei va nella console, alla sintesi e al braille dei sottotitoli.",
+    "H il segnalibro, uno per tutto MeTeOra, che resta anche chiudendo: Ctrl e Maiuscolo con H lo mettono sul brano che suona, al punto in cui è, "
+    "Maiuscolo con H ci torna, aprendo la plancia fino al brano e suonandolo da lì, Ctrl con H lo toglie.",
     "Q il punto del brano: Ctrl e Maiuscolo indietro e avanti di un salto, Alt agli ultimi secondi, Ctrl e Alt all'inizio. "
     "E i passi dei salti: Ctrl e Maiuscolo chiedono quello indietro e quello avanti, Ctrl e Maiuscolo insieme li riportano ai predefiniti. W va a un tempo.",
     "M il volume: Ctrl e Maiuscolo lo abbassano e lo alzano di un passo, Alt lo porta al massimo, Ctrl e Alt a zero, che fa da muto, "
@@ -3829,6 +3838,11 @@ class Finestra(wx.Frame):
                 self._statistiche.conta("salvataggi_non_riusciti")
         if self._statistiche.rinomina_brano(vecchio, nuovo):
             self._salva_le_statistiche_in_disparte()
+        segno = self.impostazioni["segnalibro"]
+        if segno and os.path.normcase(segno["percorso"]) == stesso:
+            # Anche il segnalibro passa al nome nuovo (issue 37).
+            segno["percorso"] = nuovo
+            self._salva_impostazioni()
         if self._pulizia is not None:
             # Il nome nuovo puo' essere uno che la pulizia ha visto mancare.
             self._toccati_in_pulizia.add(pulizia.norm(nuovo))
@@ -5143,6 +5157,11 @@ class Finestra(wx.Frame):
             return
         vecchio, pl.nome = pl.nome, nome
         self._salva_archivio()
+        segno = self.impostazioni["segnalibro"]
+        if segno and segno["lista"] == "playlist" and segno["nome"] == vecchio:
+            # Il segnalibro segue la sua playlist (issue 37).
+            segno["nome"] = nome
+            self._salva_impostazioni()
         self._popola_playlist(seleziona=pl)
         self._riscontro("playlist_rinominata", f"La playlist {vecchio} ora si chiama {nome}.")
 
@@ -5480,20 +5499,29 @@ class Finestra(wx.Frame):
         poi quelli delle sottocartelle. Z, B e N girano su tutti. I brani sono
         quelli delle playlist temporanee di ciascuna cartella, cosi' nella
         plancia il brano che suona si riconosce anche dentro le sottocartelle."""
-        with wx.BusyCursor():
-            contenuti = questo_pc.contenuti_ricorsivi(cartella)
-        if not contenuti:
-            self._riscontro("errore", f"Non riesco a leggere {cartella}.")
+        pl = self._playlist_ricorsiva(cartella)
+        if pl is None:
             return
-        brani = [b for sotto, files in contenuti for b in self._temporanea(sotto, files).brani]
-        nome = os.path.basename(cartella.rstrip("\\")) or cartella
-        pl = Playlist(nome, brani, cartella=cartella)
-        pl.ricorsiva = True
         brano = self.coda.primo(pl)
         if brano is None:
             self._riscontro("niente_da_suonare", "Né in questa cartella né nelle sue sottocartelle ci sono file da suonare.")
             return
         self._suona(pl, brano)
+
+    def _playlist_ricorsiva(self, cartella):
+        """La playlist temporanea di una cartella con tutto l'albero che le sta
+        sotto, o None, detto nella console, se la cartella non si legge. La
+        usano X su una cartella e il segnalibro (issue 37)."""
+        with wx.BusyCursor():
+            contenuti = questo_pc.contenuti_ricorsivi(cartella)
+        if not contenuti:
+            self._riscontro("errore", f"Non riesco a leggere {cartella}.")
+            return None
+        brani = [b for sotto, files in contenuti for b in self._temporanea(sotto, files).brani]
+        nome = os.path.basename(cartella.rstrip("\\")) or cartella
+        pl = Playlist(nome, brani, cartella=cartella)
+        pl.ricorsiva = True
+        return pl
 
     def _apri_fino_al_risultato(self, brano):
         """Apre i rami dei Risultati fino a quello del brano, con le pagine
@@ -9605,6 +9633,148 @@ class Finestra(wx.Frame):
         self._seleziona(voce)
         self._riscontro("vai_al_brano", f"Selezione su {self._nome_della_voce(voce)}.")
         self.albero.SetFocus()
+
+    # Il segnalibro, H (Gabriele, 28 ottobre 2026, issue 37, 2.2.0): uno per
+    # tutto MeTeOra, diverso dal punto da riprendere dei file lunghi, che e'
+    # l'ultimo ascoltato. Per esempio si segna un audiolibro, si ascolta
+    # altro, si chiude, e il giorno dopo il segnalibro riporta al libro. Sta
+    # nelle impostazioni: il file, il punto, la durata se si sa, il sottobrano
+    # e la lista da cui suonava, perche' si torni a suonare nello stesso giro.
+
+    def _frase_del_segnalibro(self, segno):
+        """Canzone.mp3, a 12:34 di 45:00, nella playlist Libri."""
+        parti = [os.path.basename(segno["percorso"]), f"a {tempo(segno['posizione'])}" + (f" di {tempo(segno['durata'])}" if segno["durata"] else "")]
+        if segno["sottobrano"] is not None:
+            parti.append(f"sottobrano {segno['sottobrano']}")
+        if segno["lista"] == "preferiti":
+            parti.append("nei Preferiti")
+        elif segno["lista"] == "playlist":
+            parti.append(f"nella playlist {segno['nome']}")
+        elif segno["lista"] == "cartella":
+            parti.append(f"nella cartella {os.path.basename(segno['nome'].rstrip(chr(92))) or segno['nome']} con le sottocartelle")
+        else:
+            cartella = os.path.dirname(segno["percorso"])
+            parti.append(f"nella cartella {os.path.basename(cartella.rstrip(chr(92))) or cartella}")
+        return ", ".join(parti)
+
+    def _comando_segnalibro(self):
+        """H (issue 37): dov'e' il segnalibro, alla sintesi e al braille dei
+        sottotitoli e nella console, come gli altri tasti da soli."""
+        segno = self.impostazioni["segnalibro"]
+        if not segno:
+            self._riporta("Nessun segnalibro: Ctrl e Maiuscolo con H lo mettono sul brano che suona.", "segnalibro")
+            return
+        self._riporta(f"Segnalibro su {self._frase_del_segnalibro(segno)}. Maiuscolo con H ci torna.", "segnalibro")
+
+    def _comando_metti_il_segnalibro(self):
+        """Ctrl e Maiuscolo con H: il segnalibro sul brano corrente, al punto
+        in cui e', con la lista da cui suona; quello di prima si riscrive. Da
+        fermi, dall'inizio, dove sta la testina dopo lo stop (issue 39)."""
+        brano, pl = self.coda.corrente, self.coda.playlist
+        if brano is None:
+            self._riscontro("non_disponibile", "Niente da segnare: il segnalibro si mette sul brano che suona.")
+            return
+        in_corso = bool(self.motore.in_corso) and os.path.normcase(self.motore.in_corso) == os.path.normcase(brano.percorso)
+        durata = self.motore.durata if in_corso else None
+        if durata is None:
+            durata = self._durata_senza_il_lettore(brano)
+        segno = {
+            "percorso": brano.percorso,
+            "posizione": round(float(self.motore.posizione or 0.0), 2) if in_corso else 0.0,
+            "durata": round(float(durata), 2) if durata else None,
+            "sottobrano": (self.motore.sottobrano if in_corso and self.motore.sottobrani else brano.sottobrano),
+            "lista": "disco", "nome": "", "indice": -1,
+        }
+        if pl is self.archivio.preferiti or (pl is not None and not pl.temporanea and pl in self.archivio.playlist):
+            indice = pl.indice(brano)
+            segno.update(lista="preferiti" if pl is self.archivio.preferiti else "playlist", nome="" if pl is self.archivio.preferiti else pl.nome,
+                indice=-1 if indice is None else indice)
+        elif pl is not None and pl.temporanea and pl.cartella and getattr(pl, "ricorsiva", False):
+            segno.update(lista="cartella", nome=pl.cartella)
+        prima = self.impostazioni["segnalibro"]
+        self.impostazioni["segnalibro"] = segno
+        self._salva_impostazioni()
+        frase = self._frase_del_segnalibro(segno)
+        self._riscontro("segnalibro_messo", f"Segnalibro riscritto su {frase}." if prima else f"Segnalibro su {frase}. Maiuscolo con H ci torna.")
+
+    def _comando_togli_il_segnalibro(self):
+        """Ctrl con H: il segnalibro non c'e' piu'."""
+        segno = self.impostazioni["segnalibro"]
+        if not segno:
+            self._riscontro("non_disponibile", "Nessun segnalibro da togliere.")
+            return
+        self.impostazioni["segnalibro"] = {}
+        self._salva_impostazioni()
+        self._riscontro("segnalibro_tolto", f"Segnalibro tolto: era su {self._frase_del_segnalibro(segno)}.")
+
+    def _comando_vai_al_segnalibro(self):
+        """Maiuscolo con H: il fuoco della plancia sul brano del segnalibro,
+        aprendo tutti i suoi contenitori, e il brano suona dal punto segnato,
+        nella lista da cui suonava; se quella non c'e' piu', dalla cartella
+        del file."""
+        segno = self.impostazioni["segnalibro"]
+        if not segno:
+            self._riscontro("non_disponibile", "Nessun segnalibro: Ctrl e Maiuscolo con H lo mettono sul brano che suona.")
+            return
+        if not os.path.isfile(segno["percorso"]):
+            self._riscontro("errore", f"Il file del segnalibro non c'è più: {segno['percorso']}.")
+            return
+        pl, brano, voce = self._dove_sta_il_segnalibro(segno)
+        if brano is None:
+            self._riscontro("errore", f"Non ritrovo {os.path.basename(segno['percorso'])} nella sua cartella.")
+            return
+        if voce is not None:
+            self.albero.EnsureVisible(voce)
+            self._seleziona(voce)
+            self.albero.SetFocus()
+        if not self.coda.nel_loop(pl, brano):
+            self._riscontro("fuori_dal_loop", f"{brano.nome_del_file} è fuori dal loop: si suona solo fra il punto A e il punto B.")
+            return
+        self._suona(pl, brano, "al_segnalibro", sottobrano=segno["sottobrano"], inizio=segno["posizione"])
+        if segno["posizione"]:
+            self.scrivi(f"Dal segnalibro, a {tempo(segno['posizione'])}.")
+
+    def _dove_sta_il_segnalibro(self, segno):
+        """(playlist, brano, voce della plancia) del segnalibro: nella sua
+        playlist o nei Preferiti, se ci sono ancora e lo contengono; altrimenti
+        dalla cartella del file, aperta nella plancia, e con le sottocartelle
+        se suonava cosi'. La voce e' None se la plancia non lo mostra."""
+        chiave = pulizia.norm(segno["percorso"])
+        if segno["lista"] in ("preferiti", "playlist"):
+            pl = self.archivio.preferiti if segno["lista"] == "preferiti" else next((p for p in self.archivio.playlist if p.nome == segno["nome"]), None)
+            brano = None
+            if pl is not None:
+                indice = segno["indice"]
+                if 0 <= indice < len(pl.brani) and pulizia.norm(pl.brani[indice].percorso) == chiave:
+                    brano = pl.brani[indice]
+                else:
+                    brano = next((b for b in pl.brani if pulizia.norm(b.percorso) == chiave), None)
+            if brano is not None:
+                nodo = self.nodo_preferiti if pl is self.archivio.preferiti else self._nodo_della_playlist(pl)
+                voce = None
+                if nodo is not None:
+                    self.albero.Expand(self.nodo_playlist)
+                    if self._dati(nodo).get("caricato") is False:
+                        self._carica(nodo, self._dati(nodo))
+                    self.albero.Expand(nodo)
+                    voce = next((v for v in self._figli(nodo) if (self._dati(v) or {}).get("brano") is brano), None)
+                return pl, brano, voce
+        cartella = os.path.dirname(segno["percorso"])
+        nodo = self._apri_fino_a(cartella)
+        voce = None
+        if nodo is not None:
+            voce = next((v for v in self._figli(nodo) if (dati := self._dati(v) or {}).get("brano") is not None
+                and pulizia.norm(dati["brano"].percorso) == chiave), None)
+        if segno["lista"] == "cartella":
+            pl = self._playlist_ricorsiva(segno["nome"])
+            brano = next((b for b in pl.brani if pulizia.norm(b.percorso) == chiave), None) if pl is not None else None
+            if brano is not None:
+                return pl, brano, voce
+        if voce is not None:
+            dati = self._dati(voce)
+            return dati["playlist"], dati["brano"], voce
+        pl = self._temporanea(cartella)
+        return pl, next((b for b in pl.brani if pulizia.norm(b.percorso) == chiave), None), None
 
     # Dove sono, l'apostrofo (Gabriele, 20 ottobre 2026, tappa 14 b).
 

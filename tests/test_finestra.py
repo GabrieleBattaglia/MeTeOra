@@ -95,7 +95,8 @@ def test_tasti_liberi_e_numpad(finestra, suoni_annotati):
     # all'albero (tappa 9); il tastierino resta a NVDA, in silenzio.
     assert _premi(finestra, "ò") == "Il tasto o accentata non ha un comando." and suoni_annotati[-1] == "non_disponibile"
     assert _premi(finestra, "ì") == "Il tasto i accentata non ha un comando."
-    assert _premi(finestra, "h", maiuscolo=True) == "Maiuscolo+H non ha un comando."
+    # La H e' il segnalibro dalla 2.2.0: Maiuscolo con Z resta libero.
+    assert _premi(finestra, "z", maiuscolo=True) == "Maiuscolo+Z non ha un comando."
     # L'apostrofo e' Dove sono dalla 1.105.0, e con il Maiuscolo la durata
     # residua dalla 1.110.0: la i accentata col Maiuscolo resta libera.
     assert _premi(finestra, "ì", maiuscolo=True) == "Maiuscolo+i accentata non ha un comando."
@@ -661,6 +662,109 @@ def _finto_motore(finestra, monkeypatch):
 
     monkeypatch.setattr(finestra.motore, "suona", suona)
     return suonati
+
+
+def _motore_del_segnalibro(finestra, monkeypatch, posizione=75.0, durata=600.0):
+    """Il motore finto per il segnalibro: annota anche il punto di partenza,
+    e dice il punto e la durata che gli si danno."""
+    suonati = []
+
+    def suona(percorso, sottobrano=None, inizio=None, sfuma_lo_stesso=False, **_altro):
+        suonati.append((os.path.basename(percorso), sottobrano, inizio))
+        finestra.motore._in_corso = percorso
+        finestra.motore.sottobrano = sottobrano
+
+    monkeypatch.setattr(finestra.motore, "suona", suona)
+    punto = [posizione]
+    monkeypatch.setattr(type(finestra.motore), "posizione", property(lambda _self: punto[0]))
+    monkeypatch.setattr(type(finestra.motore), "durata", property(lambda _self: durata))
+    return suonati, punto
+
+
+def test_il_segnalibro_si_mette_si_dice_e_si_toglie(finestra, monkeypatch, tmp_path, suoni_annotati):
+    # Issue 37 (2.2.0): uno per tutto MeTeOra, nelle impostazioni, che restano.
+    from impostazioni import Impostazioni
+
+    _motore_del_segnalibro(finestra, monkeypatch)
+    assert _premi(finestra, "h") == "Nessun segnalibro: Ctrl e Maiuscolo con H lo mettono sul brano che suona."
+    _tasto(finestra, "h", ctrl=True, maiuscolo=True)
+    assert _ultima(finestra) == "Niente da segnare: il segnalibro si mette sul brano che suona." and suoni_annotati[-1] == "non_disponibile"
+    libro = [str(tmp_path / f"capitolo {n}.mp3") for n in (1, 2, 3)]
+    finestra._aggiungi(None, libro)
+    pl = finestra.archivio.playlist[0]
+    finestra._suona(pl, pl.brani[1])
+    _tasto(finestra, "h", ctrl=True, maiuscolo=True)
+    assert suoni_annotati[-1] == "segnalibro_messo"
+    assert _ultima(finestra) == f"Segnalibro su capitolo 2.mp3, a 1:15 di 10:00, nella playlist {pl.nome}. Maiuscolo con H ci torna."
+    assert finestra.impostazioni["segnalibro"] == {"percorso": libro[1], "posizione": 75.0, "durata": 600.0, "sottobrano": None,
+        "lista": "playlist", "nome": pl.nome, "indice": 1}
+    salvate = Impostazioni(finestra.impostazioni.percorso)
+    salvate.carica()
+    assert salvate["segnalibro"] == finestra.impostazioni["segnalibro"]
+    # Rimesso, si riscrive.
+    _tasto(finestra, "h", ctrl=True, maiuscolo=True)
+    assert _ultima(finestra).startswith("Segnalibro riscritto su capitolo 2.mp3")
+    assert _premi(finestra, "h") == f"Segnalibro su capitolo 2.mp3, a 1:15 di 10:00, nella playlist {pl.nome}. Maiuscolo con H ci torna."
+    # Rinominare la playlist se lo porta dietro.
+    finestra.impostazioni["segnalibro"]["nome"] = "vecchia"
+    _tasto(finestra, "h", ctrl=True)
+    assert _ultima(finestra) == "Segnalibro tolto: era su capitolo 2.mp3, a 1:15 di 10:00, nella playlist vecchia."
+    assert suoni_annotati[-1] == "segnalibro_tolto" and finestra.impostazioni["segnalibro"] == {}
+    _tasto(finestra, "h", ctrl=True)
+    assert _ultima(finestra) == "Nessun segnalibro da togliere."
+    _tasto(finestra, "h", maiuscolo=True)
+    assert _ultima(finestra) == "Nessun segnalibro: Ctrl e Maiuscolo con H lo mettono sul brano che suona."
+    salvate.carica()
+    assert salvate["segnalibro"] == {}
+
+
+def test_maiuscolo_h_torna_al_segnalibro(finestra, monkeypatch, tmp_path, suoni_annotati):
+    # Issue 37: il fuoco sul brano, con i suoi contenitori aperti, e il brano
+    # che suona dal punto segnato, anche dopo altro e dopo la riapertura.
+    suonati, punto = _motore_del_segnalibro(finestra, monkeypatch)
+    libro = [str(tmp_path / f"capitolo {n}.mp3") for n in (1, 2, 3)]
+    for percorso in libro:
+        open(percorso, "wb").close()
+    finestra._aggiungi(None, libro)
+    finestra._aggiungi(None, [os.path.join(r"C:\m", "canzone.mp3")])
+    libri, musica = finestra.archivio.playlist
+    finestra._suona(libri, libri.brani[2])
+    _tasto(finestra, "h", ctrl=True, maiuscolo=True)
+    finestra._suona(musica, musica.brani[0])
+    punto[0] = 3.0
+    finestra._popola_playlist()
+    finestra._seleziona(finestra.nodo_pc)
+    _tasto(finestra, "h", maiuscolo=True)
+    assert suonati[-1] == ("capitolo 3.mp3", None, 75.0) and finestra.coda.playlist is libri and finestra.coda.corrente is libri.brani[2]
+    assert finestra.albero.GetItemText(finestra._voce_corrente()).startswith("capitolo 3.mp3")
+    assert "al_segnalibro" in suoni_annotati and _ultima(finestra) == "Dal segnalibro, a 1:15."
+    # Il file rinominato porta con se' il segnalibro.
+    nuovo = str(tmp_path / "capitolo tre.mp3")
+    os.rename(libro[2], nuovo)
+    finestra._segui_la_rinomina(libro[2], nuovo, {})
+    assert finestra.impostazioni["segnalibro"]["percorso"] == nuovo
+    # Un file che non c'e' piu' lo dice.
+    os.remove(nuovo)
+    _tasto(finestra, "h", maiuscolo=True)
+    assert _ultima(finestra) == f"Il file del segnalibro non c'è più: {nuovo}." and suoni_annotati[-1] == "errore"
+
+
+def test_il_segnalibro_dalla_cartella(finestra, monkeypatch, tmp_path):
+    # Issue 37: un brano suonato da una cartella torna dalla sua cartella,
+    # anche se la plancia non la mostra.
+    suonati, _punto = _motore_del_segnalibro(finestra, monkeypatch, posizione=0.0, durata=None)
+    for nome in ("a.mp3", "b.mp3"):
+        open(tmp_path / nome, "wb").close()
+    finestra._suona_file(str(tmp_path / "b.mp3"), str(tmp_path))
+    _tasto(finestra, "h", ctrl=True, maiuscolo=True)
+    segno = finestra.impostazioni["segnalibro"]
+    assert segno["lista"] == "disco" and segno["posizione"] == 0.0 and segno["indice"] == -1
+    monkeypatch.setattr(finestra, "_apri_fino_a", lambda cartella: None)
+    finestra._temporanee.clear()
+    righe = len(finestra._righe)
+    _tasto(finestra, "h", maiuscolo=True)
+    assert suonati[-1] == ("b.mp3", None, 0.0) and finestra.coda.playlist.cartella == str(tmp_path)
+    assert not any(r.endswith("Dal segnalibro, a 0:00.") for r in finestra._righe[righe:])
 
 
 def test_avanzamento_segue_la_plancia(finestra, monkeypatch):
@@ -7442,8 +7546,8 @@ def test_le_statistiche_contano_brani_tasti_e_uscita(finestra, monkeypatch, tmp_
     _tasto(finestra, "a", ctrl=True)
     assert dati["conti"]["lasciati"] == 2 and dati["tasti"]["V"] == 1 and dati["tasti"]["Ctrl con A"] == 1
     # Un tasto senza comando.
-    _tasto(finestra, "h", maiuscolo=True)
-    assert dati["senza_comando"] == {"Maiuscolo con H": 1}
+    _tasto(finestra, "z", maiuscolo=True)
+    assert dati["senza_comando"] == {"Maiuscolo con Z": 1}
     finestra.apri_dall_esterno([], "trascinamento")
     assert dati["conti"]["aperti_col_trascinamento"] == 1
     # All'uscita il file si scrive, con la sessione chiusa.

@@ -2,6 +2,15 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [2.2.0] - 2026-11-03
+
+Una novità, la issue 37, chiesta da Gabriele: il segnalibro, sulla H, l'ultima lettera libera, con la regola della 2.0.0 come l'ha voluta lui.
+
+- Il segnalibro, uno per tutto MeTeOra, che resta anche chiudendo e cambia solo quando lo sposti o lo togli: diverso dal punto lasciato dei file lunghi, che è sempre l'ultimo ascoltato. Serve per esempio a interrompere un audiolibro di tanti file, ascoltare altro, chiudere, e il giorno dopo tornare al libro. Ctrl e Maiuscolo con H lo mettono sul brano che suona, al punto in cui è, con la lista da cui suona: una playlist, i Preferiti o una cartella, anche con le sottocartelle; rimesso, riscrive quello di prima. H da solo dice dov'è, alla sintesi e al braille dei sottotitoli e nella console. Maiuscolo con H ci torna: apre la plancia fino al brano, ci porta il fuoco e lo suona dal punto segnato, nella stessa lista, così poi si va avanti con il seguente; se la playlist non c'è più si suona dalla cartella del file, e se il file non c'è più lo dice. Ctrl con H lo toglie. Rinomina file e la rinomina di una playlist se lo portano dietro.
+- Tre suoni nuovi, per metterlo, toglierlo e tornarci; H da solo parla, come gli altri tasti da soli. Le statistiche contano i segnalibri messi, ripresi e tolti, e i quattro tasti.
+- Il manuale: la guida rapida, la sezione Il segnalibro nella riproduzione e l'esempio dell'audiolibro.
+- Dentro: la nuova impostazione segnalibro, controllata alla lettura; _playlist_ricorsiva, la cartella con le sottocartelle, ora comune a X e al segnalibro.
+
 ## [2.1.0] - 2026-11-03
 
 Una novità, la issue 30, chiesta da Gabriele il 21 ottobre per tutti i programmi del parco che hanno una finestra.

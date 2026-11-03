@@ -156,6 +156,7 @@ kbd {
 <li><a href="#dove-sono">Dove sono</a></li>
 <li><a href="#durata-residua">La durata residua</a></li>
 <li><a href="#file-lunghi">I file lunghi: audiolibri e film</a></li>
+<li><a href="#segnalibro">Il segnalibro</a></li>
 <li><a href="#brano-in-errore">Un brano che non si suona</a></li>
 <li><a href="#esempi-riproduzione">Esempi</a></li>
 </ul></li>
@@ -371,6 +372,13 @@ kbd {
 <li><kbd>Maiuscolo con la virgola</kbd>: va al capitolo successivo.</li>
 <li><kbd>Alt con la virgola</kbd>: va all'ultimo capitolo.</li>
 <li><kbd>Ctrl e Alt con la virgola</kbd>: va al primo capitolo.</li>
+</ul>
+<h4>Il segnalibro</h4>
+<ul>
+<li><kbd>H</kbd>: dice dov'è il segnalibro: il brano, il punto e la lista da cui suonava.</li>
+<li><kbd>Maiuscolo con H</kbd>: torna al segnalibro: apre la plancia fino al brano, ci porta il fuoco e lo suona dal punto segnato.</li>
+<li><kbd>Ctrl con H</kbd>: toglie il segnalibro.</li>
+<li><kbd>Ctrl e Maiuscolo con H</kbd>: mette il segnalibro sul brano che suona, al punto in cui è, al posto di quello di prima.</li>
 </ul>
 <h4>Il volume</h4>
 <ul>
@@ -1161,6 +1169,10 @@ kbd {
 <h3 id="file-lunghi">I file lunghi: audiolibri e film</h3>
 <p>I file più lunghi di dieci minuti, come gli audiolibri, i podcast e i film, ricordano il punto in cui li hai lasciati: quando li suoni di nuovo, da qualunque parte, riprendono da lì, e la console dice Riprendo da, con il tempo, dove l'avevi lasciato. X, sul file ripreso, lo fa ripartire da capo, come su ogni brano che suona. I file più corti, come le canzoni, ripartono da capo come sempre; un file ascoltato fino alla fine, o lasciato nei primi o negli ultimi trenta secondi, non ha un punto da riprendere. Il limite dei dieci minuti si cambia nelle impostazioni, con la voce Punto lasciato dei file lunghi, e 0 spegne la ripresa. I marker, W e la ripresa all'avvio vanno sempre dove dicono loro.</p>
 <p>Molti audiolibri, soprattutto gli M4B, e molti film hanno i capitoli. Mentre suonano, Ctrl con la virgola va al capitolo precedente e Maiuscolo con la virgola al successivo, e la console dice quale, per esempio Capitolo 3 di 12: Il ritorno, 23:10; Ctrl con la virgola, oltre i primi tre secondi di un capitolo, torna al suo inizio, come nei lettori. La virgola da sola dice il capitolo in cui sei, Alt con la virgola va all'ultimo e Ctrl e Alt con la virgola al primo. Nella plancia, un file con i capitoli è un ramo: dentro ci sono i capitoli, prima dei marker, e X, Invio o il menu su un capitolo suonano il file da lì. I capitoli della plancia vengono dai tag, e MeTeOra li legge negli M4B, negli M4A, negli MP4 e negli MP3; quelli degli MKV si vedono solo mentre il file suona, con la virgola.</p>
+<h3 id="segnalibro">Il segnalibro</h3>
+<p>Il punto lasciato dei file lunghi è sempre l'ultimo che hai ascoltato. Il segnalibro invece lo metti tu, e resta dov'è finché non lo sposti o lo togli, anche chiudendo MeTeOra: serve a ritrovare un ascolto lungo, come un audiolibro fatto di tanti file, mentre intanto ascolti altro. Ce n'è uno solo per tutto MeTeOra.</p>
+<p>Ctrl e Maiuscolo con H mettono il segnalibro sul brano che suona, o che è in pausa, al punto in cui è; da fermi, all'inizio del brano. Il segnalibro ricorda anche la lista da cui il brano suonava: una playlist, i Preferiti, o una cartella, anche con le sottocartelle. Rimesso, prende il posto di quello di prima, e la console dice Segnalibro riscritto. H da solo dice dov'è, alla sintesi e al braille dei sottotitoli e nella console, per esempio Segnalibro su Capitolo 12.mp3, a 23:40 di 45:10, nella playlist Il conte di Montecristo.</p>
+<p>Maiuscolo con H torna al segnalibro: apre nella plancia tutti i rami fino al brano, ci porta il fuoco, e lo suona dal punto segnato, nella stessa lista di allora, così finito quel brano si va avanti con il seguente; la console dice Dal segnalibro, con il tempo. Se la playlist non c'è più, o non contiene più il brano, si suona dalla sua cartella. Se il file non c'è più, la console lo dice. Rinominando il file con Rinomina file, o la playlist, il segnalibro li segue. Ctrl con H lo toglie.</p>
 <h3 id="brano-in-errore">Un brano che non si suona</h3>
 <p>Un file che non si suona, perché non c'è più o è rovinato, fa scrivere alla console Non riesco a suonare, con il suo nome, con il suono dell'errore. Finito quel suono parte il brano seguente; V, intanto, lo ferma. Con la ripetizione del brano, quello che non si suona non si ripete: si passa al seguente. Se di fila non si riesce a suonare nessuno dei brani che l'avanzamento può suonare, per esempio con una cartella di rete staccata e la ripetizione della lista o la riproduzione casuale, MeTeOra si ferma, e la console dice Fine: nessun brano si riesce a suonare.</p>
 <h3 id="esempi-riproduzione">Esempi</h3>
@@ -1197,6 +1209,12 @@ kbd {
 <li>Mentre suona una playlist aperta nella plancia, premi Maiuscolo con l'apostrofo: NVDA dice per esempio Mancano 32:40 di 46:45, trascorsi 14:05, 30.1% ascoltato, finisce verso le 23:42, brano 3 di 12, playlist Rock.</li>
 <li>Apri un'altra playlist sotto quella che suona e premi di nuovo: il mancante cresce, perché finita la prima la plancia passerà alla seconda, e la riga dice quanti brani ci sono in tutto.</li>
 <li>Se la riga dice che qualche brano è senza durata, premi di nuovo dopo un momento: intanto MeTeOra le ha lette.</li>
+</ol>
+<h4>Interrompere un audiolibro e riprenderlo il giorno dopo</h4>
+<ol>
+<li>Mentre ascolti l'audiolibro, premi Ctrl e Maiuscolo con H: la console dice Segnalibro su, con il capitolo e il punto.</li>
+<li>Ascolta pure altra musica, o un film, e chiudi MeTeOra.</li>
+<li>Il giorno dopo, riaperto MeTeOra, premi H per sentire dove eri rimasto, poi Maiuscolo con H: la plancia si apre fino al capitolo e il libro riparte da lì.</li>
 </ol>
 <h2 id="velocita-tono-equalizzatore-dissolvenza">Velocità, tono, equalizzatore e dissolvenza</h2>
 <p>Velocità, tono, equalizzatore e dissolvenza valgono per tutti i brani, SID compresi, e MeTeOra se li ricorda fra un avvio e l'altro: ogni cambio si salva subito. Se all'avvio la velocità o il tono non sono quelli normali, la console lo dice, con il tasto che li riporta al normale. Ogni tasto ha il suo suono, e uno suo anche quando arriva a un limite; la console lo scrive in una riga breve, che si riscrive a ogni pressione, come quella del volume. Si cambiano anche dalla finestra delle impostazioni.</p>

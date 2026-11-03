@@ -143,6 +143,19 @@ def test_impostazioni_scartano_i_valori_sbagliati(tmp_path):
     assert imp["passo_volume"] == PREDEFINITE["passo_volume"]
 
 
+def test_il_segnalibro_si_controlla(tmp_path):
+    # Issue 37 (2.2.0): un segnalibro sbagliato nel file torna vuoto.
+    buono = {"percorso": r"E:\libri\uno.mp3", "posizione": 75.5, "durata": None, "sottobrano": None, "lista": "playlist", "nome": "Libri",
+        "indice": 0}
+    percorso = tmp_path / "imp.json"
+    for valore, atteso in ((buono, buono), ({**buono, "lista": "altrove"}, {}), ({**buono, "posizione": -1}, {}),
+            ({**buono, "nome": ""}, {}), ({k: v for k, v in buono.items() if k != "indice"}, {}), ({}, {})):
+        percorso.write_text(json.dumps({"segnalibro": valore}), encoding="utf-8")
+        imp = Impostazioni(str(percorso))
+        imp.carica()
+        assert imp["segnalibro"] == atteso, valore
+
+
 def test_impostazioni_illeggibili_non_si_sovrascrivono(tmp_path):
     # Tappa 9: un file che non si legge resta com'e', e le impostazioni nuove
     # vanno accanto, con .nuovo, da cui si riparte la volta dopo.
