@@ -74,3 +74,26 @@
     5.806 Richiesta 4: 0.92 MB in 3.02 s, fino a 97.00 s; fine.
    10.114 Locale: fine dopo 4.32 s dall'ultimo salto, a 5.0 s dalla fine.
    10.550 Riassunto: 17.8 MB convertiti, 0 ripartenze, 3 attese dei byte oltre 50 ms, la piu' lunga 2.67 s.
+    0.000 Prova del 05/11/2026 00:15, su GabryBat.
+    0.139 Finestra di 512 MB, 2796 secondi, con 699 dietro; brano di 97.0 secondi, 17.8 MB di PCM.
+    0.139 Conversione 1 da 0.00 s.
+    0.785 Server su http://192.168.1.171:54929/brano.wav.
+    2.912 Stato: {'stato': 'UNKNOWN', 'posizione': 0.0, 'durata': None, 'motivo': None, 'indirizzo': None}.
+    2.926 Stato: {'stato': 'UNKNOWN', 'posizione': 0.0, 'durata': None, 'motivo': None, 'indirizzo': None}.
+    2.962 Stato: {'stato': 'IDLE', 'posizione': 0, 'durata': None, 'motivo': None, 'indirizzo': 'http://192.168.1.171:54929/brano.wav'}.
+    2.971 Richiesta 1: GET tutto, da 0.00 s.
+    2.971 192.168.1.172: "GET /brano.wav HTTP/1.1" 200 -
+    3.105 Stato: {'stato': 'PLAYING', 'posizione': 0, 'durata': 97, 'motivo': None, 'indirizzo': 'http://192.168.1.171:54929/brano.wav'}.
+    3.126 Speaker: suona dopo 1.925 s.
+    4.763 Richiesta 1: 12.00 MB in 1.79 s, fino a 65.54 s; chiusa dall'apparecchio.
+   11.147 Stato: {'stato': 'PLAYING', 'posizione': 48.5, 'durata': 97, 'motivo': None, 'indirizzo': 'http://192.168.1.171:54929/brano.wav'}.
+   11.222 Richiesta 2: GET bytes=10485760-, da 54.61 s.
+   11.222 192.168.1.172: "GET /brano.wav HTTP/1.1" 206 -
+   11.447 Speaker: salto a 48.5 s, di nuovo in riproduzione dopo 0.021 s.
+   12.690 Richiesta 2: 7.76 MB in 1.47 s, fino a 97.00 s; fine.
+   14.468 Stato: {'stato': 'PLAYING', 'posizione': 87, 'durata': 97, 'motivo': None, 'indirizzo': 'http://192.168.1.171:54929/brano.wav'}.
+   14.768 Speaker: salto a 87.0 s, di nuovo in riproduzione dopo 0.02 s.
+   24.646 Stato: {'stato': 'IDLE', 'posizione': 0, 'durata': 97, 'motivo': 'FINISHED', 'indirizzo': 'http://192.168.1.171:54929/brano.wav'}.
+   24.665 Speaker: fermo dopo 6.88 s dall'ultimo salto, a 10.0 s dalla fine; motivo FINISHED.
+   24.809 Stato: {'stato': 'UNKNOWN', 'posizione': 0.0, 'durata': None, 'motivo': None, 'indirizzo': None}.
+   24.811 Riassunto: 17.8 MB convertiti, 0 ripartenze, 0 attese dei byte oltre 50 ms, la piu' lunga 0.00 s.
