@@ -1,0 +1,76 @@
+    0.000 Prova del 04/11/2026 21:43, su GabryBat.
+    0.149 Finestra di 512 MB, 2796 secondi, con 699 dietro; brano di 207.6 secondi, 38.0 MB di PCM.
+    0.149 Conversione 1 da 0.00 s.
+    0.158 Server su http://127.0.0.1:64491/brano.wav.
+    0.162 Richiesta 1: GET bytes=0-, da 0.00 s.
+    0.162 127.0.0.1: "GET /brano.wav HTTP/1.1" 206 -
+    0.182 Richiesta 1: 3.16 MB in 0.02 s, fino a 17.24 s; chiusa dall'apparecchio.
+    0.182 Richiesta 2: GET bytes=44-, da 0.00 s.
+    0.182 127.0.0.1: "GET /brano.wav HTTP/1.1" 206 -
+    0.193 Locale: parte dopo 0.021 s; durata letta 207.6455.
+    0.494 Richiesta 2: 38.02 MB in 0.31 s, fino a 207.65 s; fine.
+    3.204 Locale: salto a 103.8 s in 0.0 s.
+    6.224 Locale: salto a 202.6 s in 0.001 s.
+   10.915 Locale: fine dopo 1.69 s dall'ultimo salto, a 5.0 s dalla fine.
+   11.286 Riassunto: 38.1 MB convertiti, 0 ripartenze, 0 attese dei byte oltre 50 ms, la piu' lunga 0.00 s.
+    0.000 Prova del 04/11/2026 21:43, su GabryBat.
+    0.161 Finestra di 512 MB, 2796 secondi, con 699 dietro; brano di 97.0 secondi, 17.8 MB di PCM.
+    0.161 Conversione 1 da 0.00 s.
+    0.172 Server su http://127.0.0.1:64873/brano.wav.
+    0.175 Richiesta 1: GET bytes=0-, da 0.00 s.
+    0.175 127.0.0.1: "GET /brano.wav HTTP/1.1" 206 -
+    0.538 Richiesta 2: GET bytes=44-, da 0.00 s.
+    0.538 127.0.0.1: "GET /brano.wav HTTP/1.1" 206 -
+    0.542 Locale: parte dopo 0.364 s; durata letta 97.0.
+    0.551 Richiesta 1: 0.84 MB in 0.38 s, fino a 4.61 s; superata da una richiesta nuova.
+    3.554 Locale: salto a 48.5 s in 0.0 s.
+    6.246 Richiesta 2: 17.76 MB in 5.71 s, fino a 97.00 s; fine.
+    6.566 Locale: salto a 92.0 s in 0.0 s.
+   11.186 Locale: fine dopo 1.62 s dall'ultimo salto, a 5.0 s dalla fine.
+   11.620 Riassunto: 17.8 MB convertiti, 0 ripartenze, 1 attese dei byte oltre 50 ms, la piu' lunga 0.19 s.
+    0.000 Prova del 04/11/2026 21:44, su GabryBat.
+    0.162 Finestra di 512 MB, 2796 secondi, con 699 dietro; brano di 97.0 secondi, 17.8 MB di PCM.
+    0.162 Conversione 1 da 0.00 s.
+    0.175 Server su http://127.0.0.1:64882/brano.wav.
+    0.189 Richiesta 1: GET bytes=0-, da 0.00 s.
+    0.189 127.0.0.1: "GET /brano.wav HTTP/1.1" 206 -
+    0.549 Richiesta 2: GET bytes=44-, da 0.00 s.
+    0.549 127.0.0.1: "GET /brano.wav HTTP/1.1" 206 -
+    0.559 Locale: parte dopo 0.371 s; durata letta 97.0.
+    0.563 Richiesta 1: 0.84 MB in 0.37 s, fino a 4.61 s; superata da una richiesta nuova.
+    0.873 Richiesta 3: GET bytes=9306156-, da 48.47 s.
+    0.873 127.0.0.1: "GET /brano.wav HTTP/1.1" 206 -
+    0.873 Fuori dalla finestra a 48.47 s: si riparte.
+    0.874 Richiesta 2: 2.12 MB in 0.32 s, fino a 11.61 s; finestra ripartita.
+    0.874 Conversione 2 da 48.47 s.
+    2.263 Locale: salto a 48.5 s in 1.394 s.
+    2.580 Richiesta 4: GET bytes=17661996-, da 91.99 s.
+    2.580 127.0.0.1: "GET /brano.wav HTTP/1.1" 206 -
+    2.580 Fuori dalla finestra a 91.99 s: si riparte.
+    2.580 Richiesta 3: 1.31 MB in 1.71 s, fino a 55.64 s; finestra ripartita.
+    2.580 Conversione 3 da 91.99 s.
+    8.445 Locale: salto a 92.0 s in 5.876 s.
+    8.788 Richiesta 4: 0.92 MB in 6.21 s, fino a 97.00 s; fine.
+   13.061 Locale: fine dopo 4.31 s dall'ultimo salto, a 5.0 s dalla fine.
+   13.480 Riassunto: 4.4 MB convertiti, 2 ripartenze, 3 attese dei byte oltre 50 ms, la piu' lunga 5.85 s.
+    0.000 Prova del 04/11/2026 21:44, su GabryBat.
+    0.164 Finestra di 512 MB, 2796 secondi, con 699 dietro; brano di 97.0 secondi, 17.8 MB di PCM.
+    0.164 Conversione 1 da 0.00 s.
+    0.174 Server su http://127.0.0.1:53408/brano.wav.
+    0.178 Richiesta 1: GET bytes=0-, da 0.00 s.
+    0.178 127.0.0.1: "GET /brano.wav HTTP/1.1" 206 -
+    0.532 Richiesta 2: GET bytes=44-, da 0.00 s.
+    0.532 127.0.0.1: "GET /brano.wav HTTP/1.1" 206 -
+    0.537 Locale: parte dopo 0.355 s; durata letta 97.0.
+    0.546 Richiesta 1: 0.84 MB in 0.37 s, fino a 4.61 s; superata da una richiesta nuova.
+    0.840 Richiesta 3: GET bytes=9306156-, da 48.47 s.
+    0.840 127.0.0.1: "GET /brano.wav HTTP/1.1" 206 -
+    0.855 Richiesta 2: 2.12 MB in 0.32 s, fino a 11.61 s; chiusa dall'apparecchio.
+    2.473 Locale: salto a 48.5 s in 1.628 s.
+    2.784 Richiesta 4: GET bytes=17661996-, da 91.99 s.
+    2.784 127.0.0.1: "GET /brano.wav HTTP/1.1" 206 -
+    2.799 Richiesta 3: 1.38 MB in 1.96 s, fino a 55.98 s; chiusa dall'apparecchio.
+    5.487 Locale: salto a 92.0 s in 2.709 s.
+    5.806 Richiesta 4: 0.92 MB in 3.02 s, fino a 97.00 s; fine.
+   10.114 Locale: fine dopo 4.32 s dall'ultimo salto, a 5.0 s dalla fine.
+   10.550 Riassunto: 17.8 MB convertiti, 0 ripartenze, 3 attese dei byte oltre 50 ms, la piu' lunga 2.67 s.

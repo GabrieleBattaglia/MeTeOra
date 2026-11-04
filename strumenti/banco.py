@@ -1,6 +1,6 @@
 # MeTeOra, il banco del collaudo: MeTeOra vero su un desktop di Windows nascosto, con una copia dei dati, pilotato da una tastiera simulata.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 19/10/2026: nasce con la 1.104.0, dal banco con cui ClaudIA ha collaudato le statistiche della 1.103; sul desktop nascosto, come preferisce Gabriele. Nella 1.105.0 la sessione di Dove sono, l'opzione --solo, la sintesi finta e la pipe dell'istanza con il numero del processo. Nella 1.109.0 la sessione ordina, con --ordina. Nella 1.110.0 la sessione della durata residua, e al_normale in comune con Dove sono. Nella 1.111.0 il banco della plancia, con --plancia: lo stato della selezione letto come lo legge NVDA (issue 21). Nella 1.112.0 la sessione dischi, per la protezione dei dischi nella pulizia all'avvio, con Riconosci questo disco e la Sentinella; poi la conferma con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 la sessione dell'importazione delle playlist, a parte, con --importazione. Nella 1.113.5 la sessione dopo il crash resta oltre il minuto solo per il file del crash: le statistiche si scrivono al piu' ogni mezz'ora.
+# 19/10/2026: nasce con la 1.104.0, dal banco con cui ClaudIA ha collaudato le statistiche della 1.103; sul desktop nascosto, come preferisce Gabriele. Nella 1.105.0 la sessione di Dove sono, l'opzione --solo, la sintesi finta e la pipe dell'istanza con il numero del processo. Nella 1.109.0 la sessione ordina, con --ordina. Nella 1.110.0 la sessione della durata residua, e al_normale in comune con Dove sono. Nella 1.111.0 il banco della plancia, con --plancia: lo stato della selezione letto come lo legge NVDA (issue 21). Nella 1.112.0 la sessione dischi, per la protezione dei dischi nella pulizia all'avvio, con Riconosci questo disco e la Sentinella; poi la conferma con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 la sessione dell'importazione delle playlist, a parte, con --importazione. Nella 1.113.5 la sessione dopo il crash resta oltre il minuto solo per il file del crash: le statistiche si scrivono al piu' ogni mezz'ora. Nella 2.7.0 la sessione delle aperture in blocco, a parte, con --aperture, sui dischi veri e in sola lettura.
 
 """Il banco del collaudo.
 
@@ -13,6 +13,7 @@ Uso, dalla cartella di MeTeOra:
   python strumenti\\banco.py --ordina    solo la sessione ordina, partendo senza dati
   python strumenti\\banco.py --plancia   il banco della plancia, da solo, partendo senza dati
   python strumenti\\banco.py --importazione   solo la sessione dell'importazione delle playlist, senza dati
+  python strumenti\\banco.py --aperture   solo la sessione delle aperture in blocco, sui dischi veri e senza dati
 
 Con --video la finestra del video di MeTeOra si apre e prende i tasti, ma
 libmpv, che disegna in un suo filo nato sul desktop di partenza, li' non puo'
@@ -106,13 +107,13 @@ FILE_DELLE_STATISTICHE = "MeTeOra - Statistiche.json"
 FILE_DEI_DISCHI = "MeTeOra - Dischi.json"
 SESSIONI = ("principale", "riavvio", "dopo_il_crash", "controllo", "dove_sono", "durata_residua", "dischi")
 # Le sessioni che girano solo quando si chiedono, con la loro opzione (tappa 14 c e g).
-SESSIONI_A_PARTE = ("ordina", "importazione")
+SESSIONI_A_PARTE = ("ordina", "importazione", "aperture")
 # Il banco della plancia (1.111.0): la sessione delle misure e cinque
 # chiusure con il lettore che legge.
 SESSIONI_DELLA_PLANCIA = ("plancia", *(f"chiusura_{n}" for n in range(1, 6)))
 # Quanto puo' durare ogni sessione, in secondi: la pulizia sulla copia dei
 # dati veri guarda anche la rete.
-DURATE_MASSIME = {"principale": 1200, "riavvio": 900, "dopo_il_crash": 1200, "controllo": 900, "dove_sono": 900, "durata_residua": 900, "ordina": 600, "plancia": 600, "dischi": 900, "importazione": 300,
+DURATE_MASSIME = {"principale": 1200, "riavvio": 900, "dopo_il_crash": 1200, "controllo": 900, "dove_sono": 900, "durata_residua": 900, "ordina": 600, "plancia": 600, "dischi": 900, "importazione": 300, "aperture": 2400,
     **dict.fromkeys(SESSIONI_DELLA_PLANCIA[1:], 300)}
 # I brani della playlist grande della sessione ordina, e quanto puo' durare al
 # massimo ogni riordino, in secondi.
@@ -1737,8 +1738,168 @@ def scenario_importazione():
     premi("esc")
 
 
+def memoria():
+    """La memoria del processo, in MB: il working set."""
+
+    class Contatori(ctypes.Structure):
+        _fields_ = [("cb", wintypes.DWORD), ("PageFaultCount", wintypes.DWORD)] + [
+            (nome, ctypes.c_size_t) for nome in ("PeakWorkingSetSize", "WorkingSetSize", "QuotaPeakPagedPoolUsage", "QuotaPagedPoolUsage",
+                "QuotaPeakNonPagedPoolUsage", "QuotaNonPagedPoolUsage", "PagefileUsage", "PeakPagefileUsage")]
+
+    kernel32, psapi = ctypes.WinDLL("kernel32"), ctypes.WinDLL("psapi")
+    kernel32.GetCurrentProcess.restype = wintypes.HANDLE
+    psapi.GetProcessMemoryInfo.argtypes = [wintypes.HANDLE, ctypes.c_void_p, wintypes.DWORD]
+    contatori = Contatori()
+    contatori.cb = ctypes.sizeof(contatori)
+    psapi.GetProcessMemoryInfo(kernel32.GetCurrentProcess(), ctypes.byref(contatori), contatori.cb)
+    return round(contatori.WorkingSetSize / 2**20)
+
+
+def scenario_aperture():
+    """Le aperture in blocco della 2.7.0 sui dischi veri di questo PC, tutti in
+    sola lettura: Maiuscolo con F9 su Questo PC, con F9 a meta' e le frecce
+    mentre si apre, e la finestra che deve restare pronta; Maiuscolo con F10
+    che apre il menu della voce e F10 senza comando; Ctrl e Maiuscolo con F9
+    che fermano, Ctrl e Alt con F9 che chiude, Alt con F9 su tutta la plancia.
+    Questa rete resta senza percorsi: la rete vera la prova il collaudo."""
+    import wx
+
+    import finestra as modulo
+
+    f = S.finestra
+    aspetta_la_pulizia()
+    modulo.questa_rete.percorsi_salvati = lambda cartella=None: []
+    ritardi, attivo, fermate = [], threading.Event(), {}
+    principale = threading.main_thread().ident
+
+    def sonda():
+        # Quanto aspetta un lavoro chiesto al filo della finestra; ogni mezzo
+        # secondo d'attesa, dove sta il filo della finestra.
+        while attivo.is_set():
+            pronto = threading.Event()
+            inizio = time.monotonic()
+            wx.CallAfter(pronto.set)
+            while not pronto.wait(0.5) and time.monotonic() - inizio < 120:
+                cornice = sys._current_frames().get(principale)
+                if cornice is not None:
+                    pila = " < ".join(f"{c.name}:{c.lineno}" for c in reversed(traceback.extract_stack(cornice)[-8:]))
+                    fermate[pila] = fermate.get(pila, 0) + 1
+            ritardi.append(time.monotonic() - inizio)
+            time.sleep(0.05)
+
+    def misura(nome, attesa):
+        """Aspetta la fine dell'apertura in corso, con la sonda accesa."""
+        del ritardi[:]
+        fermate.clear()
+        attivo.set()
+        filo = threading.Thread(target=sonda, name="banco, sonda", daemon=True)
+        filo.start()
+        inizio = time.monotonic()
+        finita = aspetta(lambda: f._apertura is None, attesa=attesa, passo=0.5)
+        durata = time.monotonic() - inizio
+        attivo.clear()
+        filo.join(130)
+        ordinati = sorted(ritardi) or [0.0]
+        S.extra[nome] = {"durata": round(durata, 1), "ritardo_peggiore": round(ordinati[-1], 3), "ritardo_mediano": round(ordinati[len(ordinati) // 2], 3),
+            "ritardi_oltre_mezzo_secondo": sum(1 for r in ordinati if r > 0.5), "campioni": len(ritardi), "memoria_mb": memoria(),
+            "fermate": sorted(fermate.items(), key=lambda voce: -voce[1])[:12]}
+        S.nota("misura", nome, S.extra[nome])
+        return finita, durata, ordinati[-1]
+
+    def ultima_che_inizia(segno, inizio):
+        return next((r for r in reversed(S.console_da(segno)) if r.startswith(inizio)), None)
+
+    def unita(lettera):
+        return next(v for v in f._figli(f.nodo_pc) if (f._dati(v) or {}).get("percorso", "").upper().startswith(lettera))
+
+    # Maiuscolo con F9 su Questo PC, che fino alla 2.6 restava chiuso.
+    nel_filo(lambda: (f._seleziona(f.nodo_pc), f.albero.SetFocus()))
+    S.extra["memoria_prima_mb"] = memoria()
+    segno = time.monotonic()
+    premi("f9", maiuscolo=True)
+    time.sleep(1.5)
+    premi("f9")
+    in_corso = nel_filo(lambda: f._apertura is not None)
+    riga = ultima_che_inizia(segno, "Questo PC:")
+    if in_corso:
+        S.verifica("aperture", "F9 dice l'apertura in corso", riga and "Apertura dentro Questo PC in corso: finora " in riga, riga)
+        for _giro in range(3):
+            premi("giu")
+        S.verifica("aperture", "Le frecce non fermano l'apertura", nel_filo(lambda: f._apertura is not None), nel_filo(lambda: f._nome_della_voce(f._voce_corrente())))
+    finita, durata, peggiore = misura("questo_pc", 900)
+    fine = ultima_che_inizia(segno, "Aperto tutto dentro Questo PC")
+    S.verifica("aperture", "L'apertura di Questo PC finisce", finita and fine, f"{durata:.1f} s; {fine}")
+    S.verifica("aperture", "La finestra resta pronta mentre si apre Questo PC", peggiore < 1.0, f"ritardo peggiore {peggiore:.3f} s, {S.extra['questo_pc']}")
+    S.extra["questo_pc"]["rami_e_voci"] = nel_filo(f._aperti_dentro, f.nodo_pc)
+    nel_filo(lambda: (f._seleziona(f.nodo_pc), f.albero.SetFocus()))
+    segno = time.monotonic()
+    premi("f9")
+    riga = ultima_che_inizia(segno, "Questo PC:")
+    S.verifica("aperture", "F9 dice Questo PC aperto", riga and riga.startswith("Questo PC: aperto, con "), riga)
+
+    # B con Questo PC aperto tutto: a ogni cambio di brano le etichette da
+    # rifare sono quelle del brano di prima e di questo, non le 138 mila.
+    def primo_file():
+        return next(v for v in f._tutte_le_voci(unita("E:")) if (f._dati(v) or {}).get("tipo") == "file")
+
+    nel_filo(lambda: (f._seleziona(primo_file()), f.albero.SetFocus()))
+    premi("x")
+    aspetta(lambda: bool(f.motore.in_corso), attesa=10)
+    inizio = time.monotonic()
+    premi("b")
+    S.extra["cambio_di_brano"] = round(time.monotonic() - inizio, 2)
+    S.verifica("aperture", "B con Questo PC aperto tutto risponde subito", S.extra["cambio_di_brano"] < 0.5, S.extra["cambio_di_brano"])
+    premi("v")
+
+    # Maiuscolo con F10 apre il menu della voce, come in Windows: il menu vero,
+    # che si chiude con Esc; poi F10 da solo lo dice, e la finestra risponde.
+    # Un menu finto lascerebbe il rilascio di F10 a Windows, che porta la
+    # finestra nel suo menu di sistema.
+    nel_filo(lambda: (f._seleziona(unita("E:")), f.albero.SetFocus()))
+    segno = time.monotonic()
+    premi("f10", maiuscolo=True)
+    aperto = "menu" in S.suoni_da(segno)
+    S.verifica("aperture", "Maiuscolo con F10 apre il menu della voce", aperto, S.suoni_da(segno))
+    if aperto:
+        premi("esc")
+    segno = time.monotonic()
+    premi("f10")
+    S.verifica("aperture", "F10 da solo non ha un comando", "Il tasto F10 non ha un comando." in S.console_da(segno), S.console_da(segno))
+
+    # Ctrl e Alt con F9 chiude tutto, e presto: CollapseAllChildren di wx, con
+    # le 138 mila voci di Questo PC, teneva ferma la finestra 22 secondi.
+    segno = time.monotonic()
+    premi("f9", ctrl=True, alt=True, attesa=60)
+    S.extra["chiusura_della_plancia"] = round(time.monotonic() - segno, 2)
+    S.verifica("aperture", "Ctrl e Alt con F9 chiude in meno di due secondi", S.extra["chiusura_della_plancia"] < 2.0, S.extra["chiusura_della_plancia"])
+    S.verifica("aperture", "Ctrl e Alt con F9 chiude tutta la plancia", "Chiusa tutta la plancia." in S.console_da(segno)
+        and not nel_filo(lambda: any(f.albero.IsExpanded(v) for v in f._figli(f.albero.GetRootItem()))), S.console_da(segno))
+
+    # Ctrl e Maiuscolo con F9 ferma l'apertura del disco C, che legge decine di
+    # migliaia di cartelle.
+    nel_filo(lambda: (f._seleziona(unita("C:")), f.albero.SetFocus()))
+    nome_di_c = nel_filo(lambda: f._nome_della_voce(unita("C:")))
+    segno = time.monotonic()
+    premi("f9", maiuscolo=True)
+    time.sleep(2)
+    premi("f9", ctrl=True, maiuscolo=True)
+    riga = ultima_che_inizia(segno, f"Apertura dentro {nome_di_c} fermata")
+    S.verifica("aperture", "Ctrl e Maiuscolo con F9 fermano l'apertura", riga and nel_filo(lambda: f._apertura is None), S.console_da(segno)[-3:])
+
+    # Alt con F9, tutta la plancia: anche Questo PC.
+    segno = time.monotonic()
+    premi("f9", alt=True)
+    finita, durata, peggiore = misura("tutta_la_plancia", 900)
+    fine = ultima_che_inizia(segno, "Aperta tutta la plancia")
+    S.verifica("aperture", "Alt con F9 apre tutta la plancia", finita and fine and nel_filo(lambda: f.albero.IsExpanded(f.nodo_pc)), f"{durata:.1f} s; {fine}")
+    S.verifica("aperture", "La finestra resta pronta mentre si apre tutta la plancia", peggiore < 1.0, f"ritardo peggiore {peggiore:.3f} s, {S.extra['tutta_la_plancia']}")
+    S.extra["tutta_la_plancia"]["rami_e_voci"] = nel_filo(f._aperti_dentro, f.albero.GetRootItem())
+    premi("f9", ctrl=True, alt=True)
+    premi("esc")
+
+
 SCENARI = {"principale": scenario_principale, "riavvio": scenario_riavvio, "dopo_il_crash": scenario_dopo_il_crash, "controllo": scenario_controllo,
-    "dove_sono": scenario_dove_sono, "durata_residua": scenario_durata_residua, "ordina": scenario_ordina, "plancia": scenario_plancia, "dischi": scenario_dischi, "importazione": scenario_importazione,
+    "dove_sono": scenario_dove_sono, "durata_residua": scenario_durata_residua, "ordina": scenario_ordina, "plancia": scenario_plancia, "dischi": scenario_dischi, "importazione": scenario_importazione, "aperture": scenario_aperture,
     **dict.fromkeys(SESSIONI_DELLA_PLANCIA[1:], scenario_chiusura)}
 
 
@@ -1949,6 +2110,7 @@ def main():
     parser.add_argument("--ordina", action="store_true", help="solo la sessione di Ordina e Mescola, partendo senza dati")
     parser.add_argument("--plancia", action="store_true", help="il banco della plancia: lo stato della selezione letto come lo legge NVDA")
     parser.add_argument("--importazione", action="store_true", help="solo la sessione dell'importazione delle playlist, senza dati")
+    parser.add_argument("--aperture", action="store_true", help="solo la sessione delle aperture in blocco, sui dischi veri, senza dati")
     parser.add_argument("--sessione", choices=SESSIONI + SESSIONI_A_PARTE + SESSIONI_DELLA_PLANCIA, help=argparse.SUPPRESS)
     parser.add_argument("--dati", help=argparse.SUPPRESS)
     parser.add_argument("--esito", help=argparse.SUPPRESS)
@@ -1960,6 +2122,8 @@ def main():
         base, _esiti, falliti = banco_a_parte("ordina")
     elif argomenti.importazione:
         base, _esiti, falliti = banco_a_parte("importazione")
+    elif argomenti.aperture:
+        base, _esiti, falliti = banco_a_parte("aperture")
     else:
         base, _esiti, falliti = banco_della_plancia() if argomenti.plancia else banco(argomenti.vuoti, argomenti.video, argomenti.solo)
     if falliti:

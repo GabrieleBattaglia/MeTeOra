@@ -29,6 +29,8 @@ def test_formati():
     assert trasmissione.tipo_di("brano.sconosciuto") == trasmissione.TIPO_SCONOSCIUTO
     assert trasmissione.legge_da_se("a.mp3") and trasmissione.legge_da_se("a.M4A")
     assert not trasmissione.legge_da_se("a.ape") and not trasmissione.legge_da_se("a.sid")
+    # Gli audiolibri M4B sono AAC come gli M4A, e dalla 2.7.0 non si convertono.
+    assert trasmissione.legge_da_se("Libro.m4b") and trasmissione.tipo_di("Libro.M4B") == "audio/mp4"
     # Tutto cio' che si legge da se' ha un tipo da dichiarare.
     assert set(trasmissione.TIPI) >= trasmissione.LEGGE_DA_SE
 

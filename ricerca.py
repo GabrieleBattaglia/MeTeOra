@@ -1,7 +1,7 @@
 # MeTeOra, la ricerca globale: cerca con il filtro in tutte le playlist e in tutte le unita'.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 # 30/09/2026: nasce con la 1.15.0, issue 10. Nella 1.23.0 l'albero della provenienza dei risultati; nella 1.34.6 i risultati cestinati escono dal ramo.
-# Nella 1.73.0 la ricerca ovunque anche in rete, dopo i dischi, con le letture di rete a tempo. Nella 1.104.0 l'annullamento delle letture di rete diventa pubblico, per la pulizia all'avvio.
+# Nella 1.73.0 la ricerca ovunque anche in rete, dopo i dischi, con le letture di rete a tempo. Nella 1.104.0 l'annullamento delle letture di rete diventa pubblico, per la pulizia all'avvio. Nella 2.7.0 anche tipo_di_unita, per l'apertura di massa della plancia.
 
 """La ricerca in tutto MeTeOra.
 
@@ -37,6 +37,7 @@ from playlist import Brano
 # I tipi di unita' in cui si cerca: rimovibili, dischi fissi, dischi in memoria.
 UNITA_DA_CERCARE = (2, 3, 6)
 UNITA_DI_RETE = 4
+UNITA_CD = 5
 INTERVALLO_DEGLI_AVVISI = 0.5
 # Quanti secondi aspetta, fra una voce e l'altra, la lettura di una cartella
 # di rete prima di darla per persa: abbastanza per un disco del router che si
@@ -47,7 +48,9 @@ ATTESA_IN_RETE = 15.0
 CARTELLE_MUTE = 3
 
 
-def _tipo_di_unita(radice):
+def tipo_di_unita(radice):
+    """Il tipo di Windows dell'unita': UNITA_DI_RETE, UNITA_CD e gli altri.
+    Lo usa anche l'apertura di massa della plancia (2.7.0)."""
     import ctypes
 
     return ctypes.windll.kernel32.GetDriveTypeW(radice)
@@ -55,7 +58,7 @@ def _tipo_di_unita(radice):
 
 def in_rete(percorso):
     r"""Vero per un percorso di rete, come \\server\cartella, o su un'unita' di rete."""
-    return questa_rete.e_di_rete(percorso) or _tipo_di_unita(os.path.splitdrive(percorso)[0] + "\\") == UNITA_DI_RETE
+    return questa_rete.e_di_rete(percorso) or tipo_di_unita(os.path.splitdrive(percorso)[0] + "\\") == UNITA_DI_RETE
 
 
 def _percorso_di_rete(radice):
@@ -94,7 +97,7 @@ def lettere_di_rete():
 
     maschera = ctypes.windll.kernel32.GetLogicalDrives()
     radici = [f"{chr(65 + i)}:\\" for i in range(26) if maschera >> i & 1]
-    return [r for r in radici if _tipo_di_unita(r) == UNITA_DI_RETE]
+    return [r for r in radici if tipo_di_unita(r) == UNITA_DI_RETE]
 
 
 def radici_di_rete(percorsi):
@@ -257,7 +260,7 @@ class Ricerca:
                 return
             if self.filtro.ammette(brano, self._schedario.scheda(brano.percorso)):
                 self._trovato(brano, playlist)
-        radici = self._unita if self._unita is not None else [r for r, _nome in questo_pc.unita() if _tipo_di_unita(r) in UNITA_DA_CERCARE]
+        radici = self._unita if self._unita is not None else [r for r, _nome in questo_pc.unita() if tipo_di_unita(r) in UNITA_DA_CERCARE]
         rete = radici_di_rete(self._rete) if self._lettere_di_rete else self._rete
         for radice in [*radici, *rete]:
             self._cerca_in(radice)

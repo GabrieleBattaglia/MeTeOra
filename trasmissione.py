@@ -1,6 +1,6 @@
 # MeTeOra, la trasmissione agli apparecchi Cast: la parte comune a tutte le strade del Chromecast.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 22/10/2026: nasce con la tappa 15 b del piano, prima che Gabriele scelga la strada: il programma ancora non lo usa. Nella 1.117.0 la usa lontano.py: il brano in pausa, l'indirizzo negli stati, il muto, la connessione che non risponde e quella che cade.
+# 22/10/2026: nasce con la tappa 15 b del piano, prima che Gabriele scelga la strada: il programma ancora non lo usa. Nella 1.117.0 la usa lontano.py: il brano in pausa, l'indirizzo negli stati, il muto, la connessione che non risponde e quella che cade. Nella 2.7.0 gli M4B letti da se'.
 
 """Gli apparecchi Cast: Chromecast, speaker Google, soundbar e televisori con
 Chromecast integrato, e i gruppi di altoparlanti di Google Home.
@@ -29,7 +29,7 @@ import urllib.parse
 # I tipi che il server dichiara, per estensione.
 TIPI = {
     ".mp3": "audio/mpeg", ".flac": "audio/flac", ".ogg": "audio/ogg", ".oga": "audio/ogg", ".opus": "audio/ogg",
-    ".wav": "audio/wav", ".m4a": "audio/mp4", ".mp4": "audio/mp4", ".aac": "audio/aac", ".webm": "audio/webm",
+    ".wav": "audio/wav", ".m4a": "audio/mp4", ".m4b": "audio/mp4", ".mp4": "audio/mp4", ".aac": "audio/aac", ".webm": "audio/webm",
     ".mka": "audio/x-matroska", ".wma": "audio/x-ms-wma", ".ape": "audio/x-ape", ".wv": "audio/x-wavpack",
     ".mpc": "audio/x-musepack", ".aiff": "audio/aiff", ".aif": "audio/aiff", ".dsf": "audio/x-dsf", ".tta": "audio/x-tta",
 }
@@ -37,8 +37,10 @@ TIPO_SCONOSCIUTO = "application/octet-stream"
 # I formati che il Chromecast legge da se', secondo la documentazione di
 # Google: MP3, AAC, FLAC, Ogg con Vorbis o Opus, WAV e WebM. Gli altri vanno
 # convertiti o trasmessi. Da confermare con la prova dei formati del
-# prototipo, sugli apparecchi di Gabriele.
-LEGGE_DA_SE = frozenset({".mp3", ".flac", ".ogg", ".oga", ".opus", ".wav", ".m4a", ".mp4", ".aac", ".webm"})
+# prototipo, sugli apparecchi di Gabriele. Gli M4B, gli audiolibri, sono AAC
+# come gli M4A, con un altro nome: dalla 2.7.0 non si convertono piu', e un
+# audiolibro di dieci ore non aspetta la conversione intera (tappa 17).
+LEGGE_DA_SE = frozenset({".mp3", ".flac", ".ogg", ".oga", ".opus", ".wav", ".m4a", ".m4b", ".mp4", ".aac", ".webm"})
 # I tipi di apparecchio come li chiama pychromecast.
 TIPO_SOLO_AUDIO = "audio"
 TIPO_AUDIO_E_VIDEO = "cast"

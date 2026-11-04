@@ -1,0 +1,17 @@
+Collaudo di MeTeOra 2.7.0: le aperture in blocco senza limiti, i comandi tutti su F9, e gli audiolibri M4B sullo speaker.
+F9 su un ramo dice se è aperto o chiuso e, se è aperto, quante voci e quanti rami aperti ha dentro: senza suono, nella console e alla sintesi e al braille dei sottotitoli.
+Maiuscolo con F9 su una playlist la apre con tutto quello che ha dentro; Ctrl con F9 la chiude, e la selezione va sulla playlist.
+Maiuscolo con F9 su Questo PC: la plancia si riempie a poco a poco, solo con le cartelle che hanno qualcosa da suonare, in ordine e con le cartelle prima dei file.
+Mentre Questo PC si apre, naviga con le frecce anche dentro i rami che si riempiono: dimmi se NVDA legge bene e se qualcosa ti disturba.
+Mentre Questo PC si apre, chiudi un ramo con la freccia sinistra: resta chiuso anche quando l'apertura ci aggiunge altre voci.
+Durante la stessa apertura, F9 dice a che punto è: rami, voci, cartelle lette e la cartella che sta leggendo.
+Alla fine suona la fine, e la console dice voci, rami aperti e cartelle lette: dimmi quanto ci ha messo sul Gigante.
+Maiuscolo con F9 sul disco C, e dopo qualche secondo Ctrl e Maiuscolo con F9: l'apertura si ferma, e i rami aperti restano aperti.
+Una cartella rimasta a metà da quella fermata, chiusa e riaperta con la freccia, si rilegge e torna completa.
+Ctrl e Maiuscolo con F9 per fermare è una scelta mia: ti va bene, o preferisci un altro tasto?
+Alt con F9 apre tutta la plancia, anche Questa rete con l'Iliadbox, ma non Computer della rete: dimmi quanto dura e se la rete risponde.
+Ctrl e Alt con F9 chiude tutta la plancia, e il fuoco va sulla voce di primo livello che conteneva la tua.
+Mentre si apre un disco, Ctrl con F9 su una playlist la chiude e l'apertura va avanti; Ctrl con F9 sul disco la ferma, e la console lo dice.
+F10 da solo dice che non ha un comando; Maiuscolo con F10 apre il menu della voce, come il tasto Applicazioni.
+La guida rapida di F12 e il manuale, nel capitolo della plancia, raccontano i comandi nuovi di F9.
+Sullo speaker GabryBar un audiolibro M4B parte subito, senza la riga della conversione, e i salti con le frecce funzionano.

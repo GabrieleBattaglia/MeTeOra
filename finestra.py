@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17)
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -32,6 +32,7 @@ Il brano in riproduzione e la voce selezionata sono due cose distinte: la
 riproduzione non sposta mai la selezione; lo fa F8, su richiesta.
 """
 
+import collections
 import contextlib
 import copy
 import ctypes
@@ -92,12 +93,24 @@ from dialoghi import (
     FinestraScelta,
     FinestraStatistiche,
 )
+from esploratore import Esploratore
 from filtro import COMMENTO, ErroreFiltro, Filtro, modello_della_console
 from impostazioni import PREDEFINITE, Impostazioni
 from marcatori import Marcatori
 from motore import DURATA_SID_PREDEFINITA, VOLUME_MASSIMO, durata_del_sottobrano, sottobrano_risolto
 from playlist import CRITERI, Archivio, Brano, Coda, Playlist
-from ricerca import AlberoDeiRisultati, NonRisponde, Ricerca, errore_di_rete, in_rete, leggi_in_rete, senza_annidati
+from ricerca import (
+    UNITA_CD,
+    UNITA_DI_RETE,
+    AlberoDeiRisultati,
+    NonRisponde,
+    Ricerca,
+    errore_di_rete,
+    in_rete,
+    leggi_in_rete,
+    senza_annidati,
+    tipo_di_unita,
+)
 from schedario import Schedario, credibile
 from valori import AREE, ErroreValore, leggi_tempo, leggi_tempo_nel_brano, secondi_da_leggere, tempo
 from video import FinestraVideo
@@ -145,7 +158,9 @@ _SOLO_MODIFICATORI = (wx.WXK_SHIFT, wx.WXK_CONTROL, wx.WXK_RAW_CONTROL, wx.WXK_A
 # Quanti caratteri al massimo del messaggio di un problema interno: la
 # console riceve una riga breve, non un registro.
 MESSAGGIO_DEL_PROBLEMA = 200
-# Quanti rami al massimo apre F10 in una volta.
+# Quanti rami al massimo apre J, che apre una playlist tutta d'un fiato per
+# suonarla. Fino alla 2.6 valeva anche per F10, che dalla 2.7.0 e' Maiuscolo
+# con F9 e non ha limiti: legge il disco in disparte.
 MASSIMO_DI_RAMI = 2000
 # E al piu' tante voci in tutto: una cartella aperta porta con se' tutti i suoi
 # file, e con centinaia di migliaia di voci ogni rinfresco della plancia
@@ -156,8 +171,14 @@ MASSIMO_DI_VOCI = 10000
 # secondo, e farne uno a ogni avviso del contatore e dello schedario fermava
 # la finestra (collaudo della 1.83.0).
 PAUSA_FRA_I_RINFRESCHI = 3
-# Le aperture in blocco, F10 e Maiuscolo con F10, dicono il loro inizio, con
-# il suono, solo se durano piu' di tanti secondi (1.83.2).
+# Da quante etichette cambiate in un rinfresco in su si scrivono a pezzi, e
+# quanto dura al massimo un pezzo: con 12.600 cartelle aperte SetItemText una
+# per una chiede 1,4 secondi, e con Freeze il Thaw della plancia con 140 mila
+# voci teneva ferma la finestra fino a quattro secondi (banco della 2.7.0).
+ETICHETTE_A_PEZZI = 50
+PEZZO_DELLE_ETICHETTE = 0.03
+# Le aperture in blocco, Maiuscolo e Alt con F9, dicono il loro inizio, con il
+# suono, solo se durano piu' di tanti secondi (1.83.2).
 RITARDO_DELL_AVVIO = 0.4
 # Quanti risultati della ricerca si mostrano alla volta.
 PAGINA_DEI_RISULTATI = 1000
@@ -175,6 +196,11 @@ MAIUSCOLO = wx.MOD_SHIFT
 CTRL_MAIUSCOLO = wx.MOD_CONTROL | wx.MOD_SHIFT
 ALT = wx.MOD_ALT
 CTRL_ALT = wx.MOD_CONTROL | wx.MOD_ALT
+# F9 con i modificatori (2.7.0): Maiuscolo apre il ramo con tutto dentro, Ctrl
+# lo chiude, Alt apre tutta la plancia, Ctrl e Alt la chiude, Ctrl e Maiuscolo
+# fermano l'apertura in corso.
+COMANDI_DI_F9 = {MAIUSCOLO: "_apri_tutto", CTRL: "_chiudi_tutto", ALT: "_apri_la_plancia", CTRL_ALT: "_chiudi_la_plancia",
+    CTRL_MAIUSCOLO: "_ferma_l_apertura"}
 # I tasti a carattere: (carattere, modificatori) -> comando, una famiglia per
 # tasto dove la regola si applica. Ctrl con Alt e' anche AltGr: resta libero
 # sui tasti che con AltGr scrivono un segno, come E per l'euro, e su N, che
@@ -425,7 +451,8 @@ TASTI_COMUNI = [
     "T mette un marker dove sei, o rinomina quello su cui sei; Maiuscolo con T li toglie tutti. Y il marker su cui sei o quello prima: Ctrl e Maiuscolo il precedente e il successivo, "
     "Alt l'ultimo, Ctrl e Alt il primo. R quanti marker ha il brano: Ctrl e Maiuscolo tolgono quelli prima e quelli dopo. Maiuscolo con le cifre da 1 a 0 va ai primi dieci marker del brano della plancia.",
     "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, Maiuscolo con F7 le statistiche, F8 porta la selezione e il fuoco della plancia sul brano in riproduzione, Maiuscolo con F8 ce la tiene agganciata e Ctrl con F8 la sgancia, "
-    "F9 chiude e F10 apre tutto il ramo col fuoco, Maiuscolo con F9 chiude tutta la plancia e Maiuscolo con F10 la apre tutta, tranne Questo PC e Questa rete; "
+    "F9 dice se il ramo col fuoco è aperto, e quante voci ha aperte dentro: Maiuscolo con F9 lo apre con tutto quello che ha dentro e Ctrl con F9 lo chiude, "
+    "Alt con F9 apre tutta la plancia e Ctrl e Alt con F9 la chiude, Ctrl e Maiuscolo con F9 fermano un'apertura; mentre si apre puoi navigare; "
     "F11 legge i tag del brano selezionato, o i dettagli di una cartella, di un'unità o di una playlist, e Maiuscolo con F11 apre il menu dei tag.",
     "Barra rovesciata: nella console cerca nella console, altrove nel ramo della plancia in cui sei, e da Apri file, Statistiche o Impostazioni in tutto MeTeOra; Ctrl con la barra rovesciata cerca in tutto MeTeOra, anche dalla console. "
     "Barra verticale: il filtro della playlist o dei Preferiti in cui sta la plancia, anche dalla console.",
@@ -1045,6 +1072,61 @@ class FinestraFiltro(wx.Dialog):
         return "\n".join(righe)
 
 
+class _Apertura:
+    """Un'apertura in blocco in corso, Maiuscolo o Alt con F9 (2.7.0): i rami
+    da aprire, gli avvisi dell'esploratore, e le voci della plancia che
+    l'apertura tiene. Ogni voce tenuta si segna con il suo numero di Windows,
+    e una voce tolta dalla plancia, per esempio con il cestino mentre si
+    naviga, esce anche da qui: il numero di una voce tolta non si usa piu'."""
+
+    def __init__(self, titolo, inizio, fine, evento, tutta):
+        self.titolo, self.inizio, self.fine, self.evento, self.tutta = titolo, inizio, fine, evento, tutta
+        self.radici = []
+        self.esploratore = None
+        self.eventi = collections.deque()
+        self.da_aprire = collections.deque()
+        # Le cartelle della plancia per percorso, e le voci tenute, per numero,
+        # con il percorso o None.
+        self.mappa = {}
+        self._tenute = {}
+        # I rami caricati a mano di cui si sono gia' guardate le cartelle, e
+        # per ramo l'ultima cartella inserita dall'esploratore.
+        self.guardati = set()
+        self.ultime = {}
+        # Le cartelle che l'esploratore riempie e non ha ancora finito, e i
+        # rami chiusi da chi naviga mentre si apre, per numero: restano chiusi.
+        self.incomplete = set()
+        self.chiusi_a_mano = set()
+        self.rami = 0
+        self.voci = 0
+        self.avviato = False
+        self.pianificato = False
+
+    def tieni(self, voce, percorso=None):
+        chiave = pulizia.norm(percorso) if percorso is not None else None
+        numero = int(voce.GetID())
+        if chiave is not None or numero not in self._tenute:
+            self._tenute[numero] = chiave
+        if chiave is not None:
+            self.mappa[chiave] = voce
+        return voce
+
+    def viva(self, voce):
+        return voce is not None and int(voce.GetID()) in self._tenute
+
+    def voce(self, percorso):
+        voce = self.mappa.get(pulizia.norm(percorso))
+        return voce if self.viva(voce) else None
+
+    def tolta(self, numero):
+        chiave = self._tenute.pop(numero, None)
+        if chiave is not None and chiave in self.mappa and int(self.mappa[chiave].GetID()) == numero:
+            del self.mappa[chiave]
+        self.guardati.discard(numero)
+        self.ultime.pop(numero, None)
+        self.chiusi_a_mano.discard(numero)
+
+
 class Finestra(wx.Frame):
     def __init__(self, ao="wasapi", cartella_dati=None):
         super().__init__(None, title=f"MeTeOra {version.VERSION}")
@@ -1140,9 +1222,9 @@ class Finestra(wx.Frame):
         # I video su cui la passata non ha trovato niente: in questa sessione
         # non si rifa'.
         self._passate_vuote = set()
-        # Il segno dell'apertura di tutta la plancia in corso, Maiuscolo con
-        # F10: un tasto qualsiasi lo toglie, e l'apertura si ferma (1.79.0).
-        self._apertura_della_plancia = None
+        # L'apertura in blocco in corso, Maiuscolo o Alt con F9: dalla 2.7.0
+        # i tasti non la fermano, e si naviga mentre la plancia si riempie.
+        self._apertura = None
         # Il mazzo della riproduzione casuale (1.61.0): i brani gia' usciti,
         # come (id della playlist, id del brano, sottobrano), con le
         # playlist e i brani tenuti in vita, perche' un id non torni a un
@@ -1259,7 +1341,6 @@ class Finestra(wx.Frame):
         # Durante l'apertura di tutta la plancia, o di un ramo intero, le
         # cartelle vuote e quelle che non si leggono non suonano una per
         # una: si contano, e la fine lo dice (1.83.1).
-        self._taciuti = None
         self.marcatori = Marcatori(os.path.join(cartella_dati, FILE_MARCATORI))
         # I punti dei file lunghi (1.92.0).
         self.posizioni = posizioni.Posizioni(os.path.join(cartella_dati, FILE_POSIZIONI))
@@ -1314,6 +1395,18 @@ class Finestra(wx.Frame):
         # altrimenti le voci scelte con Maiuscolo, Ctrl o i clic, per numero
         # di voce.
         self._selezione = None
+        # Le voci dei brani, dei file e dei sottobrani per percorso, come
+        # {percorso: {numero della voce: voce}}, e il percorso del brano che le
+        # etichette dicono in riproduzione: le schede nuove e il cambio di
+        # brano rinfrescano solo le loro voci. Con Questo PC aperto tutto, 140
+        # mila voci, rifarle tutte fermava la finestra (2.7.0). La chiave sta
+        # anche nei dati della voce: una rinomina non lascia voci tolte qui.
+        self._voci_dei_file = {}
+        self._annunciato = None
+        # Le etichette che aspettano di essere scritte a pezzi, per numero di
+        # voce, come (voce, testo); una voce tolta ne esce.
+        self._etichette_in_attesa = {}
+        self._etichette_pianificate = False
         # Lo stato della selezione per lo screen reader (issue 21): l'oggetto
         # di accessibilita' della plancia, se attaccato, e la voce col fuoco
         # di prima di una freccia o di un'iniziale che Windows muove, finche'
@@ -1968,7 +2061,7 @@ class Finestra(wx.Frame):
             if tipo == "cartella" and dati.get("a_mano"):
                 righe.append("Canc, o Togli il percorso nel menu, lo toglie da Questa rete; i file restano dove sono.")
             if voce != self._voce_corrente():
-                righe.append("Il fuoco è su un'altra voce: le frecce, F9, F10, J, K e la barra verticale partono da lì; Canc, Maiuscolo con Canc, X, Maiuscolo con X, F4, F11, "
+                righe.append("Il fuoco è su un'altra voce: le frecce, F9 con i suoi comandi, J, K e la barra verticale partono da lì; Canc, Maiuscolo con Canc, X, Maiuscolo con X, F4, F11, "
                     "Maiuscolo con F11, Maiuscolo con le cifre, la barra rovesciata e il menu agiscono sulla voce selezionata.")
         if not self._tasti_rapidi:
             righe = ["Tasti rapidi spenti: lettere, cifre e segni vanno alla plancia, che cerca per iniziale; Maiuscolo con F12 li riaccende.", *righe]
@@ -1992,10 +2085,6 @@ class Finestra(wx.Frame):
         nome = self._nome_del_tasto(evento)
         if nome:
             self._statistiche.tasto(nome)
-        if self._apertura_della_plancia is not None and evento.GetKeyCode() not in _SOLO_MODIFICATORI:
-            # Un tasto qualsiasi ferma l'apertura di tutta la plancia, prima
-            # di fare il suo lavoro: niente rami tolti sotto di lei.
-            self._ferma_l_apertura()
         if self._esegui_il_tasto(evento):
             self._controlla_il_livello(prima)
 
@@ -2007,7 +2096,7 @@ class Finestra(wx.Frame):
         tasti_funzione = {
             wx.WXK_F1: self._manuale, wx.WXK_F2: self._changelog, wx.WXK_F3: self._crediti,
             wx.WXK_F5: lambda: self._vai(self.albero, "plancia"), wx.WXK_F6: lambda: self._vai(self.console, "console"),
-            wx.WXK_F7: lambda: self._vai(self.cruscotto, "cruscotto"), wx.WXK_F4: self._f4, wx.WXK_F8: self._vai_al_brano, wx.WXK_F9: self._chiudi_tutto, wx.WXK_F10: self._apri_tutto, wx.WXK_F11: self._comando_leggi_i_tag, wx.WXK_F12: self._elenco_dei_tasti,
+            wx.WXK_F7: lambda: self._vai(self.cruscotto, "cruscotto"), wx.WXK_F4: self._f4, wx.WXK_F8: self._vai_al_brano, wx.WXK_F9: self._comando_stato_del_ramo, wx.WXK_F10: self._f10, wx.WXK_F11: self._comando_leggi_i_tag, wx.WXK_F12: self._elenco_dei_tasti,
             wx.WXK_ESCAPE: self.Close,
         }
         if modificatori == wx.MOD_NONE and codice in tasti_funzione:
@@ -2017,13 +2106,10 @@ class Finestra(wx.Frame):
             # Le statistiche, da tutta la finestra (Gabriele, 1.103.0).
             self._comando_statistiche()
             return True
-        if modificatori == wx.MOD_SHIFT and codice == wx.WXK_F9:
-            self._chiudi_la_plancia()
-            return True
-        if modificatori == wx.MOD_SHIFT and codice == wx.WXK_F10:
-            # Non apre piu' il menu della voce, come in Windows: quello resta
-            # a Invio, al tasto Applicazioni e alla barra spaziatrice (Gabriele, 1.79.0).
-            self._apri_la_plancia()
+        if codice == wx.WXK_F9 and modificatori in COMANDI_DI_F9:
+            # Le aperture e le chiusure, con la regola della issue 38 (2.7.0).
+            # Maiuscolo con F10 torna a Windows, che apre il menu della voce.
+            getattr(self, COMANDI_DI_F9[modificatori])()
             return True
         if modificatori == wx.MOD_SHIFT and codice == wx.WXK_F11:
             self._comando_modifica_i_tag()
@@ -2401,7 +2487,7 @@ class Finestra(wx.Frame):
         for figlio in list(self._figli(antenato)):
             if self.albero.ItemHasChildren(figlio):
                 chiusi = chiusi or self.albero.IsExpanded(figlio)
-                self.albero.CollapseAllChildren(figlio)
+                self._chiudi_con_tutto(figlio)
         self.albero.EnsureVisible(antenato)
         # Il nome soltanto, senza i conti dell'etichetta.
         nome = self._nome_della_voce(antenato)
@@ -2582,6 +2668,17 @@ class Finestra(wx.Frame):
         numero Windows puo' darlo a una voce nuova."""
         if self._selezione:
             self._selezione.pop(int(evento.GetItem().GetID()), None)
+        if self._apertura is not None:
+            self._apertura.tolta(int(evento.GetItem().GetID()))
+        self._etichette_in_attesa.pop(int(evento.GetItem().GetID()), None)
+        # A finestra chiusa le voci si tolgono con l'albero, che non risponde piu'.
+        chiave = None if self._chiusa else (self._dati(evento.GetItem()) or {}).get("chiave_dell_indice")
+        if chiave is not None:
+            voci = self._voci_dei_file.get(chiave)
+            if voci is not None:
+                voci.pop(int(evento.GetItem().GetID()), None)
+                if not voci:
+                    del self._voci_dei_file[chiave]
         evento.Skip()
 
     # Lo stato della selezione per lo screen reader (issue 21).
@@ -2632,7 +2729,7 @@ class Finestra(wx.Frame):
         """La selezione multipla si e' chiusa mentre la voce col fuoco ne era
         fuori, e per NVDA era non selezionata: adesso e' selezionata.
         Se il fuoco e' rimasto li', come con freccia giu' sull'ultima voce,
-        con F9 sul ramo che ha il fuoco o con un clic sulla voce stessa,
+        con Ctrl e F9 sul ramo che ha il fuoco o con un clic sulla voce stessa,
         Windows non manda niente, e lo stato si annuncia; se si e' mosso,
         basta il suo evento di fuoco, che porta gia' lo stato nuovo. Si
         guarda dopo, perche' le frecce il fuoco lo muovono dopo il gestore
@@ -2651,9 +2748,15 @@ class Finestra(wx.Frame):
             figlio, cookie = self.albero.GetNextChild(voce, cookie)
 
     def _tutte_le_voci(self, voce=None):
-        for figlio in self._figli(voce or self.albero.GetRootItem()):
-            yield figlio
-            yield from self._tutte_le_voci(figlio)
+        """Tutte le voci dentro voce, o dentro la plancia, nell'ordine della
+        freccia giu' con tutto aperto. Con una pila: i generatori annidati,
+        uno per livello, con 140 mila voci costavano a ogni rinfresco
+        (banco della 2.7.0)."""
+        pila = list(self._figli(voce or self.albero.GetRootItem()))[::-1]
+        while pila:
+            attuale = pila.pop()
+            yield attuale
+            pila.extend(list(self._figli(attuale))[::-1])
 
     def _ha_sottobrani(self, brano):
         """Vero per un SID o un file delle console con piu' sottobrani, che
@@ -2727,16 +2830,27 @@ class Finestra(wx.Frame):
         if completo:
             dati["completo"] = True
         voce = self.albero.AppendItem(genitore, self._etichetta(dati), data=dati)
+        self._segna_la_voce_del_file(voce, dati)
         if self._ha_sottobrani(brano) or self._marker_della_voce(dati) or self._capitoli_della_voce(dati):
             dati["caricato"] = False
             self.albero.SetItemHasChildren(voce, True)
         return voce
 
+    def _segna_la_voce_del_file(self, voce, dati):
+        chiave = dati["chiave_dell_indice"] = dati["brano"].percorso
+        self._voci_dei_file.setdefault(chiave, {})[int(voce.GetID())] = voce
+
     def _aggiorna_etichette(self, solo=None):
         """Rinfresca le etichette di brani, file e sottobrani: saltato, loop,
         marker, in riproduzione; con solo, un insieme di percorsi, solo
-        quelle dei loro file, come quando arrivano schede nuove (1.83.1)."""
-        for voce in self._tutte_le_voci():
+        quelle dei loro file, come quando arrivano schede nuove (1.83.1). Le
+        etichette cambiate si scrivono insieme, alla fine (2.7.0)."""
+        cambiate = []
+        if solo is None:
+            voci = self._tutte_le_voci()
+        else:
+            voci = [v for percorso in solo for v in list(self._voci_dei_file.get(percorso, {}).values())]
+        for voce in voci:
             dati = self._dati(voce)
             if not dati or dati["tipo"] not in ("brano", "file", "sottobrano"):
                 continue
@@ -2744,10 +2858,38 @@ class Finestra(wx.Frame):
                 continue
             nuova = self._etichetta(dati)
             if self.albero.GetItemText(voce) != nuova:
-                self.albero.SetItemText(voce, nuova)
+                cambiate.append((voce, nuova))
                 if not self.albero.ItemHasChildren(voce) and (self._marker_della_voce(dati) or self._capitoli_della_voce(dati)):
                     dati["caricato"] = False
                     self.albero.SetItemHasChildren(voce, True)
+        self._scrivi_le_etichette(cambiate)
+
+    def _scrivi_le_etichette(self, cambiate):
+        """Scrive le etichette nuove, coppie (voce, testo): poche subito, da
+        ETICHETTE_A_PEZZI in su a pezzi, fra un giro e l'altro della finestra,
+        che intanto risponde. Il fuoco e la selezione non si muovono."""
+        if len(cambiate) < ETICHETTE_A_PEZZI and not self._etichette_in_attesa:
+            for voce, nuova in cambiate:
+                self.albero.SetItemText(voce, nuova)
+            return
+        for voce, nuova in cambiate:
+            self._etichette_in_attesa[int(voce.GetID())] = (voce, nuova)
+        if not self._etichette_pianificate:
+            self._etichette_pianificate = True
+            wx.CallLater(1, self._scrivi_un_pezzo_di_etichette)
+
+    def _scrivi_un_pezzo_di_etichette(self):
+        self._etichette_pianificate = False
+        if self._chiusa:
+            return
+        fine = time.monotonic() + PEZZO_DELLE_ETICHETTE
+        while self._etichette_in_attesa and time.monotonic() < fine:
+            numero = next(iter(self._etichette_in_attesa))
+            voce, nuova = self._etichette_in_attesa.pop(numero)
+            self.albero.SetItemText(voce, nuova)
+        if self._etichette_in_attesa:
+            self._etichette_pianificate = True
+            wx.CallLater(1, self._scrivi_un_pezzo_di_etichette)
 
     def _filtro_di(self, pl):
         """Il filtro compilato della playlist, o None se non ne ha. Un testo
@@ -2904,6 +3046,7 @@ class Finestra(wx.Frame):
         sottocartelle comprese, anche se il fuoco ci sta sopra o dentro."""
         self._applica_le_variazioni()
         vuote = set()
+        cambiate = []
         for voce, dati, mostra_file in list(self._cartelle_della_plancia()):
             if dati.get("radice_di_rete"):
                 continue
@@ -2922,8 +3065,9 @@ class Finestra(wx.Frame):
                 dati["vuota"] = self._e_vuota(dati["percorso"])
             nuova = self._etichetta_della_cartella(dati["percorso"], dati.get("nome"), dati.get("vuota"))
             if self.albero.GetItemText(voce) != nuova:
-                self.albero.SetItemText(voce, nuova)
-        if vuote and self._apertura_della_plancia is None:
+                cambiate.append((voce, nuova))
+        self._scrivi_le_etichette(cambiate)
+        if vuote and self._apertura is None:
             # Mentre si apre tutta la plancia i rami non si tolgono: la fine
             # dell'apertura li ricontrolla.
             self._togli_dalla_plancia(vuote)
@@ -2942,8 +3086,12 @@ class Finestra(wx.Frame):
             for figlio in self._figli(voce):
                 tipo = (self._dati(figlio) or {}).get("tipo")
                 if tipo == "file":
+                    # In una cartella le sottocartelle vengono prima dei file:
+                    # dopo il primo file non ce ne sono altre. Guardarli tutti,
+                    # con Questo PC aperto, voleva dire 126 mila voci (2.7.0).
                     ha_file = True
-                elif tipo not in ("brano", "sottobrano", "marker", "capitolo"):
+                    break
+                if tipo not in ("brano", "sottobrano", "marker", "capitolo"):
                     dentro.append(figlio)
             if dati.get("tipo") == "cartella":
                 yield voce, dati, bool(dati.get("caricato")) and ha_file
@@ -3269,17 +3417,20 @@ class Finestra(wx.Frame):
         """Una playlist chiusa si ricarica alla prossima apertura: cosi' le
         schede arrivate nel frattempo cambiano anche l'elenco dei brani che
         passano il filtro, non solo i conti dell'etichetta. Chiusa con la
-        freccia sinistra, ha il suo suono."""
+        freccia sinistra, ha il suo suono. Un ramo chiuso mentre si apre tutto
+        lo ha chiuso chi naviga: l'apertura non lo riapre (2.7.0)."""
         evento.Skip()
         dati = self._dati(evento.GetItem()) or {}
         if dati.get("tipo") == "playlist":
             dati["caricato"] = False
+        if self._apertura is not None:
+            self._apertura.chiusi_a_mano.add(int(evento.GetItem().GetID()))
         if self._freccia_nell_albero:
             self._suono("ramo_chiuso")
 
     def _aperta_una_voce(self, evento):
         """Un ramo aperto con la freccia destra ha il suo suono, ogni volta e
-        per ogni ramo. I rami che aprono i comandi, come F10 e J, no:
+        per ogni ramo. I rami che aprono i comandi, come Maiuscolo con F9 e J, no:
         quei comandi hanno gia' il loro."""
         evento.Skip()
         if self._freccia_nell_albero:
@@ -3327,6 +3478,7 @@ class Finestra(wx.Frame):
             for n in range(1, totale + 1):
                 figlio = {"tipo": "sottobrano", "playlist": dati["playlist"], "brano": brano, "numero": n, "totale": totale}
                 sotto = self.albero.AppendItem(voce, self._etichetta(figlio), data=figlio)
+                self._segna_la_voce_del_file(sotto, figlio)
                 if self._marker_della_voce(figlio):
                     figlio["caricato"] = False
                     self.albero.SetItemHasChildren(sotto, True)
@@ -3359,10 +3511,7 @@ class Finestra(wx.Frame):
                 # 1.85.5; prima ci pensava la prova dei tre secondi).
                 self._ramo_di_rete_muto(voce, dati, e)
                 return
-            if self._taciuti is not None:
-                self._taciuti["illeggibili"] += 1
-            else:
-                self._riscontro("errore", f"Non riesco a leggere {dati['percorso']}: {e.strerror or e}")
+            self._riscontro("errore", f"Non riesco a leggere {dati['percorso']}: {e.strerror or e}")
             self.albero.SetItemHasChildren(voce, False)
             return
         # La cartella aperta: il disco della sua lettera (1.112.0).
@@ -3391,10 +3540,7 @@ class Finestra(wx.Frame):
             self._aggiungi_voce(voce, "file", pl, brano)
         if not cartelle and not files:
             self.albero.SetItemHasChildren(voce, False)
-            if self._taciuti is not None:
-                self._taciuti["vuote"] += 1
-            else:
-                self._riscontro("niente_da_suonare", "Niente da suonare qui dentro.")
+            self._riscontro("niente_da_suonare", "Niente da suonare qui dentro.")
 
     # Questa rete, 1.64.0.
 
@@ -5475,7 +5621,10 @@ class Finestra(wx.Frame):
         if self.motore.sottobrani:
             testo += f" Sottobrano {self.motore.sottobrano} di {self.motore.sottobrani}."
         self._riscontro(evento, testo)
-        self._aggiorna_etichette()
+        # In riproduzione lo dicono solo le voci del brano di prima e di questo.
+        solo = {brano.percorso} if self._annunciato is None else {brano.percorso, self._annunciato}
+        self._annunciato = brano.percorso
+        self._aggiorna_etichette(solo=solo)
         self._insegui()
         self._video_nascosto_per = self._video_in_attesa = None
         self._aggiorna_il_video()
@@ -10055,7 +10204,7 @@ class Finestra(wx.Frame):
     def _voci_in_vista(self, voce=None):
         """Le voci che si vedono nella plancia, nell'ordine della freccia giu':
         come _tutte_le_voci con _visibile, ma senza entrare nei rami chiusi,
-        che dopo Maiuscolo con F10 possono avere migliaia di voci."""
+        che dopo Alt con F9 possono avere centinaia di migliaia di voci."""
         for figlio in self._figli(voce or self.albero.GetRootItem()):
             yield figlio
             if self.albero.IsExpanded(figlio):
@@ -10325,148 +10474,477 @@ class Finestra(wx.Frame):
         if agganciato and self.motore.in_corso:
             self._insegui()
 
-    # F9 e F10.
+    # F9, le aperture e le chiusure (2.7.0, tappa 17): tutto su un tasto, con la
+    # regola della issue 38. F9 da solo dice lo stato del ramo col fuoco;
+    # Maiuscolo con F9 lo apre con tutto quello che ha dentro e Ctrl con F9 lo
+    # chiude; Alt con F9 apre tutta la plancia e Ctrl e Alt con F9 la chiude;
+    # Ctrl e Maiuscolo con F9 fermano un'apertura. F10 resta libero.
 
     def _ramo_di_lavoro(self):
-        """Il ramo su cui lavorano F9 e F10: la voce selezionata, o quella che
-        la contiene se non ha niente dentro."""
+        """Il ramo su cui lavora F9: la voce selezionata, o quella che la
+        contiene se non ha niente dentro."""
         voce = self._voce_corrente()
         if voce.IsOk() and not self.albero.ItemHasChildren(voce):
             voce = self.albero.GetItemParent(voce)
         return voce if voce.IsOk() and voce != self.albero.GetRootItem() else None
 
+    def _comando_stato_del_ramo(self):
+        """F9 da solo: il ramo col fuoco, aperto o chiuso, con quante voci e
+        quanti rami aperti ha dentro, e l'apertura in corso, se c'e'."""
+        voce = self._ramo_di_lavoro()
+        in_corso = self._frase_dell_apertura_in_corso()
+        if voce is None:
+            self._riporta(f"Qui non c'è un ramo.{in_corso}", "ramo")
+            return
+        nome = self._nome_della_voce(voce)
+        if not self.albero.IsExpanded(voce):
+            self._riporta(f"{nome}: chiuso.{in_corso}", "ramo")
+            return
+        rami, voci = self._aperti_dentro(voce)
+        self._riporta(f"{nome}: aperto, con {al_plurale(voci, 'voce', 'voci')} e {al_plurale(rami, 'ramo aperto', 'rami aperti')} dentro.{in_corso}", "ramo")
+
+    def _aperti_dentro(self, voce):
+        """Quante voci si vedono dentro un ramo, e quanti dei rami che ha dentro
+        sono aperti: si scende solo nei rami aperti. Intanto i fili del
+        contatore, dello schedario e dell'esploratore cedono il passo: con
+        Questo PC aperto il giro e' di 140 mila voci, e con loro a pieno
+        lavoro durava tre secondi (banco della 2.7.0)."""
+        rami, voci = 0, 0
+        pila = [voce]
+        gia_ceduto = self._cedi.is_set()
+        self._cedi.set()
+        try:
+            while pila:
+                for figlio in self._figli(pila.pop()):
+                    voci += 1
+                    if self.albero.IsExpanded(figlio):
+                        rami += 1
+                        pila.append(figlio)
+        finally:
+            if not gia_ceduto:
+                self._cedi.clear()
+        return rami, voci
+
+    def _frase_dell_apertura_in_corso(self):
+        apertura = self._apertura
+        if apertura is None:
+            return ""
+        frase = f" {apertura.titolo} in corso: finora {al_plurale(apertura.rami, 'ramo', 'rami')} e {al_plurale(apertura.voci, 'voce', 'voci')}"
+        esploratore = apertura.esploratore
+        if esploratore is not None and not esploratore.finita:
+            frase += f", {al_plurale(esploratore.lette, 'cartella letta', 'cartelle lette')}"
+            if esploratore.in_lettura:
+                frase += f", sto leggendo {esploratore.in_lettura}"
+        return frase + "."
+
     def _chiudi_tutto(self):
+        """Ctrl con F9: chiude il ramo col fuoco con tutto quello che ha dentro.
+        Un'apertura in corso che lo tocca si ferma: riaprirebbe i rami appena
+        chiusi."""
         voce = self._ramo_di_lavoro()
         if voce is None:
             self._riscontro("non_disponibile", "Qui non c'è niente da chiudere.")
             return
-        self.albero.CollapseAllChildren(voce)
+        fermata = self._apertura is not None and self._l_apertura_tocca(voce)
+        if fermata:
+            self._chiudi_l_apertura()
+        self._chiudi_con_tutto(voce)
         self._seleziona(voce)
-        self._riscontro("chiudi_tutto", f"Chiuso tutto dentro {self._nome_della_voce(voce)}.")
+        self._riscontro("chiudi_tutto", f"Chiuso tutto dentro {self._nome_della_voce(voce)}.{' Apertura fermata.' if fermata else ''}")
+
+    def _l_apertura_tocca(self, voce):
+        """Vero se il ramo sta dentro una delle radici dell'apertura in corso,
+        o la contiene."""
+        apertura = self._apertura
+        return any(apertura.viva(radice) and (self._sotto(voce, radice) or self._sotto(radice, voce)) for radice in apertura.radici)
+
+    def _chiudi_con_tutto(self, voce):
+        """Chiude il ramo e tutti i rami che ha dentro, che riaprendolo si
+        trovano chiusi. Prima il ramo, poi quelli dentro, che intanto non si
+        vedono piu': CollapseAllChildren di wx li chiude dal basso, mentre si
+        vedono ancora, e con 138 mila voci aperte su Questo PC la finestra
+        restava ferma 22 secondi (banco della 2.7.0)."""
+        if self.albero.IsExpanded(voce):
+            self.albero.Collapse(voce)
+        pila = [voce]
+        while pila:
+            for figlio in self._figli(pila.pop()):
+                if self.albero.ItemHasChildren(figlio):
+                    if self.albero.IsExpanded(figlio):
+                        self.albero.Collapse(figlio)
+                    pila.append(figlio)
 
     def _chiudi_la_plancia(self):
-        """Maiuscolo con F9 (Gabriele, 4 ottobre 2026): chiude tutti i rami
-        della plancia, con tutto quello che hanno dentro; il fuoco va sulla
-        voce di primo livello che conteneva quella su cui si era."""
+        """Ctrl e Alt con F9, il minimo (Gabriele, 4 ottobre 2026, e 2.7.0):
+        chiude tutti i rami della plancia, con tutto quello che hanno dentro;
+        il fuoco va sulla voce di primo livello che conteneva quella su cui si
+        era. Un'apertura in corso si ferma."""
+        fermata = self._chiudi_l_apertura() is not None
         radice = self.albero.GetRootItem()
         primo = self._voce_corrente()
         while primo.IsOk() and primo != radice and self.albero.GetItemParent(primo) != radice:
             primo = self.albero.GetItemParent(primo)
         for voce in list(self._figli(radice)):
-            self.albero.CollapseAllChildren(voce)
+            self._chiudi_con_tutto(voce)
         if primo.IsOk() and primo != radice:
             self._seleziona(primo)
-        self._riscontro("chiudi_la_plancia", "Chiusa tutta la plancia.")
+        self._riscontro("chiudi_la_plancia", f"Chiusa tutta la plancia.{' Apertura fermata.' if fermata else ''}")
 
     def _apri_la_plancia(self):
-        """Maiuscolo con F10 (Gabriele, 4 ottobre 2026): apre i Preferiti, i
-        Risultati e le playlist con tutto quello che hanno dentro. Questo PC e
-        Questa rete restano chiusi: aprire i dischi interi caricava decine di
-        migliaia di cartelle, contatore e schedario lavoravano per minuti, e
-        la finestra si fermava, con una cacofonia di suoni (collaudo della
-        1.83.0; Gabriele ci rinuncia)."""
+        """Alt con F9, il massimo (Gabriele, 4 ottobre 2026, e 2.7.0): apre
+        tutta la plancia con tutto quello che ha dentro, anche Questo PC e
+        Questa rete, tranne i CD e Computer della rete, che ripete le stesse
+        cartelle condivise sotto il nome dei computer."""
         radice = self.albero.GetRootItem()
-        rami = [v for v in self._figli(radice) if v not in (self.nodo_rete, self.nodo_pc) and self.albero.ItemHasChildren(v)]
-
-        def avvio():
-            self._riscontro("apri_la_plancia", "Apro tutta la plancia, tranne Questo PC e Questa rete: ci vuole un po', e un tasto qualsiasi mi ferma.")
-
-        def finito(aperti, voci, fermato, taciuti):
-            if fermato:
-                return "plancia_aperta", f"Aperti {aperti} rami, {voci} voci; mi fermo qui, gli altri restano chiusi.{taciuti}"
-            return "plancia_aperta", f"Aperta tutta la plancia, tranne Questo PC e Questa rete: {al_plurale(aperti, 'ramo', 'rami')}.{taciuti}"
-
-        self._apri_in_blocco(rami, avvio, finito)
+        rami = [v for v in self._figli(radice) if self.albero.ItemHasChildren(v)]
+        self._apri_in_blocco(rami, "Apertura di tutta la plancia", "Apro tutta la plancia, tranne i CD e Computer della rete",
+            "Aperta tutta la plancia", "plancia_aperta", tutta=True)
 
     def _apri_tutto(self):
-        """F10: apre la voce col fuoco e tutti i rami che ha dentro, a fette
-        come Maiuscolo con F10 (Gabriele, 1.83.2): sotto Questo PC ci sono
-        dischi interi, e tutto d'un fiato la finestra si fermava."""
+        """Maiuscolo con F9: apre la voce col fuoco e tutto quello che ha
+        dentro, anche un disco intero o una cartella di rete."""
         voce = self._ramo_di_lavoro()
         if voce is None:
             self._riscontro("non_disponibile", "Qui non c'è niente da aprire.")
             return
         nome = self._nome_della_voce(voce)
+        self._apri_in_blocco([voce], f"Apertura dentro {nome}", f"Apro tutto dentro {nome}", f"Aperto tutto dentro {nome}", "apri_tutto")
 
-        def avvio():
-            self._riscontro("apri_la_plancia", f"Apro tutto dentro {nome}: ci vuole un po', e un tasto qualsiasi mi ferma.")
-
-        def finito(aperti, voci, fermato, taciuti):
-            if fermato:
-                return "apri_tutto", f"Aperti {aperti} rami, {voci} voci dentro {nome}; mi fermo qui, gli altri restano chiusi.{taciuti}"
-            return "apri_tutto", f"Aperto tutto dentro {nome}: {al_plurale(aperti, 'ramo', 'rami')}.{taciuti}"
-
-        self._apri_in_blocco([voce], avvio, finito)
-
-    def _apri_in_blocco(self, rami, avvio, finito):
-        """Apre i rami e tutto quello che hanno dentro, fino a MASSIMO_DI_RAMI
-        rami e MASSIMO_DI_VOCI voci, un decimo di secondo alla volta: la
-        finestra risponde, e un tasto qualsiasi ferma l'apertura. Le
-        cartelle vuote e quelle che non si leggono non suonano una per una:
-        la fine le conta. avvio() dice l'inizio, con il suo suono, solo se
-        il lavoro dura piu' di RITARDO_DELL_AVVIO secondi: quasi sempre
-        l'apertura e' istantanea, e i suoni di inizio e di fine si sarebbero
-        sovrapposti (Gabriele, 1.83.2); se e' suonato, quello di fine aspetta
-        che finisca. finito(aperti, voci, fermato, taciuti) da' (evento,
-        frase) della fine."""
-        segno = self._apertura_della_plancia = object()
-        da_aprire = list(rami)
-        aperti, voci, avviato = [0], [0], [False]
-        partenza = time.monotonic()
-        self._taciuti = {"vuote": 0, "illeggibili": 0}
-
-        def passo():
-            if segno is not self._apertura_della_plancia or self._chiusa:
-                return
-            if not avviato[0] and time.monotonic() - partenza >= RITARDO_DELL_AVVIO:
-                avviato[0] = True
-                avvio()
-            fine = time.monotonic() + 0.1
-            self._cedi.set()
-            try:
-                while da_aprire and aperti[0] < MASSIMO_DI_RAMI and voci[0] < MASSIMO_DI_VOCI and time.monotonic() < fine:
-                    ramo = da_aprire.pop(0)
-                    if not self.albero.ItemHasChildren(ramo):
-                        continue
-                    self.albero.Expand(ramo)
-                    aperti[0] += 1
-                    figli = list(self._figli(ramo))
-                    voci[0] += len(figli)
-                    da_aprire.extend(figli)
-            finally:
-                self._cedi.clear()
-            if da_aprire and aperti[0] < MASSIMO_DI_RAMI and voci[0] < MASSIMO_DI_VOCI:
-                wx.CallLater(1, passo)
-                return
-            self._apertura_della_plancia = None
-            evento, frase = finito(aperti[0], voci[0], bool(da_aprire), self._frase_dei_taciuti())
-            # Le cartelle rimaste senza niente da suonare spariscono adesso.
-            self._aggiorna_cartelle()
-            if avviato[0]:
-                self._riscontro_dopo(evento, frase)
-            else:
-                self._riscontro(evento, frase)
-
-        # La prima fetta subito: un ramo piccolo finisce qui, con il suo solo
-        # suono di fine.
-        passo()
+    def _f10(self):
+        """F10 da solo non ha piu' un comando (2.7.0): lo dice, invece di
+        lasciarlo a Windows, che porterebbe il fuoco al menu di sistema."""
+        self._statistiche.senza_comando("F10")
+        self._riscontro("non_disponibile", "Il tasto F10 non ha un comando.")
 
     def _ferma_l_apertura(self):
-        self._apertura_della_plancia = None
-        taciuti = self._frase_dei_taciuti()
-        self._riscontro("annullamento", f"Apertura della plancia fermata: i rami aperti fin qui restano aperti.{taciuti}")
-        self._aggiorna_cartelle()
+        """Ctrl e Maiuscolo con F9: ferma l'apertura in corso, e lascia aperto
+        quello che ha aperto fin qui (scelta di ClaudIA, 2.7.0)."""
+        apertura = self._chiudi_l_apertura()
+        if apertura is None:
+            self._riscontro("non_disponibile", "Non c'è un'apertura in corso.")
+            return
+        self._riscontro("annullamento", f"{apertura.titolo} fermata: i rami aperti fin qui restano aperti.")
 
-    def _frase_dei_taciuti(self):
-        """Quante cartelle vuote e illeggibili ha trovato un'apertura in
-        blocco, che non hanno suonato una per una; e la fine del silenzio."""
-        taciuti, self._taciuti = self._taciuti or {}, None
+    def _apri_in_blocco(self, rami, titolo, inizio, fine, evento, tutta=False):
+        """Apre i rami con tutto quello che hanno dentro, senza limiti (2.7.0).
+        I rami del disco e della rete li legge l'esploratore, in disparte, e
+        nella plancia entrano solo le cartelle con qualcosa da suonare: prima i
+        dischi, poi le unita' di rete, poi Questa rete. Gli altri rami, come
+        le playlist, si aprono a fette di un decimo di secondo nel filo della
+        finestra. Intanto la finestra risponde, e si naviga anche dentro i
+        rami che si stanno riempiendo: i tasti non fermano l'apertura, la
+        fermano Ctrl e Maiuscolo con F9 o una chiusura. L'inizio si dice, con
+        il suo suono, solo se il lavoro dura piu' di RITARDO_DELL_AVVIO
+        secondi, e allora quello di fine aspetta che finisca (1.83.2)."""
+        if self._apertura is not None:
+            # Una nuova apertura prende il posto di quella in corso.
+            self._chiudi_l_apertura()
+        apertura = self._apertura = _Apertura(titolo, f"{inizio}: ci vuole un po', e intanto puoi navigare. Ctrl e Maiuscolo con F9 mi fermano.",
+            fine, evento, tutta)
+        dischi, rete = [], []
+        freccia, self._freccia_nell_albero = self._freccia_nell_albero, False
+        try:
+            for ramo in rami:
+                apertura.radici.append(apertura.tieni(ramo))
+                self._smista(apertura, ramo, dischi, rete)
+        finally:
+            self._freccia_nell_albero = freccia
+        radici = [percorso for percorso, _voce in dischi + rete]
+        for percorso, voce in dischi + rete:
+            self._radice_dell_apertura(apertura, voce, percorso)
+        if radici:
+            self._sentinella.guarda(*radici)
+            apertura.esploratore = Esploratore(radici, self.contatore, lambda: wx.CallAfter(self._avviso_dell_apertura, apertura),
+                self._cedi).avvia()
+        # La prima fetta subito: un ramo piccolo finisce qui, con il suo solo
+        # suono di fine.
+        self._passo_dell_apertura(apertura)
+        if apertura is self._apertura:
+            wx.CallLater(max(1, round(RITARDO_DELL_AVVIO * 1000)), self._inizio_dell_apertura, apertura)
+
+    def _smista(self, apertura, voce, dischi, rete):
+        """Mette un ramo dove va: le cartelle e le unita' all'esploratore, come
+        (percorso, voce), prima i dischi e poi la rete; Questo PC e Questa rete
+        si aprono qui, e passano all'esploratore le loro voci; gli altri rami
+        vanno a fette. Computer della rete e i computer, che cercano in
+        disparte, si aprono come con la freccia, e basta."""
+        dati = self._dati(voce) or {}
+        tipo = dati.get("tipo")
+        if tipo in ("pc", "rete", "computer_della_rete", "computer"):
+            self._apri_se_chiuso(apertura, voce, anche_vuoto=True)
+        if tipo == "pc":
+            for unita in self._figli(voce):
+                percorso = (self._dati(unita) or {}).get("percorso")
+                if not percorso:
+                    continue
+                genere = tipo_di_unita(os.path.splitdrive(percorso)[0] + "\\")
+                if genere == UNITA_CD:
+                    continue
+                (rete if genere == UNITA_DI_RETE else dischi).append((percorso, unita))
+        elif tipo == "rete":
+            for figlio in self._figli(voce):
+                dati_figlio = self._dati(figlio) or {}
+                if dati_figlio.get("radice_di_rete"):
+                    rete.append((dati_figlio["percorso"], figlio))
+        elif tipo in ("cartella", "unita"):
+            (rete if in_rete(dati["percorso"]) else dischi).append((dati["percorso"], voce))
+        elif tipo not in ("computer_della_rete", "computer"):
+            apertura.da_aprire.append(voce)
+
+    def _radice_dell_apertura(self, apertura, voce, percorso):
+        """Una cartella da cui parte l'esploratore. Se non e' ancora caricata
+        la riempie l'esploratore; se lo e', le cartelle che trova si cercano
+        fra quelle che ha gia'."""
+        dati = self._dati(voce)
+        apertura.tieni(voce, percorso)
+        if dati.get("caricato") is False:
+            self.albero.DeleteChildren(voce)
+            dati["caricato"] = True
+            dati["esplorata"] = True
+            apertura.incomplete.add(pulizia.norm(percorso))
+
+    def _inizio_dell_apertura(self, apertura):
+        if apertura is self._apertura and not apertura.avviato and not self._chiusa:
+            apertura.avviato = True
+            self._riscontro("apri_la_plancia", apertura.inizio)
+
+    def _avviso_dell_apertura(self, apertura):
+        """L'esploratore ha degli avvisi: se non c'e' gia' una fetta in arrivo,
+        se ne fa una."""
+        if apertura is self._apertura and not apertura.pianificato and not self._chiusa:
+            self._passo_dell_apertura(apertura)
+
+    def _passo_dell_apertura(self, apertura):
+        """Una fetta dell'apertura: gli avvisi dell'esploratore e i rami da
+        aprire, per un decimo di secondo, con i fili del contatore, dello
+        schedario e dell'esploratore che cedono il passo. I rami aperti qui
+        non suonano: lo fa la fine."""
+        apertura.pianificato = False
+        if apertura is not self._apertura or self._chiusa:
+            return
+        if not any(apertura.viva(radice) for radice in apertura.radici):
+            # Le radici non ci sono piu', per esempio dopo Aggiorna.
+            self._chiudi_l_apertura()
+            return
+        if apertura.esploratore is not None:
+            apertura.eventi.extend(apertura.esploratore.prendi())
+        fine = time.monotonic() + 0.1
+        freccia, self._freccia_nell_albero = self._freccia_nell_albero, False
+        self._cedi.set()
+        try:
+            while time.monotonic() < fine:
+                if apertura.eventi:
+                    self._avviso_dell_esploratore(apertura, apertura.eventi.popleft())
+                elif apertura.da_aprire:
+                    self._apri_un_ramo(apertura, apertura.da_aprire.popleft())
+                else:
+                    break
+        finally:
+            self._cedi.clear()
+            self._freccia_nell_albero = freccia
+        if not apertura.eventi and not apertura.da_aprire and apertura.esploratore is not None:
+            if not apertura.esploratore.finita:
+                # Si aspetta il prossimo avviso.
+                return
+            apertura.eventi.extend(apertura.esploratore.prendi())
+        if apertura.eventi or apertura.da_aprire:
+            apertura.pianificato = True
+            wx.CallLater(1, self._passo_dell_apertura, apertura)
+            return
+        # Anche la fine, con il rinfresco delle cartelle e il conto, mentre i
+        # fili cedono il passo.
+        self._cedi.set()
+        try:
+            self._fine_dell_apertura(apertura)
+        finally:
+            self._cedi.clear()
+
+    def _apri_un_ramo(self, apertura, voce):
+        """Un ramo fuori dal disco e dalla rete, come una playlist o un SID: si
+        apre, e i rami che ha dentro vanno in fila."""
+        if not apertura.viva(voce) or not self.albero.ItemHasChildren(voce):
+            return
+        if (self._dati(voce) or {}).get("tipo") in ("cartella", "unita", "pc", "rete", "computer_della_rete", "computer"):
+            return
+        self._apri_se_chiuso(apertura, voce, anche_vuoto=True)
+        figli = list(self._figli(voce))
+        apertura.voci += len(figli)
+        for figlio in figli:
+            if self.albero.ItemHasChildren(figlio):
+                apertura.da_aprire.append(apertura.tieni(figlio))
+
+    def _apri_se_chiuso(self, apertura, voce, anche_vuoto=False):
+        """Apre un ramo chiuso, se ha gia' qualcosa dentro: le cartelle
+        dell'esploratore si aprono quando arriva la prima voce. Con
+        anche_vuoto si apre comunque, e si carica, come con la freccia. Un
+        ramo chiuso a mano durante l'apertura resta chiuso."""
+        if self.albero.IsExpanded(voce) or not (anche_vuoto or self.albero.GetChildrenCount(voce, False)):
+            return
+        if int(voce.GetID()) in apertura.chiusi_a_mano:
+            return
+        self.albero.Expand(voce)
+        apertura.rami += 1
+
+    def _avviso_dell_esploratore(self, apertura, avviso):
+        """Un avviso dell'esploratore: una cartella da mostrare, i file di una
+        cartella, o una cartella finita. Se la cartella che lo riguarda non
+        c'e' piu' nella plancia, l'avviso si lascia cadere."""
+        if avviso[0] == "cartella":
+            _avviso, genitore, percorso = avviso
+            padre = apertura.voce(genitore)
+            if padre is not None:
+                self._cartella_dell_apertura(apertura, padre, percorso)
+                self._apri_se_chiuso(apertura, padre)
+            return
+        if avviso[0] == "file":
+            _avviso, cartella, (_cartelle, files) = avviso
+            voce = apertura.voce(cartella)
+            if voce is None:
+                return
+            if (self._dati(voce) or {}).get("esplorata"):
+                pl = self._temporanea(cartella, files)
+                self._chiedi_schede(pl)
+                for brano in pl.brani:
+                    figlio = self._aggiungi_voce(voce, "file", pl, brano)
+                    apertura.voci += 1
+                    if self.albero.ItemHasChildren(figlio):
+                        apertura.da_aprire.append(apertura.tieni(figlio))
+            else:
+                # Una cartella caricata a mano ha gia' i suoi file: si aprono
+                # quelli che hanno qualcosa dentro, come i SID.
+                for figlio in self._figli(voce):
+                    if (self._dati(figlio) or {}).get("tipo") == "file" and self.albero.ItemHasChildren(figlio):
+                        apertura.da_aprire.append(apertura.tieni(figlio))
+            self._apri_se_chiuso(apertura, voce)
+            return
+        cartella = avviso[1]
+        apertura.incomplete.discard(pulizia.norm(cartella))
+        voce = apertura.voce(cartella)
+        if voce is not None and (self._dati(voce) or {}).get("esplorata") and not self.albero.GetChildrenCount(voce, False):
+            self.albero.SetItemHasChildren(voce, False)
+
+    def _cartella_dell_apertura(self, apertura, padre, percorso):
+        """La voce di una cartella annunciata dall'esploratore: quella che c'e'
+        gia', o una nuova, al suo posto in ordine alfabetico fra le cartelle,
+        che vengono prima dei file. Una cartella che c'era ma non era
+        caricata la riempie l'esploratore."""
+        voce = apertura.voce(percorso)
+        if voce is None and not (self._dati(padre) or {}).get("esplorata"):
+            # Un ramo caricato a mano: le sue cartelle si guardano una volta.
+            numero = int(padre.GetID())
+            if numero not in apertura.guardati:
+                apertura.guardati.add(numero)
+                for figlio in self._figli(padre):
+                    dati_figlio = self._dati(figlio) or {}
+                    if dati_figlio.get("tipo") == "cartella":
+                        apertura.tieni(figlio, dati_figlio["percorso"])
+                voce = apertura.voce(percorso)
+        chiave = pulizia.norm(percorso)
+        if voce is None:
+            dati = {"tipo": "cartella", "percorso": percorso, "caricato": True, "esplorata": True}
+            voce = self._inserisci_la_cartella(apertura, padre, percorso, dati)
+            self.albero.SetItemHasChildren(voce, True)
+            apertura.tieni(voce, percorso)
+            apertura.incomplete.add(chiave)
+            apertura.voci += 1
+            self.contatore.chiedi([percorso])
+            return voce
+        dati = self._dati(voce)
+        if dati.get("caricato") is False:
+            self.albero.DeleteChildren(voce)
+            dati["caricato"] = True
+            dati["esplorata"] = True
+            apertura.incomplete.add(chiave)
+        return voce
+
+    def _inserisci_la_cartella(self, apertura, padre, percorso, dati):
+        """Inserisce la cartella dopo l'ultima che l'esploratore ha messo nello
+        stesso ramo: arrivano in ordine. Se non c'e', si cerca il posto fra le
+        cartelle che il ramo ha."""
+        testo = self._etichetta_della_cartella(percorso)
+        numero = int(padre.GetID())
+        precedente = apertura.ultime.get(numero)
+        if not apertura.viva(precedente):
+            precedente = None
+            nome = os.path.basename(percorso.rstrip("\\")).casefold()
+            for figlio in self._figli(padre):
+                dati_figlio = self._dati(figlio) or {}
+                if dati_figlio.get("tipo") != "cartella" or os.path.basename(dati_figlio["percorso"].rstrip("\\")).casefold() > nome:
+                    break
+                precedente = figlio
+        if precedente is None:
+            voce = self.albero.PrependItem(padre, testo, data=dati)
+        else:
+            voce = self.albero.InsertItem(padre, precedente, testo, data=dati)
+        apertura.ultime[numero] = voce
+        return voce
+
+    def _fine_dell_apertura(self, apertura):
+        """La fine: quanti rami e quante voci si vedono, quante cartelle si
+        sono lette, e quelle che non si leggono o non rispondono."""
+        self._apertura = None
+        self._lascia_le_incomplete(apertura)
+        # Le cartelle rimaste senza niente da suonare spariscono adesso.
+        self._aggiorna_cartelle()
+        esploratore = apertura.esploratore
+        radici = [r for r in apertura.radici if apertura.viva(r)]
+        if not radici:
+            return
+        evento = apertura.evento
+        if not apertura.tutta and len(radici) == 1 and not self.albero.ItemHasChildren(radici[0]):
+            evento, frase = "niente_da_suonare", f"Niente da suonare dentro {self._nome_della_voce(radici[0])}."
+        else:
+            rami, voci = self._aperti_dentro(self.albero.GetRootItem() if apertura.tutta else radici[0])
+            frase = f"{apertura.fine}: {al_plurale(voci, 'voce', 'voci')} e {al_plurale(rami, 'ramo aperto', 'rami aperti')}"
+            if esploratore is not None:
+                frase += f", da {al_plurale(esploratore.lette, 'cartella letta', 'cartelle lette')}"
+            frase += "."
+        frase += self._frase_dei_silenzi(esploratore)
+        if apertura.avviato:
+            self._riscontro_dopo(evento, frase)
+        else:
+            self._riscontro(evento, frase)
+
+    def _frase_dei_silenzi(self, esploratore):
+        """Le cartelle che l'esploratore non ha letto: quelle che non si
+        leggono, e in rete quelle e le radici che non hanno risposto."""
+        if esploratore is None:
+            return ""
         parti = []
-        if taciuti.get("vuote"):
-            parti.append(f"{al_plurale(taciuti['vuote'], 'cartella', 'cartelle')} senza niente da suonare")
-        if taciuti.get("illeggibili"):
-            parti.append(f"{al_plurale(taciuti['illeggibili'], 'cartella', 'cartelle')} che non si leggono")
-        return f" Trovate {' e '.join(parti)}." if parti else ""
+        if esploratore.illeggibili:
+            parti.append(f" {al_plurale(esploratore.illeggibili, 'cartella non si legge', 'cartelle non si leggono')}.")
+        if esploratore.senza_risposta:
+            nomi = {pulizia.norm(p): n for n, p in questa_rete.percorsi_salvati()}
+            elenco = ", ".join(nomi.get(pulizia.norm(p), p) for p in esploratore.senza_risposta)
+            parti.append(f" In rete non {'ha' if len(esploratore.senza_risposta) == 1 else 'hanno'} risposto: {elenco}.")
+        if esploratore.cartelle_mute:
+            mute = len(esploratore.cartelle_mute)
+            parti.append(f" In rete {'una cartella non ha' if mute == 1 else f'{mute} cartelle non hanno'} risposto, e l'apertura è andata avanti senza.")
+        return "".join(parti)
+
+    def _lascia_le_incomplete(self, apertura):
+        """Le cartelle che l'esploratore non ha finito di leggere, perche' si
+        e' fermato o la rete taceva, si ricaricano quando si riaprono."""
+        for chiave in apertura.incomplete:
+            voce = apertura.mappa.get(chiave)
+            if not apertura.viva(voce):
+                continue
+            dati = self._dati(voce)
+            dati["caricato"] = False
+            if not self.albero.GetChildrenCount(voce, False):
+                self.albero.SetItemHasChildren(voce, True)
+
+    def _chiudi_l_apertura(self):
+        """Ferma l'apertura in corso, in silenzio: chi la ferma lo dice. Torna
+        l'apertura fermata, o None."""
+        apertura, self._apertura = self._apertura, None
+        if apertura is None:
+            return None
+        if apertura.esploratore is not None:
+            apertura.esploratore.ferma()
+        self._lascia_le_incomplete(apertura)
+        self._aggiorna_cartelle()
+        return apertura
 
     def _apri_ramo(self, voce, con_i_marker=True):
         """Apre la voce e tutti i rami che ha dentro, caricandoli, tutto
@@ -11134,6 +11612,8 @@ class Finestra(wx.Frame):
         self._braille.svuota()
         if self._ricerca is not None:
             self._ricerca.ferma()
+        if self._apertura is not None and self._apertura.esploratore is not None:
+            self._apertura.esploratore.ferma()
         if self._ricerca_cast is not None:
             # La ricerca chiude il suo zeroconf: in disparte, come lo speaker,
             # che il motore chiude con se'.

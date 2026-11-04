@@ -273,18 +273,64 @@ def test_console_riscrive_la_riga_della_stessa_categoria(finestra):
     assert [_senza_ora(r) for r in finestra._righe[-2:]] == ["altro", "Volume 60."]
 
 
-def test_f9_e_f10(finestra, suoni_annotati):
+def _aspetta_l_apertura(finestra):
+    """Aspetta l'esploratore e fa le fette rimaste dell'apertura, come il filo
+    della finestra quando arrivano i suoi avvisi."""
+    for _giro in range(1000):
+        apertura = finestra._apertura
+        if apertura is None:
+            return
+        if apertura.esploratore is not None and hasattr(apertura.esploratore, "aspetta"):
+            apertura.esploratore.aspetta()
+        finestra._passo_dell_apertura(apertura)
+    raise AssertionError("L'apertura non finisce.")
+
+
+class _EsploratoreFinto:
+    """Un esploratore che non legge niente: gli avvisi li mette la prova in
+    da_dare, e finisce quando la prova lo dice."""
+
+    def __init__(self, radici, contatore=None, avvisa=None, cedi=None):
+        self.radici, self.avvisa = list(radici), avvisa
+        self.lette, self.in_lettura, self.finita, self.fermata = 0, None, False, False
+        self.illeggibili, self.cartelle_mute, self.senza_risposta = 0, [], []
+        self.da_dare = []
+
+    def avvia(self):
+        return self
+
+    def ferma(self):
+        self.fermata = True
+
+    def prendi(self):
+        dati, self.da_dare = self.da_dare, []
+        return dati
+
+
+def test_f9_dice_maiuscolo_apre_ctrl_chiude(finestra, suoni_annotati):
+    # 2.7.0, tappa 17: tutto su F9, con la regola della issue 38. F9 da solo
+    # dice lo stato, Maiuscolo apre il ramo con tutto dentro, Ctrl lo chiude.
     finestra._aggiungi(None, [os.path.join(r"C:\m", "uno.mp3")])
     finestra._seleziona(finestra.nodo_playlist)
-    _tasto(finestra, codice=wx.WXK_F10)
+    suonati = len(suoni_annotati)
+    _tasto(finestra, codice=wx.WXK_F9)
+    assert _ultima(finestra) == "Playlist: chiuso." and len(suoni_annotati) == suonati
+    _tasto(finestra, codice=wx.WXK_F9, maiuscolo=True)
+    _aspetta_l_apertura(finestra)
     nodo = next(finestra._figli(finestra.nodo_playlist))
     assert finestra.albero.IsExpanded(nodo)
-    assert _ultima(finestra).startswith("Aperto tutto dentro Playlist")
-    finestra._seleziona(next(finestra._figli(nodo)))
+    # La playlist con il suo brano, e i comandi del ramo, come Nuova playlist.
+    assert _ultima(finestra) == "Aperto tutto dentro Playlist: 4 voci e 1 ramo aperto." and suoni_annotati[-1] == "apri_tutto"
     _tasto(finestra, codice=wx.WXK_F9)
+    assert _ultima(finestra) == "Playlist: aperto, con 4 voci e 1 ramo aperto dentro."
+    finestra._seleziona(next(finestra._figli(nodo)))
+    _tasto(finestra, codice=wx.WXK_F9, ctrl=True)
     assert not finestra.albero.IsExpanded(nodo)
     assert finestra._voce_corrente() == nodo
     assert suoni_annotati[-1] == "chiudi_tutto"
+    # F10 da solo non ha piu' un comando, e non va a Windows.
+    _tasto(finestra, codice=wx.WXK_F10)
+    assert _ultima(finestra) == "Il tasto F10 non ha un comando." and suoni_annotati[-1] == "non_disponibile"
 
 
 def test_maiuscolo_c_non_tocca_il_loop(finestra):
@@ -2806,19 +2852,19 @@ def test_beep_del_livello_dopo_dialoghi_comandi_e_non_dalla_console(finestra, mo
     finestra._seleziona(next(finestra._figli(prima)))
     _nell_albero(finestra, wx.WXK_DELETE, maiuscolo=True)
     assert livelli_annotati == [2]
-    # Un comando della finestra, F9, dal brano alla sua playlist. La
+    # Un comando della finestra, Ctrl con F9, dal brano alla sua playlist. La
     # cancellazione ha ricostruito il ramo Playlist: le voci si riprendono.
     seconda = finestra._nodo_della_playlist(finestra.archivio.playlist[1])
     finestra.albero.Expand(seconda)
     finestra._seleziona(next(finestra._figli(seconda)))
-    _tasto(finestra, codice=wx.WXK_F9)
+    _tasto(finestra, codice=wx.WXK_F9, ctrl=True)
     assert livelli_annotati == [2, 2]
     # Dalla console il livello della plancia non suona.
     finestra.albero.Expand(seconda)
     finestra._seleziona(next(finestra._figli(seconda)))
     finestra.console.SetFocus()
     wx.Yield()
-    _tasto(finestra, codice=wx.WXK_F9)
+    _tasto(finestra, codice=wx.WXK_F9, ctrl=True)
     assert livelli_annotati == [2, 2]
 
 
@@ -5623,44 +5669,180 @@ def _plancia_di_prova(finestra, monkeypatch, tmp_path):
     finestra._aggiungi(None, [os.path.join(r"C:\m", n) for n in ("a.mp3", "b.mp3", "c.mp3")])
 
 
-def test_maiuscolo_f10_apre_tutta_la_plancia_e_maiuscolo_f9_la_chiude(finestra, monkeypatch, suoni_annotati, tmp_path):
-    # 1.79.0, Gabriele: Maiuscolo con F10 apre tutto, con un suono all'inizio
-    # e uno alla fine; Maiuscolo con F9 chiude tutto. Dalla 1.83.1 Questo PC
-    # resta chiuso, come Questa rete: i dischi interi fermavano la finestra.
+def test_alt_f9_apre_tutta_la_plancia_e_ctrl_alt_f9_la_chiude(finestra, monkeypatch, suoni_annotati, tmp_path):
+    # 1.79.0, Gabriele: tutta la plancia si apre, con un suono all'inizio e uno
+    # alla fine, e si chiude. Dalla 2.7.0 con Alt e con Ctrl e Alt con F9, e
+    # anche Questo PC e Questa rete: nella plancia entrano solo le cartelle con
+    # qualcosa da suonare, in ordine e prima dei file; Computer della rete resta chiuso.
     _plancia_di_prova(finestra, monkeypatch, tmp_path)
-    _tasto(finestra, codice=wx.WXK_F10, maiuscolo=True)
-    # Istantanea: solo il suono di fine, che non si sovrappone a quello d'inizio (1.83.2).
-    assert "apri_la_plancia" not in suoni_annotati and suoni_annotati[-1] == "plancia_aperta"
-    assert _ultima(finestra).startswith("Aperta tutta la plancia, tranne Questo PC e Questa rete: ")
+    (tmp_path / "Disco" / "Vuota" / "Sotto").mkdir(parents=True)
+    monkeypatch.setattr(modulo.questa_rete, "percorsi_salvati", lambda: [])
+    _tasto(finestra, codice=wx.WXK_F9, alt=True)
+    _aspetta_l_apertura(finestra)
+    assert suoni_annotati[-1] == "plancia_aperta"
+    assert _ultima(finestra).startswith("Aperta tutta la plancia: ") and _ultima(finestra).endswith(", da 6 cartelle lette.")
     playlist = next(finestra._figli(finestra.nodo_playlist))
     assert finestra.albero.IsExpanded(finestra.nodo_playlist) and finestra.albero.IsExpanded(playlist)
-    assert not finestra.albero.IsExpanded(finestra.nodo_pc) and not finestra.albero.IsExpanded(finestra.nodo_rete)
-    # Aperto a mano fino in fondo, Maiuscolo con F9 chiude anche lui.
-    finestra.albero.Expand(finestra.nodo_pc)
     disco = next(finestra._figli(finestra.nodo_pc))
-    finestra.albero.Expand(disco)
-    uno = next(v for v in finestra._figli(disco) if finestra.albero.GetItemText(v).startswith("Uno"))
-    finestra.albero.Expand(uno)
-    dentro = next(v for v in finestra._figli(uno) if (finestra._dati(v) or {}).get("tipo") == "cartella")
-    finestra.albero.Expand(dentro)
-    finestra._seleziona(next(finestra._figli(dentro)))
-    _tasto(finestra, codice=wx.WXK_F9, maiuscolo=True)
+    assert finestra.albero.IsExpanded(finestra.nodo_pc) and finestra.albero.IsExpanded(disco)
+    cartelle = list(finestra._figli(disco))
+    assert [finestra._dati(v)["percorso"] for v in cartelle] == [str(tmp_path / "Disco" / n) for n in ("Due", "Uno")]
+    uno = cartelle[1]
+    assert finestra.albero.IsExpanded(uno)
+    dentro = [(finestra._dati(v)["tipo"], finestra._nome_della_voce(v)) for v in finestra._figli(uno)]
+    assert [tipo for tipo, _nome in dentro] == ["cartella", "file"] and dentro[0][1] == "Dentro"
+    assert finestra.albero.IsExpanded(next(finestra._figli(uno)))
+    assert finestra.albero.IsExpanded(finestra.nodo_rete)
+    computer = next(v for v in finestra._figli(finestra.nodo_rete) if finestra._dati(v).get("tipo") == "computer_della_rete")
+    assert not finestra.albero.IsExpanded(computer)
+    # Ctrl e Alt con F9 chiude tutto; il fuoco sulla voce di primo livello
+    # che conteneva quella di prima.
+    finestra._seleziona(next(finestra._figli(uno)))
+    _tasto(finestra, codice=wx.WXK_F9, ctrl=True, alt=True)
     assert suoni_annotati[-1] == "chiudi_la_plancia" and _ultima(finestra) == "Chiusa tutta la plancia."
     assert not any(finestra.albero.IsExpanded(v) for v in finestra._figli(finestra.albero.GetRootItem()))
-    # Il fuoco sulla voce di primo livello che conteneva quella di prima.
     assert finestra._voce_corrente() == finestra.nodo_pc
 
 
-def test_maiuscolo_f10_si_ferma_al_massimo_e_con_un_tasto(finestra, monkeypatch, suoni_annotati, tmp_path):
+def test_i_tasti_non_fermano_l_apertura_ctrl_maiuscolo_f9_si(finestra, monkeypatch, suoni_annotati, tmp_path):
+    # 2.7.0: mentre l'esploratore legge si naviga, e F9 dice a che punto e';
+    # la fermano Ctrl e Maiuscolo con F9, e le cartelle non finite si
+    # ricaricano alla prossima apertura.
     _plancia_di_prova(finestra, monkeypatch, tmp_path)
-    monkeypatch.setattr(modulo, "MASSIMO_DI_RAMI", 2)
-    _tasto(finestra, codice=wx.WXK_F10, maiuscolo=True)
-    assert _ultima(finestra).startswith("Aperti 2 rami, ") and _ultima(finestra).endswith(" voci; mi fermo qui, gli altri restano chiusi.")
-    # Un tasto qualsiasi, mentre l'apertura lavora, la ferma.
-    finestra._apertura_della_plancia = object()
+    monkeypatch.setattr(modulo, "Esploratore", _EsploratoreFinto)
+    finestra.albero.Expand(finestra.nodo_pc)
+    disco = next(finestra._figli(finestra.nodo_pc))
+    finestra._seleziona(disco)
+    _tasto(finestra, codice=wx.WXK_F9, maiuscolo=True)
+    esploratore = finestra._apertura.esploratore
+    assert esploratore.radici == [str(tmp_path / "Disco")]
+    assert suoni_annotati[-1] == "apri_la_plancia"
+    assert _ultima(finestra) == "Apro tutto dentro Prova: ci vuole un po', e intanto puoi navigare. Ctrl e Maiuscolo con F9 mi fermano."
     _tasto(finestra, codice=wx.WXK_DOWN)
-    assert finestra._apertura_della_plancia is None and "annullamento" in suoni_annotati
-    assert any("Apertura della plancia fermata" in r for r in finestra._righe[-3:])
+    assert finestra._apertura is not None
+    esploratore.lette, esploratore.in_lettura = 7, r"D:\Musica"
+    finestra._seleziona(disco)
+    _tasto(finestra, codice=wx.WXK_F9)
+    assert _ultima(finestra) == r"Prova: chiuso. Apertura dentro Prova in corso: finora 0 rami e 0 voci, 7 cartelle lette, sto leggendo D:\Musica."
+    _tasto(finestra, codice=wx.WXK_F9, ctrl=True, maiuscolo=True)
+    assert esploratore.fermata and finestra._apertura is None and suoni_annotati[-1] == "annullamento"
+    assert _ultima(finestra) == "Apertura dentro Prova fermata: i rami aperti fin qui restano aperti."
+    assert finestra._dati(disco)["caricato"] is False and finestra.albero.ItemHasChildren(disco)
+    _tasto(finestra, codice=wx.WXK_F9, ctrl=True, maiuscolo=True)
+    assert _ultima(finestra) == "Non c'è un'apertura in corso." and suoni_annotati[-1] == "non_disponibile"
+
+
+def test_ctrl_f9_ferma_solo_l_apertura_che_tocca(finestra, monkeypatch, suoni_annotati, tmp_path):
+    _plancia_di_prova(finestra, monkeypatch, tmp_path)
+    monkeypatch.setattr(modulo, "Esploratore", _EsploratoreFinto)
+    finestra.albero.Expand(finestra.nodo_pc)
+    disco = next(finestra._figli(finestra.nodo_pc))
+    finestra._seleziona(disco)
+    _tasto(finestra, codice=wx.WXK_F9, maiuscolo=True)
+    # Una playlist chiusa mentre si apre il disco: l'apertura va avanti.
+    finestra.albero.Expand(finestra.nodo_playlist)
+    playlist = next(finestra._figli(finestra.nodo_playlist))
+    finestra.albero.Expand(playlist)
+    finestra._seleziona(next(finestra._figli(playlist)))
+    _tasto(finestra, codice=wx.WXK_F9, ctrl=True)
+    assert finestra._apertura is not None and not _ultima(finestra).endswith("Apertura fermata.")
+    # Il disco stesso: l'apertura si ferma.
+    finestra._seleziona(disco)
+    _tasto(finestra, codice=wx.WXK_F9, ctrl=True)
+    assert finestra._apertura is None and _ultima(finestra) == "Chiuso tutto dentro Prova. Apertura fermata."
+
+
+def test_le_voci_tolte_mentre_si_apre(finestra, monkeypatch, suoni_annotati, tmp_path):
+    # 2.7.0: si naviga durante l'apertura, e una voce puo' sparire, per esempio
+    # con il cestino: gli avvisi che la riguardano si lasciano cadere.
+    _plancia_di_prova(finestra, monkeypatch, tmp_path)
+    monkeypatch.setattr(modulo, "Esploratore", _EsploratoreFinto)
+    finestra.albero.Expand(finestra.nodo_pc)
+    disco = next(finestra._figli(finestra.nodo_pc))
+    finestra._seleziona(disco)
+    _tasto(finestra, codice=wx.WXK_F9, maiuscolo=True)
+    apertura = finestra._apertura
+    radice = str(tmp_path / "Disco")
+    uno = os.path.join(radice, "Uno")
+    apertura.esploratore.da_dare = [("cartella", radice, uno)]
+    finestra._passo_dell_apertura(apertura)
+    voce = apertura.voce(uno)
+    assert voce is not None and finestra.albero.GetItemParent(voce) == disco
+    finestra.albero.Delete(voce)
+    assert apertura.voce(uno) is None
+    apertura.esploratore.da_dare = [("file", uno, ([], [os.path.join(uno, "a.mp3")])), ("cartella", uno, os.path.join(uno, "Dentro")), ("finita", uno),
+        ("finita", radice)]
+    apertura.esploratore.finita = True
+    finestra._passo_dell_apertura(apertura)
+    assert finestra._apertura is None
+    assert list(finestra._figli(disco)) == [] and _ultima(finestra) == "Niente da suonare dentro Prova."
+
+
+def test_tante_etichette_si_scrivono_a_pezzi(finestra, monkeypatch):
+    # 2.7.0: con 12.600 cartelle aperte SetItemText una per una fermava la
+    # finestra, e anche Freeze, per il Thaw; da ETICHETTE_A_PEZZI in su si
+    # scrivono a pezzi, e una voce tolta intanto non si scrive.
+    pianificati = []
+    monkeypatch.setattr(modulo.wx, "CallLater", lambda _ms, funzione, *argomenti: pianificati.append(funzione))
+    poche = [finestra.albero.AppendItem(finestra.nodo_pc, f"Voce {n}") for n in range(3)]
+    finestra._scrivi_le_etichette([(voce, f"Nuova {n}") for n, voce in enumerate(poche)])
+    assert [finestra.albero.GetItemText(v) for v in poche] == ["Nuova 0", "Nuova 1", "Nuova 2"] and not pianificati
+    quante = modulo.ETICHETTE_A_PEZZI + 10
+    voci = [finestra.albero.AppendItem(finestra.nodo_pc, f"Voce {n}") for n in range(quante)]
+    finestra._scrivi_le_etichette([(voce, f"Nuova {n}") for n, voce in enumerate(voci)])
+    assert len(pianificati) == 1 and finestra.albero.GetItemText(voci[0]) == "Voce 0"
+    finestra.albero.Delete(voci.pop())
+    while pianificati:
+        pianificati.pop()()
+    assert [finestra.albero.GetItemText(v) for v in voci] == [f"Nuova {n}" for n in range(quante - 1)]
+    assert not finestra._etichette_in_attesa
+
+
+def test_un_ramo_chiuso_a_mano_resta_chiuso(finestra, monkeypatch, suoni_annotati, tmp_path):
+    # 2.7.0: chi naviga mentre si apre puo' chiudere un ramo con la freccia
+    # sinistra, e le voci che arrivano dopo non lo riaprono.
+    _plancia_di_prova(finestra, monkeypatch, tmp_path)
+    monkeypatch.setattr(modulo, "Esploratore", _EsploratoreFinto)
+    finestra.albero.Expand(finestra.nodo_pc)
+    disco = next(finestra._figli(finestra.nodo_pc))
+    finestra._seleziona(disco)
+    _tasto(finestra, codice=wx.WXK_F9, maiuscolo=True)
+    apertura = finestra._apertura
+    radice = str(tmp_path / "Disco")
+    apertura.esploratore.da_dare = [("cartella", radice, os.path.join(radice, "Due"))]
+    finestra._passo_dell_apertura(apertura)
+    assert finestra.albero.IsExpanded(disco)
+    finestra.albero.Collapse(disco)
+    apertura.esploratore.da_dare = [("cartella", radice, os.path.join(radice, "Uno"))]
+    finestra._passo_dell_apertura(apertura)
+    assert not finestra.albero.IsExpanded(disco) and len(list(finestra._figli(disco))) == 2
+
+
+def test_l_inizio_si_dice_solo_se_dura(finestra, monkeypatch, suoni_annotati, tmp_path):
+    # 1.83.2: un'apertura che dura suona l'inizio, e la fine aspetta che
+    # l'inizio sia finito; una istantanea suona solo la fine.
+    _plancia_di_prova(finestra, monkeypatch, tmp_path)
+    monkeypatch.setattr(modulo, "Esploratore", _EsploratoreFinto)
+    rimandati = []
+    monkeypatch.setattr(finestra, "_dopo_il_suono", lambda funzione, *argomenti: rimandati.append((funzione, argomenti)))
+    finestra.albero.Expand(finestra.nodo_pc)
+    disco = next(finestra._figli(finestra.nodo_pc))
+    finestra._seleziona(disco)
+    _tasto(finestra, codice=wx.WXK_F9, maiuscolo=True)
+    assert suoni_annotati[-1] == "apri_la_plancia"
+    apertura = finestra._apertura
+    radice = str(tmp_path / "Disco")
+    uno = os.path.join(radice, "Uno")
+    apertura.esploratore.da_dare = [("cartella", radice, uno), ("file", uno, ([], [os.path.join(uno, "a.mp3")])), ("finita", uno), ("finita", radice)]
+    apertura.esploratore.lette = 3
+    apertura.esploratore.finita = True
+    finestra._passo_dell_apertura(apertura)
+    assert _ultima(finestra) == "Aperto tutto dentro Prova: 2 voci e 1 ramo aperto, da 3 cartelle lette."
+    assert [f.__name__ for f, _a in rimandati] == ["_suono"] and rimandati[0][1] == ("apri_tutto",)
+    # Un ramo in memoria finisce subito: solo il suono di fine.
+    finestra._seleziona(finestra.nodo_playlist)
+    _tasto(finestra, codice=wx.WXK_F9, maiuscolo=True)
+    assert finestra._apertura is None and suoni_annotati[-1] == "apri_tutto"
 
 
 class _LetturaFinta:
@@ -6061,9 +6243,10 @@ def test_la_barra_braille_a_blocchi(finestra, monkeypatch, suoni_annotati, sinte
     assert sintesi_finta.braille[-1] == ("nvda", "Seconda riga") and sintesi_finta.detti[-1] == ("nvda", "Terza riga")
 
 
-def test_f10_su_un_disco_tace_le_cartelle_vuote(finestra, monkeypatch, suoni_annotati, tmp_path):
-    # 1.83.1: aprendo un ramo intero le cartelle vuote non suonano una per
-    # una, la cacofonia del collaudo della 1.83.0: la fine le conta.
+def test_maiuscolo_f9_su_un_disco_lascia_fuori_le_cartelle_vuote(finestra, monkeypatch, suoni_annotati, tmp_path):
+    # 1.83.1: aprendo un ramo intero le cartelle vuote non suonano una per una,
+    # la cacofonia del collaudo della 1.83.0. Dalla 2.7.0 non entrano nemmeno
+    # nella plancia, e la fine dice quante cartelle si sono lette.
     base = tmp_path / "Disco"
     for cartella in ("Musica", "Vuota", "Anche questa"):
         (base / cartella).mkdir(parents=True)
@@ -6072,17 +6255,25 @@ def test_f10_su_un_disco_tace_le_cartelle_vuote(finestra, monkeypatch, suoni_ann
     nodo = finestra.albero.AppendItem(finestra.nodo_pc, "Disco", data={"tipo": "cartella", "percorso": str(base), "caricato": False})
     finestra.albero.SetItemHasChildren(nodo, True)
     finestra._seleziona(nodo)
-    _tasto(finestra, codice=wx.WXK_F10)
+    _tasto(finestra, codice=wx.WXK_F9, maiuscolo=True)
+    _aspetta_l_apertura(finestra)
     assert "niente_da_suonare" not in suoni_annotati and suoni_annotati[-1] == "apri_tutto"
-    assert _ultima(finestra).startswith("Aperto tutto dentro ") and "Trovate 2 cartelle senza niente da suonare." in _ultima(finestra)
-    assert finestra._taciuti is None
+    assert _ultima(finestra) == "Aperto tutto dentro Disco: 2 voci e 1 ramo aperto, da 4 cartelle lette."
+    assert [finestra._nome_della_voce(v) for v in finestra._figli(nodo)] == ["Musica"]
     # Aperta a mano, una cartella vuota suona come prima.
-    vuota = next(v for v in finestra._figli(nodo) if finestra.albero.GetItemText(v).startswith("Vuota"))
-    finestra.albero.Collapse(vuota)
-    finestra._dati(vuota)["caricato"] = False
+    vuota = finestra.albero.AppendItem(nodo, "Vuota", data={"tipo": "cartella", "percorso": str(base / "Vuota"), "caricato": False})
     finestra.albero.SetItemHasChildren(vuota, True)
     finestra.albero.Expand(vuota)
     assert suoni_annotati[-1] == "niente_da_suonare"
+    # Un ramo senza niente da suonare lo dice.
+    soltanto_vuote = tmp_path / "Soltanto vuote"
+    (soltanto_vuote / "Niente").mkdir(parents=True)
+    altro = finestra.albero.AppendItem(finestra.nodo_pc, "Soltanto vuote", data={"tipo": "cartella", "percorso": str(soltanto_vuote), "caricato": False})
+    finestra.albero.SetItemHasChildren(altro, True)
+    finestra._seleziona(altro)
+    _tasto(finestra, codice=wx.WXK_F9, maiuscolo=True)
+    _aspetta_l_apertura(finestra)
+    assert _ultima(finestra) == "Niente da suonare dentro Soltanto vuote." and not finestra.albero.ItemHasChildren(altro)
 
 
 def test_i_totali_delle_cartelle_si_ricordano(finestra, monkeypatch, tmp_path):
@@ -6140,24 +6331,6 @@ def test_i_rinfreschi_si_accorpano_e_i_fili_cedono_il_passo(finestra, monkeypatc
     assert pianificati[-1][0] > 1500
     pianificati.pop()[1]()
     assert visti[-1] == ("conti", True)
-
-
-def test_f10_lungo_dice_l_inizio_e_la_fine_dopo(finestra, monkeypatch, suoni_annotati, tmp_path):
-    # 1.83.2: un'apertura che dura suona l'inizio, e la fine aspetta che
-    # l'inizio sia finito; F10 lavora a fette come Maiuscolo con F10.
-    _plancia_di_prova(finestra, monkeypatch, tmp_path)
-    monkeypatch.setattr(modulo, "RITARDO_DELL_AVVIO", 0)
-    rimandati = []
-    monkeypatch.setattr(finestra, "_dopo_il_suono", lambda funzione, *argomenti: rimandati.append((funzione, argomenti)))
-    finestra.albero.Expand(finestra.nodo_pc)
-    disco = next(finestra._figli(finestra.nodo_pc))
-    finestra._seleziona(disco)
-    _tasto(finestra, codice=wx.WXK_F10)
-    assert suoni_annotati[-1] == "apri_la_plancia" and any(r.startswith("Apro tutto dentro ") for r in finestra._righe)
-    assert _ultima(finestra).startswith("Aperto tutto dentro ") and [f.__name__ for f, _a in rimandati] == ["_suono"]
-    assert rimandati[0][1] == ("apri_tutto",)
-    uno = next(v for v in finestra._figli(disco) if finestra.albero.GetItemText(v).startswith("Uno"))
-    assert finestra.albero.IsExpanded(uno)
 
 
 def test_la_durata_vera_di_musepack_e_dsf(finestra, monkeypatch, tmp_path):
