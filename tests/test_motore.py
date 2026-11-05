@@ -1591,17 +1591,18 @@ def test_il_lettore_lontano(crea, avvisi, tmp_path):
 
 def test_la_sorgente_wav(crea, tmp_path):
     # 2.7.0: il WAV in RAM per gli speaker, al posto del FLAC su disco, con
-    # libmpv vero che scrive nella pipe con nome: tre secondi di seno, a 48 kHz
-    # stereo, con la durata letta da libmpv.
+    # libmpv vero che scrive nella pipe con nome: tre secondi di seno a 16 bit
+    # e 44,1 kHz restano a 16 bit e 44,1 kHz, in stereo, con la durata letta da
+    # libmpv.
     import wav_in_ram
 
     m = crea()
     brano = _seno(tmp_path / "brano.wav", 3)
-    assert m.durata_da_convertire(brano) == pytest.approx(3.0, abs=0.05)
+    assert m.formato_da_convertire(brano) == (pytest.approx(3.0, abs=0.05), 44100, 16)
     sorgente = m.sorgente_wav(brano)
     try:
-        assert not sorgente.emulato and sorgente.frequenza == 48000
-        assert sorgente.dimensione == wav_in_ram.INTESTAZIONE + int(sorgente.durata * 48000) * 4
+        assert not sorgente.emulato and (sorgente.frequenza, sorgente.bit) == (44100, 16)
+        assert sorgente.dimensione == wav_in_ram.INTESTAZIONE + int(sorgente.durata * 44100) * 4
         richiesta = sorgente.nuova_richiesta()
         letti = bytearray()
         while len(letti) < sorgente.dimensione:
@@ -1611,6 +1612,28 @@ def test_la_sorgente_wav(crea, tmp_path):
         assert letti[:4] == b"RIFF" and letti[8:12] == b"WAVE"
         # Il seno c'e': il PCM non e' silenzio.
         assert max(letti[wav_in_ram.INTESTAZIONE:wav_in_ram.INTESTAZIONE + 48000]) > 0 and not sorgente.guasta
+    finally:
+        sorgente.chiudi()
+    # Un 24 bit a 96 kHz resta a 24 bit e 96 kHz (domanda di Gabriele del 5
+    # novembre 2026): 6 byte per istante.
+    alto = tmp_path / "alto.wav"
+    with wave.open(str(alto), "wb") as f:
+        f.setnchannels(1)
+        f.setsampwidth(3)
+        f.setframerate(96000)
+        campioni = np.round(0.25 * 8388607 * np.sin(2 * np.pi * 440 * np.arange(96000 * 2) / 96000)).astype("<i4")
+        f.writeframes(b"".join(int(c).to_bytes(4, "little", signed=True)[:3] for c in campioni))
+    assert m.formato_da_convertire(str(alto)) == (pytest.approx(2.0, abs=0.05), 96000, 24)
+    sorgente = m.sorgente_wav(str(alto))
+    try:
+        assert (sorgente.frequenza, sorgente.bit) == (96000, 24) and sorgente.dimensione == wav_in_ram.INTESTAZIONE + int(sorgente.durata * 96000) * 6
+        richiesta = sorgente.nuova_richiesta()
+        letti = bytearray()
+        while len(letti) < sorgente.dimensione:
+            pezzo = sorgente.leggi(len(letti), 65536, richiesta)
+            assert pezzo
+            letti += pezzo
+        assert letti[34:36] == (24).to_bytes(2, "little") and max(letti[wav_in_ram.INTESTAZIONE:wav_in_ram.INTESTAZIONE + 96000]) > 0
     finally:
         sorgente.chiudi()
     # Un file che non c'e' non ha durata, e la sorgente non si fa.

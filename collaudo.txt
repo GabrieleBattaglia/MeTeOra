@@ -18,3 +18,4 @@ La guida rapida di F12 e il manuale, nel capitolo della plancia, raccontano i co
 Sullo speaker GabryBar un audiolibro M4B parte subito, e i salti con le frecce funzionano.
 Sullo speaker GabryBar un SID, un APE o un video partono in un paio di secondi, senza la riga Converto; i salti avanti e indietro funzionano, e alla fine parte il brano seguente, o il sottobrano seguente del SID, senza attese.
 Su GabryBar, durante un film lungo, salta vicino alla fine e poi torna all'inizio: dimmi quanto aspetta ogni volta.
+Su GabryBar un brano ad alta risoluzione che lo speaker non legge da sé, come un WavPack, un APE o un AIFF a 24 bit, suona come sul PC: dimmi se senti differenze.

@@ -126,3 +126,25 @@
    25.887 Speaker: fermo dopo 7.1 s dall'ultimo salto, a 10.0 s dalla fine; motivo FINISHED.
    26.041 Stato: {'stato': 'UNKNOWN', 'posizione': 0.0, 'durata': None, 'motivo': None, 'indirizzo': None}.
    26.043 Riassunto: 793.0 MB convertiti, 2 ripartenze, 0 attese dei byte oltre 50 ms, la piu' lunga 0.00 s.
+    0.000 Prova dell'alta risoluzione del 05/11/2026 09:09, su GabryBat.
+    0.275 Sorgente: meteora_prova_24_96.aiff, 20.14 secondi, WAV in RAM a 24 bit e 96000 Hz.
+    3.340 Stato: {'stato': 'UNKNOWN', 'posizione': 0.0, 'durata': None, 'motivo': None, 'indirizzo': None}.
+    3.397 Stato: {'stato': 'IDLE', 'posizione': 0, 'durata': None, 'motivo': None, 'indirizzo': 'http://192.168.1.171:56128/sorgente/1.wav'}.
+    3.398 192.168.1.172: "GET /sorgente/1.wav HTTP/1.1" 200 -
+    3.598 Stato: {'stato': 'PLAYING', 'posizione': 0, 'durata': 20.138667, 'motivo': None, 'indirizzo': 'http://192.168.1.171:56128/sorgente/1.wav'}.
+    3.744 Suona dopo 2.53 secondi; lo speaker dice che dura 20.138667 secondi.
+    3.744 Fine: dopo 2.33 secondi, motivo None.
+    3.868 Stato: {'stato': 'IDLE', 'posizione': 0, 'durata': 20.138667, 'motivo': 'CANCELLED', 'indirizzo': 'http://192.168.1.171:56128/sorgente/1.wav'}.
+    4.285 Stato: {'stato': 'UNKNOWN', 'posizione': 0.0, 'durata': None, 'motivo': None, 'indirizzo': None}.
+    0.000 Prova dell'alta risoluzione del 05/11/2026 09:11, su GabryBat.
+    0.310 Sorgente: meteora_prova_24_96.aiff, 20.14 secondi, WAV in RAM a 24 bit e 96000 Hz.
+    2.840 Stato: {'stato': 'UNKNOWN', 'posizione': 0.0, 'durata': None, 'motivo': None, 'indirizzo': None}.
+    2.850 Stato: {'stato': 'UNKNOWN', 'posizione': 0.0, 'durata': None, 'motivo': None, 'indirizzo': None}.
+    2.895 Stato: {'stato': 'IDLE', 'posizione': 0, 'durata': None, 'motivo': None, 'indirizzo': 'http://192.168.1.171:56144/sorgente/1.wav'}.
+    2.903 192.168.1.172: "GET /sorgente/1.wav HTTP/1.1" 200 -
+    3.036 Stato: {'stato': 'PLAYING', 'posizione': 0, 'durata': 20.138667, 'motivo': None, 'indirizzo': 'http://192.168.1.171:56144/sorgente/1.wav'}.
+   13.335 192.168.1.172: "GET /sorgente/1.wav HTTP/1.1" 206 -
+   23.427 Stato: {'stato': 'IDLE', 'posizione': 0, 'durata': 20.138667, 'motivo': 'FINISHED', 'indirizzo': 'http://192.168.1.171:56144/sorgente/1.wav'}.
+   23.497 Suona dopo 1.91 secondi; lo speaker dice che dura 20.138667 secondi.
+   23.497 Fine: dopo 22.30 secondi, motivo FINISHED.
+   23.652 Stato: {'stato': 'UNKNOWN', 'posizione': 0.0, 'durata': None, 'motivo': None, 'indirizzo': None}.

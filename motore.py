@@ -53,6 +53,7 @@ import functools
 import math
 import os
 import threading
+import time
 
 import librerie  # noqa: F401
 
@@ -126,8 +127,17 @@ MARGINE_DI_FINE = 0.5
 # Ogni quanti secondi il sorvegliante guarda la dissolvenza.
 PASSO_DEL_SORVEGLIANTE = 0.02
 # Quanto si aspetta, al piu', che libmpv apra un file per dirne la durata,
-# prima del WAV in RAM per uno speaker Cast (2.7.0).
+# prima del WAV in RAM per uno speaker Cast (2.7.0), e poi la frequenza e il
+# formato dei campioni, che arrivano quando il decodificatore e' pronto.
 ATTESA_DELLA_DURATA = 15.0
+ATTESA_DEL_FORMATO = 2.0
+# I codec con perdita: escono in virgola mobile, ma 16 bit bastano, e il WAV
+# in RAM a 24 bit peserebbe di piu' per niente (2.7.0). Gli altri, senza
+# perdita, a 24 bit se i loro campioni ne hanno piu' di 16.
+CODEC_CON_PERDITA = frozenset({"mp1", "mp2", "mp3", "aac", "aac_latm", "ac3", "eac3", "dts", "wmav1", "wmav2", "wmapro", "wmavoice",
+    "musepack7", "musepack8", "opus", "vorbis", "speex", "atrac3", "atrac3p", "cook", "ra_144", "ra_288", "amrnb", "amrwb", "gsm",
+    "adpcm_ima_wav", "adpcm_ms", "qdm2", "nellymoser"})
+CAMPIONI_A_16_BIT = frozenset({"u8", "u8p", "s16", "s16p"})
 _FINE_NORMALE = mpv.MpvEventEndFile.EOF
 _FINE_PER_ERRORE = mpv.MpvEventEndFile.ERROR
 # L'errore con cui mpv chiude il brano quando non riesce ad aprire l'uscita
@@ -778,30 +788,35 @@ class Motore:
 
     def sorgente_wav(self, percorso, sottobrano=None):
         """Il WAV in RAM del brano, per uno speaker Cast che non lo legge da
-        se' (2.7.0): una wav_in_ram.SorgenteWav, che il convertitore comincia
-        a riempire subito. Solleva ValueError se la durata del brano non si
-        sa, OSError se la pipe non si crea."""
-        durata = self.durata_da_convertire(percorso, sottobrano)
+        se' (2.7.0): una wav_in_ram.SorgenteWav, con la frequenza e i bit della
+        sorgente, che il convertitore comincia a riempire subito. Solleva
+        ValueError se la durata del brano non si sa, OSError se la pipe non
+        si crea."""
+        durata, frequenza, bit = self.formato_da_convertire(percorso, sottobrano)
         if not durata:
             raise ValueError(f"la durata di {percorso} non si sa")
         emulato = sottobrano_risolto(percorso, sottobrano) is not None or bool(self._banco_midi and formati.e_midi(percorso))
-        return wav_in_ram.SorgenteWav(lambda secondi, uscita, alla_fine, frequenza: self.passaggio_in_pcm(
-            percorso, sottobrano, secondi, uscita, alla_fine, frequenza), durata, emulato)
+        return wav_in_ram.SorgenteWav(lambda secondi, uscita, alla_fine, frequenza, bit: self.passaggio_in_pcm(
+            percorso, sottobrano, secondi, uscita, alla_fine, frequenza, bit), durata, emulato, frequenza=frequenza, bit=bit)
 
     def durata_da_convertire(self, percorso, sottobrano=None):
-        """I secondi del brano da dichiarare nel WAV in RAM: dei sottobrani dal
-        database, dei MIDI resi con il banco dalla mappa dei tempi con la coda,
-        dei Musepack e dei DSF da mutagen, degli altri da libmpv, aprendo il
-        file in pausa. None se non si sa."""
+        """I secondi del brano da dichiarare nel WAV in RAM, o None."""
+        return self.formato_da_convertire(percorso, sottobrano)[0]
+
+    def formato_da_convertire(self, percorso, sottobrano=None):
+        """(durata, frequenza, bit) del WAV in RAM del brano. I sottobrani e i
+        MIDI resi con il banco escono da MeTeOra a 48 kHz e 16 bit, con la
+        durata dal database o dalla mappa dei tempi con la coda. Gli altri
+        file si aprono in pausa con libmpv: la frequenza della sorgente,
+        portata a quelle che lo speaker suona, e 24 bit se il codec e' senza
+        perdita e i campioni hanno piu' di 16 bit (domanda di Gabriele del 5
+        novembre 2026); la durata dei Musepack e dei DSF da mutagen. La durata
+        e' None se non si sa."""
         risolto = sottobrano_risolto(percorso, sottobrano)
         if risolto is not None:
-            return max(1.0, durata_del_sottobrano(percorso, risolto))
+            return max(1.0, durata_del_sottobrano(percorso, risolto)), wav_in_ram.FREQUENZA, 16
         if self._banco_midi and formati.e_midi(percorso):
-            return (midi.durata(percorso) or DURATA_DI_RISERVA_DEL_MIDI) + midi.CODA
-        if os.path.splitext(percorso)[1].lower() in DURATA_DA_MUTAGEN:
-            durata = _durata_da_mutagen(percorso)
-            if durata:
-                return durata
+            return (midi.durata(percorso) or DURATA_DI_RISERVA_DEL_MIDI) + midi.CODA, wav_in_ram.FREQUENZA, 16
         lettore = mpv.MPV(**{**OPZIONI_DI_BASE, "ao": "null", "pause": True})
         try:
             pronto = threading.Event()
@@ -809,16 +824,30 @@ class Motore:
                 mpv.MpvEventID.FILE_LOADED, mpv.MpvEventID.END_FILE) else None)
             lettore.command("loadfile", percorso)
             pronto.wait(ATTESA_DELLA_DURATA)
-            return float(lettore.duration) if lettore.duration else None
+            durata = float(lettore.duration) if lettore.duration else None
+            parametri = None
+            scadenza = time.monotonic() + ATTESA_DEL_FORMATO
+            while durata and parametri is None and time.monotonic() < scadenza:
+                parametri = lettore.audio_params
+                if parametri is None:
+                    time.sleep(0.02)
+            traccia = next((t for t in (lettore.track_list or []) if t.get("type") == "audio" and t.get("selected")), {})
         except Exception:  # noqa: BLE001 - un file che libmpv non apre non ha durata
-            return None
+            return None, wav_in_ram.FREQUENZA, 16
         finally:
             lettore.terminate()
+        if os.path.splitext(percorso)[1].lower() in DURATA_DA_MUTAGEN:
+            durata = _durata_da_mutagen(percorso) or durata
+        parametri = parametri or {}
+        frequenza = wav_in_ram.frequenza_della_sorgente(parametri.get("samplerate") or traccia.get("demux-samplerate"))
+        senza_perdita = traccia.get("codec") not in CODEC_CON_PERDITA
+        bit = 24 if senza_perdita and parametri.get("format") and parametri["format"] not in CAMPIONI_A_16_BIT else 16
+        return durata, frequenza, bit
 
-    def passaggio_in_pcm(self, percorso, sottobrano, inizio, uscita, alla_fine, frequenza=wav_in_ram.FREQUENZA):
+    def passaggio_in_pcm(self, percorso, sottobrano, inizio, uscita, alla_fine, frequenza=wav_in_ram.FREQUENZA, bit=16):
         """Comincia a scrivere in uscita, di solito una pipe con nome, il brano
-        dai secondi inizio come PCM a 16 bit, stereo, alla frequenza data,
-        con libmpv in modo codifica: anche i SID, i MIDI e la musica delle
+        dai secondi inizio come PCM intero a 16 o 24 bit, stereo, alla
+        frequenza data, con libmpv in modo codifica: anche i SID, i MIDI e la musica delle
         console, con i protocolli dei lettori, e di un video solo l'audio.
         Senza filtri: con lo speaker equalizzatore, velocita' e tono non
         valgono. Non blocca: alla_fine() arriva dal filo di libmpv quando ha
@@ -831,8 +860,10 @@ class Motore:
             secondi, percorso_del_midi = uri[len("midi://"):].split("/", 1)
             return midi.apri_flusso(percorso_del_midi, banco, float(secondi))
 
-        lettore = mpv.MPV(**{**OPZIONI_DI_BASE, "o": uscita, "of": "s16le", "oac": "pcm_s16le", "audio_channels": "stereo",
-            "audio_samplerate": frequenza, "audio_format": "s16"})
+        # A 24 bit il codificatore di FFmpeg vuole i campioni a 32 e ne tiene i 24 piu' alti.
+        a_24 = bit == 24
+        lettore = mpv.MPV(**{**OPZIONI_DI_BASE, "o": uscita, "of": "s24le" if a_24 else "s16le", "oac": "pcm_s24le" if a_24 else "pcm_s16le",
+            "audio_channels": "stereo", "audio_samplerate": frequenza, "audio_format": "s32" if a_24 else "s16"})
         try:
             lettore.register_stream_protocol("sid", _apri_sid)
             lettore.register_stream_protocol("chip", _apri_chip)

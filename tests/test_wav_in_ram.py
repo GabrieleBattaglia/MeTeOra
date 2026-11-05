@@ -21,7 +21,7 @@ def _atteso(inizio, quanti):
 
 
 class _Convertitore:
-    """avvia(secondi, uscita, alla_fine, frequenza) come quello del motore:
+    """avvia(secondi, uscita, alla_fine, frequenza, bit) come quello del motore:
     scrive nella pipe i byte da secondi in poi, fino a quanti ne ha, a pezzi;
     terminate() lo ferma. Annota le partenze."""
 
@@ -29,8 +29,8 @@ class _Convertitore:
         self.totale = totale if scrive is None else scrive
         self.partenze = []
 
-    def __call__(self, secondi, uscita, alla_fine, frequenza):
-        inizio = round(secondi * frequenza * wav_in_ram.QUADRO)
+    def __call__(self, secondi, uscita, alla_fine, frequenza, bit):
+        inizio = round(secondi * frequenza * wav_in_ram.quadro(bit))
         self.partenze.append(inizio)
         fermo = threading.Event()
 
@@ -76,14 +76,44 @@ def _tutto(sorgente, inizio=0):
 
 
 def test_misure_e_intestazione():
-    assert wav_in_ram.dimensione_della_finestra(10 * 2**20) == wav_in_ram.FINESTRA_MINIMA
-    assert wav_in_ram.dimensione_della_finestra(40 * 2**30) == wav_in_ram.FINESTRA_MASSIMA
-    assert wav_in_ram.dimensione_della_finestra(2 * 2**30) == int(2 * 2**30 * 0.05) // 4 * 4
-    # Piu' di sei ore a 48 kHz non stanno nei 4 GB del WAV: si va alla meta'.
-    assert wav_in_ram.frequenza_per(3 * 3600) == 48000 and wav_in_ram.frequenza_per(7 * 3600) == 24000
-    testa = wav_in_ram.intestazione(1000, 48000)
+    assert wav_in_ram.dimensione_della_finestra(10 * 2**20) == wav_in_ram.FINESTRA_MINIMA // 12 * 12
+    assert wav_in_ram.dimensione_della_finestra(40 * 2**30) == wav_in_ram.FINESTRA_MASSIMA // 12 * 12
+    assert wav_in_ram.dimensione_della_finestra(2 * 2**30) == int(2 * 2**30 * 0.05) // 12 * 12
+    testa = wav_in_ram.intestazione(1200, 96000, 24)
     assert len(testa) == INTESTAZIONE and testa[:4] == b"RIFF" and testa[8:16] == b"WAVEfmt "
-    assert struct.unpack("<I", testa[40:44])[0] == 1000 and struct.unpack("<I", testa[24:28])[0] == 48000
+    assert struct.unpack("<I", testa[40:44])[0] == 1200 and struct.unpack("<I", testa[24:28])[0] == 96000
+    assert struct.unpack("<IHH", testa[28:36]) == (96000 * 6, 6, 24)
+
+
+def test_la_frequenza_e_i_bit_della_sorgente():
+    # 5 novembre 2026, domanda di Gabriele: la qualita' della sorgente, nei
+    # limiti dello speaker; sopra i 96 kHz a 96, o a 88,2 per i multipli di
+    # 44,1, come i DSD; sotto i 44,1 kHz al multiplo giusto.
+    vale = wav_in_ram.frequenza_della_sorgente
+    assert [vale(f) for f in (44100, 48000, 88200, 96000)] == [44100, 48000, 88200, 96000]
+    assert vale(192000) == 96000 and vale(352800) == 88200 and vale(176400) == 88200
+    assert vale(22050) == 44100 and vale(11025) == 44100 and vale(32000) == 96000 and vale(8000) == 48000
+    assert vale(None) == 48000 and vale(64000) == 48000
+    # Nei 4 GB del WAV: prima la frequenza alla meta', poi 16 bit, per
+    # ultimo 24 kHz.
+    formato = wav_in_ram.formato_per
+    assert formato(3600, 96000, 24) == (96000, 24)
+    assert formato(3 * 3600, 96000, 24) == (48000, 24)
+    assert formato(5 * 3600, 96000, 24) == (48000, 16)
+    assert formato(3 * 3600, 44100, 24) == (44100, 24) and formato(5 * 3600, 44100, 24) == (44100, 16)
+    assert formato(5 * 3600) == (48000, 16) and formato(7 * 3600) == (24000, 16)
+
+
+def test_a_24_bit_e_96_khz():
+    durata = 0.5
+    totale = int(durata * 96000) * 6
+    sorgente = SorgenteWav(_Convertitore(totale), durata, finestra=4 * 2**20, frequenza=96000, bit=24)
+    try:
+        assert (sorgente.frequenza, sorgente.bit, sorgente.quadro) == (96000, 24, 6) and sorgente.dimensione == INTESTAZIONE + totale
+        corpo = _tutto(sorgente)
+        assert corpo[:INTESTAZIONE] == wav_in_ram.intestazione(totale, 96000, 24) and corpo[INTESTAZIONE:] == _atteso(0, totale)
+    finally:
+        sorgente.chiudi()
 
 
 def test_la_sorgente_da_tutto_il_brano(monkeypatch):
@@ -171,7 +201,7 @@ def test_un_brano_che_non_si_legge(monkeypatch):
     finally:
         sorgente.chiudi()
 
-    def rotto(secondi, uscita, alla_fine, frequenza):
+    def rotto(secondi, uscita, alla_fine, frequenza, bit):
         raise RuntimeError("libmpv non parte")
 
     sorgente = SorgenteWav(rotto, 1.0, finestra=4 * 2**20)

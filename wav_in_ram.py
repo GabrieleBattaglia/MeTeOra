@@ -12,7 +12,7 @@ parte sicura della RAM (4 novembre 2026).
 
 Il FLAC dice la sua lunghezza solo alla fine; il WAV ha un flusso costante:
 la dimensione si sa dalla durata, e ogni byte e' un istante. libmpv, in modo
-codifica, scrive il PCM a 16 bit, stereo, in una pipe con nome; un filo lo
+codifica, scrive il PCM intero, stereo, in una pipe con nome; un filo lo
 versa in una finestra di RAM, il 5% della RAM libera fra 32 e 512 MB; il
 server di trasmissione.py dichiara un WAV della dimensione che la durata
 dice, e serve ogni intervallo di byte dalla finestra, aspettando quelli che
@@ -25,6 +25,14 @@ emulano da capo, in avanti si aspetta la conversione in corsa. Se il
 convertitore finisce prima della dimensione dichiarata il resto e'
 silenzio, se va oltre si taglia: la fine arriva puntuale. Una conversione
 che non scrive niente e' un brano che non si legge, e il server chiude.
+
+La qualita' e' quella della sorgente, nei limiti dello speaker (domanda di
+Gabriele del 5 novembre 2026): 24 bit se la sorgente senza perdita ne ha piu'
+di 16, altrimenti 16; la frequenza della sorgente fra 44,1, 48, 88,2 e 96 kHz,
+il massimo degli apparecchi Cast. Sopra i 96 kHz si scende a 96, o a 88,2 per
+i multipli di 44,1 come i DSD; sotto i 44,1 kHz si sale al multiplo giusto.
+Un brano che cosi' passerebbe i 4 GB del WAV scende prima di frequenza, poi
+di bit.
 
 Prove su GabryBar del 4 e 5 novembre 2026: un sottobrano di Outrun Europa
 suona in 1,9 secondi, contro i circa 7 del FLAC; l'audio di Braveheart, 1,95
@@ -39,11 +47,13 @@ import threading
 from ctypes import wintypes
 
 FREQUENZA = 48000
-# I brani tanto lunghi che il WAV a 48 kHz passerebbe i 4 GB che la sua
-# intestazione sa dire, piu' di sei ore, vanno alla meta'.
+BIT = 16
+# Le frequenze che il WAV in RAM tiene com'e'; le altre si portano qui.
+FREQUENZE = (44100, 48000, 88200, 96000)
+# I brani tanto lunghi che il WAV passerebbe i 4 GB che la sua intestazione
+# sa dire anche a 16 bit e 44,1 kHz, piu' di sei ore, vanno alla meta'.
 FREQUENZA_DEI_LUNGHI = 24000
 CANALI = 2
-QUADRO = CANALI * 2
 INTESTAZIONE = 44
 MASSIMO_DEL_WAV = 2**32 - 1 - 36
 # La finestra: una parte della RAM libera, fra un minimo e un massimo
@@ -74,20 +84,50 @@ def ram_libera():
 
 def dimensione_della_finestra(libera=None):
     """I byte della finestra: PARTE_DELLA_RAM della RAM libera, fra
-    FINESTRA_MINIMA e FINESTRA_MASSIMA, a quadri interi."""
+    FINESTRA_MINIMA e FINESTRA_MASSIMA, a multipli di 12 byte, che sono
+    quadri interi a 16 e a 24 bit."""
     byte = min(FINESTRA_MASSIMA, max(FINESTRA_MINIMA, int((ram_libera() if libera is None else libera) * PARTE_DELLA_RAM)))
-    return byte - byte % QUADRO
+    return byte - byte % 12
 
 
-def frequenza_per(durata):
-    """La frequenza del WAV di un brano di durata secondi."""
-    return FREQUENZA if durata * FREQUENZA * QUADRO <= MASSIMO_DEL_WAV else FREQUENZA_DEI_LUNGHI
+def quadro(bit):
+    """I byte di un istante: un campione per canale."""
+    return CANALI * bit // 8
 
 
-def intestazione(totale_pcm, frequenza):
-    """L'intestazione di un WAV PCM a 16 bit, stereo, con totale_pcm byte di campioni."""
-    al_secondo = frequenza * QUADRO
-    return (b"RIFF" + struct.pack("<I", 36 + totale_pcm) + b"WAVEfmt " + struct.pack("<IHHIIHH", 16, 1, CANALI, frequenza, al_secondo, QUADRO, 16)
+def frequenza_della_sorgente(frequenza):
+    """La frequenza del WAV per una sorgente a frequenza Hz: la stessa se e'
+    fra FREQUENZE; sopra i 96 kHz 96, o 88,2 per i multipli di 44,1; sotto i
+    44,1 kHz il primo multiplo di FREQUENZE, se c'e'; altrimenti 48 kHz."""
+    if not frequenza:
+        return FREQUENZA
+    if frequenza in FREQUENZE:
+        return frequenza
+    if frequenza > 96000:
+        return 88200 if frequenza % 44100 == 0 else 96000
+    if frequenza < 44100:
+        return next((f for f in FREQUENZE if f % frequenza == 0), FREQUENZA)
+    return FREQUENZA
+
+
+def formato_per(durata, frequenza=FREQUENZA, bit=BIT):
+    """Frequenza e bit del WAV di un brano di durata secondi, partendo da
+    quelli voluti: se passerebbe i 4 GB scende prima di frequenza, da 96 e
+    88,2 kHz alla meta', poi a 16 bit, e per ultimo a FREQUENZA_DEI_LUNGHI."""
+    prove = [(frequenza, bit)]
+    if frequenza in (88200, 96000):
+        prove.append((frequenza // 2, bit))
+    prove += [(f, 16) for f, b in list(prove) if b != 16]
+    for f, b in prove:
+        if durata * f * quadro(b) <= MASSIMO_DEL_WAV:
+            return f, b
+    return FREQUENZA_DEI_LUNGHI, 16
+
+
+def intestazione(totale_pcm, frequenza, bit=BIT):
+    """L'intestazione di un WAV PCM intero, stereo, con totale_pcm byte di campioni."""
+    passo = quadro(bit)
+    return (b"RIFF" + struct.pack("<I", 36 + totale_pcm) + b"WAVEfmt " + struct.pack("<IHHIIHH", 16, 1, CANALI, frequenza, frequenza * passo, passo, bit)
         + b"data" + struct.pack("<I", totale_pcm))
 
 
@@ -141,16 +181,17 @@ class Pipe:
 
 class _Passaggio:
     """Un passaggio del convertitore dai secondi dati: avvia(secondi, uscita,
-    alla_fine) scrive nella pipe, e un filo versa i byte nella sorgente."""
+    alla_fine, frequenza, bit) scrive nella pipe, e un filo versa i byte
+    nella sorgente."""
 
-    def __init__(self, sorgente, generazione, avvia, secondi, frequenza):
+    def __init__(self, sorgente, generazione, avvia, secondi, frequenza, bit):
         self._sorgente, self._generazione = sorgente, generazione
         self.pipe = Pipe(f"meteora_wav_{os.getpid()}_{next(_numeri)}")
         self._filo = threading.Thread(target=self._versa, name="MeTeOra, WAV in RAM", daemon=True)
         self._filo.start()
         self._lettore = None
         try:
-            self._lettore = avvia(secondi, self.pipe.percorso, self._finito, frequenza)
+            self._lettore = avvia(secondi, self.pipe.percorso, self._finito, frequenza, bit)
         except Exception:
             self.pipe.sblocca()
             raise
@@ -188,25 +229,27 @@ class _Passaggio:
 
 class SorgenteWav:
     """Il WAV di un brano, servito a intervalli dalla finestra di RAM.
-    avvia(secondi, uscita, alla_fine, frequenza) fa partire il convertitore,
-    che scrive in uscita il PCM dai secondi dati e chiama alla_fine quando ha
-    finito, e torna un oggetto con terminate(); durata sono i secondi da
-    dichiarare; emulato dice se ripartendo il convertitore rende da capo.
-    Per il server: dimensione, tipo, nuova_richiesta() e leggi(); chiudi()
-    ferma tutto e libera la RAM."""
+    avvia(secondi, uscita, alla_fine, frequenza, bit) fa partire il
+    convertitore, che scrive in uscita il PCM dai secondi dati e chiama
+    alla_fine quando ha finito, e torna un oggetto con terminate(); durata
+    sono i secondi da dichiarare; frequenza e bit quelli voluti, che
+    formato_per adatta ai 4 GB; emulato dice se ripartendo il convertitore
+    rende da capo. Per il server: dimensione, tipo, nuova_richiesta() e
+    leggi(); chiudi() ferma tutto e libera la RAM."""
 
-    def __init__(self, avvia, durata, emulato=False, finestra=None):
+    def __init__(self, avvia, durata, emulato=False, finestra=None, frequenza=FREQUENZA, bit=BIT):
         self._avvia = avvia
         self.durata = float(durata)
         self.emulato = emulato
-        self.frequenza = frequenza_per(self.durata)
-        self.al_secondo = self.frequenza * QUADRO
-        self.totale_pcm = min(int(self.durata * self.frequenza) * QUADRO, MASSIMO_DEL_WAV // QUADRO * QUADRO)
+        self.frequenza, self.bit = formato_per(self.durata, frequenza, bit)
+        self.quadro = quadro(self.bit)
+        self.al_secondo = self.frequenza * self.quadro
+        self.totale_pcm = min(int(self.durata * self.frequenza) * self.quadro, MASSIMO_DEL_WAV // self.quadro * self.quadro)
         self.dimensione = INTESTAZIONE + self.totale_pcm
         self.tipo = TIPO
         self.finestra = dimensione_della_finestra() if finestra is None else finestra
-        self.dietro = int(self.finestra * PARTE_DIETRO) // QUADRO * QUADRO
-        self._testa = intestazione(self.totale_pcm, self.frequenza)
+        self.dietro = int(self.finestra * PARTE_DIETRO) // self.quadro * self.quadro
+        self._testa = intestazione(self.totale_pcm, self.frequenza, self.bit)
         self._cond = threading.Condition()
         self._generazione = 0
         self._base, self._dati, self._finito, self._letto = 0, bytearray(), False, 0
@@ -235,7 +278,7 @@ class SorgenteWav:
             vecchio.ferma()
             self.ripartenze += 1
         try:
-            passaggio = _Passaggio(self, generazione, self._avvia, inizio / self.al_secondo, self.frequenza)
+            passaggio = _Passaggio(self, generazione, self._avvia, inizio / self.al_secondo, self.frequenza, self.bit)
         except Exception:  # noqa: BLE001 - libmpv fallisce in molti modi: per la sorgente vuol dire che il brano non si legge
             self._fine(generazione, 0)
             return
@@ -257,7 +300,7 @@ class SorgenteWav:
             self.convertiti += len(pezzo)
             troppo = self._letto - self.dietro - self._base
             if troppo > 0:
-                troppo = min(troppo, len(self._dati)) // QUADRO * QUADRO
+                troppo = min(troppo, len(self._dati)) // self.quadro * self.quadro
                 del self._dati[:troppo]
                 self._base += troppo
             self._cond.notify_all()
@@ -296,7 +339,7 @@ class SorgenteWav:
             avanti = not self.emulato and pcm > fine_scritta + SECONDI_DA_ASPETTARE * self.al_secondo
             fuori = pcm < self._base or avanti
         if fuori:
-            self._avvia_da(pcm - pcm % QUADRO)
+            self._avvia_da(pcm - pcm % self.quadro)
         with self._cond:
             self._letto = pcm
             self._cond.notify_all()
