@@ -2,6 +2,23 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [2.7.2] - 2026-11-05
+
+Una correzione, dal collaudo della 2.7.0: dopo Maiuscolo con F9 sulla condivisione dell'Iliadbox, MeTeOra chiuso non tornava al prompt, e Gabriele ha dovuto forzarlo; la mattina prima era rimasto senza finestra per una decina di minuti.
+
+- La causa: il Samba dell'Iliadbox, dopo migliaia di cartelle, lascia appesa una lettura, e annullarla non serve; un programma con una lettura appesa dentro Windows non riesce a chiudersi finché quella non scade. Ora le letture delle cartelle di rete, e la prova se una cartella di rete risponde, le fa un piccolo processo lettore, lo stesso MeTeOra lanciato con --lettore-di-rete, senza finestra. Se tace per il tempo d'attesa, MeTeOra lo abbandona e per la lettura dopo ne usa un altro: il lettore appeso resta appeso lui, e sparisce quando Windows si arrende, mentre MeTeOra va avanti e si chiude subito. Vale per le aperture, la ricerca, il contatore, la plancia e la pulizia all'avvio, e per la prova della rete di F11, dell'aggiunta di un percorso e dell'importazione.
+- Provato sull'Iliadbox vera, il 5 novembre 2026: l'esploratore ha letto 17.407 cartelle in 77 secondi, poi il Samba si è piantato; tre lettori abbandonati, e il programma è uscito subito, con il codice 0.
+- Se il lettore non parte, MeTeOra legge in un filo, come fino alla 2.7.1. La lettura dei file delle playlist in rete, per l'importazione, resta in un filo: sono file piccoli.
+- Dentro: lettore_di_rete.py, nuovo, con le sue prove, anche con una lettura appesa per finta; ricerca.leggi_in_rete, pulizia._giro_in_rete e questa_rete.raggiungibile passano dal lettore; meteora.py lo avvia con --lettore-di-rete prima di aprire wx; alla chiusura i lettori liberi si chiudono. Nel pacchetto compilato va provato alla release.
+
+## [2.7.1] - 2026-11-05
+
+Una correzione, dal collaudo della 2.7.0: mentre Questo PC si apriva tutto NVDA tardava di secondi a ogni tasto, e restava meno reattivo anche dopo, mentre lo schedario leggeva i tag delle cartelle nuove.
+
+- La causa: lo stato delle voci della plancia lo dà a NVDA MeTeOra, in Python, per la selezione multipla della issue 21; e Python esegue un filo alla volta, mentre l'esploratore, il contatore e lo schedario lavoravano tutti insieme. Ogni domanda di NVDA aspettava il suo turno, e NVDA ne fa decine a ogni tasto. Ora ogni tasto ha la precedenza: per mezzo secondo i fili in disparte aspettano, e con loro le fette dell'apertura, i rinfreschi e le etichette scritte a pezzi; il lavoro va avanti quando la tastiera si ferma. Il filo a priorità bassa, l'idea di Gabriele, non sarebbe bastato: il collo di bottiglia non è il processore, ma il turno di Python.
+- Misurato con il banco delle aperture: durante l'apertura di Questo PC, dopo ogni freccia, il lettore MSAA del banco legge la voce col fuoco come NVDA, da un altro processo, alternando le letture senza e con la precedenza: la mediana resta di 17 o 18 millesimi, ma la lettura peggiore scende da 190-258 millesimi a 18-23, e gli eventi che NVDA riceve restano pochi, 566 in 18 secondi, senza coda.
+- Dentro: precedenza.py, nuovo, con Cedi al posto del threading.Event, e le sue prove; nel banco delle aperture la misura con il lettore MSAA, e le misure scritte a schermo.
+
 ## [2.7.0] - 2026-11-04
 
 Tappa 17 del piano, decisa da Gabriele il 4 novembre 2026: le aperture in blocco senza limiti, anche su Questo PC e Questa rete, e i loro comandi tutti su F9, con la regola della issue 38. E sullo speaker Cast il WAV in RAM al posto del FLAC su disco, con gli audiolibri M4B che vanno così come sono.

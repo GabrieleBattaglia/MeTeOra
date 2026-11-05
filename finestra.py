@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17)
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17). Nella 2.7.1 la precedenza ai tasti sul lavoro in disparte. Nella 2.7.2 i lettori di rete chiusi all'uscita
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -58,6 +58,7 @@ import dettagli
 import formati
 import importazione
 import karaoke
+import lettore_di_rete
 import lontano
 import marcatori
 import midi
@@ -97,6 +98,7 @@ from impostazioni import PREDEFINITE, Impostazioni
 from marcatori import Marcatori
 from motore import DURATA_SID_PREDEFINITA, VOLUME_MASSIMO, durata_del_sottobrano, sottobrano_risolto
 from playlist import CRITERI, Archivio, Brano, Coda, Playlist
+from precedenza import PRECEDENZA_AI_TASTI, Cedi
 from ricerca import (
     UNITA_CD,
     UNITA_DI_RETE,
@@ -1326,8 +1328,10 @@ class Finestra(wx.Frame):
         self.schedario.carica()
         self.contatore = Contatore(self.schedario, avvisa=lambda: wx.CallAfter(self._rinfresco_chiesto, "conti"))
         # Il segnale che fa aspettare i fili del contatore e dello schedario
-        # mentre la finestra rinfresca o apre la plancia (1.83.1).
-        self._cedi = threading.Event()
+        # mentre la finestra rinfresca o apre la plancia (1.83.1); dalla 2.7.1
+        # anche per mezzo secondo dopo ogni tasto, perche' NVDA non aspetti.
+        self._cedi = Cedi()
+        self._precedenza_ai_tasti = PRECEDENZA_AI_TASTI
         self.schedario.cedi = self.contatore.cedi = self._cedi
         # I totali delle cartelle, per le loro etichette: cartella -> [i file
         # del contatore, quanti hanno la durata, la somma, il numero
@@ -2077,7 +2081,11 @@ class Finestra(wx.Frame):
     def _tasto(self, evento):
         """I tasti di tutta la finestra. Quando un comando ha finito il suo
         lavoro, dialoghi compresi, il beep dice se ha portato il fuoco della
-        plancia a un altro livello."""
+        plancia a un altro livello. Ogni tasto ha la precedenza sul lavoro in
+        disparte per un attimo (2.7.1): NVDA, che chiede lo stato delle voci
+        a MeTeOra, trova la strada libera."""
+        if self._precedenza_ai_tasti and evento.GetKeyCode() not in _SOLO_MODIFICATORI:
+            self._cedi.trattieni(self._precedenza_ai_tasti)
         prima = self._profondita(self._voce_corrente())
         nome = self._nome_del_tasto(evento)
         if nome:
@@ -2879,6 +2887,12 @@ class Finestra(wx.Frame):
         self._etichette_pianificate = False
         if self._chiusa:
             return
+        attesa = self._cedi.trattenuto()
+        if attesa:
+            # Chi naviga ha la precedenza (2.7.1).
+            self._etichette_pianificate = True
+            wx.CallLater(max(1, round(attesa * 1000)), self._scrivi_un_pezzo_di_etichette)
+            return
         fine = time.monotonic() + PEZZO_DELLE_ETICHETTE
         while self._etichette_in_attesa and time.monotonic() < fine:
             numero = next(iter(self._etichette_in_attesa))
@@ -3189,6 +3203,12 @@ class Finestra(wx.Frame):
 
     def _rinfresca(self):
         self._rinfresco_pianificato = False
+        attesa = self._cedi.trattenuto()
+        if attesa and self._rinfreschi and not self._chiusa:
+            # Chi naviga ha la precedenza (2.7.1): il rinfresco aspetta.
+            self._rinfresco_pianificato = True
+            wx.CallLater(max(1, round(attesa * 1000)), self._rinfresca)
+            return
         cose, self._rinfreschi = self._rinfreschi, set()
         if self._chiusa or not cose:
             return
@@ -10715,6 +10735,12 @@ class Finestra(wx.Frame):
         apertura.pianificato = False
         if apertura is not self._apertura or self._chiusa:
             return
+        attesa = self._cedi.trattenuto()
+        if attesa:
+            # Chi naviga ha la precedenza (2.7.1): la fetta aspetta.
+            apertura.pianificato = True
+            wx.CallLater(max(1, round(attesa * 1000)), self._passo_dell_apertura, apertura)
+            return
         if not any(apertura.viva(radice) for radice in apertura.radici):
             # Le radici non ci sono piu', per esempio dopo Aggiorna.
             self._chiudi_l_apertura()
@@ -11607,6 +11633,8 @@ class Finestra(wx.Frame):
             self._ricerca.ferma()
         if self._apertura is not None and self._apertura.esploratore is not None:
             self._apertura.esploratore.ferma()
+        # I lettori di rete liberi si chiudono; uno appeso e' gia' abbandonato (2.7.2).
+        lettore_di_rete.lettori.chiudi()
         if self._ricerca_cast is not None:
             # La ricerca chiude il suo zeroconf: in disparte, come lo speaker,
             # che il motore chiude con se'.

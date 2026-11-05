@@ -94,6 +94,22 @@ def contenuto(cartella, al_passo=None):
     return _in_ordine(cartelle), _in_ordine(files)
 
 
+def contenuto_dalle_voci(cartella, voci):
+    """Come contenuto, ma da un elenco grezzo gia' letto: [nome, segni] per
+    voce, come lo da' il lettore di rete (2.7.2)."""
+    import lettore_di_rete as lettore
+
+    cartelle, files = [], []
+    for nome, segni in voci:
+        if segni & (lettore.NASCOSTA | lettore.DI_SISTEMA):
+            continue
+        if segni & lettore.CARTELLA:
+            cartelle.append(os.path.join(cartella, nome))
+        elif segni & lettore.FILE and formati.supportato(nome):
+            files.append(os.path.join(cartella, nome))
+    return _in_ordine(cartelle), _in_ordine(files)
+
+
 def contenuti_ricorsivi(cartella):
     """Le cartelle sotto una cartella, lei compresa, ciascuna con i suoi file
     supportati: lista di (cartella, file), in ordine alfabetico, con i file

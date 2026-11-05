@@ -443,6 +443,39 @@ def _giro(radice, fermo, cedi, al_passo, protetta):
     return elenchi
 
 
+def _giro_in_rete(radice, fermo, cedi, attesa):
+    """Il giro di una radice di rete con il lettore di rete (2.7.2), che legge
+    in un processo a parte: una cartella che tace fa sollevare
+    ricerca.NonRisponde, e il lettore appeso si abbandona, senza lasciare
+    letture appese in MeTeOra. Come _giro, e come lui None se fermo()
+    diventa vero. Se il lettore non parte, o senza lettore_di_rete.ATTIVO,
+    _giro_sorvegliato, in un filo, come fino alla 2.7.1."""
+    import lettore_di_rete
+
+    if not lettore_di_rete.ATTIVO:
+        return _giro_sorvegliato(radice, fermo, cedi, attesa)
+    elenchi = {}
+    for cartella in sorted(radice.cercati):
+        _cedi_il_passo(cedi, fermo)
+        if fermo():
+            return None
+        try:
+            voci = lettore_di_rete.lettori.elenca(radice.scritte[cartella], fermo, attesa)
+        except lettore_di_rete.NonParte:
+            return _giro_sorvegliato(radice, fermo, cedi, attesa)
+        except ricerca.NonRisponde:
+            raise ricerca.NonRisponde(radice.nome) from None
+        except OSError as errore:
+            if _manca(errore):
+                elenchi[cartella] = None
+            continue
+        if voci is None:
+            return None
+        cercati = radice.cercati[cartella]
+        elenchi[cartella] = {os.path.normcase(nome): nome for nome, _segni in voci if os.path.normcase(nome) in cercati}
+    return elenchi
+
+
 def _giro_sorvegliato(radice, fermo, cedi, attesa):
     """Il giro di una radice di rete, fatto in un filo a parte e sorvegliato
     come ricerca.leggi_in_rete: se per attesa secondi non va avanti, la
@@ -632,7 +665,7 @@ def controlla(percorsi, fermo=None, cedi=None, risponde=None, attesa=ricerca.ATT
             continue
         try:
             if ricerca.in_rete(radice.nome):
-                elenchi = _giro_sorvegliato(radice, fermo, cedi, attesa)
+                elenchi = _giro_in_rete(radice, fermo, cedi, attesa)
             else:
                 elenchi = _giro(radice, fermo, cedi, _niente, protetta=True)
         except ricerca.NonRisponde:
@@ -752,7 +785,7 @@ def conta_le_voci(radice, percorsi, fermo=None, cedi=None, risponde=None, identi
     gruppo = radici[0]
     try:
         if ricerca.in_rete(radice):
-            elenchi = _giro_sorvegliato(gruppo, fermo, cedi, attesa)
+            elenchi = _giro_in_rete(gruppo, fermo, cedi, attesa)
         else:
             elenchi = _giro(gruppo, fermo, cedi, _niente, protetta=True)
     except OSError:

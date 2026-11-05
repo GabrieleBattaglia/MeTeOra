@@ -1895,6 +1895,50 @@ def scenario_aperture():
     S.verifica("aperture", "La finestra resta pronta mentre si apre tutta la plancia", peggiore < 1.0, f"ritardo peggiore {peggiore:.3f} s, {S.extra['tutta_la_plancia']}")
     S.extra["tutta_la_plancia"]["rami_e_voci"] = nel_filo(f._aperti_dentro, f.albero.GetRootItem())
     premi("f9", ctrl=True, alt=True)
+
+    # La precedenza ai tasti (2.7.1): NVDA, mentre Questo PC si apre, tardava
+    # di secondi. Dopo ogni freccia il lettore MSAA legge la voce col fuoco
+    # come NVDA, da un processo a parte; le letture si alternano senza e con
+    # la precedenza, nella stessa apertura, cosi' il confronto e' onesto.
+    import accessibilita
+    from precedenza import PRECEDENZA_AI_TASTI
+
+    lettore = Lettore()
+    tempi = {"senza": [], "con": []}
+    eventi = {"arrivati": 0, "in_coda_massima": 0, "secondi": 0.0}
+    try:
+        nel_filo(lambda: (f._seleziona(f.nodo_pc), f.albero.SetFocus()))
+        premi("f9", maiuscolo=True)
+        time.sleep(3)
+        lettore.eventi()
+        inizio_degli_eventi = time.monotonic()
+        for giro in range(24):
+            if nel_filo(lambda: f._apertura is None):
+                break
+            chiave = "con" if giro % 2 else "senza"
+            nel_filo(lambda chiave=chiave: setattr(f, "_precedenza_ai_tasti", PRECEDENZA_AI_TASTI if chiave == "con" else 0.0))
+            premi("giu")
+            numero = nel_filo(lambda: accessibilita.numero_della_voce(f.albero.GetHandle(), int(f._voce_corrente().GetID())))
+            inizio = time.perf_counter()
+            lettore.chiedi({"comando": "nvda", "figli": [numero]})
+            tempi[chiave].append(time.perf_counter() - inizio)
+            arrivati = lettore.chiedi({"comando": "eventi"})
+            eventi["arrivati"] += len(arrivati.get("eventi", []))
+            eventi["in_coda_massima"] = max(eventi["in_coda_massima"], arrivati.get("in_coda", 0))
+            eventi["secondi"] = round(time.monotonic() - inizio_degli_eventi, 1)
+            time.sleep(0.7)
+        premi("f9", ctrl=True, maiuscolo=True)
+        premi("f9", ctrl=True, alt=True)
+    finally:
+        nel_filo(lambda: setattr(f, "_precedenza_ai_tasti", PRECEDENZA_AI_TASTI))
+        lettore.esci()
+    for chiave, valori in tempi.items():
+        ordinati = sorted(valori) or [0.0]
+        S.extra[f"msaa_{chiave}"] = {"letture": len(valori), "mediana": round(ordinati[len(ordinati) // 2], 3), "peggiore": round(ordinati[-1], 3)}
+    S.extra["eventi_msaa"] = eventi
+    S.nota("letture MSAA", S.extra["msaa_senza"], S.extra["msaa_con"], eventi)
+    S.verifica("aperture", "Con la precedenza ai tasti NVDA legge la plancia piu' in fretta",
+        tempi["con"] and S.extra["msaa_con"]["mediana"] <= S.extra["msaa_senza"]["mediana"], (S.extra["msaa_senza"], S.extra["msaa_con"]))
     premi("esc")
 
 
@@ -2012,7 +2056,17 @@ def banco_a_parte(nome):
     os.makedirs(esiti)
     print(f"Banco del collaudo, sessione {nome}: dati di prova in {dati}", flush=True)
     _aspetta_il_processo(_lancia(nome, dati, esiti, None, True), nome)
-    return base, esiti, _riassunto(esiti, (nome,))
+    falliti = _riassunto(esiti, (nome,))
+    if nome == "aperture":
+        # Le misure, che a banco riuscito si cancellano con la cartella.
+        with contextlib.suppress(OSError, ValueError), open(os.path.join(esiti, "aperture.json"), encoding="utf-8") as f:
+            extra = json.load(f)["extra"]
+        for chiave in ("questo_pc", "tutta_la_plancia", "cambio_di_brano", "chiusura_della_plancia", "msaa_senza", "msaa_con", "eventi_msaa"):
+            valore = extra.get(chiave) if isinstance(extra, dict) else None
+            if isinstance(valore, dict):
+                valore = {k: v for k, v in valore.items() if k != "fermate"}
+            print(f"  {chiave}: {valore}", flush=True)
+    return base, esiti, falliti
 
 
 def banco_della_plancia():

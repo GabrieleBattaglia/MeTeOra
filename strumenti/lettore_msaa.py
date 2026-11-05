@@ -25,6 +25,10 @@ stdout, una riga JSON ciascuna:
   cio' che un client legge delle voci date, e della plancia stessa, con i
   tempi in microsecondi, dall'oggetto della plancia, "plancia", e da quello
   standard, "standard": di partenza da tutti e due;
+- {"comando": "nvda", "figli": [...]}: solo cio' che NVDA legge per un
+  evento, nome, ruolo e stato, delle voci date, con l'oggetto chiesto alla
+  plancia e i tempi in microsecondi: senza la plancia intera, che con
+  centomila voci aperte vuol dire minuti (banco della 2.7.1);
 - {"comando": "eventi"}: gli eventi arrivati da allora, con le letture;
 - {"comando": "martella", "figli": [...], "file": percorso}: da qui legge
   le voci date senza sosta, come NVDA che tiene il fuoco, mentre MeTeOra si
@@ -312,6 +316,15 @@ class Lettore:
     def _esegui(self, comando):
         if comando["comando"] == "leggi":
             return self._leggi(comando.get("figli", []), comando.get("giri", 1), comando.get("oggetti", ("plancia", "standard")))
+        if comando["comando"] == "nvda":
+            inizio = time.perf_counter()
+            esito, accessibile = self._dalla_finestra()
+            uscita = {"esito": esito, "apertura_us": round((time.perf_counter() - inizio) * 1e6), "voci": {}}
+            if esito == 0 and accessibile:
+                uscita["voci"] = {n: come_nvda(accessibile, n) for n in comando.get("figli", [])}
+                rilascia(accessibile)
+            uscita["totale_us"] = round((time.perf_counter() - inizio) * 1e6)
+            return uscita
         if comando["comando"] == "eventi":
             letti, self.letti = self.letti, []
             return {"eventi": letti, "in_coda": len(self.in_coda)}

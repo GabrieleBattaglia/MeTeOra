@@ -1,19 +1,7 @@
-Collaudo di MeTeOra 2.7.0: le aperture in blocco senza limiti, i comandi tutti su F9, e gli audiolibri M4B sullo speaker.
-Maiuscolo con F9 su Questo PC: la plancia si riempie a poco a poco, solo con le cartelle che hanno qualcosa da suonare, in ordine e con le cartelle prima dei file.
-* Funziona, però mentre lavora per riempire, nvda diventa veramente molto lento. Credo a causa di quelle cartelle che d'hanno errore o non rispondono. Si  potrebbe valutare un thread a priorità più bassa. Ma per ora va bene così.
-
-Mentre Questo PC si apre, naviga con le frecce anche dentro i rami che si riempiono: dimmi se NVDA legge bene e se qualcosa ti disturba.
-* Sento i suoni dei livelli dei rami, ma nvda spesso tace e ci mette qualche secondo a reagire. Quando la ricerca finisce, tutto torna fluido. Ho provato aprendo C:
-
-Alla fine suona la fine, e la console dice voci, rami aperti e cartelle lette: dimmi quanto ci ha messo sul Gigante.
-* Aperto tutto dentro Questo PC: 141748 voci e 12333 rami aperti, da 230991 cartelle lette. 51 cartelle non si leggono. 09:28
-* Circa 90 secondi.
-
-Maiuscolo con F9 proprio sulla condivisione dell'Iliadbox la apre tutta: dimmi quanto dura, se risponde, e se dopo MeTeOra si chiude subito.
-* Aperto tutto dentro iliadbox (iliadbox_Server): 30070 voci e 3464 rami aperti, da 11572 cartelle lette. In rete non ha risposto: iliadbox (iliadbox_Server). 09:32
-* Più di 2 minuti
-* Mi fermo qui perchè ho scoperto un problema. Dopo questi test ho provato a chiudere meteora e vedo che non ritorna al prompt. Cioè questo compare ma non riprende il controllo come se meteora non si chiuesse. Ho dovuto forzare.
-
+Collaudo di MeTeOra 2.7.2: le correzioni dal collaudo della 2.7.0, e le prove che restavano.
+Maiuscolo con F9 su Questo PC, e mentre si riempie naviga con le frecce: NVDA risponde subito? Dimmi se è meglio della 2.7.0.
+Finita l'apertura, mentre lo schedario legge ancora i tag, NVDA è reattivo come prima delle aperture?
+Maiuscolo con F9 sulla condivisione dell'Iliadbox, aspetta che finisca, poi Esc: MeTeOra si chiude e il prompt torna subito.
 La guida rapida di F12 e il manuale, nel capitolo della plancia, raccontano i comandi nuovi di F9.
 Sullo speaker GabryBar un audiolibro M4B parte subito, e i salti con le frecce funzionano.
 Sullo speaker GabryBar un SID, un APE o un video partono in un paio di secondi, senza la riga Converto; i salti avanti e indietro funzionano, e alla fine parte il brano seguente, o il sottobrano seguente del SID, senza attese.

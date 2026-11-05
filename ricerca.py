@@ -1,7 +1,7 @@
 # MeTeOra, la ricerca globale: cerca con il filtro in tutte le playlist e in tutte le unita'.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 # 30/09/2026: nasce con la 1.15.0, issue 10. Nella 1.23.0 l'albero della provenienza dei risultati; nella 1.34.6 i risultati cestinati escono dal ramo.
-# Nella 1.73.0 la ricerca ovunque anche in rete, dopo i dischi, con le letture di rete a tempo. Nella 1.104.0 l'annullamento delle letture di rete diventa pubblico, per la pulizia all'avvio. Nella 2.7.0 anche tipo_di_unita, per l'apertura di massa della plancia.
+# Nella 1.73.0 la ricerca ovunque anche in rete, dopo i dischi, con le letture di rete a tempo. Nella 1.104.0 l'annullamento delle letture di rete diventa pubblico, per la pulizia all'avvio. Nella 2.7.0 anche tipo_di_unita, per l'apertura di massa della plancia. Nella 2.7.2 le letture di rete dal lettore di rete, in un processo a parte.
 
 """La ricerca in tutto MeTeOra.
 
@@ -30,8 +30,10 @@ import os
 import threading
 import time
 
+import lettore_di_rete
 import questa_rete
 import questo_pc
+from lettore_di_rete import NonParte, NonRisponde
 from playlist import Brano
 
 # I tipi di unita' in cui si cerca: rimovibili, dischi fissi, dischi in memoria.
@@ -136,11 +138,7 @@ def annulla_la_lettura(filo, per_quanto=3.0):
         kernel32.CloseHandle(maniglia)
 
 
-class NonRisponde(OSError):
-    """Una cartella di rete che non ha risposto in tempo. E' un OSError: chi
-    tratta una cartella illeggibile la tratta gia' bene anche cosi'."""
-
-
+# NonRisponde sta in lettore_di_rete dalla 2.7.2, e si trova anche qui.
 _NonRisponde = NonRisponde
 
 # Gli errori di Windows che vengono dalla rete, e non dalla cartella: il
@@ -158,14 +156,32 @@ def errore_di_rete(errore):
 
 
 def leggi_in_rete(cartella, fermo=None, attesa=None):
-    """Il contenuto di una cartella di rete, come questo_pc.contenuto, letto
-    in un filo a parte: se per attesa secondi, ATTESA_IN_RETE se non si dice,
+    """Il contenuto di una cartella di rete, come questo_pc.contenuto. Dalla
+    2.7.2 lo legge il lettore di rete, in un processo a parte, che se resta
+    appeso si abbandona: MeTeOra si chiude anche con una lettura appesa. Se
+    per attesa secondi, ATTESA_IN_RETE se non si dice, il lettore tace, si
+    solleva NonRisponde; fermo, se c'e', si chiede mentre si aspetta: vero, e
+    si torna subito con ([], []). Se il lettore non parte, o se
+    lettore_di_rete.ATTIVO e' falso, come nelle prove, la lettura si fa in un
+    filo, come fino alla 2.7.1."""
+    attesa = ATTESA_IN_RETE if attesa is None else attesa
+    if lettore_di_rete.ATTIVO:
+        try:
+            voci = lettore_di_rete.lettori.elenca(cartella, fermo, attesa)
+        except NonParte:
+            pass
+        else:
+            return ([], []) if voci is None else questo_pc.contenuto_dalle_voci(cartella, voci)
+    return _leggi_in_un_filo(cartella, fermo, attesa)
+
+
+def _leggi_in_un_filo(cartella, fermo, attesa):
+    """La lettura in un filo a parte, fino alla 2.7.1: se per attesa secondi
     non arriva nemmeno una voce, la lettura si annulla, in un altro filo
     perche' anche l'annullamento puo' restare fermo, e si solleva
     NonRisponde; una cartella grande che risponde a blocchi non scade.
     fermo, se c'e', si chiede mentre si aspetta: vero, e si torna subito con
     ([], []). La usano la ricerca, il contatore e la plancia (1.77.1)."""
-    attesa = ATTESA_IN_RETE if attesa is None else attesa
     esito = []
     passo = [time.monotonic()]
 

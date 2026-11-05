@@ -5789,6 +5789,35 @@ def test_le_voci_tolte_mentre_si_apre(finestra, monkeypatch, suoni_annotati, tmp
     assert list(finestra._figli(disco)) == [] and _ultima(finestra) == "Niente da suonare dentro Prova."
 
 
+def test_la_precedenza_ai_tasti(finestra, monkeypatch, tmp_path):
+    # 2.7.1, dal collaudo della 2.7.0: mentre Questo PC si apriva NVDA
+    # tardava di secondi. A ogni tasto il lavoro in disparte aspetta un attimo:
+    # i fili del contatore, dello schedario e dell'esploratore guardano lo
+    # stesso segnale, e la fetta dell'apertura si rimanda.
+    _plancia_di_prova(finestra, monkeypatch, tmp_path)
+    monkeypatch.setattr(modulo, "Esploratore", _EsploratoreFinto)
+    finestra.albero.Expand(finestra.nodo_pc)
+    disco = next(finestra._figli(finestra.nodo_pc))
+    finestra._seleziona(disco)
+    _tasto(finestra, codice=wx.WXK_F9, maiuscolo=True)
+    apertura = finestra._apertura
+    assert not finestra._cedi.is_set()
+    finestra._precedenza_ai_tasti = 0.5
+    _tasto(finestra, codice=wx.WXK_DOWN)
+    assert finestra._cedi.is_set() and finestra.contatore.cedi.is_set() and finestra.schedario.cedi.is_set()
+    assert 0.0 < finestra._cedi.trattenuto() <= 0.5
+    rimandate = []
+    monkeypatch.setattr(modulo.wx, "CallLater", lambda ms, funzione, *argomenti: rimandate.append((ms, funzione)))
+    radice = str(tmp_path / "Disco")
+    apertura.esploratore.da_dare = [("cartella", radice, os.path.join(radice, "Uno"))]
+    finestra._passo_dell_apertura(apertura)
+    assert apertura.esploratore.da_dare and rimandate and 0 < rimandate[-1][0] <= 500 and apertura.pianificato
+    # Un modificatore da solo non conta.
+    finestra._cedi = modulo.Cedi()
+    _tasto(finestra, codice=wx.WXK_SHIFT)
+    assert not finestra._cedi.is_set()
+
+
 def test_tante_etichette_si_scrivono_a_pezzi(finestra, monkeypatch):
     # 2.7.0: con 12.600 cartelle aperte SetItemText una per una fermava la
     # finestra, e anche Freeze, per il Thaw; da ETICHETTE_A_PEZZI in su si

@@ -1,6 +1,6 @@
 # MeTeOra, il lettore multimediale accessibile: il programma da avviare.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 i problemi interni arrivano nella console. Nella 1.84.0 il controllo degli aggiornamenti. Nella 1.89.0 il registro degli errori e dei crash. Nella 1.90.0 le copie dei dati. Nella 1.91.0 i file passati da Windows e l'istanza unica. Nella 1.97.0 la versione giusta in App installate. Nella 1.103.0 le copie delle statistiche, e da dove arrivano i file aperti. Nella 1.104.0 le statistiche salvate subito e la pulizia all'avvio. Nella 1.112.0 le copie dei dischi della pulizia.
+# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 i problemi interni arrivano nella console. Nella 1.84.0 il controllo degli aggiornamenti. Nella 1.89.0 il registro degli errori e dei crash. Nella 1.90.0 le copie dei dati. Nella 1.91.0 i file passati da Windows e l'istanza unica. Nella 1.97.0 la versione giusta in App installate. Nella 1.103.0 le copie delle statistiche, e da dove arrivano i file aperti. Nella 1.104.0 le statistiche salvate subito e la pulizia all'avvio. Nella 1.112.0 le copie dei dischi della pulizia. Nella 2.7.2 il lettore di rete, con --lettore-di-rete.
 
 """Avvia MeTeOra: controlla le librerie native e apre la finestra massimizzata.
 
@@ -12,6 +12,13 @@ lui, e questa copia si chiude subito.
 import os
 import sys
 
+if __name__ == "__main__" and len(sys.argv) > 1 and sys.argv[1] == "--lettore-di-rete":
+    # Il lettore di rete della 2.7.2: lo stesso eseguibile, senza finestra.
+    import lettore_di_rete
+
+    raise SystemExit(lettore_di_rete.principale())
+
+# Dopo il lettore di rete, che non lo vuole.
 import wx
 
 

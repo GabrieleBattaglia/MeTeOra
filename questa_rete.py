@@ -123,8 +123,19 @@ def condivisioni(server):
 
 
 def raggiungibile(percorso, attesa=ATTESA_DELLA_RETE):
-    """Vero se la cartella risponde entro attesa secondi. La prova continua
-    da sola nel suo filo, se Windows la fa aspettare di piu'."""
+    """Vero se la cartella risponde entro attesa secondi. Dalla 2.7.2 la prova
+    la fa il lettore di rete, in un processo a parte che si abbandona se
+    resta appeso; se non parte, o senza lettore_di_rete.ATTIVO, un filo, che
+    continua da solo se Windows la fa aspettare di piu'."""
+    import lettore_di_rete
+
+    if lettore_di_rete.ATTIVO:
+        try:
+            return lettore_di_rete.lettori.e_una_cartella(percorso, attesa)
+        except lettore_di_rete.NonParte:
+            pass
+        except OSError:
+            return False
     esito = []
     filo = threading.Thread(target=lambda: esito.append(os.path.isdir(percorso)), name="MeTeOra, prova della rete", daemon=True)
     filo.start()

@@ -74,6 +74,16 @@ def suoni_annotati(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def lettore_di_rete_spento(monkeypatch):
+    """Le prove fingono la rete nel loro processo: il lettore di rete in un
+    processo a parte (2.7.2) non vedrebbe le loro finte, e le letture si
+    fanno in un filo, come fino alla 2.7.1. Le prove del lettore lo riaccendono."""
+    import lettore_di_rete
+
+    monkeypatch.setattr(lettore_di_rete, "ATTIVO", False)
+
+
+@pytest.fixture(autouse=True)
 def startfile_vietato(monkeypatch):
     """os.startfile non apre mai niente durante le prove: un browser, come
     quello del manuale di F1, comparirebbe davanti a chi le lancia e NVDA ne
@@ -225,6 +235,9 @@ def finestra(app, tmp_path):
     from finestra import Finestra
 
     f = Finestra(ao="null", cartella_dati=str(tmp_path))
+    # Senza la precedenza ai tasti (2.7.1): le prove premono tasti in fila e
+    # aspettano subito il lavoro in disparte. La prova sua la rimette.
+    f._precedenza_ai_tasti = 0.0
     yield f
     if not f._chiusa:
         f.Close(force=True)
