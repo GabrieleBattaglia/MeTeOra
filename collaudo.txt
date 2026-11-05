@@ -1,6 +1,5 @@
-Collaudo di MeTeOra 2.7.2: le correzioni dal collaudo della 2.7.0, e le prove che restavano.
-La guida rapida di F12 e il manuale, nel capitolo della plancia, raccontano i comandi nuovi di F9.
-* non è completo, f9 non viene riportato con tutte le sue combinazioni di modificatori. Questo è gravissimo!!! Verifica che anche tutti gli altri tasti vengano riportati altrimenti abbiamo un grandissimo problema.
-
-Su GabryBar un brano ad alta risoluzione che lo speaker non legge da sé, come un WavPack, un APE o un AIFF a 24 bit, suona come sul PC: dimmi se senti differenze.
-* non so cosa riprodurre, dammi l'indirizzo di un brano da provare.
+Collaudo di MeTeOra 2.7.3: la guida rapida riordinata, e la prova su GabryBar che restava.
+Nella guida rapida di F12, fino alla sezione Nella plancia, ogni tasto ha tutte le sue combinazioni di seguito, nel punto del tasto da solo e nell'ordine della regola: da solo, Ctrl, Maiuscolo, Ctrl e Maiuscolo, Alt, Ctrl e Alt.
+F9 ha le sue sei righe una dopo l'altra nella sezione Nella plancia, seguite da F10 e Maiuscolo con F10, e nel manuale il capitolo della plancia le racconta in un paragrafo solo.
+Ctrl e Maiuscolo con F1 stanno subito dopo F1, Ctrl e Maiuscolo con F5 dopo F5, Maiuscolo con F7 dopo F7, Alt con F4 dopo F4, Maiuscolo con le cifre dopo le cifre.
+Su GabryBar E:\git\tmp\MeTeOra prova 24 bit\Pilgrim of Sorrow 24 bit 96 kHz.aiff, Joan Baez portata a 24 bit e 96 kHz, suona come sul PC: dimmi se senti differenze.

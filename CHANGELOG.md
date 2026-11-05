@@ -2,6 +2,15 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [2.7.3] - 2026-11-05
+
+Una correzione, dal collaudo della 2.7.2: nella guida rapida di F12 F9 sembrava senza alcune combinazioni. C'erano tutte e sei, ma Alt, Ctrl e Alt, Ctrl e Maiuscolo con F9 stavano cinque righe più sotto, dopo F10, Invio, il tasto Applicazioni e la barra spaziatrice, e leggendo dall'alto si trovavano solo le prime tre.
+
+- Il confronto fra il codice e la guida: nessun tasto con un comando manca, ma altri tasti avevano le combinazioni sparse. Maiuscolo e Ctrl con F1, e con F5, stavano nella sezione del video, lontani da F1 e F5; Maiuscolo con F7 prima di F7, in un'altra sezione; Alt con F4 lontano da F4; Maiuscolo con le cifre fra i marker, lontano dalle cifre; e Maiuscolo con X e Maiuscolo con V dopo Z e B.
+- Ora, fino alla sezione Nella plancia, ogni tasto ha tutte le sue combinazioni di seguito, nel punto del tasto da solo e nell'ordine della regola dei tasti a lettera: da solo, Ctrl, Maiuscolo, Ctrl e Maiuscolo, Alt, Ctrl e Alt. Per questo cambiano di posto alcune righe di F1, F5, F8, F9, H, M e Tab, e nel cruscotto quelle di F8, F9, H e M. Le sezioni dopo la plancia tengono i tasti che valgono solo lì; anche nella selezione multipla e nella finestra dei marcatori Ctrl con le frecce viene prima di Maiuscolo, e nelle impostazioni Maiuscolo+Tab si chiama Maiuscolo con Tab, come altrove. La guida lo dice in cima, e la regola dei tasti a lettera dice che la segue anche F9.
+- Il capitolo della plancia racconta F9 e le sue combinazioni in un paragrafo solo, prima delle chiusure e delle aperture.
+- La prova della guida non aveva visto il problema perché i tasti funzione li elencava a mano, senza le combinazioni con Ctrl e quelle nuove di F9. Ora i tasti funzione stanno in due tabelle del codice, COMANDI_DEI_TASTI_FUNZIONE e INTERRUTTORI, e la prova prende da lì e dalla tabella dei tasti a carattere ogni combinazione, che deve avere la sua riga; una prova nuova controlla che le combinazioni di ogni tasto stiano di seguito, nell'ordine della regola. Sul manuale della 2.7.2 la prova nuova boccia.
+
 ## [2.7.2] - 2026-11-05
 
 Una correzione, dal collaudo della 2.7.0: dopo Maiuscolo con F9 sulla condivisione dell'Iliadbox, MeTeOra chiuso non tornava al prompt, e Gabriele ha dovuto forzarlo; la mattina prima era rimasto senza finestra per una decina di minuti.

@@ -1,10 +1,11 @@
 # MeTeOra, le prove della finestra principale, sul desktop nascosto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21). Nella 1.112.0 quelle dei dischi della pulizia, anche del loro file che non si legge, e la prova della pulizia che toglie i file spariti non fa piu' leggere allo schedario i file finti; poi Riconosci questo disco, la riga che lo indica e la Sentinella che guarda i dischi dei file usati; infine la domanda di Riconosci questo disco con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 quelle dell'importazione delle playlist M3U, M3U8 e PLS. Nella 1.113.1 quella dell'etichetta di un file delle console con un sottobrano senza durata (issue 24). Nella 1.113.3 quella della Barra dei comandi per il mouse, che nell'errore dice il suo nome (issue 26). Nella 1.113.5 quelle delle statistiche scritte solo se cambiate, al piu' ogni mezz'ora. Nella 1.116.0 quelle delle schede audio che vanno e tornano, e del brano che riparte quando la sua uscita si perde. Nella 1.116.1 quella della scheda delle statistiche con la scelta che manca. Nella 1.116.2 quella dei suoni di piu' e meno fatti al volo. Nella 1.116.3 quella dei comandi da fermi (issue 39). Nella 1.119.0 quelle degli speaker Cast e della lista delle destinazioni.
+# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21). Nella 1.112.0 quelle dei dischi della pulizia, anche del loro file che non si legge, e la prova della pulizia che toglie i file spariti non fa piu' leggere allo schedario i file finti; poi Riconosci questo disco, la riga che lo indica e la Sentinella che guarda i dischi dei file usati; infine la domanda di Riconosci questo disco con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 quelle dell'importazione delle playlist M3U, M3U8 e PLS. Nella 1.113.1 quella dell'etichetta di un file delle console con un sottobrano senza durata (issue 24). Nella 1.113.3 quella della Barra dei comandi per il mouse, che nell'errore dice il suo nome (issue 26). Nella 1.113.5 quelle delle statistiche scritte solo se cambiate, al piu' ogni mezz'ora. Nella 1.116.0 quelle delle schede audio che vanno e tornano, e del brano che riparte quando la sua uscita si perde. Nella 1.116.1 quella della scheda delle statistiche con la scelta che manca. Nella 1.116.2 quella dei suoni di piu' e meno fatti al volo. Nella 1.116.3 quella dei comandi da fermi (issue 39). Nella 1.119.0 quelle degli speaker Cast e della lista delle destinazioni. Nella 2.7.3 quelle della guida rapida, con ogni combinazione presa dalle tabelle dei tasti e le combinazioni di ogni tasto di seguito, nell'ordine della regola.
 
 import contextlib
 import ctypes
 import datetime
+import html
 import math
 import os
 import re
@@ -1764,24 +1765,83 @@ def test_f12_senza_guida_lo_dice(finestra, suoni_annotati, monkeypatch):
     assert suoni_annotati[-1] == "errore"
 
 
+# I modificatori nei nomi della guida rapida, e il loro ordine nella regola
+# dei tasti a lettera.
+_MODIFICATORI_DELLA_GUIDA = {"Ctrl": modulo.CTRL, "Alt": modulo.ALT, "Maiuscolo": modulo.MAIUSCOLO}
+_ORDINE_DELLA_REGOLA = [modulo.SOLO, modulo.CTRL, modulo.MAIUSCOLO, modulo.CTRL_MAIUSCOLO, modulo.ALT, modulo.CTRL_ALT]
+
+
+def _tasto_della_guida(nome):
+    """(tasto, modificatori) del nome con cui comincia una riga della guida:
+    Ctrl e Alt con F9 e' ("f9", CTRL_ALT). Gli articoli non contano, e la
+    barra verticale e' Maiuscolo con la barra rovesciata."""
+    if nome == "Barra verticale":
+        return "barra rovesciata", modulo.MAIUSCOLO
+    modificatori = modulo.SOLO
+    trovato = re.match(r"((?:Ctrl|Alt|Maiuscolo)(?: e (?:Ctrl|Alt|Maiuscolo))*) con (.+)", nome)
+    if trovato:
+        for parola in trovato.group(1).split(" e "):
+            modificatori |= _MODIFICATORI_DELLA_GUIDA[parola]
+        nome = trovato.group(2)
+    return re.sub(r"^(?:la |il |lo |le |gli |i |l')", "", nome.lower()), modificatori
+
+
+def _blocchi_della_guida(finestra):
+    """Le righe dei tasti della guida rapida, come (tasto, modificatori), a
+    blocchi: uno per i tasti di tutta la finestra e della plancia, poi uno
+    per ogni sezione dei tasti che valgono solo in un posto."""
+    testo = finestra._leggi_risorsa("manuale.html")
+    titoli = {html.unescape(t) for t in re.findall(r"<h4>(.*?)</h4>", testo)}
+    righe = modulo.guida_rapida(testo)
+    righe = righe[righe.index("L'aiuto e l'uscita"):righe.index("I comandi della ricerca e del filtro")]
+    blocchi = [[]]
+    dopo_la_plancia = False
+    for riga in righe:
+        if riga in titoli:
+            dopo_la_plancia = dopo_la_plancia or riga == "La selezione multipla"
+            if dopo_la_plancia:
+                blocchi.append([])
+        else:
+            blocchi[-1].append(_tasto_della_guida(riga.split(":", 1)[0]))
+    return blocchi
+
+
 def test_ogni_tasto_e_nella_guida_rapida(finestra):
-    """Ogni tasto a lettera, con i suoi modificatori, e ogni tasto funzione ha
-    la sua riga nella guida rapida, che comincia con il suo nome."""
-    righe = modulo.guida_rapida(finestra._leggi_risorsa("manuale.html"))
-    tasti = [f"F{n}" for n in range(1, 13)] + [f"Maiuscolo con F{n}" for n in (1, 5, 7, 8, 9, 10, 11, 12)] + [
-        "Esc", "Alt con F4", "Tab", "Maiuscolo con Tab", "Barra rovesciata", "Ctrl con la barra rovesciata", "Barra verticale",
-        "Canc", "Maiuscolo con Canc", "Backspace", "Maiuscolo con Backspace", "Cifre da 1 a 0", "Maiuscolo con le cifre da 1 a 0",
-        "Apostrofo", "Maiuscolo con l'apostrofo"]
-    segni = {",": ("Virgola", "la virgola"), ".": ("Punto", "il punto"), "+": ("Più", "il più")}
-    for (carattere, modificatori), _comando in modulo.TASTI.items():
-        if carattere.isalpha():
-            tasti.append(modulo.nome_del_carattere(carattere, modificatori))
-        elif carattere in segni:
-            solo, con = segni[carattere]
-            prefisso = modulo.nome_del_carattere(carattere, modificatori).rsplit(" con ", 1)[0]
-            tasti.append(solo if modificatori == modulo.SOLO else f"{prefisso} con {con}")
-    for tasto in tasti:
-        assert any(r.startswith(f"{tasto}:") for r in righe), tasto
+    """Ogni tasto con un comando, con tutti i suoi modificatori, ha la sua
+    riga nella guida rapida: i tasti a carattere e i tasti funzione dalle
+    tabelle del codice, gli altri da questo elenco."""
+    nella_guida = {tasto for blocco in _blocchi_della_guida(finestra) for tasto in blocco}
+    tasti = {_tasto_della_guida(modulo.nome_del_carattere(carattere, modificatori)) for carattere, modificatori in modulo.TASTI}
+    tasti |= {(modulo.NOMI_DEI_TASTI[codice].lower(), modificatori) for codice, modificatori in modulo.COMANDI_DEI_TASTI_FUNZIONE}
+    tasti |= {(modulo.NOMI_DEI_TASTI[codice].lower(), modificatori) for codice in modulo.INTERRUTTORI for modificatori in (modulo.CTRL, modulo.MAIUSCOLO)}
+    # Fuori dalle tabelle: la ricerca globale, le cifre, i tasti della plancia
+    # e quelli che restano a Windows, come Alt con F4 e Maiuscolo con F10.
+    tasti |= {("barra rovesciata", modulo.CTRL), ("cifre da 1 a 0", modulo.SOLO), ("cifre da 1 a 0", modulo.MAIUSCOLO),
+        ("tab", modulo.SOLO), ("tab", modulo.MAIUSCOLO), ("f4", modulo.ALT), ("f10", modulo.MAIUSCOLO), ("backspace", modulo.SOLO),
+        ("backspace", modulo.MAIUSCOLO), ("canc", modulo.SOLO), ("canc", modulo.MAIUSCOLO), ("invio", modulo.SOLO),
+        ("tasto applicazioni", modulo.SOLO), ("barra spaziatrice", modulo.SOLO), ("barra spaziatrice", modulo.CTRL),
+        ("freccia sinistra", modulo.SOLO), ("freccia destra", modulo.SOLO)}
+    assert not tasti - nella_guida, sorted(tasti - nella_guida)
+
+
+def test_le_varianti_di_ogni_tasto_stanno_insieme_nella_guida(finestra):
+    """Nella guida rapida ogni tasto ha tutte le sue combinazioni di seguito,
+    nell'ordine della regola: da solo, Ctrl, Maiuscolo, Ctrl e Maiuscolo,
+    Alt, Ctrl e Alt (Gabriele, collaudo della 2.7.2). Una riga di un tasto
+    gia' detto, come Esc nella finestra del video, e' lo stesso tasto in un
+    altro posto, e non conta."""
+    for blocco in _blocchi_della_guida(finestra):
+        nuove = list(dict.fromkeys(blocco))
+        for tasto in {t for t, _m in nuove}:
+            posti = [n for n, (t, _m) in enumerate(nuove) if t == tasto]
+            assert posti == list(range(posti[0], posti[-1] + 1)), (tasto, nuove[posti[0]:posti[-1] + 1])
+            ordine = [_ORDINE_DELLA_REGOLA.index(nuove[n][1]) for n in posti]
+            assert ordine == sorted(ordine), (tasto, ordine)
+
+
+def test_i_comandi_dei_tasti_funzione_esistono(finestra):
+    for comando in [*modulo.COMANDI_DEI_TASTI_FUNZIONE.values(), *modulo.INTERRUTTORI.values()]:
+        assert callable(getattr(finestra, comando)), comando
 
 
 def test_f12_porta_il_cursore_all_inizio_della_guida(finestra):

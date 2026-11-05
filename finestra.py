@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17). Nella 2.7.1 la precedenza ai tasti sul lavoro in disparte. Nella 2.7.2 i lettori di rete chiusi all'uscita
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17). Nella 2.7.1 la precedenza ai tasti sul lavoro in disparte. Nella 2.7.2 i lettori di rete chiusi all'uscita. Nella 2.7.3 i tasti funzione nelle tabelle COMANDI_DEI_TASTI_FUNZIONE e INTERRUTTORI, lette dalla prova della guida rapida, e le righe del cruscotto nell'ordine della regola
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -196,11 +196,29 @@ MAIUSCOLO = wx.MOD_SHIFT
 CTRL_MAIUSCOLO = wx.MOD_CONTROL | wx.MOD_SHIFT
 ALT = wx.MOD_ALT
 CTRL_ALT = wx.MOD_CONTROL | wx.MOD_ALT
-# F9 con i modificatori (2.7.0): Maiuscolo apre il ramo con tutto dentro, Ctrl
-# lo chiude, Alt apre tutta la plancia, Ctrl e Alt la chiude, Ctrl e Maiuscolo
-# fermano l'apertura in corso.
-COMANDI_DI_F9 = {MAIUSCOLO: "_apri_tutto", CTRL: "_chiudi_tutto", ALT: "_apri_la_plancia", CTRL_ALT: "_chiudi_la_plancia",
-    CTRL_MAIUSCOLO: "_ferma_l_apertura"}
+# I tasti funzione ed Esc, con i modificatori: (tasto, modificatori) -> il
+# metodo del comando. La prova della guida rapida li legge da qui, cosi' una
+# combinazione nuova senza la sua riga non passa (2.7.3). Maiuscolo con F7
+# apre le statistiche da tutta la finestra (Gabriele, 1.103.0). F9 con i
+# modificatori (2.7.0): Maiuscolo apre il ramo con tutto dentro, Ctrl lo
+# chiude, Alt apre tutta la plancia, Ctrl e Alt la chiude, Ctrl e Maiuscolo
+# fermano l'apertura in corso; Maiuscolo con F10 resta a Windows, che apre il
+# menu della voce.
+COMANDI_DEI_TASTI_FUNZIONE = {
+    (wx.WXK_F1, SOLO): "_manuale", (wx.WXK_F2, SOLO): "_changelog", (wx.WXK_F3, SOLO): "_crediti", (wx.WXK_F4, SOLO): "_f4",
+    (wx.WXK_F5, SOLO): "_vai_alla_plancia", (wx.WXK_F6, SOLO): "_vai_alla_console", (wx.WXK_F7, SOLO): "_vai_al_cruscotto",
+    (wx.WXK_F7, MAIUSCOLO): "_comando_statistiche", (wx.WXK_F8, SOLO): "_vai_al_brano",
+    (wx.WXK_F9, SOLO): "_comando_stato_del_ramo", (wx.WXK_F9, CTRL): "_chiudi_tutto", (wx.WXK_F9, MAIUSCOLO): "_apri_tutto",
+    (wx.WXK_F9, CTRL_MAIUSCOLO): "_ferma_l_apertura", (wx.WXK_F9, ALT): "_apri_la_plancia", (wx.WXK_F9, CTRL_ALT): "_chiudi_la_plancia",
+    (wx.WXK_F10, SOLO): "_f10", (wx.WXK_F11, SOLO): "_comando_leggi_i_tag", (wx.WXK_F11, MAIUSCOLO): "_comando_modifica_i_tag",
+    (wx.WXK_F12, SOLO): "_elenco_dei_tasti", (wx.WXK_ESCAPE, SOLO): "Close",
+}
+# Gli interruttori, con la regola della issue 38: Ctrl spegne, Maiuscolo
+# accende, e il tasto da solo resta al suo comando (Gabriele, collaudo della
+# 2.0.0). Sottotitoli, traccia audio e rapporto dell'immagine sono passati a
+# D, G e I.
+INTERRUTTORI = {wx.WXK_F1: "_metti_il_video", wx.WXK_F5: "_metti_lo_schermo_intero", wx.WXK_F8: "_metti_l_inseguimento",
+    wx.WXK_F12: "_metti_i_tasti_rapidi"}
 # I tasti a carattere: (carattere, modificatori) -> comando, una famiglia per
 # tasto dove la regola si applica. Ctrl con Alt e' anche AltGr: resta libero
 # sui tasti che con AltGr scrivono un segno, come E per l'euro, e su N, che
@@ -431,12 +449,12 @@ TASTI_COMUNI = [
     "lo scrive nella console e lo manda alla sintesi e al braille dei sottotitoli, senza spostare il fuoco.",
     "Maiuscolo con l'apostrofo dice la durata residua: quanto manca e quanto è passato di ciò che suonerà, anche nei rami aperti dopo nella plancia, "
     "la percentuale ascoltata e l'ora in cui finisce; anche lei va nella console, alla sintesi e al braille dei sottotitoli.",
-    "H il segnalibro, uno per tutto MeTeOra, che resta anche chiudendo: Ctrl e Maiuscolo con H lo mettono sul brano che suona, al punto in cui è, "
-    "Maiuscolo con H ci torna, aprendo la plancia fino al brano e suonandolo da lì, Ctrl con H lo toglie.",
+    "H il segnalibro, uno per tutto MeTeOra, che resta anche chiudendo: Ctrl con H lo toglie, Maiuscolo con H ci torna, aprendo la plancia fino al brano "
+    "e suonandolo da lì, Ctrl e Maiuscolo con H lo mettono sul brano che suona, al punto in cui è.",
     "Q il punto del brano: Ctrl e Maiuscolo indietro e avanti di un salto, Alt agli ultimi secondi, Ctrl e Alt all'inizio. "
     "E i passi dei salti: Ctrl e Maiuscolo chiedono quello indietro e quello avanti, Ctrl e Maiuscolo insieme li riportano ai predefiniti. W va a un tempo.",
-    "M il volume: Ctrl e Maiuscolo lo abbassano e lo alzano di un passo, Alt lo porta al massimo, Ctrl e Alt a zero, che fa da muto, "
-    "e Ctrl e Maiuscolo insieme lo riportano a quello di prima del massimo o dello zero. Il punto: il passo del volume.",
+    "M il volume: Ctrl e Maiuscolo lo abbassano e lo alzano di un passo, Ctrl e Maiuscolo insieme lo riportano a quello di prima del massimo o dello zero, "
+    "Alt lo porta al massimo, Ctrl e Alt a zero, che fa da muto. Il punto: il passo del volume.",
     "La virgola, i capitoli degli audiolibri e dei film: Ctrl e Maiuscolo il precedente e il successivo, Alt l'ultimo, Ctrl e Alt il primo; "
     "Ctrl con la virgola, oltre i primi secondi di un capitolo, torna al suo inizio.",
     "A la velocità, F il tono, di un semitono: Ctrl abbassa, Maiuscolo alza, Ctrl e Maiuscolo insieme tornano al normale, Alt al massimo, Ctrl e Alt al minimo.",
@@ -450,9 +468,9 @@ TASTI_COMUNI = [
     "Nella plancia Backspace chiude il ramo in cui sei e risale di un livello, Maiuscolo con Backspace risale di colpo all'unità o alla playlist, Preferiti compresi, e chiude i rami al suo interno.",
     "T mette un marker dove sei, o rinomina quello su cui sei; Maiuscolo con T li toglie tutti. Y il marker su cui sei o quello prima: Ctrl e Maiuscolo il precedente e il successivo, "
     "Alt l'ultimo, Ctrl e Alt il primo. R quanti marker ha il brano: Ctrl e Maiuscolo tolgono quelli prima e quelli dopo. Maiuscolo con le cifre da 1 a 0 va ai primi dieci marker del brano della plancia.",
-    "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, Maiuscolo con F7 le statistiche, F8 porta la selezione e il fuoco della plancia sul brano in riproduzione, Maiuscolo con F8 ce la tiene agganciata e Ctrl con F8 la sgancia, "
-    "F9 dice se il ramo col fuoco è aperto, e quante voci ha aperte dentro: Maiuscolo con F9 lo apre con tutto quello che ha dentro e Ctrl con F9 lo chiude, "
-    "Alt con F9 apre tutta la plancia e Ctrl e Alt con F9 la chiude, Ctrl e Maiuscolo con F9 fermano un'apertura; mentre si apre puoi navigare; "
+    "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, Maiuscolo con F7 le statistiche, F8 porta la selezione e il fuoco della plancia sul brano in riproduzione, Ctrl con F8 la sgancia e Maiuscolo con F8 ce la tiene agganciata, "
+    "F9 dice se il ramo col fuoco è aperto, e quante voci ha aperte dentro: Ctrl con F9 lo chiude e Maiuscolo con F9 lo apre con tutto quello che ha dentro, "
+    "Ctrl e Maiuscolo con F9 fermano un'apertura, Alt con F9 apre tutta la plancia e Ctrl e Alt con F9 la chiude; mentre si apre puoi navigare; "
     "F11 legge i tag del brano selezionato, o i dettagli di una cartella, di un'unità o di una playlist, e Maiuscolo con F11 apre il menu dei tag.",
     "Barra rovesciata: nella console cerca nella console, altrove nel ramo della plancia in cui sei, e da Apri file, Statistiche o Impostazioni in tutto MeTeOra; Ctrl con la barra rovesciata cerca in tutto MeTeOra, anche dalla console. "
     "Barra verticale: il filtro della playlist o dei Preferiti in cui sta la plancia, anche dalla console.",
@@ -2076,6 +2094,15 @@ class Finestra(wx.Frame):
             self._rinfresca_cruscotto()
         controllo.SetFocus()
 
+    def _vai_alla_plancia(self):
+        self._vai(self.albero, "plancia")
+
+    def _vai_alla_console(self):
+        self._vai(self.console, "console")
+
+    def _vai_al_cruscotto(self):
+        self._vai(self.cruscotto, "cruscotto")
+
     # I tasti.
 
     def _tasto(self, evento):
@@ -2098,37 +2125,12 @@ class Finestra(wx.Frame):
         lascia passare e torna falso."""
         codice = evento.GetKeyCode()
         modificatori = evento.GetModifiers()
-        tasti_funzione = {
-            wx.WXK_F1: self._manuale, wx.WXK_F2: self._changelog, wx.WXK_F3: self._crediti,
-            wx.WXK_F5: lambda: self._vai(self.albero, "plancia"), wx.WXK_F6: lambda: self._vai(self.console, "console"),
-            wx.WXK_F7: lambda: self._vai(self.cruscotto, "cruscotto"), wx.WXK_F4: self._f4, wx.WXK_F8: self._vai_al_brano, wx.WXK_F9: self._comando_stato_del_ramo, wx.WXK_F10: self._f10, wx.WXK_F11: self._comando_leggi_i_tag, wx.WXK_F12: self._elenco_dei_tasti,
-            wx.WXK_ESCAPE: self.Close,
-        }
-        if modificatori == wx.MOD_NONE and codice in tasti_funzione:
-            tasti_funzione[codice]()
+        comando = COMANDI_DEI_TASTI_FUNZIONE.get((codice, modificatori))
+        if comando:
+            getattr(self, comando)()
             return True
-        if modificatori == wx.MOD_SHIFT and codice == wx.WXK_F7:
-            # Le statistiche, da tutta la finestra (Gabriele, 1.103.0).
-            self._comando_statistiche()
-            return True
-        if codice == wx.WXK_F9 and modificatori in COMANDI_DI_F9:
-            # Le aperture e le chiusure, con la regola della issue 38 (2.7.0).
-            # Maiuscolo con F10 torna a Windows, che apre il menu della voce.
-            getattr(self, COMANDI_DI_F9[modificatori])()
-            return True
-        if modificatori == wx.MOD_SHIFT and codice == wx.WXK_F11:
-            self._comando_modifica_i_tag()
-            return True
-        # Gli interruttori, con la regola della issue 38: Ctrl spegne,
-        # Maiuscolo accende, e il tasto da solo resta al suo comando
-        # (Gabriele, collaudo della 2.0.0). Sottotitoli, traccia audio e
-        # rapporto dell'immagine sono passati a D, G e I.
-        interruttori = {
-            wx.WXK_F1: self._metti_il_video, wx.WXK_F5: self._metti_lo_schermo_intero,
-            wx.WXK_F8: self._metti_l_inseguimento, wx.WXK_F12: self._metti_i_tasti_rapidi,
-        }
-        if modificatori in (wx.MOD_CONTROL, wx.MOD_SHIFT) and codice in interruttori:
-            interruttori[codice](modificatori == wx.MOD_SHIFT)
+        if modificatori in (CTRL, MAIUSCOLO) and codice in INTERRUTTORI:
+            getattr(self, INTERRUTTORI[codice])(modificatori == MAIUSCOLO)
             return True
         if modificatori == wx.MOD_CONTROL and (evento.GetUnicodeKey() in (ord("\\"), 0x1C) or codice == ord("\\")):
             # Ctrl con la barra rovesciata: la ricerca in tutto MeTeOra (1.71.0).

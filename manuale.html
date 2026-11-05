@@ -287,7 +287,7 @@ kbd {
 </nav>
 <h2 id="guida-rapida">Guida rapida</h2>
 <h3 id="tasti">I tasti</h3>
-<p>I tasti valgono in tutta la finestra, qualunque area abbia il fuoco, e anche dalla finestra del video, tranne quelli propri della plancia e della console; dentro i dialoghi, come le impostazioni, valgono solo i tasti del dialogo.</p>
+<p>I tasti valgono in tutta la finestra, qualunque area abbia il fuoco, e anche dalla finestra del video, tranne quelli propri della plancia e della console; dentro i dialoghi, come le impostazioni, valgono solo i tasti del dialogo. Fino alla sezione Nella plancia compresa, ogni tasto ha tutte le sue combinazioni di seguito, nel punto del tasto da solo e nell'ordine della regola dei tasti a lettera: da solo, Ctrl, Maiuscolo, Ctrl e Maiuscolo, Alt, Ctrl e Alt. Le sezioni dopo la plancia hanno i tasti che valgono solo lì, come nella selezione multipla, nei campi di testo o nelle impostazioni.</p>
 <h4>La regola dei tasti a lettera</h4>
 <ul>
 <li><kbd>Il tasto da solo</kbd>: dice il valore del suo controllo, con i limiti entro cui si muove, per esempio Velocità 1.05, da 0.5 a 2, o Traccia audio 3 di 4, inglese; lo scrive nella console e lo manda alla sintesi e al braille dei sottotitoli, come la voce Dove vanno sottotitoli e karaoke delle impostazioni, senza spostare il fuoco.</li>
@@ -297,28 +297,31 @@ kbd {
 <li><kbd>Alt con il tasto</kbd>: va al massimo, o all'ultimo.</li>
 <li><kbd>Ctrl e Alt con il tasto</kbd>: va al minimo, o al primo. Ctrl e Alt è anche AltGr: con E, che scrive l'euro, e con N, che avvia NVDA, non è un comando di MeTeOra.</li>
 <li>Non ci sono più giri: arrivati al primo o all'ultimo valore ci si ferma, e lo si sente. Z, X, C, V e B, il cuore del lettore, restano come prima, con i loro modificatori.</li>
-<li>Gli interruttori dei tasti funzione seguono la stessa regola: Ctrl e Maiuscolo con F1 spengono e accendono il video, con F5 lo schermo intero, con F8 l'inseguimento e con F12 i tasti rapidi. F1, F5, F8 e F12 da soli restano il manuale, la plancia, il brano che suona e la guida rapida.</li>
+<li>Gli interruttori dei tasti funzione seguono la stessa regola: Ctrl e Maiuscolo con F1 spengono e accendono il video, con F5 lo schermo intero, con F8 l'inseguimento e con F12 i tasti rapidi. F1, F5, F8 e F12 da soli restano il manuale, la plancia, il brano che suona e la guida rapida. La segue anche F9, nella plancia: Ctrl chiude e Maiuscolo apre il ramo col fuoco, Ctrl e Maiuscolo fermano l'apertura in corso, Alt apre e Ctrl e Alt chiude tutta la plancia.</li>
 </ul>
 <h4>L'aiuto e l'uscita</h4>
 <ul>
 <li><kbd>F1</kbd>: apre il manuale nel browser.</li>
+<li><kbd>Ctrl con F1</kbd>: spegne il video.</li>
+<li><kbd>Maiuscolo con F1</kbd>: accende il video, o riapre la sua finestra nascosta con Esc.</li>
 <li><kbd>F12</kbd>: scrive nella console questa guida rapida e ci porta il fuoco, sulla prima riga.</li>
 <li><kbd>Ctrl con F12</kbd>: spegne i tasti rapidi a carattere. Spenti, lettere, cifre e segni vanno alla plancia, che salta alla voce che comincia con ciò che scrivi; i tasti funzione, Esc e le combinazioni con Ctrl e con Alt restano.</li>
 <li><kbd>Maiuscolo con F12</kbd>: riaccende i tasti rapidi a carattere.</li>
 <li><kbd>F2</kbd>: scrive nella console le novità delle versioni più recenti, con in fondo dove leggere il changelog intero, e ci porta il fuoco.</li>
 <li><kbd>F3</kbd>: scrive nella console i crediti e ci porta il fuoco.</li>
 <li><kbd>Più</kbd>: apre le impostazioni, come la voce Impostazioni della plancia. Il più del tastierino numerico resta a NVDA.</li>
-<li><kbd>Maiuscolo con F7</kbd>: apre le statistiche, come la voce Statistiche della plancia: ogni sorta di conti, dal tempo di ascolto per formato ai tasti più premuti. Nel loro testo la barra rovesciata cerca e Invio passa all'occorrenza seguente.</li>
 <li><kbd>Esc</kbd>: esce da MeTeOra salvando tutto, e alla riapertura ritrovi in pausa il brano e il punto a cui eri.</li>
-<li><kbd>Alt con F4</kbd>: esce da MeTeOra come Esc, con lo stesso salvataggio.</li>
 </ul>
 <h4>Le aree della finestra</h4>
 <ul>
 <li><kbd>F5</kbd>: porta il fuoco nella plancia dei comandi, e dalla finestra del video riporta davanti MeTeOra.</li>
+<li><kbd>Ctrl con F5</kbd>: rimette la finestra del video in finestra, come Esc.</li>
+<li><kbd>Maiuscolo con F5</kbd>: mette la finestra del video a schermo intero.</li>
 <li><kbd>F6</kbd>: porta il fuoco nella console, con il cursore dove l'avevi lasciato, e come F5 riporta davanti MeTeOra dalla finestra del video.</li>
 <li><kbd>F7</kbd>: porta il fuoco nel cruscotto, con i tasti del punto da cui arrivi, e premuto nel cruscotto lo rinfresca; come F5, riporta davanti MeTeOra dalla finestra del video.</li>
-<li><kbd>Maiuscolo con Tab</kbd>: passa all'area precedente.</li>
+<li><kbd>Maiuscolo con F7</kbd>: apre le statistiche, come la voce Statistiche della plancia: ogni sorta di conti, dal tempo di ascolto per formato ai tasti più premuti. Nel loro testo la barra rovesciata cerca e Invio passa all'occorrenza seguente.</li>
 <li><kbd>Tab</kbd>: passa all'area seguente, nell'ordine plancia, console, cruscotto.</li>
+<li><kbd>Maiuscolo con Tab</kbd>: passa all'area precedente.</li>
 </ul>
 <h4>La riproduzione</h4>
 <ul>
@@ -327,13 +330,13 @@ kbd {
 <li><kbd>X</kbd>: su un marker fa come sul suo brano.</li>
 <li><kbd>X</kbd>: su un capitolo suona il file da quel capitolo.</li>
 <li><kbd>X</kbd>: sulla playlist o sulla cartella da cui stai già suonando, e sulle voci che non si suonano, come Questo PC o i Risultati, riprende dalla pausa o fa ripartire da capo il brano in corso.</li>
-<li><kbd>C</kbd>: mette in pausa, e di nuovo C riprende.</li>
-<li><kbd>V</kbd>: ferma la riproduzione, e poi X riparte dall'inizio del brano. Da fermi, i tasti che si muovono nel brano o lo raccontano, come Q, W, Y, R, la virgola, l'apostrofo e G, rimettono il brano in pausa all'inizio e poi fanno il loro lavoro; F8 porta la selezione sul brano fermo.</li>
-<li><kbd>Z</kbd>: suona il brano precedente, nella plancia se ciò che suona si vede, altrimenti nella lista da cui suona; con la riproduzione casuale accesa torna al brano suonato prima.</li>
-<li><kbd>B</kbd>: suona il brano successivo, con la stessa regola di Z; con la riproduzione casuale accesa ne sceglie uno a caso.</li>
-<li><kbd>Maiuscolo con V</kbd>: cambia la ripetizione, a giro: del brano, che ricomincia quando finisce; della lista, che dopo l'ultimo brano riparte dal primo; spenta.</li>
 <li><kbd>Maiuscolo con X</kbd>: a giro, mette il punto A del loop sul brano selezionato, poi il punto B, poi toglie il loop.</li>
 <li><kbd>Ctrl e Maiuscolo con X</kbd>: apre la lista della voce Scheda audio, senza passare dalle impostazioni: le schede del PC, comprese le cuffie Bluetooth connesse, e gli speaker Cast.</li>
+<li><kbd>C</kbd>: mette in pausa, e di nuovo C riprende.</li>
+<li><kbd>V</kbd>: ferma la riproduzione, e poi X riparte dall'inizio del brano. Da fermi, i tasti che si muovono nel brano o lo raccontano, come Q, W, Y, R, la virgola, l'apostrofo e G, rimettono il brano in pausa all'inizio e poi fanno il loro lavoro; F8 porta la selezione sul brano fermo.</li>
+<li><kbd>Maiuscolo con V</kbd>: cambia la ripetizione, a giro: del brano, che ricomincia quando finisce; della lista, che dopo l'ultimo brano riparte dal primo; spenta.</li>
+<li><kbd>Z</kbd>: suona il brano precedente, nella plancia se ciò che suona si vede, altrimenti nella lista da cui suona; con la riproduzione casuale accesa torna al brano suonato prima.</li>
+<li><kbd>B</kbd>: suona il brano successivo, con la stessa regola di Z; con la riproduzione casuale accesa ne sceglie uno a caso.</li>
 <li><kbd>N</kbd>: dice se la riproduzione casuale è accesa, e con quale modello.</li>
 <li><kbd>Ctrl con N</kbd>: spegne la riproduzione casuale.</li>
 <li><kbd>Maiuscolo con N</kbd>: accende la riproduzione casuale, che sceglie a caso il brano seguente quando uno finisce da solo e quando premi B.</li>
@@ -343,9 +346,10 @@ kbd {
 <li><kbd>Maiuscolo con S</kbd>: chiede fra quanti minuti fermare la riproduzione, che prima sfuma, oppure f per fermarla alla fine del brano, o 0 per togliere il timer.</li>
 <li><kbd>Alt con S</kbd>: mette il timer alla fine del brano.</li>
 <li><kbd>F4</kbd>: mette nei Preferiti il brano, il file o il sottobrano selezionato.</li>
+<li><kbd>Alt con F4</kbd>: esce da MeTeOra come Esc, con lo stesso salvataggio.</li>
 <li><kbd>F8</kbd>: porta la selezione e il fuoco della plancia su ciò che suona, aprendo i rami che servono, fino al sottobrano di un SID.</li>
-<li><kbd>Maiuscolo con F8</kbd>: aggancia l'inseguimento, che porta da solo la selezione su ogni brano che parte.</li>
 <li><kbd>Ctrl con F8</kbd>: sgancia l'inseguimento.</li>
+<li><kbd>Maiuscolo con F8</kbd>: aggancia l'inseguimento, che porta da solo la selezione su ogni brano che parte.</li>
 <li><kbd>Apostrofo</kbd>: dice dove sei, cioè il tempo del brano che suona, il suo nome, il posto nella lista e quello che c'è di particolare, come la pausa o la velocità cambiata; lo scrive nella console e lo manda alla sintesi e al braille dei sottotitoli, senza spostare il fuoco.</li>
 <li><kbd>Maiuscolo con l'apostrofo</kbd>: dice la durata residua, cioè quanto manca e quanto è passato di ciò che suonerà, anche nei rami aperti dopo nella plancia, con il totale, la percentuale ascoltata e l'ora in cui finisce; anche lei va nella console, alla sintesi e al braille dei sottotitoli, senza spostare il fuoco.</li>
 </ul>
@@ -357,6 +361,7 @@ kbd {
 <li><kbd>Alt con J</kbd>: apre e suona l'ultima playlist salvata.</li>
 <li><kbd>Ctrl e Alt con J</kbd>: apre e suona la prima playlist salvata.</li>
 <li><kbd>Cifre da 1 a 0</kbd>: sulla tastiera principale, aprono e suonano la playlist salvata con quel numero, e lo 0 la decima.</li>
+<li><kbd>Maiuscolo con le cifre da 1 a 0</kbd>: cioè dal punto esclamativo all'uguale, suona dal marker con quel numero il brano su cui sta la plancia.</li>
 </ul>
 <h4>Muoversi nel brano</h4>
 <ul>
@@ -379,8 +384,8 @@ kbd {
 <h4>Il segnalibro</h4>
 <ul>
 <li><kbd>H</kbd>: dice dov'è il segnalibro: il brano, il punto e la lista da cui suonava.</li>
-<li><kbd>Maiuscolo con H</kbd>: torna al segnalibro: apre la plancia fino al brano, o al sottobrano di un SID, ci porta il fuoco e lo suona dal punto segnato.</li>
 <li><kbd>Ctrl con H</kbd>: toglie il segnalibro.</li>
+<li><kbd>Maiuscolo con H</kbd>: torna al segnalibro: apre la plancia fino al brano, o al sottobrano di un SID, ci porta il fuoco e lo suona dal punto segnato.</li>
 <li><kbd>Ctrl e Maiuscolo con H</kbd>: mette il segnalibro sul brano che suona, al punto in cui è, al posto di quello di prima.</li>
 </ul>
 <h4>Il volume</h4>
@@ -388,9 +393,9 @@ kbd {
 <li><kbd>M</kbd>: dice il volume, da 0 a 300, e se c'è quello a cui Ctrl e Maiuscolo con M lo riportano.</li>
 <li><kbd>Ctrl con M</kbd>: abbassa il volume, di 5 se non lo cambi, fino a 0.</li>
 <li><kbd>Maiuscolo con M</kbd>: alza il volume fino a 300, e oltre il 100 amplifica.</li>
+<li><kbd>Ctrl e Maiuscolo con M</kbd>: riporta il volume a quello di prima che Alt o Ctrl e Alt con M lo portassero al massimo o a zero; dallo zero, toglie il muto. Lo ricorda anche dopo la chiusura.</li>
 <li><kbd>Alt con M</kbd>: porta il volume a 300.</li>
 <li><kbd>Ctrl e Alt con M</kbd>: porta il volume a 0, e fa da muto.</li>
-<li><kbd>Ctrl e Maiuscolo con M</kbd>: riporta il volume a quello di prima che Alt o Ctrl e Alt con M lo portassero al massimo o a zero; dallo zero, toglie il muto. Lo ricorda anche dopo la chiusura.</li>
 <li><kbd>Punto</kbd>: dice il passo del volume, da 1 a 50.</li>
 <li><kbd>Ctrl con il punto</kbd>: abbassa di uno il passo del volume.</li>
 <li><kbd>Maiuscolo con il punto</kbd>: alza di uno il passo del volume.</li>
@@ -450,7 +455,6 @@ kbd {
 <li><kbd>R</kbd>: dice quanti marker ha il brano, prima e dopo il punto in cui sei.</li>
 <li><kbd>Ctrl con R</kbd>: toglie i marker prima del punto in cui sei.</li>
 <li><kbd>Maiuscolo con R</kbd>: toglie i marker dopo il punto in cui sei.</li>
-<li><kbd>Maiuscolo con le cifre da 1 a 0</kbd>: cioè dal punto esclamativo all'uguale, suona dal marker con quel numero il brano su cui sta la plancia.</li>
 </ul>
 <h4>I tag</h4>
 <ul>
@@ -459,8 +463,6 @@ kbd {
 </ul>
 <h4>Il video</h4>
 <ul>
-<li><kbd>Maiuscolo con F1</kbd>: accende il video, o riapre la sua finestra nascosta con Esc.</li>
-<li><kbd>Ctrl con F1</kbd>: spegne il video.</li>
 <li><kbd>D</kbd>: dice i sottotitoli letti, fra le scelte del brano: spenti, le tracce dei sottotitoli e sui video in fondo i sottotitoli impressi; le tracce fatte di immagini le legge il riconoscimento dei caratteri.</li>
 <li><kbd>Ctrl con D</kbd>: sceglie i sottotitoli precedenti, fermandosi a spenti.</li>
 <li><kbd>Maiuscolo con D</kbd>: sceglie i sottotitoli successivi. Sui brani senza sottotitoli, Ctrl e Maiuscolo con D li spengono e li accendono per i brani dopo, e sui brani con il testo del karaoke il testo.</li>
@@ -477,8 +479,6 @@ kbd {
 <li><kbd>Ctrl e Maiuscolo con I</kbd>: torna al rapporto del video.</li>
 <li><kbd>Alt con I</kbd>: sceglie l'ultimo rapporto, 21:9.</li>
 <li><kbd>Ctrl e Alt con I</kbd>: sceglie il primo rapporto, quello del video.</li>
-<li><kbd>Maiuscolo con F5</kbd>: mette la finestra del video a schermo intero.</li>
-<li><kbd>Ctrl con F5</kbd>: rimette la finestra del video in finestra, come Esc.</li>
 <li><kbd>Esc</kbd>: nella finestra del video toglie lo schermo intero, oppure nasconde il video per il brano in corso.</li>
 <li><kbd>Alt con F4</kbd>: nella finestra del video la nasconde per il brano in corso, come Esc.</li>
 </ul>
@@ -497,24 +497,24 @@ kbd {
 <li><kbd>Backspace</kbd>: chiude il ramo in cui sei e ci porta il fuoco, un livello alla volta.</li>
 <li><kbd>Maiuscolo con Backspace</kbd>: risale di colpo al ramo di secondo livello in cui sei, come l'unità, la playlist o i Preferiti, e chiude i rami al suo interno.</li>
 <li><kbd>F9</kbd>: dice se il ramo col fuoco è aperto o chiuso, quante voci e quanti rami aperti ha dentro, e a che punto è l'apertura in corso; su una voce senza niente dentro guarda il ramo che la contiene.</li>
-<li><kbd>Maiuscolo con F9</kbd>: apre il ramo col fuoco con tutto quello che ha dentro, anche un disco intero o una cartella di rete; mentre si apre puoi navigare.</li>
 <li><kbd>Ctrl con F9</kbd>: chiude il ramo col fuoco e tutto ciò che ha dentro, e ci porta la selezione.</li>
+<li><kbd>Maiuscolo con F9</kbd>: apre il ramo col fuoco con tutto quello che ha dentro, anche un disco intero o una cartella di rete; mentre si apre puoi navigare.</li>
+<li><kbd>Ctrl e Maiuscolo con F9</kbd>: ferma l'apertura in corso, e lascia aperto quello che ha aperto fin lì.</li>
+<li><kbd>Alt con F9</kbd>: apre tutta la plancia, anche Questo PC e i percorsi di rete scritti a mano, tranne i CD, Computer della rete e le condivisioni salvate in Windows, con un suono all'inizio e uno alla fine.</li>
+<li><kbd>Ctrl e Alt con F9</kbd>: chiude tutta la plancia, e il fuoco va sulla voce di primo livello che conteneva quella su cui eri.</li>
 <li><kbd>F10</kbd>: non ha un comando, e la console lo dice.</li>
 <li><kbd>Maiuscolo con F10</kbd>: apre il menu della voce, come nel resto di Windows.</li>
 <li><kbd>Invio</kbd>: apre il menu della voce, ma esegue i comandi, mostra gli altri risultati, rinomina i marker e suona il file da un capitolo.</li>
 <li><kbd>Tasto Applicazioni</kbd>: apre il menu della voce.</li>
 <li><kbd>Barra spaziatrice</kbd>: apre il menu della voce, come il tasto Applicazioni.</li>
-<li><kbd>Alt con F9</kbd>: apre tutta la plancia, anche Questo PC e i percorsi di rete scritti a mano, tranne i CD, Computer della rete e le condivisioni salvate in Windows, con un suono all'inizio e uno alla fine.</li>
-<li><kbd>Ctrl e Alt con F9</kbd>: chiude tutta la plancia, e il fuoco va sulla voce di primo livello che conteneva quella su cui eri.</li>
-<li><kbd>Ctrl e Maiuscolo con F9</kbd>: ferma l'apertura in corso, e lascia aperto quello che ha aperto fin lì.</li>
 <li><kbd>Canc</kbd>: elimina una playlist dopo una conferma, toglie un brano da una playlist o dai Preferiti, elimina un marker o toglie un percorso di rete aggiunto a mano.</li>
 <li><kbd>Maiuscolo con Canc</kbd>: manda nel cestino di Windows il file di un brano o di un file, o una cartella vuota, dopo una conferma con No come risposta predefinita; in rete e sulle chiavette, dove il cestino non c'è, cancella per sempre e lo dice.</li>
 </ul>
 <h4>La selezione multipla</h4>
 <ul>
+<li><kbd>Ctrl con freccia su e freccia giù, Inizio, Fine, Pagina su e Pagina giù</kbd>: muovono il fuoco senza cambiare la selezione.</li>
 <li><kbd>Maiuscolo con freccia su e freccia giù</kbd>: allargano la selezione dalla voce da cui hai cominciato.</li>
 <li><kbd>Maiuscolo con Inizio, Fine, Pagina su e Pagina giù</kbd>: allargano la selezione fino alla prima voce, fino all'ultima o di una pagina.</li>
-<li><kbd>Ctrl con freccia su e freccia giù, Inizio, Fine, Pagina su e Pagina giù</kbd>: muovono il fuoco senza cambiare la selezione.</li>
 <li><kbd>Ctrl con la barra spaziatrice</kbd>: seleziona o deseleziona la voce che ha il fuoco.</li>
 <li><kbd>X</kbd>: con più voci selezionate, suona la selezione come una playlist invisibile, finché V non la chiude.</li>
 <li><kbd>Invio, tasto Applicazioni o barra spaziatrice</kbd>: con più voci selezionate, aprono il menu della selezione.</li>
@@ -549,7 +549,7 @@ kbd {
 <li><kbd>Invio</kbd>: cambia la voce selezionata, o fa la sua azione.</li>
 <li><kbd>Esc</kbd>: chiude la finestra delle impostazioni.</li>
 <li><kbd>Lettere</kbd>: portano alla voce seguente che comincia così, e ripremute passano alla successiva, come nelle liste di Windows.</li>
-<li><kbd>Maiuscolo+Tab</kbd>: dalla lista porta al filtro delle voci, che mostra solo quelle il cui nome contiene il testo scritto.</li>
+<li><kbd>Maiuscolo con Tab</kbd>: dalla lista porta al filtro delle voci, che mostra solo quelle il cui nome contiene il testo scritto.</li>
 <li><kbd>Invio</kbd>: nel filtro delle voci torna alla lista.</li>
 </ul>
 <h4>Nella finestra dei marcatori</h4>
@@ -557,8 +557,8 @@ kbd {
 <li><kbd>Barra rovesciata</kbd>: cerca un testo nelle righe, dalla riga dopo quella col fuoco.</li>
 <li><kbd>Invio</kbd>: rinomina il marker della riga col fuoco.</li>
 <li><kbd>Canc</kbd>: elimina i marker delle righe selezionate, dopo una conferma se sono più d'uno.</li>
-<li><kbd>Maiuscolo con le frecce</kbd>: allargano la selezione.</li>
 <li><kbd>Ctrl con le frecce</kbd>: muovono il fuoco senza selezionare.</li>
+<li><kbd>Maiuscolo con le frecce</kbd>: allargano la selezione.</li>
 <li><kbd>Ctrl con la barra spaziatrice</kbd>: accende e spegne la riga col fuoco.</li>
 <li><kbd>Esc</kbd>: chiude la finestra dei marcatori e torna alle impostazioni.</li>
 </ul>
@@ -662,12 +662,12 @@ kbd {
 <p>Le frecce su e giù, Inizio, Fine, Pagina su e Pagina giù muovono il fuoco come in ogni albero di Windows. I rami si aprono con freccia destra e si chiudono con freccia sinistra, ciascuno con il suo suono: un fruscio che sale quando si apre, uno più scuro che scende quando si chiude. Aprendosi, un ramo si carica: le unità, le cartelle, i brani di una playlist, i sottobrani di un SID, i marker di un brano. Freccia destra su un ramo già aperto porta alla prima voce che contiene; freccia sinistra su una voce chiusa porta il fuoco sul ramo che la contiene, senza chiuderlo.</p>
 <p>Quando un tasto porta il fuoco a un livello diverso dell'albero, un beep breve ne dice la profondità: do al primo livello, e tre semitoni più su per ogni livello in più, fino al do 8 del diciassettesimo, oltre il quale resta lì. Vale per le frecce e per ogni comando, anche quando passa da un dialogo, come Ctrl con F9, Ctrl e Maiuscolo con J o Maiuscolo con Canc; scorrendo voci dello stesso livello, o lavorando nella console o nel cruscotto, il beep tace. Se il comando ha un suono suo, il beep aspetta che finisca.</p>
 <p>Backspace chiude il ramo in cui sei e ci porta il fuoco, con la riga Chiuso e il nome del ramo; premuto ancora risale di un livello, chiudendo anche quello, fino al primo livello della plancia, dove la console dice Sei già al primo livello della plancia.</p>
+<p>F9 e le sue combinazioni lavorano sui rami, con la regola dei tasti a lettera. F9 da solo dice lo stato del ramo che ha il fuoco: chiuso, oppure aperto, con quante voci e quanti rami aperti ha dentro; durante un'apertura aggiunge a che punto è. Ctrl con F9 chiude il ramo e tutto ciò che ha dentro, e ci porta la selezione. Maiuscolo con F9 apre il ramo con tutto ciò che ha dentro. Ctrl e Maiuscolo con F9 fermano l'apertura in corso. Alt con F9 apre tutta la plancia, e Ctrl e Alt con F9 la chiude. Su una voce senza niente dentro, come un file, F9 e le sue combinazioni lavorano sul ramo che la contiene. F10 da solo non ha un comando, e lo dice; Maiuscolo con F10 apre il menu della voce, come nel resto di Windows.</p>
 <p>Backspace, Maiuscolo con Backspace, Ctrl con F9 e Ctrl e Alt con F9 chiudono tutti dei rami, ma ognuno a modo suo. Backspace sale di un livello alla volta, e un ramo riaperto ritrova aperti i rami che aveva dentro. Maiuscolo con Backspace salta di colpo al ramo di secondo livello, come l'unità o la playlist, chiude tutto ciò che ha dentro e lo lascia aperto, così con le frecce passi ai suoi fratelli. Ctrl con F9 non sale: chiude il ramo su cui sei e azzera i rami che ha dentro, che riaprendolo trovi chiusi; su una voce senza niente dentro, come un file, chiude la cartella che la contiene. Ctrl e Alt con F9 chiude tutta la plancia, e il fuoco va al primo livello, sulla voce che conteneva quella su cui eri.</p>
 <p>Alt con F9 apre tutta la plancia: i Preferiti, i Risultati e le playlist, con i loro brani, i sottobrani e i marker, e anche Questo PC e Questa rete. Maiuscolo con F9 apre allo stesso modo un ramo solo, quello col fuoco: una playlist, una cartella, un'unità intera o una cartella di rete. Non ci sono limiti: i dischi e la rete li legge in disparte un esploratore, che va in ordine alfabetico come la plancia, e nella plancia mette solo le cartelle con qualcosa da suonare, dentro di loro o più sotto. Sul disco C di un computer ci sono spesso centinaia di migliaia di cartelle, e poche con della musica: la plancia mostra solo quelle, e le altre non compaiono nemmeno per un momento. Intanto la plancia si riempie a poco a poco, come i Risultati di una ricerca, e puoi navigare, anche dentro i rami che si stanno aprendo: i tasti non fermano l'apertura. Anzi, a ogni tasto il lavoro in disparte si ferma per mezzo secondo, così NVDA risponde subito anche durante un'apertura grande, e l'apertura va avanti quando lasci la tastiera. F9 dice a che punto è: quanti rami e quante voci ha aperto, quante cartelle ha letto e quale sta leggendo. Ctrl e Maiuscolo con F9 la fermano, e lasciano aperto quello che è aperto; una cartella che l'esploratore non aveva finito si rilegge quando la riapri. La ferma anche chiudere un ramo che l'apertura sta riempiendo, con Ctrl con F9, o tutta la plancia, con Ctrl e Alt con F9; un'apertura nuova prende il posto di quella in corso. Se invece chiudi un ramo con la freccia sinistra o con Backspace, l'apertura va avanti e quel ramo resta chiuso.</p>
 <p>In rete l'esploratore legge per ultimi, come la ricerca, le unità di rete con la lettera e i percorsi che hai aggiunto a mano in Questa rete, con la lettura protetta della ricerca: una cartella che non risponde si salta, e dopo tre, o se non risponde la cartella da cui parte, si lascia tutta. Le letture di rete le fa un piccolo processo a parte: se una cartella non risponde, MeTeOra lo lascia perdere e va avanti, e quando lo chiudi si chiude subito, anche con una lettura appesa. Le condivisioni intere salvate in Windows restano chiuse, anche con Maiuscolo con F9 su Questa rete: su un disco di rete con decine di migliaia di cartelle, come quelli dei router, una lettura può restare appesa per venti minuti, e intanto MeTeOra non riesce a chiudersi. Computer della rete resta chiuso, perché mostra di nuovo le stesse cartelle condivise sotto il nome dei computer, e restano chiusi i CD, che possono essere lenti o vuoti. Con Maiuscolo con F9 proprio sul loro ramo si aprono lo stesso: una condivisione salvata o un CD con tutto quello che hanno dentro, Computer della rete come con la freccia destra, perché la ricerca dei computer va in disparte.</p>
 <p>Se l'apertura dura più di quattro decimi di secondo suona l'inizio, e la console ricorda come fermarla. Alla fine suona la fine, e la console dice quante voci si vedono, quanti rami sono aperti e quante cartelle ha letto, e anche quelle che non si leggono o che in rete non hanno risposto; il suono della fine aspetta quello dell'inizio, così non si sovrappongono. Le cartelle vuote non suonano una per una, e un ramo senza niente da suonare lo dice.</p>
 <p>Maiuscolo con Backspace risale di colpo al ramo antenato della voce su cui sei, quello al secondo livello della plancia, per esempio l'unità in Questo PC o la playlist nel ramo Playlist, e chiude i rami aperti dentro di lui. Nei Preferiti, che sono una playlist al primo livello, risale ai Preferiti stessi. L'antenato resta aperto, così con le frecce si passa subito a un ramo fratello di quello da cui vieni. Backspace invece sale di un livello alla volta. Se sei già sull'antenato, o al primo livello della plancia, il fuoco non si muove e la console lo dice; sull'antenato si chiudono comunque i rami aperti al suo interno.</p>
-<p>F9 da solo dice lo stato del ramo che ha il fuoco: chiuso, oppure aperto, con quante voci e quanti rami aperti ha dentro; durante un'apertura aggiunge a che punto è. Come gli altri comandi di F9, su una voce senza niente dentro, come un file, lavora sul ramo che la contiene. Ctrl con F9 chiude il ramo e tutto ciò che ha dentro, e ci porta la selezione. F10 da solo non ha un comando, e lo dice.</p>
 <p>Le lettere nella plancia sono comandi, come in tutta la finestra: per questo non si salta a una voce digitandone l'iniziale. Per cercare per iniziale in un ramo grande, Ctrl con F12 spegne i tasti rapidi a carattere, con due note che scendono, e la console lo dice: lettere, cifre e segni, anche con il Maiuscolo, vanno alla plancia, che come ogni albero di Windows salta alla voce che comincia con ciò che scrivi, se scrivi in fretta anche con più lettere; la selezione la segue, così Invio, Canc e gli altri tasti agiscono su di lei. Se nessuna voce comincia così, Windows suona il suo avviso. Fuori dalla plancia, nella console, nel cruscotto o nella finestra del video, un carattere dice soltanto che i tasti rapidi sono spenti. Restano i tasti funzione, come F5, F8 e F12, Esc, Ctrl con la barra rovesciata, e nella plancia Backspace, Spazio, Invio e Canc. Trovato quello che cerchi, Maiuscolo con F12 li riaccende, con tre note che salgono. Il cruscotto, F7, dice quando sono spenti; a ogni avvio di MeTeOra sono accesi.</p>
 <h4>Il menu della voce</h4>
 <p>Su ogni voce Invio, il tasto Applicazioni e la barra spaziatrice aprono il menu della voce, con il suono del menu. Lo apre anche Maiuscolo con F10, come nel resto di Windows. Ci sono quattro eccezioni per Invio: sui comandi, come Nuova playlist, Apri file, Statistiche, Impostazioni o Aggiungi un percorso di rete, Invio li esegue; sulla voce Mostra altri risultati mostra i risultati seguenti; su un marker chiede il suo nuovo nome; su un capitolo suona il file da lì.</p>
