@@ -1,6 +1,6 @@
 # MeTeOra, le prove del motore: due lettori, velocita', tono, equalizzatore, dissolvenza e fine brano senza attese.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.55.0 (tappa 4, issue 15). Nella 1.113.4 le prove del filtro del tempo e del tono cambiato al volo aspettano che il motore abbia visto gli eventi di mpv, invece dei tempi (issue 27). Nella 1.116.0 alle_uscite e l'uscita che non si apre piu'. Nella 1.117.0 il lettore lontano e la conversione in FLAC. Nella 2.0.5 il calo, la sfumatura e la catena del volume oltre 100 aspettati per stato, non per tempo (issue 28).
+# 01/10/2026: nasce con la 1.55.0 (tappa 4, issue 15). Nella 1.113.4 le prove del filtro del tempo e del tono cambiato al volo aspettano che il motore abbia visto gli eventi di mpv, invece dei tempi (issue 27). Nella 1.116.0 alle_uscite e l'uscita che non si apre piu'. Nella 1.117.0 il lettore lontano e la conversione in FLAC. Nella 2.0.5 il calo, la sfumatura e la catena del volume oltre 100 aspettati per stato, non per tempo (issue 28). Nella 2.7.4 la sorgente a 24 bit che va allo speaker a 16.
 
 """Le prove del motore vero, senza suoni.
 
@@ -1614,8 +1614,8 @@ def test_la_sorgente_wav(crea, tmp_path):
         assert max(letti[wav_in_ram.INTESTAZIONE:wav_in_ram.INTESTAZIONE + 48000]) > 0 and not sorgente.guasta
     finally:
         sorgente.chiudi()
-    # Un 24 bit a 96 kHz resta a 24 bit e 96 kHz (domanda di Gabriele del 5
-    # novembre 2026): 6 byte per istante.
+    # Un 24 bit a 96 kHz resta a 96 kHz, ma a 16 bit: i WAV a 24 bit lo
+    # speaker li suona gracchianti (prova di Gabriele del 5 novembre 2026).
     alto = tmp_path / "alto.wav"
     with wave.open(str(alto), "wb") as f:
         f.setnchannels(1)
@@ -1623,17 +1623,17 @@ def test_la_sorgente_wav(crea, tmp_path):
         f.setframerate(96000)
         campioni = np.round(0.25 * 8388607 * np.sin(2 * np.pi * 440 * np.arange(96000 * 2) / 96000)).astype("<i4")
         f.writeframes(b"".join(int(c).to_bytes(4, "little", signed=True)[:3] for c in campioni))
-    assert m.formato_da_convertire(str(alto)) == (pytest.approx(2.0, abs=0.05), 96000, 24)
+    assert m.formato_da_convertire(str(alto)) == (pytest.approx(2.0, abs=0.05), 96000, 16)
     sorgente = m.sorgente_wav(str(alto))
     try:
-        assert (sorgente.frequenza, sorgente.bit) == (96000, 24) and sorgente.dimensione == wav_in_ram.INTESTAZIONE + int(sorgente.durata * 96000) * 6
+        assert (sorgente.frequenza, sorgente.bit) == (96000, 16) and sorgente.dimensione == wav_in_ram.INTESTAZIONE + int(sorgente.durata * 96000) * 4
         richiesta = sorgente.nuova_richiesta()
         letti = bytearray()
         while len(letti) < sorgente.dimensione:
             pezzo = sorgente.leggi(len(letti), 65536, richiesta)
             assert pezzo
             letti += pezzo
-        assert letti[34:36] == (24).to_bytes(2, "little") and max(letti[wav_in_ram.INTESTAZIONE:wav_in_ram.INTESTAZIONE + 96000]) > 0
+        assert letti[34:36] == (16).to_bytes(2, "little") and max(letti[wav_in_ram.INTESTAZIONE:wav_in_ram.INTESTAZIONE + 96000]) > 0
     finally:
         sorgente.chiudi()
     # Un file che non c'e' non ha durata, e la sorgente non si fa.

@@ -1,3 +1,3 @@
-Collaudo di MeTeOra 2.7.3: la guida rapida riordinata, e la prova su GabryBar che restava.
-Su GabryBar E:\git\tmp\MeTeOra prova 24 bit\Pilgrim of Sorrow 24 bit 96 kHz.aiff, Joan Baez portata a 24 bit e 96 kHz, suona come sul PC: dimmi se senti differenze.
-* Fallita. Il file parte ma l'audio è distorto e quasi incomprensibile. Tutto gracchiante e bruttissimo.
+Collaudo di MeTeOra 2.7.4: il WAV in RAM a 16 bit sullo speaker.
+Su GabryBar E:\git\tmp\MeTeOra prova 24 bit\Pilgrim of Sorrow 24 bit 96 kHz.aiff suona pulito, come lo spezzone 3 della prova dei formati, e come sul PC.
+Sempre su GabryBar, con quel brano, i salti con Ctrl e Maiuscolo con Q, e con W a un tempo verso la fine, rispondono subito e senza rumori.

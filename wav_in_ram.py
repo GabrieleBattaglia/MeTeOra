@@ -27,12 +27,14 @@ silenzio, se va oltre si taglia: la fine arriva puntuale. Una conversione
 che non scrive niente e' un brano che non si legge, e il server chiude.
 
 La qualita' e' quella della sorgente, nei limiti dello speaker (domanda di
-Gabriele del 5 novembre 2026): 24 bit se la sorgente senza perdita ne ha piu'
-di 16, altrimenti 16; la frequenza della sorgente fra 44,1, 48, 88,2 e 96 kHz,
-il massimo degli apparecchi Cast. Sopra i 96 kHz si scende a 96, o a 88,2 per
-i multipli di 44,1 come i DSD; sotto i 44,1 kHz si sale al multiplo giusto.
-Un brano che cosi' passerebbe i 4 GB del WAV scende prima di frequenza, poi
-di bit.
+Gabriele del 5 novembre 2026): la frequenza della sorgente fra 44,1, 48, 88,2
+e 96 kHz, il massimo degli apparecchi Cast. Sopra i 96 kHz si scende a 96, o
+a 88,2 per i multipli di 44,1 come i DSD; sotto i 44,1 kHz si sale al
+multiplo giusto. I bit sono 16: la classe sa fare anche i 24, ma GabryBar i
+WAV a 24 bit li suona gracchianti, con l'intestazione semplice e con quella
+estesa, mentre a 16 bit regge anche i 96 kHz, e i FLAC a 24 bit li suona bene
+(prova di Gabriele del 5 novembre 2026, prototipi/prova_formati_wav.py). Un
+brano che passerebbe i 4 GB del WAV scende di frequenza.
 
 Prove su GabryBar del 4 e 5 novembre 2026: un sottobrano di Outrun Europa
 suona in 1,9 secondi, contro i circa 7 del FLAC; l'audio di Braveheart, 1,95

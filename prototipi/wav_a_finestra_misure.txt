@@ -148,3 +148,39 @@
    23.497 Suona dopo 1.91 secondi; lo speaker dice che dura 20.138667 secondi.
    23.497 Fine: dopo 22.30 secondi, motivo FINISHED.
    23.652 Stato: {'stato': 'UNKNOWN', 'posizione': 0.0, 'durata': None, 'motivo': None, 'indirizzo': None}.
+    0.000 Prova dei formati del WAV del 05/11/2026 11:53, su GabryBat: Pilgrim of Sorrow 24 bit 96 kHz.aiff, da 70 secondi per 12.
+    0.000 Prova dei formati del WAV del 05/11/2026 12:04, su GabryBat: Pilgrim of Sorrow 24 bit 96 kHz.aiff, da 70 secondi per 12.
+    8.290 Stato: {'stato': 'UNKNOWN', 'posizione': 0.0, 'durata': None, 'motivo': None, 'indirizzo': None}.
+    8.368 Stato: {'stato': 'UNKNOWN', 'posizione': 0.0, 'durata': None, 'motivo': None, 'indirizzo': None}.
+    8.381 Stato: {'stato': 'IDLE', 'posizione': 0, 'durata': None, 'motivo': None, 'indirizzo': 'http://192.168.1.171:59123/file/1.wav'}.
+    8.392 192.168.1.172: "GET /file/1.wav HTTP/1.1" 200 -
+    8.534 Stato: {'stato': 'PLAYING', 'posizione': 0, 'durata': 12.288, 'motivo': None, 'indirizzo': 'http://192.168.1.171:59123/file/1.wav'}.
+   21.137 Stato: {'stato': 'IDLE', 'posizione': 0, 'durata': 12.288, 'motivo': 'FINISHED', 'indirizzo': 'http://192.168.1.171:59123/file/1.wav'}.
+   24.230 Stato: {'stato': 'IDLE', 'posizione': 0, 'durata': 12.288, 'motivo': None, 'indirizzo': 'http://192.168.1.171:59123/file/2.wav'}.
+   24.240 192.168.1.172: "GET /file/2.wav HTTP/1.1" 200 -
+   24.339 Stato: {'stato': 'PLAYING', 'posizione': 0, 'durata': 12.117333, 'motivo': None, 'indirizzo': 'http://192.168.1.171:59123/file/2.wav'}.
+   36.669 Stato: {'stato': 'IDLE', 'posizione': 0, 'durata': 12.117333, 'motivo': 'FINISHED', 'indirizzo': 'http://192.168.1.171:59123/file/2.wav'}.
+   39.781 Stato: {'stato': 'IDLE', 'posizione': 0, 'durata': 12.117333, 'motivo': None, 'indirizzo': 'http://192.168.1.171:59123/file/3.wav'}.
+   39.792 192.168.1.172: "GET /file/3.wav HTTP/1.1" 200 -
+   39.878 Stato: {'stato': 'PLAYING', 'posizione': 0, 'durata': 12.117333, 'motivo': None, 'indirizzo': 'http://192.168.1.171:59123/file/3.wav'}.
+   52.209 Stato: {'stato': 'IDLE', 'posizione': 0, 'durata': 12.117333, 'motivo': 'FINISHED', 'indirizzo': 'http://192.168.1.171:59123/file/3.wav'}.
+   55.331 Stato: {'stato': 'IDLE', 'posizione': 0, 'durata': 12.117333, 'motivo': None, 'indirizzo': 'http://192.168.1.171:59123/file/4.wav'}.
+   55.341 192.168.1.172: "GET /file/4.wav HTTP/1.1" 200 -
+   55.443 Stato: {'stato': 'PLAYING', 'posizione': 0, 'durata': 12.288, 'motivo': None, 'indirizzo': 'http://192.168.1.171:59123/file/4.wav'}.
+   68.042 Stato: {'stato': 'IDLE', 'posizione': 0, 'durata': 12.288, 'motivo': 'FINISHED', 'indirizzo': 'http://192.168.1.171:59123/file/4.wav'}.
+   71.121 Stato: {'stato': 'IDLE', 'posizione': 0, 'durata': 12.288, 'motivo': None, 'indirizzo': 'http://192.168.1.171:59123/file/5.wav'}.
+   71.129 192.168.1.172: "GET /file/5.wav HTTP/1.1" 200 -
+   71.230 Stato: {'stato': 'PLAYING', 'posizione': 0, 'durata': 12.117333, 'motivo': None, 'indirizzo': 'http://192.168.1.171:59123/file/5.wav'}.
+   83.567 Stato: {'stato': 'IDLE', 'posizione': 0, 'durata': 12.117333, 'motivo': 'FINISHED', 'indirizzo': 'http://192.168.1.171:59123/file/5.wav'}.
+   86.652 Stato: {'stato': 'IDLE', 'posizione': 0, 'durata': 12.117333, 'motivo': None, 'indirizzo': 'http://192.168.1.171:59123/file/6.flac'}.
+   86.660 192.168.1.172: "GET /file/6.flac HTTP/1.1" 200 -
+   86.755 Stato: {'stato': 'PLAYING', 'posizione': 0, 'durata': 12.032, 'motivo': None, 'indirizzo': 'http://192.168.1.171:59123/file/6.flac'}.
+   99.101 Stato: {'stato': 'IDLE', 'posizione': 0, 'durata': 12.032, 'motivo': 'FINISHED', 'indirizzo': 'http://192.168.1.171:59123/file/6.flac'}.
+  102.331 Stato: {'stato': 'UNKNOWN', 'posizione': 0.0, 'durata': None, 'motivo': None, 'indirizzo': None}.
+  102.467 Spezzone 1: 48000 Hz, 16 bit, pcm; partito dopo 1.61 secondi, finito dopo 14.21 secondi, motivo FINISHED.
+  102.467 Spezzone 2: 96000 Hz, 24 bit, pcm; partito dopo 0.13 secondi, finito dopo 12.46 secondi, motivo FINISHED.
+  102.467 Spezzone 3: 96000 Hz, 16 bit, pcm; partito dopo 0.13 secondi, finito dopo 12.46 secondi, motivo FINISHED.
+  102.467 Spezzone 4: 48000 Hz, 24 bit, pcm; partito dopo 0.16 secondi, finito dopo 12.76 secondi, motivo FINISHED.
+  102.467 Spezzone 5: 96000 Hz, 24 bit, estesa; partito dopo 0.13 secondi, finito dopo 12.46 secondi, motivo FINISHED.
+  102.468 Spezzone 6: 96000 Hz, 24 bit, flac; partito dopo 0.12 secondi, finito dopo 12.46 secondi, motivo FINISHED.
+    0.000 Ascolto di Gabriele, 5 novembre 2026, senza sapere i formati: bene gli spezzoni 1, 3 e 6 (WAV 16 bit 48 kHz, WAV 16 bit 96 kHz, FLAC 24 bit 96 kHz); gracchiano 2, 4 e 5 (WAV 24 bit 96 kHz, WAV 24 bit 48 kHz il peggiore, WAV 24 bit 96 kHz con l'intestazione estesa). Il WAV in RAM era identico all'AIFF, campione per campione: il limite e' dello speaker.

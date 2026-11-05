@@ -2,6 +2,14 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [2.7.4] - 2026-11-05
+
+Una correzione, dal collaudo della 2.7.3: su GabryBar un brano a 24 bit e 96 kHz, un AIFF che lo speaker non legge da sé, partiva ma gracchiava, distorto e quasi incomprensibile.
+
+- La causa non è la conversione: il WAV in RAM era identico all'AIFF, campione per campione, con l'intestazione giusta. È lo speaker. Nella prova dei formati Gabriele ha ascoltato sei spezzoni dello stesso passaggio senza sapere quali fossero: a 16 bit suonano bene a 48 e a 96 kHz, e suona bene anche il FLAC a 24 bit e 96 kHz; i WAV a 24 bit gracchiano tutti, a 48 kHz peggio che a 96, con l'intestazione semplice e con quella estesa che Windows consiglia oltre i 16 bit.
+- Deciso da Gabriele: il WAV in RAM va sempre a 16 bit, con la frequenza della sorgente fino a 96 kHz. Quello che si perde dei 24 bit sta sotto i 96 dB, e non si sente; restano il disco libero, la partenza quasi immediata, la durata e i salti. I FLAC, anche a 24 bit, lo speaker continua a leggerli da sé, interi.
+- Dentro: motore.formato_da_convertire dà sempre 16 bit, e se ne vanno CODEC_CON_PERDITA e CAMPIONI_A_16_BIT; wav_in_ram e passaggio_in_pcm sanno ancora fare i 24 bit, che la prova dei formati usa. prototipi/prova_formati_wav.py, nuovo, con le misure in coda a wav_a_finestra_misure.txt.
+
 ## [2.7.3] - 2026-11-05
 
 Una correzione, dal collaudo della 2.7.2: nella guida rapida di F12 F9 sembrava senza alcune combinazioni. C'erano tutte e sei, ma Alt, Ctrl e Alt, Ctrl e Maiuscolo con F9 stavano cinque righe più sotto, dopo F10, Invio, il tasto Applicazioni e la barra spaziatrice, e leggendo dall'alto si trovavano solo le prime tre.

@@ -1,6 +1,6 @@
 # MeTeOra, il motore di riproduzione: libmpv, e i SID in tempo reale.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7). Nella 1.65.0 i MIDI resi da FluidSynth (tappa 8). Nella 1.66.0 la musica delle console con libgme. Nella 1.67.0 il file lasciato o rinominato per Rinomina file. Nella 1.82.0 il testo del karaoke come traccia in memoria, senza i .lrc caricati da mpv, e due sottotitoli uguali di fila detti tutti e due. Nella 1.83.0 il tempo che resta al sottotitolo, per la barra braille a blocchi. Nella 1.83.3 la durata vera di Musepack e DSF, da mutagen. Nella 1.93.0 i capitoli che libmpv vede. Nella 1.95.0 l'attenuazione, per la sfumatura del timer di spegnimento. Nella 1.96.0 il volume uniforme con ReplayGain. Nella 1.96.11 suona con a_volume_pieno. Nella 1.102.2 (issue 22) il ricampionamento con soxr, le bande compensate, il preamplificatore nella catena e il volume oltre 100 con il limitatore. Nella 1.102.3 rubberband quando velocita' o tono sono cambiati, con il tono fatto da lui (issue 20). Nella 1.116.0 alle_uscite, quando cambiano le uscite audio di mpv, e all_uscita_persa, quando il brano si ferma perche' l'uscita non si apre piu'. Nella 1.117.0 il lettore lontano, uno speaker Cast al posto delle schede, e converti_in_flac. Nella 2.7.0 sorgente_wav e passaggio_in_pcm, il WAV in RAM al posto del FLAC su disco.
+# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7). Nella 1.65.0 i MIDI resi da FluidSynth (tappa 8). Nella 1.66.0 la musica delle console con libgme. Nella 1.67.0 il file lasciato o rinominato per Rinomina file. Nella 1.82.0 il testo del karaoke come traccia in memoria, senza i .lrc caricati da mpv, e due sottotitoli uguali di fila detti tutti e due. Nella 1.83.0 il tempo che resta al sottotitolo, per la barra braille a blocchi. Nella 1.83.3 la durata vera di Musepack e DSF, da mutagen. Nella 1.93.0 i capitoli che libmpv vede. Nella 1.95.0 l'attenuazione, per la sfumatura del timer di spegnimento. Nella 1.96.0 il volume uniforme con ReplayGain. Nella 1.96.11 suona con a_volume_pieno. Nella 1.102.2 (issue 22) il ricampionamento con soxr, le bande compensate, il preamplificatore nella catena e il volume oltre 100 con il limitatore. Nella 1.102.3 rubberband quando velocita' o tono sono cambiati, con il tono fatto da lui (issue 20). Nella 1.116.0 alle_uscite, quando cambiano le uscite audio di mpv, e all_uscita_persa, quando il brano si ferma perche' l'uscita non si apre piu'. Nella 1.117.0 il lettore lontano, uno speaker Cast al posto delle schede, e converti_in_flac. Nella 2.7.0 sorgente_wav e passaggio_in_pcm, il WAV in RAM al posto del FLAC su disco. Nella 2.7.4 il WAV in RAM sempre a 16 bit, che lo speaker suona bene anche a 96 kHz.
 
 """Due lettori libmpv per tutti i formati.
 
@@ -127,17 +127,10 @@ MARGINE_DI_FINE = 0.5
 # Ogni quanti secondi il sorvegliante guarda la dissolvenza.
 PASSO_DEL_SORVEGLIANTE = 0.02
 # Quanto si aspetta, al piu', che libmpv apra un file per dirne la durata,
-# prima del WAV in RAM per uno speaker Cast (2.7.0), e poi la frequenza e il
-# formato dei campioni, che arrivano quando il decodificatore e' pronto.
+# prima del WAV in RAM per uno speaker Cast (2.7.0), e poi la frequenza dei
+# campioni, che arriva quando il decodificatore e' pronto.
 ATTESA_DELLA_DURATA = 15.0
 ATTESA_DEL_FORMATO = 2.0
-# I codec con perdita: escono in virgola mobile, ma 16 bit bastano, e il WAV
-# in RAM a 24 bit peserebbe di piu' per niente (2.7.0). Gli altri, senza
-# perdita, a 24 bit se i loro campioni ne hanno piu' di 16.
-CODEC_CON_PERDITA = frozenset({"mp1", "mp2", "mp3", "aac", "aac_latm", "ac3", "eac3", "dts", "wmav1", "wmav2", "wmapro", "wmavoice",
-    "musepack7", "musepack8", "opus", "vorbis", "speex", "atrac3", "atrac3p", "cook", "ra_144", "ra_288", "amrnb", "amrwb", "gsm",
-    "adpcm_ima_wav", "adpcm_ms", "qdm2", "nellymoser"})
-CAMPIONI_A_16_BIT = frozenset({"u8", "u8p", "s16", "s16p"})
 _FINE_NORMALE = mpv.MpvEventEndFile.EOF
 _FINE_PER_ERRORE = mpv.MpvEventEndFile.ERROR
 # L'errore con cui mpv chiude il brano quando non riesce ad aprire l'uscita
@@ -808,10 +801,11 @@ class Motore:
         MIDI resi con il banco escono da MeTeOra a 48 kHz e 16 bit, con la
         durata dal database o dalla mappa dei tempi con la coda. Gli altri
         file si aprono in pausa con libmpv: la frequenza della sorgente,
-        portata a quelle che lo speaker suona, e 24 bit se il codec e' senza
-        perdita e i campioni hanno piu' di 16 bit (domanda di Gabriele del 5
-        novembre 2026); la durata dei Musepack e dei DSF da mutagen. La durata
-        e' None se non si sa."""
+        portata a quelle che lo speaker suona, sempre a 16 bit, perche' i WAV
+        a 24 bit lo speaker li suona gracchianti (prova di Gabriele su
+        GabryBar del 5 novembre 2026, prototipi/prova_formati_wav.py); la
+        durata dei Musepack e dei DSF da mutagen. La durata e' None se non si
+        sa."""
         risolto = sottobrano_risolto(percorso, sottobrano)
         if risolto is not None:
             return max(1.0, durata_del_sottobrano(percorso, risolto)), wav_in_ram.FREQUENZA, 16
@@ -840,9 +834,7 @@ class Motore:
             durata = _durata_da_mutagen(percorso) or durata
         parametri = parametri or {}
         frequenza = wav_in_ram.frequenza_della_sorgente(parametri.get("samplerate") or traccia.get("demux-samplerate"))
-        senza_perdita = traccia.get("codec") not in CODEC_CON_PERDITA
-        bit = 24 if senza_perdita and parametri.get("format") and parametri["format"] not in CAMPIONI_A_16_BIT else 16
-        return durata, frequenza, bit
+        return durata, frequenza, 16
 
     def passaggio_in_pcm(self, percorso, sottobrano, inizio, uscita, alla_fine, frequenza=wav_in_ram.FREQUENZA, bit=16):
         """Comincia a scrivere in uscita, di solito una pipe con nome, il brano
