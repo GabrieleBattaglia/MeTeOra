@@ -5673,14 +5673,25 @@ def test_alt_f9_apre_tutta_la_plancia_e_ctrl_alt_f9_la_chiude(finestra, monkeypa
     # 1.79.0, Gabriele: tutta la plancia si apre, con un suono all'inizio e uno
     # alla fine, e si chiude. Dalla 2.7.0 con Alt e con Ctrl e Alt con F9, e
     # anche Questo PC e Questa rete: nella plancia entrano solo le cartelle con
-    # qualcosa da suonare, in ordine e prima dei file; Computer della rete resta chiuso.
+    # qualcosa da suonare, in ordine e prima dei file; Computer della rete resta
+    # chiuso. In rete, come la ricerca, i percorsi scritti a mano e non le
+    # condivisioni salvate in Windows: il Samba dell'Iliadbox lasciava appesa
+    # una lettura, e MeTeOra non si chiudeva (collaudo della 2.7.0).
     _plancia_di_prova(finestra, monkeypatch, tmp_path)
     (tmp_path / "Disco" / "Vuota" / "Sotto").mkdir(parents=True)
-    monkeypatch.setattr(modulo.questa_rete, "percorsi_salvati", lambda: [])
+    for condivisione in ("Salvata", "A mano"):
+        (tmp_path / condivisione).mkdir()
+        (tmp_path / condivisione / "d.mp3").write_bytes(b"")
+    monkeypatch.setattr(modulo.questa_rete, "percorsi_salvati", lambda: [("Salvata (box)", str(tmp_path / "Salvata"))])
+    finestra.impostazioni["percorsi_di_rete"] = [str(tmp_path / "A mano")]
     _tasto(finestra, codice=wx.WXK_F9, alt=True)
     _aspetta_l_apertura(finestra)
     assert suoni_annotati[-1] == "plancia_aperta"
-    assert _ultima(finestra).startswith("Aperta tutta la plancia: ") and _ultima(finestra).endswith(", da 6 cartelle lette.")
+    assert _ultima(finestra).startswith("Aperta tutta la plancia: ") and _ultima(finestra).endswith(", da 7 cartelle lette.")
+    salvata, a_mano = (next(v for v in finestra._figli(finestra.nodo_rete) if finestra._dati(v).get("percorso") == str(tmp_path / n))
+        for n in ("Salvata", "A mano"))
+    assert finestra.albero.IsExpanded(a_mano) and len(list(finestra._figli(a_mano))) == 1
+    assert not finestra.albero.IsExpanded(salvata) and finestra._dati(salvata)["caricato"] is False
     playlist = next(finestra._figli(finestra.nodo_playlist))
     assert finestra.albero.IsExpanded(finestra.nodo_playlist) and finestra.albero.IsExpanded(playlist)
     disco = next(finestra._figli(finestra.nodo_pc))

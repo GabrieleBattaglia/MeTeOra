@@ -10593,11 +10593,12 @@ class Finestra(wx.Frame):
     def _apri_la_plancia(self):
         """Alt con F9, il massimo (Gabriele, 4 ottobre 2026, e 2.7.0): apre
         tutta la plancia con tutto quello che ha dentro, anche Questo PC e
-        Questa rete, tranne i CD e Computer della rete, che ripete le stesse
-        cartelle condivise sotto il nome dei computer."""
+        Questa rete, tranne i CD, Computer della rete, che ripete le stesse
+        cartelle condivise sotto il nome dei computer, e le condivisioni
+        salvate in Windows, come fa la ricerca."""
         radice = self.albero.GetRootItem()
         rami = [v for v in self._figli(radice) if self.albero.ItemHasChildren(v)]
-        self._apri_in_blocco(rami, "Apertura di tutta la plancia", "Apro tutta la plancia, tranne i CD e Computer della rete",
+        self._apri_in_blocco(rami, "Apertura di tutta la plancia", "Apro tutta la plancia, tranne i CD, Computer della rete e le condivisioni salvate in Windows",
             "Aperta tutta la plancia", "plancia_aperta", tutta=True)
 
     def _apri_tutto(self):
@@ -10682,9 +10683,15 @@ class Finestra(wx.Frame):
                     continue
                 (rete if genere == UNITA_DI_RETE else dischi).append((percorso, unita))
         elif tipo == "rete":
+            # Come la ricerca (1.73.0): i percorsi scritti a mano, non le
+            # condivisioni intere salvate in Windows. Il Samba dell'Iliadbox,
+            # con decine di migliaia di cartelle di backup, lascia appesa una
+            # lettura, e MeTeOra non riusciva a chiudersi finche' non scadeva
+            # (collaudo della 2.7.0). Una condivisione salvata si apre tutta
+            # con Maiuscolo con F9 sul suo ramo.
             for figlio in self._figli(voce):
                 dati_figlio = self._dati(figlio) or {}
-                if dati_figlio.get("radice_di_rete"):
+                if dati_figlio.get("radice_di_rete") and dati_figlio.get("a_mano"):
                     rete.append((dati_figlio["percorso"], figlio))
         elif tipo in ("cartella", "unita"):
             (rete if in_rete(dati["percorso"]) else dischi).append((dati["percorso"], voce))
