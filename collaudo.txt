@@ -1,9 +1,6 @@
 Collaudo di MeTeOra 2.7.2: le correzioni dal collaudo della 2.7.0, e le prove che restavano.
-Maiuscolo con F9 su Questo PC, e mentre si riempie naviga con le frecce: NVDA risponde subito? Dimmi se è meglio della 2.7.0.
-Finita l'apertura, mentre lo schedario legge ancora i tag, NVDA è reattivo come prima delle aperture?
-Maiuscolo con F9 sulla condivisione dell'Iliadbox, aspetta che finisca, poi Esc: MeTeOra si chiude e il prompt torna subito.
 La guida rapida di F12 e il manuale, nel capitolo della plancia, raccontano i comandi nuovi di F9.
-Sullo speaker GabryBar un audiolibro M4B parte subito, e i salti con le frecce funzionano.
-Sullo speaker GabryBar un SID, un APE o un video partono in un paio di secondi, senza la riga Converto; i salti avanti e indietro funzionano, e alla fine parte il brano seguente, o il sottobrano seguente del SID, senza attese.
-Su GabryBar, durante un film lungo, salta vicino alla fine e poi torna all'inizio: dimmi quanto aspetta ogni volta.
+* non è completo, f9 non viene riportato con tutte le sue combinazioni di modificatori. Questo è gravissimo!!! Verifica che anche tutti gli altri tasti vengano riportati altrimenti abbiamo un grandissimo problema.
+
 Su GabryBar un brano ad alta risoluzione che lo speaker non legge da sé, come un WavPack, un APE o un AIFF a 24 bit, suona come sul PC: dimmi se senti differenze.
+* non so cosa riprodurre, dammi l'indirizzo di un brano da provare.
