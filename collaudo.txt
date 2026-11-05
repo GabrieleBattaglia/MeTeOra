@@ -1,19 +1,19 @@
 Collaudo di MeTeOra 2.7.0: le aperture in blocco senza limiti, i comandi tutti su F9, e gli audiolibri M4B sullo speaker.
-F9 su un ramo dice se è aperto o chiuso e, se è aperto, quante voci e quanti rami aperti ha dentro: senza suono, nella console e alla sintesi e al braille dei sottotitoli.
-Maiuscolo con F9 su una playlist la apre con tutto quello che ha dentro; Ctrl con F9 la chiude, e la selezione va sulla playlist.
 Maiuscolo con F9 su Questo PC: la plancia si riempie a poco a poco, solo con le cartelle che hanno qualcosa da suonare, in ordine e con le cartelle prima dei file.
+* Funziona, però mentre lavora per riempire, nvda diventa veramente molto lento. Credo a causa di quelle cartelle che d'hanno errore o non rispondono. Si  potrebbe valutare un thread a priorità più bassa. Ma per ora va bene così.
+
 Mentre Questo PC si apre, naviga con le frecce anche dentro i rami che si riempiono: dimmi se NVDA legge bene e se qualcosa ti disturba.
-Mentre Questo PC si apre, chiudi un ramo con la freccia sinistra: resta chiuso anche quando l'apertura ci aggiunge altre voci.
-Durante la stessa apertura, F9 dice a che punto è: rami, voci, cartelle lette e la cartella che sta leggendo.
+* Sento i suoni dei livelli dei rami, ma nvda spesso tace e ci mette qualche secondo a reagire. Quando la ricerca finisce, tutto torna fluido. Ho provato aprendo C:
+
 Alla fine suona la fine, e la console dice voci, rami aperti e cartelle lette: dimmi quanto ci ha messo sul Gigante.
-Maiuscolo con F9 sul disco C, e dopo qualche secondo Ctrl e Maiuscolo con F9: l'apertura si ferma, e i rami aperti restano aperti.
-Una cartella rimasta a metà da quella fermata, chiusa e riaperta con la freccia, si rilegge e torna completa.
-Ctrl e Maiuscolo con F9 per fermare è una scelta mia: ti va bene, o preferisci un altro tasto?
-Alt con F9 apre tutta la plancia e i percorsi di rete scritti a mano, ma non le condivisioni salvate in Windows come l'Iliadbox, né Computer della rete.
+* Aperto tutto dentro Questo PC: 141748 voci e 12333 rami aperti, da 230991 cartelle lette. 51 cartelle non si leggono. 09:28
+* Circa 90 secondi.
+
 Maiuscolo con F9 proprio sulla condivisione dell'Iliadbox la apre tutta: dimmi quanto dura, se risponde, e se dopo MeTeOra si chiude subito.
-Ctrl e Alt con F9 chiude tutta la plancia, e il fuoco va sulla voce di primo livello che conteneva la tua.
-Mentre si apre un disco, Ctrl con F9 su una playlist la chiude e l'apertura va avanti; Ctrl con F9 sul disco la ferma, e la console lo dice.
-F10 da solo dice che non ha un comando; Maiuscolo con F10 apre il menu della voce, come il tasto Applicazioni.
+* Aperto tutto dentro iliadbox (iliadbox_Server): 30070 voci e 3464 rami aperti, da 11572 cartelle lette. In rete non ha risposto: iliadbox (iliadbox_Server). 09:32
+* Più di 2 minuti
+* Mi fermo qui perchè ho scoperto un problema. Dopo questi test ho provato a chiudere meteora e vedo che non ritorna al prompt. Cioè questo compare ma non riprende il controllo come se meteora non si chiuesse. Ho dovuto forzare.
+
 La guida rapida di F12 e il manuale, nel capitolo della plancia, raccontano i comandi nuovi di F9.
 Sullo speaker GabryBar un audiolibro M4B parte subito, e i salti con le frecce funzionano.
 Sullo speaker GabryBar un SID, un APE o un video partono in un paio di secondi, senza la riga Converto; i salti avanti e indietro funzionano, e alla fine parte il brano seguente, o il sottobrano seguente del SID, senza attese.
