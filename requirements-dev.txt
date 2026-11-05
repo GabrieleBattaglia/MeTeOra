@@ -1,0 +1,7 @@
+# MeTeOra, i pacchetti per lo sviluppo, oltre a requirements.txt.
+# Il catalogo dei testi e le traduzioni (3.0.0): strumenti\cataloghi.py usa pybabel e polib.
+babel
+polib
+# Il validatore e il pacchetto.
+ruff
+pyinstaller

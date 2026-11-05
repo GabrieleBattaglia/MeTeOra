@@ -1,6 +1,6 @@
 # MeTeOra, la ricetta di PyInstaller: il pacchetto a cartella (prontuario, premessa).
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la prova del pacchetto, prima della tappa 11. Nella 1.85.0 le DLL e i pacchetti lasciati fuori, e la licenza e la cartella licenze accanto all'eseguibile. Nella 1.97.9 senza i doppioni delle DLL di lib.
+# 04/10/2026: nasce con la prova del pacchetto, prima della tappa 11. Nella 1.85.0 le DLL e i pacchetti lasciati fuori, e la licenza e la cartella licenze accanto all'eseguibile. Nella 1.97.9 senza i doppioni delle DLL di lib. Nella 3.0.0 le traduzioni compilate, in locales.
 #
 # Si compila dalla cartella del progetto con: python -m PyInstaller --noconfirm MeTeOra.spec
 # Dentro il pacchetto vanno le sole cose che MeTeOra legge: il manuale, le
@@ -25,6 +25,12 @@ datas = [
 ]
 # Le DLL dei lettori di schermo, che accessible_output2 cerca nella sua cartella lib.
 datas += collect_data_files("accessible_output2", include_py_files=False)
+# Le traduzioni compilate (3.0.0), che lingua.py cerca in locales: solo i
+# messages.mo, non il modello ne' i .po dei traduttori.
+for _lingua in sorted(os.listdir("locales")) if os.path.isdir("locales") else []:
+    _mo = os.path.join("locales", _lingua, "LC_MESSAGES", "messages.mo")
+    if os.path.isfile(_mo):
+        datas.append((_mo, os.path.join("locales", _lingua, "LC_MESSAGES")))
 
 # Fuori dal pacchetto (1.85.0): le DLL proprietarie di accessible_output2, di
 # PC-Talker, ZDSR, Dolphin e System Access, che non danno il permesso di

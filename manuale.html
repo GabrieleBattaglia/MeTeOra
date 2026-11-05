@@ -61,7 +61,7 @@ kbd {
 </head>
 <body>
 <h1>Manuale di MeTeOra</h1>
-<p>MeTeOra è un lettore audio e video pensato per chi usa uno screen reader e un display braille. Suona quasi tutti i formati audio e video, compresa la musica del Commodore 64 in formato SID, i moduli dei tracker dell'Amiga, la musica delle console di gioco e i MIDI, e si comanda tutto da tastiera. Ogni azione ha un suono suo e scrive una riga nella console. Per ora parla solo italiano.</p>
+<p>MeTeOra è un lettore audio e video pensato per chi usa uno screen reader e un display braille. Suona quasi tutti i formati audio e video, compresa la musica del Commodore 64 in formato SID, i moduli dei tracker dell'Amiga, la musica delle console di gioco e i MIDI, e si comanda tutto da tastiera. Ogni azione ha un suono suo e scrive una riga nella console. Parla italiano, e si può tradurre in altre lingue, come spiega il capitolo Le lingue e le traduzioni; il manuale esce solo in italiano.</p>
 <p>Questo manuale descrive ciò che c'è adesso, e cresce insieme al programma. Il primo capitolo, la guida rapida, elenca tutti i tasti, i comandi della ricerca e del filtro e i codici dei colori, per la consultazione al volo: F12 la scrive nella console. Gli altri capitoli spiegano un argomento alla volta, con i suoi tasti e degli esempi. F1 apre questo manuale nel browser: con NVDA, H e Maiuscolo con H passano da un titolo all'altro, e le cifre da 1 a 4 vanno ai titoli di quel livello. Il secondo capitolo, Installare MeTeOra, dice come si installa, che cosa serve e che cosa succede al primo avvio.</p>
 <nav aria-label="Indice">
 <ul>
@@ -275,6 +275,12 @@ kbd {
 <li><a href="#errori-avvio">Gli errori all'avvio</a></li>
 <li><a href="#altri-errori">Altri messaggi d'errore</a></li>
 <li><a href="#esempi-problemi">Esempi</a></li>
+</ul></li>
+<li><a href="#lingue-e-traduzioni">Le lingue e le traduzioni</a>
+<ul>
+<li><a href="#lingua-di-meteora">La lingua di MeTeOra</a></li>
+<li><a href="#tradurre">Tradurre MeTeOra</a></li>
+<li><a href="#proporre-traduzione">Proporre una traduzione</a></li>
 </ul></li>
 <li><a href="#licenze">Licenze e crediti</a>
 <ul>
@@ -1632,6 +1638,8 @@ kbd {
 <p>Sì o no, come Maiuscolo con F8 e Ctrl con F8. Di partenza è sganciato.</p>
 <h4>Punto lasciato dei file lunghi</h4>
 <p>I file più lunghi di tanti minuti riprendono dal punto in cui li hai lasciati, come spiega il capitolo La riproduzione; di partenza 10, da 0 a 600, e 0 vuol dire mai.</p>
+<h4>Lingua</h4>
+<p>Invio apre la lista delle lingue che MeTeOra sa parlare, ognuna con il suo nome e il suo codice: l'italiano e quelle che hanno una traduzione. La lingua scelta vale dal prossimo avvio, e fino ad allora la riga la dice accanto a quella di adesso, per esempio Lingua: italiano; dal riavvio English. Finché c'è solo l'italiano, Invio lo dice e basta. Il capitolo Le lingue e le traduzioni spiega il resto.</p>
 <h4>Dimensioni dei caratteri</h4>
 <p>In punti, numeri interi da 6 a 72: tre numeri per plancia, console e cruscotto, oppure uno solo che vale per tutte e tre; due numeri, o quattro, non si accettano. Il campo vuoto torna al carattere di Windows in tutte e tre le aree; un'area sola non si riporta a Windows. Il campo parte con le dimensioni di adesso, oppure vuoto se tutte e tre le aree hanno il carattere di Windows; le istruzioni dicono quanti punti ha il carattere di Windows.</p>
 <p>Il cruscotto cambia altezza con il suo carattere, per tenere cinque righe, ma di solito non occupa più di un terzo della finestra: con caratteri molto grandi ne mostra meno e scorre, così plancia e console restano visibili. Due righe però le tiene sempre, anche quando in una finestra bassa vanno oltre il terzo.</p>
@@ -1736,6 +1744,7 @@ kbd {
 <li>MeTeOra - Statistiche.json: le statistiche, descritte nel capitolo Le statistiche. Si scrive subito all'avvio e all'uscita, e in mezzo solo se è cambiato qualcosa, al più ogni mezz'ora.</li>
 <li>MeTeOra - Dischi.json: i dischi che la pulizia all'avvio riconosce, descritta più sotto, separati per nome del computer, con accanto il MachineGuid di Windows. Per ogni lettera il numero di serie del suo disco, o la condivisione per un'unità di rete, gli altri dischi che ci hanno risposto e, per una lettera che la pulizia non conosce ancora, il disco visto mentre MeTeOra ne usava un file. Se si rovina non si sovrascrive, come dice più sotto Un file che non si legge; se lo cancelli, la pulizia reimpara le lettere come la prima volta, e quelle contese tornano come nuove.</li>
 <li>MeTeOra - Marcatori esportati.json: il nome proposto da Esporta selezionati, nella finestra dei marcatori.</li>
+<li>selected_language.json: la lingua scelta con la voce Lingua delle impostazioni, scritta dalla libreria GBUtils; c'è solo quando le lingue sono più di una.</li>
 <li>La cartella copie: le ultime tre versioni diverse di MeTeOra - Playlist.json, MeTeOra - Marcatori.json, MeTeOra - Impostazioni.json, MeTeOra - Posizioni.json, MeTeOra - Statistiche.json e MeTeOra - Dischi.json, una per avvio, con il numero in fondo al nome: .1 è la più recente. Se una sessione è andata storta, per esempio hai svuotato una playlist per sbaglio, a MeTeOra chiuso copi la versione che vuoi al posto del file vero, togliendo il numero in fondo al nome. Lo schedario non ha copie: si rifà da solo rileggendo i file.</li>
 <li>MeTeOra - Errori.log, con la sua copia MeTeOra - Errori.log.1, e, dopo un crash, MeTeOra - Crash precedente.log: il registro degli errori e dei crash, descritto nel capitolo Quando qualcosa va storto.</li>
 <li>I file della console salvata, come MeTeOra-V1_51_3-2026_10_01-15_42.txt, scritti dalla voce Salva console.</li>
@@ -1812,6 +1821,18 @@ kbd {
 <li>Premi Maiuscolo con Fine; se la riga del problema va a capo, continua con Maiuscolo con freccia giù e Maiuscolo con Fine finché la selezione arriva all'ora in fondo alla riga. Poi Ctrl con C la copia; incollala nel messaggio per chi sviluppa.</li>
 <li>Oppure apri le impostazioni, scendi fino a Salva console e premi Invio: la console dice il nome del file scritto nella cartella del programma, da allegare al messaggio.</li>
 </ol>
+<h2 id="lingue-e-traduzioni">Le lingue e le traduzioni</h2>
+<h3 id="lingua-di-meteora">La lingua di MeTeOra</h3>
+<p>Dalla 3.0.0 MeTeOra si può tradurre: ogni testo che scrive nella console, nel cruscotto e nelle sue finestre può uscire in un'altra lingua, senza toccare il programma. Per ora traduzioni non ce ne sono, e MeTeOra parla italiano; quando ne arriva una, viaggia nel pacchetto con l'aggiornamento seguente.</p>
+<p>Al primo avvio MeTeOra parla la lingua di Windows, se qualcuno l'ha tradotta, altrimenti l'italiano. La voce Lingua delle impostazioni elenca le lingue che ci sono e cambia la scelta, che vale dal prossimo avvio.</p>
+<p>Il manuale esce solo in italiano, e con lui la guida rapida di F12, che ne è il primo capitolo e resta in italiano anche con il programma in un'altra lingua. Per leggerlo nella propria lingua conviene aprirlo in un browser con il traduttore automatico, come quelli di Edge e di Chrome.</p>
+<h3 id="tradurre">Tradurre MeTeOra</h3>
+<p>I testi da tradurre stanno tutti nel modello locales\messages.pot del codice sorgente, che si scarica da GitHub, <a href="https://github.com/GabrieleBattaglia/MeTeOra">github.com/GabrieleBattaglia/MeTeOra</a>. Una traduzione è un file messages.po, che nasce dal modello con un programma come Poedit, libero e gratuito, o con lo strumento dei cataloghi descritto più sotto, e sta in locales\CODICE\LC_MESSAGES, dove CODICE è il codice della lingua: en per l'inglese, es per lo spagnolo, de per il tedesco.</p>
+<p>Tre regole tengono in piedi una traduzione. I nomi fra graffe, come {volume} o {n}, sono i valori che MeTeOra mette al loro posto: vanno lasciati identici, ma si possono spostare nella frase. I testi con un numero hanno una forma per ogni plurale della lingua, che il catalogo conosce dalla sua riga Plural-Forms: l'italiano ne ha due, 1 brano e 3 brani, il polacco tre. Gli spazi all'inizio e alla fine di un testo si conservano. Accanto ai testi ambigui c'è un commento per i traduttori, che dice di che cosa si parla.</p>
+<p>I nomi dei tasti, come Ctrl e Maiuscolo, stanno dentro le frasi e si traducono con loro; i tasti invece restano gli stessi in tutte le lingue.</p>
+<h3 id="proporre-traduzione">Proporre una traduzione</h3>
+<p>Una traduzione, finita o anche solo cominciata, si propone all'autore con una pull request su GitHub, anche dal browser e senza git: nella cartella locales del repository, Add file e poi Upload files creano da soli la copia del progetto e la proposta. Chi non usa GitHub può mandare il suo messages.po al PUB, la lista di supporto, con la voce Chiedi aiuto al PUB delle impostazioni. L'autore controlla i segnaposto, compila la traduzione e la pubblica con la release seguente.</p>
+<p>Chi lavora dai sorgenti ha strumenti\cataloghi.py, che fa tutto il giro: estrai rifà il modello dai testi del codice, nuova CODICE comincia una lingua, aggiorna porta i testi nuovi in tutte le traduzioni, verifica controlla segnaposto, plurali e spazi, compila crea i messages.mo che MeTeOra legge. Servono i pacchetti di requirements-dev.txt.</p>
 <h2 id="licenze">Licenze e crediti</h2>
 <h3 id="licenza-meteora">La licenza di MeTeOra</h3>
 <p>MeTeOra è copyright 2026 di Gabriele Battaglia (IZ4APU). È software libero: puoi ridistribuirlo e modificarlo secondo la GNU General Public License, versione 3 o, a tua scelta, qualunque versione successiva. È distribuito nella speranza che sia utile, ma senza alcuna garanzia, nemmeno quella implicita di commerciabilità o di idoneità a uno scopo particolare. Il testo completo della licenza è nel file LICENSE, accanto al programma. F3 scrive nella console i crediti, con la licenza e i componenti.</p>
