@@ -53,6 +53,7 @@ import formati
 import pulizia
 import questa_rete
 import ricerca
+from lingua import _, ngettext, plurale
 
 # Uno schema come http: o file:, di almeno due lettere: C: e' un'unita'.
 _SCHEMA = re.compile(r"([A-Za-z][A-Za-z0-9+.\-]+):")
@@ -75,16 +76,32 @@ TOLLERANZA_DELLA_DATA = 2.0
 # un passo per chi sorveglia la lettura in rete.
 BLOCCO_DI_LETTURA = 65536
 
-# I motivi per cui una voce si salta, con le parole al singolare e al plurale,
-# nell'ordine in cui la console li dice a parita' di numero.
+# I motivi per cui una voce si salta, nell'ordine in cui la console li dice a
+# parita' di numero. Per ognuno una funzione di n, quante voci salta, e di
+# numero, se le parole cominciano con il numero: al singolare per una voce e
+# al plurale per le altre, come file che non ci sono o 3 indirizzi in rete
+# (3.0.0: prima erano coppie di parole, che pybabel non legge).
 MOTIVI = {
-    "mancante": ("file che non c'è", "file che non ci sono"),
-    "indirizzo": ("indirizzo in rete", "indirizzi in rete"),
-    "formato": ("file di un formato che MeTeOra non suona", "file di formati che MeTeOra non suona"),
-    "cartella": ("cartella", "cartelle"),
-    "playlist": ("playlist dentro la playlist", "playlist dentro la playlist"),
-    "non_valido": ("percorso non valido", "percorsi non validi"),
+    "mancante": lambda n, numero: (plurale(n, "{n} file che non c'è", "{n} file che non ci sono") if numero
+        else ngettext("file che non c'è", "file che non ci sono", n)),
+    "indirizzo": lambda n, numero: (plurale(n, "{n} indirizzo in rete", "{n} indirizzi in rete") if numero
+        else ngettext("indirizzo in rete", "indirizzi in rete", n)),
+    "formato": lambda n, numero: (plurale(n, "{n} file di un formato che MeTeOra non suona", "{n} file di formati che MeTeOra non suona") if numero
+        else ngettext("file di un formato che MeTeOra non suona", "file di formati che MeTeOra non suona", n)),
+    # Traduttori: la voce saltata e' una cartella, come in Saltata E:\Musica\Rock: cartella.
+    "cartella": lambda n, numero: plurale(n, "{n} cartella", "{n} cartelle") if numero else ngettext("cartella", "cartelle", n),
+    "playlist": lambda n, numero: (plurale(n, "{n} playlist dentro la playlist", "{n} playlist dentro la playlist") if numero
+        else ngettext("playlist dentro la playlist", "playlist dentro la playlist", n)),
+    "non_valido": lambda n, numero: (plurale(n, "{n} percorso non valido", "{n} percorsi non validi") if numero
+        else ngettext("percorso non valido", "percorsi non validi", n)),
 }
+
+
+def motivo(chiave, n=1, numero=False):
+    """Le parole del motivo chiave, una di MOTIVI, per n voci saltate: al
+    singolare per una, al plurale per le altre; con numero, precedute dal
+    numero, come 3 indirizzi in rete."""
+    return MOTIVI[chiave](n, numero)
 
 
 class Voce:
@@ -280,7 +297,8 @@ def _leggi_sorvegliato(percorso, attesa):
         threading.Thread(target=ricerca.annulla_la_lettura, args=(filo,), name="MeTeOra, annullamento in rete", daemon=True).start()
         raise ricerca.NonRisponde(ntpath.dirname(percorso))
     if not esito:
-        raise OSError(f"La lettura di {percorso} si e' interrotta.")
+        # Il messaggio arriva nella console, dopo Non riesco a leggere.
+        raise OSError(_("La lettura di {percorso} si e' interrotta.").format(percorso=percorso))
     if isinstance(esito[0], Exception):
         raise esito[0]
     return esito[0]
@@ -298,12 +316,12 @@ def leggi(percorso, attesa=ricerca.ATTESA_IN_RETE):
     try:
         if ricerca.in_rete(percorso):
             if not questa_rete.raggiungibile(cartella, attesa=questa_rete.ATTESA_IN_SOTTOFONDO):
-                return {"errore": f"{cartella} non risponde."}
+                return {"errore": _("{cartella} non risponde.").format(cartella=cartella)}
             stato, byte = _leggi_sorvegliato(percorso, attesa)
         else:
             stato, byte = _leggi_il_file(percorso)
     except ricerca.NonRisponde:
-        return {"errore": f"{cartella} non risponde."}
+        return {"errore": _("{cartella} non risponde.").format(cartella=cartella)}
     except OSError as e:
         return {"errore": f"{(e.strerror or str(e)).rstrip('. ')}."}
     voci, libgme = analizza(byte, percorso)
