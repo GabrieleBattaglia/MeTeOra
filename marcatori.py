@@ -25,6 +25,8 @@ import json
 import math
 import os
 
+from lingua import _
+
 # Entro questa distanza la posizione e' quella di un marker: il motore, in
 # pausa, torna sul tempo chiesto entro pochi centomillesimi di secondo.
 TOLLERANZA = 0.005
@@ -477,51 +479,57 @@ class Marcatori:
             with open(percorso, encoding="utf-8-sig") as f:
                 dati = json.load(f)
         except OSError as e:
-            raise ValueError(f"Non riesco a leggere {nome}: {e.strerror or e}.") from e
+            # Traduttori: {motivo} e' il perche' che dice Windows.
+            raise ValueError(_("Non riesco a leggere {nome}: {motivo}.").format(nome=nome, motivo=e.strerror or e)) from e
         except (ValueError, RecursionError) as e:
             # JSON rotto, o un testo che non e' UTF-8.
-            raise ValueError(f"{nome} non è un'esportazione dei marcatori di MeTeOra: non è un file JSON.") from e
+            raise ValueError(_("{nome} non è un'esportazione dei marcatori di MeTeOra: non è un file JSON.").format(nome=nome)) from e
         if not isinstance(dati, dict) or dati.get("formato") != FORMATO_DELL_ESPORTAZIONE:
-            raise ValueError(f"{nome} non è un'esportazione dei marcatori di MeTeOra.")
+            raise ValueError(_("{nome} non è un'esportazione dei marcatori di MeTeOra.").format(nome=nome))
         versione = dati.get("versione")
         if isinstance(versione, bool) or versione != VERSIONE_DELL_ESPORTAZIONE:
-            raise ValueError(f"{nome} è un'esportazione dei marcatori in un formato che questa versione di MeTeOra non sa leggere.")
+            raise ValueError(_("{nome} è un'esportazione dei marcatori in un formato che questa versione di MeTeOra non sa leggere.").format(nome=nome))
 
         def rotta(perche):
-            return ValueError(f"{nome} è un'esportazione dei marcatori di MeTeOra, ma è rovinata: {perche}.")
+            # Traduttori: {motivo} dice cosa non va nel file, come «la voce 3 non ha il nome del file».
+            return ValueError(_("{nome} è un'esportazione dei marcatori di MeTeOra, ma è rovinata: {motivo}.").format(nome=nome, motivo=perche))
 
         elenco = dati.get("marcatori")
         if not isinstance(elenco, list):
-            raise rotta("manca l'elenco dei marcatori")
+            raise rotta(_("manca l'elenco dei marcatori"))
         voci = []
         for i, voce in enumerate(elenco, 1):
             if not isinstance(voce, dict):
-                raise rotta(f"la voce {i} non è una voce")
+                # Traduttori: {voce} e' il numero della voce nel file, contato da 1.
+                raise rotta(_("la voce {voce} non è una voce").format(voce=i))
             file = voce.get("file")
             file = os.path.basename(file).strip() if isinstance(file, str) else ""
             if not file:
-                raise rotta(f"la voce {i} non ha il nome del file")
+                raise rotta(_("la voce {voce} non ha il nome del file").format(voce=i))
             durata = voce.get("durata")
             if durata is not None and _numero(durata) is None:
-                raise rotta(f"la voce {i}, {file}, non ha una durata che sia un numero")
+                # Traduttori: {voce} e' il numero della voce nel file, contato da 1; {file} il nome del file della voce.
+                raise rotta(_("la voce {voce}, {file}, non ha una durata che sia un numero").format(voce=i, file=file))
             if durata is not None and _numero(durata) > TETTO_DEI_SECONDI:
-                raise rotta(f"la voce {i}, {file}, ha una durata impossibile, di oltre trecento anni")
+                raise rotta(_("la voce {voce}, {file}, ha una durata impossibile, di oltre trecento anni").format(voce=i, file=file))
             sottobrano = voce.get("sottobrano")
             if sottobrano is not None and (isinstance(sottobrano, bool) or not isinstance(sottobrano, int) or sottobrano < 0):
-                raise rotta(f"la voce {i}, {file}, ha un sottobrano che non è un numero")
+                raise rotta(_("la voce {voce}, {file}, ha un sottobrano che non è un numero").format(voce=i, file=file))
             marker = voce.get("marker")
             if not isinstance(marker, list):
-                raise rotta(f"la voce {i}, {file}, non ha l'elenco dei marker")
+                raise rotta(_("la voce {voce}, {file}, non ha l'elenco dei marker").format(voce=i, file=file))
             letti = []
             for j, m in enumerate(marker, 1):
                 tempo = _numero(m.get("tempo")) if isinstance(m, dict) else None
                 if tempo is None or tempo < 0:
-                    raise rotta(f"il marker {j} della voce {i}, {file}, non ha un tempo valido")
+                    # Traduttori: {marker} e' il numero del marker nella sua voce, {voce} il numero della voce nel file, contati da 1.
+                    raise rotta(_("il marker {marker} della voce {voce}, {file}, non ha un tempo valido").format(marker=j, voce=i, file=file))
                 if tempo > TETTO_DEI_SECONDI:
-                    raise rotta(f"il marker {j} della voce {i}, {file}, ha un tempo impossibile, di oltre trecento anni")
+                    raise rotta(_("il marker {marker} della voce {voce}, {file}, ha un tempo impossibile, di oltre trecento anni").format(marker=j, voce=i,
+                        file=file))
                 nome_del_marker = " ".join(m.get("nome").split()) if isinstance(m.get("nome"), str) else ""
                 if not nome_del_marker:
-                    raise rotta(f"il marker {j} della voce {i}, {file}, non ha un nome")
+                    raise rotta(_("il marker {marker} della voce {voce}, {file}, non ha un nome").format(marker=j, voce=i, file=file))
                 letti.append({"tempo": tempo, "nome": nome_del_marker})
             letti.sort(key=lambda m: m["tempo"])
             voci.append({"file": file, "durata": None if durata is None else float(durata), "sottobrano": sottobrano or None, "marker": letti})

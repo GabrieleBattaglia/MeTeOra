@@ -32,9 +32,18 @@ import os
 import re
 import struct
 
+from lingua import _, plurale
+
 # I dieci tag comuni, nell'ordine in cui si mostrano.
-COMUNI = (("titolo", "Titolo"), ("artista", "Artista"), ("album", "Album"), ("artista_album", "Artista dell'album"), ("anno", "Anno"),
-    ("genere", "Genere"), ("traccia", "Traccia"), ("disco", "Disco"), ("compositore", "Compositore"), ("commento", "Commento"))
+# Traduttori: i nomi dei tag dei file audio e video.
+COMUNI = (("titolo", _("Titolo")), ("artista", _("Artista")), ("album", _("Album")), ("artista_album", _("Artista dell'album")), ("anno", _("Anno")),
+    # Traduttori: il tag del genere musicale.
+    ("genere", _("Genere")),
+    # Traduttori: il tag del numero della traccia, come 3 o 3/12.
+    ("traccia", _("Traccia")),
+    # Traduttori: il tag del numero del disco di un album, come 1 o 1/2.
+    ("disco", _("Disco")),
+    ("compositore", _("Compositore")), ("commento", _("Commento")))
 NOMI_COMUNI = dict(COMUNI)
 # La tilde davanti alle chiavi della famiglia.
 ALTRO = "~"
@@ -61,23 +70,63 @@ _FAMIGLIE = {"MP3": "id3", "EasyMP3": "id3", "WAVE": "id3", "AIFF": "id3", "True
 
 # I nomi da leggere di qualche tag non comune, per famiglia.
 NOMI_NOTI = {
-    "id3": {"TENC": "Codificato da", "TSSE": "Programma di codifica", "TCOP": "Copyright", "TBPM": "BPM", "TKEY": "Tonalità", "TLAN": "Lingua",
-        "TPUB": "Editore", "TSRC": "ISRC", "TIT1": "Gruppo", "TIT3": "Sottotitolo", "TPE3": "Direttore", "TPE4": "Remix", "TEXT": "Paroliere",
-        "TMOO": "Umore", "TOAL": "Album originale", "TOPE": "Artista originale", "TSOP": "Artista per l'ordine", "TSOA": "Album per l'ordine",
-        "TSOT": "Titolo per l'ordine", "TSO2": "Artista dell'album per l'ordine", "TCMP": "Compilation", "USLT": "Testo", "APIC": "Copertina",
-        "TDOR": "Data originale", "TDRL": "Data di pubblicazione", "TDEN": "Data di codifica", "TDTG": "Data dei tag"},
-    "mp4": {"\xa9too": "Programma di codifica", "\xa9lyr": "Testo", "\xa9grp": "Gruppo", "cprt": "Copyright", "covr": "Copertina", "tmpo": "BPM",
-        "cpil": "Compilation", "pgap": "Senza pause", "desc": "Descrizione", "soar": "Artista per l'ordine", "soal": "Album per l'ordine",
-        "sonm": "Titolo per l'ordine"},
-    "asf": {"WM/Picture": "Copertina", "WM/EncodedBy": "Codificato da", "WM/ToolName": "Programma di codifica", "WM/Lyrics": "Testo",
-        "WM/Publisher": "Editore", "Copyright": "Copyright", "WM/BeatsPerMinute": "BPM"},
+    # Traduttori: i nomi dei tag meno comuni dei file audio e video.
+    "id3": {"TENC": _("Codificato da"), "TSSE": _("Programma di codifica"), "TCOP": _("Copyright"),
+        # Traduttori: i battiti al minuto di un brano, il tempo musicale.
+        "TBPM": _("BPM"),
+        # Traduttori: la tonalità musicale di un brano, come do maggiore.
+        "TKEY": _("Tonalità"),
+        # Traduttori: la lingua in cui si canta un brano.
+        "TLAN": _("Lingua"),
+        "TPUB": _("Editore"),
+        # Traduttori: il codice internazionale di una registrazione, International Standard Recording Code.
+        "TSRC": _("ISRC"),
+        # Traduttori: il raggruppamento, la categoria piu' ampia a cui appartiene un brano, come Concerti per pianoforte.
+        "TIT1": _("Gruppo"),
+        "TIT3": _("Sottotitolo"),
+        # Traduttori: il direttore d'orchestra.
+        "TPE3": _("Direttore"),
+        # Traduttori: chi ha fatto il remix di un brano.
+        "TPE4": _("Remix"),
+        "TEXT": _("Paroliere"),
+        # Traduttori: l'umore, lo stato d'animo di un brano.
+        "TMOO": _("Umore"),
+        "TOAL": _("Album originale"), "TOPE": _("Artista originale"), "TSOP": _("Artista per l'ordine"), "TSOA": _("Album per l'ordine"),
+        "TSOT": _("Titolo per l'ordine"), "TSO2": _("Artista dell'album per l'ordine"),
+        # Traduttori: il segno di un brano che fa parte di una raccolta di artisti diversi.
+        "TCMP": _("Compilation"),
+        # Traduttori: il testo di una canzone.
+        "USLT": _("Testo"),
+        "APIC": _("Copertina"),
+        "TDOR": _("Data originale"), "TDRL": _("Data di pubblicazione"), "TDEN": _("Data di codifica"), "TDTG": _("Data dei tag")},
+    "mp4": {"\xa9too": _("Programma di codifica"), "\xa9lyr": _("Testo"), "\xa9grp": _("Gruppo"), "cprt": _("Copyright"), "covr": _("Copertina"),
+        "tmpo": _("BPM"), "cpil": _("Compilation"),
+        # Traduttori: il segno di un brano che suona attaccato al successivo, senza pause in mezzo.
+        "pgap": _("Senza pause"),
+        "desc": _("Descrizione"), "soar": _("Artista per l'ordine"), "soal": _("Album per l'ordine"), "sonm": _("Titolo per l'ordine")},
+    "asf": {"WM/Picture": _("Copertina"), "WM/EncodedBy": _("Codificato da"), "WM/ToolName": _("Programma di codifica"), "WM/Lyrics": _("Testo"),
+        "WM/Publisher": _("Editore"), "Copyright": _("Copyright"), "WM/BeatsPerMinute": _("BPM")},
 }
 # I campi del blocco INFO dei WAV: quelli dei tag comuni, e i nomi da
 # leggere degli altri piu' diffusi.
 INFO_COMUNI = {"titolo": "INAM", "artista": "IART", "album": "IPRD", "anno": "ICRD", "genere": "IGNR", "commento": "ICMT", "traccia": "ITRK"}
-NOMI_INFO = {"ICOP": "Copyright", "ISFT": "Programma", "IENG": "Tecnico del suono", "ITCH": "Tecnico della digitalizzazione", "ISRC": "Fonte",
-    "IKEY": "Parole chiave", "ISBJ": "Soggetto", "IARL": "Archivio", "ICMS": "Commissionato da", "IMED": "Supporto", "ISRF": "Supporto originale",
-    "IMUS": "Compositore", "IPRT": "Parte"}
+NOMI_INFO = {"ICOP": _("Copyright"),
+    # Traduttori: il programma che ha scritto un file WAV.
+    "ISFT": _("Programma"),
+    "IENG": _("Tecnico del suono"), "ITCH": _("Tecnico della digitalizzazione"),
+    # Traduttori: la fonte da cui viene la registrazione di un file WAV.
+    "ISRC": _("Fonte"),
+    "IKEY": _("Parole chiave"),
+    # Traduttori: l'argomento di un file WAV.
+    "ISBJ": _("Soggetto"),
+    # Traduttori: l'archivio in cui si conserva l'originale di un file WAV.
+    "IARL": _("Archivio"),
+    "ICMS": _("Commissionato da"),
+    # Traduttori: il supporto da cui viene un file WAV, come un disco o un nastro.
+    "IMED": _("Supporto"),
+    "ISRF": _("Supporto originale"), "IMUS": _("Compositore"),
+    # Traduttori: la parte di un'opera a cui appartiene un file WAV.
+    "IPRT": _("Parte")}
 INFO = "INFO:"
 # Un nome di quattro caratteri stampabili, come quelli degli spezzoni RIFF.
 _FOURCC = re.compile(rb"[\x20-\x7e]{4}")
@@ -134,9 +183,10 @@ def _apri(percorso):
             file.add_tags()
     except Exception as e:
         # mutagen su un file rovinato solleva di tutto.
-        raise ErroreTag(f"Non riesco a leggere i tag di {nome}: {_motivo(e)}") from e
+        # Traduttori: {motivo} e' il perche' che dice Windows o la libreria dei tag.
+        raise ErroreTag(_("Non riesco a leggere i tag di {nome}: {motivo}").format(nome=nome, motivo=_motivo(e))) from e
     if famiglia is None:
-        raise ErroreTag(f"MeTeOra non sa scrivere i tag di {nome}.")
+        raise ErroreTag(_("MeTeOra non sa scrivere i tag di {nome}.").format(nome=nome))
     return file, famiglia
 
 
@@ -160,7 +210,10 @@ def _sola_lettura(chiave, nome, descrizione):
 
 
 def _dimensione(byte):
-    return f"{max(1, round(byte / 1000))} KB" if byte >= 1000 else f"{byte} byte"
+    if byte >= 1000:
+        # Traduttori: una dimensione in kilobyte.
+        return _("{kilobyte} KB").format(kilobyte=max(1, round(byte / 1000)))
+    return plurale(byte, "{n} byte", "{n} byte")
 
 
 def leggi(percorso):
@@ -171,7 +224,7 @@ def leggi(percorso):
         comuni, altri = _LETTURE[famiglia](file.tags)
     except Exception as e:
         # Un frame rovinato non deve fermare chi legge.
-        raise ErroreTag(f"Non riesco a leggere i tag di {os.path.basename(percorso)}: {_motivo(e)}") from e
+        raise ErroreTag(_("Non riesco a leggere i tag di {nome}: {motivo}").format(nome=os.path.basename(percorso), motivo=_motivo(e))) from e
     if _e_un_wav(file):
         _unisci_info(percorso, comuni, altri)
     risultato = [comuni.get(chiave) or _voce(chiave, nome, []) for chiave, nome in COMUNI]
@@ -254,16 +307,19 @@ def _leggi_id3(tags):
             # Il genere puo' essere un numero fra parentesi, come (17): genres lo scioglie.
             comuni[per_frame[fid]] = _voce(per_frame[fid], "", frame.genres if fid == "TCON" else frame.text)
         elif isinstance(frame, COMM):
-            altri.append(_voce(ALTRO + chiave_id3, frame.desc or f"Commento ({frame.lang})", frame.text))
+            # Traduttori: un commento in un'altra lingua; {lingua} e' il codice di tre lettere, come eng.
+            altri.append(_voce(ALTRO + chiave_id3, frame.desc or _("Commento ({lingua})").format(lingua=frame.lang), frame.text))
         elif isinstance(frame, TextFrame):
             nome = frame.desc if fid == "TXXX" and frame.desc else NOMI_NOTI["id3"].get(fid, fid)
             altri.append(_voce(ALTRO + chiave_id3, nome, frame.text))
         elif isinstance(frame, UrlFrame):
             altri.append(_sola_lettura(ALTRO + chiave_id3, NOMI_NOTI["id3"].get(fid, fid), frame.url))
         elif isinstance(frame, APIC):
-            altri.append(_sola_lettura(ALTRO + chiave_id3, "Copertina", f"immagine di {_dimensione(len(frame.data))}"))
+            # Traduttori: il valore del tag della copertina, come «immagine di 35 KB».
+            immagine = _("immagine di {dimensione}").format(dimensione=_dimensione(len(frame.data)))
+            altri.append(_sola_lettura(ALTRO + chiave_id3, _("Copertina"), immagine))
         else:
-            altri.append(_sola_lettura(ALTRO + chiave_id3, NOMI_NOTI["id3"].get(fid, fid), "dati non testuali"))
+            altri.append(_sola_lettura(ALTRO + chiave_id3, NOMI_NOTI["id3"].get(fid, fid), _("dati non testuali")))
     return comuni, altri
 
 
@@ -276,7 +332,9 @@ def _leggi_vorbis(tags):
         if k in per_chiave:
             comuni[per_chiave[k]] = _voce(per_chiave[k], "", valori)
         elif k == "metadata_block_picture":
-            altri.append(_sola_lettura(ALTRO + k, "Copertina", "immagine"))
+            # Traduttori: il valore del tag della copertina, quando la dimensione non si sa.
+            immagine = _("immagine")
+            altri.append(_sola_lettura(ALTRO + k, _("Copertina"), immagine))
         else:
             altri.append(_voce(ALTRO + k, k.upper(), valori))
     return comuni, altri
@@ -299,11 +357,11 @@ def _leggi_mp4(tags):
             if all(getattr(v, "dataformat", AtomDataType.UTF8) == AtomDataType.UTF8 for v in valori):
                 altri.append(_voce(ALTRO + k, nome, [bytes(v).decode("utf-8", "replace") for v in valori]))
             else:
-                altri.append(_sola_lettura(ALTRO + k, nome, "dati non testuali"))
+                altri.append(_sola_lettura(ALTRO + k, nome, _("dati non testuali")))
         elif valori and all(isinstance(v, str) for v in valori):
             altri.append(_voce(ALTRO + k, NOMI_NOTI["mp4"].get(k, k), valori))
         elif k == "covr":
-            altri.append(_sola_lettura(ALTRO + k, "Copertina", f"immagine di {_dimensione(sum(len(v) for v in valori))}"))
+            altri.append(_sola_lettura(ALTRO + k, _("Copertina"), _("immagine di {dimensione}").format(dimensione=_dimensione(sum(len(v) for v in valori)))))
         else:
             altri.append(_sola_lettura(ALTRO + k, NOMI_NOTI["mp4"].get(k, k), _pulito(SEPARATORE.join(str(v) for v in valori))))
     return comuni, altri
@@ -321,9 +379,9 @@ def _leggi_ape(tags):
             else:
                 altri.append(_voce(ALTRO + k, k, list(valore)))
         elif k.casefold().startswith("cover art"):
-            altri.append(_sola_lettura(ALTRO + k, "Copertina", f"immagine di {_dimensione(len(valore.value))}"))
+            altri.append(_sola_lettura(ALTRO + k, _("Copertina"), _("immagine di {dimensione}").format(dimensione=_dimensione(len(valore.value)))))
         else:
-            altri.append(_sola_lettura(ALTRO + k, k, "dati non testuali"))
+            altri.append(_sola_lettura(ALTRO + k, k, _("dati non testuali")))
     return comuni, altri
 
 
@@ -339,7 +397,7 @@ def _leggi_asf(tags):
         elif valori and all(isinstance(v, ASFUnicodeAttribute) for v in valori):
             altri.append(_voce(ALTRO + k, NOMI_NOTI["asf"].get(k, k), [v.value for v in valori]))
         elif k == "WM/Picture":
-            altri.append(_sola_lettura(ALTRO + k, "Copertina", "immagine"))
+            altri.append(_sola_lettura(ALTRO + k, _("Copertina"), _("immagine")))
         else:
             altri.append(_sola_lettura(ALTRO + k, NOMI_NOTI["asf"].get(k, k), _pulito(SEPARATORE.join(str(v.value) for v in valori))))
     return comuni, altri
@@ -356,9 +414,11 @@ def controlla(chiave, valore):
     if not valore:
         return ""
     if chiave == "anno" and not _DATA.fullmatch(valore):
-        raise ErroreTag(f"{valore} non è un anno: si scrive con quattro cifre, per esempio 1999, oppure come data, 1999-05-21.")
+        raise ErroreTag(_("{valore} non è un anno: si scrive con quattro cifre, per esempio 1999, oppure come data, 1999-05-21.").format(valore=valore))
     if chiave in ("traccia", "disco") and not re.fullmatch(r"\d{1,4}(/\d{1,4})?", valore):
-        raise ErroreTag(f"{valore} non è un numero di {NOMI_COMUNI[chiave].lower()}: si scrive per esempio 3, oppure 3/12 con il totale.")
+        if chiave == "traccia":
+            raise ErroreTag(_("{valore} non è un numero di traccia: si scrive per esempio 3, oppure 3/12 con il totale.").format(valore=valore))
+        raise ErroreTag(_("{valore} non è un numero di disco: si scrive per esempio 3, oppure 3/12 con il totale.").format(valore=valore))
     return valore
 
 
@@ -393,15 +453,16 @@ def scrivi(percorso, chiave, valore):
         raise
     except Exception as e:
         # mutagen su un file rovinato solleva di tutto.
-        raise ErroreTag(f"Non riesco a scrivere i tag di {os.path.basename(percorso)}: {_motivo(e)}") from e
+        raise ErroreTag(_("Non riesco a scrivere i tag di {nome}: {motivo}").format(nome=os.path.basename(percorso), motivo=_motivo(e))) from e
     if _e_un_wav(file) and chiave in INFO_COMUNI:
         # I tag comuni dei WAV vanno anche nel blocco INFO, per Esplora risorse.
         try:
             scrivi_info(percorso, {INFO_COMUNI[chiave]: valore})
         except ErroreTag as e:
-            raise ErroreTag(f"ID3 scritto, il blocco INFO no: {e}") from e
+            # Traduttori: {errore} e' la frase che dice perche' il blocco INFO del WAV non si e' scritto.
+            raise ErroreTag(_("ID3 scritto, il blocco INFO no: {errore}").format(errore=e)) from e
         except Exception as e:
-            raise ErroreTag(f"ID3 scritto, il blocco INFO di {os.path.basename(percorso)} no: {_motivo(e)}") from e
+            raise ErroreTag(_("ID3 scritto, il blocco INFO di {nome} no: {motivo}").format(nome=os.path.basename(percorso), motivo=_motivo(e))) from e
 
 
 def _salva(file, famiglia):
@@ -453,7 +514,7 @@ def _scrivi_id3(tags, k, valore, comune):
     vecchio = tags.get(k)
     classe = Frames.get(k[:4])
     if classe is not None and issubclass(classe, TimeStampTextFrame) and valore and not _DATA.fullmatch(valore):
-        raise ErroreTag(f"{valore} non è una data: si scrive per esempio 1999, oppure 1999-05-21.")
+        raise ErroreTag(_("{valore} non è una data: si scrive per esempio 1999, oppure 1999-05-21.").format(valore=valore))
     if vecchio is not None:
         del tags[k]
     if not valore:
@@ -467,7 +528,7 @@ def _scrivi_id3(tags, k, valore, comune):
     elif classe is not None:
         tags.add(classe(encoding=3, text=valori))
     else:
-        raise ErroreTag(f"Il tag {k} non si modifica.")
+        raise ErroreTag(_("Il tag {tag} non si modifica.").format(tag=k))
 
 
 def _scrivi_vorbis(tags, k, valore, _comune):
@@ -635,7 +696,7 @@ def prepara_il_wav(percorso):
         with open(percorso, "rb+") as f:
             riff = _Riff(f)
             if not riff.valido or not riff.sicuro:
-                raise ErroreTag(f"La struttura di {nome} non è regolare, per esempio una registrazione interrotta: i suoi tag restano com'erano.")
+                raise ErroreTag(_("La struttura di {nome} non è regolare, per esempio una registrazione interrotta: i suoi tag restano com'erano.").format(nome=nome))
             if not riff.pad_mancanti:
                 return
             for posizione in reversed(riff.pad_mancanti):
@@ -645,7 +706,7 @@ def prepara_il_wav(percorso):
             f.seek(4)
             f.write(struct.pack("<I", riff.fine + len(riff.pad_mancanti) - 8))
     except OSError as e:
-        raise ErroreTag(f"Non riesco a preparare {nome}: {_motivo(e)}") from e
+        raise ErroreTag(_("Non riesco a preparare {nome}: {motivo}").format(nome=nome, motivo=_motivo(e))) from e
 
 
 def scrivi_info(percorso, cambi):
@@ -660,10 +721,10 @@ def scrivi_info(percorso, cambi):
     with open(percorso, "rb+") as f:
         riff = _Riff(f)
         if not riff.valido or not riff.sicuro or riff.pad_mancanti:
-            raise ErroreTag(f"La struttura di {nome_del_file} non è regolare: il blocco INFO resta com'era.")
+            raise ErroreTag(_("La struttura di {nome} non è regolare: il blocco INFO resta com'era.").format(nome=nome_del_file))
         blocchi = _blocchi_info(f, riff)
         if any(campi is None for _spezzone, campi in blocchi):
-            raise ErroreTag(f"Il blocco INFO di {nome_del_file} è rovinato: resta com'era.")
+            raise ErroreTag(_("Il blocco INFO di {nome} è rovinato: resta com'era.").format(nome=nome_del_file))
         campi = [campo for _spezzone, uno in blocchi for campo in uno]
         nuovi = [list(campo) for campo in campi]
         for nome, testo in cambi.items():
@@ -710,7 +771,7 @@ def leggi_insieme(percorsi):
         except ErroreTag as e:
             errori.append(str(e))
         except Exception as e:  # noqa: BLE001 - un file che non si legge non ferma gli altri
-            errori.append(f"Non riesco a leggere i tag di {os.path.basename(percorso)}: {_motivo(e)}")
+            errori.append(_("Non riesco a leggere i tag di {nome}: {motivo}").format(nome=os.path.basename(percorso), motivo=_motivo(e)))
     if not letti:
         return [], errori
     per_file = [{t["chiave"]: t for t in tag} for tag in letti]

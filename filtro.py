@@ -35,6 +35,7 @@ import re
 import unicodedata
 
 import formati
+from lingua import _
 
 OPERATORI = ("<=", ">=", "<", ">", "=")
 _TERMINE = re.compile(r'-?(?:"[^"]*"|[^\s"|]+)(?:\|(?:"[^"]*"|[^\s"|]+))*|\|')
@@ -48,9 +49,27 @@ FAMIGLIE = {
     "chip": formati.CHIP,
 }
 NUMERICI = {"t", "d", "y", "r"}
+# Le chiavi dei tag nella scheda dello schedario.
 TESTUALI = {"a": "autore", "n": "titolo", "l": "album", "g": "genere"}
-NOMI_DEI_COMANDI = {"t": "tempo", "d": "dimensione", "k": "tipo", "a": "autore", "n": "titolo", "l": "album", "g": "genere",
-    "y": "anno", "p": "percorso", "s": "saltato", "r": "sottobrani"}
+# I nomi dei comandi, per le frasi d'errore: le lettere restano quelle, i
+# nomi si traducono (3.0.0).
+NOMI_DEI_COMANDI = {
+    # Traduttori: i nomi dei comandi del filtro, come in «I comandi sono: t tempo, d dimensione»; la lettera resta quella.
+    "t": _("tempo"),
+    "d": _("dimensione"),
+    # Traduttori: il nome del comando k del filtro, il tipo di file, come mp3 o audio.
+    "k": _("tipo"),
+    "a": _("autore"),
+    "n": _("titolo"),
+    "l": _("album"),
+    "g": _("genere"),
+    "y": _("anno"),
+    "p": _("percorso"),
+    # Traduttori: il nome del comando s del filtro, i brani da saltare.
+    "s": _("saltato"),
+    # Traduttori: il nome del comando r del filtro, quanti sottobrani ha un file SID.
+    "r": _("sottobrani"),
+}
 
 
 COMMENTO = "$"
@@ -72,24 +91,24 @@ def modello_della_console(testo):
     testo nella stessa riga e il cancelletto una o piu' cifre; fra le
     virgolette la sequenza e' esatta, maiuscole comprese, senza jolly."""
     if testo.count('"') % 2:
-        raise ErroreFiltro("Le virgolette non sono chiuse.")
+        raise ErroreFiltro(_("Le virgolette non sono chiuse."))
     # La ricerca non e' ancorata: un asterisco in testa non aggiunge niente,
     # e toglierlo fa cominciare l'occorrenza dove comincia cio' che si cerca,
     # senza rallentare la ricerca con tutte le righe lunghe.
     testo = testo.lstrip("*")
     if not testo.strip("* "):
-        raise ErroreFiltro("Scrivi cosa cercare: l'asterisco da solo trova qualsiasi cosa.")
+        raise ErroreFiltro(_("Scrivi cosa cercare: l'asterisco da solo trova qualsiasi cosa."))
     parti = []
     for pezzo in re.split(r'("[^"]*")', testo):
         if pezzo.startswith('"'):
             if len(pezzo) == 2:
-                raise ErroreFiltro("Fra le virgolette non c'è niente.")
+                raise ErroreFiltro(_("Fra le virgolette non c'è niente."))
             parti.append(re.escape(pezzo[1:-1]))
         elif pezzo:
             libero = "".join(r"[^\n]*" if c == "*" else r"\d+" if c == "#" else re.escape(c) for c in pezzo)
             parti.append(f"(?i:{libero})")
     if not parti:
-        raise ErroreFiltro("Scrivi cosa cercare.")
+        raise ErroreFiltro(_("Scrivi cosa cercare."))
     return re.compile("".join(parti))
 
 
@@ -151,7 +170,7 @@ def _alternativa(testo):
     if testo.startswith('"'):
         frase = normale(testo.strip('"'))
         if not frase:
-            raise ErroreFiltro("Fra le virgolette non c'è niente.")
+            raise ErroreFiltro(_("Fra le virgolette non c'è niente."))
         return lambda _b, _s, dove: frase in dove
     comando = _COMANDO.match(testo)
     if comando:
@@ -162,25 +181,30 @@ def _alternativa(testo):
 
 def _comando(lettera, operatore, valore, testo):
     if lettera not in NOMI_DEI_COMANDI:
-        raise ErroreFiltro(f"In {testo}, {lettera} non è un comando. I comandi sono: " + ", ".join(f"{k} {v}" for k, v in NOMI_DEI_COMANDI.items()) + ".")
+        # Traduttori: {testo} e' il termine del filtro, {lettera} la lettera che non e' un comando, {comandi} l'elenco, come «t tempo, d dimensione».
+        raise ErroreFiltro(_("In {testo}, {lettera} non è un comando. I comandi sono: {comandi}.").format(testo=testo, lettera=lettera,
+            comandi=", ".join(f"{k} {v}" for k, v in NOMI_DEI_COMANDI.items())))
     if not valore:
-        raise ErroreFiltro(f"In {testo} manca il valore dopo {operatore}.")
+        # Traduttori: {operatore} e' il segno del confronto, come < o =.
+        raise ErroreFiltro(_("In {testo} manca il valore dopo {operatore}.").format(testo=testo, operatore=operatore))
     nome = NOMI_DEI_COMANDI[lettera]
     if lettera not in NUMERICI and operatore != "=":
-        raise ErroreFiltro(f"In {testo}: il comando {lettera}, {nome}, accetta solo l'uguale.")
+        # Traduttori: {lettera} e' la lettera del comando, {nome} il suo nome, come «a, autore».
+        raise ErroreFiltro(_("In {testo}: il comando {lettera}, {nome}, accetta solo l'uguale.").format(testo=testo, lettera=lettera, nome=nome))
     if lettera == "t":
         soglia = _tempo(valore)
         if soglia is None:
-            raise ErroreFiltro(f"In {testo}, {valore} non è un tempo: si scrive come 3:00, 1:02:03 o in secondi.")
+            raise ErroreFiltro(_("In {testo}, {valore} non è un tempo: si scrive come 3:00, 1:02:03 o in secondi.").format(testo=testo, valore=valore))
         return lambda b, s, _d: _confronta(_durata(b, s), operatore, soglia)
     if lettera == "d":
         soglia = _dimensione(valore)
         if soglia is None:
-            raise ErroreFiltro(f"In {testo}, {valore} non è una dimensione: si scrive come 700k, 5m o 1.5g.")
+            # Traduttori: le lettere k, m e g degli esempi restano come sono: sono quelle che il filtro capisce.
+            raise ErroreFiltro(_("In {testo}, {valore} non è una dimensione: si scrive come 700k, 5m o 1.5g.").format(testo=testo, valore=valore))
         return lambda _b, s, _d: _confronta(s.get("dim") if s else None, operatore, soglia)
     if lettera in ("y", "r"):
         if not valore.isdigit():
-            raise ErroreFiltro(f"In {testo}, {valore} non è un numero intero.")
+            raise ErroreFiltro(_("In {testo}, {valore} non è un numero intero.").format(testo=testo, valore=valore))
         soglia = int(valore)
         chiave = "anno" if lettera == "y" else "sottobrani"
         if lettera == "y":
@@ -191,9 +215,12 @@ def _comando(lettera, operatore, valore, testo):
         estensioni = FAMIGLIE.get(valore, frozenset({"." + valore}))
         return lambda b, _s, _d: formati.estensione(b.percorso) in estensioni
     if lettera == "s":
-        if normale(valore) not in ("1", "0", "si", "no"):
-            raise ErroreFiltro(f"In {testo}: il comando s, saltato, vuole 1 o 0.")
-        voluto = normale(valore) in ("1", "si")
+        # 1, 0, si' e no valgono sempre; accanto, si' e no nella lingua di MeTeOra (3.0.0).
+        si, no = {"1", "si", normale(_("sì"))}, {"0", "no", normale(_("no"))}
+        if normale(valore) not in si | no:
+            # Traduttori: la lettera s resta s; saltato e' il nome del comando, come nell'elenco dei comandi.
+            raise ErroreFiltro(_("In {testo}: il comando s, saltato, vuole 1 o 0.").format(testo=testo))
+        voluto = normale(valore) in si
         return lambda b, _s, _d: b.saltato == voluto
     if lettera == "p":
         modello = _modello(valore)
@@ -234,15 +261,15 @@ class Filtro:
                 uniti.append(pezzo)
         for termine in uniti:
             if termine.strip("|") != termine and "|" in (termine[0], termine[-1]):
-                raise ErroreFiltro(f"In {termine} la barra verticale deve stare fra due alternative.")
+                raise ErroreFiltro(_("In {termine} la barra verticale deve stare fra due alternative.").format(termine=termine))
             negato = termine.startswith("-") and len(termine) > 1
             corpo = termine[1:] if negato else termine
             alternative = [_alternativa(a) for a in re.findall(r'"[^"]*"|[^|]+', corpo)]
             if not alternative:
-                raise ErroreFiltro(f"Il termine {termine} è vuoto.")
+                raise ErroreFiltro(_("Il termine {termine} è vuoto.").format(termine=termine))
             self._termini.append((negato, alternative))
         if self.testo.count('"') % 2:
-            raise ErroreFiltro("Le virgolette non sono chiuse.")
+            raise ErroreFiltro(_("Le virgolette non sono chiuse."))
 
     @property
     def vuoto(self):
