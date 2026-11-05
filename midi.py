@@ -1,6 +1,6 @@
 # MeTeOra, i MIDI: FluidSynth con un banco di suoni General MIDI, resa in RAM come i SID.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/10/2026: nasce con la tappa 8 (issue 16). Nella 1.67.4 solo i banchi General MIDI, e la cartella dei temporanei saltata. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
+# 03/10/2026: nasce con la tappa 8 (issue 16). Nella 1.67.4 solo i banchi General MIDI, e la cartella dei temporanei saltata. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.1.0 lo scaricamento di un banco qualunque, con l'impronta git, per i componenti aggiuntivi.
 
 """I MIDI di MeTeOra (tappa 8, issue 16).
 
@@ -241,29 +241,49 @@ def scarica_fluidsynth(avanza=None):
         raise OSError(_("nello zip di FluidSynth mancano le DLL attese"))
 
 
-def scarica_fluidr3(avanza=None):
-    """Scarica FluidR3 GM dalla prima fonte che risponde, controlla dimensione
-    e intestazione, e restituisce il percorso del banco. OSError se nessuna
-    fonte va."""
+def fluidsynth_caricato():
+    """Vero se FluidSynth e' gia' caricato in questa sessione: allora le sue
+    DLL non si cancellano."""
+    return bool(_LIBRERIA)
+
+
+def impronta_git(dati):
+    """L'impronta che git da' a un file, quella che le API di GitHub dicono
+    senza scaricarlo: lo sha1 della parola blob, della dimensione e dei byte."""
+    return hashlib.sha1(b"blob %d\0" % len(dati) + dati).hexdigest()  # noqa: S324 - e' l'impronta di git, non una protezione
+
+
+def scarica_banco(titolo, nome_file, fonti, dimensione, impronta=None, avanza=None):
+    """Scarica un banco di suoni dalla prima fonte che risponde, controlla
+    dimensione, intestazione e, se c'e', l'impronta git, lo mette nella
+    cartella dei banchi e ne restituisce il percorso. titolo e' il nome da
+    dire; OSError se nessuna fonte va (3.1.0: prima valeva solo per FluidR3)."""
     cartella = cartella_dei_banchi()
     os.makedirs(cartella, exist_ok=True)
-    destinazione = os.path.join(cartella, FLUIDR3_NOME)
+    destinazione = os.path.join(cartella, nome_file)
     errori = []
-    for url in FLUIDR3_URL:
+    for url in fonti:
         try:
             dati = _scarica(url, avanza)
         except OSError as e:
             errori.append(str(e))
             continue
-        if len(dati) != FLUIDR3_DIMENSIONE or dati[:4] != b"RIFF" or dati[8:12] != b"sfbk":
-            errori.append(_("{url}: il file non è FluidR3 GM").format(url=url))
+        if len(dati) != dimensione or dati[:4] != b"RIFF" or dati[8:12] != b"sfbk" or (impronta and impronta_git(dati) != impronta):
+            errori.append(_("{url}: il file non è {banco}").format(url=url, banco=titolo))
             continue
         parziale = destinazione + ".parziale"
         with open(parziale, "wb") as f:
             f.write(dati)
         os.replace(parziale, destinazione)
         return destinazione
-    raise OSError("; ".join(errori) or _("nessuna fonte di FluidR3 GM risponde"))
+    raise OSError("; ".join(errori) or _("nessuna fonte di {banco} risponde").format(banco=titolo))
+
+
+def scarica_fluidr3(avanza=None):
+    """Scarica FluidR3 GM dalla prima fonte che risponde, controlla dimensione
+    e intestazione, e restituisce il percorso del banco. OSError se nessuna
+    fonte va."""
+    return scarica_banco("FluidR3 GM", FLUIDR3_NOME, FLUIDR3_URL, FLUIDR3_DIMENSIONE, avanza=avanza)
 
 
 # La libreria di FluidSynth, caricata alla prima resa.

@@ -1,6 +1,6 @@
 # MeTeOra, utilita': raccoglie nella cartella licenze i testi delle licenze dei componenti e i loro sorgenti esatti.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.85.0, per la prima release. Nella 1.85.2 i testi scaricati da scarica_licenze.py. Nella 1.97.9 PortAudio, e la cartella da rifare a ogni release. Nella 1.99.0 il caricatore di Vulkan di scorta. Nella 1.119.0 i pacchetti degli speaker Cast, e i file di licenza fuori dalla cartella del pacchetto saltati.
+# 04/10/2026: nasce con la 1.85.0, per la prima release. Nella 1.85.2 i testi scaricati da scarica_licenze.py. Nella 1.97.9 PortAudio, e la cartella da rifare a ogni release. Nella 1.99.0 il caricatore di Vulkan di scorta. Nella 1.119.0 i pacchetti degli speaker Cast, e i file di licenza fuori dalla cartella del pacchetto saltati. Nella 3.1.0 i banchi GeneralUser GS e MS Basic fra i componenti scaricati.
 
 """Prepara la cartella licenze, che il pacchetto porta accanto all'eseguibile.
 
@@ -335,9 +335,14 @@ def main():
     # I componenti che MeTeOra non porta con se'.
     leggimi.append("Non sono nel pacchetto, e MeTeOra li scarica solo quando servono: FluidSynth 2.6.1 con libsndfile, per i MIDI, "
         "LGPL-2.1-or-later, dal sito di FluidSynth; il banco di suoni FluidR3 GM di Frank Wen, licenza MIT, se lo chiedi, con il testo in "
-        + " e ".join(f"fluidr3\\{file}" for file in altri["fluidr3"]["file"]) + ". "
+        + " e ".join(f"fluidr3\\{file}" for file in altri["fluidr3"]["file"]) + "; "
+        # I banchi dei componenti aggiuntivi (3.1.0).
+        "il banco GeneralUser GS 2.0.3 di S. Christian Collins, uso libero anche nei programmi, con il testo in "
+        + " e ".join(f"generaluser_gs\\{file}" for file in altri["generaluser_gs"]["file"]) + "; "
+        "il banco MS Basic di MuseScore, licenza MIT, con il testo in " + " e ".join(f"ms_basic\\{file}" for file in altri["ms_basic"]["file"]) + ". "
         "Le durate dei SID vengono dal database Songlengths della High Voltage SID Collection, che MeTeOra legge dalla tua copia.")
-    sorgenti.append("FluidSynth: https://github.com/FluidSynth/fluidsynth; FluidR3 GM: https://github.com/pianobooster/fluid-soundfont")
+    sorgenti.append("FluidSynth: https://github.com/FluidSynth/fluidsynth; FluidR3 GM: https://github.com/pianobooster/fluid-soundfont; "
+        "GeneralUser GS: https://github.com/mrbumpy409/GeneralUser-GS; MS Basic: https://github.com/musescore/MuseScore/tree/master/share/sound")
 
     raccolta.scrivi("LEGGIMI.txt", leggimi)
     raccolta.scrivi("SORGENTI.txt", sorgenti)

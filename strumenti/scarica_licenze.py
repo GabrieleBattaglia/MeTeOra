@@ -1,6 +1,6 @@
 # MeTeOra, utilita': scarica i testi delle licenze che sul disco non ci sono: le librerie dentro libmpv, winrt, FluidR3 e PortAudio.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.85.2, con il permesso di Gabriele per gli scaricamenti.
+# 04/10/2026: nasce con la 1.85.2, con il permesso di Gabriele per gli scaricamenti. Nella 3.1.0 i testi dei banchi GeneralUser GS e MS Basic, a un commit fissato.
 
 """I testi delle licenze che raccogli_licenze.py non trova sul disco.
 
@@ -76,6 +76,16 @@ ALTRI = [
     # Il caricatore di Vulkan di scorta (1.99.0, permesso di Gabriele del 6
     # ottobre 2026): il testo intero della licenza Apache 2.0.
     ("vulkan", "https://github.com/KhronosGroup/Vulkan-Loader", "il caricatore di Vulkan di scorta, per libmpv"),
+]
+# I testi che non stanno nella radice del repository: cartella in licenze,
+# repository, a che cosa serve, commit e percorsi dei file. Sono i banchi di
+# suoni che MeTeOra scarica come componenti aggiuntivi (3.1.0, permesso di
+# Gabriele del 5 novembre 2026), allo stesso commit dei banchi.
+FILE_FISSI = [
+    ("generaluser_gs", "https://github.com/mrbumpy409/GeneralUser-GS", "il banco di suoni GeneralUser GS, scaricato per i MIDI se lo chiedi",
+        "97049183643d5fc5a9322a69c5b09efb667c6c3a", ["documentation/LICENSE.txt"]),
+    ("ms_basic", "https://github.com/musescore/MuseScore", "il banco di suoni MS Basic di MuseScore, scaricato per i MIDI se lo chiedi",
+        "37128c5ac8f9af804b63650610952414421828b8", ["share/sound/MS Basic_License.md"]),
 ]
 SENZA_FILE = {
     "avisynth-headers": "solo le intestazioni di AviSynth+, per usarlo se è installato; la licenza è scritta in testa ai file",
@@ -207,6 +217,22 @@ def scarica(nome, repository, cartella):
     return scritti
 
 
+def scarica_fissi(nome, repository, commit, percorsi):
+    """Scarica i file dati di un repository di GitHub, al commit dato, in
+    licenze/nome: i loro nomi."""
+    proprietario, progetto = urllib.parse.urlparse(repository).path.strip("/").split("/")[:2]
+    scritti = []
+    for percorso in percorsi:
+        contenuto = _richiesta(f"https://raw.githubusercontent.com/{proprietario}/{progetto}/{commit}/{urllib.parse.quote(percorso)}")
+        file = os.path.basename(percorso)
+        arrivo = os.path.join(LICENZE, nome, file)
+        os.makedirs(os.path.dirname(arrivo), exist_ok=True)
+        with open(arrivo, "wb") as f:
+            f.write(contenuto)
+        scritti.append(file)
+    return scritti
+
+
 def main():
     with open(DLL, "rb") as f:
         nella_dll = f.read().lower()
@@ -231,6 +257,10 @@ def main():
         file = scarica("", repository, nome)
         if not file:
             sys.exit(f"{nome}: nessun file di licenza nella radice di {repository}.")
+        altri.append({"nome": nome, "repository": repository, "ruolo": ruolo, "file": file})
+        print(f"{nome}: {', '.join(file)}", flush=True)
+    for nome, repository, ruolo, commit, percorsi in FILE_FISSI:
+        file = scarica_fissi(nome, repository, commit, percorsi)
         altri.append({"nome": nome, "repository": repository, "ruolo": ruolo, "file": file})
         print(f"{nome}: {', '.join(file)}", flush=True)
     with open(ELENCO, "w", encoding="utf-8") as f:

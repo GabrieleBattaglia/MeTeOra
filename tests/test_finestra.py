@@ -1,6 +1,6 @@
 # MeTeOra, le prove della finestra principale, sul desktop nascosto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21). Nella 1.112.0 quelle dei dischi della pulizia, anche del loro file che non si legge, e la prova della pulizia che toglie i file spariti non fa piu' leggere allo schedario i file finti; poi Riconosci questo disco, la riga che lo indica e la Sentinella che guarda i dischi dei file usati; infine la domanda di Riconosci questo disco con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 quelle dell'importazione delle playlist M3U, M3U8 e PLS. Nella 1.113.1 quella dell'etichetta di un file delle console con un sottobrano senza durata (issue 24). Nella 1.113.3 quella della Barra dei comandi per il mouse, che nell'errore dice il suo nome (issue 26). Nella 1.113.5 quelle delle statistiche scritte solo se cambiate, al piu' ogni mezz'ora. Nella 1.116.0 quelle delle schede audio che vanno e tornano, e del brano che riparte quando la sua uscita si perde. Nella 1.116.1 quella della scheda delle statistiche con la scelta che manca. Nella 1.116.2 quella dei suoni di piu' e meno fatti al volo. Nella 1.116.3 quella dei comandi da fermi (issue 39). Nella 1.119.0 quelle degli speaker Cast e della lista delle destinazioni. Nella 2.7.3 quelle della guida rapida, con ogni combinazione presa dalle tabelle dei tasti e le combinazioni di ogni tasto di seguito, nell'ordine della regola.
+# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21). Nella 1.112.0 quelle dei dischi della pulizia, anche del loro file che non si legge, e la prova della pulizia che toglie i file spariti non fa piu' leggere allo schedario i file finti; poi Riconosci questo disco, la riga che lo indica e la Sentinella che guarda i dischi dei file usati; infine la domanda di Riconosci questo disco con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 quelle dell'importazione delle playlist M3U, M3U8 e PLS. Nella 1.113.1 quella dell'etichetta di un file delle console con un sottobrano senza durata (issue 24). Nella 1.113.3 quella della Barra dei comandi per il mouse, che nell'errore dice il suo nome (issue 26). Nella 1.113.5 quelle delle statistiche scritte solo se cambiate, al piu' ogni mezz'ora. Nella 1.116.0 quelle delle schede audio che vanno e tornano, e del brano che riparte quando la sua uscita si perde. Nella 1.116.1 quella della scheda delle statistiche con la scelta che manca. Nella 1.116.2 quella dei suoni di piu' e meno fatti al volo. Nella 1.116.3 quella dei comandi da fermi (issue 39). Nella 1.119.0 quelle degli speaker Cast e della lista delle destinazioni. Nella 2.7.3 quelle della guida rapida, con ogni combinazione presa dalle tabelle dei tasti e le combinazioni di ogni tasto di seguito, nell'ordine della regola. Nella 3.1.0 i banchi scaricati nella cartella della prova, e le voci dei componenti aggiuntivi.
 
 import contextlib
 import ctypes
@@ -3079,6 +3079,7 @@ def test_il_piu_apre_le_impostazioni(finestra, monkeypatch, suoni_annotati):
 
 def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_annotati):
     monkeypatch.setattr(modulo.schede_audio, "in_uso", lambda elenco=None: AUTOMATICA)
+    _midi_finti(finestra, monkeypatch, presente=False)
     aperte = []
 
     class Finta:
@@ -3125,6 +3126,7 @@ def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_an
         ("celle_braille", "Celle della barra braille: 0, il testo intero"),
         ("lettura_minima", "Tempo minimo di lettura in braille: 2000 ms"),
         ("banco_midi", "Banco dei suoni MIDI: nessuno, si sceglie al primo MIDI"),
+        ("componenti", "Componenti aggiuntivi: nessuno installato, 4 disponibili"),
         ("insegui", "Inseguimento della plancia (Ctrl+F8, Maiuscolo+F8): no"),
         ("ripresa_oltre", "Punto lasciato dei file lunghi: oltre 10 minuti"),
         ("lingua", "Lingua: italiano"),
@@ -5201,6 +5203,10 @@ def _midi_finti(finestra, monkeypatch, presente=True):
     """FluidSynth finto e il lavoro in disparte fatto subito, con wx.CallAfter
     che chiama al momento: la preparazione dei MIDI senza fili ne' rete."""
     stato = {"presente": presente, "scaricati": []}
+    # I banchi scaricati nella cartella dei dati della prova, non accanto al
+    # programma: le righe da scaricare non dipendono dalla macchina (3.1.0).
+    banchi = os.path.join(os.path.dirname(finestra.impostazioni.percorso), "banchi")
+    monkeypatch.setattr(modulo.midi, "cartella_dei_banchi", lambda: banchi)
     monkeypatch.setattr(modulo.midi, "fluidsynth_presente", lambda: stato["presente"])
     monkeypatch.setattr(modulo.midi, "scarica_fluidsynth", lambda avanza=None: stato.update(presente=True) or stato["scaricati"].append("fluidsynth"))
     monkeypatch.setattr(modulo, "midi_in_disparte", lambda lavoro, al_termine: al_termine(lavoro()))
@@ -5227,7 +5233,8 @@ def test_il_primo_midi_scarica_fluidsynth_cerca_i_banchi_e_poi_suona(finestra, m
     finestra._suona(pl, pl.brani[0])
     assert "Scarico FluidSynth e cerco nei dischi" in domande[0] and stato["scaricati"] == ["fluidsynth"]
     titolo, righe, _partenza = scelta.aperture[0]
-    assert titolo == "Banco dei suoni MIDI" and righe == [f"Banco, 30 MB, in {tmp_path}", "Scarica FluidR3 GM, circa 148 MB"]
+    assert titolo == "Banco dei suoni MIDI" and righe == [f"Banco, 30 MB, in {tmp_path}", "Scarica FluidR3 GM, circa 148 MB", "Scarica GeneralUser GS, circa 32 MB",
+        "Scarica MS Basic, circa 51 MB"]
     for evento in ("scaricamento_avviato", "scaricamento_finito", "ricerca_avviata", "ricerca_finita", "impostazione_cambiata"):
         assert evento in suoni_annotati
     assert finestra.impostazioni["banco_midi"] == banco and _salvate(finestra)["banco_midi"] == banco and stato["banco"] == banco
@@ -5246,7 +5253,7 @@ def test_senza_banchi_nei_dischi_si_scarica_fluidr3(finestra, monkeypatch, tmp_p
     pl = finestra.archivio.playlist[0]
     finestra._suona(pl, pl.brani[0])
     assert domande[1].startswith("Scarico FluidR3 GM") and finestra.impostazioni["banco_midi"] == banco
-    assert any(_senza_ora(r) == "FluidR3 GM: 50 per cento." for r in finestra._righe)
+    assert any(_senza_ora(r) == "FluidR3 GM: 50%." for r in finestra._righe)
     assert suonati == [("canzone.mid", None)] and "scaricamento_finito" in suoni_annotati
 
 

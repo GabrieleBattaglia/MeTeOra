@@ -673,6 +673,22 @@
    "file": [
     "LICENSE.txt"
    ]
+  },
+  {
+   "nome": "generaluser_gs",
+   "repository": "https://github.com/mrbumpy409/GeneralUser-GS",
+   "ruolo": "il banco di suoni GeneralUser GS, scaricato per i MIDI se lo chiedi",
+   "file": [
+    "LICENSE.txt"
+   ]
+  },
+  {
+   "nome": "ms_basic",
+   "repository": "https://github.com/musescore/MuseScore",
+   "ruolo": "il banco di suoni MS Basic di MuseScore, scaricato per i MIDI se lo chiedi",
+   "file": [
+    "MS Basic_License.md"
+   ]
   }
  ]
 }

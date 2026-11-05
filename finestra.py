@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17). Nella 2.7.1 la precedenza ai tasti sul lavoro in disparte. Nella 2.7.2 i lettori di rete chiusi all'uscita. Nella 2.7.3 i tasti funzione nelle tabelle COMANDI_DEI_TASTI_FUNZIONE e INTERRUTTORI, lette dalla prova della guida rapida, e le righe del cruscotto nell'ordine della regola. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17). Nella 2.7.1 la precedenza ai tasti sul lavoro in disparte. Nella 2.7.2 i lettori di rete chiusi all'uscita. Nella 2.7.3 i tasti funzione nelle tabelle COMANDI_DEI_TASTI_FUNZIONE e INTERRUTTORI, lette dalla prova della guida rapida, e le righe del cruscotto nell'ordine della regola. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.1.0 la voce Componenti aggiuntivi delle impostazioni, e gli altri banchi liberi da scaricare.
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -54,6 +54,7 @@ import wx
 
 import accessibilita
 import associazioni
+import componenti
 import dettagli
 import formati
 import importazione
@@ -659,6 +660,8 @@ VOCI_DELLE_IMPOSTAZIONI = {
     "celle_braille": (_("Celle della barra braille"), _("Celle della barra braille non cambiate.")),
     "lettura_minima": (_("Tempo minimo di lettura in braille"), _("Tempo minimo di lettura in braille non cambiato.")),
     "banco_midi": (_("Banco dei suoni MIDI"), _("Banco dei suoni MIDI non cambiato.")),
+    # I componenti aggiuntivi da scaricare, tappa 19 a (3.1.0, issue 40).
+    "componenti": (_("Componenti aggiuntivi"), None),
     "insegui": (_("Inseguimento della plancia (Ctrl+F8, Maiuscolo+F8)"), _("Inseguimento della plancia (Ctrl+F8, Maiuscolo+F8) non cambiato.")),
     "ripresa_oltre": (_("Punto lasciato dei file lunghi"), _("Punto lasciato dei file lunghi non cambiato.")),
     # La lingua di MeTeOra, fra quelle con un catalogo (3.0.0).
@@ -1290,6 +1293,8 @@ class Finestra(wx.Frame):
         # I MIDI, tappa 8: vero mentre si scarica FluidSynth, si cercano i
         # banchi o si scarica FluidR3.
         self._midi_in_preparazione = False
+        # Il componente aggiuntivo che si sta scaricando, uno alla volta (3.1.0).
+        self._componente_in_arrivo = None
         self._video = None
         self._video_nel_motore = False
         # Il brano su cui la finestra del video e' stata nascosta a mano, con
@@ -7913,6 +7918,7 @@ class Finestra(wx.Frame):
             "celle_braille": lambda: str(imp["celle_braille"]) if imp["celle_braille"] else _("0, il testo intero"),
             "lettura_minima": lambda: f"{imp['lettura_minima']} ms",
             "banco_midi": self._banco_da_leggere,
+            "componenti": self._componenti_da_leggere,
             "insegui": lambda: _("sì") if imp["insegui"] else _("no"),
             # Traduttori: la voce Punto lasciato dei file lunghi, come Punto lasciato dei file lunghi: oltre 30 minuti, oppure mai.
             "ripresa_oltre": lambda: ngettext("oltre {n} minuto", "oltre {n} minuti", imp["ripresa_oltre"]).format(n=imp["ripresa_oltre"]) if imp["ripresa_oltre"] else _("mai"),
@@ -8005,6 +8011,7 @@ class Finestra(wx.Frame):
             "replaygain": self._scegli_il_volume_uniforme,
             "sintesi": self._scegli_la_sintesi,
             "banco_midi": self._scegli_il_banco,
+            "componenti": self._scegli_un_componente,
             "salva_console": lambda _genitore: self._salva_console(),
             "marcatori": self._finestra_dei_marcatori,
             "importa_marcatori": self._importa_i_marcatori,
@@ -9213,51 +9220,30 @@ class Finestra(wx.Frame):
         self._scegli_fra_i_banchi(trovati, genitore, dopo)
 
     def _scegli_fra_i_banchi(self, trovati, genitore, dopo=None):
-        """La lista dei banchi trovati, con in fondo lo scaricamento di FluidR3."""
+        """La lista dei banchi trovati, con in fondo lo scaricamento dei banchi
+        liberi che mancano (3.1.0: prima solo FluidR3)."""
         # Traduttori: un banco di suoni trovato: nome, dimensione e cartella.
         righe = [_("{nome}, {dimensione}, in {cartella}").format(nome=os.path.splitext(os.path.basename(p))[0], dimensione=midi.dimensione_da_leggere(d),
             cartella=os.path.dirname(p)) for p, d in trovati]
-        righe.append(_("Scarica FluidR3 GM, circa {mega} MB").format(mega=midi.FLUIDR3_DIMENSIONE // 1_000_000))
+        da_scaricare = [b for b in componenti.BANCHI if not b.presente()]
+        righe += [self._riga_dello_scaricamento(b) for b in da_scaricare]
         self._domanda()
         with FinestraScelta(genitore, _("Banco dei suoni MIDI"), righe, 0) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
                 self._annullato(_("Banco dei suoni MIDI non cambiato."))
                 return
             indice = dialogo.GetSelection()
-        if indice == len(trovati):
-            self._scarica_fluidr3(dopo, genitore)
+        if indice >= len(trovati):
+            self._installa_il_componente(da_scaricare[indice - len(trovati)], genitore, dopo)
         else:
             self._usa_il_banco(trovati[indice][0], dopo, genitore)
 
+    def _riga_dello_scaricamento(self, banco):
+        # Traduttori: la riga che scarica un banco di suoni, come Scarica FluidR3 GM, circa 148 MB.
+        return _("Scarica {nome}, circa {peso}").format(nome=banco.nome, peso=midi.dimensione_da_leggere(banco.peso))
+
     def _scarica_fluidr3(self, dopo=None, genitore=None):
-        self._midi_in_preparazione = True
-        self._riscontro("scaricamento_avviato", _("Scarico FluidR3 GM, circa {mega} MB.").format(mega=midi.FLUIDR3_DIMENSIONE // 1_000_000))
-        decimi = [0]
-
-        def avanza(scaricati, totale):
-            if totale and scaricati * 10 // totale > decimi[0]:
-                decimi[0] = scaricati * 10 // totale
-                wx.CallAfter(self.scrivi, _("FluidR3 GM: {percentuale} per cento.").format(percentuale=decimi[0] * 10), "banchi")
-
-        def lavoro():
-            try:
-                return ("banco", midi.scarica_fluidr3(avanza))
-            except (OSError, ValueError) as e:
-                return ("errore", _("FluidR3 GM non si scarica: {errore}").format(errore=e))
-
-        midi_in_disparte(lavoro, lambda esito: wx.CallAfter(self._fluidr3_scaricato, esito, dopo, genitore))
-
-    def _fluidr3_scaricato(self, esito, dopo, genitore):
-        self._midi_in_preparazione = False
-        if self._chiusa:
-            return
-        tipo, valore = esito
-        if tipo == "errore":
-            self._riscontro("errore", valore)
-            return
-        self._riscontro("scaricamento_finito", _("FluidR3 GM scaricato."))
-        # Il banco nuovo, e il MIDI in attesa, dopo il suono dello scaricamento.
-        self._dopo_il_suono(self._usa_il_banco, valore, dopo, genitore)
+        self._installa_il_componente(componenti.FLUIDR3, genitore, dopo)
 
     def _usa_il_banco(self, percorso, dopo=None, genitore=None):
         """Il banco scelto vale da subito, e si ricorda."""
@@ -9284,8 +9270,9 @@ class Finestra(wx.Frame):
 
     def _scegli_il_banco(self, genitore):
         """La voce Banco dei suoni MIDI: cerca nel PC, scrivi il percorso, o
-        scarica FluidR3."""
-        righe = [_("Cerca i banchi nel PC"), _("Scrivi il percorso di un banco"), _("Scarica FluidR3 GM, circa {mega} MB").format(mega=midi.FLUIDR3_DIMENSIONE // 1_000_000)]
+        scarica uno dei banchi liberi che mancano (3.1.0: prima solo FluidR3)."""
+        da_scaricare = [b for b in componenti.BANCHI if not b.presente()]
+        righe = [_("Cerca i banchi nel PC"), _("Scrivi il percorso di un banco")] + [self._riga_dello_scaricamento(b) for b in da_scaricare]
         self._domanda()
         with FinestraScelta(genitore, _("Banco dei suoni MIDI"), righe, 0) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
@@ -9297,7 +9284,140 @@ class Finestra(wx.Frame):
         elif indice == 1:
             self._scrivi_il_banco(genitore)
         else:
-            self._scarica_fluidr3(genitore=genitore)
+            self._installa_il_componente(da_scaricare[indice - 2], genitore)
+
+    # I componenti aggiuntivi, tappa 19 a (3.1.0, issue 40).
+
+    def _componenti_da_leggere(self):
+        totale = len(componenti.TUTTI)
+        presenti = sum(1 for c in componenti.TUTTI if c.presente())
+        if not presenti:
+            return ngettext("nessuno installato, {totale} disponibile", "nessuno installato, {totale} disponibili", totale).format(totale=totale)
+        return ngettext("{n} installato su {totale}", "{n} installati su {totale}", presenti).format(n=presenti, totale=totale)
+
+    def _riga_del_componente(self, componente):
+        """La riga di un componente nella lista: nome, stato, uso, licenza e peso."""
+        nome, uso, licenza, peso = componente.nome, componente.uso, componente.licenza, midi.dimensione_da_leggere(componente.peso)
+        if not componente.presente():
+            # Traduttori: uso e' una frase che comincia in minuscolo, come il sintetizzatore che suona i MIDI con un banco di suoni.
+            return _("{nome}, da installare: {uso} Licenza {licenza}, circa {peso}.").format(nome=nome, uso=uso, licenza=licenza, peso=peso)
+        if componente.da_aggiornare():
+            return _("{nome}, da aggiornare: {uso} Licenza {licenza}, circa {peso}.").format(nome=nome, uso=uso, licenza=licenza, peso=peso)
+        if componente.banco and componente.percorso() == self.impostazioni["banco_midi"]:
+            return _("{nome}, installato e in uso per i MIDI: {uso} Licenza {licenza}, {peso}.").format(nome=nome, uso=uso, licenza=licenza, peso=peso)
+        return _("{nome}, installato: {uso} Licenza {licenza}, {peso}.").format(nome=nome, uso=uso, licenza=licenza, peso=peso)
+
+    def _azioni_del_componente(self, componente):
+        """Le azioni di un componente, come (riga, funzione(componente, genitore))."""
+        peso = midi.dimensione_da_leggere(componente.peso)
+        if not componente.presente():
+            return [(_("Installa, circa {peso}").format(peso=peso), self._installa_il_componente)]
+        azioni = []
+        if componente.da_aggiornare():
+            azioni.append((_("Aggiorna, circa {peso}").format(peso=peso), self._installa_il_componente))
+        if componente.banco and componente.percorso() != self.impostazioni["banco_midi"]:
+            azioni.append((_("Usa per i MIDI"), lambda c, genitore: self._usa_il_banco(c.percorso(), genitore=genitore)))
+        azioni.append((_("Togli"), self._togli_il_componente))
+        return azioni
+
+    def _scegli_un_componente(self, genitore):
+        """La voce Componenti aggiuntivi: la lista dei componenti, poi le azioni
+        di quello scelto: installa, aggiorna, usa per i MIDI, togli."""
+        elenco = componenti.TUTTI
+        self._domanda()
+        with FinestraScelta(genitore, _("Componenti aggiuntivi"), [self._riga_del_componente(c) for c in elenco], 0) as dialogo:
+            if dialogo.ShowModal() != wx.ID_OK:
+                self._annullato(_("Componenti aggiuntivi: niente di cambiato."))
+                return
+            componente = elenco[dialogo.GetSelection()]
+        azioni = self._azioni_del_componente(componente)
+        self._domanda()
+        with FinestraScelta(genitore, componente.nome, [riga for riga, _funzione in azioni], 0) as dialogo:
+            if dialogo.ShowModal() != wx.ID_OK:
+                self._annullato(_("{nome}: niente di cambiato.").format(nome=componente.nome))
+                return
+            funzione = azioni[dialogo.GetSelection()][1]
+        funzione(componente, genitore)
+
+    def _installa_il_componente(self, componente, genitore=None, dopo=None):
+        """Scarica e installa un componente in disparte, con l'avanzamento nella
+        console a ogni decimo. Un banco nuovo, se i MIDI non ne hanno uno o se un
+        MIDI aspetta, vale subito; altrimenti si chiede. dopo() arriva quando i
+        MIDI sono pronti, come al primo MIDI."""
+        if self._componente_in_arrivo is not None:
+            self._riscontro("non_disponibile", _("Sto già scaricando {nome}: un momento.").format(nome=self._componente_in_arrivo.nome))
+            return
+        self._componente_in_arrivo = componente
+        if componente.midi:
+            self._midi_in_preparazione = True
+        self._riscontro("scaricamento_avviato", _("Scarico {nome}, circa {peso}.").format(nome=componente.nome, peso=midi.dimensione_da_leggere(componente.peso)))
+        decimi = [0]
+
+        def avanza(scaricati, totale):
+            if totale and scaricati * 10 // totale > decimi[0]:
+                decimi[0] = scaricati * 10 // totale
+                # Traduttori: l'avanzamento dello scaricamento, come FluidR3 GM: 50%.
+                wx.CallAfter(self.scrivi, _("{nome}: {percentuale}%.").format(nome=componente.nome, percentuale=decimi[0] * 10), "componenti")
+
+        def lavoro():
+            try:
+                return ("fatto", componente.installa(avanza))
+            except (OSError, ValueError) as e:
+                return ("errore", _("{nome} non si scarica: {errore}").format(nome=componente.nome, errore=e))
+
+        midi_in_disparte(lavoro, lambda esito: wx.CallAfter(self._componente_installato, componente, esito, dopo, genitore))
+
+    def _componente_installato(self, componente, esito, dopo, genitore):
+        self._componente_in_arrivo = None
+        if componente.midi:
+            self._midi_in_preparazione = False
+        if self._chiusa:
+            return
+        tipo, valore = esito
+        if tipo == "errore":
+            self._riscontro("errore", valore)
+            return
+        self._riscontro("scaricamento_finito", _("{nome} scaricato.").format(nome=componente.nome))
+        if genitore and genitore.IsShown() and hasattr(genitore, "aggiorna"):
+            genitore.aggiorna("componenti", self._riga_dell_impostazione("componenti"))
+        if not componente.banco:
+            return
+        percorso = valore or componente.percorso()
+        attuale = self.impostazioni["banco_midi"]
+        if dopo is not None or not attuale or not midi.e_un_banco(attuale):
+            # Il banco nuovo, e il MIDI in attesa, dopo il suono dello scaricamento.
+            self._dopo_il_suono(self._usa_il_banco, percorso, dopo, genitore)
+        elif self._conferma(_("Uso {nome} per i MIDI, al posto di {banco}?").format(nome=componente.nome, banco=os.path.basename(attuale)), "MIDI",
+                self._genitore_valido(genitore)):
+            self._dopo_il_suono(self._usa_il_banco, percorso, None, genitore)
+        if not midi.fluidsynth_presente():
+            self.scrivi(_("Per suonare i MIDI serve anche FluidSynth, che si scarica al primo MIDI o da Componenti aggiuntivi."))
+
+    def _togli_il_componente(self, componente, genitore):
+        """Toglie un componente, dopo la conferma. Se era il banco dei MIDI, i
+        MIDI restano senza banco, che si sceglie al prossimo MIDI."""
+        domanda = _("Tolgo {nome}? Si libera circa {peso}, e si può installare di nuovo da qui.").format(nome=componente.nome,
+            peso=midi.dimensione_da_leggere(componente.peso))
+        if not self._conferma(domanda, _("Componenti aggiuntivi"), self._genitore_valido(genitore)):
+            self._annullato(_("{nome}: niente di cambiato.").format(nome=componente.nome))
+            return
+        in_uso = componente.banco and componente.percorso() == self.impostazioni["banco_midi"]
+        try:
+            componente.togli()
+        except OSError as e:
+            self._riscontro("errore", _("{nome} non si toglie: {errore}").format(nome=componente.nome, errore=e))
+            return
+        if in_uso:
+            self.impostazioni["banco_midi"] = ""
+            self._salva_impostazioni()
+            self._applica_il_banco()
+        if genitore and genitore.IsShown() and hasattr(genitore, "aggiorna"):
+            genitore.aggiorna("componenti", self._riga_dell_impostazione("componenti"))
+            genitore.aggiorna("banco_midi", self._riga_dell_impostazione("banco_midi"))
+        if in_uso:
+            self._riscontro("impostazione_cambiata", _("{nome} tolto. I MIDI non hanno più un banco: si sceglie al prossimo MIDI.").format(nome=componente.nome))
+        else:
+            self._riscontro("impostazione_cambiata", _("{nome} tolto.").format(nome=componente.nome))
 
     def _scrivi_il_banco(self, genitore):
         self._domanda()

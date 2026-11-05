@@ -2,6 +2,17 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.1.0] - 2026-11-05
+
+I componenti aggiuntivi, la prima tappa dei plugin della issue 40: ciò che MeTeOra scarica quando serve, ognuno con la sua licenza, ora si vede e si gestisce da una voce delle impostazioni.
+
+- La voce Componenti aggiuntivi, nelle impostazioni dopo Banco dei suoni MIDI, elenca FluidSynth e tre banchi di suoni General MIDI liberi, ognuno con lo stato, a che cosa serve, la licenza e il peso; Invio su un componente lo installa, lo usa per i MIDI, lo aggiorna o lo toglie. Decisione di Gabriele: la voce sta nelle impostazioni, e ogni tappa dei plugin ha la sua versione.
+- Due banchi nuovi accanto a FluidR3 GM: GeneralUser GS 2.0.3, 32 MB, leggero, e MS Basic di MuseScore, 51 MB, compresso, che al primo MIDI si carica in una decina di secondi. Compaiono anche nella lista dei banchi del primo MIDI e in Banco dei suoni MIDI, se non ci sono già. Prova con il permesso di Gabriele: scaricati una volta, le impronte di GitHub tornano, sono General MIDI completi e un MIDI di prova suona con tutti e due.
+- GeneralUser GS si scarica da una copia fra i file della release componenti di MeTeOra su GitHub, come chiede il suo autore, che non vuole collegamenti diretti ai suoi file; MS Basic dal GitHub di MuseScore, fissato a una versione. Ogni banco si controlla dopo lo scaricamento, con la dimensione e l'impronta git.
+- Togliere il banco in uso lascia i MIDI senza banco, che si sceglie al prossimo MIDI; FluidSynth, dopo un MIDI, si toglie solo dopo aver riaperto MeTeOra. Uno scaricamento alla volta.
+- L'avanzamento degli scaricamenti si dice con il simbolo, FluidR3 GM: 50%, come vuole la regola delle percentuali.
+- Dentro: componenti.py, nuovo; midi.scarica_banco per ogni banco, con impronta_git, e midi.fluidsynth_caricato; le licenze dei due banchi in licenze, con scarica_licenze.py che sa prendere i file fuori dalla radice di un repository. tests/test_componenti.py, nuovo, e le prove dei MIDI con i banchi nella cartella della prova.
+
 ## [3.0.0] - 2026-11-05
 
 MeTeOra si può tradurre in qualsiasi lingua. Ogni testo che scrive nella console, nel cruscotto e nelle sue finestre passa da gettext, con l'italiano come lingua sorgente; traduzioni non ce ne sono ancora, e l'italiano che esce è lo stesso di prima, salvo le correzioni qui sotto. Il manuale e la guida rapida di F12 restano in italiano. La versione sale a 3.0.0 perché tocca ogni testo del programma. Con lei arrivano su GitHub anche le 2.7, che non avevano avuto una release.

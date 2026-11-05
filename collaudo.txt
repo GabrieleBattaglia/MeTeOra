@@ -1,3 +1,9 @@
 Collaudo di MeTeOra 3.0.0: la localizzazione.
 In italiano MeTeOra parla come la 2.7.4: un giro dei comandi di tutti i giorni, plancia, riproduzione, impostazioni, F11 e statistiche, senza frasi nuove o storte.
 Nelle impostazioni la voce Lingua dice Lingua: italiano, e Invio dice che per ora MeTeOra parla solo italiano.
+Collaudo di MeTeOra 3.1.0: i componenti aggiuntivi.
+Nelle impostazioni la voce Componenti aggiuntivi, dopo Banco dei suoni MIDI, dice quanti sono installati, e Invio apre la lista dei quattro, con stato, uso, licenza e peso.
+Installa MS Basic dalla lista: la console dice l'avanzamento a passi del 10% e poi MS Basic scaricato, e chiede se usarlo al posto del banco che hai; un MIDI con MS Basic la prima volta parte dopo una decina di secondi, e suona bene.
+Togli MS Basic: prima la domanda, poi MS Basic tolto; se era il banco in uso, la console dice che i MIDI non hanno più un banco, e il primo MIDI lo fa scegliere.
+Banco dei suoni MIDI: la lista ha in fondo lo scaricamento dei banchi liberi che non hai.
+GeneralUser GS si installa solo dopo che la sua copia è su GitHub: prima la console dice che non si scarica.
