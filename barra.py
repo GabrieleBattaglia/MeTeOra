@@ -45,6 +45,7 @@ from ctypes import wintypes
 
 import wx
 
+from lingua import _
 from valori import tempo as scrivi_il_tempo
 
 # Ogni quanto si guarda il mouse; quanti giri di fila il mouse deve muoversi
@@ -56,35 +57,47 @@ NASCONDI_DOPO = 3.0
 MOVIMENTI_PER_CLICCARE = 2
 # Con la linea del tempo, la barra e' larga questa parte della finestra.
 LARGHEZZA_CON_IL_TEMPO = 0.9
-NOME = "Barra dei comandi per il mouse"
+NOME = _("Barra dei comandi per il mouse")
 # I font dei simboli di Windows, nell'ordine di preferenza.
 FONT_DEI_SIMBOLI = ("Segoe Fluent Icons", "Segoe MDL2 Assets")
 # I gruppi della barra: (titolo, [(comando della finestra, simbolo, nome, tasto)]).
 # I comandi sono quelli dei tasti, _comando_<nome> della finestra principale.
+# I titoli e i nomi si traducono, e cosi' i tasti con Ctrl, Alt e Maiuscolo;
+# le lettere da sole restano quelle.
 GRUPPI = [
-    ("Riproduzione", [
-        ("precedente", "\ue892", "Brano precedente", "Z"),
-        ("indietro", "\ueb9e", "Indietro nel brano", "Ctrl+Q"),
-        ("play", "\ue768", "Suona", "X"),
-        ("pausa", "\ue769", "Pausa", "C"),
-        ("stop", "\ue71a", "Stop", "V"),
-        ("avanti", "\ueb9d", "Avanti nel brano", "Maiuscolo+Q"),
-        ("successivo", "\ue893", "Brano successivo", "B"),
+    # Traduttori: il titolo di un gruppo di pulsanti della barra dei comandi per il mouse.
+    (_("Riproduzione"), [
+        ("precedente", "\ue892", _("Brano precedente"), "Z"),
+        ("indietro", "\ueb9e", _("Indietro nel brano"), _("Ctrl+Q")),
+        # Traduttori: il pulsante che fa partire la musica.
+        ("play", "\ue768", _("Suona"), "X"),
+        ("pausa", "\ue769", _("Pausa"), "C"),
+        ("stop", "\ue71a", _("Stop"), "V"),
+        ("avanti", "\ueb9d", _("Avanti nel brano"),
+            # Traduttori: il nome di un tasto, come lo scrive la barra dei comandi per il mouse; Maiuscolo e' il tasto delle maiuscole.
+            _("Maiuscolo+Q")),
+        ("successivo", "\ue893", _("Brano successivo"), "B"),
     ]),
-    ("Volume", [
-        ("volume_giu", "\ue993", "Volume giù", "Ctrl+M"),
-        ("muto", "\ue74f", "Muto", "Ctrl+Alt+M"),
-        ("volume_su", "\ue995", "Volume su", "Maiuscolo+M"),
+    # Traduttori: il titolo di un gruppo di pulsanti della barra dei comandi per il mouse.
+    (_("Volume"), [
+        ("volume_giu", "\ue993", _("Volume giù"), _("Ctrl+M")),
+        # Traduttori: il pulsante che toglie e rimette l'audio.
+        ("muto", "\ue74f", _("Muto"), _("Ctrl+Alt+M")),
+        ("volume_su", "\ue995", _("Volume su"), _("Maiuscolo+M")),
     ]),
-    ("Velocità", [
-        ("velocita_giu", "\ue738", "Più lenta", "Ctrl+A"),
-        ("velocita_normale", "\ue72c", "Velocità normale", "Ctrl+Maiuscolo+A"),
-        ("velocita_su", "\ue710", "Più veloce", "Maiuscolo+A"),
+    # Traduttori: il titolo di un gruppo di pulsanti della barra dei comandi per il mouse: la velocità di riproduzione.
+    (_("Velocità"), [
+        # Traduttori: la velocità di riproduzione piu' lenta.
+        ("velocita_giu", "\ue738", _("Più lenta"), _("Ctrl+A")),
+        ("velocita_normale", "\ue72c", _("Velocità normale"), _("Ctrl+Maiuscolo+A")),
+        # Traduttori: la velocità di riproduzione piu' veloce.
+        ("velocita_su", "\ue710", _("Più veloce"), _("Maiuscolo+A")),
     ]),
-    ("Tono", [
-        ("tono_giu", "\ue738", "Tono più basso", "Ctrl+F"),
-        ("tono_normale", "\ue72c", "Tono normale", "Ctrl+Maiuscolo+F"),
-        ("tono_su", "\ue710", "Tono più alto", "Maiuscolo+F"),
+    # Traduttori: il titolo di un gruppo di pulsanti della barra dei comandi per il mouse: il tono musicale.
+    (_("Tono"), [
+        ("tono_giu", "\ue738", _("Tono più basso"), _("Ctrl+F")),
+        ("tono_normale", "\ue72c", _("Tono normale"), _("Ctrl+Maiuscolo+F")),
+        ("tono_su", "\ue710", _("Tono più alto"), _("Maiuscolo+F")),
     ]),
 ]
 
@@ -418,7 +431,8 @@ class BarraDeiComandi(wx.PopupWindow):
                 dc.DrawLabel(nome[:3], riquadro, wx.ALIGN_CENTER)
         if self._sotto is not None:
             _riquadro, _comando, _simbolo, nome, tasto = self._celle[self._sotto]
-            didascalia = f"{nome}, tasto {tasto}"
+            # Traduttori: la didascalia del pulsante sotto il puntatore, come «Suona, tasto X».
+            didascalia = _("{nome}, tasto {tasto}").format(nome=nome, tasto=tasto)
         if didascalia:
             dc.SetFont(self._testo)
             dc.DrawLabel(didascalia, self._riga_del_nome, wx.ALIGN_CENTER)
@@ -446,7 +460,8 @@ class BarraDeiComandi(wx.PopupWindow):
         indicata = self._trascinando if self._trascinando is not None else self._sul_tempo
         if indicata is None:
             return None
-        return f"Vai a {scrivi_il_tempo(indicata * durata)} di {scrivi_il_tempo(durata)}"
+        # Traduttori: la didascalia della linea del tempo, come «Vai a 1:30 di 4:00».
+        return _("Vai a {tempo} di {durata}").format(tempo=scrivi_il_tempo(indicata * durata), durata=scrivi_il_tempo(durata))
 
     def _cella_in(self, punto):
         return next((i for i, cella in enumerate(self._celle) if cella[0].Contains(punto)), None)

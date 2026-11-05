@@ -27,12 +27,15 @@ from ctypes import wintypes
 
 import formati
 import questa_rete
+from lingua import _, ngettext
 from ricerca import in_rete
 
-MESI = ("gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre")
+# Traduttori: i nomi dei mesi, nelle date come «4 ottobre 2026 alle 9:05».
+MESI = (_("gennaio"), _("febbraio"), _("marzo"), _("aprile"), _("maggio"), _("giugno"), _("luglio"), _("agosto"), _("settembre"), _("ottobre"),
+    _("novembre"), _("dicembre"))
 _NASCOSTO_O_DI_SISTEMA = stat.FILE_ATTRIBUTE_HIDDEN | stat.FILE_ATTRIBUTE_SYSTEM
 # Il nome dei tipi di unita' di GetDriveTypeW.
-TIPI_DI_UNITA = {2: "unità rimovibile", 3: "disco locale", 4: "unità di rete", 5: "unità CD o DVD", 6: "disco in memoria"}
+TIPI_DI_UNITA = {2: _("unità rimovibile"), 3: _("disco locale"), 4: _("unità di rete"), 5: _("unità CD o DVD"), 6: _("disco in memoria")}
 
 
 def quando(secondi):
@@ -42,20 +45,26 @@ def quando(secondi):
     try:
         t = time.localtime(secondi)
     except (OSError, OverflowError, ValueError):
-        return "una data non valida"
-    return f"{t.tm_mday} {MESI[t.tm_mon - 1]} {t.tm_year} alle {t.tm_hour}:{t.tm_min:02d}"
+        # Traduttori: quello che si dice al posto di una data che Windows non sa convertire.
+        return _("una data non valida")
+    # Traduttori: una data con l'ora, come «4 ottobre 2026 alle 9:05»; {mese} e' il nome del mese.
+    return _("{giorno} {mese} {anno} alle {ora}:{minuti:02d}").format(giorno=t.tm_mday, mese=MESI[t.tm_mon - 1], anno=t.tm_year, ora=t.tm_hour,
+        minuti=t.tm_min)
 
 
 def dimensione(byte):
     """Una dimensione con l'unita' adatta, con un decimale: 1.5 GB."""
     from GBUtils import formatta_dimensione
 
-    return formatta_dimensione(byte, decimali=1, unita=("byte", "KB", "MB", "GB", "TB", "PB"), byte_interi=True)
+    # Traduttori: le unita' delle dimensioni dei file, dal byte al petabyte, come in «1.5 GB».
+    return formatta_dimensione(byte, decimali=1, unita=(_("byte"), _("KB"), _("MB"), _("GB"), _("TB"), _("PB")), byte_interi=True)
 
 
 def per_tipo(percorsi):
     """Quanti file per estensione, dalla piu' frequente: mp3 120, flac 3."""
-    conti = Counter(os.path.splitext(p)[1].lower().lstrip(".") or "senza estensione" for p in percorsi)
+    # Traduttori: i file senza estensione, come in «Tipi: mp3 120, senza estensione 2».
+    senza = _("senza estensione")
+    conti = Counter(os.path.splitext(p)[1].lower().lstrip(".") or senza for p in percorsi)
     return ", ".join(f"{tipo} {n}" for tipo, n in sorted(conti.items(), key=lambda c: (-c[1], c[0])))
 
 
@@ -155,7 +164,8 @@ def dati_dell_unita(radice):
     tipo di un'unita' come E:\\. pronta e' falso per un lettore senza disco
     o una rete che non risponde."""
     tipo = ctypes.windll.kernel32.GetDriveTypeW(wintypes.LPCWSTR(radice))
-    esito = {"radice": radice, "tipo": TIPI_DI_UNITA.get(tipo, "unità"), "pronta": False}
+    # Traduttori: un'unita' di cui Windows non dice il tipo.
+    esito = {"radice": radice, "tipo": TIPI_DI_UNITA.get(tipo, _("unità")), "pronta": False}
     with contextlib.suppress(OSError):
         uso = shutil.disk_usage(radice)
         esito.update(pronta=True, totale=uso.total, libero=uso.free, occupato=uso.used)
@@ -174,15 +184,21 @@ def percentuale(parte, tutto):
 def righe_dell_unita(dati):
     """Le righe dello spazio di un'unita'."""
     lettera = dati["radice"].rstrip("\\")
-    nome = f", {dati['nome']}" if dati["nome"] else ""
-    sistema = f", file system {dati['file_system']}" if dati["file_system"] else ""
-    righe = [f"Unità {lettera}{nome}: {dati['tipo']}{sistema}."]
+    unita = f"{lettera}, {dati['nome']}" if dati["nome"] else lettera
+    if dati["file_system"]:
+        # Traduttori: {unita} e' la lettera dell'unita', con il nome del volume se c'e', come «E:, Musica»; {tipo} come disco locale; {sistema} come NTFS.
+        righe = [_("Unità {unita}: {tipo}, file system {sistema}.").format(unita=unita, tipo=dati["tipo"], sistema=dati["file_system"])]
+    else:
+        righe = [_("Unità {unita}: {tipo}.").format(unita=unita, tipo=dati["tipo"])]
     if not dati["pronta"]:
-        righe.append("Spazio: l'unità non risponde, o non ha un disco.")
+        righe.append(_("Spazio: l'unità non risponde, o non ha un disco."))
         return righe
-    righe.append(f"Capacità: {dimensione(dati['totale'])}.")
-    righe.append(f"Spazio libero: {dimensione(dati['libero'])}, {percentuale(dati['libero'], dati['totale'])} del totale.")
-    righe.append(f"Spazio occupato: {dimensione(dati['occupato'])}, {percentuale(dati['occupato'], dati['totale'])} del totale.")
+    righe.append(_("Capacità: {dimensione}.").format(dimensione=dimensione(dati["totale"])))
+    # Traduttori: {percentuale} e' come 58.4%.
+    righe.append(_("Spazio libero: {dimensione}, {percentuale} del totale.").format(dimensione=dimensione(dati["libero"]),
+        percentuale=percentuale(dati["libero"], dati["totale"])))
+    righe.append(_("Spazio occupato: {dimensione}, {percentuale} del totale.").format(dimensione=dimensione(dati["occupato"]),
+        percentuale=percentuale(dati["occupato"], dati["totale"])))
     return righe
 
 
@@ -196,19 +212,27 @@ def righe_dei_brani(elementi, durata_di, scrivi_durata, nome_di=None, percorso_d
         return []
     percorso_di = percorso_di or (lambda e: e)
     nome_di = nome_di or (lambda e: os.path.basename(percorso_di(e)))
-    righe = [f"Tipi: {per_tipo([percorso_di(e) for e in elementi])}."]
+    # Traduttori: quanti file per estensione, come «Tipi: mp3 120, flac 3.».
+    righe = [_("Tipi: {tipi}.").format(tipi=per_tipo([percorso_di(e) for e in elementi]))]
     durate = [(e, durata_di(e)) for e in elementi]
     note = [(p, d) for p, d in durate if d is not None]
     ignote = len(durate) - len(note)
     if note:
-        righe.append(f"Durata: {scrivi_durata(sum(d for _p, d in note))}" + (f", più {ignote} di cui la durata non si conosce." if ignote else "."))
+        totale = scrivi_durata(sum(d for _p, d in note))
+        if ignote:
+            # Traduttori: {n} e' quanti file non hanno ancora una durata conosciuta.
+            righe.append(ngettext("Durata: {durata}, più {n} di cui la durata non si conosce.", "Durata: {durata}, più {n} di cui la durata non si conosce.",
+                ignote).format(durata=totale, n=ignote))
+        else:
+            righe.append(_("Durata: {durata}.").format(durata=totale))
         lungo = max(note, key=lambda c: c[1])
         corto = min(note, key=lambda c: c[1])
-        righe.append(f"Il più lungo: {nome_di(lungo[0])}, {scrivi_durata(lungo[1])}.")
+        # Traduttori: il brano piu' lungo, con il suo nome e la sua durata.
+        righe.append(_("Il più lungo: {nome}, {durata}.").format(nome=nome_di(lungo[0]), durata=scrivi_durata(lungo[1])))
         if len(note) > 1:
-            righe.append(f"Il più corto: {nome_di(corto[0])}, {scrivi_durata(corto[1])}.")
+            righe.append(_("Il più corto: {nome}, {durata}.").format(nome=nome_di(corto[0]), durata=scrivi_durata(corto[1])))
     else:
-        righe.append("Durata: non ancora nota.")
+        righe.append(_("Durata: non ancora nota."))
     return righe
 
 
@@ -218,44 +242,51 @@ def attributi(percorso):
         valore = os.stat(percorso).st_file_attributes
     except (OSError, AttributeError):
         return []
-    nomi = ((stat.FILE_ATTRIBUTE_HIDDEN, "nascosta"), (stat.FILE_ATTRIBUTE_SYSTEM, "di sistema"),
-        (stat.FILE_ATTRIBUTE_READONLY, "sola lettura"), (stat.FILE_ATTRIBUTE_COMPRESSED, "compressa"))
+    # Traduttori: gli attributi di una cartella, come in «Attributi: nascosta, di sistema.».
+    nomi = ((stat.FILE_ATTRIBUTE_HIDDEN, _("nascosta")), (stat.FILE_ATTRIBUTE_SYSTEM, _("di sistema")),
+        (stat.FILE_ATTRIBUTE_READONLY, _("sola lettura")), (stat.FILE_ATTRIBUTE_COMPRESSED, _("compressa")))
     return [nome for bit, nome in nomi if valore & bit]
 
 
 def righe_della_cartella(percorso, censimento, durata_di, scrivi_durata):
     """Le righe dei dettagli di una cartella, dal suo censimento."""
     nome = os.path.basename(percorso.rstrip("\\")) or percorso
-    righe = [f"Cartella {nome}: {percorso}."]
+    righe = [_("Cartella {nome}: {percorso}.").format(nome=nome, percorso=percorso)]
     if censimento["errore"]:
-        return [*righe, f"Non riesco a leggerla: {censimento['errore']}."]
+        # Traduttori: {errore} e' il perche' che dice Windows.
+        return [*righe, _("Non riesco a leggerla: {errore}.").format(errore=censimento["errore"])]
     suonabili = censimento["suonabili"]
     # Vuota solo se si e' letto tutto: una sottocartella illeggibile puo' avere file.
     if not censimento["file"] and not censimento["sottocartelle"] and not censimento["illeggibili"]:
-        righe.append("È vuota: niente file e niente sottocartelle.")
+        righe.append(_("È vuota: niente file e niente sottocartelle."))
     elif not censimento["file"] and not censimento["illeggibili"]:
-        righe.append("È vuota: ha solo sottocartelle vuote.")
+        righe.append(_("È vuota: ha solo sottocartelle vuote."))
     if suonabili:
-        righe.append(f"Da suonare: {len(suonabili)} file, sottocartelle comprese, {dimensione(censimento['byte_suonabili'])}.")
+        righe.append(ngettext("Da suonare: {n} file, sottocartelle comprese, {dimensione}.", "Da suonare: {n} file, sottocartelle comprese, {dimensione}.",
+            len(suonabili)).format(n=len(suonabili), dimensione=dimensione(censimento["byte_suonabili"])))
         righe += righe_dei_brani(suonabili, durata_di, scrivi_durata)
     elif censimento["file"]:
-        righe.append("Da suonare: niente, in nessuna sottocartella.")
+        righe.append(_("Da suonare: niente, in nessuna sottocartella."))
     if censimento["sottocartelle"]:
-        righe.append(f"Sottocartelle: {censimento['dirette']} qui dentro, {censimento['sottocartelle']} in tutto.")
+        # Traduttori: {dirette} sono le sottocartelle subito dentro la cartella, {tutte} quelle a ogni livello.
+        righe.append(_("Sottocartelle: {dirette} qui dentro, {tutte} in tutto.").format(dirette=censimento["dirette"], tutte=censimento["sottocartelle"]))
     if censimento["file"]:
-        righe.append(f"Tutti i file: {censimento['file']}, {dimensione(censimento['byte'])}, nascosti e di ogni tipo compresi.")
+        # Traduttori: {n} e' il numero di tutti i file della cartella, {dimensione} quanto occupano.
+        righe.append(_("Tutti i file: {n}, {dimensione}, nascosti e di ogni tipo compresi.").format(n=censimento["file"], dimensione=dimensione(censimento["byte"])))
     with contextlib.suppress(OSError):
         info = os.stat(percorso)
         nascita = getattr(info, "st_birthtime", info.st_ctime)
-        righe.append(f"Creata il {quando(nascita)}; modificata il {quando(info.st_mtime)}.")
+        # Traduttori: {creata} e {modificata} sono date con l'ora, come «4 ottobre 2026 alle 9:05».
+        righe.append(_("Creata il {creata}; modificata il {modificata}.").format(creata=quando(nascita), modificata=quando(info.st_mtime)))
     if censimento["piu_recente"]:
         istante, recente = censimento["piu_recente"]
-        righe.append(f"Il file cambiato per ultimo: {os.path.relpath(recente, percorso)}, il {quando(istante)}.")
+        righe.append(_("Il file cambiato per ultimo: {percorso}, il {quando}.").format(percorso=os.path.relpath(recente, percorso), quando=quando(istante)))
     segni = attributi(percorso)
     if segni:
-        righe.append(f"Attributi: {', '.join(segni)}.")
+        righe.append(_("Attributi: {attributi}.").format(attributi=", ".join(segni)))
     if censimento["illeggibili"]:
-        righe.append(f"Non si leggono: {censimento['illeggibili']} {'cartella' if censimento['illeggibili'] == 1 else 'cartelle'}, che i conti non comprendono.")
+        righe.append(ngettext("Non si leggono: {n} cartella, che i conti non comprendono.", "Non si leggono: {n} cartelle, che i conti non comprendono.",
+            censimento["illeggibili"]).format(n=censimento["illeggibili"]))
     if censimento["interrotto"]:
-        righe.append("Conto interrotto: i numeri valgono per la parte letta.")
+        righe.append(_("Conto interrotto: i numeri valgono per la parte letta."))
     return righe

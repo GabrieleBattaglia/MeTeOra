@@ -22,16 +22,24 @@ import contextlib
 import wx
 
 from filtro import normale
+from lingua import _, plurale
 
 # La riga della lista dei marcatori quando non ce n'e' nessuno: una lista
 # vuota, per NVDA, non dice niente.
-NESSUN_MARCATORE = "Nessun marcatore."
+NESSUN_MARCATORE = _("Nessun marcatore.")
 # Il PayPal.Me dell'autore, lo stesso di Tornello.
 INDIRIZZO_PAYPAL = "https://paypal.me/GabrieleBattaglia780"
 
 
 def _premuto_invio(evento):
     return evento.GetKeyCode() in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER) and evento.GetModifiers() == wx.MOD_NONE
+
+
+def _lettera(etichetta):
+    """La lettera dell'acceleratore di un'etichetta, quella dopo la &, in
+    minuscolo; senza la &, la prima (3.0.0)."""
+    i = etichetta.find("&")
+    return etichetta[i + 1:i + 2].lower() if 0 <= i < len(etichetta) - 1 else etichetta[:1].lower()
 
 
 class DialogoTesto(wx.TextEntryDialog):
@@ -64,8 +72,13 @@ class DialogoConferma(wx.Dialog):
         # Le righe vanno a capo a una sessantina di caratteri, misurati sul
         # carattere in uso.
         self.domanda.Wrap(self.domanda.GetCharWidth() * 60)
-        self.si = wx.Button(pannello, wx.ID_YES, "&Sì")
-        self.no = wx.Button(pannello, wx.ID_NO, "&No")
+        etichetta_del_si, etichetta_del_no = _("&Sì"), _("&No")
+        self.si = wx.Button(pannello, wx.ID_YES, etichetta_del_si)
+        self.no = wx.Button(pannello, wx.ID_NO, etichetta_del_no)
+        # Le lettere che rispondono: s e n valgono sempre, e accanto ci sono
+        # quelle dei pulsanti nella lingua di MeTeOra, che vincono se
+        # coincidono con l'altra risposta (3.0.0).
+        self._risposte = {"s": wx.ID_YES, "n": wx.ID_NO, _lettera(etichetta_del_si): wx.ID_YES, _lettera(etichetta_del_no): wx.ID_NO}
         pulsanti = wx.BoxSizer(wx.HORIZONTAL)
         for pulsante in (self.si, self.no):
             pulsanti.Add(pulsante, 0, wx.LEFT, 5)
@@ -82,8 +95,8 @@ class DialogoConferma(wx.Dialog):
     def _tasto(self, evento):
         codice = evento.GetUnicodeKey()
         lettera = chr(codice).lower() if codice != wx.WXK_NONE and evento.GetModifiers() == wx.MOD_NONE else ""
-        if lettera in ("s", "n"):
-            self.EndModal(wx.ID_YES if lettera == "s" else wx.ID_NO)
+        if lettera in self._risposte:
+            self.EndModal(self._risposte[lettera])
             return
         evento.Skip()
 
@@ -98,13 +111,13 @@ class DialogoDonazione(wx.Dialog):
     def __init__(self, genitore, testo):
         from GBwx import STILE_ADATTABILE, adatta_finestra, pannello_scorrevole
 
-        super().__init__(genitore, title="Offri un caffè", style=STILE_ADATTABILE)
+        super().__init__(genitore, title=_("Offri un caffè"), style=STILE_ADATTABILE)
         pannello = pannello_scorrevole(self)
         sizer = wx.BoxSizer(wx.VERTICAL)
         self.testo = wx.TextCtrl(pannello, value=testo, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2)
-        self.testo.SetName("Offri un caffè")
-        self.dona = wx.Button(pannello, wx.ID_YES, "&Dona con PayPal")
-        self.chiudi = wx.Button(pannello, wx.ID_NO, "&Chiudi")
+        self.testo.SetName(_("Offri un caffè"))
+        self.dona = wx.Button(pannello, wx.ID_YES, _("&Dona con PayPal"))
+        self.chiudi = wx.Button(pannello, wx.ID_NO, _("&Chiudi"))
         pulsanti = wx.BoxSizer(wx.HORIZONTAL)
         for pulsante in (self.dona, self.chiudi):
             pulsanti.Add(pulsante, 0, wx.LEFT, 5)
@@ -151,18 +164,21 @@ class FinestraAggiornamento(wx.Dialog):
     def __init__(self, genitore, attuale, nuova, novita, attesa=None):
         from GBwx import STILE_ADATTABILE, adatta_finestra, pannello_scorrevole
 
-        super().__init__(genitore, title="Aggiornamento di MeTeOra", style=STILE_ADATTABILE)
+        super().__init__(genitore, title=_("Aggiornamento di MeTeOra"), style=STILE_ADATTABILE)
         pannello = pannello_scorrevole(self)
         sizer = wx.BoxSizer(wx.VERTICAL)
-        righe = [f"È disponibile MeTeOra {nuova}; tu hai la {attuale}.",
-            "Aggiorna adesso scarica la versione nuova, chiude MeTeOra e lo riapre aggiornato; playlist, impostazioni e marker restano."]
+        # Traduttori: {nuova} e {attuale} sono due versioni di MeTeOra, come 3.1.0 e 3.0.0.
+        righe = [_("È disponibile MeTeOra {nuova}; tu hai la {attuale}.").format(nuova=nuova, attuale=attuale),
+            _("Aggiorna adesso scarica la versione nuova, chiude MeTeOra e lo riapre aggiornato; playlist, impostazioni e marker restano.")]
         if attesa:
-            righe.append(f"Se non rispondi entro {durata_dell_attesa(attesa)}, la finestra si chiude da sola e te lo ripropongo al prossimo avvio.")
-        righe += ["Le novità:", (novita or "").strip() or "Nessuna novità scritta per questa versione."]
+            # Traduttori: {attesa} e' un tempo, come 2 minuti.
+            righe.append(_("Se non rispondi entro {attesa}, la finestra si chiude da sola e te lo ripropongo al prossimo avvio.").format(
+                attesa=durata_dell_attesa(attesa)))
+        righe += [_("Le novità:"), (novita or "").strip() or _("Nessuna novità scritta per questa versione.")]
         self.testo = wx.TextCtrl(pannello, value="\n".join(righe), style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2)
-        self.testo.SetName("Aggiornamento di MeTeOra")
-        self.aggiorna = wx.Button(pannello, wx.ID_YES, "&Aggiorna adesso")
-        self.non_adesso = wx.Button(pannello, wx.ID_NO, "&Non adesso")
+        self.testo.SetName(_("Aggiornamento di MeTeOra"))
+        self.aggiorna = wx.Button(pannello, wx.ID_YES, _("&Aggiorna adesso"))
+        self.non_adesso = wx.Button(pannello, wx.ID_NO, _("&Non adesso"))
         pulsanti = wx.BoxSizer(wx.HORIZONTAL)
         for pulsante in (self.aggiorna, self.non_adesso):
             pulsanti.Add(pulsante, 0, wx.LEFT, 5)
@@ -210,7 +226,7 @@ class FinestraStatistiche(wx.Dialog):
     def __init__(self, genitore, testo, azioni):
         from GBwx import STILE_ADATTABILE, adatta_finestra, pannello_scorrevole
 
-        super().__init__(genitore, title="Statistiche di MeTeOra", style=STILE_ADATTABILE)
+        super().__init__(genitore, title=_("Statistiche di MeTeOra"), style=STILE_ADATTABILE)
         self._azioni = azioni
         self._valore = testo
         self._cercato = ""
@@ -220,9 +236,9 @@ class FinestraStatistiche(wx.Dialog):
         pannello = pannello_scorrevole(self)
         sizer = wx.BoxSizer(wx.VERTICAL)
         self.testo = wx.TextCtrl(pannello, value=testo, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2)
-        self.testo.SetName("Statistiche")
-        self.azzera = wx.Button(pannello, label="&Azzera le statistiche")
-        self.chiudi = wx.Button(pannello, wx.ID_CANCEL, "&Chiudi")
+        self.testo.SetName(_("Statistiche"))
+        self.azzera = wx.Button(pannello, label=_("&Azzera le statistiche"))
+        self.chiudi = wx.Button(pannello, wx.ID_CANCEL, _("&Chiudi"))
         pulsanti = wx.BoxSizer(wx.HORIZONTAL)
         for pulsante in (self.azzera, self.chiudi):
             pulsanti.Add(pulsante, 0, wx.LEFT, 5)
@@ -285,7 +301,7 @@ class FinestraStatistiche(wx.Dialog):
             trovato = self._modello.search(self._valore)
         if trovato is None:
             self._occorrenza = None
-            self._azioni["riscontro"]("non_trovato_nelle_statistiche", f"Nelle statistiche non c'è {self._cercato}.")
+            self._azioni["riscontro"]("non_trovato_nelle_statistiche", _("Nelle statistiche non c'è {testo}.").format(testo=self._cercato))
             return
         self._occorrenza = trovato.span()
         self._azioni["suono"]("ripartito_nelle_statistiche" if ripartito else "trovato_nelle_statistiche")
@@ -311,9 +327,8 @@ class FinestraStatistiche(wx.Dialog):
 def durata_dell_attesa(secondi):
     """Il tempo dell'attesa a parole: 2 minuti, 1 minuto, 90 secondi."""
     if secondi % 60:
-        return f"{int(secondi)} secondi"
-    minuti = int(secondi // 60)
-    return "1 minuto" if minuti == 1 else f"{minuti} minuti"
+        return plurale(int(secondi), "{n} secondo", "{n} secondi")
+    return plurale(int(secondi // 60), "{n} minuto", "{n} minuti")
 
 
 class FinestraImpostazioni(wx.Dialog):
@@ -330,7 +345,7 @@ class FinestraImpostazioni(wx.Dialog):
     def __init__(self, genitore, voci, al_cambio):
         from GBwx import STILE_ADATTABILE, adatta_finestra, pannello_scorrevole
 
-        super().__init__(genitore, title="Impostazioni", style=STILE_ADATTABILE)
+        super().__init__(genitore, title=_("Impostazioni"), style=STILE_ADATTABILE)
         self._chiavi = [chiave for chiave, _testo in voci]
         self._testi = dict(voci)
         # Le voci mostrate dalla lista, nel suo ordine: tutte, finche' il
@@ -346,15 +361,15 @@ class FinestraImpostazioni(wx.Dialog):
         # controllo il nome del testo creato subito prima: il filtro, poi le
         # istruzioni, che sono il nome della lista, poi la lista. Il sizer
         # mette comunque le istruzioni in cima.
-        etichetta_del_filtro = wx.StaticText(pannello, label="Filtro delle voci:")
+        etichetta_del_filtro = wx.StaticText(pannello, label=_("Filtro delle voci:"))
         self.filtro = wx.TextCtrl(pannello)
-        self.filtro.SetName("Filtro delle voci")
-        etichetta = wx.StaticText(pannello, label="Impostazioni. Invio cambia la voce, Esc chiude, Maiuscolo con Tab va al filtro.")
+        self.filtro.SetName(_("Filtro delle voci"))
+        etichetta = wx.StaticText(pannello, label=_("Impostazioni. Invio cambia la voce, Esc chiude, Maiuscolo con Tab va al filtro."))
         self.lista = wx.ListBox(pannello, choices=[testo for _chiave, testo in voci], style=wx.LB_SINGLE)
-        self.lista.SetName("Impostazioni")
+        self.lista.SetName(_("Impostazioni"))
         # Almeno tante righe quante sono le voci, misurate sul carattere.
         self.lista.SetMinSize(wx.Size(-1, self.lista.GetCharHeight() * (len(voci) + 2)))
-        chiudi = wx.Button(pannello, wx.ID_CANCEL, "Chiudi")
+        chiudi = wx.Button(pannello, wx.ID_CANCEL, _("Chiudi"))
         sizer.Add(etichetta, 0, wx.ALL, 5)
         riga_del_filtro = wx.BoxSizer(wx.HORIZONTAL)
         riga_del_filtro.Add(etichetta_del_filtro, 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 5)
@@ -402,7 +417,7 @@ class FinestraImpostazioni(wx.Dialog):
             self.lista.Set([self._testi[chiave] for chiave in self._visibili])
             self.lista.SetSelection(self._visibili.index(self._scelta) if self._scelta in self._visibili else 0)
         else:
-            self.lista.Set([f"Nessuna voce contiene {scritto}."])
+            self.lista.Set([_("Nessuna voce contiene {testo}.").format(testo=scritto)])
             self.lista.SetSelection(0)
 
     def _cambia(self):
@@ -451,19 +466,23 @@ class FinestraScelta(wx.Dialog):
         # da' i nomi a NVDA: il filtro, poi le istruzioni, poi la lista.
         self.filtro = None
         if con_filtro:
-            etichetta_del_filtro = wx.StaticText(pannello, label="Filtro delle righe:")
+            etichetta_del_filtro = wx.StaticText(pannello, label=_("Filtro delle righe:"))
             self.filtro = wx.TextCtrl(pannello)
-            self.filtro.SetName("Filtro delle righe")
-        istruzioni = f"{titolo}. Invio conferma, Esc annulla" + (", Maiuscolo con Tab va al filtro." if con_filtro else ".")
+            self.filtro.SetName(_("Filtro delle righe"))
+        if con_filtro:
+            # Traduttori: {titolo} e' il titolo della finestra della scelta, come Lingua.
+            istruzioni = _("{titolo}. Invio conferma, Esc annulla, Maiuscolo con Tab va al filtro.").format(titolo=titolo)
+        else:
+            istruzioni = _("{titolo}. Invio conferma, Esc annulla.").format(titolo=titolo)
         etichetta = wx.StaticText(pannello, label=istruzioni)
         self.lista = wx.ListBox(pannello, choices=list(voci), style=wx.LB_SINGLE)
         self.lista.SetName(titolo)
         self.lista.SetMinSize(wx.Size(-1, self.lista.GetCharHeight() * (min(len(voci), 16) + 2)))
         pulsanti = wx.StdDialogButtonSizer()
-        conferma = wx.Button(pannello, wx.ID_OK, "Conferma")
+        conferma = wx.Button(pannello, wx.ID_OK, _("Conferma"))
         conferma.SetDefault()
         pulsanti.AddButton(conferma)
-        pulsanti.AddButton(wx.Button(pannello, wx.ID_CANCEL, "Annulla"))
+        pulsanti.AddButton(wx.Button(pannello, wx.ID_CANCEL, _("Annulla")))
         pulsanti.Realize()
         sizer.Add(etichetta, 0, wx.ALL, 5)
         if con_filtro:
@@ -511,7 +530,7 @@ class FinestraScelta(wx.Dialog):
             self.lista.Set([self._voci[i] for i in self._visibili])
             self.lista.SetSelection(self._visibili.index(self._scelta) if self._scelta in self._visibili else 0)
         else:
-            self.lista.Set([f"Nessuna riga contiene {scritto}."])
+            self.lista.Set([_("Nessuna riga contiene {testo}.").format(testo=scritto)])
             self.lista.SetSelection(0)
 
     def GetSelection(self):
@@ -530,7 +549,8 @@ def riga_del_marcatore(voce, marker):
     percorsi = voce.get("percorsi") or []
     file = percorsi[0] if percorsi else voce.get("file") or ""
     if voce.get("sottobrano"):
-        file += f", sottobrano {voce['sottobrano']}"
+        # Traduttori: {file} e' il nome del file di un SID, {numero} il numero del sottobrano.
+        file = _("{file}, sottobrano {numero}").format(file=file, numero=voce["sottobrano"])
     return f"{file}\\{marker['nome']}, {durata_lunga(marker['tempo'])}"
 
 
@@ -555,22 +575,22 @@ class FinestraMarcatori(wx.Dialog):
     def __init__(self, genitore, marcatori, azioni):
         from GBwx import STILE_ADATTABILE, adatta_finestra, pannello_scorrevole
 
-        super().__init__(genitore, title="Marcatori", style=STILE_ADATTABILE)
+        super().__init__(genitore, title=_("Marcatori"), style=STILE_ADATTABILE)
         self._marcatori = marcatori
         self._azioni = azioni
         self._righe = []
         self._cercato = ""
         pannello = pannello_scorrevole(self)
         sizer = wx.BoxSizer(wx.VERTICAL)
-        etichetta = wx.StaticText(pannello, label="Marcatori. Barra rovesciata cerca, Invio rinomina, Canc elimina le righe selezionate, Esc chiude.")
+        etichetta = wx.StaticText(pannello, label=_("Marcatori. Barra rovesciata cerca, Invio rinomina, Canc elimina le righe selezionate, Esc chiude."))
         self.lista = wx.ListCtrl(pannello, style=wx.LC_REPORT | wx.LC_NO_HEADER)
-        self.lista.SetName("Marcatori")
-        self.lista.InsertColumn(0, "Marcatori")
+        self.lista.SetName(_("Marcatori"))
+        self.lista.InsertColumn(0, _("Marcatori"))
         self.lista.SetMinSize(wx.Size(self.lista.GetCharWidth() * 60, self.lista.GetCharHeight() * 16))
         pulsanti = wx.BoxSizer(wx.HORIZONTAL)
-        cancella = wx.Button(pannello, label="Cancella tutto")
-        esporta = wx.Button(pannello, label="Esporta selezionati")
-        chiudi = wx.Button(pannello, wx.ID_CANCEL, "Chiudi")
+        cancella = wx.Button(pannello, label=_("Cancella tutto"))
+        esporta = wx.Button(pannello, label=_("Esporta selezionati"))
+        chiudi = wx.Button(pannello, wx.ID_CANCEL, _("Chiudi"))
         for pulsante in (cancella, esporta, chiudi):
             pulsanti.Add(pulsante, 0, wx.LEFT, 5)
         sizer.Add(etichetta, 0, wx.ALL, 5)
@@ -653,7 +673,7 @@ class FinestraMarcatori(wx.Dialog):
         evento.Skip()
 
     def _niente(self):
-        self._azioni["riscontro"]("non_disponibile", "Non ci sono marcatori.")
+        self._azioni["riscontro"]("non_disponibile", _("Non ci sono marcatori."))
 
     def _rinomina(self):
         scelta = self._col_fuoco()
@@ -667,7 +687,7 @@ class FinestraMarcatori(wx.Dialog):
         scelti = self.scelti()
         if not scelti:
             if self._righe:
-                self._azioni["riscontro"]("non_disponibile", "Nessuna riga selezionata: Canc elimina le righe selezionate.")
+                self._azioni["riscontro"]("non_disponibile", _("Nessuna riga selezionata: Canc elimina le righe selezionate."))
             else:
                 self._niente()
             return
@@ -685,7 +705,7 @@ class FinestraMarcatori(wx.Dialog):
         scelti = self.scelti()
         if not scelti:
             if self._righe:
-                self._azioni["riscontro"]("non_disponibile", "Nessuna riga selezionata: seleziona i marcatori da esportare.")
+                self._azioni["riscontro"]("non_disponibile", _("Nessuna riga selezionata: seleziona i marcatori da esportare."))
             else:
                 self._niente()
             return
@@ -700,13 +720,13 @@ class FinestraMarcatori(wx.Dialog):
             self._niente()
             return
         self._azioni["suono"]("domanda")
-        with DialogoTesto(self, "Testo da cercare nei marcatori:", "Cerca nei marcatori", self._cercato) as dialogo:
+        with DialogoTesto(self, _("Testo da cercare nei marcatori:"), _("Cerca nei marcatori"), self._cercato) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
-                self._azioni["riscontro"]("annullamento", "Ricerca nei marcatori annullata.")
+                self._azioni["riscontro"]("annullamento", _("Ricerca nei marcatori annullata."))
                 return
             testo = " ".join(dialogo.GetValue().split())
         if not testo:
-            self._azioni["riscontro"]("annullamento", "Ricerca nei marcatori annullata: il testo è vuoto.")
+            self._azioni["riscontro"]("annullamento", _("Ricerca nei marcatori annullata: il testo è vuoto."))
             return
         self._cercato = testo
         cercato = testo.casefold()
@@ -717,7 +737,7 @@ class FinestraMarcatori(wx.Dialog):
         if ripartita:
             trovata = next((i for i in range(fuoco + 1) if cercato in righe[i]), None)
         if trovata is None:
-            self._azioni["riscontro"]("non_trovato_nei_marcatori", f"Nei marcatori non c'è {testo}.")
+            self._azioni["riscontro"]("non_trovato_nei_marcatori", _("Nei marcatori non c'è {testo}.").format(testo=testo))
             return
         for i in list(self._selezionate()):
             self.lista.Select(i, False)
