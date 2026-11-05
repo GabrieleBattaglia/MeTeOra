@@ -21,5 +21,7 @@ copie/
 # I dati di MeTeOra (1.104.0): playlist, impostazioni, schedario, marker, posizioni e statistiche, con i loro .tmp e .nuovo. Ogni macchina ha i suoi, e da qui parte da zero (Gabriele).
 MeTeOra - *.json
 MeTeOra - *.json.*
+# La lingua scelta (3.0.0), che polipo di GBUtils salva accanto ai dati quando c'e' piu' di una lingua.
+selected_language.json
 # I registri per il PUB (2.4.0), il file da allegare che Chiedi aiuto al PUB scrive accanto ai dati.
 MeTeOra - Registri per il PUB.txt

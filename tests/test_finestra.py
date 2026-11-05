@@ -3127,6 +3127,7 @@ def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_an
         ("banco_midi", "Banco dei suoni MIDI: nessuno, si sceglie al primo MIDI"),
         ("insegui", "Inseguimento della plancia (Ctrl+F8, Maiuscolo+F8): no"),
         ("ripresa_oltre", "Punto lasciato dei file lunghi: oltre 10 minuti"),
+        ("lingua", "Lingua: italiano"),
         ("caratteri", "Dimensioni dei caratteri: quelle di Windows"),
         ("colori_testo", "Colori dei caratteri: quelli di Windows"),
         ("colori_sfondo", "Colori dello sfondo: quelli di Windows"),
@@ -10321,3 +10322,34 @@ def test_q_dice_il_punto_e_va_alla_fine_e_all_inizio(finestra, monkeypatch):
     assert _premi(finestra, "q", ctrl=True, alt=True) == "Indietro a 0:00 di 3:00."
     assert salti == [140.0, -170.0]
 
+def test_la_voce_lingua(finestra, monkeypatch, suoni_annotati):
+    """La voce Lingua della 3.0.0: con il solo italiano lo dice; con piu'
+    lingue la lista, e la scelta vale dal riavvio."""
+    import lingua
+
+    lista = _ListaFinta()
+    monkeypatch.setattr(lingua, "lingue", lambda: ["it"])
+    monkeypatch.setattr(lingua, "prossima", None)
+    assert finestra._riga_dell_impostazione("lingua") == "Lingua: italiano"
+    finestra._cambia_impostazione("lingua", lista)
+    assert suoni_annotati[-1] == "non_disponibile"
+    assert _ultima(finestra) == "Per ora MeTeOra parla solo italiano: le altre lingue arrivano con le traduzioni, come spiega il manuale."
+    scelte = []
+    monkeypatch.setattr(lingua, "lingue", lambda: ["en", "it"])
+    monkeypatch.setattr(lingua, "_polipo", lambda codice=None: scelte.append(codice))
+    scelta = _SceltaFinta(0)
+    monkeypatch.setattr(modulo, "FinestraScelta", scelta)
+    finestra._cambia_impostazione("lingua", lista)
+    assert scelta.aperture == [("Lingua", ["English, codice en", "italiano, codice it"], 1)]
+    assert scelte == ["en"] and lingua.prossima == "en"
+    assert _ultima(finestra) == "La lingua sarà English dal prossimo avvio di MeTeOra."
+    assert lista.righe["lingua"] == "Lingua: italiano; dal riavvio English"
+    scelta = _SceltaFinta(1)
+    monkeypatch.setattr(modulo, "FinestraScelta", scelta)
+    finestra._cambia_impostazione("lingua", lista)
+    assert scelta.aperture[0][2] == 0
+    assert _ultima(finestra) == "La lingua resta italiano." and lingua.prossima is None
+    assert lista.righe["lingua"] == "Lingua: italiano"
+    monkeypatch.setattr(modulo, "FinestraScelta", _SceltaFinta(None))
+    finestra._cambia_impostazione("lingua", lista)
+    assert _ultima(finestra) == "Lingua: non cambiata." and scelte == ["en", "it"]

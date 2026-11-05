@@ -81,7 +81,7 @@ class Riga(NamedTuple):
 def _numero_variabile(dati, pos):
     """Un numero a lunghezza variabile dei MIDI: (valore, posizione dopo)."""
     valore = 0
-    for _ in range(4):
+    for _volta in range(4):
         byte = dati[pos]
         pos += 1
         valore = (valore << 7) | (byte & 0x7F)

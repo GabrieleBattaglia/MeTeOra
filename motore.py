@@ -225,7 +225,7 @@ def guadagni_compensati(bande):
     suo centro; ogni banda pesa sulle vicine per meno di un quinto, e il conto
     converge in pochi giri. Con le bande a zero restano zero."""
     guadagni = [float(b) for b in bande]
-    for _ in range(GIRI_DEL_COMPENSO):
+    for _volta in range(GIRI_DEL_COMPENSO):
         errori = [b - _curva(centro, guadagni) for centro, b in zip(valori.FREQUENZE_DELLE_BANDE, bande, strict=True)]
         if max(abs(e) for e in errori) < 1e-4:
             break
@@ -643,7 +643,7 @@ class Motore:
         self._generazione = 0
         lettori = []
         try:
-            for _ in range(2):
+            for _volta in range(2):
                 lettori.append(_Lettore(self, ao, self._volume_attenuato(), self._catena(), opzioni_mpv or {}))
         except Exception:
             # Un lettore con il protocollo registrato e mai chiuso manda

@@ -590,7 +590,7 @@ def leggi_dissolvenza(testo, secondi_attuali=None):
         f"{_con_il_punto(DISSOLVENZA_MASSIMA, 3)}, per accenderla con quella durata, per esempio 4 o 2.5")
     if not testo:
         raise ErroreValore(f"{nome}: manca il valore; {attesa}.")
-    prima, _, resto = testo.partition(" ")
+    prima, _spazio, resto = testo.partition(" ")
     parola = prima.rstrip(",:;.").casefold()
     if parola in _ACCESA or parola in _SPENTA:
         accesa = parola in _ACCESA

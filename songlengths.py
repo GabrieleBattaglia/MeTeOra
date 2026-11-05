@@ -25,7 +25,7 @@ def carica(percorso_md5):
             riga = riga.strip()
             if not riga or riga.startswith((";", "[")):
                 continue
-            chiave, _, valori = riga.partition("=")
+            chiave, _uguale, valori = riga.partition("=")
             tabella[chiave.lower()] = [durata_in_secondi(v) for v in valori.split()]
     return tabella
 

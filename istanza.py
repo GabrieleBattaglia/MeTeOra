@@ -143,7 +143,7 @@ class Ascolto:
             # usava, Windows ne riusava i numeri, e un'istanza della pipe
             # poteva restare aperta fino alla fine del processo, cosi' che
             # nessuno, nello stesso processo, poteva piu' ascoltare con quel nome.
-            for _ in range(LIMITE_DEGLI_SBLOCCHI):
+            for _volta in range(LIMITE_DEGLI_SBLOCCHI):
                 if self._filo is None or not self._filo.is_alive():
                     break
                 with contextlib.suppress(OSError), open(self._nome, "rb", buffering=0):

@@ -59,6 +59,7 @@ import formati
 import importazione
 import karaoke
 import lettore_di_rete
+import lingua
 import lontano
 import marcatori
 import midi
@@ -95,6 +96,7 @@ from dialoghi import (
 from esploratore import Esploratore
 from filtro import COMMENTO, ErroreFiltro, Filtro, modello_della_console
 from impostazioni import PREDEFINITE, Impostazioni
+from lingua import _, ngettext, plurale
 from marcatori import Marcatori
 from motore import DURATA_SID_PREDEFINITA, VOLUME_MASSIMO, durata_del_sottobrano, sottobrano_risolto
 from playlist import CRITERI, Archivio, Brano, Coda, Playlist
@@ -652,6 +654,8 @@ VOCI_DELLE_IMPOSTAZIONI = {
     "banco_midi": ("Banco dei suoni MIDI", "cambiato"),
     "insegui": ("Inseguimento della plancia (Ctrl+F8, Maiuscolo+F8)", "cambiato"),
     "ripresa_oltre": ("Punto lasciato dei file lunghi", "cambiato"),
+    # La lingua di MeTeOra, fra quelle con un catalogo (3.0.0).
+    "lingua": (_("Lingua"), _("cambiata")),
     "caratteri": ("Dimensioni dei caratteri", "cambiate"),
     "colori_testo": ("Colori dei caratteri", "cambiati"),
     "colori_sfondo": ("Colori dello sfondo", "cambiati"),
@@ -868,7 +872,7 @@ def al_plurale(n, singolare, plurale):
 
 
 def brani_al_plurale(n):
-    return al_plurale(n, "brano", "brani")
+    return plurale(n, "{n} brano", "{n} brani")
 
 
 # Quante voci saltate la console elenca una per una, dopo l'importazione di
@@ -2439,7 +2443,7 @@ class Finestra(wx.Frame):
         else:
             passo = self._dopo if codice in (wx.WXK_DOWN, wx.WXK_PAGEDOWN) else self._prima
             arrivo = voce
-            for _ in range(self._voci_visibili_per_pagina() if codice in (wx.WXK_PAGEUP, wx.WXK_PAGEDOWN) else 1):
+            for _volta in range(self._voci_visibili_per_pagina() if codice in (wx.WXK_PAGEUP, wx.WXK_PAGEDOWN) else 1):
                 seguente = passo(arrivo)
                 if seguente is None:
                     break
@@ -7572,6 +7576,7 @@ class Finestra(wx.Frame):
             "banco_midi": self._banco_da_leggere,
             "insegui": lambda: "sì" if imp["insegui"] else "no",
             "ripresa_oltre": lambda: f"oltre {imp['ripresa_oltre']} minuti" if imp["ripresa_oltre"] else "mai",
+            "lingua": self._lingua_da_leggere,
             "caratteri": self._caratteri_da_leggere,
             "colori_testo": lambda: self._colori_da_leggere("colori_testo"),
             "colori_sfondo": lambda: self._colori_da_leggere("colori_sfondo"),
@@ -7613,6 +7618,37 @@ class Finestra(wx.Frame):
         quanti = sum(len(voce["marker"]) for voce in voci.values())
         return f"{quanti} in {len(voci)} file" if quanti else "nessuno"
 
+    def _lingua_da_leggere(self):
+        """La lingua di adesso e, se nelle impostazioni se n'e' scelta
+        un'altra, quella che vale dal riavvio (3.0.0)."""
+        if lingua.prossima:
+            return _("{adesso}; dal riavvio {prossima}").format(adesso=lingua.nome(lingua.CODICE), prossima=lingua.nome(lingua.prossima))
+        return lingua.nome(lingua.CODICE)
+
+    def _scegli_la_lingua(self, genitore):
+        """La voce Lingua (3.0.0): una lista delle lingue che hanno un
+        catalogo. polipo salva la scelta, che vale dal riavvio: le tabelle
+        dei testi si traducono quando i moduli si caricano."""
+        codici = lingua.lingue()
+        if len(codici) < 2:
+            self._riscontro("non_disponibile", _("Per ora MeTeOra parla solo {lingua}: le altre lingue arrivano con le traduzioni, "
+                "come spiega il manuale.").format(lingua=lingua.nome(lingua.CODICE)))
+            return
+        attuale = lingua.prossima or lingua.CODICE
+        righe = [_("{nome}, codice {codice}").format(nome=lingua.nome(c), codice=c) for c in codici]
+        self._domanda()
+        with FinestraScelta(genitore, _("Lingua"), righe, codici.index(attuale) if attuale in codici else 0) as dialogo:
+            if dialogo.ShowModal() != wx.ID_OK:
+                self._annullato(_("Lingua: non cambiata."))
+                return
+            scelta = codici[dialogo.GetSelection()]
+        lingua.scegli(scelta)
+        genitore.aggiorna("lingua", self._riga_dell_impostazione("lingua"))
+        if scelta == lingua.CODICE:
+            self._riscontro("impostazione_cambiata", _("La lingua resta {lingua}.").format(lingua=lingua.nome(scelta)))
+        else:
+            self._riscontro("impostazione_cambiata", _("La lingua sarà {lingua} dal prossimo avvio di MeTeOra.").format(lingua=lingua.nome(scelta)))
+
     def _cambia_impostazione(self, chiave, genitore):
         """Invio su una voce della finestra delle impostazioni, genitore: le
         voci di valore aprono il loro campo, le altre fanno la loro azione."""
@@ -7633,6 +7669,7 @@ class Finestra(wx.Frame):
             "impressi": self._scegli_come_leggere_gli_impressi,
             "destinazione": self._scegli_la_destinazione,
             "karaoke": self._scegli_il_modo_del_karaoke,
+            "lingua": self._scegli_la_lingua,
         }
         self._statistiche.impostazione(chiave)
         if chiave in azioni:

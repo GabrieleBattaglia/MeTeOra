@@ -27,6 +27,8 @@ ignore = [
 # Lo script di preparazione lancia solo programmi dai percorsi che conosce:
 # 7-Zip, l'installatore di MSYS2 appena scaricato e la bash di MSYS2.
 "strumenti/prepara_ambiente.py" = ["S603"]
+# Lo strumento dei cataloghi (3.0.0) lancia solo pybabel, con l'interprete che lo esegue.
+"strumenti/cataloghi.py" = ["S603"]
 # Il banco del collaudo (1.104.0) rilancia se stesso, con l'interprete che
 # lo sta eseguendo, una volta per sessione; dalla 1.111.0 lancia allo
 # stesso modo strumenti/lettore_msaa.py.
