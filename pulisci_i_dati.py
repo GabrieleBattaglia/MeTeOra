@@ -23,10 +23,15 @@ from GBUtils import key
 import copie
 import istanza
 import registro
+from lingua import _
 
 CARTELLA = os.path.dirname(os.path.abspath(__file__))
 DATI = ("Impostazioni", "Playlist", "Schedario", "Marcatori", "Posizioni", "Statistiche", "Dischi")
 SYNCHRONIZE = 0x00100000
+# Il tasto che conferma la cancellazione: la s di sì vale sempre, e accanto
+# quello della lingua di MeTeOra.
+# Traduttori: il tasto da premere per rispondere sì alla domanda "Cancello tutto?", una lettera minuscola.
+CONFERMA = frozenset({"s", _("s")})
 
 
 def meteora_aperto():
@@ -55,22 +60,27 @@ def da_cancellare():
 
 
 def main():
-    print("Pulizia dei dati di MeTeOra.")
-    print(f"Cartella: {CARTELLA}")
+    print(_("Pulizia dei dati di MeTeOra."))
+    print(_("Cartella: {cartella}").format(cartella=CARTELLA))
     if meteora_aperto():
-        print("MeTeOra è aperto: chiudilo e rilancia.")
+        print(_("MeTeOra è aperto: chiudilo e rilancia."))
         return 1
     elenco = da_cancellare()
     if not elenco:
-        print("Niente da cancellare: è già pulita.")
+        # Traduttori: e' gia' pulita la cartella dei dati.
+        print(_("Niente da cancellare: è già pulita."))
         return 0
-    print(f"Da cancellare per sempre, {len(elenco)}:")
+    # Traduttori: n e' il numero dei file e delle cartelle da cancellare, che seguono uno per riga.
+    print(_("Da cancellare per sempre, {n}:").format(n=len(elenco)))
     for percorso in elenco:
-        print(f"  {os.path.basename(percorso)}{', cartella' if os.path.isdir(percorso) else ''}")
-    risposta = key("\rCancello tutto? S sì, altro tasto no.\r")
+        nome = os.path.basename(percorso)
+        # Traduttori: un elemento dell'elenco da cancellare che e' una cartella.
+        print("  " + (_("{nome}, cartella").format(nome=nome) if os.path.isdir(percorso) else nome))
+    # Traduttori: S e' il tasto che risponde sì: la stessa lettera della traduzione di "s", qui in maiuscolo.
+    risposta = key("\r" + _("Cancello tutto? S sì, altro tasto no.") + "\r")
     print()
-    if str(risposta).lower() != "s":
-        print("Niente cancellato.")
+    if str(risposta).lower() not in CONFERMA:
+        print(_("Niente cancellato."))
         return 0
     non_riusciti = []
     for percorso in elenco:
@@ -81,12 +91,13 @@ def main():
                 os.remove(percorso)
         except OSError as e:
             non_riusciti.append(f"{os.path.basename(percorso)}: {e.strerror or e}")
-    print(f"Cancellati: {len(elenco) - len(non_riusciti)} su {len(elenco)}.")
+    print(_("Cancellati: {n} su {totale}.").format(n=len(elenco) - len(non_riusciti), totale=len(elenco)))
     for riga in non_riusciti:
-        print(f"  Non cancellato, {riga}")
+        # Traduttori: dettaglio e' il nome del file, due punti, e il motivo dato da Windows.
+        print("  " + _("Non cancellato, {dettaglio}").format(dettaglio=riga))
     if non_riusciti:
         return 1
-    print("Fatto: al prossimo avvio MeTeOra riparte da zero.")
+    print(_("Fatto: al prossimo avvio MeTeOra riparte da zero."))
     return 0
 
 

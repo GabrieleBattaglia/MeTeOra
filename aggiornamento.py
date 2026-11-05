@@ -22,6 +22,7 @@ import sys
 import threading
 
 import version
+from lingua import _
 
 APP = "MeTeOra"
 API = "https://api.github.com/repos/GabrieleBattaglia/MeTeOra/releases/latest"
@@ -49,8 +50,11 @@ def novita_fra(changelog, da, a):
         if testata:
             dentro = dopo < numeri(testata.group(1)) <= fino
             if dentro:
-                data = f" del {testata.group(2).strip()}" if testata.group(2) else ""
-                righe.append(f"Versione {testata.group(1)}{data}:")
+                if testata.group(2):
+                    # Traduttori: la testata di una versione nelle novita' dell'aggiornamento; la data e' quella del changelog, come 2026-10-04.
+                    righe.append(_("Versione {versione} del {data}:").format(versione=testata.group(1), data=testata.group(2).strip()))
+                else:
+                    righe.append(_("Versione {versione}:").format(versione=testata.group(1)))
             continue
         if pulita.startswith("#"):
             dentro = False

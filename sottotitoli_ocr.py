@@ -29,6 +29,7 @@ import traceback
 import librerie  # noqa: F401
 import ocr
 from formati import testo_srt
+from lingua import _
 
 # Le tracce di sottotitoli fatte di immagini, come le chiama mpv.
 CODEC_A_IMMAGINI = frozenset({"dvd_subtitle", "hdmv_pgs_subtitle", "dvb_subtitle", "xsub", "dvb_teletext"})
@@ -104,7 +105,7 @@ class _Lettura(_Lavoro):
     def _giro_guasto(self, errore):
         self._guasti += 1
         if self._guasti == 1 and self._guasto is not None:
-            self._guasto(f"La lettura dei sottotitoli fatti di immagini ha avuto un problema e prova ad andare avanti: {errore}")
+            self._guasto(_("La lettura dei sottotitoli fatti di immagini ha avuto un problema e prova ad andare avanti: {errore}").format(errore=errore))
 
 
 class LetturaDelleImmagini(_Lettura):
@@ -256,8 +257,12 @@ class PassataDegliImpressi(_Lavoro):
             esito = self._passa()
         except Exception as errore:  # noqa: BLE001 - torna a chi aspetta come frase
             traceback.print_exc()
-            motivo = f": {errore.strerror}" if isinstance(errore, OSError) and errore.strerror else ""
-            esito = f"La passata dei sottotitoli impressi di {os.path.basename(self.video)} si è fermata per un errore{motivo}."
+            video = os.path.basename(self.video)
+            if isinstance(errore, OSError) and errore.strerror:
+                # Traduttori: motivo e' la descrizione dell'errore data da Windows.
+                esito = _("La passata dei sottotitoli impressi di {video} si è fermata per un errore: {motivo}.").format(video=video, motivo=errore.strerror)
+            else:
+                esito = _("La passata dei sottotitoli impressi di {video} si è fermata per un errore.").format(video=video)
         if not self._fermo.is_set():
             self._finita(esito)
 
@@ -270,7 +275,7 @@ class PassataDegliImpressi(_Lavoro):
                 pass
             os.remove(percorso + ".prova")
         except OSError:
-            return f"La passata dei sottotitoli impressi non parte: nella cartella di {os.path.basename(self.video)} non posso scrivere il file."
+            return _("La passata dei sottotitoli impressi non parte: nella cartella di {video} non posso scrivere il file.").format(video=os.path.basename(self.video))
         lettore = self._crea_lettore(self.video)
         try:
             inizio = time.monotonic()
@@ -278,7 +283,7 @@ class PassataDegliImpressi(_Lavoro):
                 time.sleep(0.1)
             durata = lettore.duration
             if not durata:
-                return f"La passata dei sottotitoli impressi non apre {os.path.basename(self.video)}."
+                return _("La passata dei sottotitoli impressi non apre {video}.").format(video=os.path.basename(self.video))
             lettore.speed = self.velocita
             lettore.pause = False
             campioni, prossimo, ultimo_avviso = self.campioni, 0.0, -1

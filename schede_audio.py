@@ -34,6 +34,8 @@ Funzioni senza finestre e senza suono: chi le usa scrive in console.
 
 import re
 
+from lingua import _
+
 # Le interfacce che l'elenco lascia fuori: WDM-KS non si apre mai a
 # scrittura, e il mixer degli effetti scrive.
 ESCLUSE = ("WDM-KS",)
@@ -88,7 +90,8 @@ def _millisecondi(latenza):
     """3 ms, 23.2 ms: il decimale solo se serve, con il punto."""
     decimi = round(latenza, 1)
     numero = f"{decimi:.0f}" if decimi == int(decimi) else f"{decimi:.1f}"
-    return f"{numero} ms"
+    # Traduttori: la latenza di una scheda audio, in millisecondi.
+    return _("{numero} ms").format(numero=numero)
 
 
 def e_vivavoce(dispositivo):
@@ -106,9 +109,11 @@ def etichetta(uscita):
     if uscita.get("latenza") is not None:
         parti.append(_millisecondi(uscita["latenza"]))
     if uscita.get("esclusiva"):
-        parti.append("esclusiva: può zittire NVDA")
+        # Traduttori: in coda alla riga di una scheda audio con un'interfaccia esclusiva, come ASIO.
+        parti.append(_("esclusiva: può zittire NVDA"))
     if e_vivavoce(uscita["dispositivo"]):
-        parti.append("vivavoce: suona come un telefono")
+        # Traduttori: in coda alla riga del vivavoce di cuffie Bluetooth, che Windows apre per le telefonate.
+        parti.append(_("vivavoce: suona come un telefono"))
     return ", ".join(parti)
 
 
@@ -151,7 +156,8 @@ def automatica():
             return uscita
     # Un indice che l'elenco non ha non dovrebbe capitare: la scelta resta
     # buona per il mixer, e del nome si sa solo l'interfaccia.
-    return {"indice": indice, "dispositivo": f"dispositivo {indice}", "interfaccia": interfaccia, "breve": (interfaccia or "").replace("Windows ", ""),
+    # Traduttori: il nome di ripiego di una scheda audio di cui si sa solo il numero.
+    return {"indice": indice, "dispositivo": _("dispositivo {indice}").format(indice=indice), "interfaccia": interfaccia, "breve": (interfaccia or "").replace("Windows ", ""),
             "latenza": None, "esclusiva": False}
 
 

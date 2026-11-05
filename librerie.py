@@ -25,6 +25,7 @@ import os
 import sys
 
 import percorsi
+from lingua import _
 
 VULKAN = "vulkan-1.dll"
 # Le cartelle aggiunte alla ricerca delle DLL, da tenere vive.
@@ -55,9 +56,12 @@ def prepara():
     mancanti = [f for f in ("libmpv-2.dll", "sidshim.dll") if not os.path.isfile(os.path.join(cartella, f))]
     if mancanti:
         if getattr(sys, "frozen", False):
-            raise LibrerieMancanti(f"Nella cartella {cartella} mancano {', '.join(mancanti)}: reinstalla MeTeOra. Se le ha tolte "
-                "l'antivirus, rimettile dalla sua quarantena.")
-        raise LibrerieMancanti(f"Nella cartella {cartella} mancano {', '.join(mancanti)}: eseguire strumenti/prepara_ambiente.py")
+            # Traduttori: librerie sono i nomi dei file delle librerie, separati da virgole.
+            raise LibrerieMancanti(_("Nella cartella {cartella} mancano {librerie}: reinstalla MeTeOra. Se le ha tolte "
+                "l'antivirus, rimettile dalla sua quarantena.").format(cartella=cartella, librerie=", ".join(mancanti)))
+        # Traduttori: come sopra, ma da chi lancia MeTeOra dai sorgenti, per sviluppare.
+        raise LibrerieMancanti(_("Nella cartella {cartella} mancano {librerie}: eseguire strumenti/prepara_ambiente.py").format(cartella=cartella,
+            librerie=", ".join(mancanti)))
     if cartella not in os.environ["PATH"].split(os.pathsep):
         os.environ["PATH"] = cartella + os.pathsep + os.environ["PATH"]
         _CARTELLE.append(os.add_dll_directory(cartella))
@@ -69,10 +73,12 @@ def prepara():
         _carica(os.path.join(cartella, "libmpv-2.dll"))
     except OSError as errore:
         if not _vulkan_presente():
-            raise LibrerieMancanti(f"Manca {VULKAN}, la libreria di Vulkan che libmpv usa per il video, e senza di lei MeTeOra non suona. "
+            # Traduttori: libreria e' vulkan-1.dll.
+            raise LibrerieMancanti(_("Manca {libreria}, la libreria di Vulkan che libmpv usa per il video, e senza di lei MeTeOra non suona. "
                 "Di solito la installano i driver della scheda video: aggiornali dal sito di chi ha fatto la scheda, oppure installa "
-                "il Vulkan Runtime da https://vulkan.lunarg.com.") from errore
-        raise LibrerieMancanti(f"libmpv-2.dll, nella cartella {cartella}, non si carica: {errore}") from errore
+                "il Vulkan Runtime da https://vulkan.lunarg.com.").format(libreria=VULKAN)) from errore
+        # Traduttori: errore e' la descrizione dell'errore data da Windows.
+        raise LibrerieMancanti(_("libmpv-2.dll, nella cartella {cartella}, non si carica: {errore}").format(cartella=cartella, errore=errore)) from errore
     _importa_mpv(cartella)
     return cartella
 
@@ -86,7 +92,7 @@ def _importa_mpv(cartella):
     try:
         import mpv  # noqa: F401
     except OSError as errore:
-        raise LibrerieMancanti(f"python-mpv non trova libmpv-2.dll nella cartella {cartella}: {errore}") from errore
+        raise LibrerieMancanti(_("python-mpv non trova libmpv-2.dll nella cartella {cartella}: {errore}").format(cartella=cartella, errore=errore)) from errore
     finally:
         os.environ["PATH"] = path
 

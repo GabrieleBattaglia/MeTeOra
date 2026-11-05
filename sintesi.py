@@ -11,17 +11,28 @@ parole che l'utente legge le da' MeTeOra, qui.
 
 from GBsintesi import AUTOMATICA
 
+from lingua import _
+
 # Le uscite di GBsintesi.USCITE, con il nome da leggere.
 NOMI = {
     "nvda": "NVDA",
     "jaws": "JAWS",
-    "sapi5": "la voce di Windows, SAPI5",
+    # Traduttori: una delle uscite della sintesi dei sottotitoli, accanto a NVDA e JAWS.
+    "sapi5": _("la voce di Windows, SAPI5"),
 }
 # Dove vanno i testi letti, sottotitoli e karaoke (1.82.0): le chiavi di
 # GBsintesi.DESTINAZIONI, salvate nelle impostazioni, e le loro righe.
-DESTINAZIONI = {"entrambi": "alla sintesi e al braille", "sintesi": "solo alla sintesi", "braille": "solo al braille"}
+DESTINAZIONI = {
+    # Traduttori: dove vanno sottotitoli e karaoke; e' una riga della lista e chiude la frase "Sottotitoli e karaoke ora vanno ...".
+    "entrambi": _("alla sintesi e al braille"),
+    # Traduttori: come sopra, solo alla sintesi vocale.
+    "sintesi": _("solo alla sintesi"),
+    # Traduttori: come sopra, solo alla barra braille.
+    "braille": _("solo al braille"),
+}
 
 
 def nome(chiave):
     """Il nome da leggere di una scelta delle impostazioni."""
-    return "automatica" if chiave == AUTOMATICA else NOMI[chiave]
+    # Traduttori: la sintesi dei sottotitoli scelta da MeTeOra, al femminile come la sintesi.
+    return _("automatica") if chiave == AUTOMATICA else NOMI[chiave]

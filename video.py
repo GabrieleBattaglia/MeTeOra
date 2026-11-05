@@ -27,6 +27,7 @@ video quando compariva, e prendeva il fuoco al clic.
 import wx
 
 from barra import BarraDeiComandi
+from lingua import _
 
 # Ogni quanti millisecondi si guarda il fuoco.
 PASSO_DEL_CONTROLLO = 200
@@ -39,14 +40,16 @@ class FinestraVideo(wx.Frame):
     finestra."""
 
     def __init__(self, principale, posizione, durata, salta, nascondi):
-        super().__init__(None, title="MeTeOra, video", style=wx.DEFAULT_FRAME_STYLE)
+        # Traduttori: il titolo della finestra del video, prima che ne prenda uno del brano.
+        super().__init__(None, title=_("MeTeOra, video"), style=wx.DEFAULT_FRAME_STYLE)
         self._principale = principale
         self._nascondi = nascondi
         self.SetBackgroundColour(wx.BLACK)
         self.pannelli = []
         sizer = wx.BoxSizer(wx.VERTICAL)
         for numero in (1, 2):
-            pannello = wx.Panel(self, name=f"Video, lettore {numero}")
+            # Traduttori: il nome del pannello dove suona il video di uno dei due lettori, 1 o 2.
+            pannello = wx.Panel(self, name=_("Video, lettore {numero}").format(numero=numero))
             pannello.SetBackgroundColour(wx.BLACK)
             sizer.Add(pannello, 1, wx.EXPAND)
             self.pannelli.append(pannello)

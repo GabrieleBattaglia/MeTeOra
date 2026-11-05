@@ -109,6 +109,7 @@ from ctypes import wintypes
 
 import questa_rete
 import ricerca
+from lingua import _
 
 # I codici di Windows con cui una cartella dice di non esserci: il file e il
 # percorso che non si trovano.
@@ -507,7 +508,8 @@ def _giro_sorvegliato(radice, fermo, cedi, attesa):
             return None
         raise ricerca.NonRisponde(radice.nome)
     if not esito:
-        raise OSError(f"Il giro di {radice.nome} si e' interrotto.")
+        # Traduttori: il giro della pulizia all'avvio su una radice di rete, come \\server\musica.
+        raise OSError(_("Il giro di {radice} si e' interrotto.").format(radice=radice.nome))
     if isinstance(esito[0], Exception):
         raise esito[0]
     return esito[0]
@@ -919,16 +921,18 @@ def _ricordi_letti(dati, computer):
         return isinstance(valore, list) and all(isinstance(chi, str) and chi for chi in valore)
 
     if not isinstance(dati, dict):
-        raise ValueError(f"i dischi di {computer} non si capiscono")
+        # Traduttori: computer e' il nome di un computer nel file dei dischi della pulizia all'avvio.
+        raise ValueError(_("i dischi di {computer} non si capiscono").format(computer=computer))
     ricordi = {}
     for radice, ricordo in dati.items():
         if not isinstance(ricordo, dict):
-            raise ValueError(f"il ricordo di {radice} su {computer} non si capisce")
+            # Traduttori: radice e' una lettera di unita', come E:\, e computer il nome di un computer.
+            raise ValueError(_("il ricordo di {radice} su {computer} non si capisce").format(radice=radice, computer=computer))
         disco, altri, visti = ricordo.get("disco"), ricordo.get("altri", []), ricordo.get("visti", [])
         # Il disco, se c'e', e ognuno degli altri e dei visti sono testi non
         # vuoti; il disco non e' anche fra gli altri.
         if (disco is not None and not (isinstance(disco, str) and disco)) or not testi(altri) or not testi(visti) or disco in altri:
-            raise ValueError(f"il ricordo di {radice} su {computer} non si capisce")
+            raise ValueError(_("il ricordo di {radice} su {computer} non si capisce").format(radice=radice, computer=computer))
         valido = _unisci({"disco": disco, "altri": altri, "visti": visti})
         if valido:
             ricordi[radice] = valido
@@ -942,11 +946,12 @@ def _computer_letti(dati):
     computer senza le sue lettere o con un MachineGuid che non e' un testo:
     un computer letto senza lettere farebbe sembrare nuove le sue contese."""
     if not isinstance(dati, dict):
-        raise ValueError("non contiene i dischi dei computer")
+        # Traduttori: il motivo per cui il file dei dischi della pulizia all'avvio non si legge.
+        raise ValueError(_("non contiene i dischi dei computer"))
     letti = {}
     for computer, suoi in dati.items():
         if not isinstance(suoi, dict) or not isinstance(suoi.get("lettere"), dict) or not isinstance(suoi.get("guid", ""), str):
-            raise ValueError(f"i dischi di {computer} non si capiscono")
+            raise ValueError(_("i dischi di {computer} non si capiscono").format(computer=computer))
         letti[computer] = {"lettere": _ricordi_letti(suoi["lettere"], computer)}
         if suoi.get("guid"):
             letti[computer]["guid"] = suoi["guid"].lower()

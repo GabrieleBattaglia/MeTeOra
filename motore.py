@@ -68,6 +68,7 @@ import sid
 import sottobrani
 import valori
 import wav_in_ram
+from lingua import _
 
 # La durata di un SID che non sta in nessun database: tre minuti, come fanno
 # i lettori di SID.
@@ -1253,7 +1254,8 @@ class Motore:
                 for posto, percorso in enumerate(passate, 1):
                     lingua = os.path.splitext(percorso)[0].rsplit(".", 1)[-1]
                     risposta = (lambda _errore, _esito: poi()) if poi is not None and posto == len(passate) else None
-                    lettore.comando("sub-add", percorso, "auto", "Sottotitoli impressi", lingua, risposta=risposta)
+                    # Traduttori: il titolo della traccia di sottotitoli scritta dalla passata dei sottotitoli impressi nel video.
+                    lettore.comando("sub-add", percorso, "auto", _("Sottotitoli impressi"), lingua, risposta=risposta)
                 return
         if poi is not None:
             poi()

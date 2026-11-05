@@ -26,6 +26,8 @@ import socket
 import threading
 import urllib.parse
 
+from lingua import _
+
 # I tipi che il server dichiara, per estensione.
 TIPI = {
     ".mp3": "audio/mpeg", ".flac": "audio/flac", ".ogg": "audio/ogg", ".oga": "audio/ogg", ".opus": "audio/ogg",
@@ -147,7 +149,8 @@ class Ricerca:
         browser = self._browser
         info = browser.devices.get(uuid) if browser is not None else None
         if info is None:
-            raise LookupError(f"apparecchio {uuid} non trovato")
+            # Traduttori: uuid e' il codice che identifica uno speaker Cast nella rete.
+            raise LookupError(_("apparecchio {uuid} non trovato").format(uuid=uuid))
         return Apparecchio(info, browser.zc, allo_stato, attesa, al_distacco)
 
     def _cambio(self, _uuid, _servizio):
@@ -190,7 +193,8 @@ class Apparecchio:
             # wait torna anche allo scadere, senza dire niente.
             with contextlib.suppress(Exception):
                 self._cast.disconnect(timeout=1)
-            raise ConnectionError(f"{self.nome} non risponde")
+            # Traduttori: nome e' quello di uno speaker Cast.
+            raise ConnectionError(_("{nome} non risponde").format(nome=self.nome))
         self._mc = self._cast.media_controller
         apparecchio = self
 

@@ -16,11 +16,30 @@ import string
 from ctypes import wintypes
 
 import formati
+from lingua import _
 
 # I caratteri che Windows non accetta nei nomi dei file, con il nome da
 # leggere, e i nomi riservati (Rinomina file, 1.67.0).
-CARATTERI_VIETATI = {"<": "minore", ">": "maggiore", ":": "due punti", '"': "virgolette", "/": "barra", "\\": "barra rovesciata",
-    "|": "barra verticale", "?": "punto interrogativo", "*": "asterisco"}
+CARATTERI_VIETATI = {
+    # Traduttori: i nomi dei caratteri vietati nei nomi dei file, in un elenco dopo "Nel nome di un file non possono stare:"; questo e' <.
+    "<": _("minore"),
+    # Traduttori: il carattere >.
+    ">": _("maggiore"),
+    # Traduttori: il carattere :.
+    ":": _("due punti"),
+    # Traduttori: il carattere ".
+    '"': _("virgolette"),
+    # Traduttori: il carattere /.
+    "/": _("barra"),
+    # Traduttori: il carattere \.
+    "\\": _("barra rovesciata"),
+    # Traduttori: il carattere |.
+    "|": _("barra verticale"),
+    # Traduttori: il carattere ?.
+    "?": _("punto interrogativo"),
+    # Traduttori: il carattere *.
+    "*": _("asterisco"),
+}
 NOMI_RISERVATI = frozenset({"con", "prn", "aux", "nul", *(f"com{n}" for n in range(1, 10)), *(f"lpt{n}" for n in range(1, 10))})
 # I file che accompagnano un brano con il suo stesso nome, e che cambiano
 # nome con lui: i sottotitoli e i testi sincronizzati.
@@ -29,7 +48,18 @@ ESTENSIONI_COMPAGNE = frozenset({".srt", ".ass", ".ssa", ".vtt", ".sub", ".idx",
 _NASCOSTO = 0x2
 _SISTEMA = 0x4
 # I nomi dei tipi di unita' di GetDriveTypeW, usati quando il volume non ha nome.
-_TIPI = {2: "Unità rimovibile", 3: "Disco locale", 4: "Unità di rete", 5: "Unità CD", 6: "Disco in memoria"}
+_TIPI = {
+    # Traduttori: il nome di un'unita' senza nome del volume, dopo la lettera, come in "F:\Unità rimovibile".
+    2: _("Unità rimovibile"),
+    # Traduttori: come sopra, un disco fisso.
+    3: _("Disco locale"),
+    # Traduttori: come sopra, un'unita' di rete.
+    4: _("Unità di rete"),
+    # Traduttori: come sopra, un lettore di CD o DVD.
+    5: _("Unità CD"),
+    # Traduttori: come sopra, un disco fatto nella memoria, un RAM disk.
+    6: _("Disco in memoria"),
+}
 
 
 def _nome_del_volume(radice):
@@ -48,7 +78,8 @@ def _nome_del_volume(radice):
             kernel32.SetThreadErrorMode(vecchia.value, None)
     if riuscito and nome.value:
         return nome.value
-    return _TIPI.get(kernel32.GetDriveTypeW(wintypes.LPCWSTR(radice)), "Unità")
+    # Traduttori: il nome di un'unita' di tipo sconosciuto e senza nome del volume, dopo la lettera.
+    return _TIPI.get(kernel32.GetDriveTypeW(wintypes.LPCWSTR(radice)), _("Unità"))
 
 
 def unita():
@@ -196,11 +227,12 @@ def nome_non_valido(nome):
     """Perche' nome non va bene come nome di un file in Windows, o None."""
     vietati = [CARATTERI_VIETATI[c] for c in dict.fromkeys(nome) if c in CARATTERI_VIETATI]
     if vietati:
-        return f"Nel nome di un file non possono stare: {', '.join(vietati)}."
+        # Traduttori: elenco sono i nomi dei caratteri, separati da virgole.
+        return _("Nel nome di un file non possono stare: {elenco}.").format(elenco=", ".join(vietati))
     if any(ord(c) < 32 for c in nome):
-        return "Nel nome di un file non possono stare caratteri di controllo."
+        return _("Nel nome di un file non possono stare caratteri di controllo.")
     if nome.split(".")[0].strip().casefold() in NOMI_RISERVATI:
-        return f"{nome} è un nome riservato di Windows."
+        return _("{nome} è un nome riservato di Windows.").format(nome=nome)
     return None
 
 

@@ -13,6 +13,8 @@ e Speex restano da provare con file veri.
 
 import os
 
+from lingua import _
+
 SID = frozenset({".sid"})
 # I MIDI li rende FluidSynth, dalla 1.65.0 (tappa 8, issue 16).
 MIDI = frozenset({".mid", ".midi", ".kar"})
@@ -105,10 +107,22 @@ def filtro_dialogo():
     """Il filtro dei file per la finestra Apri file: dalla 1.113.0 i file
     multimediali comprendono le playlist, che hanno anche un filtro loro."""
     tutti, playlist = _modelli(TUTTI | PLAYLIST), _modelli(PLAYLIST)
-    return f"File multimediali ({tutti})|{tutti}|Playlist ({playlist})|{playlist}|Tutti i file (*.*)|*.*"
+    # Traduttori: una voce del tipo di file nella finestra Apri file; fra parentesi i modelli dei nomi, come *.mp3;*.flac.
+    multimediali = _("File multimediali ({modelli})").format(modelli=tutti)
+    return "|".join((multimediali, tutti, _voce_delle_playlist(playlist), playlist, _voce_di_tutti_i_file(), "*.*"))
 
 
 def filtro_delle_playlist():
     """Il filtro dei file per il comando Importa playlist (1.113.0)."""
     playlist = _modelli(PLAYLIST)
-    return f"Playlist ({playlist})|{playlist}|Tutti i file (*.*)|*.*"
+    return "|".join((_voce_delle_playlist(playlist), playlist, _voce_di_tutti_i_file(), "*.*"))
+
+
+def _voce_delle_playlist(modelli):
+    # Traduttori: una voce del tipo di file nelle finestre dei file; fra parentesi i modelli dei nomi, come *.m3u;*.pls.
+    return _("Playlist ({modelli})").format(modelli=modelli)
+
+
+def _voce_di_tutti_i_file():
+    # Traduttori: l'ultima voce del tipo di file nelle finestre dei file; (*.*) e' il modello di tutti i nomi.
+    return _("Tutti i file (*.*)")
