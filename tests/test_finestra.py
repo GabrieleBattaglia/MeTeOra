@@ -1,6 +1,6 @@
 # MeTeOra, le prove della finestra principale, sul desktop nascosto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21). Nella 1.112.0 quelle dei dischi della pulizia, anche del loro file che non si legge, e la prova della pulizia che toglie i file spariti non fa piu' leggere allo schedario i file finti; poi Riconosci questo disco, la riga che lo indica e la Sentinella che guarda i dischi dei file usati; infine la domanda di Riconosci questo disco con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 quelle dell'importazione delle playlist M3U, M3U8 e PLS. Nella 1.113.1 quella dell'etichetta di un file delle console con un sottobrano senza durata (issue 24). Nella 1.113.3 quella della Barra dei comandi per il mouse, che nell'errore dice il suo nome (issue 26). Nella 1.113.5 quelle delle statistiche scritte solo se cambiate, al piu' ogni mezz'ora. Nella 1.116.0 quelle delle schede audio che vanno e tornano, e del brano che riparte quando la sua uscita si perde. Nella 1.116.1 quella della scheda delle statistiche con la scelta che manca. Nella 1.116.2 quella dei suoni di piu' e meno fatti al volo. Nella 1.116.3 quella dei comandi da fermi (issue 39). Nella 1.119.0 quelle degli speaker Cast e della lista delle destinazioni. Nella 2.7.3 quelle della guida rapida, con ogni combinazione presa dalle tabelle dei tasti e le combinazioni di ogni tasto di seguito, nell'ordine della regola. Nella 3.1.0 i banchi scaricati nella cartella della prova, e le voci dei componenti aggiuntivi. Nella 3.2.0 il ramo Indirizzi fra i rami principali, e i componenti sono sei.
+# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21). Nella 1.112.0 quelle dei dischi della pulizia, anche del loro file che non si legge, e la prova della pulizia che toglie i file spariti non fa piu' leggere allo schedario i file finti; poi Riconosci questo disco, la riga che lo indica e la Sentinella che guarda i dischi dei file usati; infine la domanda di Riconosci questo disco con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 quelle dell'importazione delle playlist M3U, M3U8 e PLS. Nella 1.113.1 quella dell'etichetta di un file delle console con un sottobrano senza durata (issue 24). Nella 1.113.3 quella della Barra dei comandi per il mouse, che nell'errore dice il suo nome (issue 26). Nella 1.113.5 quelle delle statistiche scritte solo se cambiate, al piu' ogni mezz'ora. Nella 1.116.0 quelle delle schede audio che vanno e tornano, e del brano che riparte quando la sua uscita si perde. Nella 1.116.1 quella della scheda delle statistiche con la scelta che manca. Nella 1.116.2 quella dei suoni di piu' e meno fatti al volo. Nella 1.116.3 quella dei comandi da fermi (issue 39). Nella 1.119.0 quelle degli speaker Cast e della lista delle destinazioni. Nella 2.7.3 quelle della guida rapida, con ogni combinazione presa dalle tabelle dei tasti e le combinazioni di ogni tasto di seguito, nell'ordine della regola. Nella 3.1.0 i banchi scaricati nella cartella della prova, e le voci dei componenti aggiuntivi. Nella 3.2.0 il ramo Indirizzi fra i rami principali, e i componenti sono sei. Nella 3.3.0 il ramo Radio fra i rami principali, e gli indirizzi saltati dall'importazione sono rtsp e mms.
 
 import contextlib
 import ctypes
@@ -58,7 +58,7 @@ def test_aree_nell_ordine_di_tabulazione(finestra):
 
 
 def test_rami_principali(finestra):
-    assert _etichette(finestra, finestra.albero.GetRootItem()) == ["Preferiti, brani: 0, totali: 0", "Playlist", "Questo PC", "Questa rete", "Indirizzi, brani: 0, totali: 0", "Apri file",
+    assert _etichette(finestra, finestra.albero.GetRootItem()) == ["Preferiti, brani: 0, totali: 0", "Playlist", "Questo PC", "Questa rete", "Indirizzi, brani: 0, totali: 0", "Radio", "Apri file",
         "Statistiche", "Impostazioni"]
     assert _etichette(finestra, finestra.nodo_playlist) == ["Nuova playlist", "Importa playlist"]
 
@@ -2490,7 +2490,7 @@ def test_maiuscolo_e_ctrl_con_le_frecce_senza_passare_dall_albero(finestra):
     # seleziona da b fino in fondo.
     _nell_albero(finestra, wx.WXK_END, maiuscolo=True)
     assert _selezionate(finestra) == sorted(["b.mp3", "c.mp3", "d.mp3", "Nuova playlist", "Importa playlist", "Questo PC", "Questa rete",
-        "Indirizzi, brani: 0, totali: 0", "Apri file", "Statistiche", "Impostazioni"])
+        "Indirizzi, brani: 0, totali: 0", "Radio", "Apri file", "Statistiche", "Impostazioni"])
     assert finestra.albero.GetItemText(finestra._voce_corrente()) == "Impostazioni"
     # Un altro tasto lascia l'ancora: si riparte dalla voce col fuoco.
     _nell_albero(finestra, wx.WXK_LEFT)
@@ -6208,6 +6208,7 @@ class _LettoreDelKaraoke:
 
         self.percorso, self._richieste, self.pronto = percorso, 1, True
         self.karaoke = self.formato_imposto = None
+        self.dal_vivo, self.titolo_in_onda = False, None
         self.karaoke_in_volo = self.karaoke_da_rifare = False
         self.comandi, self.in_sospeso, self.trattieni = [], [], False
         self.mpv = types.SimpleNamespace(track_list=[])
@@ -9892,7 +9893,7 @@ def test_importa_playlist_dal_comando(finestra, monkeypatch, suoni_annotati, car
     os.makedirs(os.path.join(musica, "Album"))
     for nome in ("uno.mp3", "due.flac"):
         _file(os.path.join(musica, nome))
-    m3u = _file(os.path.join(musica, "Rock anni 80.m3u"), "#EXTM3U\n#EXTINF:10,Uno\nuno.mp3\nhttp://radio.example/flusso\nmanca.mp3\nAlbum\ndue.flac\nuno.mp3\n")
+    m3u = _file(os.path.join(musica, "Rock anni 80.m3u"), "#EXTM3U\n#EXTINF:10,Uno\nuno.mp3\nrtsp://radio.example/flusso\nmanca.mp3\nAlbum\ndue.flac\nuno.mp3\n")
     finestra._aggiungi(None, [os.path.join(musica, "due.flac")], nome="Rock anni 80")
     finestra._seleziona(finestra.nodo_preferiti)
     monkeypatch.setattr(modulo, "DialogoDiFile", _FileScelti([m3u, os.path.join(musica, "uno.mp3")]))
@@ -9904,7 +9905,7 @@ def test_importa_playlist_dal_comando(finestra, monkeypatch, suoni_annotati, car
     assert pl.origine == {"percorso": m3u, "data": os.path.getmtime(m3u), "dimensione": os.path.getsize(m3u)}
     assert [_senza_ora(r) for r in finestra._righe[-4:]] == [
         f"Importata la playlist Rock anni 80 2: 3 brani, da {m3u}. Saltate 3 voci: 1 file che non c'è, 1 indirizzo in rete, 1 cartella.",
-        "Saltata http://radio.example/flusso: indirizzo in rete.",
+        "Saltata rtsp://radio.example/flusso: indirizzo in rete.",
         f"Saltata {os.path.join(musica, 'manca.mp3')}: file che non c'è.",
         f"Saltata {os.path.join(musica, 'Album')}: cartella.",
     ]
@@ -10000,11 +10001,11 @@ def test_le_playlist_da_windows_e_da_apri_file(finestra, monkeypatch, suoni_anno
 
 def test_le_playlist_senza_niente_da_importare(finestra, monkeypatch, suoni_annotati, cartella_visibile):
     _importazione_subito(finestra, monkeypatch)
-    radio = _file(os.path.join(cartella_visibile, "radio.m3u"), "#EXTM3U\nhttp://a.example/1\nhttps://b.example/2\n")
+    radio = _file(os.path.join(cartella_visibile, "radio.m3u"), "#EXTM3U\nrtsp://a.example/1\nmms://b.example/2\n")
     finestra._importa_le_playlist([radio])
     assert finestra.archivio.playlist == [] and suoni_annotati[-1] == "niente_da_suonare"
     assert [_senza_ora(r) for r in finestra._righe[-3:]] == ["Niente da importare da radio.m3u. Saltate 2 voci: indirizzi in rete.",
-        "Saltata http://a.example/1: indirizzo in rete.", "Saltata https://b.example/2: indirizzo in rete."]
+        "Saltata rtsp://a.example/1: indirizzo in rete.", "Saltata mms://b.example/2: indirizzo in rete."]
     vuota = _file(os.path.join(cartella_visibile, "vuota.m3u"), "#EXTM3U\n")
     finestra._importa_le_playlist([vuota])
     assert _ultima(finestra) == "Niente da importare da vuota.m3u: non ha nessuna voce."
@@ -10023,7 +10024,7 @@ def test_le_playlist_senza_niente_da_importare(finestra, monkeypatch, suoni_anno
     monkeypatch.setattr(modulo.pulizia, "controlla", guasto)
     finestra._importa_le_playlist([buona, radio])
     assert "Non riesco a controllare i file di buona.m3u: RuntimeError: disco in fiamme" in [_senza_ora(r) for r in finestra._righe]
-    assert _ultima(finestra) == "Saltata https://b.example/2: indirizzo in rete." and finestra.archivio.playlist == []
+    assert _ultima(finestra) == "Saltata mms://b.example/2: indirizzo in rete." and finestra.archivio.playlist == []
     assert finestra._importazione is None and finestra._da_importare == []
 
 
@@ -10032,7 +10033,7 @@ def test_il_resoconto_e_le_radici_che_non_rispondono(finestra, monkeypatch, suon
     # controllo; la console elenca fino a venti voci saltate.
     _importazione_subito(finestra, monkeypatch)
     a = _file(os.path.join(cartella_visibile, "a.mp3"))
-    m3u = _file(os.path.join(cartella_visibile, "Misto.m3u"), "\n".join(["a.mp3", r"F:\lontano\b.mp3", r"F:\lontano\c.mp3", *[f"http://radio/{n}" for n in range(25)]]))
+    m3u = _file(os.path.join(cartella_visibile, "Misto.m3u"), "\n".join(["a.mp3", r"F:\lontano\b.mp3", r"F:\lontano\c.mp3", *[f"rtsp://radio/{n}" for n in range(25)]]))
     controllati = []
 
     def controlla(percorsi, fermo=None, cedi=None):
@@ -10046,7 +10047,7 @@ def test_il_resoconto_e_le_radici_che_non_rispondono(finestra, monkeypatch, suon
     assert len(finestra.archivio.playlist[0].brani) == 3 and finestra._voce_corrente() == finestra.nodo_preferiti
     righe = [_senza_ora(r) for r in finestra._righe[-22:]]
     assert righe[0] == f"Importata la playlist Misto: 3 brani, da {m3u}. Saltate 25 voci: indirizzi in rete. Tenute senza controllo 2 voci di F:, che non risponde."
-    assert righe[1] == "Saltata http://radio/0: indirizzo in rete." and righe[20] == "Saltata http://radio/19: indirizzo in rete."
+    assert righe[1] == "Saltata rtsp://radio/0: indirizzo in rete." and righe[20] == "Saltata rtsp://radio/19: indirizzo in rete."
     assert righe[21] == "E altre 5 voci saltate." and re.search(r" \d\d:\d\d$", finestra._righe[-1]) and not re.search(r" \d\d:\d\d$", finestra._righe[-2])
 
 
@@ -10152,12 +10153,12 @@ def test_la_rilettura_senza_niente_da_rileggere(finestra, monkeypatch, suoni_ann
     assert pl.brani == brani and suonati == [("a.mp3", None)] and finestra.coda.playlist is pl
     assert suoni_annotati[-2:] == ["niente_da_suonare", "file_aperto"]
     # Voci tutte saltate: dal comando, la selezione va su di lei.
-    _file(m3u, "http://radio/x\nmanca.mp3\n")
+    _file(m3u, "rtsp://radio/x\nmanca.mp3\n")
     finestra._seleziona(finestra.nodo_preferiti)
     finestra._importa_le_playlist([m3u], "seleziona")
     assert [_senza_ora(r) for r in finestra._righe[-3:]] == [
         "Niente da rileggere da Rock.m3u: la playlist Rock resta com'è. Saltate 2 voci: 1 file che non c'è, 1 indirizzo in rete.",
-        "Saltata http://radio/x: indirizzo in rete.", f"Saltata {os.path.join(musica, 'manca.mp3')}: file che non c'è."]
+        "Saltata rtsp://radio/x: indirizzo in rete.", f"Saltata {os.path.join(musica, 'manca.mp3')}: file che non c'è."]
     assert pl.brani == brani and finestra._dati(finestra._voce_corrente())["playlist"] is pl
     assert finestra._importazione is None and finestra._da_importare == []
     # Eliminata mentre si controllano i file: si importa da capo.

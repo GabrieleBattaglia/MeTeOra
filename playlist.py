@@ -1,6 +1,6 @@
 # MeTeOra, le playlist: brani, playlist, archivio e coda di riproduzione.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 il sottobrano dei SID, nella 1.3.0 il loop A-B, nella 1.6.0 i Preferiti, nella 1.8.0 il filtro. Nella 1.59.0 Coda.altri, per la riproduzione casuale. Nella 1.104.0 si tolgono i brani dei file spariti, per la pulizia all'avvio. Nella 1.109.0 Ordina, Inverti l'ordine, Mescola e Ordine di prima. Nella 1.113.0 l'origine delle playlist importate da un M3U o da un PLS di altri programmi. Nella 1.113.1 un file con piu' sottobrani di cui nessuno ha la durata va in fondo con i brani senza durata, non in cima come se durasse zero (issue 24). Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 il titolo dei brani dei siti, Brano.copia, e gli Indirizzi nell'archivio, con le playlist dei siti.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 il sottobrano dei SID, nella 1.3.0 il loop A-B, nella 1.6.0 i Preferiti, nella 1.8.0 il filtro. Nella 1.59.0 Coda.altri, per la riproduzione casuale. Nella 1.104.0 si tolgono i brani dei file spariti, per la pulizia all'avvio. Nella 1.109.0 Ordina, Inverti l'ordine, Mescola e Ordine di prima. Nella 1.113.0 l'origine delle playlist importate da un M3U o da un PLS di altri programmi. Nella 1.113.1 un file con piu' sottobrani di cui nessuno ha la durata va in fondo con i brani senza durata, non in cima come se durasse zero (issue 24). Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 il titolo dei brani dei siti, Brano.copia, e gli Indirizzi nell'archivio, con le playlist dei siti. Nella 3.3.0 le radio e gli indirizzi diretti nei brani, e le radio ascoltate di recente.
 
 """Il modello dei dati, senza finestre e senza suono.
 
@@ -35,6 +35,20 @@ NOME_DEI_PREFERITI = _("Preferiti")
 NOME_DELLA_NUOVA = _("Playlist")
 # Traduttori: il nome del ramo della plancia con gli indirizzi in rete aperti, le pagine dei siti.
 NOME_DEGLI_INDIRIZZI = _("Indirizzi")
+# Traduttori: il nome della lista delle radio ascoltate di recente, nel ramo Radio.
+NOME_DELLE_RADIO = _("Radio ascoltate di recente")
+# Quante radio ascoltate di recente si tengono (3.3.0).
+RADIO_RECENTI = 50
+# Le chiavi di una radio di radio-browser in un brano, con il loro tipo.
+_CHIAVI_DELLA_RADIO = {"uuid": str, "paese": str, "codec": str, "bitrate": int, "generi": str}
+
+
+def _radio(dati):
+    """La radio di un brano, come la scrive il file dei dati: le sole chiavi
+    note, del loro tipo, con l'uuid di radio-browser; None se non c'e'."""
+    if not isinstance(dati, dict) or not isinstance(dati.get("uuid"), str) or not dati["uuid"]:
+        return None
+    return {k: v for k, v in dati.items() if k in _CHIAVI_DELLA_RADIO and isinstance(v, _CHIAVI_DELLA_RADIO[k]) and not isinstance(v, bool)}
 
 # I criteri di Ordina, nell'ordine del sottomenu (Gabriele, 20 ottobre 2026):
 # la chiave, la voce del menu e il dato che puo' mancare, None per quelli che
@@ -223,7 +237,7 @@ def _origine(dati):
 
 
 class Brano:
-    def __init__(self, percorso, saltato=False, sottobrano=None, titolo=None):
+    def __init__(self, percorso, saltato=False, sottobrano=None, titolo=None, radio=None, diretto=False):
         self.percorso = percorso
         self.saltato = saltato
         # Per un SID, il sottobrano da suonare; None vuol dire quello iniziale.
@@ -231,6 +245,11 @@ class Brano:
         # Per un indirizzo in rete (3.2.0), il titolo che dice il sito: e'
         # il nome del brano nella plancia, al posto di quello del file.
         self.titolo = titolo
+        # Dalla 3.3.0: per una radio di radio-browser, uuid, paese, codec,
+        # bitrate e generi; diretto per un indirizzo che libmpv apre da se',
+        # senza yt-dlp, come quelli dei file M3U e PLS importati.
+        self.radio = radio
+        self.diretto = diretto
 
     @property
     def nome(self):
@@ -250,7 +269,8 @@ class Brano:
     def copia(self, sottobrano=None):
         """Un brano nuovo dello stesso file, con il sottobrano dato o il suo,
         e il titolo di un indirizzo."""
-        return Brano(self.percorso, sottobrano=sottobrano or self.sottobrano, titolo=self.titolo)
+        return Brano(self.percorso, sottobrano=sottobrano or self.sottobrano, titolo=self.titolo, radio=dict(self.radio) if self.radio else None,
+            diretto=self.diretto)
 
     def come_dati(self):
         dati = {"percorso": self.percorso, "saltato": self.saltato}
@@ -258,13 +278,17 @@ class Brano:
             dati["sottobrano"] = self.sottobrano
         if self.titolo:
             dati["titolo"] = self.titolo
+        if self.radio:
+            dati["radio"] = dict(self.radio)
+        if self.diretto:
+            dati["diretto"] = True
         return dati
 
     @classmethod
     def da_dati(cls, dati):
         sottobrano, titolo = dati.get("sottobrano"), dati.get("titolo")
         return cls(dati["percorso"], bool(dati.get("saltato", False)), sottobrano if isinstance(sottobrano, int) and sottobrano > 0 else None,
-            titolo if isinstance(titolo, str) and titolo else None)
+            titolo if isinstance(titolo, str) and titolo else None, _radio(dati.get("radio")), dati.get("diretto") is True)
 
 
 class Playlist:
@@ -406,12 +430,15 @@ class Archivio:
         self.preferiti = Playlist(NOME_DEI_PREFERITI)
         self.indirizzi = Playlist(NOME_DEGLI_INDIRIZZI)
         self.in_rete = []
+        # Le radio ascoltate di recente, dalla piu' recente (3.3.0).
+        self.radio = Playlist(NOME_DELLE_RADIO)
 
     def carica(self):
         """Legge il file; se non c'e' l'archivio resta vuoto."""
         self.preferiti = Playlist(NOME_DEI_PREFERITI)
         self.indirizzi = Playlist(NOME_DEGLI_INDIRIZZI)
         self.in_rete = []
+        self.radio = Playlist(NOME_DELLE_RADIO)
         if not os.path.isfile(self.percorso):
             self.playlist = []
             return
@@ -425,6 +452,9 @@ class Archivio:
         if isinstance(indirizzi, dict):
             self.indirizzi.brani = [Brano.da_dati(b) for b in indirizzi.get("brani", []) if formati.e_indirizzo(b.get("percorso"))]
             self.in_rete = [Playlist.da_dati(p) for p in indirizzi.get("playlist", [])]
+        radio = dati.get("radio")
+        if isinstance(radio, dict):
+            self.radio.brani = [b for b in (Brano.da_dati(d) for d in radio.get("brani", []) if formati.e_indirizzo(d.get("percorso"))) if b.radio][:RADIO_RECENTI]
 
     def nei_preferiti(self, brano):
         """Il brano dei Preferiti con lo stesso file e sottobrano, o None."""
@@ -436,6 +466,8 @@ class Archivio:
         dati = {"versione": VERSIONE_DEL_FILE, "playlist": [p.come_dati() for p in self.playlist], "preferiti": self.preferiti.come_dati()}
         if self.indirizzi.brani or self.in_rete:
             dati["indirizzi"] = {"brani": [b.come_dati() for b in self.indirizzi.brani], "playlist": [p.come_dati() for p in self.in_rete]}
+        if self.radio.brani:
+            dati["radio"] = {"brani": [b.come_dati() for b in self.radio.brani]}
         provvisorio = self.percorso + ".tmp"
         with open(provvisorio, "w", encoding="utf-8") as f:
             json.dump(dati, f, ensure_ascii=False, indent=1)
@@ -476,6 +508,20 @@ class Archivio:
         quella dello stesso indirizzo, se c'era: il sito puo' averla cambiata."""
         self.in_rete = [pl] + [p for p in self.in_rete if p.indirizzo != pl.indirizzo]
         return pl
+
+    def metti_la_radio(self, brano):
+        """Una radio ascoltata va in cima alle recenti, senza doppioni della
+        stessa radio; le piu' vecchie oltre RADIO_RECENTI escono. Torna il
+        brano che resta in cima (3.3.0)."""
+        chiave = brano.radio["uuid"] if brano.radio else brano.percorso
+        vecchio = next((b for b in self.radio.brani if (b.radio or {}).get("uuid", b.percorso) == chiave), None)
+        if vecchio is not None:
+            self.radio.brani.remove(vecchio)
+            vecchio.percorso, vecchio.titolo, vecchio.radio = brano.percorso, brano.titolo or vecchio.titolo, brano.radio or vecchio.radio
+            brano = vecchio
+        self.radio.brani.insert(0, brano)
+        del self.radio.brani[RADIO_RECENTI:]
+        return brano
 
     def in_rete_da(self, indirizzo):
         """La playlist degli Indirizzi che viene da indirizzo, o None."""

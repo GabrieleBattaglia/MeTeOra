@@ -1,6 +1,6 @@
 # MeTeOra, le prove dell'importazione delle playlist di altri programmi: codifiche, righe M3U e PLS, percorsi, motivi e origine.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 20/10/2026: nasce con la 1.113.0.
+# 20/10/2026: nasce con la 1.113.0. Nella 3.3.0 gli indirizzi http e https si tengono.
 
 """Quasi tutto si prova sul testo, senza dischi: analizza riceve i byte e il
 percorso della playlist. Solo leggi apre un file vero, in una cartella
@@ -72,7 +72,7 @@ def test_gli_indirizzi_file_e_quelli_in_rete():
         "file:////nas/musica/c.ogg\nhttp://radio.example/flusso\nhttps://example.com/a.mp3\nrtsp://example.com/x\nmms://example.com/y\n")
     assert voci == [
         (r"E:\Musica\Città mia.mp3", None), (r"C:\vecchio.mp3", None), (r"D:\a.mp3", None), (r"\\nas\musica\b.flac", None), (r"\\nas\musica\c.ogg", None),
-        (None, "indirizzo"), (None, "indirizzo"), (None, "indirizzo"), (None, "indirizzo"),
+        ("http://radio.example/flusso", None), ("https://example.com/a.mp3", None), (None, "indirizzo"), (None, "indirizzo"),
     ]
     # Con due barre sole la lettera non e' un server, e il cancelletto resta nel nome.
     assert _voci("file://C:/Musica/a.mp3\nfile://D|/b.mp3\nfile:///E:/Musica/Best #1.mp3\n") == [
@@ -91,7 +91,7 @@ def test_cartelle_playlist_formati_e_percorsi_non_validi():
 def test_un_pls_si_legge_dalle_voci_file():
     voci, libgme = importazione.analizza(b"[playlist]\r\nFile2=b.mp3\r\nFile1=a.mp3\r\nFile3=http://radio/x\r\n", r"E:\Liste\Radio.pls")
     assert libgme is None and [(v.scritta, v.percorso, v.motivo) for v in voci] == [
-        ("a.mp3", r"E:\Liste\a.mp3", None), ("b.mp3", r"E:\Liste\b.mp3", None), ("http://radio/x", None, "indirizzo")]
+        ("a.mp3", r"E:\Liste\a.mp3", None), ("b.mp3", r"E:\Liste\b.mp3", None), ("http://radio/x", "http://radio/x", None)]
     assert voci[2].leggibile == "http://radio/x" and voci[0].leggibile == r"E:\Liste\a.mp3"
 
 
@@ -102,7 +102,7 @@ def test_la_lista_di_libgme_non_si_importa():
     assert importazione.analizza(b"::KSS,3\r\n", r"E:\Console\Gioco.m3u") == ([], "Gioco.kss")
     # Un indirizzo con i due punti doppi, come IPv6, non e' una riga di libgme.
     voci, libgme = importazione.analizza(b"http://[::1]:8000/flusso\r\n", r"E:\Liste\Radio.m3u")
-    assert libgme is None and [v.motivo for v in voci] == ["indirizzo"]
+    assert libgme is None and [v.motivo for v in voci] == [None]
 
 
 def test_leggi_apre_il_file_e_ne_ricorda_l_origine(cartella):
@@ -172,11 +172,11 @@ def test_cambiata_guarda_la_dimensione_e_la_data():
 
 
 def test_l_esito_toglie_i_mancanti_e_conta_le_radici_che_non_rispondono():
-    voci = [importazione.risolvi(r, r"E:\Musica") for r in ("a.mp3", "manca.mp3", "http://x/y", r"F:\lontano\b.mp3", "a.mp3", r"f:\lontano\c.mp3", "note.txt")]
+    voci = [importazione.risolvi(r, r"E:\Musica") for r in ("a.mp3", "manca.mp3", "rtsp://x/y", r"F:\lontano\b.mp3", "a.mp3", r"f:\lontano\c.mp3", "note.txt")]
     percorsi, scartate, tenute = importazione.esito(voci, {pulizia.norm(r"E:\Musica\manca.mp3")}, {"F:": 2})
     # I doppioni restano, nell'ordine del file.
     assert percorsi == [r"E:\Musica\a.mp3", r"F:\lontano\b.mp3", r"E:\Musica\a.mp3", r"f:\lontano\c.mp3"]
-    assert [(v.leggibile, v.motivo) for v in scartate] == [(r"E:\Musica\manca.mp3", "mancante"), ("http://x/y", "indirizzo"), (r"E:\Musica\note.txt", "formato")]
+    assert [(v.leggibile, v.motivo) for v in scartate] == [(r"E:\Musica\manca.mp3", "mancante"), ("rtsp://x/y", "indirizzo"), (r"E:\Musica\note.txt", "formato")]
     assert tenute == {"F:": 2}
     # Dal piu' frequente; a parita' nell'ordine dei motivi, i mancanti per primi.
     assert importazione.conta_i_motivi(scartate) == [("mancante", 1), ("indirizzo", 1), ("formato", 1)]

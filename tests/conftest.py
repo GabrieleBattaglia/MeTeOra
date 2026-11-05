@@ -9,6 +9,7 @@
 # 27/10/2026, 1.116.2: si annotano anche i suoni del volume, fatti al volo.
 # 03/11/2026, 1.119.0: la ricerca degli speaker Cast non parte, come se pychromecast non ci fosse.
 # 05/11/2026, 3.2.0: yt-dlp e QuickJS nella cartella della prova, e mai chiamati davvero.
+# 06/11/2026, 3.3.0: radio-browser mai interrogato, e gli indirizzi diretti di ogni prova per conto loro.
 
 """Le regole comuni delle prove.
 
@@ -149,6 +150,20 @@ def indirizzi_senza_rete(monkeypatch, tmp_path):
     monkeypatch.setattr(indirizzi, "_esegui", vietato)
     monkeypatch.setattr(indirizzi, "ultima_versione", senza_github)
     monkeypatch.setattr(indirizzi, "_flussi", {})
+    monkeypatch.setattr(indirizzi, "_diretti", {})
+
+
+@pytest.fixture(autouse=True)
+def radio_senza_rete(monkeypatch):
+    """Le radio (3.3.0): radio-browser non si interroga mai; le prove delle
+    radio mettono le loro risposte finte."""
+    import radio
+
+    def vietato(*argomenti, **opzioni):
+        raise radio.ErroreRadio("nelle prove radio-browser non si interroga")
+
+    monkeypatch.setattr(radio, "_chiedi", vietato)
+    monkeypatch.setattr(radio, "_server", [])
 
 
 @pytest.fixture(autouse=True)

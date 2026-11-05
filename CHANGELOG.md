@@ -2,6 +2,19 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.3.0] - 2026-11-06
+
+Le radio in rete, la terza tappa dei plugin della issue 40: più di sessantamila radio di tutto il mondo, dall'elenco libero di radio-browser.info, in un ramo nuovo della plancia.
+
+- Il ramo Radio, dopo gli Indirizzi: le radio ascoltate di recente, poi Per paese, con il paese di Windows in cima e gli altri dalla A alla Z, Per genere e Per lingua, ognuno con le sue radio dalle più ascoltate; in fondo i risultati dell'ultima ricerca. La riga di ogni radio dice nome, paese, formato e qualità, come Rai Radio 3, Italia, MP3 a 320 kbps. I nomi dei paesi e delle lingue sono quelli di Windows. Decisioni di Gabriele.
+- La barra rovesciata nel ramo Radio cerca una radio per nome fra tutte quelle di radio-browser, e così fa Cerca una radio nel menu; i risultati diventano un ramo che si apre da solo. Decisione di Gabriele.
+- Il titolo in onda, che molte radio mandano, va nella console a ogni brano nuovo, sulla stessa riga, e alla sintesi e al braille scelti per i sottotitoli; Dove sono lo dice. Decisione di Gabriele. Le radio preferite stanno nei Preferiti, con F4, come i brani.
+- Le dirette non hanno durata: libmpv ne dice una che cresce, pochi secondi avanti, e senza correzione la dissolvenza chiedeva il brano seguente dopo pochi secondi. Ora una radio non ha durata, Dove sono dice in diretta e i salti dicono che non si salta. MeTeOra riconosce da solo anche le dirette aperte con Ctrl con V, le Icecast che non si saltano, e le dirette di YouTube, che yt-dlp segna.
+- Le playlist M3U, M3U8 e PLS importate tengono gli indirizzi http e https, con il titolo di #EXTINF o di Title, e li suonano senza yt-dlp; gli altri indirizzi, come rtsp, si saltano ancora.
+- Le statistiche contano le radio ascoltate, le ricerche delle radio e i titoli in onda, con le radio fra i formati come dalle radio; e, come ha chiesto Gabriele, da qui ogni caratteristica nuova ha i suoi contatori: anche i componenti aggiuntivi installati e tolti e la lingua cambiata.
+- Nel manuale il capitolo nuovo La radio.
+- Dentro: radio.py, nuovo, con i server di radio-browser, che chiede il nome nell'User-Agent e il clic di chi ascolta; Brano.radio e Brano.diretto; l'Archivio con le radio ascoltate di recente; indirizzi.metti_il_diretto; il motore con le dirette e il titolo in onda dai metadati ICY. tests/test_radio.py, nuovo: nelle prove radio-browser non si interroga mai.
+
 ## [3.2.0] - 2026-11-05
 
 Gli indirizzi in rete, la seconda tappa dei plugin della issue 40: MeTeOra apre le pagine dei siti, come una puntata di RaiPlay Sound, un video di YouTube o un album di Bandcamp, e le suona come i file.

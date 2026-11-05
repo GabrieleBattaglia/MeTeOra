@@ -1,6 +1,6 @@
 # MeTeOra, l'importazione delle playlist di altri programmi: M3U, M3U8 e PLS.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 20/10/2026: nasce con la 1.113.0, tappa 14 g del piano. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
+# 20/10/2026: nasce con la 1.113.0, tappa 14 g del piano. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.3.0 gli indirizzi http e https si tengono, con il loro titolo.
 
 """L'importazione delle playlist di altri programmi, la parte senza wx.
 
@@ -24,8 +24,10 @@ cose. Le regole, decise con Gabriele il 20 ottobre 2026:
   rete; file://C:/ con due barre sole vale come file:///C:/, e il
   cancelletto resta nel nome. Le barre diventano quelle di Windows. Tutto
   si salva in forma assoluta, l'unica che la pulizia controlla.
-- Si saltano, con il motivo, gli indirizzi in rete (http, https e ogni altro
-  schema), le cartelle, le playlist dentro la playlist, che non si aprono, i
+- Dalla 3.3.0 gli indirizzi http e https si tengono, con il titolo che il
+  file da' loro, dall'EXTINF di un M3U o dal Title di un PLS: sono quasi
+  sempre radio, e libmpv li apre da se', senza yt-dlp. Si saltano, con il
+  motivo, gli indirizzi degli altri schemi, come rtsp e mms, le cartelle, le playlist dentro la playlist, che non si aprono, i
   file di un formato che MeTeOra non suona e i percorsi con caratteri che
   Windows non vuole. Cartella o formato si decidono dal nome, e sui dischi
   del computer leggi li corregge guardando il disco. I doppioni restano,
@@ -67,6 +69,8 @@ _ESTENSIONE = re.compile(r"\.[A-Za-z0-9]{1,10}")
 _NON_VALIDI = frozenset('<>"|?*') | frozenset(chr(c) for c in range(32))
 # La voce PLS di un file: File1, File2... senza badare alle maiuscole.
 _VOCE_PLS = re.compile(r"file(\d+)", re.IGNORECASE)
+# E il suo titolo, Title1, Title2... (3.3.0).
+_TITOLO_PLS = re.compile(r"title(\d+)", re.IGNORECASE)
 # Una lettera d'unita' dove un indirizzo file: ha il server: file://C:/a.mp3.
 _UNITA_AL_POSTO_DEL_SERVER = re.compile(r"[A-Za-z][:|]")
 # Sotto quanti secondi la data del file non conta, se la dimensione e' la
@@ -109,12 +113,14 @@ class Voce:
     porta, o None per un indirizzo in rete, e il motivo per cui si salta,
     una chiave di MOTIVI, o None se e' un file da suonare."""
 
-    __slots__ = ("motivo", "percorso", "scritta")
+    __slots__ = ("motivo", "percorso", "scritta", "titolo")
 
-    def __init__(self, scritta, percorso, motivo):
+    def __init__(self, scritta, percorso, motivo, titolo=None):
         self.scritta = scritta
         self.percorso = percorso
         self.motivo = motivo
+        # Il titolo che il file da' a un indirizzo in rete (3.3.0).
+        self.titolo = titolo
 
     @property
     def leggibile(self):
@@ -140,6 +146,35 @@ def decodifica(byte, estensione):
 def righe_m3u(testo):
     """Le voci di un M3U: le righe non vuote che non cominciano con il cancelletto."""
     return [riga.strip() for riga in testo.splitlines() if riga.strip() and not riga.strip().startswith("#")]
+
+
+def titoli_m3u(testo):
+    """I titoli delle voci di un M3U, uno per voce come righe_m3u, dalla riga
+    EXTINF che le precede, dopo la virgola; None dove non c'e' (3.3.0)."""
+    titoli, titolo = [], None
+    for riga in testo.splitlines():
+        riga = riga.strip()
+        if riga.upper().startswith("#EXTINF:"):
+            titolo = riga.partition(",")[2].strip() or None
+        elif riga and not riga.startswith("#"):
+            titoli.append(titolo)
+            titolo = None
+    return titoli
+
+
+def titoli_pls(testo):
+    """I titoli delle voci di un PLS, uno per voce come righe_pls, da Title1,
+    Title2 e seguenti; None dove non c'e' (3.3.0)."""
+    voci, titoli = {}, {}
+    for riga in testo.splitlines():
+        chiave, uguale, valore = riga.strip().partition("=")
+        numero = _VOCE_PLS.fullmatch(chiave.strip())
+        if uguale and numero and valore.strip():
+            voci.setdefault(int(numero.group(1)), True)
+        titolo = _TITOLO_PLS.fullmatch(chiave.strip())
+        if uguale and titolo and valore.strip():
+            titoli.setdefault(int(titolo.group(1)), valore.strip())
+    return [titoli.get(n) for n in sorted(voci)]
 
 
 def righe_pls(testo):
@@ -195,6 +230,9 @@ def risolvi(scritta, cartella):
         testo = testo[1:-1].strip()
     schema = _SCHEMA.match(testo)
     if schema:
+        if formati.e_indirizzo(testo):
+            # Un indirizzo http o https si tiene com'e' (3.3.0).
+            return Voce(scritta, testo, None)
         if schema.group(1).lower() != "file":
             return Voce(scritta, None, "indirizzo")
         testo = _da_indirizzo_file(testo)
@@ -230,14 +268,18 @@ def analizza(byte, percorso):
     estensione = formati.estensione(percorso)
     testo = decodifica(byte, estensione)
     if estensione == ".pls":
-        righe = righe_pls(testo)
+        righe, titoli = righe_pls(testo), titoli_pls(testo)
     else:
-        righe = righe_m3u(testo)
+        righe, titoli = righe_m3u(testo), titoli_m3u(testo)
         libgme = lista_di_libgme(righe, percorso)
         if libgme:
             return [], libgme
     cartella = ntpath.dirname(percorso)
-    return [risolvi(riga, cartella) for riga in righe], None
+    voci = [risolvi(riga, cartella) for riga in righe]
+    for voce, titolo in zip(voci, titoli, strict=True):
+        if formati.e_indirizzo(voce.percorso):
+            voce.titolo = titolo
+    return voci, None
 
 
 def rivedi_i_motivi(voci, in_rete=None):

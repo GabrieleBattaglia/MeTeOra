@@ -1,6 +1,6 @@
 # MeTeOra, gli indirizzi in rete: le pagine dei siti, aperte con yt-dlp.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 05/11/2026: nasce con la 3.2.0, tappa 19 b del piano, issue 40.
+# 05/11/2026: nasce con la 3.2.0, tappa 19 b del piano, issue 40. Nella 3.3.0 le dirette, senza durata, e gli indirizzi diretti, che libmpv apre senza yt-dlp.
 
 """Gli indirizzi in rete (3.2.0, issue 40).
 
@@ -232,10 +232,11 @@ def chiudi():
 
 class Flusso:
     """Che cosa dare a libmpv: l'indirizzo diretto, le intestazioni HTTP come
-    righe Nome: valore, e gli indirizzi delle tracce audio a parte."""
+    righe Nome: valore, gli indirizzi delle tracce audio a parte, e se e' una
+    diretta, che non ha durata ne' fine (3.3.0)."""
 
-    def __init__(self, indirizzo, intestazioni=(), audio=()):
-        self.indirizzo, self.intestazioni, self.audio = indirizzo, tuple(intestazioni), tuple(audio)
+    def __init__(self, indirizzo, intestazioni=(), audio=(), dal_vivo=False):
+        self.indirizzo, self.intestazioni, self.audio, self.dal_vivo = indirizzo, tuple(intestazioni), tuple(audio), dal_vivo
 
     def __repr__(self):
         return f"Flusso({self.indirizzo!r})"
@@ -274,7 +275,7 @@ def flusso_dell_info(info):
         raise ErroreIndirizzo(_("il sito non dà un flusso da suonare"))
     intestazioni = formati_scelti[0].get("http_headers") or info.get("http_headers") or {}
     audio = [a for a in (_diretto_del_formato(f) for f in formati_scelti[1:]) if a]
-    return Flusso(principale, [f"{nome}: {valore}" for nome, valore in intestazioni.items()], audio)
+    return Flusso(principale, [f"{nome}: {valore}" for nome, valore in intestazioni.items()], audio, dal_vivo=bool(info.get("is_live")))
 
 
 def scheda_dell_info(info):
@@ -337,10 +338,28 @@ def _tieni(indirizzo, video, flusso):
         _flussi[indirizzo] = (flusso, _scadenza(flusso, adesso), video)
 
 
+# Gli indirizzi che libmpv apre da se', senza yt-dlp, anche senza l'estensione
+# di un formato: le radio di radio-browser, che sono dirette, e gli indirizzi
+# dei file M3U e PLS importati (3.3.0). indirizzo -> dal vivo. Li mette chi
+# li suona, prima di chiederne il flusso.
+_diretti = {}
+
+
+def metti_il_diretto(indirizzo, dal_vivo=False):
+    _diretti[indirizzo] = dal_vivo
+
+
+def e_una_radio(indirizzo):
+    """Vero per un indirizzo messo come diretta, cioe' per una radio."""
+    return _diretti.get(indirizzo, False)
+
+
 def pronto(indirizzo, video=None):
     """Il Flusso dell'indirizzo se c'e' e vale ancora, chiesto con il video o
     senza come dice video, o in un modo qualunque con None, come lo chiede il
     motore; None se va chiesto a yt-dlp. Un indirizzo diretto e' sempre pronto."""
+    if indirizzo in _diretti:
+        return Flusso(indirizzo, dal_vivo=_diretti[indirizzo])
     if diretto(indirizzo):
         return Flusso(indirizzo)
     with _flussi_blocco:

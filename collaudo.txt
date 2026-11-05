@@ -24,3 +24,15 @@ Su GabryBar un brano di un sito con la durata, come una puntata di RaiPlay Sound
 NVDA legge le righe Apro e In riproduzione con il titolo e il sito, non l'indirizzo intero.
 Nelle impostazioni Componenti aggiuntivi elenca sei componenti, yt-dlp con la sua versione; Cerca un aggiornamento dice che è già all'ultima versione.
 Il giorno dopo, al primo indirizzo, se c'è una versione nuova di yt-dlp la console dice yt-dlp aggiornato, con la versione; se non c'è non dice niente.
+Collaudo di MeTeOra 3.3.0: le radio in rete.
+Nella plancia, dopo gli Indirizzi, il ramo Radio; aperto, Per paese ha l'Italia in cima e poi i paesi dalla A alla Z, con i nomi in italiano e quante radio hanno.
+Italia aperta mostra le radio dalle più ascoltate, con nome, paese, formato e qualità, come Rai Radio 3, Italia, MP3 a 320 kbps; Per genere e Per lingua si aprono allo stesso modo.
+X su una radio la suona; la console dice In onda con il titolo quando la radio lo manda, sulla stessa riga a ogni brano nuovo, e NVDA lo legge come i sottotitoli.
+L'apostrofo su una radio dice il tempo, in diretta, e il titolo in onda; Q, Alt con Q e W dicono che una diretta non si salta.
+Con la dissolvenza accesa una radio suona per minuti senza passare da sola al brano seguente.
+La barra rovesciata nel ramo Radio chiede il nome: con deejay la console dice quante radio ha trovato, e la selezione va sul ramo Ricerca di deejay, aperto.
+Richiuso e riaperto il ramo Radio, in cima ci sono le radio ascoltate, dalla più recente; Canc su una di loro la toglie, su una radio di un paese dice che non si toglie.
+F4 su una radio la mette nei Preferiti, e da lì suona anche dopo aver chiuso e riaperto MeTeOra.
+Una radio aperta con Ctrl con V, come http://icestreaming.rai.it/1.mp3, dice in diretta e non passa da sola al seguente.
+Un file M3U o PLS di radio di un altro programma si importa con i nomi delle radio, e le radio suonano.
+Le statistiche hanno la riga delle radio, e nelle impostazioni quella dei componenti aggiuntivi installati e della lingua cambiata.

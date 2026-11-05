@@ -1,6 +1,6 @@
 # MeTeOra, le statistiche: ogni sorta di conti, raccolti mentre lo si usa, e la pagina che li racconta.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (UltraCode).
-# 17/10/2026: nasce con la 1.103.0, chiesta da Gabriele: piu' dati ci sono, piu' e' contento. Nella 1.104.0 le righe che elencano voci tengono solo quelle diverse da zero, le percentuali uniformi, gli anni futuri dei tag ignorati, le date sempre con il giorno della settimana, e i brani dello storico tolti dalla pulizia all'avvio o rinominati, con i conti della pulizia nella salute. Nella 1.105.0 i nomi di Dove sono, il comando dell'apostrofo, e del suo suono. Nella 1.109.0 le playlist ordinate, invertite, mescolate e rimesse nell'ordine di prima. Nella 1.110.0 quelli della durata residua, Maiuscolo con l'apostrofo. Nella 1.112.0, nella salute, anche le unita' saltate dalla pulizia perche' usate da dischi diversi o perche' il disco che rispondeva non si riconosceva, i dischi riconosciuti a mano e le lettere rese contese dalla Sentinella. Nella 1.113.0 le playlist importate da un M3U o da un PLS, riaperte e rilette. Nella 1.113.5 il campo modificate, perche' la finestra scriva il file solo quando qualcosa e' cambiato davvero. Nella 1.116.0 i nomi delle schede audio che se ne vanno e tornano. Nella 1.119.0 le uscite: la scelta che va e torna, i brani ripresi, gli speaker Cast e l'assenza piu' lunga (issue 31). Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 i brani dei siti fra i formati, e la riga degli indirizzi in rete.
+# 17/10/2026: nasce con la 1.103.0, chiesta da Gabriele: piu' dati ci sono, piu' e' contento. Nella 1.104.0 le righe che elencano voci tengono solo quelle diverse da zero, le percentuali uniformi, gli anni futuri dei tag ignorati, le date sempre con il giorno della settimana, e i brani dello storico tolti dalla pulizia all'avvio o rinominati, con i conti della pulizia nella salute. Nella 1.105.0 i nomi di Dove sono, il comando dell'apostrofo, e del suo suono. Nella 1.109.0 le playlist ordinate, invertite, mescolate e rimesse nell'ordine di prima. Nella 1.110.0 quelli della durata residua, Maiuscolo con l'apostrofo. Nella 1.112.0, nella salute, anche le unita' saltate dalla pulizia perche' usate da dischi diversi o perche' il disco che rispondeva non si riconosceva, i dischi riconosciuti a mano e le lettere rese contese dalla Sentinella. Nella 1.113.0 le playlist importate da un M3U o da un PLS, riaperte e rilette. Nella 1.113.5 il campo modificate, perche' la finestra scriva il file solo quando qualcosa e' cambiato davvero. Nella 1.116.0 i nomi delle schede audio che se ne vanno e tornano. Nella 1.119.0 le uscite: la scelta che va e torna, i brani ripresi, gli speaker Cast e l'assenza piu' lunga (issue 31). Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 i brani dei siti fra i formati, e la riga degli indirizzi in rete. Nella 3.3.0 le radio fra i formati, la riga delle radio, e i componenti aggiuntivi e la lingua.
 
 """Le statistiche di MeTeOra (1.103.0).
 
@@ -48,6 +48,7 @@ import time
 from collections import Counter
 
 import formati
+import indirizzi
 import valori
 from lingua import _, ngettext, plurale
 
@@ -279,6 +280,8 @@ SENZA_ESTENSIONE = "senza estensione"
 # I brani dei siti, aperti dagli indirizzi in rete, hanno una voce loro fra i
 # formati (3.2.0): il formato vero lo sa solo il sito.
 DAI_SITI = "dai siti"
+# E dalla 3.3.0 le radio, che sono dirette.
+DALLE_RADIO = "dalle radio"
 
 
 # Le parole.
@@ -292,6 +295,8 @@ def estensione_da_dire(estensione):
     estensione nella lingua di MeTeOra."""
     if estensione == DAI_SITI:
         return _("dai siti")
+    if estensione == DALLE_RADIO:
+        return _("dalle radio")
     return _("senza estensione") if estensione == SENZA_ESTENSIONE else estensione.lstrip(".")
 
 
@@ -812,6 +817,8 @@ class Statistiche:
 
     def _formato_di(self, percorso):
         """La voce del formato di un brano; per un indirizzo in rete, quella dei siti (3.2.0)."""
+        if indirizzi.e_una_radio(percorso):
+            return self._formato(DALLE_RADIO)
         return self._formato(DAI_SITI if formati.e_indirizzo(percorso) else formati.estensione(percorso))
 
     def _del_brano(self, percorso):
@@ -1319,7 +1326,7 @@ class Pagina:
     def per_formato(self):
         voci = self.formati_in_ordine()
         suonati = {e for e, _v in voci}
-        righe = [_("Formati suonati: {n} dei {totale} che MeTeOra conosce.").format(n=len([e for e, _v in voci if e != DAI_SITI]), totale=len(formati.TUTTI))]
+        righe = [_("Formati suonati: {n} dei {totale} che MeTeOra conosce.").format(n=len([e for e, _v in voci if e not in (DAI_SITI, DALLE_RADIO)]), totale=len(formati.TUTTI))]
         for estensione, voce in voci:
             avvii = int(voce.get("avvii", 0))
             quanti = plurale(avvii, "{n} avvio", "{n} avvii")
@@ -1710,6 +1717,8 @@ class Pagina:
                 "flussi chiesti a yt-dlp: {flussi}; yt-dlp aggiornato {aggiornato}.").format(aperti=self.c("indirizzi_aperti"), playlist=dai_siti,
                 brani=plurale(self.c("brani_dai_siti"), "{n} brano", "{n} brani"), rilette=rilette_dai_siti, flussi=self.c("flussi_chiesti"),
                 aggiornato=_volte(self.c("ytdlp_aggiornato"))),
+            _("Radio ascoltate: {ascoltate}; cercate per nome: {cercate}; titoli in onda arrivati: {titoli}.").format(ascoltate=self.c("radio_ascoltate"),
+                cercate=_volte(self.c("radio_cercate")), titoli=self.c("titoli_in_onda")),
             _("Playlist rinominate: {rinominate}; eliminate: {eliminate}; ordinate: {ordinate}; "
                 "invertite: {invertite}; mescolate: {mescolate}; rimesse nell'ordine di prima: {rimesse}.").format(rinominate=self.e("playlist_rinominata"),
                 eliminate=self.e("playlist_eliminata"), ordinate=self.e("playlist_ordinata"), invertite=self.e("ordine_invertito"),
@@ -1879,6 +1888,9 @@ class Pagina:
             _("Banco dei suoni MIDI scelto: {volte}; scaricamenti avviati: {avviati}, finiti: {finiti}.").format(volte=_volte(self.c("banchi_scelti")),
                 avviati=self.e("scaricamento_avviato"), finiti=self.e("scaricamento_finito")),
             _("Aggiornamenti proposti: {n}.").format(n=self.e("aggiornamento")),
+            # I componenti aggiuntivi (3.1.0) e la lingua (3.0.0), contati dalla 3.3.0.
+            _("Componenti aggiuntivi installati: {installati}; tolti: {tolti}. Lingua cambiata: {lingua}.").format(installati=self.c("componenti_installati"),
+                tolti=self.c("componenti_tolti"), lingua=_volte(self.c("lingua_cambiata"))),
             # Traduttori: Dona per questo progetto è il nome di una voce del menu; volte come «2 volte».
             _("Dona per questo progetto aperto: {volte}.").format(volte=_volte(self.e("donazione"))),
             # Traduttori: Entra al PUB e Chiedi aiuto al PUB sono voci del menu; entra e aiuto come «2 volte»; pronte e registri sono numeri.
