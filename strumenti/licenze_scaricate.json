@@ -689,6 +689,22 @@
    "file": [
     "MS Basic_License.md"
    ]
+  },
+  {
+   "nome": "yt_dlp",
+   "repository": "https://github.com/yt-dlp/yt-dlp",
+   "ruolo": "yt-dlp, scaricato per gli indirizzi in rete se lo chiedi",
+   "file": [
+    "LICENSE"
+   ]
+  },
+  {
+   "nome": "quickjs",
+   "repository": "https://github.com/quickjs-ng/quickjs",
+   "ruolo": "QuickJS-NG, scaricato per YouTube se lo chiedi",
+   "file": [
+    "LICENSE"
+   ]
   }
  ]
 }

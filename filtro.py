@@ -1,6 +1,6 @@
 # MeTeOra, il filtro delle playlist: dal testo scritto da chi ascolta a una funzione che dice si' o no a ogni brano.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la 1.8.0, issue 2. Nella 1.34.0 i commenti col dollaro e la grammatica della ricerca nella console. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
+# 30/09/2026: nasce con la 1.8.0, issue 2. Nella 1.34.0 i commenti col dollaro e la grammatica della ricerca nella console. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 il titolo e il sito dei brani dei siti, dove cercano i termini.
 
 """Il filtro delle playlist.
 
@@ -240,8 +240,9 @@ def _durata(brano, scheda):
 
 
 def dove_cercare(brano, scheda):
-    """Il testo in cui cercano i termini senza comando: nome del file e tag."""
-    parti = [os.path.basename(brano.percorso)]
+    """Il testo in cui cercano i termini senza comando: nome del file e tag;
+    per un indirizzo in rete, il titolo e il sito (3.2.0)."""
+    parti = [brano.nome_del_file, brano.percorso] if formati.e_indirizzo(brano.percorso) else [os.path.basename(brano.percorso)]
     if scheda:
         parti.extend(str(v) for v in scheda.get("tag", {}).values() if v)
     return normale(" / ".join(parti))

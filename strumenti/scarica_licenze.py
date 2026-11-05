@@ -86,6 +86,11 @@ FILE_FISSI = [
         "97049183643d5fc5a9322a69c5b09efb667c6c3a", ["documentation/LICENSE.txt"]),
     ("ms_basic", "https://github.com/musescore/MuseScore", "il banco di suoni MS Basic di MuseScore, scaricato per i MIDI se lo chiedi",
         "37128c5ac8f9af804b63650610952414421828b8", ["share/sound/MS Basic_License.md"]),
+    # I componenti degli indirizzi in rete (3.2.0): yt-dlp alla release 2026.10.26, QuickJS-NG alla 0.18.0.
+    ("yt_dlp", "https://github.com/yt-dlp/yt-dlp", "yt-dlp, scaricato per gli indirizzi in rete se lo chiedi", "f264a6cbd1f630894da0f368df00f8aae50140e0",
+        ["LICENSE"]),
+    ("quickjs", "https://github.com/quickjs-ng/quickjs", "QuickJS-NG, scaricato per YouTube se lo chiedi", "d7215b0ad3fc2c562e8317fd9bca058fd4863804",
+        ["LICENSE"]),
 ]
 SENZA_FILE = {
     "avisynth-headers": "solo le intestazioni di AviSynth+, per usarlo se è installato; la licenza è scritta in testa ai file",

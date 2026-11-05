@@ -1,6 +1,6 @@
 # MeTeOra, le playlist: brani, playlist, archivio e coda di riproduzione.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 il sottobrano dei SID, nella 1.3.0 il loop A-B, nella 1.6.0 i Preferiti, nella 1.8.0 il filtro. Nella 1.59.0 Coda.altri, per la riproduzione casuale. Nella 1.104.0 si tolgono i brani dei file spariti, per la pulizia all'avvio. Nella 1.109.0 Ordina, Inverti l'ordine, Mescola e Ordine di prima. Nella 1.113.0 l'origine delle playlist importate da un M3U o da un PLS di altri programmi. Nella 1.113.1 un file con piu' sottobrani di cui nessuno ha la durata va in fondo con i brani senza durata, non in cima come se durasse zero (issue 24). Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 il sottobrano dei SID, nella 1.3.0 il loop A-B, nella 1.6.0 i Preferiti, nella 1.8.0 il filtro. Nella 1.59.0 Coda.altri, per la riproduzione casuale. Nella 1.104.0 si tolgono i brani dei file spariti, per la pulizia all'avvio. Nella 1.109.0 Ordina, Inverti l'ordine, Mescola e Ordine di prima. Nella 1.113.0 l'origine delle playlist importate da un M3U o da un PLS di altri programmi. Nella 1.113.1 un file con piu' sottobrani di cui nessuno ha la durata va in fondo con i brani senza durata, non in cima come se durasse zero (issue 24). Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 il titolo dei brani dei siti, Brano.copia, e gli Indirizzi nell'archivio, con le playlist dei siti.
 
 """Il modello dei dati, senza finestre e senza suono.
 
@@ -33,6 +33,8 @@ VERSIONE_DEL_FILE = 1
 NOME_DEI_PREFERITI = _("Preferiti")
 # Traduttori: il nome di una playlist nuova senza nome; se c'e' gia', diventa "Playlist 2", "Playlist 3".
 NOME_DELLA_NUOVA = _("Playlist")
+# Traduttori: il nome del ramo della plancia con gli indirizzi in rete aperti, le pagine dei siti.
+NOME_DEGLI_INDIRIZZI = _("Indirizzi")
 
 # I criteri di Ordina, nell'ordine del sottomenu (Gabriele, 20 ottobre 2026):
 # la chiave, la voce del menu e il dato che puo' mancare, None per quelli che
@@ -221,36 +223,52 @@ def _origine(dati):
 
 
 class Brano:
-    def __init__(self, percorso, saltato=False, sottobrano=None):
+    def __init__(self, percorso, saltato=False, sottobrano=None, titolo=None):
         self.percorso = percorso
         self.saltato = saltato
         # Per un SID, il sottobrano da suonare; None vuol dire quello iniziale.
         self.sottobrano = sottobrano
+        # Per un indirizzo in rete (3.2.0), il titolo che dice il sito: e'
+        # il nome del brano nella plancia, al posto di quello del file.
+        self.titolo = titolo
 
     @property
     def nome(self):
-        """Il nome del file senza estensione."""
+        """Il nome del file senza estensione; per un indirizzo, il titolo."""
+        if formati.e_indirizzo(self.percorso):
+            return self.titolo or self.percorso
         return os.path.splitext(os.path.basename(self.percorso))[0]
 
     @property
     def nome_del_file(self):
-        """Il nome del file con l'estensione, come compare nella plancia."""
+        """Il nome del file con l'estensione, come compare nella plancia; per
+        un indirizzo, il titolo."""
+        if formati.e_indirizzo(self.percorso):
+            return self.titolo or self.percorso
         return os.path.basename(self.percorso)
+
+    def copia(self, sottobrano=None):
+        """Un brano nuovo dello stesso file, con il sottobrano dato o il suo,
+        e il titolo di un indirizzo."""
+        return Brano(self.percorso, sottobrano=sottobrano or self.sottobrano, titolo=self.titolo)
 
     def come_dati(self):
         dati = {"percorso": self.percorso, "saltato": self.saltato}
         if self.sottobrano is not None:
             dati["sottobrano"] = self.sottobrano
+        if self.titolo:
+            dati["titolo"] = self.titolo
         return dati
 
     @classmethod
     def da_dati(cls, dati):
-        sottobrano = dati.get("sottobrano")
-        return cls(dati["percorso"], bool(dati.get("saltato", False)), sottobrano if isinstance(sottobrano, int) and sottobrano > 0 else None)
+        sottobrano, titolo = dati.get("sottobrano"), dati.get("titolo")
+        return cls(dati["percorso"], bool(dati.get("saltato", False)), sottobrano if isinstance(sottobrano, int) and sottobrano > 0 else None,
+            titolo if isinstance(titolo, str) and titolo else None)
 
 
 class Playlist:
-    def __init__(self, nome, brani=None, cartella=None, filtro="", origine=None):
+    def __init__(self, nome, brani=None, cartella=None, filtro="", origine=None, indirizzo=None):
         self.nome = nome
         self.brani = list(brani or [])
         # Il testo del filtro; vuoto vuol dire tutti i brani.
@@ -263,6 +281,9 @@ class Playlist:
         # Il file M3U o PLS da cui e' stata importata, con la sua data e la
         # sua dimensione di allora, o None (1.113.0).
         self.origine = origine
+        # La pagina di un sito da cui viene, come un album di Bandcamp, per
+        # le playlist del ramo Indirizzi (3.2.0).
+        self.indirizzo = indirizzo
 
     @property
     def temporanea(self):
@@ -361,27 +382,36 @@ class Playlist:
             dati["filtro"] = self.filtro
         if self.origine:
             dati["origine"] = dict(self.origine)
+        if self.indirizzo:
+            dati["indirizzo"] = self.indirizzo
         return dati
 
     @classmethod
     def da_dati(cls, dati):
-        filtro = dati.get("filtro")
+        filtro, indirizzo = dati.get("filtro"), dati.get("indirizzo")
         return cls(dati["nome"], [Brano.da_dati(b) for b in dati.get("brani", [])], filtro=filtro if isinstance(filtro, str) else "",
-            origine=_origine(dati.get("origine")))
+            origine=_origine(dati.get("origine")), indirizzo=indirizzo if formati.e_indirizzo(indirizzo) else None)
 
 
 class Archivio:
     """Le playlist salvate, nell'ordine in cui compaiono nella plancia, e i
-    Preferiti, una playlist speciale che non si rinomina e non si elimina."""
+    Preferiti, una playlist speciale che non si rinomina e non si elimina.
+    Dalla 3.2.0 anche gli indirizzi in rete aperti, del ramo Indirizzi: le
+    playlist dei siti, in_rete, e i brani da soli, nella playlist speciale
+    indirizzi; gli uni e gli altri dal piu' recente."""
 
     def __init__(self, percorso):
         self.percorso = percorso
         self.playlist = []
         self.preferiti = Playlist(NOME_DEI_PREFERITI)
+        self.indirizzi = Playlist(NOME_DEGLI_INDIRIZZI)
+        self.in_rete = []
 
     def carica(self):
         """Legge il file; se non c'e' l'archivio resta vuoto."""
         self.preferiti = Playlist(NOME_DEI_PREFERITI)
+        self.indirizzi = Playlist(NOME_DEGLI_INDIRIZZI)
+        self.in_rete = []
         if not os.path.isfile(self.percorso):
             self.playlist = []
             return
@@ -391,6 +421,10 @@ class Archivio:
         if isinstance(dati.get("preferiti"), dict):
             self.preferiti = Playlist.da_dati(dati["preferiti"])
             self.preferiti.nome = NOME_DEI_PREFERITI
+        indirizzi = dati.get("indirizzi")
+        if isinstance(indirizzi, dict):
+            self.indirizzi.brani = [Brano.da_dati(b) for b in indirizzi.get("brani", []) if formati.e_indirizzo(b.get("percorso"))]
+            self.in_rete = [Playlist.da_dati(p) for p in indirizzi.get("playlist", [])]
 
     def nei_preferiti(self, brano):
         """Il brano dei Preferiti con lo stesso file e sottobrano, o None."""
@@ -400,6 +434,8 @@ class Archivio:
         """Scrive su un file accanto e poi lo sostituisce, cosi' un'uscita a
         meta' scrittura non lascia un archivio troncato."""
         dati = {"versione": VERSIONE_DEL_FILE, "playlist": [p.come_dati() for p in self.playlist], "preferiti": self.preferiti.come_dati()}
+        if self.indirizzi.brani or self.in_rete:
+            dati["indirizzi"] = {"brani": [b.come_dati() for b in self.indirizzi.brani], "playlist": [p.come_dati() for p in self.in_rete]}
         provvisorio = self.percorso + ".tmp"
         with open(provvisorio, "w", encoding="utf-8") as f:
             json.dump(dati, f, ensure_ascii=False, indent=1)
@@ -422,6 +458,28 @@ class Archivio:
 
     def elimina(self, pl):
         self.playlist = [p for p in self.playlist if p is not pl]
+        self.in_rete = [p for p in self.in_rete if p is not pl]
+
+    def metti_l_indirizzo(self, brano):
+        """Un brano di un sito aperto da solo va in cima agli Indirizzi; se
+        c'era gia', ci sale, con il titolo nuovo. Torna il brano che resta."""
+        vecchio = next((b for b in self.indirizzi.brani if b.percorso == brano.percorso), None)
+        if vecchio is not None:
+            self.indirizzi.brani.remove(vecchio)
+            vecchio.titolo = brano.titolo or vecchio.titolo
+            brano = vecchio
+        self.indirizzi.brani.insert(0, brano)
+        return brano
+
+    def metti_la_playlist_in_rete(self, pl):
+        """Una playlist di un sito va in cima agli Indirizzi, al posto di
+        quella dello stesso indirizzo, se c'era: il sito puo' averla cambiata."""
+        self.in_rete = [pl] + [p for p in self.in_rete if p.indirizzo != pl.indirizzo]
+        return pl
+
+    def in_rete_da(self, indirizzo):
+        """La playlist degli Indirizzi che viene da indirizzo, o None."""
+        return next((p for p in self.in_rete if p.indirizzo == indirizzo), None)
 
     def dall_origine(self, percorso):
         """La playlist importata dal file M3U o PLS percorso, anche se poi e'

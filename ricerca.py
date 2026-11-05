@@ -1,6 +1,6 @@
 # MeTeOra, la ricerca globale: cerca con il filtro in tutte le playlist e in tutte le unita'.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la 1.15.0, issue 10. Nella 1.23.0 l'albero della provenienza dei risultati; nella 1.34.6 i risultati cestinati escono dal ramo.
+# 30/09/2026: nasce con la 1.15.0, issue 10. Nella 1.23.0 l'albero della provenienza dei risultati; nella 1.34.6 i risultati cestinati escono dal ramo. Nella 3.2.0 i risultati tengono il titolo dei brani dei siti.
 # Nella 1.73.0 la ricerca ovunque anche in rete, dopo i dischi, con le letture di rete a tempo. Nella 1.104.0 l'annullamento delle letture di rete diventa pubblico, per la pulizia all'avvio. Nella 2.7.0 anche tipo_di_unita, per l'apertura di massa della plancia. Nella 2.7.2 le letture di rete dal lettore di rete, in un processo a parte. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
 
 """La ricerca in tutto MeTeOra.
@@ -264,7 +264,7 @@ class Ricerca:
             return
         self._visti.add(chiave)
         with self._lucchetto:
-            self.risultati.append(Brano(brano.percorso, sottobrano=brano.sottobrano))
+            self.risultati.append(brano.copia())
             self.origini.append(origine)
         adesso = time.monotonic()
         if self._avvisa and adesso - self._ultimo_avviso >= INTERVALLO_DEGLI_AVVISI:

@@ -2,6 +2,19 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.2.0] - 2026-11-05
+
+Gli indirizzi in rete, la seconda tappa dei plugin della issue 40: MeTeOra apre le pagine dei siti, come una puntata di RaiPlay Sound, un video di YouTube o un album di Bandcamp, e le suona come i file.
+
+- Ctrl con V apre e suona l'indirizzo che c'è negli appunti; se non c'è, chiede di scriverlo, anche senza https davanti. Il campo si apre anche con la voce Apri un indirizzo, nel menu degli Indirizzi e dei loro brani. Decisione di Gabriele: Ctrl con V e la voce di menu, tutti e due; prima Ctrl con V andava a Windows, e nella plancia non faceva niente.
+- Il ramo Indirizzi, nella plancia dopo Questa rete, tiene ciò che apri, anche dopo la chiusura: prima le playlist dei siti, come un album o una playlist di YouTube, ognuna con i suoi brani, poi i brani aperti da soli, dal più recente, con il titolo, la durata e i capitoli che dice il sito. Decisione di Gabriele. I brani dei siti vanno nelle playlist e nei Preferiti, con il titolo; la ricerca e il filtro li trovano dal titolo, dall'autore e dal sito. Una playlist di un sito si rilegge dal suo menu, e il suo indirizzo, come quello di un brano, si copia negli appunti.
+- Il flusso lo trova yt-dlp, che conosce più di mille siti, e libmpv lo suona con le intestazioni che il sito vuole e, per i video, con l'audio a parte; un indirizzo diretto a un file suona anche senza yt-dlp. Con il video acceso arriva il video fino a 1080 righe, spento solo l'audio. Misure del 5 novembre 2026: circa un secondo per RaiPlay Sound, SoundCloud, Bandcamp e Mixcloud, cinque per YouTube. Il flusso trovato vale venti minuti, o fino alla scadenza scritta nel suo indirizzo, e quello del brano seguente si chiede in anticipo; uno che non si apre più si richiede al sito, una volta.
+- yt-dlp e QuickJS, il motore JavaScript che serve per YouTube, sono due componenti aggiuntivi nuovi: MeTeOra li propone al primo indirizzo, e stanno nella voce Componenti aggiuntivi delle impostazioni. yt-dlp si scarica a cartella, che parte in mezzo secondo, dalla sua ultima release su GitHub, controllato con le impronte della release; QuickJS, la 0.18.0 di QuickJS-NG, con la sua impronta.
+- yt-dlp si aggiorna da sé al primo indirizzo di ogni giorno, in sottofondo, e la console lo dice solo se c'era una versione nuova; nei Componenti aggiuntivi ha anche Cerca un aggiornamento. Decisione di Gabriele.
+- Segnalibro, ripresa all'avvio, Dove sono, la riga In riproduzione e le statistiche conoscono i brani dei siti, con il loro titolo; le statistiche li contano fra i formati come dai siti, e hanno la riga degli indirizzi aperti, delle playlist dei siti, dei flussi chiesti e degli aggiornamenti di yt-dlp.
+- Nel manuale il capitolo nuovo Gli indirizzi in rete, con l'avvertimento che delle condizioni dei siti risponde chi ascolta.
+- Dentro: indirizzi.py, nuovo; formati.e_indirizzo, e gli indirizzi senza l'estensione di un formato; Brano.titolo e Brano.copia; l'Archivio con indirizzi e in_rete; lo schedario con le schede dei siti, che non legge dal disco; il motore con il flusso, le intestazioni e l'audio a parte scritti con change-list; pulizia.norm che lascia gli indirizzi come sono. tests/test_indirizzi.py, nuovo, con yt-dlp finto: nelle prove yt-dlp non si chiama mai.
+
 ## [3.1.0] - 2026-11-05
 
 I componenti aggiuntivi, la prima tappa dei plugin della issue 40: ciò che MeTeOra scarica quando serve, ognuno con la sua licenza, ora si vede e si gestisce da una voce delle impostazioni.

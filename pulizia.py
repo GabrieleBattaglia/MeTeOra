@@ -1,6 +1,6 @@
 # MeTeOra, la pulizia all'avvio: quali dei file che MeTeOra conosce non ci sono piu' sul disco.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 19/10/2026: nasce con la 1.104.0, perche' schedario, playlist, Preferiti, marker, punti da riprendere e statistiche non si portino dietro per sempre i file spariti. Nella 1.112.0 la protezione dei dischi: la pulizia riconosce il disco di ogni lettera, anche di quelle fatte con subst, e salta una lettera usata da dischi diversi o con un disco che non riconosce, e tutte quando il file dei dischi non si legge; poi Riconosci questo disco, il controllo dei dischi quando MeTeOra usa un file, con la Sentinella, e i dischi di ogni computer tenuti a parte; infine il conto delle voci per la conferma di Riconosci questo disco, e il MachineGuid accanto al nome del computer. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
+# 19/10/2026: nasce con la 1.104.0, perche' schedario, playlist, Preferiti, marker, punti da riprendere e statistiche non si portino dietro per sempre i file spariti. Nella 1.112.0 la protezione dei dischi: la pulizia riconosce il disco di ogni lettera, anche di quelle fatte con subst, e salta una lettera usata da dischi diversi o con un disco che non riconosce, e tutte quando il file dei dischi non si legge; poi Riconosci questo disco, il controllo dei dischi quando MeTeOra usa un file, con la Sentinella, e i dischi di ogni computer tenuti a parte; infine il conto delle voci per la conferma di Riconosci questo disco, e il MachineGuid accanto al nome del computer. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 norm lascia gli indirizzi in rete come sono.
 
 """La pulizia all'avvio, la parte senza wx.
 
@@ -107,6 +107,7 @@ import traceback
 from collections import Counter
 from ctypes import wintypes
 
+import formati
 import questa_rete
 import ricerca
 from lingua import _
@@ -147,7 +148,10 @@ MEMORIA_DELLA_SENTINELLA = 5.0
 
 def norm(percorso):
     """La forma in cui i moduli della pulizia confrontano i percorsi:
-    assoluta, in minuscolo e con le barre di Windows."""
+    assoluta, in minuscolo e con le barre di Windows. Un indirizzo in rete
+    resta com'e' (3.2.0): non e' un file, e le sue maiuscole contano."""
+    if formati.e_indirizzo(percorso):
+        return percorso
     return os.path.normcase(os.path.abspath(percorso))
 
 

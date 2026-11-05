@@ -339,10 +339,16 @@ def main():
         # I banchi dei componenti aggiuntivi (3.1.0).
         "il banco GeneralUser GS 2.0.3 di S. Christian Collins, uso libero anche nei programmi, con il testo in "
         + " e ".join(f"generaluser_gs\\{file}" for file in altri["generaluser_gs"]["file"]) + "; "
-        "il banco MS Basic di MuseScore, licenza MIT, con il testo in " + " e ".join(f"ms_basic\\{file}" for file in altri["ms_basic"]["file"]) + ". "
+        "il banco MS Basic di MuseScore, licenza MIT, con il testo in " + " e ".join(f"ms_basic\\{file}" for file in altri["ms_basic"]["file"]) + "; "
+        # I componenti degli indirizzi in rete (3.2.0).
+        "yt-dlp, per gli indirizzi in rete, con il codice di pubblico dominio, Unlicense, e l'eseguibile GPL-3.0-or-later, con le licenze delle sue "
+        "librerie dentro la sua cartella, e il testo in " + " e ".join(f"yt_dlp\\{file}" for file in altri["yt_dlp"]["file"]) + "; "
+        "QuickJS-NG 0.18.0, il motore JavaScript che yt-dlp usa per YouTube, licenza MIT, con il testo in "
+        + " e ".join(f"quickjs\\{file}" for file in altri["quickjs"]["file"]) + ". "
         "Le durate dei SID vengono dal database Songlengths della High Voltage SID Collection, che MeTeOra legge dalla tua copia.")
     sorgenti.append("FluidSynth: https://github.com/FluidSynth/fluidsynth; FluidR3 GM: https://github.com/pianobooster/fluid-soundfont; "
-        "GeneralUser GS: https://github.com/mrbumpy409/GeneralUser-GS; MS Basic: https://github.com/musescore/MuseScore/tree/master/share/sound")
+        "GeneralUser GS: https://github.com/mrbumpy409/GeneralUser-GS; MS Basic: https://github.com/musescore/MuseScore/tree/master/share/sound; "
+        "yt-dlp: https://github.com/yt-dlp/yt-dlp; QuickJS-NG: https://github.com/quickjs-ng/quickjs")
 
     raccolta.scrivi("LEGGIMI.txt", leggimi)
     raccolta.scrivi("SORGENTI.txt", sorgenti)

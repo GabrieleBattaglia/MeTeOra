@@ -13,6 +13,11 @@ dist/
 # FluidSynth e i banchi di suoni che MeTeOra scarica al primo MIDI (tappa 8): FluidR3 pesa 148 MB.
 fluidsynth/
 banchi/
+# yt-dlp e QuickJS, i componenti degli indirizzi in rete (3.2.0), con le cartelle di passaggio dell'aggiornamento, solo nella radice: licenze\quickjs resta.
+/yt-dlp/
+/yt-dlp.nuova/
+/yt-dlp.vecchia/
+/quickjs/
 # Il registro degli errori e dei crash (1.89.0), che nasce accanto ai dati provando MeTeOra dai sorgenti.
 MeTeOra - *.log
 MeTeOra - *.log.*

@@ -1,6 +1,6 @@
 # MeTeOra, le prove della finestra principale, sul desktop nascosto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21). Nella 1.112.0 quelle dei dischi della pulizia, anche del loro file che non si legge, e la prova della pulizia che toglie i file spariti non fa piu' leggere allo schedario i file finti; poi Riconosci questo disco, la riga che lo indica e la Sentinella che guarda i dischi dei file usati; infine la domanda di Riconosci questo disco con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 quelle dell'importazione delle playlist M3U, M3U8 e PLS. Nella 1.113.1 quella dell'etichetta di un file delle console con un sottobrano senza durata (issue 24). Nella 1.113.3 quella della Barra dei comandi per il mouse, che nell'errore dice il suo nome (issue 26). Nella 1.113.5 quelle delle statistiche scritte solo se cambiate, al piu' ogni mezz'ora. Nella 1.116.0 quelle delle schede audio che vanno e tornano, e del brano che riparte quando la sua uscita si perde. Nella 1.116.1 quella della scheda delle statistiche con la scelta che manca. Nella 1.116.2 quella dei suoni di piu' e meno fatti al volo. Nella 1.116.3 quella dei comandi da fermi (issue 39). Nella 1.119.0 quelle degli speaker Cast e della lista delle destinazioni. Nella 2.7.3 quelle della guida rapida, con ogni combinazione presa dalle tabelle dei tasti e le combinazioni di ogni tasto di seguito, nell'ordine della regola. Nella 3.1.0 i banchi scaricati nella cartella della prova, e le voci dei componenti aggiuntivi.
+# 30/09/2026: nasce con la tappa 1. Nella 1.55.0 le prove di velocita', tono, equalizzatore e dissolvenza, e del passaggio fra due brani (tappa 4, issue 15). Nella 1.103.0 le prove delle statistiche. Nella 1.104.0 quelle della pulizia all'avvio, delle statistiche salvate subito e della rinomina che porta con se' il punto e lo storico. Nella 1.105.0 quelle di Dove sono, l'apostrofo. Nella 1.105.1 quella della riga In riproduzione con i nomi delle liste di Dove sono. Nella 1.109.0 quelle di Ordina e Mescola. Nella 1.110.0 quelle della durata residua, Maiuscolo con l'apostrofo. Nella 1.111.0 quelle dello stato della selezione dato a NVDA dalla plancia, con un client MSAA nel processo (issue 21). Nella 1.112.0 quelle dei dischi della pulizia, anche del loro file che non si legge, e la prova della pulizia che toglie i file spariti non fa piu' leggere allo schedario i file finti; poi Riconosci questo disco, la riga che lo indica e la Sentinella che guarda i dischi dei file usati; infine la domanda di Riconosci questo disco con il conto delle voci, e la riga e il suono della Sentinella. Nella 1.113.0 quelle dell'importazione delle playlist M3U, M3U8 e PLS. Nella 1.113.1 quella dell'etichetta di un file delle console con un sottobrano senza durata (issue 24). Nella 1.113.3 quella della Barra dei comandi per il mouse, che nell'errore dice il suo nome (issue 26). Nella 1.113.5 quelle delle statistiche scritte solo se cambiate, al piu' ogni mezz'ora. Nella 1.116.0 quelle delle schede audio che vanno e tornano, e del brano che riparte quando la sua uscita si perde. Nella 1.116.1 quella della scheda delle statistiche con la scelta che manca. Nella 1.116.2 quella dei suoni di piu' e meno fatti al volo. Nella 1.116.3 quella dei comandi da fermi (issue 39). Nella 1.119.0 quelle degli speaker Cast e della lista delle destinazioni. Nella 2.7.3 quelle della guida rapida, con ogni combinazione presa dalle tabelle dei tasti e le combinazioni di ogni tasto di seguito, nell'ordine della regola. Nella 3.1.0 i banchi scaricati nella cartella della prova, e le voci dei componenti aggiuntivi. Nella 3.2.0 il ramo Indirizzi fra i rami principali, e i componenti sono sei.
 
 import contextlib
 import ctypes
@@ -58,7 +58,8 @@ def test_aree_nell_ordine_di_tabulazione(finestra):
 
 
 def test_rami_principali(finestra):
-    assert _etichette(finestra, finestra.albero.GetRootItem()) == ["Preferiti, brani: 0, totali: 0", "Playlist", "Questo PC", "Questa rete", "Apri file", "Statistiche", "Impostazioni"]
+    assert _etichette(finestra, finestra.albero.GetRootItem()) == ["Preferiti, brani: 0, totali: 0", "Playlist", "Questo PC", "Questa rete", "Indirizzi, brani: 0, totali: 0", "Apri file",
+        "Statistiche", "Impostazioni"]
     assert _etichette(finestra, finestra.nodo_playlist) == ["Nuova playlist", "Importa playlist"]
 
 
@@ -2488,8 +2489,8 @@ def test_maiuscolo_e_ctrl_con_le_frecce_senza_passare_dall_albero(finestra):
     # Dopo Ctrl l'ancora resta, come in Esplora risorse: Maiuscolo con Fine
     # seleziona da b fino in fondo.
     _nell_albero(finestra, wx.WXK_END, maiuscolo=True)
-    assert _selezionate(finestra) == sorted(["b.mp3", "c.mp3", "d.mp3", "Nuova playlist", "Importa playlist", "Questo PC", "Questa rete", "Apri file", "Statistiche",
-        "Impostazioni"])
+    assert _selezionate(finestra) == sorted(["b.mp3", "c.mp3", "d.mp3", "Nuova playlist", "Importa playlist", "Questo PC", "Questa rete",
+        "Indirizzi, brani: 0, totali: 0", "Apri file", "Statistiche", "Impostazioni"])
     assert finestra.albero.GetItemText(finestra._voce_corrente()) == "Impostazioni"
     # Un altro tasto lascia l'ancora: si riparte dalla voce col fuoco.
     _nell_albero(finestra, wx.WXK_LEFT)
@@ -3126,7 +3127,7 @@ def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_an
         ("celle_braille", "Celle della barra braille: 0, il testo intero"),
         ("lettura_minima", "Tempo minimo di lettura in braille: 2000 ms"),
         ("banco_midi", "Banco dei suoni MIDI: nessuno, si sceglie al primo MIDI"),
-        ("componenti", "Componenti aggiuntivi: nessuno installato, 4 disponibili"),
+        ("componenti", "Componenti aggiuntivi: nessuno installato, 6 disponibili"),
         ("insegui", "Inseguimento della plancia (Ctrl+F8, Maiuscolo+F8): no"),
         ("ripresa_oltre", "Punto lasciato dei file lunghi: oltre 10 minuti"),
         ("lingua", "Lingua: italiano"),

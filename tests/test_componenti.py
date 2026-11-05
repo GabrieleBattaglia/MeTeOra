@@ -1,6 +1,6 @@
 # MeTeOra, le prove dei componenti aggiuntivi: il modulo e la voce delle impostazioni.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 05/11/2026: nasce con la 3.1.0, tappa 19 a, issue 40.
+# 05/11/2026: nasce con la 3.1.0, tappa 19 a, issue 40. Nella 3.2.0 yt-dlp e QuickJS nell'elenco.
 
 """Le prove dei componenti aggiuntivi.
 
@@ -100,8 +100,9 @@ def test_fluidsynth_non_si_toglie_mentre_e_in_uso(tmp_path, monkeypatch):
 
 
 def test_l_elenco_dei_componenti():
-    assert [c.chiave for c in componenti.TUTTI] == ["fluidsynth", "fluidr3", "generaluser_gs", "ms_basic"]
-    assert componenti.TUTTI[1:] == componenti.BANCHI and all(c.banco and c.midi for c in componenti.BANCHI)
+    assert [c.chiave for c in componenti.TUTTI] == ["fluidsynth", "fluidr3", "generaluser_gs", "ms_basic", "yt_dlp", "quickjs"]
+    assert componenti.TUTTI[1:4] == componenti.BANCHI and all(c.banco and c.midi for c in componenti.BANCHI)
+    assert componenti.TUTTI[4:] == componenti.INDIRIZZI and not any(c.banco or c.midi for c in componenti.INDIRIZZI)
     for banco in componenti.BANCHI:
         assert banco.fonti and all(f.startswith("https://") for f in banco.fonti) and banco.dimensione > 1_000_000
     # GeneralUser GS dalla copia di MeTeOra, come vuole il suo autore.
@@ -112,7 +113,7 @@ def test_l_elenco_dei_componenti():
 def test_la_voce_componenti_installa_un_banco_e_lo_usa(finestra, monkeypatch, suoni_annotati, tmp_path):
     _midi_finti(finestra, monkeypatch)
     lista = _ListaFinta()
-    assert finestra._riga_dell_impostazione("componenti") == "Componenti aggiuntivi: 1 installato su 4"
+    assert finestra._riga_dell_impostazione("componenti") == "Componenti aggiuntivi: 1 installato su 6"
 
     def installa(avanza=None):
         avanza(50, 100)

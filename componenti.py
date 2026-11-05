@@ -1,6 +1,6 @@
 # MeTeOra, i componenti aggiuntivi: cio' che MeTeOra scarica quando serve, ognuno con la sua licenza.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 05/11/2026: nasce con la 3.1.0, tappa 19 a del piano, issue 40.
+# 05/11/2026: nasce con la 3.1.0, tappa 19 a del piano, issue 40. Nella 3.2.0 yt-dlp e QuickJS, per gli indirizzi in rete.
 
 """I componenti aggiuntivi di MeTeOra (3.1.0, issue 40).
 
@@ -18,11 +18,16 @@ di MeTeOra su GitHub, come chiede il suo autore, che non vuole collegamenti
 diretti ai suoi file (Gabriele, 5 novembre 2026). Gli altri banchi dalla loro
 fonte, fissata a una versione, con l'impronta git che le API di GitHub
 dicono senza scaricarli.
+Dalla 3.2.0 yt-dlp, che apre gli indirizzi in rete, e QuickJS, che gli serve
+per YouTube. yt-dlp non ha una versione fissa: si scarica l'ultima, con le
+impronte della sua release, e si aggiorna da se' una volta al giorno, o a
+mano da qui con Cerca un aggiornamento; QuickJS si', la 0.18.0.
 """
 
 import contextlib
 import os
 
+import indirizzi
 import midi
 from lingua import _
 
@@ -33,12 +38,17 @@ class Componente:
 
     banco = False
     midi = False
+    # Vero per chi si aggiorna dalla rete, come yt-dlp: allora ha aggiorna().
+    aggiornabile = False
 
     def __init__(self, chiave, nome, uso, licenza, peso):
         self.chiave, self.nome, self.uso, self.licenza, self.peso = chiave, nome, uso, licenza, peso
 
     def presente(self):
         raise NotImplementedError
+
+    def versione(self):
+        """La versione installata, da dire nella lista, o None."""
 
     def da_aggiornare(self):
         """Vero se c'e' ma non e' la versione di questo MeTeOra."""
@@ -122,5 +132,42 @@ GENERALUSER_GS = Banco("generaluser_gs", "GeneralUser GS", _("un banco di suoni 
 MS_BASIC = Banco("ms_basic", "MS Basic", _("il banco di suoni General MIDI di MuseScore 4: compresso, al primo MIDI si carica in una decina di secondi."),
     "MIT", "MS Basic.sf3", ("https://raw.githubusercontent.com/musescore/MuseScore/37128c5ac8f9af804b63650610952414421828b8/share/sound/MS%20Basic.sf3",),
     51_278_610, "5be56b2fafa5eee347256cbe0d2fbfacd01702b6")
+
+
+class YtDlp(Componente):
+    aggiornabile = True
+
+    def presente(self):
+        return indirizzi.ytdlp_presente()
+
+    def versione(self):
+        return indirizzi.versione_di_ytdlp() if self.presente() else None
+
+    def installa(self, avanza=None):
+        return indirizzi.installa_ytdlp(avanza=avanza)
+
+    def aggiorna(self, avanza=None):
+        """La versione nuova installata, o None se c'era gia' l'ultima."""
+        return indirizzi.aggiorna_ytdlp(avanza)
+
+    def togli(self):
+        indirizzi.togli_ytdlp()
+
+
+class QuickJS(Componente):
+    def presente(self):
+        return indirizzi.quickjs_presente()
+
+    def installa(self, avanza=None):
+        indirizzi.installa_quickjs(avanza)
+
+    def togli(self):
+        indirizzi.togli_quickjs()
+
+
 BANCHI = (FLUIDR3, GENERALUSER_GS, MS_BASIC)
-TUTTI = (FLUIDSYNTH, *BANCHI)
+YT_DLP = YtDlp("yt_dlp", "yt-dlp", _("apre gli indirizzi dei siti, come RaiPlay Sound, YouTube, SoundCloud e Bandcamp, e si aggiorna da sé ogni giorno."),
+    _("Unlicense, l'eseguibile GPL 3"), indirizzi.YTDLP_PESO)
+QUICKJS = QuickJS("quickjs", "QuickJS", _("il motore JavaScript che serve a yt-dlp per YouTube."), "MIT", indirizzi.QUICKJS_PESO)
+INDIRIZZI = (YT_DLP, QUICKJS)
+TUTTI = (FLUIDSYNTH, *BANCHI, *INDIRIZZI)

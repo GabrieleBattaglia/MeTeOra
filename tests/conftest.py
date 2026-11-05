@@ -8,6 +8,7 @@
 # 22/10/2026, 1.116.0: PortAudio non si rilegge davvero, e le riletture si annotano.
 # 27/10/2026, 1.116.2: si annotano anche i suoni del volume, fatti al volo.
 # 03/11/2026, 1.119.0: la ricerca degli speaker Cast non parte, come se pychromecast non ci fosse.
+# 05/11/2026, 3.2.0: yt-dlp e QuickJS nella cartella della prova, e mai chiamati davvero.
 
 """Le regole comuni delle prove.
 
@@ -126,6 +127,28 @@ def speaker_non_cercati(monkeypatch):
     import trasmissione
 
     monkeypatch.setattr(trasmissione, "disponibile", lambda: False)
+
+
+@pytest.fixture(autouse=True)
+def indirizzi_senza_rete(monkeypatch, tmp_path):
+    """Gli indirizzi in rete (3.2.0): yt-dlp e QuickJS stanno nella cartella
+    della prova, cosi' le righe dei componenti non dipendono dalla macchina,
+    yt-dlp non si chiama e GitHub non si interroga; i flussi trovati non
+    passano da una prova all'altra. Le prove degli indirizzi mettono le loro
+    risposte finte."""
+    import indirizzi
+
+    def vietato(*argomenti, **opzioni):
+        raise indirizzi.ErroreIndirizzo("nelle prove yt-dlp non si chiama")
+
+    def senza_github():
+        raise OSError("nelle prove GitHub non si interroga")
+
+    monkeypatch.setattr(indirizzi, "cartella_di_ytdlp", lambda: str(tmp_path / "componenti" / "yt-dlp"))
+    monkeypatch.setattr(indirizzi, "cartella_di_quickjs", lambda: str(tmp_path / "componenti" / "quickjs"))
+    monkeypatch.setattr(indirizzi, "_esegui", vietato)
+    monkeypatch.setattr(indirizzi, "ultima_versione", senza_github)
+    monkeypatch.setattr(indirizzi, "_flussi", {})
 
 
 @pytest.fixture(autouse=True)

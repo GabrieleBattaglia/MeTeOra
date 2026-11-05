@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17). Nella 2.7.1 la precedenza ai tasti sul lavoro in disparte. Nella 2.7.2 i lettori di rete chiusi all'uscita. Nella 2.7.3 i tasti funzione nelle tabelle COMANDI_DEI_TASTI_FUNZIONE e INTERRUTTORI, lette dalla prova della guida rapida, e le righe del cruscotto nell'ordine della regola. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.1.0 la voce Componenti aggiuntivi delle impostazioni, e gli altri banchi liberi da scaricare.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17). Nella 2.7.1 la precedenza ai tasti sul lavoro in disparte. Nella 2.7.2 i lettori di rete chiusi all'uscita. Nella 2.7.3 i tasti funzione nelle tabelle COMANDI_DEI_TASTI_FUNZIONE e INTERRUTTORI, lette dalla prova della guida rapida, e le righe del cruscotto nell'ordine della regola. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.1.0 la voce Componenti aggiuntivi delle impostazioni, e gli altri banchi liberi da scaricare. Nella 3.2.0 gli indirizzi in rete: Ctrl con V, Apri un indirizzo, il ramo Indirizzi, il flusso chiesto prima di suonare e in anticipo per il seguente, e yt-dlp aggiornato ogni giorno.
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -58,6 +58,7 @@ import componenti
 import dettagli
 import formati
 import importazione
+import indirizzi
 import karaoke
 import lettore_di_rete
 import lingua
@@ -241,6 +242,9 @@ TASTI = {
     ("v", SOLO): "stop",
     # La ripetizione a giro (Gabriele, 1.94.0).
     ("v", MAIUSCOLO): "ripetizione",
+    # Ctrl con V incolla l'indirizzo in rete degli appunti e lo suona
+    # (Gabriele, 3.2.0): prima andava a Windows, e nella plancia non faceva niente.
+    ("v", CTRL): "apri_un_indirizzo",
     ("b", SOLO): "successivo",
     ("w", SOLO): "vai_a_tempo",
     # Dove sono: tempo, brano e lista di cio' che suona (Gabriele, tappa 14 b).
@@ -445,7 +449,8 @@ TASTI_COMUNI = [
     _("La regola dei tasti a lettera: il tasto da solo dice il valore del suo controllo, con i limiti, nella console e alla sintesi e al braille dei sottotitoli; "
     "con Ctrl va indietro, abbassa o spegne; con Maiuscolo va avanti, alza o accende; con Ctrl e Maiuscolo torna al valore predefinito; con Alt va al massimo, con Ctrl e Alt al minimo."),
     _("X suona la voce selezionata, riprende dalla pausa o fa ripartire da capo il brano che suona già; C pausa, V stop, Z e B brano precedente e successivo. "
-    "Maiuscolo con V la ripetizione, a giro: del brano, della lista, spenta. Maiuscolo con X, a giro: punto A del loop sul brano selezionato, poi punto B, poi toglie il loop."),
+    "Maiuscolo con V la ripetizione, a giro: del brano, della lista, spenta. Ctrl con V apre e suona l'indirizzo in rete degli appunti, come una pagina di RaiPlay Sound o di YouTube, "
+    "e senza un indirizzo negli appunti lo chiede. Maiuscolo con X, a giro: punto A del loop sul brano selezionato, poi punto B, poi toglie il loop."),
     _("N la riproduzione casuale: Ctrl la spegne, Maiuscolo la accende, e con lei B sceglie a caso e Z torna ai brani suonati prima; Alt con N suona subito un brano a caso. "
     "S il timer di spegnimento: Ctrl lo toglie, Maiuscolo lo chiede in minuti, Alt lo mette alla fine del brano."),
     _("L'apostrofo dice dove sei: il tempo del brano che suona, il suo nome, il posto nella lista e quello che c'è di particolare, come la pausa; "
@@ -513,6 +518,11 @@ TASTI_DEL_CONTESTO = {
     "capitolo": (_("un capitolo"), _("X, Invio, Applicazioni o Spazio suonano il file da questo capitolo. Ctrl e Maiuscolo con la virgola, mentre suona, vanno al capitolo precedente e successivo.")),
     "marker": (_("un marker"), _("Invio rinomina il marker, Canc lo elimina, X fa come sul suo brano. Applicazioni o Spazio: menu con Vai al marker, che suona il brano da lì, Rinomina ed Elimina.")),
     "comando": (_("un comando"), _("Invio esegue il comando.")),
+    # Gli Indirizzi e i loro brani (3.2.0).
+    "indirizzi": (_("gli Indirizzi"), _("Freccia destra mostra le playlist dei siti e i brani aperti da soli, dal più recente. Invio, Applicazioni o Spazio: menu con Riproduci, "
+        "Apri un indirizzo, Filtro, Ordina e Mescola. Ctrl con V apre l'indirizzo degli appunti. Canc su un loro brano o su una loro playlist la toglie.")),
+    "brano_in_rete": (_("un brano di un sito"), _("Invio, Applicazioni o Spazio: menu con Riproduci, Sposta su, giù, in cima e in fondo, Saltato, Togli dalla playlist, "
+        "Aggiungi alla playlist, Aggiungi ai preferiti, Copia l'indirizzo e Apri un indirizzo. Canc toglie il brano dalla sua lista. Se il sito dice i capitoli, freccia destra li mostra.")),
 }
 def _stesso_posto(a, b):
     """Vero se due (playlist, brano, sottobrano) sono lo stesso posto: la
@@ -624,6 +634,12 @@ def midi_in_disparte(lavoro, al_termine):
     """Fa lavoro() in un filo a parte e passa il risultato ad al_termine:
     gli scaricamenti e la ricerca dei banchi non fermano la finestra."""
     threading.Thread(target=lambda: al_termine(lavoro()), name="MeTeOra, preparazione dei MIDI", daemon=True).start()
+
+
+def indirizzi_in_disparte(lavoro, al_termine):
+    """Come midi_in_disparte, per le chiamate a yt-dlp degli indirizzi in
+    rete (3.2.0): le prove la sostituiscono, come l'altra."""
+    threading.Thread(target=lambda: al_termine(lavoro()), name="MeTeOra, indirizzi in rete", daemon=True).start()
 
 
 def _frase_del_video(acceso):
@@ -1295,6 +1311,13 @@ class Finestra(wx.Frame):
         self._midi_in_preparazione = False
         # Il componente aggiuntivo che si sta scaricando, uno alla volta (3.1.0).
         self._componente_in_arrivo = None
+        # Gli indirizzi in rete (3.2.0): quello che si sta aprendo, il segno
+        # del flusso atteso prima di suonare, gli indirizzi i cui flussi si
+        # chiedono in anticipo, e quelli gia' riprovati dopo un errore.
+        self._indirizzo_in_apertura = None
+        self._flusso_atteso = None
+        self._flussi_in_anticipo = set()
+        self._indirizzi_riprovati = set()
         self._video = None
         self._video_nel_motore = False
         # Il brano su cui la finestra del video e' stata nascosta a mano, con
@@ -1670,6 +1693,12 @@ class Finestra(wx.Frame):
         self.albero.SetItemHasChildren(self.nodo_pc, True)
         self.nodo_rete = self.albero.AppendItem(radice, _("Questa rete"), data={"tipo": "rete", "caricato": False})
         self.albero.SetItemHasChildren(self.nodo_rete, True)
+        # Gli indirizzi in rete aperti, dopo Questa rete (Gabriele, 3.2.0): una
+        # playlist speciale come i Preferiti, con dentro prima le playlist dei
+        # siti e poi i brani aperti da soli.
+        self.nodo_indirizzi = self.albero.AppendItem(radice, self._etichetta_della_playlist(self.archivio.indirizzi),
+            data={"tipo": "playlist", "playlist": self.archivio.indirizzi, "caricato": False})
+        self.albero.SetItemHasChildren(self.nodo_indirizzi, True)
         self.albero.AppendItem(radice, _("Apri file"), data={"tipo": "comando", "comando": "apri_file"})
         # Le statistiche, prima delle impostazioni (Gabriele, 1.103.0).
         self.albero.AppendItem(radice, _("Statistiche"), data={"tipo": "comando", "comando": "statistiche"})
@@ -1942,7 +1971,7 @@ class Finestra(wx.Frame):
             return
         elenco = self._capitoli_in_corso()
         if not elenco:
-            self._riporta(_("{file} non ha capitoli.").format(file=os.path.basename(self.motore.in_corso)), "capitolo")
+            self._riporta(_("{file} non ha capitoli.").format(file=self._nome_in_corso()), "capitolo")
             return
         indice = capitolo_attuale(elenco, self.motore.posizione or 0.0)
         secondi, titolo = elenco[indice]
@@ -1961,7 +1990,7 @@ class Finestra(wx.Frame):
             return
         elenco = self._capitoli_in_corso()
         if not elenco:
-            self._riscontro("non_disponibile", _("{file} non ha capitoli.").format(file=os.path.basename(self.motore.in_corso)))
+            self._riscontro("non_disponibile", _("{file} non ha capitoli.").format(file=self._nome_in_corso()))
             return
         posizione = self.motore.posizione or 0.0
         attuale = capitolo_attuale(elenco, posizione)
@@ -1986,7 +2015,7 @@ class Finestra(wx.Frame):
             return
         elenco = self._capitoli_in_corso()
         if not elenco:
-            self._riscontro("non_disponibile", _("{file} non ha capitoli.").format(file=os.path.basename(self.motore.in_corso)))
+            self._riscontro("non_disponibile", _("{file} non ha capitoli.").format(file=self._nome_in_corso()))
             return
         posizione = self.motore.posizione or 0.0
         attuale = capitolo_attuale(elenco, posizione)
@@ -2112,6 +2141,10 @@ class Finestra(wx.Frame):
             voce = self._voce_di_lavoro()
             dati = self._dati(voce) or {}
             tipo = "preferiti" if dati.get("tipo") == "playlist" and dati["playlist"] is self.archivio.preferiti else dati.get("tipo")
+            if dati.get("tipo") == "playlist" and dati["playlist"] is self.archivio.indirizzi:
+                tipo = "indirizzi"
+            elif dati.get("tipo") == "brano" and formati.e_indirizzo(dati["brano"].percorso):
+                tipo = "brano_in_rete"
             nome, riga = TASTI_DEL_CONTESTO.get(tipo, (_("la plancia"), ""))
             # Traduttori: nome e' il tipo di voce della plancia, con l'articolo, come i Preferiti o una cartella.
             righe = [_("Tasti per {nome}.").format(nome=nome)] + ([riga] if riga else [])
@@ -2529,8 +2562,10 @@ class Finestra(wx.Frame):
         antenato = voce
         while self._profondita(antenato) > 2:
             antenato = self.albero.GetItemParent(antenato)
-        if self.albero.GetItemParent(antenato) == self.nodo_preferiti:
-            antenato = self.nodo_preferiti
+        # Dagli Indirizzi un brano risale a loro, e una playlist di un sito resta lei (3.2.0).
+        if self.albero.GetItemParent(antenato) == self.nodo_preferiti or (
+                self.albero.GetItemParent(antenato) == self.nodo_indirizzi and (self._dati(antenato) or {}).get("tipo") != "playlist"):
+            antenato = self.albero.GetItemParent(antenato)
         # Il fuoco va sull'antenato prima di chiudere i rami in cui stava.
         self._seleziona(antenato)
         chiusi = False
@@ -3306,6 +3341,15 @@ class Finestra(wx.Frame):
         c'e': il filtro non e' una voce della playlist, cosi' NVDA conta solo
         i brani."""
         filtrati = [b for b in pl.brani if self._ammesso(pl, b)]
+        if pl is self.archivio.indirizzi and self.archivio.in_rete:
+            # Gli Indirizzi dicono anche quante playlist dei siti hanno dentro (3.2.0).
+            nome = plurale(len(self.archivio.in_rete), "{n} playlist", "{n} playlist")
+            if pl.filtro:
+                # Traduttori: playlist e' come 2 playlist; i brani che passano il filtro e quelli da soli, ciascuno come 12 (40:00).
+                return _("Indirizzi, {playlist}, brani: {filtrati}, totali: {totali}, filtro: {filtro}").format(playlist=nome, filtrati=self._conto(filtrati),
+                    totali=self._conto(pl.brani), filtro=pl.filtro)
+            # Traduttori: playlist e' come 2 playlist; i brani da soli, ciascuno come 12 (40:00).
+            return _("Indirizzi, {playlist}, brani: {filtrati}, totali: {totali}").format(playlist=nome, filtrati=self._conto(filtrati), totali=self._conto(pl.brani))
         if pl.filtro:
             # Traduttori: i brani che passano il filtro e quelli della playlist, ciascuno come 12 (40:00).
             return _("{nome}, brani: {filtrati}, totali: {totali}, filtro: {filtro}").format(nome=pl.nome, filtrati=self._conto(filtrati), totali=self._conto(pl.brani),
@@ -3325,7 +3369,7 @@ class Finestra(wx.Frame):
         # durate e tag: per non cambiare la plancia sotto le mani di chi la
         # sta leggendo si rinfrescano solo i conti; l'elenco dei brani si
         # aggiorna riaprendo la playlist.
-        for voce in [self.nodo_preferiti, *self._figli(self.nodo_playlist)]:
+        for voce in self._nodi_delle_playlist():
             dati = self._dati(voce) or {}
             if dati.get("tipo") == "playlist":
                 nuova = self._etichetta_della_playlist(dati["playlist"])
@@ -3342,6 +3386,13 @@ class Finestra(wx.Frame):
                 self.schedario.salva()
             except OSError as e:
                 self._riscontro("errore", _("Non riesco a salvare lo schedario: {errore}").format(errore=e))
+
+    def _nodi_delle_playlist(self):
+        """Le voci delle playlist salvate nella plancia: i Preferiti, quelle del
+        ramo Playlist e, dalla 3.2.0, gli Indirizzi con le playlist dei siti."""
+        nodi = [self.nodo_preferiti, *self._figli(self.nodo_playlist), self.nodo_indirizzi]
+        nodi += [v for v in self._figli(self.nodo_indirizzi) if (self._dati(v) or {}).get("tipo") == "playlist"]
+        return nodi
 
     def _sotto(self, voce, radice):
         """Vero se la voce sta dentro il ramo radice."""
@@ -3373,19 +3424,23 @@ class Finestra(wx.Frame):
         for voce in self._voci_selezionate() if esplicita else ():
             if voce == voce_selezionata:
                 continue
-            if self._sotto(voce, self.nodo_playlist) or self._sotto(voce, self.nodo_preferiti):
+            if self._sotto(voce, self.nodo_playlist) or self._sotto(voce, self.nodo_preferiti) or self._sotto(voce, self.nodo_indirizzi):
                 dati = self._dati(voce) or {}
                 oggetto = dati.get("brano") if dati.get("tipo") == "brano" else dati.get("playlist") if dati.get("tipo") == "playlist" else None
                 if oggetto is not None:
                     altre_selezionate.add(id(oggetto))
             else:
                 fuori.append(voce)
-        for voce in self._figli(self.nodo_playlist):
-            dati = self._dati(voce)
+        # Dalla 3.2.0 anche le playlist dei siti, dentro gli Indirizzi.
+        for voce in [*self._figli(self.nodo_playlist), *self._figli(self.nodo_indirizzi)]:
+            dati = self._dati(voce) or {}
             if dati.get("tipo") == "playlist" and self.albero.IsExpanded(voce):
                 aperte.add(id(dati["playlist"]))
-        preferiti_aperti = self.albero.IsExpanded(self.nodo_preferiti)
-        if voce_selezionata.IsOk() and self._sotto(voce_selezionata, self.nodo_preferiti):
+        # I Preferiti e, dalla 3.2.0, gli Indirizzi: le playlist speciali della radice.
+        speciali = ((self.nodo_preferiti, self.archivio.preferiti), (self.nodo_indirizzi, self.archivio.indirizzi))
+        speciali_aperti = [self.albero.IsExpanded(nodo) for nodo, _pl in speciali]
+        speciale = next((nodo for nodo, _pl in speciali if voce_selezionata.IsOk() and self._sotto(voce_selezionata, nodo)), None)
+        if speciale is not None:
             dati = self._dati(voce_selezionata) or {}
             dentro = True
             selezionato = dati.get("brano") or dati.get("playlist")
@@ -3400,27 +3455,45 @@ class Finestra(wx.Frame):
             interno = dict(self._dati(voce_selezionata))
         if seleziona is not None:
             selezionato, dentro = seleziona, True
-        if dentro and voce_selezionata != self.nodo_preferiti:
+        if dentro and voce_selezionata not in [nodo for nodo, _pl in speciali]:
             # La selezione passa sul ramo mentre i figli spariscono, senza
             # rimbalzi su voci che stanno per essere cancellate: dai Preferiti
             # sulla loro voce, che resta, e non su Playlist. Sulla voce dei
             # Preferiti la selezione resta dov'e': spariscono solo i suoi
             # figli, e NVDA non deve sentire un fuoco su Playlist, come a fine
-            # pulizia all'avvio (issue 29).
-            self._seleziona(self.nodo_preferiti if self._sotto(voce_selezionata, self.nodo_preferiti) else self.nodo_playlist)
-        preferiti = self.archivio.preferiti
-        self.albero.SetItemText(self.nodo_preferiti, self._etichetta_della_playlist(preferiti))
-        self.albero.DeleteChildren(self.nodo_preferiti)
-        self._dati(self.nodo_preferiti)["caricato"] = False
-        self.albero.SetItemHasChildren(self.nodo_preferiti, True)
+            # pulizia all'avvio (issue 29). Lo stesso per gli Indirizzi.
+            self._seleziona(speciale if speciale is not None else self.nodo_playlist)
         da_selezionare = None
-        if selezionato is preferiti:
-            da_selezionare = self.nodo_preferiti
-        if preferiti_aperti or (isinstance(selezionato, Brano) and preferiti.indice(selezionato) is not None):
-            self.albero.Expand(self.nodo_preferiti)
-            self._riapri_i_brani(self.nodo_preferiti, brani_aperti)
+        for (nodo, pl), aperto in zip(speciali, speciali_aperti, strict=True):
+            self.albero.SetItemText(nodo, self._etichetta_della_playlist(pl))
+            self.albero.DeleteChildren(nodo)
+            self._dati(nodo)["caricato"] = False
+            self.albero.SetItemHasChildren(nodo, True)
+            if selezionato is pl:
+                da_selezionare = nodo
+            dentro_di_lui = [pl, *self.archivio.in_rete] if pl is self.archivio.indirizzi else [pl]
+            contiene = any(p is selezionato for p in dentro_di_lui[1:]) or (isinstance(selezionato, Brano) and any(p.indice(selezionato) is not None for p in dentro_di_lui))
+            if not (aperto or contiene):
+                continue
+            self.albero.Expand(nodo)
+            self._riapri_i_brani(nodo, brani_aperti)
+            for figlio in self._figli(nodo):
+                sotto = self._dati(figlio) or {}
+                if sotto.get("tipo") != "playlist":
+                    continue
+                # Una playlist di un sito, dentro gli Indirizzi (3.2.0).
+                del_sito = sotto["playlist"]
+                if del_sito is selezionato:
+                    da_selezionare = figlio
+                elif isinstance(selezionato, Brano) and del_sito.indice(selezionato) is not None:
+                    aperte.add(id(del_sito))
+                if id(del_sito) in aperte:
+                    self.albero.Expand(figlio)
+                    self._riapri_i_brani(figlio, brani_aperti)
+                    if isinstance(selezionato, Brano):
+                        da_selezionare = next((v for v in self._figli(figlio) if self._dati(v).get("brano") is selezionato), da_selezionare)
             if isinstance(selezionato, Brano):
-                da_selezionare = next((v for v in self._figli(self.nodo_preferiti) if self._dati(v).get("brano") is selezionato), da_selezionare)
+                da_selezionare = next((v for v in self._figli(nodo) if self._dati(v).get("brano") is selezionato), da_selezionare)
         self.albero.DeleteChildren(self.nodo_playlist)
         for pl in self.archivio.playlist:
             nodo = self.albero.AppendItem(self.nodo_playlist, self._etichetta_della_playlist(pl), data={"tipo": "playlist", "playlist": pl, "caricato": False})
@@ -3441,15 +3514,19 @@ class Finestra(wx.Frame):
             if selezionato == nome:
                 da_selezionare = comando
         if dentro:
-            if da_selezionare is None or self._sotto(da_selezionare, self.nodo_playlist):
+            # Dentro gli Indirizzi la selezione che non si ritrova resta su di
+            # loro; altrove va su Playlist, come prima della 3.2.0.
+            ricovero = self.nodo_indirizzi if speciale is not None and speciale == self.nodo_indirizzi else self.nodo_playlist
+            bersaglio = da_selezionare or ricovero
+            if self._sotto(bersaglio, self.nodo_playlist):
                 self.albero.Expand(self.nodo_playlist)
-            self._seleziona(da_selezionare or self.nodo_playlist)
+            self._seleziona(bersaglio)
             if interno is not None:
                 self._ritrova_dentro(interno)
         if esplicita:
             ritrovate = []
             if altre_selezionate:
-                for radice in (self.nodo_preferiti, self.nodo_playlist):
+                for radice in (self.nodo_preferiti, self.nodo_playlist, self.nodo_indirizzi):
                     for voce in self._tutte_le_voci(radice):
                         dati = self._dati(voce) or {}
                         oggetto = dati.get("brano") if dati.get("tipo") == "brano" else dati.get("playlist") if dati.get("tipo") == "playlist" else None
@@ -3467,7 +3544,7 @@ class Finestra(wx.Frame):
         che rinascesse chiuso farebbe saltare all'avanzamento della plancia i
         sottobrani rimasti, per esempio dopo un Ordina (1.109.0)."""
         aperti = set()
-        for radice in (self.nodo_preferiti, *self._figli(self.nodo_playlist)):
+        for radice in self._nodi_delle_playlist():
             if not self.albero.IsExpanded(radice):
                 continue
             for voce in self._figli(radice):
@@ -3560,6 +3637,11 @@ class Finestra(wx.Frame):
             return
         if tipo == "playlist":
             pl = dati["playlist"]
+            if pl is self.archivio.indirizzi:
+                # Prima le playlist dei siti, come le cartelle prima dei file (3.2.0).
+                for del_sito in self.archivio.in_rete:
+                    nodo = self.albero.AppendItem(voce, self._etichetta_della_playlist(del_sito), data={"tipo": "playlist", "playlist": del_sito, "caricato": False})
+                    self.albero.SetItemHasChildren(nodo, True)
             for brano in pl.brani:
                 if self._ammesso(pl, brano):
                     self._aggiungi_voce(voce, "brano", pl, brano)
@@ -3897,18 +3979,36 @@ class Finestra(wx.Frame):
             return [(_("Salva come playlist"), lambda: self._salva_risultati(gruppo)), dettagli_della_voce]
         if tipo == "playlist":
             pl = dati["playlist"]
-            voci = [(_("Riproduci"), lambda: self._riproduci_playlist(pl)), (_("Filtro"), lambda: self._modifica_filtro(pl))]
+            voci = [(_("Riproduci"), lambda: self._riproduci_playlist(pl))]
+            # Gli Indirizzi aprono un indirizzo; una playlist di un sito si
+            # rilegge dal sito e da' il suo indirizzo (3.2.0).
+            if pl is self.archivio.indirizzi:
+                voci.append((_("Apri un indirizzo"), self._chiedi_un_indirizzo))
+            elif pl in self.archivio.in_rete:
+                voci += [(_("Rileggi dal sito"), lambda: self._apri_l_indirizzo(pl.indirizzo, suona=False)),
+                    (_("Copia l'indirizzo"), lambda: self._copia_l_indirizzo(pl.indirizzo, pl.nome))]
+            voci.append((_("Filtro"), lambda: self._modifica_filtro(pl)))
             if pl.filtro:
                 voci.append((_("Togli il filtro"), lambda: self._imposta_filtro(pl, "")))
             # Il posto di Ordina e Mescola e' quello del punto 3.10 del piano;
-            # i Preferiti non si rinominano e non si eliminano (tappa 14 c).
-            preferiti = pl is self.archivio.preferiti
+            # i Preferiti non si rinominano e non si eliminano (tappa 14 c), e
+            # nemmeno gli Indirizzi (3.2.0).
+            preferiti = pl is self.archivio.preferiti or pl is self.archivio.indirizzi
             if not preferiti:
                 voci.append((_("Rinomina"), lambda: self._rinomina(pl)))
             voci += [(_("Ordina"), self._voci_dell_ordine(pl)), (_("Mescola"), lambda: self._mescola(pl))]
             if not preferiti:
                 voci.append((_("Elimina"), lambda: self._elimina_playlist(pl)))
             return [*voci, dettagli_della_voce]
+        if tipo == "brano" and formati.e_indirizzo(dati["brano"].percorso):
+            # Un brano di un sito (3.2.0): niente file da rinominare, tag o cestino.
+            pl, brano = dati["playlist"], dati["brano"]
+            return [(_("Riproduci"), lambda: self._riproduci(pl, brano)),
+                (_("Sposta su"), lambda: self._sposta(pl, brano, "su")), (_("Sposta giù"), lambda: self._sposta(pl, brano, "giu")),
+                (_("Sposta in cima"), lambda: self._sposta(pl, brano, "cima")), (_("Sposta in fondo"), lambda: self._sposta(pl, brano, "fondo")),
+                (_("Saltato"), (lambda: self._salta(pl, brano), brano.saltato)), (_("Togli dalla playlist"), lambda: self._togli(pl, brano)),
+                (_("Aggiungi alla playlist"), self._menu_aggiungi(lambda: [brano.copia()])), (_("Aggiungi ai preferiti"), lambda: self._ai_preferiti(brano)),
+                (_("Copia l'indirizzo"), lambda: self._copia_l_indirizzo(brano.percorso, brano.nome_del_file)), (_("Apri un indirizzo"), self._chiedi_un_indirizzo)]
         if tipo == "brano":
             pl, brano = dati["playlist"], dati["brano"]
             return [(_("Riproduci"), lambda: self._riproduci(pl, brano)),
@@ -4208,6 +4308,8 @@ class Finestra(wx.Frame):
         tipo = dati.get("tipo")
         if tipo == "playlist" and dati["playlist"] is self.archivio.preferiti:
             return _("Raccolgo i dettagli dei Preferiti: ci vuole qualche secondo.")
+        if tipo == "playlist" and dati["playlist"] is self.archivio.indirizzi:
+            return _("Raccolgo i dettagli degli Indirizzi: ci vuole qualche secondo.")
         if tipo == "playlist":
             return _("Raccolgo i dettagli della playlist {nome}: ci vuole qualche secondo.").format(nome=dati["playlist"].nome)
         if tipo == "risultati":
@@ -4275,6 +4377,8 @@ class Finestra(wx.Frame):
         tipo = dati["tipo"]
         if tipo == "playlist":
             pl = dati["playlist"]
+            if pl is self.archivio.indirizzi:
+                return _("Indirizzi"), list(pl.brani), pl
             return (_("Preferiti") if pl is self.archivio.preferiti else _("Playlist {nome}").format(nome=pl.nome)), list(pl.brani), pl
         if tipo == "risultati":
             return _("Risultati di {ricerca}").format(ricerca=self._testo_della_ricerca), list(self.risultati.brani), None
@@ -4564,6 +4668,8 @@ class Finestra(wx.Frame):
         dati = self._dati(voce) or {}
         if dati.get("tipo") == "playlist" and dati["playlist"] is self.archivio.preferiti:
             self._riscontro("non_disponibile", _("I Preferiti non si eliminano; Canc su un loro brano lo toglie."))
+        elif dati.get("tipo") == "playlist" and dati["playlist"] is self.archivio.indirizzi:
+            self._riscontro("non_disponibile", _("Gli Indirizzi non si eliminano; Canc su un loro brano o su una loro playlist la toglie."))
         elif dati.get("tipo") == "playlist":
             self._elimina_playlist(dati["playlist"])
         elif dati.get("tipo") == "brano":
@@ -4618,7 +4724,7 @@ class Finestra(wx.Frame):
 
     def _copie_della_selezione(self):
         """I brani della selezione come brani nuovi, per playlist e Preferiti."""
-        return [Brano(b.percorso, sottobrano=n or b.sottobrano) for _pl, b, n in self._brani_della_selezione()]
+        return [b.copia(n) for _pl, b, n in self._brani_della_selezione()]
 
     def _suona_selezione(self):
         """X su piu' voci: la selezione diventa una playlist invisibile, che
@@ -4735,8 +4841,8 @@ class Finestra(wx.Frame):
         sull'approdo, da solo nella selezione. Le voci delle playlist e dei
         Preferiti rinascono, e si ritrovano dal brano o dalla playlist che
         mostrano; le altre restano le stesse."""
-        rinasce = approdo is not None and approdo not in (self.nodo_preferiti, self.nodo_playlist) and (
-            self._sotto(approdo, self.nodo_preferiti) or self._sotto(approdo, self.nodo_playlist))
+        rinasce = approdo is not None and approdo not in (self.nodo_preferiti, self.nodo_playlist, self.nodo_indirizzi) and (
+            self._sotto(approdo, self.nodo_preferiti) or self._sotto(approdo, self.nodo_playlist) or self._sotto(approdo, self.nodo_indirizzi))
         oggetto = interno = None
         if rinasce:
             dati = self._dati(approdo) or {}
@@ -5147,7 +5253,7 @@ class Finestra(wx.Frame):
         if self.archivio.nei_preferiti(brano):
             self._riscontro("gia_nei_preferiti", _("{nome} è già nei Preferiti.").format(nome=brano.nome_del_file))
             return
-        self.archivio.preferiti.brani.append(Brano(brano.percorso, sottobrano=brano.sottobrano))
+        self.archivio.preferiti.brani.append(brano.copia())
         self._sentinella.guarda(brano.percorso)
         self._chiedi_schede(self.archivio.preferiti)
         self._salva_archivio()
@@ -5222,7 +5328,10 @@ class Finestra(wx.Frame):
                 if pl is self.archivio.preferiti:
                     # Traduttori: dove si cerca, come in Ricerca nei Preferiti.
                     return _("nei Preferiti"), [(b, _("Preferiti")) for b in pl.brani], []
-                if pl in self.archivio.playlist:
+                if pl is self.archivio.indirizzi:
+                    # Traduttori: dove si cerca, come in Ricerca negli Indirizzi, il ramo degli indirizzi in rete.
+                    return _("negli Indirizzi"), self._brani_degli_indirizzi(), []
+                if pl in self.archivio.playlist or pl in self.archivio.in_rete:
                     # Traduttori: dove si cerca, come in Ricerca nella playlist Rock.
                     return _("nella playlist {nome}").format(nome=pl.nome), [(b, _("Playlist {nome}").format(nome=pl.nome)) for b in pl.brani], []
                 if pl.cartella:
@@ -5281,6 +5390,7 @@ class Finestra(wx.Frame):
         if brani is None:
             brani = [(b, _("Preferiti")) for b in self.archivio.preferiti.brani]
             brani += [(b, _("Playlist {nome}").format(nome=pl.nome)) for pl in self.archivio.playlist for b in pl.brani]
+            brani += self._brani_degli_indirizzi()
         else:
             # I brani si prendono prima che i Risultati, se sono loro, si svuotino.
             brani = list(brani)
@@ -5485,7 +5595,7 @@ class Finestra(wx.Frame):
         self._aggiorna_risultati()
         brani = self.risultati.brani if gruppo is None else self._brani_del_gruppo(gruppo)
         self._statistiche.conta("playlist_dalla_ricerca")
-        self._aggiungi(None, [Brano(b.percorso, sottobrano=b.sottobrano) for b in brani], nome=nome)
+        self._aggiungi(None, [b.copia() for b in brani], nome=nome)
 
     def _crea_da_qui(self, cartella, nome):
         with wx.BusyCursor():
@@ -5526,6 +5636,9 @@ class Finestra(wx.Frame):
         self._riscontro("playlist_rinominata", _("La playlist {vecchio} ora si chiama {nome}.").format(vecchio=vecchio, nome=nome))
 
     def _elimina_playlist(self, pl):
+        if pl in self.archivio.in_rete:
+            self._togli_la_playlist_in_rete(pl)
+            return
         domanda = ngettext("Eliminare la playlist {nome}, con {n} brano? I file restano sul disco.", "Eliminare la playlist {nome}, con {n} brani? I file restano sul disco.",
             len(pl.brani)).format(nome=pl.nome, n=len(pl.brani))
         if not self._conferma(domanda, _("Elimina playlist")):
@@ -5800,6 +5913,13 @@ class Finestra(wx.Frame):
         if formati.e_midi(brano.percorso) and not self._midi_pronti():
             self._prepara_i_midi(lambda: self._suona(pl, brano, evento, sottobrano, inizio, sfuma_lo_stesso))
             return
+        if formati.e_indirizzo(brano.percorso) and indirizzi.pronto(brano.percorso, self._video_negli_indirizzi()) is None:
+            self._trova_il_flusso(pl, brano, evento, sottobrano, inizio, sfuma_lo_stesso)
+            return
+        # Un flusso atteso intanto non suona piu': ha vinto questo brano.
+        self._flusso_atteso = None
+        if evento not in ("brano_seguente_da_solo", "ritorno_al_punto_a"):
+            self._indirizzi_riprovati.discard(brano.percorso)
         self._uscente = self._preparato = self._avanzamento_dopo_errore = None
         self._fermo_del_timer = False
         sveglio = False
@@ -5843,7 +5963,7 @@ class Finestra(wx.Frame):
             # Traduttori: il posto del brano nella lista, come 3 di 12, playlist Rock.
             dove = _("{numero} di {totale}, {lista}").format(numero=numero, totale=totale, lista=self._nome_della_lista(pl, sottocartelle=False)) if totale > 1 else pl.nome
         # Traduttori: dove e' il posto del brano nella lista, come 3 di 12, playlist Rock.
-        testo = _("In riproduzione: {percorso}, {dove}.").format(percorso=brano.percorso, dove=dove)
+        testo = _("In riproduzione: {percorso}, {dove}.").format(percorso=self._percorso_da_dire(brano), dove=dove)
         if self.motore.sottobrani:
             testo += " " + _("Sottobrano {numero} di {totale}.").format(numero=self.motore.sottobrano, totale=self.motore.sottobrani)
         self._riscontro(evento, testo)
@@ -5854,6 +5974,7 @@ class Finestra(wx.Frame):
         self._insegui()
         self._video_nascosto_per = self._video_in_attesa = None
         self._aggiorna_il_video()
+        self._anticipa_il_seguente_in_rete(pl, brano)
 
     def _riproduci(self, pl, brano, sottobrano=None):
         """Suona un brano scelto nella plancia, se il loop lo permette."""
@@ -6298,6 +6419,10 @@ class Finestra(wx.Frame):
         if formati.e_midi(brano.percorso) and not self._midi_pronti():
             # Senza banco il MIDI non si prepara: a fine brano lo chiede _suona.
             return
+        if formati.e_indirizzo(brano.percorso) and indirizzi.pronto(brano.percorso, self._video_negli_indirizzi()) is None:
+            # Il flusso si chiede adesso: se arriva in tempo, il brano si prepara (3.2.0).
+            self._anticipa_il_flusso(brano, prepara=True)
+            return
         self._sentinella.guarda(brano.percorso)
         if self.motore.prepara(brano.percorso, sottobrano or brano.sottobrano):
             self._uscente = (self.coda.playlist, self.coda.corrente, self.motore.sottobrano)
@@ -6366,10 +6491,20 @@ class Finestra(wx.Frame):
         if self._chiusa:
             return
         self._uscente = self._preparato = None
+        corrente = self.coda.corrente
+        if formati.e_indirizzo(percorso):
+            # Un flusso tenuto puo' essere scaduto: si dimentica, e il brano si
+            # richiede al sito, una volta sola per ogni scelta (3.2.0).
+            indirizzi.dimentica(percorso)
+            if percorso not in self._indirizzi_riprovati and corrente is not None and corrente.percorso == percorso and self.coda.playlist is not None:
+                self._indirizzi_riprovati.add(percorso)
+                self._suona(self.coda.playlist, corrente, "brano_seguente_da_solo")
+                return
         self._statistiche.brano_in_errore(percorso)
-        if self.coda.corrente is not None:
-            self._errori_di_fila[id(self.coda.corrente)] = self.coda.corrente
-        self._riscontro("errore", _("Non riesco a suonare {nome}.").format(nome=os.path.basename(percorso or "")))
+        if corrente is not None:
+            self._errori_di_fila[id(corrente)] = corrente
+        nome = corrente.nome_del_file if corrente is not None and corrente.percorso == percorso else os.path.basename(percorso or "")
+        self._riscontro("errore", _("Non riesco a suonare {nome}.").format(nome=nome))
         segno = self._avanzamento_dopo_errore = object()
         self._dopo_il_suono(self._avanza_dopo_l_errore, segno)
 
@@ -6488,6 +6623,15 @@ class Finestra(wx.Frame):
             self._riscontro("niente_da_suonare", _("Niente da riprodurre: scegli un brano, una playlist o una cartella nella plancia."))
 
     def _nodo_della_playlist(self, pl):
+        """La voce di una playlist del ramo Playlist o, dalla 3.2.0, degli
+        Indirizzi: loro stessi o una playlist di un sito, che c'e' solo con gli
+        Indirizzi caricati."""
+        if pl is self.archivio.indirizzi:
+            return self.nodo_indirizzi
+        if pl in self.archivio.in_rete:
+            if self._dati(self.nodo_indirizzi).get("caricato") is False:
+                self._carica(self.nodo_indirizzi, self._dati(self.nodo_indirizzi))
+            return next((v for v in self._figli(self.nodo_indirizzi) if (self._dati(v) or {}).get("playlist") is pl), None)
         return next((v for v in self._figli(self.nodo_playlist) if (self._dati(v) or {}).get("playlist") is pl), None)
 
     def _playlist_selezionata(self):
@@ -6625,6 +6769,12 @@ class Finestra(wx.Frame):
         return _("Riprende da {tempo}.").format(tempo=tempo(posizione)) if posizione is not None else _("Riprende.")
 
     def _comando_stop(self):
+        if self._flusso_atteso is not None:
+            # Un indirizzo che si sta aprendo (3.2.0): V lo lascia perdere.
+            self._flusso_atteso = None
+            if not self.motore.in_corso:
+                self._riscontro("stop", _("Stop: l'indirizzo non suona."))
+                return
         if self._avanzamento_dopo_errore is not None and not self.motore.in_corso:
             # Il brano dopo uno che non si suona sta per partire: V lo ferma.
             self._avanzamento_dopo_errore = None
@@ -7647,7 +7797,9 @@ class Finestra(wx.Frame):
             return "altro"
         if pl is self.archivio.preferiti:
             return "Preferiti"
-        if pl in self.archivio.playlist:
+        if pl is self.archivio.indirizzi:
+            return "Indirizzi"
+        if pl in self.archivio.playlist or pl in self.archivio.in_rete:
             return f"playlist {pl.nome}"
         if pl is self.risultati:
             return "Risultati della ricerca"
@@ -8644,7 +8796,7 @@ class Finestra(wx.Frame):
             self._video_nel_motore = True
         self._video.mostra_il_lettore(self.motore.indice_attivo())
         # Traduttori: il titolo della finestra del video; nome e' quello del file.
-        titolo = _("{nome}, video, MeTeOra").format(nome=os.path.basename(self.motore.in_corso or ""))
+        titolo = _("{nome}, video, MeTeOra").format(nome=self._nome_in_corso())
         if self._video.IsShown():
             # Gia' aperta: si aggiorna, senza riprendere il fuoco a chi lo ha.
             self._video.SetTitle(titolo)
@@ -9286,6 +9438,336 @@ class Finestra(wx.Frame):
         else:
             self._installa_il_componente(da_scaricare[indice - 2], genitore)
 
+    # Gli indirizzi in rete, tappa 19 b (3.2.0, issue 40).
+
+    def _video_negli_indirizzi(self):
+        """Il video dei siti si chiede solo con il video acceso: spento, basta
+        l'audio, che pesa molto meno."""
+        return bool(self.impostazioni["video"])
+
+    def _nome_in_corso(self):
+        """Il nome del file che suona o, per un indirizzo, il suo titolo."""
+        in_corso, corrente = self.motore.in_corso or "", self.coda.corrente
+        if corrente is not None and corrente.percorso == in_corso:
+            return corrente.nome_del_file
+        return os.path.basename(in_corso)
+
+    def _percorso_da_dire(self, brano):
+        """Il brano come lo dice la riga In riproduzione: il percorso del file
+        o, per un indirizzo, il titolo con il sito."""
+        if formati.e_indirizzo(brano.percorso):
+            # Traduttori: un brano di un sito nella riga In riproduzione, come Il Ruggito del Coniglio, da raiplaysound.it.
+            return _("{titolo}, da {sito}").format(titolo=brano.nome_del_file, sito=indirizzi.sito(brano.percorso))
+        return brano.percorso
+
+    def _brani_degli_indirizzi(self):
+        """I brani degli Indirizzi per la ricerca, come (brano, nome della
+        lista): quelli aperti da soli, poi quelli delle playlist dei siti."""
+        brani = [(b, _("Indirizzi")) for b in self.archivio.indirizzi.brani]
+        brani += [(b, _("Playlist {nome}").format(nome=pl.nome)) for pl in self.archivio.in_rete for b in pl.brani]
+        return brani
+
+    @staticmethod
+    def _testo_degli_appunti():
+        """Il testo degli appunti di Windows, vuoto se non ce n'e'."""
+        if not wx.TheClipboard.Open():
+            return ""
+        try:
+            dato = wx.TextDataObject()
+            return dato.GetText() if wx.TheClipboard.GetData(dato) else ""
+        finally:
+            wx.TheClipboard.Close()
+
+    def _copia_l_indirizzo(self, indirizzo, nome):
+        """Copia l'indirizzo, dal menu di un brano o di una playlist di un sito."""
+        if not wx.TheClipboard.Open():
+            self._riscontro("errore", _("Gli appunti di Windows non si aprono: riprova fra un momento."))
+            return
+        try:
+            wx.TheClipboard.SetData(wx.TextDataObject(indirizzo))
+        finally:
+            wx.TheClipboard.Close()
+        self.scrivi(_("Negli appunti l'indirizzo di {nome}.").format(nome=nome))
+
+    def _comando_apri_un_indirizzo(self):
+        """Ctrl con V (Gabriele, 3.2.0): l'indirizzo degli appunti si apre e
+        suona; se negli appunti non c'e' un indirizzo, si chiede."""
+        indirizzo = indirizzi.dagli_appunti(self._testo_degli_appunti())
+        if indirizzo is None:
+            self._chiedi_un_indirizzo()
+            return
+        self._apri_l_indirizzo(indirizzo)
+
+    def _chiedi_un_indirizzo(self):
+        """Apri un indirizzo, dal menu degli Indirizzi, o Ctrl con V senza un
+        indirizzo negli appunti: il campo, con quello degli appunti se c'e'."""
+        self._domanda()
+        with DialogoTesto(self, _("L'indirizzo della pagina da aprire, per esempio di RaiPlay Sound, YouTube, SoundCloud o Bandcamp."), _("Apri un indirizzo"),
+                indirizzi.dagli_appunti(self._testo_degli_appunti()) or "") as dialogo:
+            if dialogo.ShowModal() != wx.ID_OK:
+                self._annullato(_("Nessun indirizzo aperto."))
+                return
+            testo = dialogo.GetValue().strip()
+        if not testo:
+            self._annullato(_("Nessun indirizzo aperto."))
+            return
+        indirizzo = indirizzi.indirizzo_scritto(testo)
+        if indirizzo is None:
+            self._riscontro("errore", _("{testo} non è un indirizzo: si scrive come https://www.raiplaysound.it/...").format(testo=testo))
+            return
+        self._apri_l_indirizzo(indirizzo)
+
+    def _ytdlp_pronto(self, dopo):
+        """Vero se yt-dlp c'e'. Se manca, propone di scaricarlo, con QuickJS
+        per YouTube, e dopo() arriva quando sono installati; falso."""
+        if indirizzi.ytdlp_presente():
+            return True
+        mancano = [componenti.YT_DLP] + ([] if componenti.QUICKJS.presente() else [componenti.QUICKJS])
+        peso = midi.dimensione_da_leggere(sum(c.peso for c in mancano))
+        if len(mancano) == 2:
+            domanda = _("Per aprire gli indirizzi dei siti serve yt-dlp, e per YouTube anche QuickJS: in tutto circa {peso}. Li scarico?").format(peso=peso)
+        else:
+            domanda = _("Per aprire gli indirizzi dei siti serve yt-dlp, circa {peso}. Lo scarico?").format(peso=peso)
+        if not self._conferma(domanda, _("Indirizzi in rete")):
+            self._annullato(_("Senza yt-dlp gli indirizzi dei siti non si aprono: si installa anche da Componenti aggiuntivi, nelle impostazioni."))
+            return False
+
+        def installa(resto):
+            if resto:
+                self._installa_il_componente(resto[0], dopo=lambda: installa(resto[1:]))
+            else:
+                dopo()
+
+        installa(mancano)
+        return False
+
+    def _controlla_ytdlp(self):
+        """Al primo indirizzo di ogni giorno yt-dlp guarda se c'e' una versione
+        nuova, in disparte, e se c'e' la installa (Gabriele, 3.2.0)."""
+        oggi = datetime.date.today().isoformat()
+        if self.impostazioni["ytdlp_controllato"] == oggi or not indirizzi.ytdlp_presente() or self._componente_in_arrivo is not None:
+            return
+        self.impostazioni["ytdlp_controllato"] = oggi
+        self._salva_impostazioni()
+
+        def lavoro():
+            try:
+                return ("fatto", indirizzi.aggiorna_ytdlp())
+            except (OSError, ValueError) as e:
+                return ("errore", e)
+
+        indirizzi_in_disparte(lavoro, lambda esito: wx.CallAfter(self._ytdlp_controllato, esito))
+
+    def _ytdlp_controllato(self, esito):
+        if self._chiusa:
+            return
+        tipo, valore = esito
+        if tipo == "errore":
+            self.scrivi(_("yt-dlp non si aggiorna: {errore}").format(errore=valore), "indirizzi")
+        elif valore:
+            self._statistiche.conta("ytdlp_aggiornato")
+            self._riscontro("scaricamento_finito", _("yt-dlp aggiornato alla versione {versione}.").format(versione=valore))
+
+    def _aggiorna_il_componente(self, componente, genitore=None):
+        """Cerca un aggiornamento, nel menu di yt-dlp: la versione nuova si
+        installa, in disparte; se c'e' gia' l'ultima, lo dice."""
+        if self._componente_in_arrivo is not None:
+            self._riscontro("non_disponibile", _("Sto già scaricando {nome}: un momento.").format(nome=self._componente_in_arrivo.nome))
+            return
+        self._componente_in_arrivo = componente
+        self.scrivi(_("Cerco una versione nuova di {nome}.").format(nome=componente.nome), "componenti")
+
+        def lavoro():
+            try:
+                return ("fatto", componente.aggiorna())
+            except (OSError, ValueError) as e:
+                return ("errore", _("{nome} non si aggiorna: {errore}").format(nome=componente.nome, errore=e))
+
+        indirizzi_in_disparte(lavoro, lambda esito: wx.CallAfter(self._componente_aggiornato, componente, esito, genitore))
+
+    def _componente_aggiornato(self, componente, esito, genitore):
+        self._componente_in_arrivo = None
+        if self._chiusa:
+            return
+        tipo, valore = esito
+        if tipo == "errore":
+            self._riscontro("errore", valore)
+            return
+        if valore is None:
+            self._riscontro("non_disponibile", _("{nome} è già all'ultima versione, {versione}.").format(nome=componente.nome, versione=componente.versione()))
+            return
+        self._statistiche.conta("ytdlp_aggiornato")
+        self._riscontro("scaricamento_finito", _("{nome} aggiornato alla versione {versione}.").format(nome=componente.nome, versione=valore))
+        if genitore and genitore.IsShown() and hasattr(genitore, "aggiorna"):
+            genitore.aggiorna("componenti", self._riga_dell_impostazione("componenti"))
+
+    def _apri_l_indirizzo(self, indirizzo, suona=True):
+        """Apre un indirizzo in disparte: un brano va in cima agli Indirizzi e
+        suona; una playlist di un sito diventa un ramo degli Indirizzi, o
+        prende il posto di quella che c'era, e suona dal primo brano. Con
+        suona falso, come Rileggi dal sito, non suona niente."""
+        if self._indirizzo_in_apertura is not None:
+            self._riscontro("non_disponibile", _("Sto già aprendo un indirizzo di {sito}: un momento.").format(sito=indirizzi.sito(self._indirizzo_in_apertura)))
+            return
+        if not indirizzi.diretto(indirizzo) and not self._ytdlp_pronto(lambda: self._apri_l_indirizzo(indirizzo, suona)):
+            return
+        self._indirizzo_in_apertura = indirizzo
+        self._statistiche.conta("indirizzi_aperti")
+        self._controlla_ytdlp()
+        self.scrivi(_("Apro un indirizzo di {sito}: ci vuole qualche secondo.").format(sito=indirizzi.sito(indirizzo)), "indirizzi")
+        video = self._video_negli_indirizzi()
+
+        def lavoro():
+            try:
+                return indirizzi.esplora(indirizzo, video)
+            except indirizzi.ErroreIndirizzo as e:
+                return e
+
+        indirizzi_in_disparte(lavoro, lambda esito: wx.CallAfter(self._indirizzo_aperto, indirizzo, esito, suona))
+
+    def _indirizzo_aperto(self, indirizzo, esito, suona=True):
+        self._indirizzo_in_apertura = None
+        if self._chiusa:
+            return
+        if isinstance(esito, Exception):
+            self._riscontro("errore", _("L'indirizzo di {sito} non si apre: {motivo}.").format(sito=indirizzi.sito(indirizzo), motivo=esito))
+            return
+        if esito.playlist:
+            self._playlist_dal_sito(esito, suona)
+            return
+        brano = self.archivio.metti_l_indirizzo(Brano(indirizzo, titolo=esito.titolo))
+        if esito.scheda is not None:
+            self.schedario.metti_la_scheda(indirizzo, esito.scheda)
+        self._salva_archivio()
+        self._popola_playlist(seleziona=brano)
+        if suona:
+            self._suona(self.archivio.indirizzi, brano)
+
+    def _playlist_dal_sito(self, pagina, suona=True):
+        """Una playlist di un sito, come un album di Bandcamp, negli Indirizzi:
+        i brani con il titolo e, se il sito la dice, la durata."""
+        sito = indirizzi.sito(pagina.indirizzo)
+        if not pagina.voci:
+            self._riscontro("niente_da_suonare", _("La playlist {nome} di {sito} è vuota.").format(nome=pagina.titolo, sito=sito))
+            return
+        vecchia = self.archivio.in_rete_da(pagina.indirizzo)
+        pl = Playlist(pagina.titolo, [Brano(voce, titolo=titolo) for voce, titolo, _durata in pagina.voci], indirizzo=pagina.indirizzo)
+        for voce, titolo, durata in pagina.voci:
+            if durata is not None and (self.schedario.scheda(voce) or {}).get("durata") is None:
+                self.schedario.metti_la_scheda(voce, indirizzi.scheda_della_voce(titolo, durata))
+        self.archivio.metti_la_playlist_in_rete(pl)
+        if vecchia is not None:
+            self._statistiche.conta("playlist_rilette_dai_siti")
+        else:
+            self._statistiche.conta("playlist_dai_siti")
+            self._statistiche.conta("brani_dai_siti", len(pl.brani))
+        self._salva_archivio()
+        self._popola_playlist(seleziona=pl)
+        n = len(pl.brani)
+        if vecchia is not None:
+            self._riscontro("playlist_riletta", ngettext("Riletta dal sito la playlist {nome}: {n} brano.", "Riletta dal sito la playlist {nome}: {n} brani.", n).format(
+                nome=pl.nome, n=n))
+        else:
+            self._riscontro("playlist_creata", ngettext("Negli Indirizzi la playlist {nome}, da {sito}: {n} brano.", "Negli Indirizzi la playlist {nome}, da {sito}: {n} brani.",
+                n).format(nome=pl.nome, sito=sito, n=n))
+        if suona:
+            self._dopo_il_suono(self._riproduci_playlist, pl)
+
+    def _togli_la_playlist_in_rete(self, pl):
+        """Canc, o Elimina, su una playlist di un sito: esce dagli Indirizzi."""
+        domanda = ngettext("Tolgo dagli Indirizzi la playlist {nome}, con {n} brano? Si può riaprire dal suo indirizzo.",
+            "Tolgo dagli Indirizzi la playlist {nome}, con {n} brani? Si può riaprire dal suo indirizzo.", len(pl.brani)).format(nome=pl.nome, n=len(pl.brani))
+        if not self._conferma(domanda, _("Indirizzi")):
+            self._annullato(_("Eliminazione annullata."))
+            return
+        self.archivio.elimina(pl)
+        self._salva_archivio()
+        self._popola_playlist(seleziona=self.archivio.indirizzi)
+        self._riscontro("playlist_eliminata", _("Tolta dagli Indirizzi la playlist {nome}.").format(nome=pl.nome))
+
+    def _trova_il_flusso(self, pl, brano, evento, sottobrano, inizio, sfuma_lo_stesso):
+        """Prima di suonare un indirizzo: il flusso, chiesto a yt-dlp in
+        disparte; poi il brano suona, se intanto non si e' scelto altro o
+        premuto V."""
+        if not self._ytdlp_pronto(lambda: self._suona(pl, brano, evento, sottobrano, inizio, sfuma_lo_stesso)):
+            return
+        segno = self._flusso_atteso = object()
+        self._controlla_ytdlp()
+        self._statistiche.conta("flussi_chiesti")
+        self.scrivi(_("Apro {nome}, da {sito}.").format(nome=brano.nome_del_file, sito=indirizzi.sito(brano.percorso)), "indirizzi")
+        video = self._video_negli_indirizzi()
+
+        def lavoro():
+            try:
+                return indirizzi.risolvi(brano.percorso, video)
+            except indirizzi.ErroreIndirizzo as e:
+                return e
+
+        indirizzi_in_disparte(lavoro, lambda esito: wx.CallAfter(self._flusso_trovato, segno, pl, brano, esito, (evento, sottobrano, inizio, sfuma_lo_stesso)))
+
+    def _scheda_dal_sito(self, brano, pagina):
+        """La scheda e il titolo che il sito dice di un brano, appena arrivati."""
+        if pagina.scheda is None:
+            return
+        self.schedario.metti_la_scheda(brano.percorso, pagina.scheda)
+        if pagina.titolo and not brano.titolo:
+            brano.titolo = pagina.titolo
+            self._salva_archivio()
+        self._aggiorna_etichette(solo={brano.percorso})
+
+    def _flusso_trovato(self, segno, pl, brano, esito, argomenti):
+        if self._chiusa or segno is not self._flusso_atteso:
+            return
+        self._flusso_atteso = None
+        evento = argomenti[0]
+        if isinstance(esito, Exception):
+            if evento in ("brano_seguente_da_solo", "ritorno_al_punto_a"):
+                # Nell'avanzamento da solo vale come un brano che non si suona:
+                # si va al seguente, come dopo un errore del motore.
+                self.coda.imposta(pl, brano)
+                self._indirizzi_riprovati.add(brano.percorso)
+                self._brano_in_errore(brano.percorso)
+                return
+            self._riscontro("errore", _("{nome} non si apre: {motivo}.").format(nome=brano.nome_del_file, motivo=esito))
+            return
+        self._scheda_dal_sito(brano, esito)
+        self._suona(pl, brano, *argomenti)
+
+    def _anticipa_il_seguente_in_rete(self, pl, brano):
+        """Partito un brano: se il seguente della sua lista e' un indirizzo, il
+        suo flusso si chiede subito, cosi' alla fine parte senza attesa."""
+        indice = pl.indice(brano)
+        if indice is None or indice + 1 >= len(pl.brani):
+            return
+        seguente = pl.brani[indice + 1]
+        if formati.e_indirizzo(seguente.percorso) and not seguente.saltato:
+            self._anticipa_il_flusso(seguente)
+
+    def _anticipa_il_flusso(self, brano, prepara=False):
+        """Il flusso di un brano che suonera' dopo, chiesto in disparte; con
+        prepara, arrivato in tempo, il brano si prepara per la dissolvenza."""
+        video = self._video_negli_indirizzi()
+        if brano.percorso in self._flussi_in_anticipo or not indirizzi.ytdlp_presente() or indirizzi.pronto(brano.percorso, video) is not None:
+            return
+        self._flussi_in_anticipo.add(brano.percorso)
+        corrente = self.coda.corrente
+
+        def lavoro():
+            try:
+                return indirizzi.risolvi(brano.percorso, video)
+            except indirizzi.ErroreIndirizzo as e:
+                return e
+
+        def arrivato(esito):
+            self._flussi_in_anticipo.discard(brano.percorso)
+            if self._chiusa or isinstance(esito, Exception):
+                return
+            self._scheda_dal_sito(brano, esito)
+            if prepara and self.coda.corrente is corrente and self.motore.in_corso and self._preparato is None:
+                self._prepara_il_seguente()
+
+        indirizzi_in_disparte(lavoro, lambda esito: wx.CallAfter(arrivato, esito))
+
     # I componenti aggiuntivi, tappa 19 a (3.1.0, issue 40).
 
     def _componenti_da_leggere(self):
@@ -9298,6 +9780,10 @@ class Finestra(wx.Frame):
     def _riga_del_componente(self, componente):
         """La riga di un componente nella lista: nome, stato, uso, licenza e peso."""
         nome, uso, licenza, peso = componente.nome, componente.uso, componente.licenza, midi.dimensione_da_leggere(componente.peso)
+        versione = componente.versione()
+        if versione:
+            # Traduttori: il nome di un componente con la sua versione, come yt-dlp 2026.10.26.
+            nome = _("{nome} {versione}").format(nome=nome, versione=versione)
         if not componente.presente():
             # Traduttori: uso e' una frase che comincia in minuscolo, come il sintetizzatore che suona i MIDI con un banco di suoni.
             return _("{nome}, da installare: {uso} Licenza {licenza}, circa {peso}.").format(nome=nome, uso=uso, licenza=licenza, peso=peso)
@@ -9315,6 +9801,8 @@ class Finestra(wx.Frame):
         azioni = []
         if componente.da_aggiornare():
             azioni.append((_("Aggiorna, circa {peso}").format(peso=peso), self._installa_il_componente))
+        if componente.aggiornabile:
+            azioni.append((_("Cerca un aggiornamento"), self._aggiorna_il_componente))
         if componente.banco and componente.percorso() != self.impostazioni["banco_midi"]:
             azioni.append((_("Usa per i MIDI"), lambda c, genitore: self._usa_il_banco(c.percorso(), genitore=genitore)))
         azioni.append((_("Togli"), self._togli_il_componente))
@@ -9381,6 +9869,9 @@ class Finestra(wx.Frame):
         if genitore and genitore.IsShown() and hasattr(genitore, "aggiorna"):
             genitore.aggiorna("componenti", self._riga_dell_impostazione("componenti"))
         if not componente.banco:
+            # yt-dlp e QuickJS scaricati per un indirizzo, che poi si apre (3.2.0).
+            if dopo is not None:
+                self._dopo_il_suono(dopo)
             return
         percorso = valore or componente.percorso()
         attuale = self.impostazioni["banco_midi"]
@@ -10509,7 +11000,7 @@ class Finestra(wx.Frame):
         corrente, pl = self.coda.corrente, self.coda.playlist
         if not pl.temporanea:
             # Una playlist mai aperta non ha ancora i suoi brani nella plancia.
-            nodo = self.nodo_preferiti if pl is self.archivio.preferiti else next((v for v in self._figli(self.nodo_playlist) if self._dati(v).get("playlist") is pl), None)
+            nodo = self.nodo_preferiti if pl is self.archivio.preferiti else self._nodo_della_playlist(pl)
             if nodo is not None and self._dati(nodo).get("caricato") is False:
                 self._carica(nodo, self._dati(nodo))
         voce = next((v for v in self._tutte_le_voci() if (self._dati(v) or {}).get("tipo") in ("brano", "file")
@@ -10568,13 +11059,17 @@ class Finestra(wx.Frame):
         # Traduttori: i pezzi della frase del segnalibro, come Canzone.mp3, a 12:34 di 45:00, nella playlist Libri.
         punto = _("a {tempo} di {durata}").format(tempo=tempo(segno["posizione"]), durata=tempo(segno["durata"])) if segno["durata"] else _("a {tempo}").format(
             tempo=tempo(segno["posizione"]))
-        parti = [os.path.basename(segno["percorso"]), punto]
+        parti = [segno.get("titolo") or os.path.basename(segno["percorso"]), punto]
         if segno["sottobrano"] is not None:
             parti.append(_("sottobrano {numero}").format(numero=segno["sottobrano"]))
         if segno["lista"] == "preferiti":
             parti.append(_("nei Preferiti"))
         elif segno["lista"] == "playlist":
             parti.append(_("nella playlist {nome}").format(nome=segno["nome"]))
+        elif segno["lista"] == "indirizzi":
+            parti.append(_("negli Indirizzi"))
+        elif segno["lista"] == "in_rete":
+            parti.append(_("nella playlist {nome}").format(nome=segno.get("titolo_della_lista") or segno["nome"]))
         elif segno["lista"] == "cartella":
             parti.append(_("nella cartella {nome} con le sottocartelle").format(nome=os.path.basename(segno["nome"].rstrip(chr(92))) or segno["nome"]))
         else:
@@ -10610,10 +11105,19 @@ class Finestra(wx.Frame):
             "sottobrano": (self.motore.sottobrano if in_corso and self.motore.sottobrani else brano.sottobrano),
             "lista": "disco", "nome": "", "indice": -1,
         }
+        if formati.e_indirizzo(brano.percorso):
+            segno["titolo"] = brano.nome_del_file
         if pl is self.archivio.preferiti or (pl is not None and not pl.temporanea and pl in self.archivio.playlist):
             indice = pl.indice(brano)
             segno.update(lista="preferiti" if pl is self.archivio.preferiti else "playlist", nome="" if pl is self.archivio.preferiti else pl.nome,
                 indice=-1 if indice is None else indice)
+        elif pl is self.archivio.indirizzi or (pl is not None and pl in self.archivio.in_rete):
+            # Gli Indirizzi e le playlist dei siti, che si riconoscono dalla pagina (3.2.0).
+            indice = pl.indice(brano)
+            segno.update(lista="indirizzi" if pl is self.archivio.indirizzi else "in_rete", nome="" if pl is self.archivio.indirizzi else pl.indirizzo,
+                indice=-1 if indice is None else indice)
+            if pl is not self.archivio.indirizzi:
+                segno["titolo_della_lista"] = pl.nome
         elif pl is not None and pl.temporanea and pl.cartella and getattr(pl, "ricorsiva", False):
             segno.update(lista="cartella", nome=pl.cartella)
         prima = self.impostazioni["segnalibro"]
@@ -10670,8 +11174,15 @@ class Finestra(wx.Frame):
         dalla cartella del file, aperta nella plancia, e con le sottocartelle
         se suonava cosi'. La voce e' None se la plancia non lo mostra."""
         chiave = pulizia.norm(segno["percorso"])
-        if segno["lista"] in ("preferiti", "playlist"):
-            pl = self.archivio.preferiti if segno["lista"] == "preferiti" else next((p for p in self.archivio.playlist if p.nome == segno["nome"]), None)
+        if segno["lista"] in ("preferiti", "playlist", "indirizzi", "in_rete"):
+            if segno["lista"] == "preferiti":
+                pl = self.archivio.preferiti
+            elif segno["lista"] == "indirizzi":
+                pl = self.archivio.indirizzi
+            elif segno["lista"] == "in_rete":
+                pl = self.archivio.in_rete_da(segno["nome"])
+            else:
+                pl = next((p for p in self.archivio.playlist if p.nome == segno["nome"]), None)
             brano = None
             if pl is not None:
                 indice = segno["indice"]
@@ -10683,12 +11194,16 @@ class Finestra(wx.Frame):
                 nodo = self.nodo_preferiti if pl is self.archivio.preferiti else self._nodo_della_playlist(pl)
                 voce = None
                 if nodo is not None:
-                    self.albero.Expand(self.nodo_playlist)
+                    self.albero.Expand(self.nodo_indirizzi if self._sotto(nodo, self.nodo_indirizzi) else self.nodo_playlist)
                     if self._dati(nodo).get("caricato") is False:
                         self._carica(nodo, self._dati(nodo))
                     self.albero.Expand(nodo)
                     voce = next((v for v in self._figli(nodo) if (self._dati(v) or {}).get("brano") is brano), None)
                 return pl, brano, voce
+        if formati.e_indirizzo(segno["percorso"]):
+            # Un indirizzo tolto dalla sua lista: si suona da solo, senza plancia.
+            brano = Brano(segno["percorso"], titolo=segno.get("titolo"))
+            return Playlist(segno.get("titolo") or segno["percorso"], [brano], cartella=""), brano, None
         cartella = os.path.dirname(segno["percorso"])
         nodo = self._apri_fino_a(cartella)
         voce = None
@@ -10817,6 +11332,8 @@ class Finestra(wx.Frame):
         sottocartelle falso: con le sottocartelle lo dice solo Dove sono."""
         if pl is self.archivio.preferiti:
             return _("Preferiti")
+        if pl is self.archivio.indirizzi:
+            return _("Indirizzi")
         if not pl.temporanea:
             # Anche una playlist eliminata mentre suonava.
             return _("playlist {nome}").format(nome=pl.nome)
@@ -11970,6 +12487,10 @@ class Finestra(wx.Frame):
             "numero": pl.indice(brano), "posizione": (self.motore.posizione or 0) if self.motore.in_corso else 0}
         if pl is self.archivio.preferiti:
             stato["tipo"] = "preferiti"
+        elif pl is self.archivio.indirizzi:
+            stato["tipo"] = "indirizzi"
+        elif pl in self.archivio.in_rete:
+            stato.update(tipo="in_rete", indirizzo=pl.indirizzo)
         elif pl in self.archivio.playlist:
             stato.update(tipo="playlist", indice=self.archivio.playlist.index(pl))
         elif pl.cartella:
@@ -11982,6 +12503,10 @@ class Finestra(wx.Frame):
         tipo = stato.get("tipo")
         if tipo == "preferiti":
             return self.archivio.preferiti
+        if tipo == "indirizzi":
+            return self.archivio.indirizzi
+        if tipo == "in_rete":
+            return self.archivio.in_rete_da(stato.get("indirizzo"))
         if tipo == "playlist" and isinstance(stato.get("indice"), int) and 0 <= stato["indice"] < len(self.archivio.playlist):
             return self.archivio.playlist[stato["indice"]]
         if tipo == "cartella" and os.path.isdir(stato.get("cartella", "")):
@@ -12001,7 +12526,7 @@ class Finestra(wx.Frame):
         percorso = stato.get("percorso")
         if not percorso:
             return
-        if not os.path.isfile(percorso):
+        if not formati.e_indirizzo(percorso) and not os.path.isfile(percorso):
             self._riscontro_dopo("errore", _("Non trovo più {percorso}, che suonava l'ultima volta.").format(percorso=percorso))
             return
         pl = self._lista_da_riprendere(stato)
@@ -12019,6 +12544,16 @@ class Finestra(wx.Frame):
         posizione = stato.get("posizione") or 0
         self.coda.imposta(pl, brano)
         sottobrano = stato.get("sottobrano") if isinstance(stato.get("sottobrano"), int) else None
+        if formati.e_indirizzo(percorso):
+            # Un indirizzo in rete (3.2.0): il flusso si chiede in disparte, e
+            # il brano si rimette in pausa quando arriva.
+            voce = self._trova_voce_che_suona()
+            if voce is not None:
+                self.albero.EnsureVisible(voce)
+                self._seleziona(voce)
+            self._aggiorna_etichette()
+            self._riprendi_l_indirizzo(brano, posizione)
+            return
         # Un video ripreso in pausa apre la sua finestra con X, non subito:
         # il fuoco resta nella plancia (tappa 9).
         self._video_in_attesa = percorso
@@ -12032,6 +12567,39 @@ class Finestra(wx.Frame):
         self._aggiorna_etichette()
         # Dopo il suono dell'avvio, che parte un attimo prima.
         self._riscontro_dopo("ripresa_all_avvio", _("Riprendo da dove eri: {percorso}, in pausa a {tempo}. X riparte.").format(percorso=percorso, tempo=tempo(posizione)))
+
+    def _riprendi_l_indirizzo(self, brano, posizione):
+        """La ripresa all'avvio di un brano di un sito: quando il flusso
+        arriva, il brano va in pausa al suo punto, se intanto non e' partito
+        altro, per esempio con X."""
+        if not indirizzi.ytdlp_presente():
+            self._riscontro_dopo("errore", _("{nome}, che suonava l'ultima volta, è un indirizzo in rete, e senza yt-dlp non si apre.").format(nome=brano.nome_del_file))
+            return
+        video = self._video_negli_indirizzi()
+        self._controlla_ytdlp()
+        self.scrivi(_("Apro {nome}, da {sito}.").format(nome=brano.nome_del_file, sito=indirizzi.sito(brano.percorso)), "indirizzi")
+
+        def lavoro():
+            try:
+                return indirizzi.risolvi(brano.percorso, video)
+            except indirizzi.ErroreIndirizzo as e:
+                return e
+
+        def arrivato(esito):
+            if self._chiusa:
+                return
+            if isinstance(esito, Exception):
+                self._riscontro("errore", _("{nome} non si apre: {motivo}.").format(nome=brano.nome_del_file, motivo=esito))
+                return
+            self._scheda_dal_sito(brano, esito)
+            if self.motore.in_corso or self.coda.corrente is not brano:
+                return
+            self.motore.suona(brano.percorso, inizio=posizione, in_pausa=True)
+            self._statistiche.brano_avviato(brano.percorso, None, "ripresa_all_avvio")
+            self._riscontro_dopo("ripresa_all_avvio", _("Riprendo da dove eri: {percorso}, in pausa a {tempo}. X riparte.").format(
+                percorso=self._percorso_da_dire(brano), tempo=tempo(posizione)))
+
+        indirizzi_in_disparte(lavoro, lambda esito: wx.CallAfter(arrivato, esito))
 
     def dopo_l_avvio(self):
         """Da meteora.py, con la finestra mostrata, la ripresa fatta e i file
@@ -12430,6 +12998,8 @@ class Finestra(wx.Frame):
             self._apertura.esploratore.ferma()
         # I lettori di rete liberi si chiudono; uno appeso e' gia' abbandonato (2.7.2).
         lettore_di_rete.lettori.chiudi()
+        # Le chiamate a yt-dlp in corso si fermano (3.2.0).
+        indirizzi.chiudi()
         if self._ricerca_cast is not None:
             # La ricerca chiude il suo zeroconf: in disparte, come lo speaker,
             # che il motore chiude con se'.

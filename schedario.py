@@ -1,6 +1,6 @@
 # MeTeOra, lo schedario: durata, dimensione e tag dei file, ricordati fra un avvio e l'altro.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la 1.7.0, per le durate delle playlist (issue 4) e poi per il filtro (issue 2). Nella 1.62.4 le durate da libmpv per i formati che mutagen non conosce, e quella esatta dell'AAC grezzo. Nella 1.66.0 le schede della musica delle console, con i sottobrani. Nella 1.67.0 la scheda segue un file rinominato. Nella 1.69.0 i tag letti con tag.py, anche di WAV, AIFF, WMA e TTA. Nella 1.83.1 le variazioni delle schede, per i totali delle cartelle, e il filo che cede il passo alla finestra. Nella 1.103.0 la copia delle schede per le statistiche. Nella 1.103.1 le durate da una settimana in su non si tengono. Nella 1.104.0 le durate troppo lunghe per il peso di un file campionato non si tengono, togli() leva le schede dei file che mancano, e rinomina() trova la scheda anche con le maiuscole diverse. Nella 1.109.0 la traccia e il disco, per Ordina. Nella 1.112.0 letto() dice i file letti, per il controllo dei dischi. Nella 1.113.2 l'APEv2 dei TTA, unito all'ID3 da tag.py, e le loro schede si rileggono.
+# 30/09/2026: nasce con la 1.7.0, per le durate delle playlist (issue 4) e poi per il filtro (issue 2). Nella 1.62.4 le durate da libmpv per i formati che mutagen non conosce, e quella esatta dell'AAC grezzo. Nella 1.66.0 le schede della musica delle console, con i sottobrani. Nella 1.67.0 la scheda segue un file rinominato. Nella 1.69.0 i tag letti con tag.py, anche di WAV, AIFF, WMA e TTA. Nella 1.83.1 le variazioni delle schede, per i totali delle cartelle, e il filo che cede il passo alla finestra. Nella 1.103.0 la copia delle schede per le statistiche. Nella 1.103.1 le durate da una settimana in su non si tengono. Nella 1.104.0 le durate troppo lunghe per il peso di un file campionato non si tengono, togli() leva le schede dei file che mancano, e rinomina() trova la scheda anche con le maiuscole diverse. Nella 1.109.0 la traccia e il disco, per Ordina. Nella 1.112.0 letto() dice i file letti, per il controllo dei dischi. Nella 1.113.2 l'APEv2 dei TTA, unito all'ID3 da tag.py, e le loro schede si rileggono. Nella 3.2.0 le schede degli indirizzi in rete, che porta chi li apre e che non si leggono dal disco.
 
 """Lo schedario dei file.
 
@@ -473,13 +473,22 @@ class Schedario:
         """Quanti file aspettano di essere letti o ricontrollati."""
         return len(self._in_coda)
 
+    def metti_la_scheda(self, percorso, scheda):
+        """La scheda di un indirizzo in rete, come la dice il sito (3.2.0):
+        non si legge dal disco, la porta chi apre l'indirizzo."""
+        with self._lucchetto:
+            self._metti(percorso, scheda)
+            self._verificati.add(percorso)
+            self._modificato = True
+
     def chiedi(self, percorsi):
         """Mette in coda i file che in questa sessione non sono ancora stati
-        ricontrollati. Torna subito; il lavoro lo fa il filo."""
+        ricontrollati. Torna subito; il lavoro lo fa il filo. Gli indirizzi in
+        rete no: le loro schede le porta chi li apre (3.2.0)."""
         nuovi = 0
         with self._lucchetto:
             for p in percorsi:
-                if p not in self._verificati and p not in self._in_coda:
+                if p not in self._verificati and p not in self._in_coda and not formati.e_indirizzo(p):
                     self._in_coda.add(p)
                     self._coda.put(p)
                     nuovi += 1
