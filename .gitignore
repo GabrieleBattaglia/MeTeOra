@@ -23,5 +23,7 @@ MeTeOra - *.json
 MeTeOra - *.json.*
 # La lingua scelta (3.0.0), che polipo di GBUtils salva accanto ai dati quando c'e' piu' di una lingua.
 selected_language.json
+# La lingua di prova del collaudo (3.0.0), che fa strumenti\cataloghi.py prova.
+locales/prova/
 # I registri per il PUB (2.4.0), il file da allegare che Chiedi aiuto al PUB scrive accanto ai dati.
 MeTeOra - Registri per il PUB.txt

@@ -19,8 +19,12 @@ Uso, dalla cartella di MeTeOra:
   python strumenti\\cataloghi.py scoperti [--parole] [FILE...]
       elenca le stringhe dei moduli che sembrano testi per l'utente e non
       passano dalla traduzione, da rivedere a mano; con --parole anche quelle
-      di una parola sola.
-Le prime cinque vogliono babel e polib (requirements-dev.txt).
+      di una parola sola;
+  python strumenti\\cataloghi.py prova [--togli]
+      prepara la lingua di prova per il collaudo, in locales\\prova: ogni
+      testo con il segno § davanti, cosi' un testo che esce senza segno e'
+      sfuggito alla traduzione; con --togli la cancella.
+Tutte tranne scoperti vogliono babel e polib (requirements-dev.txt).
 """
 
 import ast
@@ -45,6 +49,10 @@ SEPARATORI = re.compile(r"[-=_]{4,}")
 CHIAMATE_SENZA_TRADUZIONE = {("registro", "scrivi")}
 FUNZIONI_DI_TRADUZIONE = {"_", "ngettext", "plurale"}
 FUORI_DAL_CATALOGO = {"setup_maker.py", "zip_maker.py"}
+# La lingua di prova del collaudo: il codice, che e' anche il nome della
+# cartella, e il segno davanti a ogni testo tradotto.
+CODICE_DI_PROVA = "prova"
+SEGNO_DI_PROVA = "§ "
 
 
 def _babel(*argomenti):
@@ -130,6 +138,34 @@ def compila(forza=False):
         print("Compilazione non eseguita: prima vanno sistemate le traduzioni.")
         return 1
     return _babel("compile", "-d", CATALOGHI, "-D", DOMINIO, "--statistics")
+
+
+def prova(togli=False):
+    """La lingua di prova: ogni testo del modello tradotto con il segno
+    davanti, compilata in locales\\prova, dove la voce Lingua la trova."""
+    import shutil
+
+    import polib
+
+    radice = os.path.join(CATALOGHI, CODICE_DI_PROVA)
+    if togli:
+        shutil.rmtree(radice, ignore_errors=True)
+        print("Lingua di prova tolta.")
+        return 0
+    po = polib.POFile()
+    po.metadata = {"Content-Type": "text/plain; charset=UTF-8", "Plural-Forms": "nplurals=2; plural=(n != 1);", "Language": CODICE_DI_PROVA}
+    for voce in polib.pofile(MODELLO):
+        if voce.msgid_plural:
+            forme = {0: SEGNO_DI_PROVA + voce.msgid, 1: SEGNO_DI_PROVA + voce.msgid_plural}
+            po.append(polib.POEntry(msgid=voce.msgid, msgid_plural=voce.msgid_plural, msgstr_plural=forme))
+        else:
+            po.append(polib.POEntry(msgid=voce.msgid, msgstr=SEGNO_DI_PROVA + voce.msgid))
+    cartella = os.path.join(radice, "LC_MESSAGES")
+    os.makedirs(cartella, exist_ok=True)
+    po.save(os.path.join(cartella, f"{DOMINIO}.po"))
+    po.save_as_mofile(os.path.join(cartella, f"{DOMINIO}.mo"))
+    print(f"Lingua di prova pronta, {len(po)} testi, in {os.path.relpath(radice, RADICE)}: la sceglie la voce Lingua delle impostazioni, e vale dal riavvio.")
+    return 0
 
 
 def _dentro(nodo, genitori, condizione):
@@ -219,6 +255,8 @@ def principale(argomenti):
         return verifica()
     if comando == "compila":
         return compila("--forza" in argomenti)
+    if comando == "prova":
+        return prova("--togli" in argomenti)
     if comando == "scoperti":
         return elenca_scoperti([a for a in argomenti[1:] if a != "--parole"], "--parole" in argomenti)
     print(__doc__)
