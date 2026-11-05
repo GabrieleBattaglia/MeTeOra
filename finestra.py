@@ -41,9 +41,7 @@ import math
 import os
 import random
 import re
-import shutil
 import sys
-import tempfile
 import threading
 import time
 import traceback
@@ -1165,7 +1163,6 @@ class Finestra(wx.Frame):
         self._speaker_atteso = None
         self._speaker_in_collegamento = None
         self._assenza_dal = None
-        self._conversioni = None
         # Gli avvisi del motore arrivano dai suoi fili: wx.CallAfter li porta
         # nel filo della finestra.
         self.motore = Motore(alla_fine=lambda: wx.CallAfter(self._brano_finito),
@@ -8952,7 +8949,8 @@ class Finestra(wx.Frame):
             self.scrivi(testo)
 
     # Gli speaker Cast (tappa 15 b, 1.119.0): la strada A con conversione,
-    # con lontano.py e trasmissione.py.
+    # con lontano.py e trasmissione.py; dalla 2.7.0 i brani da convertire vanno
+    # come WAV in RAM, con wav_in_ram.py, senza disco.
 
     def _scelta_del_pc(self):
         """La scheda del PC della scelta salvata: per uno speaker Cast quella
@@ -8997,11 +8995,6 @@ class Finestra(wx.Frame):
         if voce is not None:
             self._collega_lo_speaker(voce)
 
-    def _cartella_delle_conversioni(self):
-        if self._conversioni is None:
-            self._conversioni = tempfile.mkdtemp(prefix="meteora_speaker_")
-        return self._conversioni
-
     def _collega_lo_speaker(self, voce, salva=False, genitore=None):
         """Si collega allo speaker in disparte, perche' puo' volerci un po';
         la scelta si salva, con salva, quando il collegamento riesce."""
@@ -9010,12 +9003,11 @@ class Finestra(wx.Frame):
         self._speaker_in_collegamento = voce["uuid"]
         if salva:
             self.scrivi(f"Mi collego a {voce['nome']}.", "scheda_audio")
-        ricerca, cartella, converti = self._ricerca_cast, self._cartella_delle_conversioni(), self.motore.converti_in_flac
+        ricerca, converti = self._ricerca_cast, self.motore.sorgente_wav
         avvisi = {
             "alla_fine": lambda: wx.CallAfter(self._brano_finito),
             "all_errore": lambda percorso: wx.CallAfter(self._brano_in_errore, percorso),
             "al_caricamento": lambda: wx.CallAfter(self._aggiorna_il_video),
-            "alla_conversione": lambda percorso: wx.CallAfter(self._conversione_per_lo_speaker, percorso),
             "all_interruzione": lambda: wx.CallAfter(self._speaker_interrotto),
             "al_guasto": lambda errore: wx.CallAfter(self._speaker_perso, errore),
         }
@@ -9025,7 +9017,7 @@ class Finestra(wx.Frame):
                 server = trasmissione.Server(trasmissione.indirizzo_verso(voce["indirizzo"]), 0)
                 try:
                     lettore = lontano.LettoreLontano(lambda allo_stato, al_distacco: ricerca.connetti(voce["uuid"], allo_stato, al_distacco=al_distacco),
-                                                     server, cartella, converti, **avvisi)
+                                                     server, converti, **avvisi)
                 except Exception:
                     server.ferma()
                     raise
@@ -9113,12 +9105,6 @@ class Finestra(wx.Frame):
         self._uscente = self._preparato = None
         self._aggiorna_etichette()
         self._riscontro("stop", f"Su {lettore.nome} suona altro, mandato da fuori: MeTeOra si ferma. X riparte da qui.")
-
-    def _conversione_per_lo_speaker(self, percorso):
-        lettore = self.motore.lontano
-        if self._chiusa or lettore is None:
-            return
-        self.scrivi(f"Converto {os.path.basename(percorso)} in FLAC per {lettore.nome}: un attimo.", "conversione")
 
     def _vale_solo_sul_pc(self, cosa):
         """Vero, e lo dice, se suona uno speaker Cast: dissolvenza,
@@ -11664,8 +11650,6 @@ class Finestra(wx.Frame):
         self._statistiche.conta("salvataggi_non_riusciti", len(non_salvati))
         self._salva_all_uscita(self._statistiche.salva, "le statistiche", non_salvati)
         self.motore.chiudi()
-        if self._conversioni is not None:
-            shutil.rmtree(self._conversioni, ignore_errors=True)
         if non_salvati:
             # La console sta per sparire: lo dice una finestra, prima di
             # chiudere (tappa 9).

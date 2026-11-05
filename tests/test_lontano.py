@@ -2,8 +2,8 @@
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 # 03/11/2026: nasce con lontano.py, nella 1.117.0.
 
-"""Le prove di lontano.py, con un apparecchio, un server e una conversione
-finti: niente rete e niente libmpv. Gli stati dell'apparecchio si mandano
+"""Le prove di lontano.py, con un apparecchio, un server e una sorgente del
+WAV in RAM finti: niente rete e niente libmpv. Gli stati dell'apparecchio si mandano
 a mano, come li manderebbe pychromecast dal suo filo."""
 
 import os
@@ -49,14 +49,34 @@ class _ApparecchioFinto:
         self.chiamate.append(("chiudi", lascia_l_app))
 
 
+class _SorgenteFinta:
+    tipo = "audio/wav"
+
+    def __init__(self, percorso, sottobrano):
+        self.percorso, self.sottobrano = percorso, sottobrano
+        self.chiusa = False
+
+    def chiudi(self):
+        self.chiusa = True
+
+
 class _ServerFinto:
     def __init__(self):
         self.pubblicati = []
+        self.sorgenti = []
+        self.ritirate = []
         self.fermato = False
 
     def pubblica_file(self, percorso):
         self.pubblicati.append(percorso)
         return f"http://pc/file/{len(self.pubblicati)}{os.path.splitext(percorso)[1].lower()}"
+
+    def pubblica_sorgente(self, sorgente):
+        self.sorgenti.append(sorgente)
+        return f"http://pc/sorgente/{len(self.sorgenti)}.wav"
+
+    def ritira_sorgente(self, sorgente):
+        self.ritirate.append(sorgente)
 
     def ferma(self):
         self.fermato = True
@@ -76,15 +96,13 @@ class _Banco:
             self.allo_stato, self.al_distacco = allo_stato, al_distacco
             return self.apparecchio
 
-        def converti_finto(percorso, sottobrano, uscita):
+        def converti_finto(percorso, sottobrano):
             self.conversioni.append((percorso, sottobrano))
-            with open(uscita, "wb") as f:
-                f.write(b"fLaC")
-            return True
+            return _SorgenteFinta(percorso, sottobrano)
 
-        self.lettore = lontano.LettoreLontano(connetti, self.server, str(tmp_path), converti or converti_finto,
+        self.lettore = lontano.LettoreLontano(connetti, self.server, converti or converti_finto,
             alla_fine=lambda: self.avvisi.append("fine"), all_errore=lambda p: self.avvisi.append(("errore", p)),
-            al_caricamento=lambda: self.avvisi.append("caricato"), alla_conversione=lambda p: self.avvisi.append(("conversione", p)),
+            al_caricamento=lambda: self.avvisi.append("caricato"),
             all_interruzione=lambda: self.avvisi.append("interruzione"), al_guasto=lambda e: self.avvisi.append(("guasto", str(e))))
 
     def stato(self, stato, indirizzo=None, durata=None, motivo=None):
@@ -218,41 +236,49 @@ def test_la_chiusura_spegne_solo_i_brani_di_meteora(banco):
 
 
 def test_la_conversione(banco):
-    lettore, apparecchio = banco.lettore, banco.apparecchio
+    # 2.7.0: i brani che lo speaker non legge vanno come WAV in RAM, una
+    # sorgente che il server serve a intervalli; a ogni brano la sua.
+    lettore, apparecchio, server = banco.lettore, banco.apparecchio, banco.server
     lettore.suona(r"C:\m\brano.ape")
     assert banco.aspetta_suona()
-    assert banco.conversioni == [(r"C:\m\brano.ape", None)] and banco.avvisi == [("conversione", r"C:\m\brano.ape")]
+    assert banco.conversioni == [(r"C:\m\brano.ape", None)]
     indirizzo, tipo, titolo = apparecchio.chiamate[-1][1:4]
-    assert indirizzo.endswith(".flac") and tipo == "audio/flac" and titolo == "brano.ape"
-    assert banco.server.pubblicati[-1].endswith(".flac") and os.path.isfile(banco.server.pubblicati[-1])
-    # Lo stesso brano, di nuovo: la conversione c'e' gia'.
+    assert indirizzo == "http://pc/sorgente/1.wav" and tipo == "audio/wav" and titolo == "brano.ape"
+    prima = server.sorgenti[-1]
+    # Lo stesso brano, di nuovo: si riconverte, e la sorgente di prima se ne va.
     lettore.suona(r"C:\m\brano.ape")
-    assert banco.aspetta_suona(2) and len(banco.conversioni) == 1
-    # Un sottobrano di un SID si converte a parte.
+    assert banco.aspetta_suona(2) and len(banco.conversioni) == 2
+    assert prima.chiusa and prima in server.ritirate
+    # Un sottobrano di un SID ha la sua sorgente.
     lettore.suona(r"C:\m\musica.sid", sottobrano=2, sottobrani=12)
     assert banco.aspetta_suona(3) and banco.conversioni[-1] == (r"C:\m\musica.sid", 2)
     assert lettore.sottobrano == 2 and lettore.sottobrani == 12
     # A fine brano il sottobrano resta, come nel motore: la finestra ci trova
-    # il seguente, e non riparte dal primo (2.6.4). Lo stop lo cancella.
+    # il seguente, e non riparte dal primo (2.6.4). La sorgente se ne va.
     indirizzo = apparecchio.chiamate[-1][1]
     banco.stato(trasmissione.IN_RIPRODUZIONE, indirizzo, durata=97.0)
     banco.stato(trasmissione.FERMO, indirizzo, motivo="FINISHED")
     assert banco.avvisi[-1] == "fine" and lettore.percorso is None
     assert lettore.sottobrano == 2 and lettore.sottobrani == 12
+    assert server.sorgenti[-1].chiusa
     lettore.suona(r"C:\m\musica.sid", sottobrano=3, sottobrani=12)
     assert banco.aspetta_suona(4) and lettore.sottobrano == 3
+    # Lo stop cancella il sottobrano, e anche la sua sorgente se ne va.
     lettore.stop()
-    assert lettore.sottobrano is None and lettore.sottobrani is None
+    assert lettore.sottobrano is None and lettore.sottobrani is None and server.sorgenti[-1].chiusa
+    # Un file che lo speaker legge da se' va com'e', senza sorgente.
+    lettore.suona(r"C:\m\brano.mp3")
+    assert banco.aspetta_suona(5) and apparecchio.chiamate[-1][1:3] == ("http://pc/file/1.mp3", "audio/mpeg") and len(server.sorgenti) == 4
 
 
-def test_una_conversione_finita_tardi_non_suona(tmp_path):
+def test_una_sorgente_pronta_tardi_non_suona(tmp_path):
     via = threading.Event()
+    preparate = []
 
-    def lenta(percorso, sottobrano, uscita):
+    def lenta(percorso, sottobrano):
         via.wait(5)
-        with open(uscita, "wb") as f:
-            f.write(b"fLaC")
-        return True
+        preparate.append(_SorgenteFinta(percorso, sottobrano))
+        return preparate[-1]
 
     banco = _Banco(tmp_path, converti=lenta)
     banco.lettore.suona("lento.ape")
@@ -261,11 +287,16 @@ def test_una_conversione_finita_tardi_non_suona(tmp_path):
     assert banco.aspetta_suona()
     threading.Event().wait(0.2)
     assert [c[1] for c in banco.apparecchio.chiamate if c[0] == "suona"] == ["http://pc/file/1.mp3"]
+    # La sorgente arrivata tardi non serve, e si chiude.
+    assert preparate and preparate[0].chiusa
 
 
 def test_gli_errori(tmp_path):
-    banco = _Banco(tmp_path, converti=lambda percorso, sottobrano, uscita: False)
-    # Una conversione che non riesce e' un errore del brano.
+    def rotta(percorso, sottobrano):
+        raise ValueError(f"la durata di {percorso} non si sa")
+
+    banco = _Banco(tmp_path, converti=rotta)
+    # Una sorgente che non si prepara e' un errore del brano.
     banco.lettore.suona("rovinato.ape")
     for _ in range(500):
         if ("errore", "rovinato.ape") in banco.avvisi:

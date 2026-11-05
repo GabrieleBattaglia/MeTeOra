@@ -321,6 +321,46 @@ def test_server_dei_flussi(server):
     assert _leggi(indirizzo, "HEAD")[2] == b""
 
 
+class _SorgenteFinta:
+    """Una sorgente come il WAV in RAM: i byte da un bytes, e una richiesta
+    nuova ferma quella di prima."""
+
+    tipo = "audio/wav"
+
+    def __init__(self, contenuto):
+        self.contenuto = contenuto
+        self.dimensione = len(contenuto)
+        self.richieste = 0
+
+    def nuova_richiesta(self):
+        self.richieste += 1
+        return self.richieste
+
+    def leggi(self, inizio, quanti, richiesta):
+        if richiesta != self.richieste:
+            return None
+        return self.contenuto[inizio:inizio + min(quanti, 1000)] or None
+
+
+def test_server_delle_sorgenti(server):
+    # 2.7.0: il WAV in RAM, servito a intervalli come un file.
+    contenuto = bytes(range(256)) * 20
+    sorgente = _SorgenteFinta(contenuto)
+    indirizzo = server.pubblica_sorgente(sorgente)
+    assert indirizzo.startswith(server.base + "/sorgente/") and indirizzo.endswith(".wav")
+    stato, intestazioni, corpo = _leggi(indirizzo, "HEAD")
+    assert stato == 200 and corpo == b"" and intestazioni["Content-Length"] == str(len(contenuto)) and intestazioni["Content-Type"] == "audio/wav"
+    assert _leggi(indirizzo)[2] == contenuto
+    stato, intestazioni, corpo = _leggi(indirizzo, intervallo="bytes=3000-")
+    assert stato == 206 and corpo == contenuto[3000:] and intestazioni["Content-Range"] == f"bytes 3000-{len(contenuto) - 1}/{len(contenuto)}"
+    # Una sorgente ritirata risponde 404, e ogni sorgente ha un indirizzo suo.
+    server.ritira_sorgente(sorgente)
+    with pytest.raises(urllib.error.HTTPError) as errore:
+        _leggi(indirizzo)
+    assert errore.value.code == 404
+    assert server.pubblica_sorgente(_SorgenteFinta(b"x")) != indirizzo
+
+
 def test_intervallo():
     assert trasmissione._intervallo(None, 100) is None
     assert trasmissione._intervallo("bytes=10-19", 100) == (10, 19)

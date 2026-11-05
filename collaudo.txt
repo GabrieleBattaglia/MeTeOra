@@ -15,4 +15,6 @@ Ctrl e Alt con F9 chiude tutta la plancia, e il fuoco va sulla voce di primo liv
 Mentre si apre un disco, Ctrl con F9 su una playlist la chiude e l'apertura va avanti; Ctrl con F9 sul disco la ferma, e la console lo dice.
 F10 da solo dice che non ha un comando; Maiuscolo con F10 apre il menu della voce, come il tasto Applicazioni.
 La guida rapida di F12 e il manuale, nel capitolo della plancia, raccontano i comandi nuovi di F9.
-Sullo speaker GabryBar un audiolibro M4B parte subito, senza la riga della conversione, e i salti con le frecce funzionano.
+Sullo speaker GabryBar un audiolibro M4B parte subito, e i salti con le frecce funzionano.
+Sullo speaker GabryBar un SID, un APE o un video partono in un paio di secondi, senza la riga Converto; i salti avanti e indietro funzionano, e alla fine parte il brano seguente, o il sottobrano seguente del SID, senza attese.
+Su GabryBar, durante un film lungo, salta vicino alla fine e poi torna all'inizio: dimmi quanto aspetta ogni volta.

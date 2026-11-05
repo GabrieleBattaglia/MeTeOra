@@ -1,7 +1,7 @@
-# MeTeOra, il lettore lontano: uno speaker Cast al posto della scheda audio, con la strada A e la conversione in FLAC.
+# MeTeOra, il lettore lontano: uno speaker Cast al posto della scheda audio, con la strada A e il WAV in RAM.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 # 03/11/2026: nasce con la 1.117.0, tappa 15 b del piano. Nella 2.6.4 il sottobrano resta a fine brano, come nel motore.
-# Nella 2.6.5 la fine che lo speaker non dice, fermo in caricamento all'ultimo campione.
+# Nella 2.6.5 la fine che lo speaker non dice, fermo in caricamento all'ultimo campione. Nella 2.7.0 il WAV in RAM al posto del FLAC su disco.
 
 """Il lettore che suona su un apparecchio Cast, per il motore.
 
@@ -9,17 +9,17 @@ E' la strada A con conversione, scelta da Gabriele il 29 ottobre 2026:
 l'apparecchio scarica il file dal server di trasmissione.py e lo suona da
 se', e il lettore lontano fa da telecomando. I file che il Chromecast legge
 da se' vanno cosi' come sono; gli altri, i video, di cui va solo l'audio, e
-i brani che MeTeOra rende da se', SID, MIDI e musica delle console, si
-convertono prima in FLAC, in disparte, con la funzione converti del motore,
-che usa i suoi protocolli. Le conversioni restano nella cartella data finche'
-il lettore non si chiude, cosi' un brano risentito non si converte due
-volte.
+i brani che MeTeOra rende da se', SID, MIDI e musica delle console, vanno
+come WAV in RAM (2.7.0, wav_in_ram.py): la funzione converti del motore da'
+la sorgente, che il server serve a intervalli mentre il convertitore la
+riempie, e il brano parte subito, senza disco. Fino alla 2.6 si convertiva
+prima tutto in FLAC su disco, e lo speaker aspettava. La sorgente si lascia
+a fine brano, allo stop e al brano nuovo; un brano risentito si riconverte.
 Quando l'apparecchio e' scelto il motore gli passa i comandi: suona, pausa,
 stop, i salti e il volume; posizione, durata e pausa le dice lui. Gli avvisi
 arrivano dai fili di pychromecast e delle conversioni, come quelli del
 motore: alla_fine() a fine brano, all_errore(percorso) se l'apparecchio non
 lo suona, al_caricamento() quando comincia a suonarlo o e' pronto in pausa,
-alla_conversione(percorso) quando una conversione comincia,
 all_interruzione() quando sull'apparecchio parte altro, per esempio dal
 telefono, e al_guasto(errore) quando un comando non arriva, per esempio
 perche' l'apparecchio si e' spento.
@@ -37,8 +37,10 @@ import trasmissione
 MEMORIA_DEL_VOLUME = 1.0
 # Gli stati che dicono che l'apparecchio ha in mano il brano.
 _SUONA_O_ASPETTA = (trasmissione.IN_RIPRODUZIONE, trasmissione.IN_PAUSA, trasmissione.IN_CARICAMENTO)
-# La fine che lo speaker non dice (2.6.5). Misurato su GabryBar, una Ambeo
-# Soundbar Plus, il 3 novembre 2026: con i FLAC che MeTeOra converte arriva
+# La fine che lo speaker non dice (2.6.5). Dalla 2.7.0 i brani convertiti
+# vanno come WAV, che su GabryBar finisce puntuale: resta per sicurezza.
+# Misurato su GabryBar, una Ambeo Soundbar Plus, il 3 novembre 2026: con i
+# FLAC che MeTeOra convertiva arriva
 # all'ultimo campione, passa in caricamento con la posizione uguale alla
 # durata, resta cosi' 23 secondi e poi chiude il brano con un errore; un MP3
 # e un WAV finiscono da soli, entro mezzo secondo. Se dopo ATTESA_DELLA_FINE
@@ -49,7 +51,7 @@ MARGINE_DELLA_FINE = 0.25
 
 
 def da_convertire(percorso, sottobrano=None, midi_reso=False):
-    """Vero se il brano va convertito in FLAC prima di mandarlo: un formato
+    """Vero se il brano va mandato come WAV in RAM: un formato
     che il Chromecast non legge, un video, un sottobrano di un SID o della
     musica delle console, o un MIDI che MeTeOra rende con FluidSynth."""
     return sottobrano is not None or midi_reso or formati.e_video(percorso) or not trasmissione.legge_da_se(percorso)
@@ -59,20 +61,17 @@ class LettoreLontano:
     """Il lettore di un apparecchio Cast. connetti(allo_stato, al_distacco)
     da' la connessione, un trasmissione.Apparecchio, e il distacco va ad
     al_guasto, come un comando che non arriva; server e' il server da cui
-    l'apparecchio prende i file; cartella quella delle conversioni;
-    converti(percorso, sottobrano, uscita) scrive il FLAC e torna vero se ci
-    e' riuscito. I comandi non sollevano mai: un errore va ad al_guasto."""
+    l'apparecchio prende i file e le sorgenti; converti(percorso, sottobrano)
+    da' la sorgente del WAV in RAM, con chiudi(), o solleva se il brano non si
+    legge. I comandi non sollevano mai: un errore va ad al_guasto."""
 
-    def __init__(self, connetti, server, cartella, converti, alla_fine=None, all_errore=None, al_caricamento=None, alla_conversione=None,
-                 all_interruzione=None, al_guasto=None):
+    def __init__(self, connetti, server, converti, alla_fine=None, all_errore=None, al_caricamento=None, all_interruzione=None, al_guasto=None):
         self._blocco = threading.RLock()
         self._server = server
-        self._cartella = cartella
         self._converti = converti
         self._alla_fine = alla_fine
         self._all_errore = all_errore
         self._al_caricamento = al_caricamento
-        self._alla_conversione = alla_conversione
         self._all_interruzione = all_interruzione
         self._al_guasto = al_guasto
         # Il brano: il file, il sottobrano e quanti ce ne sono, come nel
@@ -84,10 +83,11 @@ class LettoreLontano:
         self._pronto = False
         self._pausa = False
         self._durata = None
-        # Cresce a ogni brano e a ogni stop: una conversione finita tardi non
-        # manda un brano che non serve piu'.
+        # Cresce a ogni brano e a ogni stop: una sorgente pronta tardi non
+        # manda un brano che non serve piu'. E la sorgente del brano, se va
+        # come WAV in RAM.
         self._generazione = 0
-        self._convertiti = {}
+        self._sorgente = None
         # La fine attesa, con lo speaker in caricamento all'ultimo campione:
         # un segno che ogni stato nuovo, ogni brano e lo stop tolgono.
         self._fine_attesa = None
@@ -148,8 +148,8 @@ class LettoreLontano:
 
     def suona(self, percorso, sottobrano=None, sottobrani=None, inizio=None, in_pausa=False, midi_reso=False):
         """Fa suonare il brano all'apparecchio, dai secondi inizio, in pausa
-        se chiesto. Se va convertito, la conversione si fa in disparte e il
-        brano parte quando e' pronta."""
+        se chiesto. Se va come WAV in RAM, la sorgente si prepara in disparte,
+        perche' chiede la durata del brano, e il brano parte appena c'e'."""
         with self._blocco:
             self._generazione += 1
             generazione = self._generazione
@@ -159,43 +159,59 @@ class LettoreLontano:
             self._fine_attesa = None
             self._pausa = bool(in_pausa)
             self._durata = None
-            chiave = (os.path.normcase(percorso), sottobrano, midi_reso)
-            convertito = self._convertiti.get(chiave)
+            vecchia, self._sorgente = self._sorgente, None
+        if vecchia is not None:
+            self._lascia(vecchia)
         if not da_convertire(percorso, sottobrano, midi_reso):
             self._manda(generazione, percorso, inizio)
-        elif convertito is not None and os.path.isfile(convertito):
-            self._manda(generazione, convertito, inizio)
         else:
-            threading.Thread(target=self._converti_e_manda, args=(generazione, chiave, percorso, sottobrano, inizio),
-                             name="MeTeOra, conversione per lo speaker", daemon=True).start()
+            threading.Thread(target=self._converti_e_manda, args=(generazione, percorso, sottobrano, inizio),
+                             name="MeTeOra, WAV per lo speaker", daemon=True).start()
 
-    def _converti_e_manda(self, generazione, chiave, percorso, sottobrano, inizio):
-        if self._alla_conversione is not None:
-            self._alla_conversione(percorso)
-        uscita = os.path.join(self._cartella, f"brano_{len(self._convertiti) + 1}_{generazione}.flac")
+    def _converti_e_manda(self, generazione, percorso, sottobrano, inizio):
         try:
-            riuscita = self._converti(percorso, sottobrano, uscita)
-        except Exception:  # noqa: BLE001 - libmpv fallisce in molti modi: per il lettore vuol dire che il brano non si suona
-            riuscita = False
+            sorgente = self._converti(percorso, sottobrano)
+        except Exception:  # noqa: BLE001 - libmpv e la pipe falliscono in molti modi: per il lettore vuol dire che il brano non si suona
+            sorgente = None
         with self._blocco:
             corrente = generazione == self._generazione
-            if riuscita:
-                self._convertiti[chiave] = uscita
+            if corrente and sorgente is not None:
+                self._sorgente = sorgente
         if not corrente:
+            if sorgente is not None:
+                self._lascia(sorgente)
             return
-        if not riuscita or not os.path.isfile(uscita):
+        if sorgente is None:
             self._errore(generazione)
             return
-        self._manda(generazione, uscita, inizio)
+        self._manda(generazione, None, inizio, sorgente)
 
-    def _manda(self, generazione, file, inizio):
+    def _manda(self, generazione, file, inizio, sorgente=None):
         with self._blocco:
             if generazione != self._generazione:
                 return
-            indirizzo = self._indirizzo = self._server.pubblica_file(file)
+            if sorgente is not None:
+                indirizzo = self._indirizzo = self._server.pubblica_sorgente(sorgente)
+                tipo = sorgente.tipo
+            else:
+                indirizzo = self._indirizzo = self._server.pubblica_file(file)
+                tipo = trasmissione.tipo_di(file)
             in_pausa = self._pausa
             titolo = os.path.basename(self.percorso or file)
-        self._comanda(lambda: self.apparecchio.suona(indirizzo, trasmissione.tipo_di(file), titolo=titolo, inizio=inizio or None, in_pausa=in_pausa))
+        self._comanda(lambda: self.apparecchio.suona(indirizzo, tipo, titolo=titolo, inizio=inizio or None, in_pausa=in_pausa))
+
+    def _lascia(self, sorgente):
+        """Il server non la serve piu', e il convertitore si ferma."""
+        self._server.ritira_sorgente(sorgente)
+        sorgente.chiudi()
+
+    def _lascia_se_finito(self):
+        """A brano finito, fermo o in errore, la sorgente se ne va: la RAM torna libera."""
+        with self._blocco:
+            if self.percorso is not None or self._sorgente is None:
+                return
+            sorgente, self._sorgente = self._sorgente, None
+        self._lascia(sorgente)
 
     def pausa(self, valore=None, sfumando=False):
         """Mette o toglie la pausa; senza valore la inverte. Torna il nuovo
@@ -217,6 +233,7 @@ class LettoreLontano:
             self._pronto = False
             self._fine_attesa = None
             self._pausa = False
+        self._lascia_se_finito()
         if c_era:
             self._comanda(self.apparecchio.ferma)
 
@@ -271,6 +288,7 @@ class LettoreLontano:
             self.percorso = None
             self._indirizzo = None
             self._pronto = False
+        self._lascia_se_finito()
         if self._all_errore is not None:
             self._all_errore(percorso)
 
@@ -291,6 +309,7 @@ class LettoreLontano:
                     avviso = self._all_interruzione
             else:
                 avviso = self._stato_del_brano(stato)
+        self._lascia_se_finito()
         if avviso is not None:
             avviso()
 
@@ -317,6 +336,7 @@ class LettoreLontano:
             self.percorso = None
             self._indirizzo = None
             self._pronto = False
+        self._lascia_se_finito()
         if self._alla_fine is not None:
             self._alla_fine()
 

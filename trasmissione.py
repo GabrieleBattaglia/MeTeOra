@@ -1,6 +1,6 @@
 # MeTeOra, la trasmissione agli apparecchi Cast: la parte comune a tutte le strade del Chromecast.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 22/10/2026: nasce con la tappa 15 b del piano, prima che Gabriele scelga la strada: il programma ancora non lo usa. Nella 1.117.0 la usa lontano.py: il brano in pausa, l'indirizzo negli stati, il muto, la connessione che non risponde e quella che cade. Nella 2.7.0 gli M4B letti da se'.
+# 22/10/2026: nasce con la tappa 15 b del piano, prima che Gabriele scelga la strada: il programma ancora non lo usa. Nella 1.117.0 la usa lontano.py: il brano in pausa, l'indirizzo negli stati, il muto, la connessione che non risponde e quella che cade. Nella 2.7.0 gli M4B letti da se', e le sorgenti a intervalli per il WAV in RAM.
 
 """Gli apparecchi Cast: Chromecast, speaker Google, soundbar e televisori con
 Chromecast integrato, e i gruppi di altoparlanti di Google Home.
@@ -289,7 +289,8 @@ class Apparecchio:
 # Il server.
 
 class _Gestore(http.server.BaseHTTPRequestHandler):
-    """/file/<numero><estensione> e /flusso/<nome>; il resto e' 404."""
+    """/file/<numero><estensione>, /sorgente/<numero><estensione> e
+    /flusso/<nome>; il resto e' 404."""
 
     def log_message(self, formato, *argomenti):
         self.server.proprietario.annota(f"{self.client_address[0]}: {formato % argomenti}")
@@ -313,6 +314,11 @@ class _Gestore(http.server.BaseHTTPRequestHandler):
                 file = proprietario.file(os.path.splitext(percorso[len("/file/"):])[0])
                 if file is not None:
                     self._manda_il_file(file, solo_intestazioni)
+                    return
+            elif percorso.startswith("/sorgente/"):
+                sorgente = proprietario.sorgente(os.path.splitext(percorso[len("/sorgente/"):])[0])
+                if sorgente is not None:
+                    self._manda_la_sorgente(sorgente, solo_intestazioni)
                     return
             self.send_error(404)
         except OSError:
@@ -348,6 +354,37 @@ class _Gestore(http.server.BaseHTTPRequestHandler):
                     break
                 self.wfile.write(pezzo)
                 restano -= len(pezzo)
+
+    def _manda_la_sorgente(self, sorgente, solo_intestazioni):
+        """Come un file, ma i byte li da' la sorgente, che puo' farli
+        aspettare: ogni richiesta ha il suo numero, e quando ne arriva una
+        nuova quella di prima smette (2.7.0)."""
+        dimensione = sorgente.dimensione
+        intervallo = _intervallo(self.headers.get("Range"), dimensione)
+        if intervallo == "fuori":
+            self.send_response(416)
+            self.send_header("Content-Range", f"bytes */{dimensione}")
+            self.end_headers()
+            return
+        inizio, fine = intervallo or (0, dimensione - 1)
+        richiesta = sorgente.nuova_richiesta()
+        self.send_response(206 if intervallo else 200)
+        self.send_header("Content-Type", sorgente.tipo)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Accept-Ranges", "bytes")
+        self.send_header("Content-Length", str(fine - inizio + 1))
+        if intervallo:
+            self.send_header("Content-Range", f"bytes {inizio}-{fine}/{dimensione}")
+        self.end_headers()
+        if solo_intestazioni:
+            return
+        posizione = inizio
+        while posizione <= fine:
+            pezzo = sorgente.leggi(posizione, min(65536, fine + 1 - posizione), richiesta)
+            if not pezzo:
+                break
+            self.wfile.write(pezzo)
+            posizione += len(pezzo)
 
     def _manda_il_flusso(self, scrivi, tipo, solo_intestazioni):
         self.send_response(200)
@@ -393,6 +430,10 @@ class Server:
         self._blocco = threading.Lock()
         self._file = {}
         self._numeri = {}
+        self._sorgenti = {}
+        # Le sorgenti si contano sempre in avanti: un indirizzo non torna mai a
+        # un brano nuovo, e gli stati di quello di prima non si confondono.
+        self._ultima_sorgente = 0
         self._flussi = {}
         self._server = http.server.ThreadingHTTPServer((indirizzo, porta), _Gestore)
         self._server.proprietario = self
@@ -416,6 +457,24 @@ class Server:
                 self._file[numero] = percorso
         return f"{self.base}/file/{numero}{os.path.splitext(percorso)[1].lower()}"
 
+    def pubblica_sorgente(self, sorgente, estensione=".wav"):
+        """L'indirizzo di una sorgente, come il WAV in RAM: un oggetto con
+        dimensione, tipo, nuova_richiesta() e leggi(inizio, quanti,
+        richiesta), che serve gli intervalli come un file (2.7.0). Ogni
+        sorgente ha un indirizzo nuovo."""
+        with self._blocco:
+            self._ultima_sorgente += 1
+            numero = str(self._ultima_sorgente)
+            self._sorgenti[numero] = sorgente
+        return f"{self.base}/sorgente/{numero}{estensione}"
+
+    def ritira_sorgente(self, sorgente):
+        """Toglie una sorgente: da qui in poi il suo indirizzo risponde 404."""
+        with self._blocco:
+            for numero, pubblicata in list(self._sorgenti.items()):
+                if pubblicata is sorgente:
+                    del self._sorgenti[numero]
+
     def pubblica_flusso(self, nome, scrivi, tipo):
         """L'indirizzo di un flusso: a ogni richiesta il server chiama
         scrivi(uscita) nel filo della connessione, e scrivi scrive finche'
@@ -430,11 +489,16 @@ class Server:
         with self._blocco:
             self._file.clear()
             self._numeri.clear()
+            self._sorgenti.clear()
             self._flussi.clear()
 
     def file(self, numero):
         with self._blocco:
             return self._file.get(numero)
+
+    def sorgente(self, numero):
+        with self._blocco:
+            return self._sorgenti.get(numero)
 
     def flusso(self, nome):
         with self._blocco:

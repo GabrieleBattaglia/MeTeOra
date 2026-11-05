@@ -1,6 +1,6 @@
 # MeTeOra, il motore di riproduzione: libmpv, e i SID in tempo reale.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7). Nella 1.65.0 i MIDI resi da FluidSynth (tappa 8). Nella 1.66.0 la musica delle console con libgme. Nella 1.67.0 il file lasciato o rinominato per Rinomina file. Nella 1.82.0 il testo del karaoke come traccia in memoria, senza i .lrc caricati da mpv, e due sottotitoli uguali di fila detti tutti e due. Nella 1.83.0 il tempo che resta al sottotitolo, per la barra braille a blocchi. Nella 1.83.3 la durata vera di Musepack e DSF, da mutagen. Nella 1.93.0 i capitoli che libmpv vede. Nella 1.95.0 l'attenuazione, per la sfumatura del timer di spegnimento. Nella 1.96.0 il volume uniforme con ReplayGain. Nella 1.96.11 suona con a_volume_pieno. Nella 1.102.2 (issue 22) il ricampionamento con soxr, le bande compensate, il preamplificatore nella catena e il volume oltre 100 con il limitatore. Nella 1.102.3 rubberband quando velocita' o tono sono cambiati, con il tono fatto da lui (issue 20). Nella 1.116.0 alle_uscite, quando cambiano le uscite audio di mpv, e all_uscita_persa, quando il brano si ferma perche' l'uscita non si apre piu'. Nella 1.117.0 il lettore lontano, uno speaker Cast al posto delle schede, e converti_in_flac.
+# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7). Nella 1.65.0 i MIDI resi da FluidSynth (tappa 8). Nella 1.66.0 la musica delle console con libgme. Nella 1.67.0 il file lasciato o rinominato per Rinomina file. Nella 1.82.0 il testo del karaoke come traccia in memoria, senza i .lrc caricati da mpv, e due sottotitoli uguali di fila detti tutti e due. Nella 1.83.0 il tempo che resta al sottotitolo, per la barra braille a blocchi. Nella 1.83.3 la durata vera di Musepack e DSF, da mutagen. Nella 1.93.0 i capitoli che libmpv vede. Nella 1.95.0 l'attenuazione, per la sfumatura del timer di spegnimento. Nella 1.96.0 il volume uniforme con ReplayGain. Nella 1.96.11 suona con a_volume_pieno. Nella 1.102.2 (issue 22) il ricampionamento con soxr, le bande compensate, il preamplificatore nella catena e il volume oltre 100 con il limitatore. Nella 1.102.3 rubberband quando velocita' o tono sono cambiati, con il tono fatto da lui (issue 20). Nella 1.116.0 alle_uscite, quando cambiano le uscite audio di mpv, e all_uscita_persa, quando il brano si ferma perche' l'uscita non si apre piu'. Nella 1.117.0 il lettore lontano, uno speaker Cast al posto delle schede, e converti_in_flac. Nella 2.7.0 sorgente_wav e passaggio_in_pcm, il WAV in RAM al posto del FLAC su disco.
 
 """Due lettori libmpv per tutti i formati.
 
@@ -66,6 +66,7 @@ import midi
 import sid
 import sottobrani
 import valori
+import wav_in_ram
 
 # La durata di un SID che non sta in nessun database: tre minuti, come fanno
 # i lettori di SID.
@@ -124,9 +125,9 @@ ANTICIPO_DEL_SEGUENTE = 1.5
 MARGINE_DI_FINE = 0.5
 # Ogni quanti secondi il sorvegliante guarda la dissolvenza.
 PASSO_DEL_SORVEGLIANTE = 0.02
-# Quanto si aspetta, al piu', una conversione in FLAC per uno speaker Cast:
-# un brano lungo, o un SID che si rende da capo, puo' volerci un po'.
-ATTESA_DELLA_CONVERSIONE = 600.0
+# Quanto si aspetta, al piu', che libmpv apra un file per dirne la durata,
+# prima del WAV in RAM per uno speaker Cast (2.7.0).
+ATTESA_DELLA_DURATA = 15.0
 _FINE_NORMALE = mpv.MpvEventEndFile.EOF
 _FINE_PER_ERRORE = mpv.MpvEventEndFile.ERROR
 # L'errore con cui mpv chiude il brano quando non riesce ad aprire l'uscita
@@ -775,34 +776,74 @@ class Motore:
         if prima is not None and prima is not lettore:
             prima.chiudi(attendi=False)
 
-    def converti_in_flac(self, percorso, sottobrano, uscita):
-        """Scrive in uscita il brano in FLAC, con libmpv in modo codifica, per
-        uno speaker Cast che non lo legge da se': anche i SID, i MIDI e la
-        musica delle console, con i protocolli dei lettori, e di un video
-        solo l'audio. Senza filtri: con il Chromecast equalizzatore,
-        velocita' e tono non valgono. Blocca finche' non ha finito, al piu'
-        ATTESA_DELLA_CONVERSIONE secondi; vero se il file c'e' e non e'
-        vuoto."""
-        brano = _Brano(percorso, sottobrano, None, self._banco_midi)
+    def sorgente_wav(self, percorso, sottobrano=None):
+        """Il WAV in RAM del brano, per uno speaker Cast che non lo legge da
+        se' (2.7.0): una wav_in_ram.SorgenteWav, che il convertitore comincia
+        a riempire subito. Solleva ValueError se la durata del brano non si
+        sa, OSError se la pipe non si crea."""
+        durata = self.durata_da_convertire(percorso, sottobrano)
+        if not durata:
+            raise ValueError(f"la durata di {percorso} non si sa")
+        emulato = sottobrano_risolto(percorso, sottobrano) is not None or bool(self._banco_midi and formati.e_midi(percorso))
+        return wav_in_ram.SorgenteWav(lambda secondi, uscita, alla_fine, frequenza: self.passaggio_in_pcm(
+            percorso, sottobrano, secondi, uscita, alla_fine, frequenza), durata, emulato)
+
+    def durata_da_convertire(self, percorso, sottobrano=None):
+        """I secondi del brano da dichiarare nel WAV in RAM: dei sottobrani dal
+        database, dei MIDI resi con il banco dalla mappa dei tempi con la coda,
+        dei Musepack e dei DSF da mutagen, degli altri da libmpv, aprendo il
+        file in pausa. None se non si sa."""
+        risolto = sottobrano_risolto(percorso, sottobrano)
+        if risolto is not None:
+            return max(1.0, durata_del_sottobrano(percorso, risolto))
+        if self._banco_midi and formati.e_midi(percorso):
+            return (midi.durata(percorso) or DURATA_DI_RISERVA_DEL_MIDI) + midi.CODA
+        if os.path.splitext(percorso)[1].lower() in DURATA_DA_MUTAGEN:
+            durata = _durata_da_mutagen(percorso)
+            if durata:
+                return durata
+        lettore = mpv.MPV(**{**OPZIONI_DI_BASE, "ao": "null", "pause": True})
+        try:
+            pronto = threading.Event()
+            lettore.register_event_callback(lambda evento: pronto.set() if evento.event_id.value in (
+                mpv.MpvEventID.FILE_LOADED, mpv.MpvEventID.END_FILE) else None)
+            lettore.command("loadfile", percorso)
+            pronto.wait(ATTESA_DELLA_DURATA)
+            return float(lettore.duration) if lettore.duration else None
+        except Exception:  # noqa: BLE001 - un file che libmpv non apre non ha durata
+            return None
+        finally:
+            lettore.terminate()
+
+    def passaggio_in_pcm(self, percorso, sottobrano, inizio, uscita, alla_fine, frequenza=wav_in_ram.FREQUENZA):
+        """Comincia a scrivere in uscita, di solito una pipe con nome, il brano
+        dai secondi inizio come PCM a 16 bit, stereo, alla frequenza data,
+        con libmpv in modo codifica: anche i SID, i MIDI e la musica delle
+        console, con i protocolli dei lettori, e di un video solo l'audio.
+        Senza filtri: con lo speaker equalizzatore, velocita' e tono non
+        valgono. Non blocca: alla_fine() arriva dal filo di libmpv quando ha
+        finito, anche per un errore. Torna il lettore, che si ferma con
+        terminate() (2.7.0)."""
+        brano = _Brano(percorso, sottobrano, inizio or None, self._banco_midi)
         banco = self._banco_midi
-        finito = threading.Event()
 
         def apri_midi(uri):
             secondi, percorso_del_midi = uri[len("midi://"):].split("/", 1)
             return midi.apri_flusso(percorso_del_midi, banco, float(secondi))
 
-        lettore = mpv.MPV(**{**OPZIONI_DI_BASE, "o": uscita, "of": "flac", "oac": "flac"})
+        lettore = mpv.MPV(**{**OPZIONI_DI_BASE, "o": uscita, "of": "s16le", "oac": "pcm_s16le", "audio_channels": "stereo",
+            "audio_samplerate": frequenza, "audio_format": "s16"})
         try:
             lettore.register_stream_protocol("sid", _apri_sid)
             lettore.register_stream_protocol("chip", _apri_chip)
             lettore.register_stream_protocol("midi", apri_midi)
-            lettore.register_event_callback(lambda evento: finito.set() if evento.event_id.value == mpv.MpvEventID.END_FILE else None)
+            lettore.register_event_callback(lambda evento: alla_fine() if evento.event_id.value == mpv.MpvEventID.END_FILE else None)
             opzioni = ",".join(f"{chiave}={valore}" for chiave, valore in brano.opzioni.items())
             lettore.command("loadfile", brano.indirizzo, "replace", "-1", opzioni)
-            finito.wait(ATTESA_DELLA_CONVERSIONE)
-        finally:
+        except Exception:
             lettore.terminate()
-        return os.path.isfile(uscita) and os.path.getsize(uscita) > 0
+            raise
+        return lettore
 
     @property
     def in_corso(self):

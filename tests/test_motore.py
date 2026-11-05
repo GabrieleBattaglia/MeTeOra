@@ -1589,12 +1589,32 @@ def test_il_lettore_lontano(crea, avvisi, tmp_path):
     assert lontano.chiamate[-1] == ("chiudi", False) and m.lontano is None
 
 
-def test_converti_in_flac(crea, tmp_path):
+def test_la_sorgente_wav(crea, tmp_path):
+    # 2.7.0: il WAV in RAM per gli speaker, al posto del FLAC su disco, con
+    # libmpv vero che scrive nella pipe con nome: tre secondi di seno, a 48 kHz
+    # stereo, con la durata letta da libmpv.
+    import wav_in_ram
+
     m = crea()
     brano = _seno(tmp_path / "brano.wav", 3)
-    uscita = tmp_path / "brano.flac"
-    assert m.converti_in_flac(brano, None, str(uscita))
-    assert uscita.read_bytes()[:4] == b"fLaC"
-    # Un file che non c'e' non si converte.
-    assert not m.converti_in_flac(str(tmp_path / "non_ce.wav"), None, str(tmp_path / "vuoto.flac"))
+    assert m.durata_da_convertire(brano) == pytest.approx(3.0, abs=0.05)
+    sorgente = m.sorgente_wav(brano)
+    try:
+        assert not sorgente.emulato and sorgente.frequenza == 48000
+        assert sorgente.dimensione == wav_in_ram.INTESTAZIONE + int(sorgente.durata * 48000) * 4
+        richiesta = sorgente.nuova_richiesta()
+        letti = bytearray()
+        while len(letti) < sorgente.dimensione:
+            pezzo = sorgente.leggi(len(letti), 65536, richiesta)
+            assert pezzo
+            letti += pezzo
+        assert letti[:4] == b"RIFF" and letti[8:12] == b"WAVE"
+        # Il seno c'e': il PCM non e' silenzio.
+        assert max(letti[wav_in_ram.INTESTAZIONE:wav_in_ram.INTESTAZIONE + 48000]) > 0 and not sorgente.guasta
+    finally:
+        sorgente.chiudi()
+    # Un file che non c'e' non ha durata, e la sorgente non si fa.
+    assert m.durata_da_convertire(str(tmp_path / "non_ce.wav")) is None
+    with pytest.raises(ValueError):
+        m.sorgente_wav(str(tmp_path / "non_ce.wav"))
 
