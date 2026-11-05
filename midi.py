@@ -32,6 +32,7 @@ import numpy as np
 
 import percorsi
 import sid
+from lingua import _
 
 # I file dei banchi di suoni, e le cartelle che la ricerca non visita.
 ESTENSIONI_DEI_BANCHI = (".sf2", ".sf3")
@@ -104,7 +105,11 @@ def dimensione_da_leggere(byte):
     """La dimensione di un banco in MB: con un decimale sotto i 10 MB, il punto
     come separatore, perche' sotto il mezzo MB l'arrotondamento dava 0 MB."""
     mega = byte / 1_000_000
-    return f"{mega:.1f} MB" if mega < 10 else f"{round(mega)} MB"
+    if mega < 10:
+        # Traduttori: la dimensione di un banco di suoni in megabyte, con un decimale dopo il punto.
+        return _("{mega:.1f} MB").format(mega=mega)
+    # Traduttori: la dimensione di un banco di suoni in megabyte, senza decimali.
+    return _("{mega} MB").format(mega=round(mega))
 
 
 def dischi_fissi():
@@ -206,7 +211,7 @@ def _scarica(url, avanza=None):
     """I byte di un URL, a pezzi: avanza(scaricati, totale) a ogni pezzo,
     con totale None se il server non lo dice."""
     if not url.startswith("https://"):
-        raise ValueError(f"solo indirizzi https: {url}")
+        raise ValueError(_("solo indirizzi https: {url}").format(url=url))
     richiesta = urllib.request.Request(url, headers={"User-Agent": "MeTeOra"})  # noqa: S310 - indirizzi https fissi, controllati sopra
     with urllib.request.urlopen(richiesta, timeout=60) as risposta:  # noqa: S310 - idem
         totale = int(risposta.headers.get("Content-Length") or 0) or None
@@ -224,7 +229,7 @@ def scarica_fluidsynth(avanza=None):
     sua cartella. Solleva OSError se qualcosa non va."""
     dati = _scarica(FLUIDSYNTH_URL, avanza)
     if hashlib.sha256(dati).hexdigest() != FLUIDSYNTH_SHA256:
-        raise OSError("lo zip di FluidSynth scaricato non è quello atteso")
+        raise OSError(_("lo zip di FluidSynth scaricato non è quello atteso"))
     cartella = cartella_fluidsynth()
     os.makedirs(cartella, exist_ok=True)
     with zipfile.ZipFile(io.BytesIO(dati)) as archivio:
@@ -233,7 +238,7 @@ def scarica_fluidsynth(avanza=None):
                 with open(os.path.join(cartella, os.path.basename(nome)), "wb") as f:
                     f.write(archivio.read(nome))
     if not fluidsynth_presente():
-        raise OSError("nello zip di FluidSynth mancano le DLL attese")
+        raise OSError(_("nello zip di FluidSynth mancano le DLL attese"))
 
 
 def scarica_fluidr3(avanza=None):
@@ -251,14 +256,14 @@ def scarica_fluidr3(avanza=None):
             errori.append(str(e))
             continue
         if len(dati) != FLUIDR3_DIMENSIONE or dati[:4] != b"RIFF" or dati[8:12] != b"sfbk":
-            errori.append(f"{url}: il file non è FluidR3 GM")
+            errori.append(_("{url}: il file non è FluidR3 GM").format(url=url))
             continue
         parziale = destinazione + ".parziale"
         with open(parziale, "wb") as f:
             f.write(dati)
         os.replace(parziale, destinazione)
         return destinazione
-    raise OSError("; ".join(errori) or "nessuna fonte di FluidR3 GM risponde")
+    raise OSError("; ".join(errori) or _("nessuna fonte di FluidR3 GM risponde"))
 
 
 # La libreria di FluidSynth, caricata alla prima resa.

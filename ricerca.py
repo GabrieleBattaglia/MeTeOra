@@ -34,6 +34,7 @@ import lettore_di_rete
 import questa_rete
 import questo_pc
 from lettore_di_rete import NonParte, NonRisponde
+from lingua import _
 from playlist import Brano
 
 # I tipi di unita' in cui si cerca: rimovibili, dischi fissi, dischi in memoria.
@@ -204,7 +205,7 @@ def _leggi_in_un_filo(cartella, fermo, attesa):
             return [], []
         raise NonRisponde(cartella)
     if not esito:
-        raise OSError(f"La lettura di {cartella} si e' interrotta.")
+        raise OSError(_("La lettura di {cartella} si e' interrotta.").format(cartella=cartella))
     if isinstance(esito[0], Exception):
         raise esito[0]
     return esito[0]
@@ -350,7 +351,8 @@ class AlberoDeiRisultati:
     radice di un'unita', come E:\\, nel nome che ha in Questo PC."""
 
     def __init__(self, nomi_delle_unita=None):
-        self.radice = Gruppo("Risultati")
+        # Traduttori: la radice dell'albero dei risultati di una ricerca.
+        self.radice = Gruppo(_("Risultati"))
         self._nomi = {os.path.normcase(k): v for k, v in (nomi_delle_unita or {}).items()}
         self.gruppo_del_brano = {}
 

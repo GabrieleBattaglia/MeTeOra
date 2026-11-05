@@ -44,8 +44,11 @@ def main():
     try:
         import librerie  # noqa: F401
     except RuntimeError as e:
+        from lingua import _
+
         registro.scrivi(f"MeTeOra non può partire: {e}")
-        wx.MessageBox(str(e), "MeTeOra non può partire", wx.OK | wx.ICON_ERROR)
+        # Traduttori: il titolo della finestra di errore quando mancano le librerie di MeTeOra.
+        wx.MessageBox(str(e), _("MeTeOra non può partire"), wx.OK | wx.ICON_ERROR)
         registro.chiudi()
         return 1
     import copie

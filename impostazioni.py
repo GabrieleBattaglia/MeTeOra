@@ -24,6 +24,7 @@ from GBsintesi import DESTINAZIONI
 from GBsintesi import USCITE as USCITE_DELLA_SINTESI
 
 from karaoke import MODI as MODI_DEL_KARAOKE
+from lingua import _
 from valori import (
     ANTICIPO_MASSIMO_DEL_KARAOKE,
     AREE,
@@ -296,7 +297,8 @@ class Impostazioni(dict):
         # Un file che non contiene un dizionario, per esempio una lista, vale
         # come un file illeggibile.
         if not isinstance(dati, dict):
-            raise ValueError("il file non contiene le impostazioni")
+            # Traduttori: il motivo per cui il file delle impostazioni non si legge.
+            raise ValueError(_("il file non contiene le impostazioni"))
         return dati
 
     def _applica(self, dati):

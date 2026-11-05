@@ -25,21 +25,28 @@ import re
 
 import filtro
 import formati
+from lingua import _
 
 VERSIONE_DEL_FILE = 1
+# Il nome dei Preferiti, e quello di una playlist nuova senza nome.
+# Traduttori: il nome della playlist speciale dei brani preferiti.
+NOME_DEI_PREFERITI = _("Preferiti")
+# Traduttori: il nome di una playlist nuova senza nome; se c'e' gia', diventa "Playlist 2", "Playlist 3".
+NOME_DELLA_NUOVA = _("Playlist")
 
 # I criteri di Ordina, nell'ordine del sottomenu (Gabriele, 20 ottobre 2026):
 # la chiave, la voce del menu e il dato che puo' mancare, None per quelli che
 # ogni brano ha. Ogni criterio va in un verso solo: dalla A alla Z, dal piu'
 # vecchio, dal piu' corto. I brani senza il dato vanno in fondo.
 CRITERI = {
-    "nome": ("Per nome del file", None),
-    "percorso": ("Per percorso", None),
-    "titolo": ("Per titolo", "titolo"),
-    "autore": ("Per autore", "autore"),
-    "album": ("Per album", "album"),
-    "anno": ("Per anno", "anno"),
-    "durata": ("Per durata", "durata"),
+    # Traduttori: le voci del sottomenu Ordina di una playlist; con l'iniziale minuscola chiudono anche una frase, come "ordinata per titolo".
+    "nome": (_("Per nome del file"), None),
+    "percorso": (_("Per percorso"), None),
+    "titolo": (_("Per titolo"), "titolo"),
+    "autore": (_("Per autore"), "autore"),
+    "album": (_("Per album"), "album"),
+    "anno": (_("Per anno"), "anno"),
+    "durata": (_("Per durata"), "durata"),
 }
 _CIFRE = re.compile(r"(\d+)")
 _BARRE = re.compile(r"[\\/]+")
@@ -370,11 +377,11 @@ class Archivio:
     def __init__(self, percorso):
         self.percorso = percorso
         self.playlist = []
-        self.preferiti = Playlist("Preferiti")
+        self.preferiti = Playlist(NOME_DEI_PREFERITI)
 
     def carica(self):
         """Legge il file; se non c'e' l'archivio resta vuoto."""
-        self.preferiti = Playlist("Preferiti")
+        self.preferiti = Playlist(NOME_DEI_PREFERITI)
         if not os.path.isfile(self.percorso):
             self.playlist = []
             return
@@ -383,7 +390,7 @@ class Archivio:
         self.playlist = [Playlist.da_dati(p) for p in dati.get("playlist", [])]
         if isinstance(dati.get("preferiti"), dict):
             self.preferiti = Playlist.da_dati(dati["preferiti"])
-            self.preferiti.nome = "Preferiti"
+            self.preferiti.nome = NOME_DEI_PREFERITI
 
     def nei_preferiti(self, brano):
         """Il brano dei Preferiti con lo stesso file e sottobrano, o None."""
@@ -398,7 +405,7 @@ class Archivio:
             json.dump(dati, f, ensure_ascii=False, indent=1)
         os.replace(provvisorio, self.percorso)
 
-    def nome_libero(self, base="Playlist"):
+    def nome_libero(self, base=NOME_DELLA_NUOVA):
         """Un nome non ancora usato: base, poi base 2, base 3..."""
         nomi = {p.nome.casefold() for p in self.playlist}
         if base.casefold() not in nomi:
@@ -409,7 +416,7 @@ class Archivio:
         return f"{base} {n}"
 
     def nuova(self, nome=None, percorsi=()):
-        pl = Playlist.da_percorsi(self.nome_libero(nome or "Playlist"), percorsi)
+        pl = Playlist.da_percorsi(self.nome_libero(nome or NOME_DELLA_NUOVA), percorsi)
         self.playlist.append(pl)
         return pl
 

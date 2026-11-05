@@ -19,13 +19,21 @@ import os
 import winreg
 
 import formati
+from lingua import _
 
 NOME = "MeTeOra"
 PROGID_AUDIO = "MeTeOra.Audio"
 PROGID_VIDEO = "MeTeOra.Video"
 PROGID_PLAYLIST = "MeTeOra.Playlist"
 # I tre ProgID, con la descrizione che Windows mostra.
-PROGID = ((PROGID_AUDIO, "Audio per MeTeOra"), (PROGID_VIDEO, "Video per MeTeOra"), (PROGID_PLAYLIST, "Playlist per MeTeOra"))
+PROGID = (
+    # Traduttori: il tipo dei file audio associati a MeTeOra, come lo mostra Esplora risorse.
+    (PROGID_AUDIO, _("Audio per MeTeOra")),
+    # Traduttori: come sopra, per i file video.
+    (PROGID_VIDEO, _("Video per MeTeOra")),
+    # Traduttori: come sopra, per le playlist M3U e PLS.
+    (PROGID_PLAYLIST, _("Playlist per MeTeOra")),
+)
 _CLASSI = r"Software\Classes"
 _APPLICAZIONE = rf"{_CLASSI}\Applications\MeTeOra.exe"
 _CAPACITA = r"Software\MeTeOra\Capabilities"
@@ -63,7 +71,8 @@ def registra(eseguibile, reg=winreg):
         _scrivi(reg, rf"{_CLASSI}\{progid}\shell\open\command", {"": comando})
     for estensione, progid in tipi.items():
         _scrivi(reg, rf"{_CLASSI}\{estensione}\OpenWithProgids", {progid: ""})
-    _scrivi(reg, _CAPACITA, {"ApplicationName": NOME, "ApplicationDescription": "Lettore audio e video accessibile"})
+    # Traduttori: la descrizione di MeTeOra fra le app predefinite delle impostazioni di Windows.
+    _scrivi(reg, _CAPACITA, {"ApplicationName": NOME, "ApplicationDescription": _("Lettore audio e video accessibile")})
     _scrivi(reg, rf"{_CAPACITA}\FileAssociations", tipi)
     _scrivi(reg, _REGISTRATE, {NOME: _CAPACITA})
     _avvisa_windows()

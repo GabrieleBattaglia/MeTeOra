@@ -27,10 +27,20 @@ import struct
 from typing import NamedTuple
 
 import formati
+from lingua import _
 
-# Il titolo delle tracce del karaoke, e da dove viene il testo.
-TITOLO = "Testo del karaoke"
-FONTI = {"midi": "dal MIDI", "lrc": "dal file LRC", "sylt": "dai tag del brano"}
+# Il titolo delle tracce del karaoke, e da dove viene il testo: il titolo
+# e' "Testo del karaoke, dal MIDI", e chi lo legge lo riconosce dall'inizio.
+# Traduttori: il titolo della traccia di sottotitoli fatta con le parole del karaoke.
+TITOLO = _("Testo del karaoke")
+FONTI = {
+    # Traduttori: da dove viene il testo del karaoke, dopo "Testo del karaoke," nel titolo della traccia: da un file MIDI.
+    "midi": _("dal MIDI"),
+    # Traduttori: come sopra: da un file .lrc accanto al brano.
+    "lrc": _("dal file LRC"),
+    # Traduttori: come sopra: dai testi sincronizzati dei tag ID3 del brano.
+    "sylt": _("dai tag del brano"),
+}
 MODI = ("riga", "strofa")
 # L'ultima riga, o strofa, resta per tanto dopo il suo inizio.
 DURATA_DELL_ULTIMA = 10.0
