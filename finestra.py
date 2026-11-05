@@ -4418,28 +4418,34 @@ class Finestra(wx.Frame):
         campo vuoto lo cancella. Un brano che suona si ferma un istante e
         riparte dal suo punto: mpv legge il file mentre mutagen lo riscrive."""
         nome, chi = t["nome"], self._di_chi(percorsi)
-        diversi = " I file hanno valori diversi: quello che scrivi va in tutti." if t.get("diversi") else ""
+        # Traduttori: nome e' il nome del tag, come Titolo; chi dice di quali file, come il nome di un file o 3 file.
+        domanda = _("{nome} di {chi}. Un campo vuoto cancella il tag.").format(nome=nome, chi=chi)
+        if t.get("diversi"):
+            domanda += " " + _("I file hanno valori diversi: quello che scrivi va in tutti.")
         self._domanda()
-        with DialogoTesto(self, f"{nome} di {chi}. Un campo vuoto cancella il tag.{diversi}", f"Tag {nome}", t["valore"]) as dialogo:
+        # Traduttori: il titolo del campo, con il nome del tag, come Titolo.
+        with DialogoTesto(self, domanda, _("Tag {nome}").format(nome=nome), t["valore"]) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
-                self._annullato(f"Tag {nome} non cambiato.")
+                self._annullato(_("Tag {nome} non cambiato.").format(nome=nome))
                 return
             scritto = dialogo.GetValue()
         if not t.get("diversi") and tag.pulito(scritto) == t["valore"]:
             # Un valore lasciato com'era non si controlla: un anno con l'ora,
             # o una traccia come A1, restano dove sono.
-            self._annullato(f"Tag {nome} non cambiato.")
+            self._annullato(_("Tag {nome} non cambiato.").format(nome=nome))
             return
         try:
             valore = tag.controlla(t["chiave"], scritto)
         except tag.ErroreTag as e:
-            self._riscontro("errore", f"{e} Il tag {nome} resta com'era.")
+            self._riscontro("errore", _("{errore} Il tag {nome} resta com'era.").format(errore=e, nome=nome))
             return
         if not valore and t.get("diversi") and len(percorsi) > 1 and not self._conferma(
-                f"Cancellare il tag {nome} da {len(percorsi)} file? Hanno valori diversi, che si perdono.", f"Tag {nome}"):
+                ngettext("Cancellare il tag {nome} da {n} file? Hanno valori diversi, che si perdono.",
+                    "Cancellare il tag {nome} da {n} file? Hanno valori diversi, che si perdono.", len(percorsi)).format(nome=nome, n=len(percorsi)),
+                _("Tag {nome}").format(nome=nome)):
             # Il campo dei valori diversi parte vuoto: un Invio distratto non
             # deve cancellare il tag da tutti.
-            self._annullato(f"Tag {nome} non cambiato.")
+            self._annullato(_("Tag {nome} non cambiato.").format(nome=nome))
             return
         scritti, errori = 0, []
         for percorso in percorsi:
@@ -4458,9 +4464,9 @@ class Finestra(wx.Frame):
         if not scritti:
             self._riscontro("errore", " ".join(errori))
             return
-        chi = self._di_chi(percorsi) if scritti == len(percorsi) else f"{scritti} file su {len(percorsi)}"
+        chi = self._di_chi(percorsi) if scritti == len(percorsi) else ngettext("{n} file su {totale}", "{n} file su {totale}", scritti).format(n=scritti, totale=len(percorsi))
         self._statistiche.conta("file_dei_tag_cambiati", scritti)
-        testo = f"{nome} di {chi}: {valore}." if valore else f"Tag {nome} cancellato da {chi}."
+        testo = _("{nome} di {chi}: {valore}.").format(nome=nome, chi=chi, valore=valore) if valore else _("Tag {nome} cancellato da {chi}.").format(nome=nome, chi=chi)
         self._riscontro("tag_cambiato" if valore else "tag_cancellato", " ".join([testo, *errori]))
         self._aggiorna_etichette()
 
@@ -4474,22 +4480,23 @@ class Finestra(wx.Frame):
             self._cartella_al_cestino(voce, dati)
             return
         if tipo == "sottobrano":
-            self._riscontro("non_disponibile", "Un sottobrano non si cestina da solo: Maiuscolo+Canc si usa sul file che lo contiene.")
+            self._riscontro("non_disponibile", _("Un sottobrano non si cestina da solo: Maiuscolo+Canc si usa sul file che lo contiene."))
             return
         if tipo not in ("brano", "file"):
-            self._riscontro("non_disponibile", "Maiuscolo+Canc manda nel cestino un file, da una playlist o da una cartella, o una cartella vuota.")
+            self._riscontro("non_disponibile", _("Maiuscolo+Canc manda nel cestino un file, da una playlist o da una cartella, o una cartella vuota."))
             return
         pl, brano = dati["playlist"], dati["brano"]
-        dove = "" if pl.temporanea else f" Si toglie anche dalla playlist {pl.nome}."
+        dove = "" if pl.temporanea else " " + _("Si toglie anche dalla playlist {nome}.").format(nome=pl.nome)
         cestino = questo_pc.ha_il_cestino(brano.percorso)
-        domanda = f"Mandare nel cestino di Windows il file {brano.percorso}?" if cestino else f"Cancellare per sempre il file {brano.percorso}? Lì il cestino di Windows non c'è."
-        if not self._conferma(domanda + dove, "Manda nel cestino" if cestino else "Cancella per sempre"):
-            self._annullato("Il file resta dov'è.")
+        domanda = _("Mandare nel cestino di Windows il file {percorso}?").format(percorso=brano.percorso) if cestino else _(
+            "Cancellare per sempre il file {percorso}? Lì il cestino di Windows non c'è.").format(percorso=brano.percorso)
+        if not self._conferma(domanda + dove, _("Manda nel cestino") if cestino else _("Cancella per sempre")):
+            self._annullato(_("Il file resta dov'è."))
             return
         if self.motore.in_corso == brano.percorso:
             self.motore.stop()
         if not questo_pc.nel_cestino(brano.percorso):
-            self._riscontro("errore", f"Non riesco a mandare nel cestino {brano.percorso}.")
+            self._riscontro("errore", _("Non riesco a mandare nel cestino {percorso}.").format(percorso=brano.percorso))
             return
         if pl.temporanea:
             genitore = self.albero.GetItemParent(voce)
@@ -4507,7 +4514,8 @@ class Finestra(wx.Frame):
             self._togli(pl, brano, annuncia=False)
         self._riconta(os.path.dirname(brano.percorso))
         self._statistiche.conta("file_nel_cestino")
-        self._riscontro("cestino", f"{brano.nome_del_file} è nel cestino di Windows." if cestino else f"{brano.nome_del_file} è cancellato per sempre.")
+        self._riscontro("cestino", _("{nome} è nel cestino di Windows.").format(nome=brano.nome_del_file) if cestino else _(
+            "{nome} è cancellato per sempre.").format(nome=brano.nome_del_file))
 
     def _cartella_al_cestino(self, voce, dati):
         """Maiuscolo+Canc su una cartella (Gabriele, 4 ottobre 2026): va nel
@@ -4519,23 +4527,25 @@ class Finestra(wx.Frame):
         nome = self._nome_della_voce(voce)
         genitore = self.albero.GetItemParent(voce)
         if dati.get("a_mano") or (self._dati(genitore) or {}).get("tipo") in ("rete", "computer"):
-            self._riscontro("non_disponibile", f"{nome} è un percorso di rete, non una cartella da cestinare.")
+            self._riscontro("non_disponibile", _("{nome} è un percorso di rete, non una cartella da cestinare.").format(nome=nome))
             return
         try:
             vuota = questo_pc.cartella_vuota(percorso)
         except OSError as e:
-            self._riscontro("errore", f"Non riesco a leggere {nome}: {e.strerror or e}.")
+            self._riscontro("errore", _("Non riesco a leggere {nome}: {errore}.").format(nome=nome, errore=e.strerror or e))
             return
         if not vuota:
-            self._riscontro("non_disponibile", f"{nome} non è vuota: ci sono dei file, anche se MeTeOra magari non li suona. Maiuscolo+Canc manda nel cestino solo le cartelle vuote.")
+            self._riscontro("non_disponibile", _("{nome} non è vuota: ci sono dei file, anche se MeTeOra magari non li suona. "
+                "Maiuscolo+Canc manda nel cestino solo le cartelle vuote.").format(nome=nome))
             return
         cestino = questo_pc.ha_il_cestino(percorso)
-        domanda = f"Mandare nel cestino di Windows la cartella vuota {percorso}?" if cestino else f"Cancellare per sempre la cartella vuota {percorso}? Lì il cestino di Windows non c'è."
-        if not self._conferma(domanda, "Manda nel cestino" if cestino else "Cancella per sempre"):
-            self._annullato("La cartella resta dov'è.")
+        domanda = _("Mandare nel cestino di Windows la cartella vuota {percorso}?").format(percorso=percorso) if cestino else _(
+            "Cancellare per sempre la cartella vuota {percorso}? Lì il cestino di Windows non c'è.").format(percorso=percorso)
+        if not self._conferma(domanda, _("Manda nel cestino") if cestino else _("Cancella per sempre")):
+            self._annullato(_("La cartella resta dov'è."))
             return
         if not questo_pc.nel_cestino(percorso):
-            self._riscontro("errore", f"Non riesco a mandare nel cestino {percorso}.")
+            self._riscontro("errore", _("Non riesco a mandare nel cestino {percorso}.").format(percorso=percorso))
             return
         vicina = self.albero.GetNextSibling(voce)
         if not vicina.IsOk():
@@ -4547,12 +4557,13 @@ class Finestra(wx.Frame):
         self.contatore.chiedi(self.contatore.dimentica(percorso, anche_sopra=False))
         self._riconta(os.path.dirname(percorso.rstrip("\\")))
         self._statistiche.conta("cartelle_nel_cestino")
-        self._riscontro("cestino", f"La cartella {nome} è nel cestino di Windows." if cestino else f"La cartella {nome} è cancellata per sempre.")
+        self._riscontro("cestino", _("La cartella {nome} è nel cestino di Windows.").format(nome=nome) if cestino else _(
+            "La cartella {nome} è cancellata per sempre.").format(nome=nome))
 
     def _cancella(self, voce):
         dati = self._dati(voce) or {}
         if dati.get("tipo") == "playlist" and dati["playlist"] is self.archivio.preferiti:
-            self._riscontro("non_disponibile", "I Preferiti non si eliminano; Canc su un loro brano lo toglie.")
+            self._riscontro("non_disponibile", _("I Preferiti non si eliminano; Canc su un loro brano lo toglie."))
         elif dati.get("tipo") == "playlist":
             self._elimina_playlist(dati["playlist"])
         elif dati.get("tipo") == "brano":
@@ -4562,7 +4573,7 @@ class Finestra(wx.Frame):
         elif dati.get("a_mano"):
             self._togli_percorso_di_rete(dati["percorso"])
         else:
-            self._riscontro("non_disponibile", "Qui Canc non cancella niente.")
+            self._riscontro("non_disponibile", _("Qui Canc non cancella niente."))
 
     # La selezione multipla.
 
@@ -4616,34 +4627,36 @@ class Finestra(wx.Frame):
         un brano a se'."""
         terne = self._brani_della_selezione()
         brani = [b if n is None else Brano(b.percorso, sottobrano=n) for _pl, b, n in terne]
-        pl = Playlist("Selezione", brani, cartella="")
+        # Traduttori: il nome della lista che fanno le voci selezionate.
+        pl = Playlist(_("Selezione"), brani, cartella="")
         pl.selezione = True
         primo = self.coda.primo(pl)
         if primo is None:
-            self._riscontro("niente_da_suonare", "Nella selezione non c'è niente da suonare.")
+            self._riscontro("niente_da_suonare", _("Nella selezione non c'è niente da suonare."))
             return
         self._suona(pl, primo)
 
     def _voci_del_menu_della_selezione(self):
         n = len(self._voci_selezionate())
-        return [(f"Riproduci le {n} voci selezionate", self._suona_selezione), ("Crea playlist dalla selezione", self._crea_dalla_selezione),
-            ("Aggiungi alla playlist", self._menu_aggiungi(self._copie_della_selezione)), ("Aggiungi ai preferiti", self._selezione_ai_preferiti),
-            ("Togli dalle playlist, ed elimina le playlist e i marker selezionati", self._cancella_selezione), ("Manda nel cestino", self._cestina_selezione),
+        return [(ngettext("Riproduci {n} voce selezionata", "Riproduci le {n} voci selezionate", n).format(n=n), self._suona_selezione),
+            (_("Crea playlist dalla selezione"), self._crea_dalla_selezione),
+            (_("Aggiungi alla playlist"), self._menu_aggiungi(self._copie_della_selezione)), (_("Aggiungi ai preferiti"), self._selezione_ai_preferiti),
+            (_("Togli dalle playlist, ed elimina le playlist e i marker selezionati"), self._cancella_selezione), (_("Manda nel cestino"), self._cestina_selezione),
             # I file e i loro tag si leggono solo alla scelta: aprire il menu
             # di una selezione con un'unita' intera non deve fermare tutto.
-            ("Leggi i tag", self._comando_leggi_i_tag), ("Modifica i tag", self._comando_modifica_i_tag)]
+            (_("Leggi i tag"), self._comando_leggi_i_tag), (_("Modifica i tag"), self._comando_modifica_i_tag)]
 
     def _crea_dalla_selezione(self):
         brani = self._copie_della_selezione()
         if not brani:
-            self._riscontro("niente_da_suonare", "Nella selezione non c'è niente da mettere in una playlist.")
+            self._riscontro("niente_da_suonare", _("Nella selezione non c'è niente da mettere in una playlist."))
             return
         self._domanda()
-        with DialogoTesto(self, "Nome della nuova playlist:", "Crea playlist dalla selezione", "Selezione") as dialogo:
+        with DialogoTesto(self, _("Nome della nuova playlist:"), _("Crea playlist dalla selezione"), _("Selezione")) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
-                self._annullato("Nessuna playlist creata.")
+                self._annullato(_("Nessuna playlist creata."))
                 return
-            nome = dialogo.GetValue().strip() or "Selezione"
+            nome = dialogo.GetValue().strip() or _("Selezione")
         self._aggiungi(None, brani, nome=nome)
 
     def _f4(self):
@@ -4656,15 +4669,18 @@ class Finestra(wx.Frame):
         nuovi = [b for b in self._copie_della_selezione() if not self.archivio.nei_preferiti(b)]
         gia = len(self._brani_della_selezione()) - len(nuovi)
         if not nuovi:
-            self._riscontro("gia_nei_preferiti", "I brani selezionati sono già tutti nei Preferiti.")
+            self._riscontro("gia_nei_preferiti", _("I brani selezionati sono già tutti nei Preferiti."))
             return
         self.archivio.preferiti.brani.extend(nuovi)
         self._sentinella.guarda(*(b.percorso for b in nuovi))
         self._chiedi_schede(self.archivio.preferiti)
         self._salva_archivio()
         self._popola_playlist()
-        altri = ("; 1 c'era già" if gia == 1 else f"; {gia} c'erano già") if gia else ""
-        self._riscontro("preferito_aggiunto", f"{'Aggiunto' if len(nuovi) == 1 else 'Aggiunti'} ai Preferiti {brani_al_plurale(len(nuovi))}{altri}.")
+        frase = ngettext("Aggiunto ai Preferiti {n} brano", "Aggiunti ai Preferiti {n} brani", len(nuovi)).format(n=len(nuovi))
+        if gia:
+            # Traduttori: segue la frase dei brani aggiunti ai Preferiti; n sono quelli che c'erano gia'.
+            frase += ngettext("; {n} c'era già", "; {n} c'erano già", gia).format(n=gia)
+        self._riscontro("preferito_aggiunto", frase + ".")
 
     def _cancella_selezione(self):
         """Canc su piu' voci: toglie i brani dalle loro playlist ed elimina le
@@ -4675,10 +4691,11 @@ class Finestra(wx.Frame):
         da_togliere = [(v, d["playlist"], d["brano"]) for v, d in voci if d.get("tipo") == "brano" and d["playlist"] not in da_eliminare]
         marker = [(v, d["chiave"], d["marker"]) for v, d in voci if d.get("tipo") == "marker"]
         if not (da_eliminare or da_togliere or marker):
-            self._riscontro("non_disponibile", "Nella selezione non c'è niente che Canc possa togliere: brani di playlist, playlist o marker.")
+            self._riscontro("non_disponibile", _("Nella selezione non c'è niente che Canc possa togliere: brani di playlist, playlist o marker."))
             return
-        if da_eliminare and not self._conferma(f"Eliminare {len(da_eliminare)} playlist? I file restano sul disco.", "Elimina playlist"):
-            self._annullato("Eliminazione annullata.")
+        if da_eliminare and not self._conferma(ngettext("Eliminare {n} playlist? I file restano sul disco.", "Eliminare {n} playlist? I file restano sul disco.",
+                len(da_eliminare)).format(n=len(da_eliminare)), _("Elimina playlist")):
+            self._annullato(_("Eliminazione annullata."))
             return
         approdo = self._approdo([v for v, d in voci if d.get("tipo") == "playlist" and d["playlist"] in da_eliminare] + [v for v, _pl, _b in da_togliere]
             + [v for v, _k, _m in marker])
@@ -4701,13 +4718,14 @@ class Finestra(wx.Frame):
             self._salva_i_marker(*{k for _v, k, _m in marker})
         self._statistiche.conta("brani_tolti", len(da_togliere))
         self._statistiche.conta("marker_tolti_selezione", tolti_marker)
+        # I pezzi della frase, uniti dalle virgole, con la maiuscola al primo.
         parti = []
         if da_togliere:
-            parti.append(f"{'tolto' if len(da_togliere) == 1 else 'tolti'} {brani_al_plurale(len(da_togliere))}")
+            parti.append(ngettext("tolto {n} brano", "tolti {n} brani", len(da_togliere)).format(n=len(da_togliere)))
         if da_eliminare:
-            parti.append(f"{'eliminata' if len(da_eliminare) == 1 else 'eliminate'} {len(da_eliminare)} playlist")
+            parti.append(ngettext("eliminata {n} playlist", "eliminate {n} playlist", len(da_eliminare)).format(n=len(da_eliminare)))
         if tolti_marker:
-            parti.append(f"{'eliminato' if tolti_marker == 1 else 'eliminati'} {tolti_marker} marker")
+            parti.append(ngettext("eliminato {n} marker", "eliminati {n} marker", tolti_marker).format(n=tolti_marker))
         evento = "brano_tolto" if da_togliere else "playlist_eliminata" if da_eliminare else "marker_eliminato"
         self._riscontro(evento, ", ".join(parti).capitalize() + ".")
 
@@ -4776,15 +4794,18 @@ class Finestra(wx.Frame):
         voci = [(v, self._dati(v) or {}) for v in self._voci_selezionate()]
         bersagli = [(v, d["playlist"], d["brano"]) for v, d in voci if d.get("tipo") in ("brano", "file")]
         if not bersagli:
-            self._riscontro("non_disponibile", "Maiuscolo+Canc manda nel cestino i file: seleziona brani o file.")
+            self._riscontro("non_disponibile", _("Maiuscolo+Canc manda nel cestino i file: seleziona brani o file."))
             return
         senza_cestino = sum(1 for _v, _pl, brano in bersagli if not questo_pc.ha_il_cestino(brano.percorso))
         avviso = ""
         if senza_cestino:
             # In rete e sulle chiavette Windows cancella per sempre: lo si dice prima.
-            avviso = f" {'1 sta' if senza_cestino == 1 else f'{senza_cestino} stanno'} dove il cestino non c'è, e si {'cancella' if senza_cestino == 1 else 'cancellano'} per sempre."
-        if not self._conferma(f"Mandare nel cestino di Windows {len(bersagli)} file? I brani escono anche dalle loro playlist.{avviso}", "Manda nel cestino"):
-            self._annullato("I file restano dove sono.")
+            avviso = " " + ngettext("{n} sta dove il cestino non c'è, e si cancella per sempre.", "{n} stanno dove il cestino non c'è, e si cancellano per sempre.",
+                senza_cestino).format(n=senza_cestino)
+        domanda = ngettext("Mandare nel cestino di Windows {n} file? I brani escono anche dalle loro playlist.",
+            "Mandare nel cestino di Windows {n} file? I brani escono anche dalle loro playlist.", len(bersagli)).format(n=len(bersagli))
+        if not self._conferma(domanda + avviso, _("Manda nel cestino")):
+            self._annullato(_("I file restano dove sono."))
             return
         riusciti, falliti = 0, 0
         cestinate, cancellate = [], []
@@ -4807,9 +4828,13 @@ class Finestra(wx.Frame):
         self._riconta(*{os.path.dirname(brano.percorso) for _v, _pl, brano in bersagli if not os.path.exists(brano.percorso)})
         if any(pl is self.risultati for _v, pl, _b in bersagli):
             self._aggiorna_risultati()
-        testo = f"Nel cestino di Windows {riusciti} file." if not senza_cestino else f"Tolti {riusciti} file: quelli dove il cestino non c'è sono cancellati per sempre."
+        if not senza_cestino:
+            testo = ngettext("Nel cestino di Windows {n} file.", "Nel cestino di Windows {n} file.", riusciti).format(n=riusciti)
+        else:
+            testo = ngettext("Tolti {n} file: quelli dove il cestino non c'è sono cancellati per sempre.",
+                "Tolti {n} file: quelli dove il cestino non c'è sono cancellati per sempre.", riusciti).format(n=riusciti)
         if falliti:
-            testo += " 1 non c'è andato." if falliti == 1 else f" {falliti} non ci sono andati."
+            testo += " " + ngettext("{n} non c'è andato.", "{n} non ci sono andati.", falliti).format(n=falliti)
         self._statistiche.conta("file_nel_cestino", riusciti)
         self._riscontro("cestino", testo)
 
@@ -4820,20 +4845,20 @@ class Finestra(wx.Frame):
             self.archivio.salva()
         except OSError as e:
             self._statistiche.conta("salvataggi_non_riusciti")
-            self._riscontro("errore", f"Non riesco a salvare le playlist: {e}")
+            self._riscontro("errore", _("Non riesco a salvare le playlist: {errore}").format(errore=e))
 
     def _salva_impostazioni(self):
         try:
             self.impostazioni.salva()
         except OSError as e:
             self._statistiche.conta("salvataggi_non_riusciti")
-            self._riscontro("errore", f"Non riesco a salvare le impostazioni: {e}")
+            self._riscontro("errore", _("Non riesco a salvare le impostazioni: {errore}").format(errore=e))
 
     def _comando_nuova_playlist(self):
         pl = self.archivio.nuova()
         self._salva_archivio()
         self._popola_playlist(seleziona=pl)
-        self._riscontro("nuova_playlist", f"Creata la playlist {pl.nome}, vuota. Si riempie da Questo PC, con Aggiungi alla playlist.")
+        self._riscontro("nuova_playlist", _("Creata la playlist {nome}, vuota. Si riempie da Questo PC, con Aggiungi alla playlist.").format(nome=pl.nome))
 
     # L'importazione delle playlist di altri programmi (Gabriele, 20 ottobre 2026, 1.113.0).
 
@@ -4844,16 +4869,17 @@ class Finestra(wx.Frame):
         con Nuova playlist."""
         self._domanda()
         stile = wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE
-        with DialogoDiFile(self, "Importa playlist", wildcard=formati.filtro_delle_playlist(), style=stile) as dialogo:
+        with DialogoDiFile(self, _("Importa playlist"), wildcard=formati.filtro_delle_playlist(), style=stile) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
-                self._annullato("Nessuna playlist importata.")
+                self._annullato(_("Nessuna playlist importata."))
                 return
             percorsi = list(dialogo.GetPaths())
         liste = [p for p in percorsi if formati.e_playlist(p)]
         altri = [os.path.basename(p) for p in percorsi if not formati.e_playlist(p)]
         if altri:
-            cosa = "non è una playlist" if len(altri) == 1 else "non sono playlist"
-            self._riscontro("non_disponibile", f"{', '.join(altri)}: {cosa}. MeTeOra importa i file m3u, m3u8 e pls.")
+            # Traduttori: nomi sono i nomi dei file scelti, separati da virgole.
+            self._riscontro("non_disponibile", ngettext("{nomi}: non è una playlist. MeTeOra importa i file m3u, m3u8 e pls.",
+                "{nomi}: non sono playlist. MeTeOra importa i file m3u, m3u8 e pls.", len(altri)).format(nomi=", ".join(altri)))
         self._importa_le_playlist(liste, "seleziona")
 
     def _importa_le_playlist(self, percorsi, dopo=None):
@@ -4885,12 +4911,13 @@ class Finestra(wx.Frame):
                 return
             nome, altre = os.path.basename(coda[0][0]), len(in_attesa) - 1
             if altre == 0:
-                chi = f"{nome} aspetta"
-            elif altre == 1:
-                chi = f"{nome} e un'altra playlist aspettano"
+                # Traduttori: nome e in_corso sono nomi di file di playlist; in_corso e' quella che si sta importando.
+                frase = _("{nome} aspetta che finisca l'importazione di {in_corso}.").format(nome=nome, in_corso=lavoro["nome"])
             else:
-                chi = f"{nome} e altre {altre} playlist aspettano"
-            self.scrivi(f"{chi} che finisca l'importazione di {lavoro['nome']}.")
+                # Traduttori: nome e in_corso sono nomi di file di playlist; in_corso e' quella che si sta importando.
+                frase = ngettext("{nome} e un'altra playlist aspettano che finisca l'importazione di {in_corso}.",
+                    "{nome} e altre {n} playlist aspettano che finisca l'importazione di {in_corso}.", altre).format(nome=nome, n=altre, in_corso=lavoro["nome"])
+            self.scrivi(frase)
 
         wx.CallLater(800, se_aspetta)
 
@@ -4901,7 +4928,7 @@ class Finestra(wx.Frame):
             return
         percorso, gruppo = self._da_importare.pop(0)
         lavoro = self._importazione = {"percorso": percorso, "nome": os.path.basename(percorso), "gruppo": gruppo}
-        self._avvisa_se_tarda(lavoro, f"Leggo {lavoro['nome']}: ci vuole qualche secondo.")
+        self._avvisa_se_tarda(lavoro, _("Leggo {nome}: ci vuole qualche secondo.").format(nome=lavoro["nome"]))
         self._in_disparte(lambda: importazione.leggi(percorso), lambda letta: self._esito_dell_importazione(self._playlist_letta, lavoro, letta),
             "MeTeOra, importazione", guasto=self._guasto_dell_importazione)
 
@@ -4960,22 +4987,23 @@ class Finestra(wx.Frame):
             return
         percorso, nome = lavoro["percorso"], lavoro["nome"]
         if "errore" in letta:
-            self._riscontro("errore", f"Non riesco a leggere {nome}: {letta['errore']}")
+            self._riscontro("errore", _("Non riesco a leggere {nome}: {errore}").format(nome=nome, errore=letta["errore"]))
             self._importazione_finita(lavoro)
             return
         if letta["libgme"]:
-            self._riscontro("niente_da_suonare", f"Niente da importare da {nome}: è la lista dei brani di {letta['libgme']}, che MeTeOra usa già da sola "
-                f"quando suona {letta['libgme']}.")
+            # Traduttori: nome e' il file della playlist, musica il file di musica delle console a cui appartiene.
+            self._riscontro("niente_da_suonare", _("Niente da importare da {nome}: è la lista dei brani di {musica}, che MeTeOra usa già da sola "
+                "quando suona {musica}.").format(nome=nome, musica=letta["libgme"]))
             self._importazione_finita(lavoro)
             return
         esistente = self.archivio.dall_origine(percorso)
         if esistente is not None:
             if not importazione.cambiata(esistente.origine, letta["origine"]):
-                self._riscontro("playlist_gia_importata", f"La playlist {esistente.nome} viene già da {percorso}.")
+                self._riscontro("playlist_gia_importata", _("La playlist {nome} viene già da {percorso}.").format(nome=esistente.nome, percorso=percorso))
                 self._dopo_l_importazione(lavoro, esistente)
                 return
-            if not self._conferma(f"{nome} è cambiato dopo l'importazione. Rileggerlo, perdendo le modifiche fatte in MeTeOra?", "Importa playlist"):
-                self._annullato(f"La playlist {esistente.nome} resta com'è.")
+            if not self._conferma(_("{nome} è cambiato dopo l'importazione. Rileggerlo, perdendo le modifiche fatte in MeTeOra?").format(nome=nome), _("Importa playlist")):
+                self._annullato(_("La playlist {nome} resta com'è.").format(nome=esistente.nome))
                 self._dopo_l_importazione(lavoro, esistente)
                 return
         voci = letta["voci"]
@@ -4983,17 +5011,19 @@ class Finestra(wx.Frame):
             if esistente is not None:
                 # Si' alla rilettura di un file svuotato: resta quella che
                 # c'e', e va avanti come con No.
-                self._riscontro("niente_da_suonare", f"Niente da rileggere da {nome}: non ha nessuna voce, e la playlist {esistente.nome} resta com'è.")
+                # Traduttori: nome e' il file letto, playlist la playlist di MeTeOra che ne viene.
+                self._riscontro("niente_da_suonare", _("Niente da rileggere da {nome}: non ha nessuna voce, e la playlist {playlist} resta com'è.").format(
+                    nome=nome, playlist=esistente.nome))
                 self._dopo_l_importazione(lavoro, esistente)
                 return
-            self._riscontro("niente_da_suonare", f"Niente da importare da {nome}: non ha nessuna voce.")
+            self._riscontro("niente_da_suonare", _("Niente da importare da {nome}: non ha nessuna voce.").format(nome=nome))
             self._importazione_finita(lavoro)
             return
         candidati = [voce.percorso for voce in voci if voce.motivo is None]
         if not candidati:
             self._playlist_controllata(lavoro, letta, esistente, {"mancanti": set(), "saltate": {}})
             return
-        self._avvisa_se_tarda(lavoro, f"Controllo i file di {nome}: ci vuole qualche secondo.")
+        self._avvisa_se_tarda(lavoro, _("Controllo i file di {nome}: ci vuole qualche secondo.").format(nome=nome))
         self._in_disparte(lambda: pulizia.controlla(candidati, fermo=lambda: self._chiusa, cedi=self._cedi),
             lambda esito: self._esito_dell_importazione(self._playlist_controllata, lavoro, letta, esistente, esito), "MeTeOra, importazione",
             guasto=self._guasto_dell_importazione)
@@ -5008,7 +5038,7 @@ class Finestra(wx.Frame):
             return
         percorso, nome = lavoro["percorso"], lavoro["nome"]
         if "errore" in esito:
-            self._riscontro("errore", f"Non riesco a controllare i file di {nome}: {esito['errore']}")
+            self._riscontro("errore", _("Non riesco a controllare i file di {nome}: {errore}").format(nome=nome, errore=esito["errore"]))
             self._importazione_finita(lavoro)
             return
         if esistente is not None and esistente not in self.archivio.playlist:
@@ -5018,9 +5048,9 @@ class Finestra(wx.Frame):
         saltate = [frase_delle_saltate(scartate), frase_delle_tenute(tenute)]
         if not percorsi:
             if esistente is not None:
-                testa = f"Niente da rileggere da {nome}: la playlist {esistente.nome} resta com'è."
+                testa = _("Niente da rileggere da {nome}: la playlist {playlist} resta com'è.").format(nome=nome, playlist=esistente.nome)
             else:
-                testa = f"Niente da importare da {nome}."
+                testa = _("Niente da importare da {nome}.").format(nome=nome)
             self._scrivi_l_importazione("niente_da_suonare", [" ".join(t for t in (testa, *saltate) if t), *righe_delle_saltate(scartate)])
             if esistente is not None:
                 # Resta quella che c'e', e va avanti come con No.
@@ -5042,13 +5072,16 @@ class Finestra(wx.Frame):
             pl.origine = letta["origine"]
             if self.coda.loop_playlist is pl:
                 self.coda.togli_loop()
-            evento, testa = "playlist_riletta", f"Riletta la playlist {pl.nome}: {brani_al_plurale(len(brani))}, da {percorso}."
+            evento, testa = "playlist_riletta", ngettext("Riletta la playlist {nome}: {n} brano, da {percorso}.", "Riletta la playlist {nome}: {n} brani, da {percorso}.",
+                len(brani)).format(nome=pl.nome, n=len(brani), percorso=percorso)
         else:
-            pl = self.archivio.nuova(os.path.splitext(nome)[0].strip() or "Playlist", percorsi)
+            # Traduttori: il nome di una playlist importata da un file senza nome.
+            pl = self.archivio.nuova(os.path.splitext(nome)[0].strip() or _("Playlist"), percorsi)
             pl.origine = letta["origine"]
             self._statistiche.conta("playlist_importate")
             self._statistiche.conta("brani_importati", len(brani))
-            evento, testa = "playlist_creata", f"Importata la playlist {pl.nome}: {brani_al_plurale(len(brani))}, da {percorso}."
+            evento, testa = "playlist_creata", ngettext("Importata la playlist {nome}: {n} brano, da {percorso}.", "Importata la playlist {nome}: {n} brani, da {percorso}.",
+                len(brani)).format(nome=pl.nome, n=len(brani), percorso=percorso)
         self._chiedi_schede(pl)
         self._salva_archivio()
         self._popola_playlist(seleziona=pl if seleziona else None)
@@ -5076,13 +5109,13 @@ class Finestra(wx.Frame):
             return
         brano = self.coda.primo(pl)
         if brano is None:
-            self._riscontro("niente_da_suonare", f"La playlist {pl.nome} non ha brani da suonare.")
+            self._riscontro("niente_da_suonare", _("La playlist {nome} non ha brani da suonare.").format(nome=pl.nome))
             return
         self._suona(pl, brano, "file_aperto")
 
     def _aggiungi(self, pl, percorsi_da_aggiungere, nome=None):
         if not percorsi_da_aggiungere:
-            self._riscontro("niente_da_suonare", "Non c'è niente da aggiungere: nessun file supportato.")
+            self._riscontro("niente_da_suonare", _("Non c'è niente da aggiungere: nessun file supportato."))
             return
         nuova = pl is None
         if nuova:
@@ -5095,23 +5128,33 @@ class Finestra(wx.Frame):
         self._chiedi_schede(pl)
         self._salva_archivio()
         self._popola_playlist()
-        cosa = "Creata la playlist" if nuova else "Aggiunto alla playlist" if len(percorsi_da_aggiungere) == 1 else "Aggiunti alla playlist"
-        self._riscontro("playlist_creata" if nuova else "brano_aggiunto", f"{cosa} {pl.nome}: {brani_al_plurale(len(percorsi_da_aggiungere))}, ora {brani_al_plurale(len(pl.brani))}.")
+        n = len(percorsi_da_aggiungere)
+        ora = plurale(len(pl.brani), "{n} brano", "{n} brani")
+        if nuova:
+            # Traduttori: ora sono i brani che la playlist ha adesso, come 12 brani.
+            frase = ngettext("Creata la playlist {nome}: {n} brano, ora {ora}.", "Creata la playlist {nome}: {n} brani, ora {ora}.", n).format(nome=pl.nome, n=n, ora=ora)
+        else:
+            # Traduttori: ora sono i brani che la playlist ha adesso, come 12 brani.
+            frase = ngettext("Aggiunto alla playlist {nome}: {n} brano, ora {ora}.", "Aggiunti alla playlist {nome}: {n} brani, ora {ora}.", n).format(
+                nome=pl.nome, n=n, ora=ora)
+        self._riscontro("playlist_creata" if nuova else "brano_aggiunto", frase)
 
     def _ai_preferiti(self, brano):
         """Mette nei Preferiti una copia del brano: stesso file e sottobrano."""
         if brano is None:
-            self._riscontro("non_disponibile", "F4 mette nei Preferiti il brano selezionato: scegline uno in una playlist o in una cartella.")
+            self._riscontro("non_disponibile", _("F4 mette nei Preferiti il brano selezionato: scegline uno in una playlist o in una cartella."))
             return
         if self.archivio.nei_preferiti(brano):
-            self._riscontro("gia_nei_preferiti", f"{brano.nome_del_file} è già nei Preferiti.")
+            self._riscontro("gia_nei_preferiti", _("{nome} è già nei Preferiti.").format(nome=brano.nome_del_file))
             return
         self.archivio.preferiti.brani.append(Brano(brano.percorso, sottobrano=brano.sottobrano))
         self._sentinella.guarda(brano.percorso)
         self._chiedi_schede(self.archivio.preferiti)
         self._salva_archivio()
         self._popola_playlist()
-        self._riscontro("preferito_aggiunto", f"{brano.nome_del_file} è nei Preferiti, che ora hanno {brani_al_plurale(len(self.archivio.preferiti.brani))}.")
+        n = len(self.archivio.preferiti.brani)
+        self._riscontro("preferito_aggiunto", ngettext("{nome} è nei Preferiti, che ora hanno {n} brano.", "{nome} è nei Preferiti, che ora hanno {n} brani.", n).format(
+            nome=brano.nome_del_file, n=n))
 
     def _preferito_selezionato(self):
         """F4: il brano da mettere nei Preferiti, dalla voce selezionata."""
@@ -5133,7 +5176,7 @@ class Finestra(wx.Frame):
             return
         ramo = self._ramo_della_ricerca()
         if ramo is None:
-            self._riscontro("non_disponibile", "Qui non c'è niente in cui cercare: Ctrl con la barra rovesciata cerca in tutto MeTeOra.")
+            self._riscontro("non_disponibile", _("Qui non c'è niente in cui cercare: Ctrl con la barra rovesciata cerca in tutto MeTeOra."))
             return
         self._ricerca_globale(*ramo)
 
@@ -5150,32 +5193,41 @@ class Finestra(wx.Frame):
         while voce.IsOk() and voce != self.albero.GetRootItem():
             dati = self._dati(voce) or {}
             tipo = dati.get("tipo")
+            # I posti in cui si cerca entrano nelle frasi della ricerca, come
+            # Ricerca in Musica o Cerco rock nei Preferiti.
             if tipo in ("cartella", "unita"):
-                return f"in {self._nome_della_voce(voce)}", [], [dati["percorso"]]
+                # Traduttori: dove si cerca, come in Ricerca in Musica; nome e' una cartella o un'unita'.
+                return _("in {nome}").format(nome=self._nome_della_voce(voce)), [], [dati["percorso"]]
             if tipo == "pc":
-                return "in Questo PC", [], None
+                # Traduttori: dove si cerca, come in Ricerca in Questo PC.
+                return _("in Questo PC"), [], None
             if tipo == "radice_playlist":
-                return "nelle playlist", [(b, f"Playlist {pl.nome}") for pl in self.archivio.playlist for b in pl.brani], []
+                # Traduttori: dove si cerca, come in Ricerca nelle playlist.
+                return _("nelle playlist"), [(b, _("Playlist {nome}").format(nome=pl.nome)) for pl in self.archivio.playlist for b in pl.brani], []
             if tipo in ("risultati", "gruppo_risultati"):
-                return "nei Risultati", [(b, None) for b in self._brani_del_gruppo(dati["gruppo"])], []
+                # Traduttori: dove si cerca, come in Ricerca nei Risultati.
+                return _("nei Risultati"), [(b, None) for b in self._brani_del_gruppo(dati["gruppo"])], []
             if tipo == "rete":
                 percorsi = self._percorsi_di_questa_rete()
-                return ("in Questa rete", [], percorsi) if percorsi else None
+                # Traduttori: dove si cerca, come in Ricerca in Questa rete.
+                return (_("in Questa rete"), [], percorsi) if percorsi else None
             if tipo == "computer":
                 percorsi = [d["percorso"] for d in (self._dati(v) for v in self._figli(voce)) if d.get("tipo") == "cartella"]
-                return (f"in {dati['nome']}", [], percorsi) if percorsi else None
+                return (_("in {nome}").format(nome=dati["nome"]), [], percorsi) if percorsi else None
             if tipo in ("playlist", "brano", "file", "sottobrano", "marker"):
                 pl = dati["playlist"]
                 if pl is self.risultati:
                     voce = self.albero.GetItemParent(voce)
                     continue
                 if pl is self.archivio.preferiti:
-                    return "nei Preferiti", [(b, "Preferiti") for b in pl.brani], []
+                    # Traduttori: dove si cerca, come in Ricerca nei Preferiti.
+                    return _("nei Preferiti"), [(b, _("Preferiti")) for b in pl.brani], []
                 if pl in self.archivio.playlist:
-                    return f"nella playlist {pl.nome}", [(b, f"Playlist {pl.nome}") for b in pl.brani], []
+                    # Traduttori: dove si cerca, come in Ricerca nella playlist Rock.
+                    return _("nella playlist {nome}").format(nome=pl.nome), [(b, _("Playlist {nome}").format(nome=pl.nome)) for b in pl.brani], []
                 if pl.cartella:
                     # Il file di una cartella: la cartella, con le sue sottocartelle.
-                    return f"in {os.path.basename(pl.cartella.rstrip(chr(92))) or pl.cartella}", [], [pl.cartella]
+                    return _("in {nome}").format(nome=os.path.basename(pl.cartella.rstrip(chr(92))) or pl.cartella), [], [pl.cartella]
                 return None
             voce = self.albero.GetItemParent(voce)
         return OVUNQUE, None, None
@@ -5193,22 +5245,24 @@ class Finestra(wx.Frame):
         la ricerca e i Risultati si riempiono mentre procede. Senza argomenti
         cerca in tutto MeTeOra; dove, brani e unita la limitano a un ramo."""
         testo = self._testo_della_ricerca
-        titolo = "Ricerca in tutto MeTeOra" if dove == OVUNQUE else f"Ricerca {dove}"
-        istruzioni = ISTRUZIONI_DELLA_RICERCA if dove == OVUNQUE else [f"Puoi usare questi comandi per comporre la ricerca, {dove}.", *_GRAMMATICA_DEL_FILTRO]
+        # Traduttori: dove e' il posto in cui si cerca, come in Musica o nei Preferiti.
+        titolo = _("Ricerca in tutto MeTeOra") if dove == OVUNQUE else _("Ricerca {dove}").format(dove=dove)
+        # Traduttori: dove e' il posto in cui si cerca, come in Musica o nei Preferiti.
+        istruzioni = ISTRUZIONI_DELLA_RICERCA if dove == OVUNQUE else [_("Puoi usare questi comandi per comporre la ricerca, {dove}.").format(dove=dove), *_GRAMMATICA_DEL_FILTRO]
         while True:
             self._domanda()
             with FinestraFiltro(self, titolo, testo, istruzioni) as dialogo:
                 if dialogo.ShowModal() != wx.ID_OK:
-                    self._annullato("Ricerca annullata.")
+                    self._annullato(_("Ricerca annullata."))
                     return
                 testo = " ".join(dialogo.testo.split())
             if not testo:
-                self._riscontro("errore", "Scrivi cosa cercare.")
+                self._riscontro("errore", _("Scrivi cosa cercare."))
                 continue
             try:
                 filtro = Filtro(testo)
             except ErroreFiltro as e:
-                self._riscontro("errore", f"Nella ricerca non capisco: {e}")
+                self._riscontro("errore", _("Nella ricerca non capisco: {errore}").format(errore=e))
                 continue
             break
         self._avvia_ricerca(testo, filtro, unita, brani, dove)
@@ -5225,12 +5279,12 @@ class Finestra(wx.Frame):
             self._ricerca.ferma()
         self._testo_della_ricerca = testo
         if brani is None:
-            brani = [(b, "Preferiti") for b in self.archivio.preferiti.brani]
-            brani += [(b, f"Playlist {pl.nome}") for pl in self.archivio.playlist for b in pl.brani]
+            brani = [(b, _("Preferiti")) for b in self.archivio.preferiti.brani]
+            brani += [(b, _("Playlist {nome}").format(nome=pl.nome)) for pl in self.archivio.playlist for b in pl.brani]
         else:
             # I brani si prendono prima che i Risultati, se sono loro, si svuotino.
             brani = list(brani)
-        self.risultati = Playlist("Risultati", cartella="")
+        self.risultati = Playlist(_("Risultati"), cartella="")
         # Dove sono riconosce i Risultati anche dopo una ricerca nuova, se il
         # brano che suona viene da quelli di prima (tappa 14 b).
         self.risultati.risultati = True
@@ -5245,7 +5299,7 @@ class Finestra(wx.Frame):
         nomi = {percorso + "\\": nome for nome, percorso in salvati}
         self._albero_dei_risultati = AlberoDeiRisultati({**nomi, **dict(questo_pc.unita())})
         if self.nodo_risultati is None:
-            self.nodo_risultati = self.albero.InsertItem(self.albero.GetRootItem(), self.nodo_preferiti, "Risultati")
+            self.nodo_risultati = self.albero.InsertItem(self.albero.GetRootItem(), self.nodo_preferiti, _("Risultati"))
         else:
             self.albero.Collapse(self.nodo_risultati)
             self.albero.DeleteChildren(self.nodo_risultati)
@@ -5256,12 +5310,17 @@ class Finestra(wx.Frame):
         self._statistiche.conta("ricerche_ovunque" if dove == OVUNQUE else "ricerche_nel_ramo")
         self._inizio_della_ricerca = time.monotonic()
         self._ricerca_contata = False
-        self._riscontro("ricerca_avviata", f"Cerco {testo} {dove}. I Risultati si riempiono mentre cerco.")
+        # Traduttori: testo e' cio' che si cerca, dove il posto in cui si cerca, come nei Preferiti.
+        self._riscontro("ricerca_avviata", _("Cerco {testo} {dove}. I Risultati si riempiono mentre cerco.").format(testo=testo, dove=dove))
 
     def _etichetta_dei_risultati(self):
         trovati = self._ricerca.quanti() if self._ricerca else 0
-        stato = "" if self._ricerca is None or self._ricerca.finita else (", ricerca fermata" if self._ricerca.fermata else ", ricerca in corso")
-        return f"Risultati di {self._testo_della_ricerca}: {trovati} {'trovato' if trovati == 1 else 'trovati'}{stato}"
+        testo = self._testo_della_ricerca
+        if self._ricerca is None or self._ricerca.finita:
+            return ngettext("Risultati di {testo}: {n} trovato", "Risultati di {testo}: {n} trovati", trovati).format(testo=testo, n=trovati)
+        if self._ricerca.fermata:
+            return ngettext("Risultati di {testo}: {n} trovato, ricerca fermata", "Risultati di {testo}: {n} trovati, ricerca fermata", trovati).format(testo=testo, n=trovati)
+        return ngettext("Risultati di {testo}: {n} trovato, ricerca in corso", "Risultati di {testo}: {n} trovati, ricerca in corso", trovati).format(testo=testo, n=trovati)
 
     def _dati_del_gruppo(self, tipo, gruppo):
         """I dati di un ramo dei Risultati: quanti suoi rami e brani sono gia'
@@ -5270,7 +5329,7 @@ class Finestra(wx.Frame):
             "pagina": PAGINA_DEI_RISULTATI}
 
     def _etichetta_del_gruppo(self, gruppo):
-        return f"{gruppo.nome}, {gruppo.totale} {'risultato' if gruppo.totale == 1 else 'risultati'}"
+        return ngettext("{nome}, {n} risultato", "{nome}, {n} risultati", gruppo.totale).format(nome=gruppo.nome, n=gruppo.totale)
 
     def _aggiorna_risultati(self):
         """Porta dentro i risultati nuovi della ricerca: nella playlist, nel
@@ -5325,7 +5384,9 @@ class Finestra(wx.Frame):
             dati["brani"] += 1
         restano = len(gruppo.brani) - dati["brani"]
         if restano > 0:
-            testo = "Mostra l'ultimo risultato" if restano == 1 else f"Mostra altri {min(restano, PAGINA_DEI_RISULTATI)} risultati, ne restano {restano}"
+            mostrati = min(restano, PAGINA_DEI_RISULTATI)
+            testo = _("Mostra l'ultimo risultato") if restano == 1 else ngettext("Mostra {n} altro risultato, ne restano {restano}",
+                "Mostra altri {n} risultati, ne restano {restano}", mostrati).format(n=mostrati, restano=restano)
             if altri is None:
                 self.albero.AppendItem(voce, testo, data={"tipo": "altri", "ramo": voce})
             elif self.albero.GetItemText(altri) != testo:
@@ -5347,7 +5408,7 @@ class Finestra(wx.Frame):
             altri = self._dati(self._voce_di_lavoro()) or {}
         ramo = altri.get("ramo")
         if ramo is None:
-            self._riscontro("non_disponibile", "Mostra altri risultati si usa sulla sua voce, in fondo a un ramo dei Risultati.")
+            self._riscontro("non_disponibile", _("Mostra altri risultati si usa sulla sua voce, in fondo a un ramo dei Risultati."))
             return
         dati = self._dati(ramo)
         prima = dati["rami"] + dati["brani"]
@@ -5357,7 +5418,8 @@ class Finestra(wx.Frame):
         figli = list(self._figli(ramo))
         if len(figli) > prima:
             self._seleziona(figli[prima])
-        self._riscontro("altri_risultati", f"Mostrati {dati['brani']} risultati su {len(dati['gruppo'].brani)} in {dati['gruppo'].nome}.")
+        self._riscontro("altri_risultati", ngettext("Mostrati {n} risultati su {totale} in {nome}.", "Mostrati {n} risultati su {totale} in {nome}.", dati["brani"]).format(
+            n=dati["brani"], totale=len(dati["gruppo"].brani), nome=dati["gruppo"].nome))
 
     def _risultati_arrivati(self):
         if self._chiusa or self._ricerca is None:
@@ -5368,12 +5430,23 @@ class Finestra(wx.Frame):
             muti = self._ricerca.senza_risposta
             # Le radici di rete che non hanno risposto, con il nome di Questa rete se ce l'hanno.
             nomi = {os.path.normcase(p): n for n, p in questa_rete.percorsi_salvati()} if muti else {}
-            silenzio = f" In rete non {'ha' if len(muti) == 1 else 'hanno'} risposto: {', '.join(nomi.get(os.path.normcase(p), p) for p in muti)}." if muti else ""
+            silenzio = ""
+            if muti:
+                silenzio = " " + ngettext("In rete non ha risposto: {nomi}.", "In rete non hanno risposto: {nomi}.", len(muti)).format(
+                    nomi=", ".join(nomi.get(os.path.normcase(p), p) for p in muti))
             saltate = len(self._ricerca.cartelle_mute)
             if saltate:
-                silenzio += f" In rete {'una cartella non ha' if saltate == 1 else f'{saltate} cartelle non hanno'} risposto, e la ricerca è andata avanti senza."
+                silenzio += " " + ngettext("In rete una cartella non ha risposto, e la ricerca è andata avanti senza.",
+                    "In rete {n} cartelle non hanno risposto, e la ricerca è andata avanti senza.", saltate).format(n=saltate)
             self._conta_la_ricerca(dove)
-            self._riscontro("ricerca_finita", f"Ricerca di {self._testo_della_ricerca}{dove} finita: {al_plurale(len(self.risultati.brani), 'risultato', 'risultati')}.{silenzio}")
+            n = len(self.risultati.brani)
+            if self._dove_si_cerca == OVUNQUE:
+                finita = ngettext("Ricerca di {testo} finita: {n} risultato.", "Ricerca di {testo} finita: {n} risultati.", n).format(testo=self._testo_della_ricerca, n=n)
+            else:
+                # Traduttori: testo e' cio' che si cerca, dove il posto in cui si cerca, come nei Preferiti.
+                finita = ngettext("Ricerca di {testo} {dove} finita: {n} risultato.", "Ricerca di {testo} {dove} finita: {n} risultati.", n).format(
+                    testo=self._testo_della_ricerca, dove=self._dove_si_cerca, n=n)
+            self._riscontro("ricerca_finita", finita + silenzio)
             # Lo schedario legge senza tempo massimo: i file delle radici che
             # non hanno risposto lo terrebbero fermo.
             mute = tuple(os.path.normcase(p).rstrip("\\") + "\\" for p in muti)
@@ -5381,11 +5454,12 @@ class Finestra(wx.Frame):
 
     def _ferma_ricerca(self):
         if self._ricerca is None or self._ricerca.finita or self._ricerca.fermata:
-            self._riscontro("non_disponibile", "Non c'è una ricerca in corso.")
+            self._riscontro("non_disponibile", _("Non c'è una ricerca in corso."))
             return
         self._ricerca.ferma()
         self._aggiorna_risultati()
-        self._riscontro("ricerca_fermata", f"Ricerca fermata: {al_plurale(len(self.risultati.brani), 'risultato', 'risultati')}.")
+        self._riscontro("ricerca_fermata", ngettext("Ricerca fermata: {n} risultato.", "Ricerca fermata: {n} risultati.", len(self.risultati.brani)).format(
+            n=len(self.risultati.brani)))
 
     def _brani_del_gruppo(self, gruppo):
         """I risultati di un ramo e di tutti quelli che contiene, in ordine."""
@@ -5397,15 +5471,17 @@ class Finestra(wx.Frame):
     def _salva_risultati(self, gruppo=None):
         """Salva come playlist tutti i Risultati, o soltanto un loro ramo."""
         if not self.risultati or not self.risultati.brani:
-            self._riscontro("niente_da_suonare", "Non ci sono risultati da salvare.")
+            self._riscontro("niente_da_suonare", _("Non ci sono risultati da salvare."))
             return
-        proposta = f"Ricerca {self._testo_della_ricerca}" if gruppo is None else f"{gruppo.nome} {self._testo_della_ricerca}"
+        # Traduttori: il nome proposto per la playlist dei risultati; testo e' cio' che si e' cercato.
+        proposta = _("Ricerca {testo}").format(testo=self._testo_della_ricerca) if gruppo is None else f"{gruppo.nome} {self._testo_della_ricerca}"
         self._domanda()
-        with DialogoTesto(self, "Nome della nuova playlist:", "Salva i risultati", proposta) as dialogo:
+        with DialogoTesto(self, _("Nome della nuova playlist:"), _("Salva i risultati"), proposta) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
-                self._annullato("Risultati non salvati.")
+                self._annullato(_("Risultati non salvati."))
                 return
-            nome = dialogo.GetValue().strip() or "Ricerca"
+            # Traduttori: il nome della playlist dei risultati, se il campo resta vuoto.
+            nome = dialogo.GetValue().strip() or _("Ricerca")
         self._aggiorna_risultati()
         brani = self.risultati.brani if gruppo is None else self._brani_del_gruppo(gruppo)
         self._statistiche.conta("playlist_dalla_ricerca")
@@ -5415,28 +5491,29 @@ class Finestra(wx.Frame):
         with wx.BusyCursor():
             files = questo_pc.file_ricorsivi(cartella)
         if not files:
-            self._riscontro("niente_da_suonare", f"In {cartella} non c'è niente da suonare.")
+            self._riscontro("niente_da_suonare", _("In {cartella} non c'è niente da suonare.").format(cartella=cartella))
             return
-        pl = self.archivio.nuova(nome or "Playlist", files)
+        pl = self.archivio.nuova(nome or _("Playlist"), files)
         self._sentinella.guarda(*files)
         self._statistiche.conta("playlist_da_una_cartella")
         self._chiedi_schede(pl)
         self._salva_archivio()
         self._popola_playlist()
-        self._riscontro("playlist_creata", f"Creata la playlist {pl.nome} con {brani_al_plurale(len(files))}.")
+        self._riscontro("playlist_creata", ngettext("Creata la playlist {nome} con {n} brano.", "Creata la playlist {nome} con {n} brani.", len(files)).format(
+            nome=pl.nome, n=len(files)))
 
     def _rinomina(self, pl):
         self._domanda()
-        with DialogoTesto(self, "Nuovo nome della playlist:", "Rinomina", pl.nome) as dialogo:
+        with DialogoTesto(self, _("Nuovo nome della playlist:"), _("Rinomina"), pl.nome) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
-                self._annullato("Nome della playlist non cambiato.")
+                self._annullato(_("Nome della playlist non cambiato."))
                 return
             nome = dialogo.GetValue().strip()
         if not nome or nome == pl.nome:
-            self._annullato("Nome della playlist non cambiato.")
+            self._annullato(_("Nome della playlist non cambiato."))
             return
         if any(p is not pl and p.nome.casefold() == nome.casefold() for p in self.archivio.playlist):
-            self._riscontro("errore", f"C'è già una playlist che si chiama {nome}.")
+            self._riscontro("errore", _("C'è già una playlist che si chiama {nome}.").format(nome=nome))
             return
         vecchio, pl.nome = pl.nome, nome
         self._salva_archivio()
@@ -5446,28 +5523,30 @@ class Finestra(wx.Frame):
             segno["nome"] = nome
             self._salva_impostazioni()
         self._popola_playlist(seleziona=pl)
-        self._riscontro("playlist_rinominata", f"La playlist {vecchio} ora si chiama {nome}.")
+        self._riscontro("playlist_rinominata", _("La playlist {vecchio} ora si chiama {nome}.").format(vecchio=vecchio, nome=nome))
 
     def _elimina_playlist(self, pl):
-        domanda = f"Eliminare la playlist {pl.nome}, con {brani_al_plurale(len(pl.brani))}? I file restano sul disco."
-        if not self._conferma(domanda, "Elimina playlist"):
-            self._annullato("Eliminazione annullata.")
+        domanda = ngettext("Eliminare la playlist {nome}, con {n} brano? I file restano sul disco.", "Eliminare la playlist {nome}, con {n} brani? I file restano sul disco.",
+            len(pl.brani)).format(nome=pl.nome, n=len(pl.brani))
+        if not self._conferma(domanda, _("Elimina playlist")):
+            self._annullato(_("Eliminazione annullata."))
             return
         indice = self.archivio.playlist.index(pl)
         self.archivio.elimina(pl)
         self._salva_archivio()
         vicina = self.archivio.playlist[min(indice, len(self.archivio.playlist) - 1)] if self.archivio.playlist else "nuova_playlist"
         self._popola_playlist(seleziona=vicina)
-        self._riscontro("playlist_eliminata", f"Eliminata la playlist {pl.nome}.")
+        self._riscontro("playlist_eliminata", _("Eliminata la playlist {nome}.").format(nome=pl.nome))
 
     def _sposta(self, pl, brano, dove):
         if not pl.sposta(brano, dove):
-            self._riscontro("nessun_altro_brano", "Il brano è già lì.")
+            self._riscontro("nessun_altro_brano", _("Il brano è già lì."))
             return
         self._salva_archivio()
         self._popola_playlist(seleziona=brano)
         i = pl.indice(brano)
-        self._riscontro("brano_spostato", f"{brano.nome} ora è il {i + 1} di {len(pl.brani)}.")
+        # Traduttori: posto e' il numero del brano nella playlist, totale quanti ne ha.
+        self._riscontro("brano_spostato", _("{nome} ora è il {posto} di {totale}.").format(nome=brano.nome, posto=i + 1, totale=len(pl.brani)))
 
     # Ordina e Mescola, nel menu della playlist e dei Preferiti (tappa 14 c,
     # decisa da Gabriele il 20 ottobre 2026). Si riordina tutta la playlist,
@@ -5480,26 +5559,25 @@ class Finestra(wx.Frame):
         l'ordine."""
         voci = [(etichetta, lambda c=criterio: self._ordina(pl, c)) for criterio, (etichetta, _dato) in CRITERI.items()]
         if pl.ordine_di_prima is not None:
-            voci.append(("Ordine di prima", lambda: self._ordine_di_prima(pl)))
-        voci.append(("Inverti l'ordine", lambda: self._inverti(pl)))
+            voci.append((_("Ordine di prima"), lambda: self._ordine_di_prima(pl)))
+        voci.append((_("Inverti l'ordine"), lambda: self._inverti(pl)))
         return voci
 
-    def _nomi_per_l_ordine(self, pl):
-        """Le forme del nome nelle righe di Ordina e Mescola: (soggetto con
-        il verbo essere, nome breve, finale degli aggettivi, nome con la
-        preposizione in). Rock e' una playlist, i Preferiti sono loro."""
-        if pl is self.archivio.preferiti:
-            return "I Preferiti sono", "Preferiti", "i", "Nei Preferiti"
-        return f"{pl.nome} è", pl.nome, "a", f"In {pl.nome}"
+    # Le righe di Ordina e Mescola sono frasi intere, una per i Preferiti e
+    # una per le playlist: Rock e' una playlist, i Preferiti sono loro (3.0.0).
 
-    def _troppo_pochi(self, pl, verbo):
+    def _troppo_pochi(self, pl, niente):
         """Con meno di due brani non c'e' niente da riordinare: lo dice, e
-        torna vero."""
+        torna vero. niente e' la fine della frase, come niente da ordinare."""
         if len(pl.brani) >= 2:
             return False
-        dove = self._nomi_per_l_ordine(pl)[3]
-        quanti = "non ci sono brani" if not pl.brani else "c'è un brano solo"
-        self._riscontro("non_disponibile", f"{dove} {quanti}: niente da {verbo}.")
+        preferiti = pl is self.archivio.preferiti
+        if not pl.brani:
+            quanti = _("Nei Preferiti non ci sono brani") if preferiti else _("In {nome} non ci sono brani").format(nome=pl.nome)
+        else:
+            quanti = _("Nei Preferiti c'è un brano solo") if preferiti else _("In {nome} c'è un brano solo").format(nome=pl.nome)
+        # Traduttori: quanti dice che la playlist e' vuota o ha un brano solo, niente e' come niente da ordinare.
+        self._riscontro("non_disponibile", _("{quanti}: {niente}.").format(quanti=quanti, niente=niente))
         return True
 
     def _che_suona_in(self, pl):
@@ -5514,8 +5592,10 @@ class Finestra(wx.Frame):
         lo passa, fra i brani che la plancia mostra, e lo dice."""
         if pl.filtro and self._ammesso(pl, brano):
             visibili = [b for b in pl.brani if self._ammesso(pl, b)]
-            return f"il {next(i for i, b in enumerate(visibili) if b is brano) + 1} di {len(visibili)} col filtro"
-        return f"il {pl.indice(brano) + 1} di {len(pl.brani)}"
+            # Traduttori: il posto del brano fra quelli che il filtro lascia vedere, come il 57 di 340 col filtro.
+            return _("il {posto} di {totale} col filtro").format(posto=next(i for i, b in enumerate(visibili) if b is brano) + 1, totale=len(visibili))
+        # Traduttori: il posto del brano nella playlist, come il 57 di 340.
+        return _("il {posto} di {totale}").format(posto=pl.indice(brano) + 1, totale=len(pl.brani))
 
     def _ordina(self, pl, criterio):
         """Una voce di Ordina: i brani senza il dato vanno in fondo, in ordine
@@ -5524,9 +5604,9 @@ class Finestra(wx.Frame):
         schedario, senza aspettarle, e un nuovo Ordina li sistema."""
         etichetta, dato = CRITERI[criterio]
         come = etichetta[0].lower() + etichetta[1:]
-        if self._troppo_pochi(pl, "ordinare"):
+        if self._troppo_pochi(pl, _("niente da ordinare")):
             return
-        soggetto, nome, finale, _dove = self._nomi_per_l_ordine(pl)
+        preferiti = pl is self.archivio.preferiti
         # Le schede che mancano si annotano mentre si ordina: lo schedario le
         # aggiunge da un altro filo, e il conto deve essere quello dell'ordine.
         non_letti = []
@@ -5544,58 +5624,74 @@ class Finestra(wx.Frame):
         if not cambiata:
             # Come Sposta con il brano gia' li': non si salva niente, e
             # l'ordine di prima resta quello che era.
-            self._riscontro("nessun_altro_brano", f"{soggetto} già ordinat{finale} {come}{in_fondo}.{avviso}")
+            # Traduttori: come e' il criterio, come per autore; in_fondo dice dei brani senza il dato, come , 3 senza album in fondo.
+            frase = _("I Preferiti sono già ordinati {come}{in_fondo}.").format(come=come, in_fondo=in_fondo) if preferiti else _(
+                "{nome} è già ordinata {come}{in_fondo}.").format(nome=pl.nome, come=come, in_fondo=in_fondo)
+            self._riscontro("nessun_altro_brano", frase + avviso)
             return
-        self._dopo_il_riordino(pl, "playlist_ordinata", f"{nome} ordinat{finale} {come}", in_fondo, avviso=avviso)
+        # Traduttori: come e' il criterio, come per autore.
+        testa = _("Preferiti ordinati {come}").format(come=come) if preferiti else _("{nome} ordinata {come}").format(nome=pl.nome, come=come)
+        self._dopo_il_riordino(pl, "playlist_ordinata", testa, in_fondo, avviso=avviso)
 
     @staticmethod
     def _in_fondo(dato, senza, non_letti, totale):
         """(il pezzo della riga di Ordina sui brani andati in fondo, l'avviso
         da mettere dopo). I brani che lo schedario non ha ancora letto stanno
         in fondo con quelli senza il dato, ma si contano a parte: il dato forse
-        ce l'hanno, e un nuovo Ordina, quando sono letti, li mette a posto."""
+        ce l'hanno, e un nuovo Ordina, quando sono letti, li mette a posto.
+        Il pezzo segue la frase dell'ordine, come Rock ordinata per album."""
         if not senza:
             return "", ""
         mancanti = senza - non_letti
         if not non_letti:
             if senza == totale:
                 # Come Per album su una raccolta di SID, che l'album non l'hanno.
-                return f", tutti senza {dato}, in ordine di percorso", ""
-            return f", {mancanti} senza {dato} in fondo", ""
-        letti = "non ancora letto dallo schedario" if non_letti == 1 else "non ancora letti dallo schedario"
-        avviso = " Quando lo schedario l'ha letto, un nuovo Ordina lo mette al suo posto." if non_letti == 1 else \
-            " Quando lo schedario li ha letti, un nuovo Ordina li mette al loro posto."
+                # Traduttori: segue la frase dell'ordine, come Rock ordinata per album: 5 brani; dato e' cio' che manca ai brani, come album.
+                return _(", tutti senza {dato}, in ordine di percorso").format(dato=dato), ""
+            # Traduttori: segue la frase dell'ordine, come Rock ordinata per album: 5 brani; dato e' cio' che manca ai brani, come album.
+            return ngettext(", {n} senza {dato} in fondo", ", {n} senza {dato} in fondo", mancanti).format(n=mancanti, dato=dato), ""
+        avviso = " " + ngettext("Quando lo schedario l'ha letto, un nuovo Ordina lo mette al suo posto.",
+            "Quando lo schedario li ha letti, un nuovo Ordina li mette al loro posto.", non_letti)
         if non_letti == totale:
-            return f", tutti {letti}, in ordine di percorso", avviso
-        parti = ([f"{mancanti} senza {dato}"] if mancanti else []) + [f"{non_letti} {letti}"]
-        dove = ", tutti in ordine di percorso" if senza == totale else " in fondo"
-        return f", {' e '.join(parti)}{dove}", avviso
+            # Traduttori: segue la frase dell'ordine, come Rock ordinata per album: 5 brani.
+            return _(", tutti non ancora letti dallo schedario, in ordine di percorso"), avviso
+        if not mancanti:
+            # Traduttori: segue la frase dell'ordine, come Rock ordinata per album: 5 brani.
+            return ngettext(", {n} non ancora letto dallo schedario in fondo", ", {n} non ancora letti dallo schedario in fondo", non_letti).format(n=non_letti), avviso
+        if senza == totale:
+            # Traduttori: segue la frase dell'ordine, come Rock ordinata per album: 5 brani; senza sono i brani senza il dato, come album, n quelli non ancora letti.
+            return ngettext(", {senza} senza {dato} e {n} non ancora letto dallo schedario, tutti in ordine di percorso",
+                ", {senza} senza {dato} e {n} non ancora letti dallo schedario, tutti in ordine di percorso", non_letti).format(senza=mancanti, dato=dato, n=non_letti), avviso
+        # Traduttori: segue la frase dell'ordine, come Rock ordinata per album: 5 brani; senza sono i brani senza il dato, come album, n quelli non ancora letti.
+        return ngettext(", {senza} senza {dato} e {n} non ancora letto dallo schedario in fondo",
+            ", {senza} senza {dato} e {n} non ancora letti dallo schedario in fondo", non_letti).format(senza=mancanti, dato=dato, n=non_letti), avviso
 
     def _inverti(self, pl):
         """Inverti l'ordine: la lista rovesciata com'e', anche un ordine fatto
         a mano; i brani senza il dato, che stavano in fondo, vanno in cima."""
-        if self._troppo_pochi(pl, "invertire"):
+        if self._troppo_pochi(pl, _("niente da invertire")):
             return
-        soggetto, nome, _finale, _dove = self._nomi_per_l_ordine(pl)
+        preferiti = pl is self.archivio.preferiti
         if not pl.inverti():
-            self._riscontro("nessun_altro_brano", f"{soggetto} uguale anche al contrario.")
+            self._riscontro("nessun_altro_brano", _("I Preferiti sono uguale anche al contrario.") if preferiti else _(
+                "{nome} è uguale anche al contrario.").format(nome=pl.nome))
             return
-        self._dopo_il_riordino(pl, "ordine_invertito", f"{nome} in ordine inverso")
+        self._dopo_il_riordino(pl, "ordine_invertito", _("Preferiti in ordine inverso") if preferiti else _("{nome} in ordine inverso").format(nome=pl.nome))
 
     def _mescola(self, pl):
         """Mescola: ogni ordine ugualmente probabile, con random.shuffle, senza
         distribuire gli autori. Se la playlist suona, o e' in pausa, il brano in
         riproduzione va in cima e gli altri dopo di lui (Gabriele). Cambia
         l'ordine salvato, non la riproduzione casuale, che ha il suo mazzo."""
-        if self._troppo_pochi(pl, "mescolare"):
+        if self._troppo_pochi(pl, _("niente da mescolare")):
             return
-        _soggetto, nome, finale, _dove = self._nomi_per_l_ordine(pl)
+        preferiti = pl is self.archivio.preferiti
         suona = self._che_suona_in(pl)
         if not pl.mescola(self._mescola_a_caso, in_cima=suona):
-            di_chi = "dei Preferiti" if pl is self.archivio.preferiti else f"di {pl.nome}"
-            self._riscontro("nessun_altro_brano", f"Mescolando, l'ordine {di_chi} è venuto uguale a prima: niente cambia.")
+            self._riscontro("nessun_altro_brano", _("Mescolando, l'ordine dei Preferiti è venuto uguale a prima: niente cambia.") if preferiti else _(
+                "Mescolando, l'ordine di {nome} è venuto uguale a prima: niente cambia.").format(nome=pl.nome))
             return
-        self._dopo_il_riordino(pl, "playlist_mescolata", f"{nome} mescolat{finale}", in_cima=suona is not None)
+        self._dopo_il_riordino(pl, "playlist_mescolata", _("Preferiti mescolati") if preferiti else _("{nome} mescolata").format(nome=pl.nome), in_cima=suona is not None)
 
     # Il mescolamento di Mescola, che le prove sostituiscono, come _a_caso.
     _mescola_a_caso = staticmethod(random.shuffle)
@@ -5604,11 +5700,13 @@ class Finestra(wx.Frame):
         """Ordine di prima: l'ordine di prima dell'ultimo Ordina, Inverti
         l'ordine o Mescola, con gli stessi brani; quelli aggiunti dopo restano
         in fondo. Poi la voce sparisce, fino al prossimo riordino."""
-        soggetto, nome, _finale, _dove = self._nomi_per_l_ordine(pl)
+        preferiti = pl is self.archivio.preferiti
         if not pl.rimetti_l_ordine_di_prima():
-            self._riscontro("nessun_altro_brano", f"{soggetto} già nell'ordine di prima.")
+            self._riscontro("nessun_altro_brano", _("I Preferiti sono già nell'ordine di prima.") if preferiti else _(
+                "{nome} è già nell'ordine di prima.").format(nome=pl.nome))
             return
-        self._dopo_il_riordino(pl, "ordine_ripristinato", f"{nome} di nuovo nell'ordine di prima")
+        self._dopo_il_riordino(pl, "ordine_ripristinato", _("Preferiti di nuovo nell'ordine di prima") if preferiti else _(
+            "{nome} di nuovo nell'ordine di prima").format(nome=pl.nome))
 
     def _dopo_il_riordino(self, pl, evento, testa, dettaglio="", in_cima=False, avviso=""):
         """Dopo un riordino che ha cambiato l'ordine: salva; toglie il loop
@@ -5624,17 +5722,19 @@ class Finestra(wx.Frame):
         if senza_loop:
             coda.togli_loop()
         self._popola_playlist(seleziona=pl)
-        testo = f"{testa}: {brani_al_plurale(len(pl.brani))}"
+        # Traduttori: testa e' la frase del riordino, come Rock ordinata per autore.
+        testo = ngettext("{testa}: {n} brano", "{testa}: {n} brani", len(pl.brani)).format(testa=testa, n=len(pl.brani))
         nascosti = sum(1 for b in pl.brani if not self._ammesso(pl, b)) if pl.filtro else 0
         if nascosti:
-            testo += ", anche quello nascosto dal filtro" if nascosti == 1 else f", anche i {nascosti} nascosti dal filtro"
+            testo += ngettext(", anche quello nascosto dal filtro", ", anche i {n} nascosti dal filtro", nascosti).format(n=nascosti)
         testo += dettaglio
         suona = self._che_suona_in(pl)
         if suona is not None:
-            testo += "; quello in riproduzione ora è in cima" if in_cima else f"; quello in riproduzione ora è {self._posto_come_la_plancia(pl, suona)}"
+            # Traduttori: posto e' come il 3 di 40.
+            testo += _("; quello in riproduzione ora è in cima") if in_cima else _("; quello in riproduzione ora è {posto}").format(posto=self._posto_come_la_plancia(pl, suona))
         testo += "." + avviso
         if senza_loop:
-            testo += " Il loop A-B è tolto: fra A e B sarebbero finiti altri brani."
+            testo += " " + _("Il loop A-B è tolto: fra A e B sarebbero finiti altri brani.")
         self._riscontro(evento, testo)
 
     def _salta(self, pl, brano):
@@ -5642,9 +5742,9 @@ class Finestra(wx.Frame):
         self._salva_archivio()
         self._aggiorna_etichette()
         if brano.saltato:
-            self._riscontro("saltato_acceso", f"{brano.nome} resta nella playlist ma non verrà suonato.")
+            self._riscontro("saltato_acceso", _("{nome} resta nella playlist ma non verrà suonato.").format(nome=brano.nome))
         else:
-            self._riscontro("saltato_spento", f"{brano.nome} torna a essere suonato.")
+            self._riscontro("saltato_spento", _("{nome} torna a essere suonato.").format(nome=brano.nome))
 
     def _togli(self, pl, brano, annuncia=True):
         i = pl.togli(brano)
@@ -5663,7 +5763,9 @@ class Finestra(wx.Frame):
         self._popola_playlist(seleziona=vicino)
         if annuncia:
             self._statistiche.conta("brani_tolti")
-            self._riscontro("brano_tolto", f"Tolto {brano.nome_del_file}; nella playlist {pl.nome} restano {brani_al_plurale(len(pl.brani))}.")
+            # Traduttori: file e' il nome del file tolto, nome quello della playlist.
+            self._riscontro("brano_tolto", ngettext("Tolto {file}; nella playlist {nome} restano {n} brano.", "Tolto {file}; nella playlist {nome} restano {n} brani.",
+                len(pl.brani)).format(file=brano.nome_del_file, nome=pl.nome, n=len(pl.brani)))
 
     # La riproduzione.
 
@@ -5721,7 +5823,7 @@ class Finestra(wx.Frame):
         self._annuncia(pl, brano, evento)
         if ripresa:
             self._statistiche.conta("ripresi_dal_punto")
-            self.scrivi(f"Riprendo da {tempo(ripresa)}, dove l'avevi lasciato: X lo fa ripartire da capo.")
+            self.scrivi(_("Riprendo da {tempo}, dove l'avevi lasciato: X lo fa ripartire da capo.").format(tempo=tempo(ripresa)))
 
     def _annuncia(self, pl, brano, evento):
         """Il riscontro del brano appena partito, con la sua posizione nella
@@ -5732,16 +5834,18 @@ class Finestra(wx.Frame):
             a_caso = evento == "casuale" or (self.impostazioni["casuale"] and evento in ("brano_seguente_da_solo", "successivo"))
             self._statistiche.brano_avviato(brano.percorso, self.motore.sottobrano if self.motore.sottobrani else None, evento, a_caso)
         if getattr(pl, "selezione", False):
-            dove = f"{numero} di {totale} della selezione"
+            dove = _("{numero} di {totale} della selezione").format(numero=numero, totale=totale)
         else:
             # La lista con il nome della plancia, come in Dove sono: Preferiti e
             # Risultati, non playlist Preferiti e cartella Risultati (1.105.1).
             # Senza con le sottocartelle, che allungherebbe ogni riga di avvio:
             # resta solo in Dove sono (Gabriele).
-            dove = f"{numero} di {totale}, {self._nome_della_lista(pl, sottocartelle=False)}" if totale > 1 else pl.nome
-        testo = f"In riproduzione: {brano.percorso}, {dove}."
+            # Traduttori: il posto del brano nella lista, come 3 di 12, playlist Rock.
+            dove = _("{numero} di {totale}, {lista}").format(numero=numero, totale=totale, lista=self._nome_della_lista(pl, sottocartelle=False)) if totale > 1 else pl.nome
+        # Traduttori: dove e' il posto del brano nella lista, come 3 di 12, playlist Rock.
+        testo = _("In riproduzione: {percorso}, {dove}.").format(percorso=brano.percorso, dove=dove)
         if self.motore.sottobrani:
-            testo += f" Sottobrano {self.motore.sottobrano} di {self.motore.sottobrani}."
+            testo += " " + _("Sottobrano {numero} di {totale}.").format(numero=self.motore.sottobrano, totale=self.motore.sottobrani)
         self._riscontro(evento, testo)
         # In riproduzione lo dicono solo le voci del brano di prima e di questo.
         solo = {brano.percorso} if self._annunciato is None else {brano.percorso, self._annunciato}
@@ -5754,7 +5858,7 @@ class Finestra(wx.Frame):
     def _riproduci(self, pl, brano, sottobrano=None):
         """Suona un brano scelto nella plancia, se il loop lo permette."""
         if not self.coda.nel_loop(pl, brano):
-            self._riscontro("fuori_dal_loop", f"{brano.nome_del_file} è fuori dal loop: si suona solo fra il punto A e il punto B.")
+            self._riscontro("fuori_dal_loop", _("{nome} è fuori dal loop: si suona solo fra il punto A e il punto B.").format(nome=brano.nome_del_file))
             return
         self._suona(pl, brano, sottobrano=sottobrano)
 
@@ -5766,17 +5870,17 @@ class Finestra(wx.Frame):
             pl = self._temporanea(cartella, questo_pc.contenuto(cartella)[1])
             brano = next((b for b in pl.brani if b.percorso == percorso), None)
         if brano is None:
-            self._riscontro("errore", f"{os.path.basename(percorso)} non c'è più.")
+            self._riscontro("errore", _("{nome} non c'è più.").format(nome=os.path.basename(percorso)))
             return
         self._riproduci(pl, brano)
 
     def _riproduci_playlist(self, pl):
         brano = self.coda.primo(pl)
         if brano is None and pl is self.archivio.preferiti:
-            self._riscontro("niente_da_suonare", "I Preferiti sono vuoti: F4 ci mette il brano selezionato.")
+            self._riscontro("niente_da_suonare", _("I Preferiti sono vuoti: F4 ci mette il brano selezionato."))
             return
         if brano is None:
-            self._riscontro("niente_da_suonare", f"La playlist {pl.nome} non ha brani da suonare.")
+            self._riscontro("niente_da_suonare", _("La playlist {nome} non ha brani da suonare.").format(nome=pl.nome))
             return
         self._suona(pl, brano)
 
@@ -5790,7 +5894,7 @@ class Finestra(wx.Frame):
             return
         brano = self.coda.primo(pl)
         if brano is None:
-            self._riscontro("niente_da_suonare", "Né in questa cartella né nelle sue sottocartelle ci sono file da suonare.")
+            self._riscontro("niente_da_suonare", _("Né in questa cartella né nelle sue sottocartelle ci sono file da suonare."))
             return
         self._suona(pl, brano)
 
@@ -5801,7 +5905,7 @@ class Finestra(wx.Frame):
         with wx.BusyCursor():
             contenuti = questo_pc.contenuti_ricorsivi(cartella)
         if not contenuti:
-            self._riscontro("errore", f"Non riesco a leggere {cartella}.")
+            self._riscontro("errore", _("Non riesco a leggere {cartella}.").format(cartella=cartella))
             return None
         brani = [b for sotto, files in contenuti for b in self._temporanea(sotto, files).brani]
         nome = os.path.basename(cartella.rstrip("\\")) or cartella
@@ -6168,15 +6272,15 @@ class Finestra(wx.Frame):
         self._aggiorna_il_video()
         if self._timer_a_fine_brano:
             self._timer_a_fine_brano = False
-            self._riscontro("timer_scaduto", "Timer scaduto: il brano è finito, e la riproduzione si ferma.")
+            self._riscontro("timer_scaduto", _("Timer scaduto: il brano è finito, e la riproduzione si ferma."))
             return
         if self._mazzo_finito:
             # Il mazzo si rifa': la prossima riproduzione comincia un giro nuovo.
             self._mazzo_finito = False
             self._ricomincia_il_mazzo()
-            self._riscontro("fine_playlist", "Fine: ogni brano del mazzo ha suonato una volta.")
+            self._riscontro("fine_playlist", _("Fine: ogni brano del mazzo ha suonato una volta."))
             return
-        self._riscontro("fine_playlist", "Fine: davanti non c'è altro da suonare.")
+        self._riscontro("fine_playlist", _("Fine: davanti non c'è altro da suonare."))
 
     # Il passaggio con la dissolvenza incrociata.
 
@@ -6265,7 +6369,7 @@ class Finestra(wx.Frame):
         self._statistiche.brano_in_errore(percorso)
         if self.coda.corrente is not None:
             self._errori_di_fila[id(self.coda.corrente)] = self.coda.corrente
-        self._riscontro("errore", f"Non riesco a suonare {os.path.basename(percorso or '')}.")
+        self._riscontro("errore", _("Non riesco a suonare {nome}.").format(nome=os.path.basename(percorso or "")))
         segno = self._avanzamento_dopo_errore = object()
         self._dopo_il_suono(self._avanza_dopo_l_errore, segno)
 
@@ -6280,7 +6384,7 @@ class Finestra(wx.Frame):
             # un altro giro non servirebbe (1.96.11).
             self._errori_di_fila.clear()
             self._aggiorna_etichette()
-            self._riscontro("fine_playlist", "Fine: nessun brano si riesce a suonare.")
+            self._riscontro("fine_playlist", _("Fine: nessun brano si riesce a suonare."))
             return
         if seguente:
             nuova, brano, sottobrano = seguente
@@ -6311,7 +6415,7 @@ class Finestra(wx.Frame):
         il brano fermo si ricarica in pausa, con _risveglia_il_fermo."""
         if self.motore.in_corso or (risveglia and self._risveglia_il_fermo()):
             return False
-        self._riscontro("niente_da_suonare", "Non sta suonando niente.")
+        self._riscontro("niente_da_suonare", _("Non sta suonando niente."))
         return True
 
     def _risveglia_il_fermo(self):
@@ -6381,7 +6485,7 @@ class Finestra(wx.Frame):
         elif corrente:
             self._suona(self.coda.playlist, corrente)
         else:
-            self._riscontro("niente_da_suonare", "Niente da riprodurre: scegli un brano, una playlist o una cartella nella plancia.")
+            self._riscontro("niente_da_suonare", _("Niente da riprodurre: scegli un brano, una playlist o una cartella nella plancia."))
 
     def _nodo_della_playlist(self, pl):
         return next((v for v in self._figli(self.nodo_playlist) if (self._dati(v) or {}).get("playlist") is pl), None)
@@ -6409,7 +6513,7 @@ class Finestra(wx.Frame):
         while voce is not None and self._sotto(voce, nodo) and not self._suonabile_in_plancia(voce):
             voce = self._dopo(voce)
         if voce is None or not self._sotto(voce, nodo):
-            self._riscontro("niente_da_suonare", f"La playlist {pl.nome} non ha niente da suonare.")
+            self._riscontro("niente_da_suonare", _("La playlist {nome} non ha niente da suonare.").format(nome=pl.nome))
             return
         dati = self._dati(voce)
         self._suona(dati["playlist"], dati["brano"], evento, dati.get("numero"))
@@ -6417,14 +6521,14 @@ class Finestra(wx.Frame):
     def _playlist_vicina(self, passo):
         playlist = self.archivio.playlist
         if not playlist:
-            self._riscontro("niente_da_suonare", "Non ci sono playlist salvate.")
+            self._riscontro("niente_da_suonare", _("Non ci sono playlist salvate."))
             return
         attuale = self._playlist_selezionata()
         # Senza una playlist di partenza, K parte dalla prima e J dall'ultima.
         partenza = playlist.index(attuale) if attuale is not None else (-1 if passo > 0 else len(playlist))
         indice = partenza + passo
         if not 0 <= indice < len(playlist):
-            self._riscontro("nessun_altro_brano", "È la prima playlist." if passo < 0 else "È l'ultima playlist.")
+            self._riscontro("nessun_altro_brano", _("È la prima playlist.") if passo < 0 else _("È l'ultima playlist."))
             return
         self._apri_e_suona(playlist[indice], "playlist_precedente" if passo < 0 else "playlist_successiva")
 
@@ -6440,28 +6544,29 @@ class Finestra(wx.Frame):
         playlist = self.archivio.playlist
         attuale = self._playlist_selezionata()
         if not playlist:
-            testo = "Non ci sono playlist salvate."
+            testo = _("Non ci sono playlist salvate.")
         elif attuale is None:
-            testo = f"La plancia non è in una playlist; ne hai {len(playlist)}."
+            testo = ngettext("La plancia non è in una playlist; ne hai {n}.", "La plancia non è in una playlist; ne hai {n}.", len(playlist)).format(n=len(playlist))
         else:
-            testo = f"Playlist {playlist.index(attuale) + 1} di {len(playlist)}, {attuale.nome}."
+            testo = _("Playlist {numero} di {totale}, {nome}.").format(numero=playlist.index(attuale) + 1, totale=len(playlist), nome=attuale.nome)
         self._riporta(testo, "playlist")
 
     def _comando_prima_playlist(self):
         if not self.archivio.playlist:
-            self._riscontro("niente_da_suonare", "Non ci sono playlist salvate.")
+            self._riscontro("niente_da_suonare", _("Non ci sono playlist salvate."))
             return
         self._playlist_numero(1)
 
     def _comando_ultima_playlist(self):
         if not self.archivio.playlist:
-            self._riscontro("niente_da_suonare", "Non ci sono playlist salvate.")
+            self._riscontro("niente_da_suonare", _("Non ci sono playlist salvate."))
             return
         self._playlist_numero(len(self.archivio.playlist))
 
     def _playlist_numero(self, numero):
         if numero > len(self.archivio.playlist):
-            self._riscontro("nessun_altro_brano", f"Non c'è la playlist numero {numero}: ne hai {len(self.archivio.playlist)}.")
+            self._riscontro("nessun_altro_brano", ngettext("Non c'è la playlist numero {numero}: ne hai {n}.", "Non c'è la playlist numero {numero}: ne hai {n}.",
+                len(self.archivio.playlist)).format(numero=numero, n=len(self.archivio.playlist)))
             return
         self._apri_e_suona(self.archivio.playlist[numero - 1], "playlist_numero")
 
@@ -6474,23 +6579,26 @@ class Finestra(wx.Frame):
         if coda.loop_playlist is not None and coda.punto_b is not None:
             coda.togli_loop()
             self._aggiorna_etichette()
-            self._riscontro("loop_tolto", "Loop tolto: si suona di nuovo tutta la lista.")
+            self._riscontro("loop_tolto", _("Loop tolto: si suona di nuovo tutta la lista."))
             return
         dati = self._dati(self._voce_di_lavoro()) or {}
         if dati.get("tipo") not in ("brano", "file", "sottobrano"):
-            self._riscontro("loop_non_qui", "Il loop si mette su un brano: scegline uno in una playlist o in una cartella.")
+            self._riscontro("loop_non_qui", _("Il loop si mette su un brano: scegline uno in una playlist o in una cartella."))
             return
         pl, brano = dati["playlist"], dati["brano"]
         if coda.loop_playlist is None:
             coda.loop_playlist, coda.punto_a, coda.punto_b = pl, brano, None
-            self._riscontro("loop_a_messo", f"Punto A del loop su {brano.nome_del_file}. Maiuscolo+X su un brano della stessa lista, anche questo, mette il punto B.")
+            self._riscontro("loop_a_messo", _("Punto A del loop su {nome}. Maiuscolo+X su un brano della stessa lista, anche questo, mette il punto B.").format(
+                nome=brano.nome_del_file))
         elif coda.loop_playlist is not pl:
-            self._riscontro("loop_non_qui", f"Il punto A sta in {coda.loop_playlist.nome}: il punto B va su un brano della stessa lista.")
+            self._riscontro("loop_non_qui", _("Il punto A sta in {lista}: il punto B va su un brano della stessa lista.").format(lista=coda.loop_playlist.nome))
             return
         else:
             coda.punto_b = brano
             primo, ultimo = coda.intervallo(pl)
-            self._riscontro("loop_b_messo", f"Loop fra {coda.punto_a.nome_del_file} e {brano.nome_del_file}: {brani_al_plurale(ultimo - primo + 1)}. Maiuscolo+X lo toglie.")
+            # Traduttori: a e b sono i nomi dei file dei punti A e B del loop.
+            self._riscontro("loop_b_messo", ngettext("Loop fra {a} e {b}: {n} brano. Maiuscolo+X lo toglie.", "Loop fra {a} e {b}: {n} brani. Maiuscolo+X lo toglie.",
+                ultimo - primo + 1).format(a=coda.punto_a.nome_del_file, b=brano.nome_del_file, n=ultimo - primo + 1))
         self._aggiorna_etichette()
 
     def _comando_pausa(self):
@@ -6498,7 +6606,7 @@ class Finestra(wx.Frame):
             return
         if self.motore.pausa(sfumando=True):
             posizione = self.motore.posizione
-            self._riscontro("pausa", f"Pausa a {tempo(posizione)}." if posizione is not None else "Pausa.")
+            self._riscontro("pausa", _("Pausa a {tempo}.").format(tempo=tempo(posizione)) if posizione is not None else _("Pausa."))
         else:
             self._conta_la_ripartenza()
             self._riscontro("ripresa", self._frase_della_ripresa())
@@ -6514,13 +6622,13 @@ class Finestra(wx.Frame):
 
     def _frase_della_ripresa(self):
         posizione = self.motore.posizione
-        return f"Riprende da {tempo(posizione)}." if posizione is not None else "Riprende."
+        return _("Riprende da {tempo}.").format(tempo=tempo(posizione)) if posizione is not None else _("Riprende.")
 
     def _comando_stop(self):
         if self._avanzamento_dopo_errore is not None and not self.motore.in_corso:
             # Il brano dopo uno che non si suona sta per partire: V lo ferma.
             self._avanzamento_dopo_errore = None
-            self._riscontro("stop", "Stop: il brano seguente non parte.")
+            self._riscontro("stop", _("Stop: il brano seguente non parte."))
             return
         if self._niente_in_corso():
             return
@@ -6528,9 +6636,9 @@ class Finestra(wx.Frame):
         # subito libero (Gabriele, 2 ottobre 2026); non se sta gia' sfumando
         # per il timer.
         if self._ferma(sfumando=self._inizio_della_sfumatura is None):
-            self._riscontro("stop", "Stop. La selezione suonata è chiusa: X suona di nuovo ciò che selezioni.")
+            self._riscontro("stop", _("Stop. La selezione suonata è chiusa: X suona di nuovo ciò che selezioni."))
             return
-        self._riscontro("stop", "Stop. X riparte dall'inizio del brano.")
+        self._riscontro("stop", _("Stop. X riparte dall'inizio del brano."))
 
     def _ferma(self, sfumando):
         """Lo stop, per V e per il timer: il punto del file lungo, il motore e
@@ -6567,51 +6675,56 @@ class Finestra(wx.Frame):
         self._orologio_della_sfumatura.Stop()
         sfumato = None if self._inizio_della_sfumatura is None else self._adesso() - self._inizio_della_sfumatura
         proposta = valori.FINE_DEL_BRANO if self._timer_a_fine_brano else str(self._minuti_del_timer)
-        with DialogoTesto(self, f"Fra quanti minuti si ferma la riproduzione? Da 1 a {valori.TIMER_MASSIMO}; "
-                f"f la ferma alla fine del brano, 0 toglie il timer. {self._frase_del_timer()}", "Timer di spegnimento", proposta) as dialogo:
+        # Traduttori: f e' la lettera che il campo accetta per la fine del brano; adesso e' la frase del timer di adesso.
+        with DialogoTesto(self, _("Fra quanti minuti si ferma la riproduzione? Da 1 a {massimo}; "
+                "f la ferma alla fine del brano, 0 toglie il timer. {adesso}").format(massimo=valori.TIMER_MASSIMO, adesso=self._frase_del_timer()),
+                _("Timer di spegnimento"), proposta) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
                 self._riprendi_il_timer(sfumato)
-                self._annullato(f"Timer non cambiato. {self._frase_del_timer()}")
+                # Traduttori: adesso e' la frase del timer di adesso, come Adesso non c'e' un timer.
+                self._annullato(_("Timer non cambiato. {adesso}").format(adesso=self._frase_del_timer()))
                 return
             testo = dialogo.GetValue()
         try:
             scelta, correzioni = valori.leggi_timer(testo)
         except ErroreValore as e:
             self._riprendi_il_timer(sfumato)
-            self._riscontro("errore", f"{e} Timer non cambiato.")
+            self._riscontro("errore", _("{errore} Timer non cambiato.").format(errore=e))
             return
         c_era = self._timer_scade is not None or self._timer_a_fine_brano or self._inizio_della_sfumatura is not None
         self._togli_il_timer()
         if scelta == 0:
-            self._riscontro("timer_tolto", "Timer tolto." if c_era else "Non c'era un timer da togliere.")
+            self._riscontro("timer_tolto", _("Timer tolto.") if c_era else _("Non c'era un timer da togliere."))
             return
         if scelta == valori.FINE_DEL_BRANO:
             self._timer_a_fine_brano = True
             self._statistiche.conta("timer_a_fine_brano")
-            frase = "Timer impostato: la riproduzione si ferma alla fine del brano."
+            frase = _("Timer impostato: la riproduzione si ferma alla fine del brano.")
         else:
             self._minuti_del_timer = scelta
             self._timer_scade = self._adesso() + scelta * 60
             self._sveglia_del_timer.StartOnce(scelta * 60 * 1000)
-            frase = f"Timer impostato: la riproduzione si ferma fra {_minuti(scelta)}, alle {self._ora_del_timer()}."
+            # Traduttori: minuti e' come 30 minuti, ora come 21:45.
+            frase = _("Timer impostato: la riproduzione si ferma fra {minuti}, alle {ora}.").format(minuti=_minuti(scelta), ora=self._ora_del_timer())
         self._riscontro("timer_impostato", " ".join([frase, *correzioni]))
 
     def _comando_timer_attuale(self):
         """S (issue 38): il timer di spegnimento, con i suoi limiti."""
-        self._riporta(f"{self._frase_del_timer()} Il timer va da 1 a {valori.TIMER_MASSIMO} minuti, o alla fine del brano.", "timer")
+        self._riporta(self._frase_del_timer() + " " + ngettext("Il timer va da 1 a {massimo} minuti, o alla fine del brano.",
+            "Il timer va da 1 a {massimo} minuti, o alla fine del brano.", valori.TIMER_MASSIMO).format(massimo=valori.TIMER_MASSIMO), "timer")
 
     def _comando_togli_il_timer(self):
         """Ctrl con S: toglie il timer, anche mentre la musica sfuma."""
         c_era = self._timer_scade is not None or self._timer_a_fine_brano or self._inizio_della_sfumatura is not None
         self._togli_il_timer()
-        self._riscontro("timer_tolto", "Timer tolto." if c_era else "Non c'era un timer da togliere.")
+        self._riscontro("timer_tolto", _("Timer tolto.") if c_era else _("Non c'era un timer da togliere."))
 
     def _comando_timer_a_fine_brano(self):
         """Alt con S: il timer alla fine del brano, al posto di quello che c'era."""
         self._togli_il_timer()
         self._timer_a_fine_brano = True
         self._statistiche.conta("timer_a_fine_brano")
-        self._riscontro("timer_impostato", "Timer impostato: la riproduzione si ferma alla fine del brano.")
+        self._riscontro("timer_impostato", _("Timer impostato: la riproduzione si ferma alla fine del brano."))
 
     def _riprendi_il_timer(self, sfumato):
         """Dopo la domanda lasciata com'era: la sfumatura riprende dal punto
@@ -6633,13 +6746,14 @@ class Finestra(wx.Frame):
     def _frase_del_timer(self):
         """Il timer di adesso, per la domanda di Maiuscolo con S."""
         if self._inizio_della_sfumatura is not None:
-            return "Adesso il timer è scaduto, e la musica sta sfumando."
+            return _("Adesso il timer è scaduto, e la musica sta sfumando.")
         if self._timer_a_fine_brano:
-            return "Adesso la ferma alla fine del brano."
+            return _("Adesso la ferma alla fine del brano.")
         if self._timer_scade is not None:
             minuti = max(1, math.ceil((self._timer_scade - self._adesso()) / 60))
-            return f"Adesso scade fra {_minuti(minuti)}, alle {self._ora_del_timer()}."
-        return "Adesso non c'è un timer."
+            # Traduttori: minuti e' come 30 minuti, ora come 21:45.
+            return _("Adesso scade fra {minuti}, alle {ora}.").format(minuti=_minuti(minuti), ora=self._ora_del_timer())
+        return _("Adesso non c'è un timer.")
 
     def _togli_il_timer(self):
         self._sveglia_del_timer.Stop()
@@ -6656,7 +6770,7 @@ class Finestra(wx.Frame):
         if not self.motore.in_corso or self.motore.in_pausa:
             self._fermato_dal_timer()
             return
-        self.scrivi("Timer scaduto: la musica sfuma.")
+        self.scrivi(_("Timer scaduto: la musica sfuma."))
         self._inizio_della_sfumatura = self._adesso()
         self._orologio_della_sfumatura.Start(PASSO_DELLA_SFUMATURA)
 
@@ -6678,7 +6792,7 @@ class Finestra(wx.Frame):
         self._avanzamento_dopo_errore = None
         self._ferma(sfumando=False)
         self._fermo_del_timer = True
-        self._riscontro("timer_scaduto", "Timer scaduto: riproduzione fermata." if fermato else "Timer scaduto.")
+        self._riscontro("timer_scaduto", _("Timer scaduto: riproduzione fermata.") if fermato else _("Timer scaduto."))
 
     def _ferma_la_sfumatura(self, riporta=True):
         """La sfumatura del timer, se c'e', finisce, e il volume torna pieno;
@@ -6694,7 +6808,7 @@ class Finestra(wx.Frame):
         """Z e B: il brano prima o dopo, dalla plancia se cio' che suona si
         vede, altrimenti dalla lista."""
         if not self.coda.playlist:
-            self._riscontro("niente_da_suonare", "Non c'è una playlist in riproduzione.")
+            self._riscontro("niente_da_suonare", _("Non c'è una playlist in riproduzione."))
             return
         voce = self._voce_da_seguire()
         if voce is not None:
@@ -6712,20 +6826,20 @@ class Finestra(wx.Frame):
         if self.impostazioni["casuale"] and self.coda.playlist:
             self._successivo_a_caso()
             return
-        self._vicino(1, "successivo", "È l'ultimo brano.")
+        self._vicino(1, "successivo", _("È l'ultimo brano."))
 
     def _comando_precedente(self):
         if self.impostazioni["casuale"] and self.coda.playlist:
             # Z torna al brano suonato prima, non a quello che sta prima.
             indietro = self._dalla_storia(-1)
             if indietro is None:
-                self._riscontro("nessun_altro_brano", "È il primo brano suonato a caso.")
+                self._riscontro("nessun_altro_brano", _("È il primo brano suonato a caso."))
                 return
             self._atteso_dalla_storia = indietro
             pl, brano, numero = indietro
             self._suona(pl, brano, "precedente", numero)
             return
-        self._vicino(-1, "precedente", "È il primo brano.")
+        self._vicino(-1, "precedente", _("È il primo brano."))
 
     def _successivo_a_caso(self):
         """B con la riproduzione casuale accesa (Gabriele, 4 ottobre 2026):
@@ -6739,10 +6853,10 @@ class Finestra(wx.Frame):
             self._atteso_dalla_storia = seguente
         if seguente is FINE_DEL_MAZZO:
             self._ricomincia_il_mazzo()
-            self._riscontro("nessun_altro_brano", "Ogni brano del mazzo ha suonato una volta: B ricomincia un giro nuovo.")
+            self._riscontro("nessun_altro_brano", _("Ogni brano del mazzo ha suonato una volta: B ricomincia un giro nuovo."))
             return
         if seguente is None:
-            self._riscontro("nessun_altro_brano", "Non c'è un altro brano da scegliere a caso.")
+            self._riscontro("nessun_altro_brano", _("Non c'è un altro brano da scegliere a caso."))
             return
         pl, brano, numero = seguente
         self._suona(pl, brano, "successivo", numero)
@@ -6751,19 +6865,19 @@ class Finestra(wx.Frame):
         """Alt con N: a caso fra le voci suonabili che si vedono nella plancia, se cio'
         che suona si vede; altrimenti a caso nella sua lista."""
         if not self.coda.playlist:
-            self._riscontro("niente_da_suonare", "Non c'è una playlist in riproduzione.")
+            self._riscontro("niente_da_suonare", _("Non c'è una playlist in riproduzione."))
             return
         voce = self._voce_da_seguire()
         if voce is None:
             brano = self.coda.casuale(scelta)
             if brano is None:
-                self._riscontro("nessun_altro_brano", "Non ci sono brani da scegliere.")
+                self._riscontro("nessun_altro_brano", _("Non ci sono brani da scegliere."))
                 return
             self._suona(self.coda.playlist, brano, "casuale")
             return
         candidati = self._candidati_in_plancia(voce)
         if not candidati:
-            self._riscontro("nessun_altro_brano", "Nella plancia non si vede nient'altro da suonare.")
+            self._riscontro("nessun_altro_brano", _("Nella plancia non si vede nient'altro da suonare."))
             return
         dati = self._dati(scelta(candidati))
         self._suona(dati["playlist"], dati["brano"], "casuale", dati.get("numero"))
@@ -6778,8 +6892,15 @@ class Finestra(wx.Frame):
             arrivo = min(arrivo, durata)
         self.motore.salta(secondi)
         self._statistiche.conta("secondi_avanti" if secondi > 0 else "secondi_indietro", round(abs(arrivo - prima), 3))
-        di = f" di {tempo(durata)}" if durata is not None else ""
-        self._riscontro(evento, f"{'Avanti' if secondi > 0 else 'Indietro'} a {tempo(arrivo)}{di}.", "salto")
+        if secondi > 0:
+            # Traduttori: tempo e' il punto d'arrivo nel brano, durata quella del brano, come 1:20 di 3:45.
+            testo = _("Avanti a {tempo} di {durata}.").format(tempo=tempo(arrivo), durata=tempo(durata)) if durata is not None else _("Avanti a {tempo}.").format(
+                tempo=tempo(arrivo))
+        else:
+            # Traduttori: tempo e' il punto d'arrivo nel brano, durata quella del brano, come 1:20 di 3:45.
+            testo = _("Indietro a {tempo} di {durata}.").format(tempo=tempo(arrivo), durata=tempo(durata)) if durata is not None else _("Indietro a {tempo}.").format(
+                tempo=tempo(arrivo))
+        self._riscontro(evento, testo, "salto")
         self._avvisa_l_attesa_del_sid(arrivo)
 
     def _avvisa_l_attesa_del_sid(self, arrivo):
@@ -6791,8 +6912,18 @@ class Finestra(wx.Frame):
         if attesa >= ATTESA_DA_DIRE:
             self._statistiche.conta("attese_lunghe")
             in_corso = self.motore.in_corso or ""
-            che = "Il MIDI" if formati.e_midi(in_corso) else "Il brano della console" if formati.e_chip(in_corso) else "Il SID"
-            self.scrivi(f"{che} si prepara fino a {tempo(arrivo)}: circa {max(2, round(attesa))} secondi.")
+            secondi = max(2, round(attesa))
+            # Traduttori: tempo e' il punto del brano a cui si e' saltati, come 1:20.
+            if formati.e_midi(in_corso):
+                frase = ngettext("Il MIDI si prepara fino a {tempo}: circa {n} secondo.", "Il MIDI si prepara fino a {tempo}: circa {n} secondi.", secondi).format(
+                    tempo=tempo(arrivo), n=secondi)
+            elif formati.e_chip(in_corso):
+                frase = ngettext("Il brano della console si prepara fino a {tempo}: circa {n} secondo.", "Il brano della console si prepara fino a {tempo}: circa {n} secondi.",
+                    secondi).format(tempo=tempo(arrivo), n=secondi)
+            else:
+                frase = ngettext("Il SID si prepara fino a {tempo}: circa {n} secondo.", "Il SID si prepara fino a {tempo}: circa {n} secondi.", secondi).format(
+                    tempo=tempo(arrivo), n=secondi)
+            self.scrivi(frase)
 
     def _comando_avanti(self):
         self._salto(self.impostazioni["passo_avanti"], "avanti")
@@ -6801,20 +6932,29 @@ class Finestra(wx.Frame):
         self._salto(-self.impostazioni["passo_indietro"], "indietro")
 
     def _chiedi_secondi(self, chiave, verso):
+        """Ctrl e Maiuscolo con E: il passo del salto indietro o avanti; verso
+        e' indietro o avanti, e sceglie le frasi."""
         self._domanda()
         attuale = self.impostazioni[chiave]
-        with DialogoTesto(self, f"Di quanti secondi salta {verso}? Anche con i decimali, per esempio 2.5.", "Passo di salto", secondi_da_leggere(attuale)) as dialogo:
+        avanti = verso == "avanti"
+        domanda = _("Di quanti secondi salta avanti? Anche con i decimali, per esempio 2.5.") if avanti else _(
+            "Di quanti secondi salta indietro? Anche con i decimali, per esempio 2.5.")
+        with DialogoTesto(self, domanda, _("Passo di salto"), secondi_da_leggere(attuale)) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
-                self._annullato(f"Il salto {verso} resta di {valori.scrivi_durata(attuale)}.")
+                self._annullato(_("Il salto avanti resta di {durata}.").format(durata=valori.scrivi_durata(attuale)) if avanti else _(
+                    "Il salto indietro resta di {durata}.").format(durata=valori.scrivi_durata(attuale)))
                 return
             testo = dialogo.GetValue()
         secondi = leggi_tempo(testo)
         if not secondi or secondi < 0.1:
-            self._riscontro("errore", f"{testo} non è un numero di secondi valido; il passo resta {secondi_da_leggere(attuale)}.")
+            # Traduttori: testo e' quello scritto nel campo, passo il passo di adesso in secondi.
+            self._riscontro("errore", _("{testo} non è un numero di secondi valido; il passo resta {passo}.").format(testo=testo, passo=secondi_da_leggere(attuale)))
             return
         self.impostazioni[chiave] = round(secondi, 3)
         self._salva_impostazioni()
-        self._riscontro("passo_di_salto", f"Il salto {verso} ora è di {valori.scrivi_durata(round(secondi, 3))}.", "passo_di_salto")
+        durata = valori.scrivi_durata(round(secondi, 3))
+        self._riscontro("passo_di_salto", _("Il salto avanti ora è di {durata}.").format(durata=durata) if avanti else _(
+            "Il salto indietro ora è di {durata}.").format(durata=durata), "passo_di_salto")
 
     def _comando_passo_indietro(self):
         self._chiedi_secondi("passo_indietro", "indietro")
@@ -6830,9 +6970,10 @@ class Finestra(wx.Frame):
         if self.coda.corrente is not None:
             testo = self._tempo_di_dove_sono(self.coda.corrente)
         elif posizione is not None and durata is not None:
-            testo = f"{tempo(posizione)} di {tempo(durata)}"
+            # Traduttori: il punto del brano e la sua durata, come 1:23 di 4:56.
+            testo = _("{tempo} di {durata}").format(tempo=tempo(posizione), durata=tempo(durata))
         else:
-            testo = "il tempo non si sa ancora"
+            testo = _("il tempo non si sa ancora")
         self._riporta(f"{testo[0].upper()}{testo[1:]}.", "salto")
 
     def _comando_verso_la_fine(self):
@@ -6842,7 +6983,7 @@ class Finestra(wx.Frame):
             return
         durata = self.motore.durata
         if durata is None:
-            self._riscontro("non_disponibile", "La durata del brano non si sa ancora: Alt con Q non sa dove sia la fine.")
+            self._riscontro("non_disponibile", _("La durata del brano non si sa ancora: Alt con Q non sa dove sia la fine."))
             return
         self._salto(max(0, durata - self.impostazioni["passo_avanti"]) - (self.motore.posizione or 0), "avanti")
 
@@ -6855,42 +6996,46 @@ class Finestra(wx.Frame):
     def _comando_passi_dei_salti(self):
         """E (issue 38): i passi dei salti di Ctrl e Maiuscolo con Q."""
         imp = self.impostazioni
-        self._riporta(f"Salto indietro di {valori.scrivi_durata(imp['passo_indietro'])}, avanti di {valori.scrivi_durata(imp['passo_avanti'])}; "
-            f"da {valori.scrivi_durata(valori.SECONDI_MINIMI)} in su, e il predefinito è di {valori.scrivi_durata(PREDEFINITE['passo_avanti'])}.", "passo_di_salto")
+        self._riporta(_("Salto indietro di {indietro}, avanti di {avanti}; da {minimo} in su, e il predefinito è di {predefinito}.").format(
+            indietro=valori.scrivi_durata(imp["passo_indietro"]), avanti=valori.scrivi_durata(imp["passo_avanti"]), minimo=valori.scrivi_durata(valori.SECONDI_MINIMI),
+            predefinito=valori.scrivi_durata(PREDEFINITE["passo_avanti"])), "passo_di_salto")
 
     def _comando_passi_predefiniti(self):
         """Ctrl e Maiuscolo con E: i due passi dei salti tornano ai predefiniti."""
         for chiave in ("passo_indietro", "passo_avanti"):
             self.impostazioni[chiave] = PREDEFINITE[chiave]
         self._salva_impostazioni()
-        self._riscontro("passo_di_salto", f"I salti indietro e avanti sono di nuovo di {valori.scrivi_durata(PREDEFINITE['passo_avanti'])}.", "passo_di_salto")
+        self._riscontro("passo_di_salto", _("I salti indietro e avanti sono di nuovo di {durata}.").format(durata=valori.scrivi_durata(PREDEFINITE["passo_avanti"])),
+            "passo_di_salto")
 
     def _comando_vai_a_tempo(self):
         if self._niente_in_corso(risveglia=True):
             return
         self._domanda()
         durata = self.motore.durata
-        dura = f"Il brano dura {tempo(durata)}." if durata is not None else "La durata del brano non si sa ancora."
-        with DialogoTesto(self, f"A che tempo andare? Minuti e secondi, per esempio 1:30, o dalla fine con il meno, per esempio -12. {dura}",
-                "Vai al tempo") as dialogo:
+        dura = _("Il brano dura {durata}.").format(durata=tempo(durata)) if durata is not None else _("La durata del brano non si sa ancora.")
+        # Traduttori: dura e' la frase sulla durata del brano, come Il brano dura 3:45.
+        with DialogoTesto(self, _("A che tempo andare? Minuti e secondi, per esempio 1:30, o dalla fine con il meno, per esempio -12. {dura}").format(dura=dura),
+                _("Vai al tempo")) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
-                self._annullato("Vai al tempo annullato.")
+                self._annullato(_("Vai al tempo annullato."))
                 return
             testo = dialogo.GetValue()
         secondi = leggi_tempo_nel_brano(testo, durata)
         if secondi is None:
-            self._riscontro("errore", f"{testo} non è un tempo dentro il brano.")
+            self._riscontro("errore", _("{testo} non è un tempo dentro il brano.").format(testo=testo))
             return
         self.motore.vai_a(secondi)
-        di = f" di {tempo(durata)}" if durata is not None else ""
-        self._riscontro("vai_a_tempo", f"Vado a {tempo(secondi)}{di}.")
+        # Traduttori: tempo e' il punto d'arrivo nel brano, durata quella del brano, come 1:20 di 3:45.
+        self._riscontro("vai_a_tempo", _("Vado a {tempo} di {durata}.").format(tempo=tempo(secondi), durata=tempo(durata)) if durata is not None else _(
+            "Vado a {tempo}.").format(tempo=tempo(secondi)))
         self._avvisa_l_attesa_del_sid(secondi)
 
     def _volume(self, passo):
         """Ctrl e Maiuscolo con M: il volume giu' o su di un passo."""
         attuale = self._volume_attuale()
         if attuale is None:
-            self._riscontro("errore", f"Il volume di {self.motore.lontano.nome} non si legge.")
+            self._riscontro("errore", _("Il volume di {nome} non si legge.").format(nome=self.motore.lontano.nome))
             return
         self._porta_il_volume(attuale + passo, passo)
 
@@ -6907,43 +7052,65 @@ class Finestra(wx.Frame):
         al volo, dice il volume nuovo con la sua frequenza, dopo il
         riferimento del volume 100 (1.116.2)."""
         lettore = self.motore.lontano
-        massimo, di = (VOLUME_MASSIMO, "") if lettore is None else (100, f" di {lettore.nome}")
+        massimo = VOLUME_MASSIMO if lettore is None else 100
         attuale = self._volume_attuale()
         if attuale is None:
-            self._riscontro("errore", f"Il volume{di} non si legge.")
+            self._riscontro("errore", _("Il volume non si legge.") if lettore is None else _("Il volume di {nome} non si legge.").format(nome=lettore.nome))
             return
         nuovo = max(0, min(massimo, nuovo))
         if nuovo == attuale:
-            limite = "al massimo, " if nuovo == massimo and verso > 0 else "al minimo, " if nuovo == 0 and verso < 0 else "a "
+            # Il volume di uno speaker Cast porta il suo nome, come Volume di Cucina.
+            if nuovo == massimo and verso > 0:
+                frase = _("Volume già al massimo, {volume}.").format(volume=attuale) if lettore is None else _(
+                    "Volume di {nome} già al massimo, {volume}.").format(nome=lettore.nome, volume=attuale)
+            elif nuovo == 0 and verso < 0:
+                frase = _("Volume già al minimo, {volume}.").format(volume=attuale) if lettore is None else _(
+                    "Volume di {nome} già al minimo, {volume}.").format(nome=lettore.nome, volume=attuale)
+            else:
+                frase = _("Volume già a {volume}.").format(volume=attuale) if lettore is None else _(
+                    "Volume di {nome} già a {volume}.").format(nome=lettore.nome, volume=attuale)
             # Sullo speaker il 100 e' il suo massimo: lo si dice, perche' sul
             # PC si va fino a 300 (Gabriele, collaudo della 2.6.0).
-            oltre = " Oltre il 100 si amplifica solo sulle schede del PC." if lettore is not None and nuovo == massimo and verso > 0 else ""
-            self._riscontro("volume_al_limite", f"Volume{di} già {limite}{attuale}.{oltre}", "volume")
+            if lettore is not None and nuovo == massimo and verso > 0:
+                frase += " " + _("Oltre il 100 si amplifica solo sulle schede del PC.")
+            self._riscontro("volume_al_limite", frase, "volume")
             return
         if lettore is not None:
             lettore.volume = nuovo
         else:
             self.motore.volume = nuovo
             self.impostazioni["volume"] = nuovo
-        amplificato = ", amplificato oltre il 100" if nuovo > 100 else ""
         self._domanda_viva = None
         self._conta_l_evento("volume_su" if nuovo > attuale else "volume_giu")
         suoni.volume_della_musica(nuovo, self.impostazioni["volume_effetti"])
-        self.scrivi(f"Volume{di} {nuovo}{amplificato}.", "volume")
+        # Sullo speaker il volume arriva al piu' a 100: amplificato vale solo sul PC.
+        if lettore is not None:
+            frase = _("Volume di {nome} {volume}.").format(nome=lettore.nome, volume=nuovo)
+        elif nuovo > 100:
+            frase = _("Volume {volume}, amplificato oltre il 100.").format(volume=nuovo)
+        else:
+            frase = _("Volume {volume}.").format(volume=nuovo)
+        self.scrivi(frase, "volume")
 
     def _comando_volume(self):
         """M (issue 38): il volume, con i suoi limiti, e quello a cui Ctrl e
         Maiuscolo con M lo riportano, se c'e'."""
         lettore = self.motore.lontano
-        massimo, di = (VOLUME_MASSIMO, "") if lettore is None else (100, f" di {lettore.nome}")
+        massimo = VOLUME_MASSIMO if lettore is None else 100
         volume = self._volume_attuale()
         if volume is None:
-            self._riporta(f"Il volume{di} non si legge.", "volume")
+            self._riporta(_("Il volume non si legge.") if lettore is None else _("Il volume di {nome} non si legge.").format(nome=lettore.nome), "volume")
             return
-        amplificato = ", amplificato oltre il 100" if volume > 100 else ""
+        if lettore is None:
+            frase = _("Volume {volume}, amplificato oltre il 100, da 0 a {massimo}.").format(volume=volume, massimo=massimo) if volume > 100 else _(
+                "Volume {volume}, da 0 a {massimo}.").format(volume=volume, massimo=massimo)
+        else:
+            frase = _("Volume di {nome} {volume}, amplificato oltre il 100, da 0 a {massimo}.").format(nome=lettore.nome, volume=volume, massimo=massimo) if volume > 100 else _(
+                "Volume di {nome} {volume}, da 0 a {massimo}.").format(nome=lettore.nome, volume=volume, massimo=massimo)
         prima = self._volume_di_prima()
-        di_prima = f" Ctrl e Maiuscolo con M lo riportano a {prima}." if prima is not None else ""
-        self._riporta(f"Volume{di} {volume}{amplificato}, da 0 a {massimo}.{di_prima}", "volume")
+        if prima is not None:
+            frase += " " + _("Ctrl e Maiuscolo con M lo riportano a {volume}.").format(volume=prima)
+        self._riporta(frase, "volume")
 
     def _comando_volume_su(self):
         self._volume(self.impostazioni["passo_volume"])
@@ -6977,7 +7144,7 @@ class Finestra(wx.Frame):
         prima = self._volume_di_prima()
         attuale = self._volume_attuale()
         if prima is None:
-            self._riscontro("volume_al_limite", f"Il volume non è stato portato al massimo o a zero: resta {attuale}.", "volume")
+            self._riscontro("volume_al_limite", _("Il volume non è stato portato al massimo o a zero: resta {volume}.").format(volume=attuale), "volume")
             return
         self._ricorda_il_volume(None)
         self._porta_il_volume(prima, 1 if attuale is None or prima >= attuale else -1)
@@ -7008,19 +7175,24 @@ class Finestra(wx.Frame):
 
     def _comando_passo_volume(self):
         """Il punto (issue 38): il passo di Ctrl e Maiuscolo con M."""
-        self._riporta(f"Passo del volume {self.impostazioni['passo_volume']}, da {valori.PASSO_VOLUME_MINIMO} a {valori.PASSO_VOLUME_MASSIMO}; "
-            f"il predefinito è {PREDEFINITE['passo_volume']}.", "passo_del_volume")
+        self._riporta(_("Passo del volume {passo}, da {minimo} a {massimo}; il predefinito è {predefinito}.").format(passo=self.impostazioni["passo_volume"],
+            minimo=valori.PASSO_VOLUME_MINIMO, massimo=valori.PASSO_VOLUME_MASSIMO, predefinito=PREDEFINITE["passo_volume"]), "passo_del_volume")
 
     def _porta_il_passo_del_volume(self, nuovo, verso):
         attuale = self.impostazioni["passo_volume"]
         nuovo = max(valori.PASSO_VOLUME_MINIMO, min(valori.PASSO_VOLUME_MASSIMO, nuovo))
         if nuovo == attuale:
-            limite = "al massimo, " if nuovo == valori.PASSO_VOLUME_MASSIMO and verso > 0 else "al minimo, " if nuovo == valori.PASSO_VOLUME_MINIMO and verso < 0 else ""
-            self._riscontro("volume_al_limite", f"Passo del volume già {limite}{attuale}.", "passo_del_volume")
+            if nuovo == valori.PASSO_VOLUME_MASSIMO and verso > 0:
+                frase = _("Passo del volume già al massimo, {passo}.").format(passo=attuale)
+            elif nuovo == valori.PASSO_VOLUME_MINIMO and verso < 0:
+                frase = _("Passo del volume già al minimo, {passo}.").format(passo=attuale)
+            else:
+                frase = _("Passo del volume già {passo}.").format(passo=attuale)
+            self._riscontro("volume_al_limite", frase, "passo_del_volume")
             return
         self.impostazioni["passo_volume"] = nuovo
         self._salva_impostazioni()
-        self._riscontro("passo_del_volume", f"Passo del volume {nuovo}: Ctrl e Maiuscolo con M cambiano il volume di {nuovo}.", "passo_del_volume")
+        self._riscontro("passo_del_volume", _("Passo del volume {passo}: Ctrl e Maiuscolo con M cambiano il volume di {passo}.").format(passo=nuovo), "passo_del_volume")
 
     def _comando_passo_volume_giu(self):
         self._porta_il_passo_del_volume(self.impostazioni["passo_volume"] - 1, -1)
@@ -7074,31 +7246,40 @@ class Finestra(wx.Frame):
         vuota se lo sono."""
         velocita, tono = self.impostazioni["velocita"], self.impostazioni["tono"]
         if velocita != 1 and tono:
-            return f"Velocità {valori.scrivi_velocita(velocita)} e tono {valori.scrivi_tono(tono)}: Ctrl e Maiuscolo con A e con F li riportano al normale."
+            return _("Velocità {velocita} e tono {tono}: Ctrl e Maiuscolo con A e con F li riportano al normale.").format(velocita=valori.scrivi_velocita(velocita),
+                tono=valori.scrivi_tono(tono))
         if velocita != 1:
-            return f"Velocità {valori.scrivi_velocita(velocita)}: Ctrl e Maiuscolo con A la riportano al normale."
+            return _("Velocità {velocita}: Ctrl e Maiuscolo con A la riportano al normale.").format(velocita=valori.scrivi_velocita(velocita))
         if tono:
-            return f"Tono {valori.scrivi_tono(tono)}: Ctrl e Maiuscolo con F lo riportano al normale."
+            return _("Tono {tono}: Ctrl e Maiuscolo con F lo riportano al normale.").format(tono=valori.scrivi_tono(tono))
         return ""
 
     @staticmethod
     def _riga_della_velocita(velocita):
-        return f"Velocità {valori.scrivi_velocita(velocita)}{', la normale' if velocita == 1 else ''}."
+        if velocita == 1:
+            return _("Velocità {velocita}, la normale.").format(velocita=valori.scrivi_velocita(velocita))
+        return _("Velocità {velocita}.").format(velocita=valori.scrivi_velocita(velocita))
 
     @staticmethod
     def _riga_del_tono(tono):
-        return f"Tono {valori.scrivi_tono(tono)}{', il normale' if tono == 0 else ''}."
+        if tono == 0:
+            return _("Tono {tono}, il normale.").format(tono=valori.scrivi_tono(tono))
+        return _("Tono {tono}.").format(tono=valori.scrivi_tono(tono))
 
     def _velocita(self, nuova, evento):
         """Porta la velocita' a nuova, nei limiti; ai limiti lo dice con il
         suono suo."""
-        if self._vale_solo_sul_pc("La velocità"):
+        # Traduttori: il soggetto di frasi come La velocità su Cucina non vale: vale sulle schede del PC.
+        if self._vale_solo_sul_pc(_("La velocità")):
             return
         attuale = self.impostazioni["velocita"]
         nuova = max(valori.VELOCITA_MINIMA, min(valori.VELOCITA_MASSIMA, round(nuova, 2)))
         if nuova == attuale and evento != "velocita_normale":
-            limite = "massimo" if nuova >= valori.VELOCITA_MASSIMA else "minimo"
-            self._riscontro("velocita_al_limite", f"Velocità già al {limite}, {valori.scrivi_velocita(attuale)}.", "velocita")
+            if nuova >= valori.VELOCITA_MASSIMA:
+                frase = _("Velocità già al massimo, {velocita}.").format(velocita=valori.scrivi_velocita(attuale))
+            else:
+                frase = _("Velocità già al minimo, {velocita}.").format(velocita=valori.scrivi_velocita(attuale))
+            self._riscontro("velocita_al_limite", frase, "velocita")
             return
         self.motore.velocita = nuova
         self.impostazioni["velocita"] = nuova
@@ -7122,19 +7303,28 @@ class Finestra(wx.Frame):
 
     def _comando_velocita(self):
         """A (issue 38): la velocita', con i suoi limiti."""
-        self._riporta(f"{self._riga_della_velocita(self.impostazioni['velocita'])[:-1]}, da {valori.scrivi_velocita(valori.VELOCITA_MINIMA)} "
-            f"a {valori.scrivi_velocita(valori.VELOCITA_MASSIMA)}.", "velocita")
+        velocita = self.impostazioni["velocita"]
+        minima, massima = valori.scrivi_velocita(valori.VELOCITA_MINIMA), valori.scrivi_velocita(valori.VELOCITA_MASSIMA)
+        if velocita == 1:
+            frase = _("Velocità {velocita}, la normale, da {minima} a {massima}.").format(velocita=valori.scrivi_velocita(velocita), minima=minima, massima=massima)
+        else:
+            frase = _("Velocità {velocita}, da {minima} a {massima}.").format(velocita=valori.scrivi_velocita(velocita), minima=minima, massima=massima)
+        self._riporta(frase, "velocita")
 
     def _tono(self, nuovo, evento):
         """Porta il tono a nuovo semitoni, nei limiti; ai limiti lo dice con il
         suono suo."""
-        if self._vale_solo_sul_pc("Il tono"):
+        # Traduttori: il soggetto di frasi come La velocità su Cucina non vale: vale sulle schede del PC.
+        if self._vale_solo_sul_pc(_("Il tono")):
             return
         attuale = self.impostazioni["tono"]
         nuovo = max(-valori.TONO_MASSIMO, min(valori.TONO_MASSIMO, nuovo))
         if nuovo == attuale and evento != "tono_normale":
-            limite = "massimo" if nuovo > 0 else "minimo"
-            self._riscontro("tono_al_limite", f"Tono già al {limite}, {valori.scrivi_tono(attuale)}.", "tono")
+            if nuovo > 0:
+                frase = _("Tono già al massimo, {tono}.").format(tono=valori.scrivi_tono(attuale))
+            else:
+                frase = _("Tono già al minimo, {tono}.").format(tono=valori.scrivi_tono(attuale))
+            self._riscontro("tono_al_limite", frase, "tono")
             return
         self.motore.tono = nuovo
         self.impostazioni["tono"] = nuovo
@@ -7158,15 +7348,25 @@ class Finestra(wx.Frame):
 
     def _comando_tono(self):
         """F (issue 38): il tono, con i suoi limiti."""
-        self._riporta(f"{self._riga_del_tono(self.impostazioni['tono'])[:-1]}, da {valori.scrivi_tono(-valori.TONO_MASSIMO)} "
-            f"a {valori.scrivi_tono(valori.TONO_MASSIMO)}.", "tono")
+        tono = self.impostazioni["tono"]
+        minimo, massimo = valori.scrivi_tono(-valori.TONO_MASSIMO), valori.scrivi_tono(valori.TONO_MASSIMO)
+        if tono == 0:
+            frase = _("Tono {tono}, il normale, da {minimo} a {massimo}.").format(tono=valori.scrivi_tono(tono), minimo=minimo, massimo=massimo)
+        else:
+            frase = _("Tono {tono}, da {minimo} a {massimo}.").format(tono=valori.scrivi_tono(tono), minimo=minimo, massimo=massimo)
+        self._riporta(frase, "tono")
 
-    def _riga_della_banda(self, aggiunta=""):
-        """La riga della banda scelta: Banda 3, 400 Hz: +2 dB. La maiuscola
-        non viene da capitalize, che scriverebbe hz."""
+    def _banda_e_guadagno(self):
+        """La banda scelta e il suo guadagno, per le sue righe: Banda 3, 400
+        Hz e +2 dB. La maiuscola non viene da capitalize, che scriverebbe hz."""
         nome = valori.nome_della_banda(self._banda)
-        guadagno = valori.scrivi_guadagno(self.impostazioni["bande"][self._banda])
-        return f"{nome[0].upper()}{nome[1:]}: {guadagno}{aggiunta}."
+        return f"{nome[0].upper()}{nome[1:]}", valori.scrivi_guadagno(self.impostazioni["bande"][self._banda])
+
+    def _riga_della_banda(self):
+        """La riga della banda scelta: Banda 3, 400 Hz: +2 dB. Le righe con
+        un'aggiunta, come il massimo, sono frasi intere (3.0.0)."""
+        banda, guadagno = self._banda_e_guadagno()
+        return f"{banda}: {guadagno}."
 
     def _scegli_la_banda(self, passo):
         """Ctrl e Maiuscolo con U: la banda prima o dopo."""
@@ -7176,11 +7376,16 @@ class Finestra(wx.Frame):
         """La banda nuova, contata da zero; si ferma alla prima e all'ultima,
         e lo dice. Il suono, fatto al volo, dice la banda con una nota della
         scala."""
-        if self._vale_solo_sul_pc("L'equalizzatore"):
+        # Traduttori: il soggetto di frasi come La velocità su Cucina non vale: vale sulle schede del PC.
+        if self._vale_solo_sul_pc(_("L'equalizzatore")):
             return
         nuova = max(0, min(len(valori.FREQUENZE_DELLE_BANDE) - 1, nuova))
         if nuova == self._banda:
-            self._riscontro("banda_al_limite", self._riga_della_banda(". È la prima" if verso < 0 else ". È l'ultima"), "banda")
+            banda, guadagno = self._banda_e_guadagno()
+            # Traduttori: banda e' come Banda 3, 400 Hz, guadagno come +2 dB.
+            frase = _("{banda}: {guadagno}. È la prima.").format(banda=banda, guadagno=guadagno) if verso < 0 else _(
+                "{banda}: {guadagno}. È l'ultima.").format(banda=banda, guadagno=guadagno)
+            self._riscontro("banda_al_limite", frase, "banda")
             return
         self._banda = nuova
         suoni.banda(nuova, self.impostazioni["volume_effetti"])
@@ -7196,21 +7401,25 @@ class Finestra(wx.Frame):
         """U (issue 38): la banda scelta, fra quante, e il suo guadagno."""
         frequenza = valori.FREQUENZE_DELLE_BANDE[self._banda]
         guadagno = valori.scrivi_guadagno(self.impostazioni["bande"][self._banda])
-        self._riporta(f"Banda {self._banda + 1} di {len(valori.FREQUENZE_DELLE_BANDE)}, {frequenza} Hz: {guadagno}.", "banda")
+        self._riporta(_("Banda {numero} di {totale}, {frequenza} Hz: {guadagno}.").format(numero=self._banda + 1, totale=len(valori.FREQUENZE_DELLE_BANDE),
+            frequenza=frequenza, guadagno=guadagno), "banda")
 
     def _comando_guadagno(self):
         """O (issue 38): il guadagno della banda scelta, con i suoi limiti."""
-        limiti = f", da {valori.scrivi_guadagno(-valori.GUADAGNO_MASSIMO)} a {valori.scrivi_guadagno(valori.GUADAGNO_MASSIMO)}"
-        self._riporta(self._riga_della_banda(limiti), "banda")
+        banda, guadagno = self._banda_e_guadagno()
+        # Traduttori: banda e' come Banda 3, 400 Hz, guadagno come +2 dB; minimo e massimo i guadagni ai limiti.
+        self._riporta(_("{banda}: {guadagno}, da {minimo} a {massimo}.").format(banda=banda, guadagno=guadagno,
+            minimo=valori.scrivi_guadagno(-valori.GUADAGNO_MASSIMO), massimo=valori.scrivi_guadagno(valori.GUADAGNO_MASSIMO)), "banda")
 
     def _comando_curva(self):
         """P (issue 38): i guadagni di tutte le bande, dalla piu' bassa."""
         bande = self.impostazioni["bande"]
         if not any(bande):
-            self._riporta(f"Equalizzatore piatto: tutte le {len(bande)} bande a 0 dB.", "banda")
+            self._riporta(ngettext("Equalizzatore piatto: tutte le {n} bande a 0 dB.", "Equalizzatore piatto: tutte le {n} bande a 0 dB.", len(bande)).format(n=len(bande)), "banda")
             return
         curva = ", ".join(f"{frequenza} Hz {valori.scrivi_guadagno(guadagno)}" for frequenza, guadagno in zip(valori.FREQUENZE_DELLE_BANDE, bande, strict=True))
-        self._riporta(f"Equalizzatore: {curva}.", "banda")
+        # Traduttori: curva sono i guadagni di tutte le bande, come 60 Hz +2 dB, 150 Hz 0 dB.
+        self._riporta(_("Equalizzatore: {curva}.").format(curva=curva), "banda")
 
     def _comando_banda_precedente(self):
         self._scegli_la_banda(-1)
@@ -7231,12 +7440,17 @@ class Finestra(wx.Frame):
     def _porta_il_guadagno(self, nuovo, verso):
         """Il guadagno della banda scelta a nuovo, nei limiti, che dice. Il
         suono, fatto al volo, dice il guadagno con l'altezza della nota."""
-        if self._vale_solo_sul_pc("L'equalizzatore"):
+        # Traduttori: il soggetto di frasi come La velocità su Cucina non vale: vale sulle schede del PC.
+        if self._vale_solo_sul_pc(_("L'equalizzatore")):
             return
         bande = list(self.impostazioni["bande"])
         nuovo = max(-valori.GUADAGNO_MASSIMO, min(valori.GUADAGNO_MASSIMO, nuovo))
         if nuovo == bande[self._banda]:
-            self._riscontro("guadagno_al_limite", self._riga_della_banda(", il massimo" if verso > 0 else ", il minimo"), "banda")
+            banda, guadagno = self._banda_e_guadagno()
+            # Traduttori: banda e' come Banda 3, 400 Hz, guadagno come +2 dB.
+            frase = _("{banda}: {guadagno}, il massimo.").format(banda=banda, guadagno=guadagno) if verso > 0 else _(
+                "{banda}: {guadagno}, il minimo.").format(banda=banda, guadagno=guadagno)
+            self._riscontro("guadagno_al_limite", frase, "banda")
             return
         bande[self._banda] = nuovo
         self._metti_le_bande(bande)
@@ -7257,36 +7471,44 @@ class Finestra(wx.Frame):
         self._guadagno(-1)
 
     def _comando_azzera_la_banda(self):
-        if self._vale_solo_sul_pc("L'equalizzatore"):
+        # Traduttori: il soggetto di frasi come La velocità su Cucina non vale: vale sulle schede del PC.
+        if self._vale_solo_sul_pc(_("L'equalizzatore")):
             return
         bande = list(self.impostazioni["bande"])
         bande[self._banda] = 0
         self._metti_le_bande(bande)
-        self._riscontro("banda_azzerata", self._riga_della_banda(", azzerata"), "banda")
+        banda, guadagno = self._banda_e_guadagno()
+        # Traduttori: banda e' come Banda 3, 400 Hz, guadagno come 0 dB; azzerata si riferisce alla banda.
+        self._riscontro("banda_azzerata", _("{banda}: {guadagno}, azzerata.").format(banda=banda, guadagno=guadagno), "banda")
 
     def _comando_azzera_le_bande(self):
-        if self._vale_solo_sul_pc("L'equalizzatore"):
+        # Traduttori: il soggetto di frasi come La velocità su Cucina non vale: vale sulle schede del PC.
+        if self._vale_solo_sul_pc(_("L'equalizzatore")):
             return
         self._metti_le_bande([0] * len(valori.FREQUENZE_DELLE_BANDE))
-        self._riscontro("bande_azzerate", "Equalizzatore azzerato, tutte a 0 dB.", "banda")
+        self._riscontro("bande_azzerate", _("Equalizzatore azzerato, tutte a 0 dB."), "banda")
 
     def _comando_dissolvenza(self):
         """L (issue 38): la dissolvenza, accesa o spenta, e la sua durata."""
-        self._riporta(f"Dissolvenza {valori.scrivi_dissolvenza(self.impostazioni['dissolvenza'])}.", "dissolvenza")
+        # Traduttori: dissolvenza e' come accesa, 4 secondi, oppure spenta.
+        self._riporta(_("Dissolvenza {dissolvenza}.").format(dissolvenza=valori.scrivi_dissolvenza(self.impostazioni["dissolvenza"])), "dissolvenza")
 
     def _metti_la_dissolvenza(self, accesa):
         """Ctrl con L la spegne, Maiuscolo con L la accende; la durata resta."""
-        if self._vale_solo_sul_pc("La dissolvenza"):
+        # Traduttori: il soggetto di frasi come La velocità su Cucina non vale: vale sulle schede del PC.
+        if self._vale_solo_sul_pc(_("La dissolvenza")):
             return
         dissolvenza = self.impostazioni["dissolvenza"]
         evento = "dissolvenza_accesa" if accesa else "dissolvenza_spenta"
         if dissolvenza["accesa"] == accesa:
-            self._riscontro(evento, f"La dissolvenza è già {valori.scrivi_dissolvenza(dissolvenza)}.", "dissolvenza")
+            # Traduttori: dissolvenza e' come accesa, 4 secondi, oppure spenta.
+            self._riscontro(evento, _("La dissolvenza è già {dissolvenza}.").format(dissolvenza=valori.scrivi_dissolvenza(dissolvenza)), "dissolvenza")
             return
         dissolvenza["accesa"] = accesa
         self._applica_la_dissolvenza()
         self._salva_impostazioni()
-        self._riscontro(evento, f"Dissolvenza {valori.scrivi_dissolvenza(dissolvenza)}.", "dissolvenza")
+        # Traduttori: dissolvenza e' come accesa, 4 secondi, oppure spenta.
+        self._riscontro(evento, _("Dissolvenza {dissolvenza}.").format(dissolvenza=valori.scrivi_dissolvenza(dissolvenza)), "dissolvenza")
 
     def _comando_spegni_la_dissolvenza(self):
         self._metti_la_dissolvenza(False)
@@ -7305,7 +7527,8 @@ class Finestra(wx.Frame):
         evento = "casuale_acceso" if accesa else "casuale_spento"
         frase = _frase_della_casuale(accesa, self.impostazioni["modello_casuale"])
         if self.impostazioni["casuale"] == accesa:
-            self._riscontro(evento, f"Già così. {frase}")
+            # Traduttori: frase dice la riproduzione casuale di adesso, come Riproduzione casuale spenta.
+            self._riscontro(evento, _("Già così. {frase}").format(frase=frase))
             return
         self.impostazioni["casuale"] = accesa
         self._ricomincia_il_mazzo()
@@ -7332,24 +7555,36 @@ class Finestra(wx.Frame):
     def _comando_durata_della_dissolvenza(self):
         """K (issue 38): la durata della dissolvenza, con i suoi limiti."""
         dissolvenza = self.impostazioni["dissolvenza"]
-        self._riporta(f"Durata della dissolvenza {valori.scrivi_durata(dissolvenza['secondi'])}, da {valori.scrivi_durata(valori.DISSOLVENZA_MINIMA)} "
-            f"a {valori.scrivi_durata(valori.DISSOLVENZA_MASSIMA)}; la dissolvenza è {'accesa' if dissolvenza['accesa'] else 'spenta'}.", "dissolvenza")
+        durata, minima, massima = (valori.scrivi_durata(s) for s in (dissolvenza["secondi"], valori.DISSOLVENZA_MINIMA, valori.DISSOLVENZA_MASSIMA))
+        if dissolvenza["accesa"]:
+            frase = _("Durata della dissolvenza {durata}, da {minima} a {massima}; la dissolvenza è accesa.").format(durata=durata, minima=minima, massima=massima)
+        else:
+            frase = _("Durata della dissolvenza {durata}, da {minima} a {massima}; la dissolvenza è spenta.").format(durata=durata, minima=minima, massima=massima)
+        self._riporta(frase, "dissolvenza")
 
     def _porta_la_dissolvenza(self, secondi, verso):
         """La durata della dissolvenza a secondi, nei limiti, che dice. La
         dissolvenza resta accesa o spenta com'era."""
-        if self._vale_solo_sul_pc("La dissolvenza"):
+        # Traduttori: il soggetto di frasi come La velocità su Cucina non vale: vale sulle schede del PC.
+        if self._vale_solo_sul_pc(_("La dissolvenza")):
             return
         dissolvenza = self.impostazioni["dissolvenza"]
         secondi = max(valori.DISSOLVENZA_MINIMA, min(valori.DISSOLVENZA_MASSIMA, round(secondi, 3)))
         if secondi == dissolvenza["secondi"]:
-            limite = "al massimo, " if secondi == valori.DISSOLVENZA_MASSIMA and verso > 0 else "al minimo, " if secondi == valori.DISSOLVENZA_MINIMA and verso < 0 else ""
-            self._riscontro("nessun_altro_brano", f"Durata della dissolvenza già {limite}{valori.scrivi_durata(secondi)}.", "dissolvenza")
+            durata = valori.scrivi_durata(secondi)
+            if secondi == valori.DISSOLVENZA_MASSIMA and verso > 0:
+                frase = _("Durata della dissolvenza già al massimo, {durata}.").format(durata=durata)
+            elif secondi == valori.DISSOLVENZA_MINIMA and verso < 0:
+                frase = _("Durata della dissolvenza già al minimo, {durata}.").format(durata=durata)
+            else:
+                frase = _("Durata della dissolvenza già {durata}.").format(durata=durata)
+            self._riscontro("nessun_altro_brano", frase, "dissolvenza")
             return
         dissolvenza["secondi"] = secondi
         self._applica_la_dissolvenza()
         self._salva_impostazioni()
-        self._riscontro("dissolvenza_durata", f"Dissolvenza {valori.scrivi_dissolvenza(dissolvenza)}.", "dissolvenza")
+        # Traduttori: dissolvenza e' come accesa, 4 secondi, oppure spenta.
+        self._riscontro("dissolvenza_durata", _("Dissolvenza {dissolvenza}.").format(dissolvenza=valori.scrivi_dissolvenza(dissolvenza)), "dissolvenza")
 
     def _comando_dissolvenza_piu_breve(self):
         self._porta_la_dissolvenza(self.impostazioni["dissolvenza"]["secondi"] - PASSO_DELLA_DISSOLVENZA, -1)
@@ -7368,9 +7603,9 @@ class Finestra(wx.Frame):
 
     def _comando_apri_file(self):
         self._domanda()
-        with DialogoDiFile(self, "Apri file", wildcard=formati.filtro_dialogo(), style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST) as dialogo:
+        with DialogoDiFile(self, _("Apri file"), wildcard=formati.filtro_dialogo(), style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
-                self._annullato("Nessun file aperto.")
+                self._annullato(_("Nessun file aperto."))
                 return
             percorso = dialogo.GetPath()
         if formati.e_playlist(percorso):
@@ -7379,7 +7614,8 @@ class Finestra(wx.Frame):
             return
         # Il file aperto non entra in nessuna playlist: resta finche' non si
         # suona altro. La sua cartella vuota lo tiene fuori da Questo PC.
-        pl = Playlist("file aperto", [Brano(percorso)], cartella="")
+        # Traduttori: il nome della lista di un file aperto da solo, come in In riproduzione: C:\musica\a.mp3, file aperto.
+        pl = Playlist(_("file aperto"), [Brano(percorso)], cartella="")
         self._suona(pl, pl.brani[0], "file_aperto")
 
     # Le statistiche (Gabriele, 17 ottobre 2026, 1.103.0).
@@ -7463,7 +7699,7 @@ class Finestra(wx.Frame):
         if self._chiusa or self._statistiche_non_salvate:
             return
         self._statistiche_non_salvate = True
-        self._riscontro("errore", f"Non riesco a salvare le statistiche: {errore.strerror or errore}.")
+        self._riscontro("errore", _("Non riesco a salvare le statistiche: {errore}.").format(errore=errore.strerror or errore))
 
     def _aggiorna_la_scheda_delle_statistiche(self):
         """Il nome della scheda audio su cui suona la musica, per le
@@ -7522,7 +7758,8 @@ class Finestra(wx.Frame):
         self._statistiche.conta("risultati", risultati)
         if not risultati:
             self._statistiche.conta("ricerche_senza_risultati")
-        cosa = f"{self._testo_della_ricerca}{dove or ' in tutto MeTeOra'}"
+        # Traduttori: il record della ricerca nelle statistiche; testo e' cio' che si e' cercato.
+        cosa = f"{self._testo_della_ricerca}{dove}" if dove else _("{testo} in tutto MeTeOra").format(testo=self._testo_della_ricerca)
         self._statistiche.massimo("risultati", risultati, cosa)
         if self._inizio_della_ricerca is not None:
             self._statistiche.massimo("ricerca_piu_lunga", round(time.monotonic() - self._inizio_della_ricerca, 1), cosa)
@@ -7568,43 +7805,49 @@ class Finestra(wx.Frame):
         percorsi di rete."""
         playlist = self.archivio.playlist
         brani = [b for pl in playlist for b in pl.brani]
-        righe = [f"Playlist: {len(playlist)}, con {self._brani_e_durata(brani)}." if playlist else "Playlist: nessuna, oltre ai Preferiti.",
-            f"Preferiti: {self._brani_e_durata(self.archivio.preferiti.brani)}."]
+        # Traduttori: brani e' come 12 brani, 45 minuti.
+        righe = [_("Playlist: {n}, con {brani}.").format(n=len(playlist), brani=self._brani_e_durata(brani)) if playlist else _("Playlist: nessuna, oltre ai Preferiti."),
+            # Traduttori: brani e' come 12 brani, 45 minuti.
+            _("Preferiti: {brani}.").format(brani=self._brani_e_durata(self.archivio.preferiti.brani))]
         if playlist:
             lunga = max(playlist, key=lambda pl: len(pl.brani))
-            righe.append(f"La playlist più lunga: {lunga.nome}, {brani_al_plurale(len(lunga.brani))}.")
+            righe.append(ngettext("La playlist più lunga: {nome}, {n} brano.", "La playlist più lunga: {nome}, {n} brani.", len(lunga.brani)).format(
+                nome=lunga.nome, n=len(lunga.brani)))
         voci = self.marcatori.voci
         quanti = sum(len(voce["marker"]) for voce in voci.values())
-        righe.append(f"Marker di adesso: {quanti}, su {al_plurale(len(voci), 'brano', 'brani')}.")
+        # Traduttori: marker e' quanti marker ci sono in tutto, n su quanti brani.
+        righe.append(ngettext("Marker di adesso: {marker}, su {n} brano.", "Marker di adesso: {marker}, su {n} brani.", len(voci)).format(marker=quanti, n=len(voci)))
         if voci:
             voce = max(voci.values(), key=lambda v: len(v["marker"]))
             nome = os.path.basename((voce.get("percorsi") or [voce.get("file") or ""])[0])
-            righe.append(f"Il brano con più marker adesso: {nome}, {len(voce['marker'])}.")
-        righe.append(f"File lunghi con un punto da riprendere: {self.posizioni.quante()}.")
-        righe.append(f"Percorsi di rete scritti a mano: {len(self.impostazioni['percorsi_di_rete'])}.")
+            # Traduttori: n e' quanti marker ha il brano.
+            righe.append(_("Il brano con più marker adesso: {nome}, {n}.").format(nome=nome, n=len(voce["marker"])))
+        righe.append(_("File lunghi con un punto da riprendere: {n}.").format(n=self.posizioni.quante()))
+        righe.append(_("Percorsi di rete scritti a mano: {n}.").format(n=len(self.impostazioni["percorsi_di_rete"])))
         return righe
 
     def _brani_e_durata(self, brani):
         """Quanti brani e quanto durano, a parole, per le statistiche."""
         durate = [self.schedario.durata(b) for b in brani]
         note = [d for d in durate if d is not None]
-        testo = brani_al_plurale(len(brani))
+        testo = plurale(len(brani), "{n} brano", "{n} brani")
         if note:
             testo += f", {statistiche.durata(sum(note))}"
         if len(note) < len(durate):
-            testo += f", più {len(durate) - len(note)} di cui la durata non si sa"
+            # Traduttori: segue come 12 brani, 45 minuti; n sono i brani di cui la durata non si sa.
+            testo += ngettext(", più {n} di cui la durata non si sa", ", più {n} di cui la durata non si sa", len(durate) - len(note)).format(n=len(durate) - len(note))
         return testo
 
     def _azzera_le_statistiche(self, genitore, libreria, numeri):
         """Azzera le statistiche nella loro finestra, dopo una conferma con No
         come risposta predefinita: da' il testo nuovo, o None se restano."""
-        if not self._conferma("Azzero tutte le statistiche? I conti ripartono da zero, e non si torna indietro; restano la data della prima raccolta "
-                "e quante volte le hai azzerate. La copia dell'ultimo avvio resta nella cartella copie.", "Azzera le statistiche", genitore):
-            self._annullato("Le statistiche restano come sono.")
+        if not self._conferma(_("Azzero tutte le statistiche? I conti ripartono da zero, e non si torna indietro; restano la data della prima raccolta "
+                "e quante volte le hai azzerate. La copia dell'ultimo avvio resta nella cartella copie."), _("Azzera le statistiche"), genitore):
+            self._annullato(_("Le statistiche restano come sono."))
             return None
         self._statistiche.azzera()
         self._salva_le_statistiche()
-        self._riscontro("statistiche_azzerate", "Statistiche azzerate: i conti ripartono da adesso.")
+        self._riscontro("statistiche_azzerate", _("Statistiche azzerate: i conti ripartono da adesso."))
         return self._testo_delle_statistiche(libreria, numeri)
 
     def _salva_le_statistiche(self):
@@ -7612,7 +7855,7 @@ class Finestra(wx.Frame):
             self._statistiche.salva()
         except OSError as e:
             self._statistiche.conta("salvataggi_non_riusciti")
-            self._riscontro("errore", f"Non riesco a salvare le statistiche: {e.strerror or e}.")
+            self._riscontro("errore", _("Non riesco a salvare le statistiche: {errore}.").format(errore=e.strerror or e))
 
     def _cerca_nelle_statistiche(self, genitore, testo):
         """La barra rovesciata nelle statistiche, come nella console: il
@@ -7620,18 +7863,18 @@ class Finestra(wx.Frame):
         ripropone. Da' (testo, espressione), o None se la ricerca e' annullata."""
         while True:
             self._domanda()
-            with FinestraFiltro(genitore, "Cerca nelle statistiche", testo, ISTRUZIONI_DELLE_STATISTICHE) as dialogo:
+            with FinestraFiltro(genitore, _("Cerca nelle statistiche"), testo, ISTRUZIONI_DELLE_STATISTICHE) as dialogo:
                 if dialogo.ShowModal() != wx.ID_OK:
-                    self._annullato("Ricerca nelle statistiche annullata.")
+                    self._annullato(_("Ricerca nelle statistiche annullata."))
                     return None
                 testo = " ".join(dialogo.testo.splitlines()).strip()
             if not testo:
-                self._annullato("Ricerca nelle statistiche annullata: il testo è vuoto.")
+                self._annullato(_("Ricerca nelle statistiche annullata: il testo è vuoto."))
                 return None
             try:
                 return testo, modello_della_console(testo)
             except ErroreFiltro as e:
-                self._riscontro("errore", f"Nella ricerca non capisco: {e}")
+                self._riscontro("errore", _("Nella ricerca non capisco: {errore}").format(errore=e))
 
     # Le impostazioni, piano 5.8.
 
@@ -7661,35 +7904,38 @@ class Finestra(wx.Frame):
             "tono": lambda: valori.scrivi_tono(imp["tono"]),
             "bande": self._bande_da_leggere,
             "dissolvenza": lambda: valori.scrivi_dissolvenza(imp["dissolvenza"]),
-            "casuale": lambda: "sì" if imp["casuale"] else "no",
+            # Traduttori: il valore di una voce delle impostazioni, come Video: sì; e' anche una delle risposte che il suo campo accetta.
+            "casuale": lambda: _("sì") if imp["casuale"] else _("no"),
             "modello_casuale": lambda: valori.MODELLI_CASUALI[imp["modello_casuale"]],
             "ripetizione": lambda: valori.RIPETIZIONI[imp["ripetizione"]],
-            "video": lambda: "sì" if imp["video"] else "no",
-            "sottotitoli": lambda: "sì" if imp["sottotitoli"] else "no",
+            "video": lambda: _("sì") if imp["video"] else _("no"),
+            "sottotitoli": lambda: _("sì") if imp["sottotitoli"] else _("no"),
             "sintesi": self._sintesi_da_leggere,
             "destinazione": lambda: sintesi.DESTINAZIONI[imp["destinazione"]],
             "karaoke": lambda: MODI_DEL_KARAOKE[imp["karaoke"]],
             "anticipo_karaoke": lambda: f"{imp['anticipo_karaoke']} ms",
-            "celle_braille": lambda: str(imp["celle_braille"]) if imp["celle_braille"] else "0, il testo intero",
+            # Traduttori: le celle della barra braille a 0, come Celle della barra braille: 0, il testo intero.
+            "celle_braille": lambda: str(imp["celle_braille"]) if imp["celle_braille"] else _("0, il testo intero"),
             "lettura_minima": lambda: f"{imp['lettura_minima']} ms",
             "banco_midi": self._banco_da_leggere,
-            "insegui": lambda: "sì" if imp["insegui"] else "no",
-            "ripresa_oltre": lambda: f"oltre {imp['ripresa_oltre']} minuti" if imp["ripresa_oltre"] else "mai",
+            "insegui": lambda: _("sì") if imp["insegui"] else _("no"),
+            # Traduttori: la voce Punto lasciato dei file lunghi, come Punto lasciato dei file lunghi: oltre 30 minuti, oppure mai.
+            "ripresa_oltre": lambda: ngettext("oltre {n} minuti", "oltre {n} minuti", imp["ripresa_oltre"]).format(n=imp["ripresa_oltre"]) if imp["ripresa_oltre"] else _("mai"),
             "lingua": self._lingua_da_leggere,
             "caratteri": self._caratteri_da_leggere,
             "colori_testo": lambda: self._colori_da_leggere("colori_testo"),
             "colori_sfondo": lambda: self._colori_da_leggere("colori_sfondo"),
-            "barra_dei_comandi": lambda: "sì" if imp["barra_dei_comandi"] else "no",
-            "stato_della_selezione": lambda: "sì" if imp["stato_della_selezione"] else "no",
+            "barra_dei_comandi": lambda: _("sì") if imp["barra_dei_comandi"] else _("no"),
+            "stato_della_selezione": lambda: _("sì") if imp["stato_della_selezione"] else _("no"),
             "righe_della_console": lambda: str(imp["righe_della_console"]),
-            "salva_console": lambda: "scrive la console in un file di testo",
+            "salva_console": lambda: _("scrive la console in un file di testo"),
             "marcatori": self._marcatori_da_leggere,
-            "importa_marcatori": lambda: "da un file esportato da MeTeOra",
-            "associazioni": lambda: "Apri con MeTeOra e app predefinite di Windows" if getattr(sys, "frozen", False) else "solo dal programma compilato",
+            "importa_marcatori": lambda: _("da un file esportato da MeTeOra"),
+            "associazioni": lambda: _("Apri con MeTeOra e app predefinite di Windows") if getattr(sys, "frozen", False) else _("solo dal programma compilato"),
             "impressi": lambda: MODI_DEGLI_IMPRESSI[imp["impressi"]],
-            "dona": lambda: "offri un caffè all'autore, con PayPal",
-            "entra_al_pub": lambda: "prepara la mail che ti iscrive alla lista di supporto",
-            "chiedi_aiuto_al_pub": lambda: "prepara una mail alla lista, con la tua domanda e le informazioni del computer",
+            "dona": lambda: _("offri un caffè all'autore, con PayPal"),
+            "entra_al_pub": lambda: _("prepara la mail che ti iscrive alla lista di supporto"),
+            "chiedi_aiuto_al_pub": lambda: _("prepara una mail alla lista, con la tua domanda e le informazioni del computer"),
         }[chiave]()
         return f"{VOCI_DELLE_IMPOSTAZIONI[chiave][0]}: {valore}"
 
@@ -7697,25 +7943,31 @@ class Finestra(wx.Frame):
         """I guadagni dell'equalizzatore come li scrive il campo, in dB, o
         piatto se sono tutti a zero."""
         bande = self.impostazioni["bande"]
-        return f"{valori.scrivi_bande(bande)} dB" if any(bande) else "piatto, tutte le bande a 0 dB"
+        # Traduttori: la voce Equalizzatore, come Equalizzatore: piatto, tutte le bande a 0 dB.
+        return f"{valori.scrivi_bande(bande)} dB" if any(bande) else _("piatto, tutte le bande a 0 dB")
 
     def _caratteri_da_leggere(self):
         caratteri = self.impostazioni["caratteri"]
         if not caratteri:
-            return "quelle di Windows"
-        return ", ".join(f"{nome} {caratteri[area]}" if area in caratteri else f"{nome} di Windows" for area, nome in AREE.items())
+            # Traduttori: la voce Dimensioni dei caratteri, come Dimensioni dei caratteri: quelle di Windows.
+            return _("quelle di Windows")
+        # Traduttori: area e' una delle tre aree della finestra, come plancia.
+        return ", ".join(f"{nome} {caratteri[area]}" if area in caratteri else _("{area} di Windows").format(area=nome) for area, nome in AREE.items())
 
     def _colori_da_leggere(self, chiave):
         colori = self.impostazioni[chiave]
         if not colori:
-            return "quelli di Windows"
+            # Traduttori: la voce Colori dei caratteri o Colori dello sfondo, come Colori dello sfondo: quelli di Windows.
+            return _("quelli di Windows")
         testo = ", ".join(f"{nome} {'.'.join(str(p) for p in colori[area])}" for area, nome in AREE.items() if area in colori)
-        return testo + ("; le altre aree di Windows" if len(colori) < len(AREE) else "")
+        # Traduttori: segue i colori delle aree scelte, come plancia 31.31.31; le altre sono le aree della finestra.
+        return testo + (_("; le altre aree di Windows") if len(colori) < len(AREE) else "")
 
     def _marcatori_da_leggere(self):
         voci = self.marcatori.voci
         quanti = sum(len(voce["marker"]) for voce in voci.values())
-        return f"{quanti} in {len(voci)} file" if quanti else "nessuno"
+        # Traduttori: la voce Marcatori, come Marcatori: 12 in 3 file, oppure nessuno; marker sono i marker, n i file.
+        return ngettext("{marker} in {n} file", "{marker} in {n} file", len(voci)).format(marker=quanti, n=len(voci)) if quanti else _("nessuno")
 
     def _lingua_da_leggere(self):
         """La lingua di adesso e, se nelle impostazioni se n'e' scelta
@@ -7790,7 +8042,8 @@ class Finestra(wx.Frame):
             self._domanda()
             with FinestraFiltro(genitore, f"{errore} {etichetta}" if errore else etichetta, testo, istruzioni) as dialogo:
                 if dialogo.ShowModal() != wx.ID_OK:
-                    self._annullato(f"{etichetta} non {participio}.")
+                    # Traduttori: etichetta e' la voce delle impostazioni, come Volume della musica, participio come cambiato.
+                    self._annullato(_("{etichetta} non {participio}.").format(etichetta=etichetta, participio=participio))
                     return
                 # Piu' righe valgono come una, unite da spazi.
                 testo = " ".join(dialogo.testo.splitlines()).strip()
@@ -7812,139 +8065,185 @@ class Finestra(wx.Frame):
         """(lettura, istruzioni, testo di adesso) del campo di una voce di
         valore: la lettura e' la funzione di valori.py che legge il testo."""
         imp = self.impostazioni
+        # Le righe col dollaro dei campi: "Adesso" dice il valore di adesso.
         if chiave == "volume":
             return valori.leggi_volume_musica, [
-                "Il volume della musica, da 0 a 300: 100 è il livello originale del file; oltre il 100 amplifica, con un limitatore contro la distorsione, per gli audio registrati troppo bassi.",
-                "Per esempio 80 o 150. Anche Ctrl e Maiuscolo con M lo cambiano, dalla finestra principale.",
-                f"Adesso è {imp['volume']}.", REGOLA_DEL_DOLLARO], str(imp["volume"])
+                _("Il volume della musica, da 0 a 300: 100 è il livello originale del file; oltre il 100 amplifica, con un limitatore contro la distorsione, "
+                    "per gli audio registrati troppo bassi."),
+                _("Per esempio 80 o 150. Anche Ctrl e Maiuscolo con M lo cambiano, dalla finestra principale."),
+                # Traduttori: valore e' il valore di adesso della voce, come 80.
+                _("Adesso è {valore}.").format(valore=imp["volume"]), REGOLA_DEL_DOLLARO], str(imp["volume"])
         if chiave == "passo_volume":
             return valori.leggi_passo_volume, [
-                "Di quanto cambiano il volume Ctrl e Maiuscolo con M: un numero intero da 1 a 50.",
-                "Per esempio 5. Anche Ctrl e Maiuscolo con il punto lo cambiano, dalla finestra principale.",
-                f"Adesso è {imp['passo_volume']}.", REGOLA_DEL_DOLLARO], str(imp["passo_volume"])
+                _("Di quanto cambiano il volume Ctrl e Maiuscolo con M: un numero intero da 1 a 50."),
+                _("Per esempio 5. Anche Ctrl e Maiuscolo con il punto lo cambiano, dalla finestra principale."),
+                _("Adesso è {valore}.").format(valore=imp["passo_volume"]), REGOLA_DEL_DOLLARO], str(imp["passo_volume"])
         if chiave == "volume_effetti":
             percentuale = round(imp["volume_effetti"] * 100)
             return valori.leggi_volume_effetti, [
-                "Quanto forte suonano gli effetti sonori, in percentuale, da 0 a 100: 0 li zittisce. Il volume della musica non cambia.",
-                "Per esempio 50, oppure 35%.",
-                f"Adesso è {percentuale}%.", REGOLA_DEL_DOLLARO], str(percentuale)
+                _("Quanto forte suonano gli effetti sonori, in percentuale, da 0 a 100: 0 li zittisce. Il volume della musica non cambia."),
+                _("Per esempio 50, oppure 35%."),
+                _("Adesso è {percentuale}%.").format(percentuale=percentuale), REGOLA_DEL_DOLLARO], str(percentuale)
         if chiave in ("passo_indietro", "passo_avanti"):
-            nome, verso, tasto, del_passo = VOCI_DELLE_IMPOSTAZIONI[chiave][0], *(("indietro", "Ctrl con Q", "Ctrl con E") if chiave == "passo_indietro"
-                else ("avanti", "Maiuscolo con Q", "Maiuscolo con E"))
+            nome = VOCI_DELLE_IMPOSTAZIONI[chiave][0]
+            if chiave == "passo_indietro":
+                spiegazione = [_("Di quanti secondi salta indietro Ctrl con Q: almeno 0.1, anche con i decimali."),
+                    _("Per esempio 10 o 2.5, oppure minuti e secondi come 1:30. Anche Ctrl con E lo cambia, dalla finestra principale.")]
+            else:
+                spiegazione = [_("Di quanti secondi salta avanti Maiuscolo con Q: almeno 0.1, anche con i decimali."),
+                    _("Per esempio 10 o 2.5, oppure minuti e secondi come 1:30. Anche Maiuscolo con E lo cambia, dalla finestra principale.")]
             attuale = secondi_da_leggere(imp[chiave])
             return (lambda testo: valori.leggi_secondi(testo, nome)), [
-                f"Di quanti secondi salta {verso} {tasto}: almeno 0.1, anche con i decimali.",
-                f"Per esempio 10 o 2.5, oppure minuti e secondi come 1:30. Anche {del_passo} lo cambia, dalla finestra principale.",
-                f"Adesso è di {valori.scrivi_durata(imp[chiave])}.", REGOLA_DEL_DOLLARO], attuale
+                # Traduttori: durata e' come 5 secondi.
+                *spiegazione, _("Adesso è di {durata}.").format(durata=valori.scrivi_durata(imp[chiave])), REGOLA_DEL_DOLLARO], attuale
         if chiave == "velocita":
             minima, massima, passo = (valori.scrivi_velocita(v) for v in (valori.VELOCITA_MINIMA, valori.VELOCITA_MASSIMA, valori.PASSO_VELOCITA))
             return valori.leggi_velocita, [
-                f"La velocità di riproduzione, da {minima} a {massima}: 1 è la normale, meno di 1 rallenta, più di 1 accelera. Il tono non cambia.",
-                f"Va a passi di {passo}: un valore fra due passi va al più vicino. Per esempio 1.05 o 0.9.",
-                "Anche Ctrl e Maiuscolo con A la cambiano, e premuti insieme la riportano a 1, dalla finestra principale.",
-                f"Adesso è {valori.scrivi_velocita(imp['velocita'])}.", REGOLA_DEL_DOLLARO], valori.scrivi_velocita(imp["velocita"])
+                _("La velocità di riproduzione, da {minima} a {massima}: 1 è la normale, meno di 1 rallenta, più di 1 accelera. Il tono non cambia.").format(
+                    minima=minima, massima=massima),
+                _("Va a passi di {passo}: un valore fra due passi va al più vicino. Per esempio 1.05 o 0.9.").format(passo=passo),
+                _("Anche Ctrl e Maiuscolo con A la cambiano, e premuti insieme la riportano a 1, dalla finestra principale."),
+                _("Adesso è {valore}.").format(valore=valori.scrivi_velocita(imp["velocita"])), REGOLA_DEL_DOLLARO], valori.scrivi_velocita(imp["velocita"])
         if chiave == "tono":
             return valori.leggi_tono, [
-                f"Il tono in semitoni, da -{valori.TONO_MASSIMO} a +{valori.TONO_MASSIMO}: 0 è il normale. La velocità non cambia, e l'equalizzatore segue il tono.",
-                "Per esempio +2 per alzarlo di due semitoni, -3 per abbassarlo di tre.",
-                "Anche Ctrl e Maiuscolo con F lo cambiano, e premuti insieme lo riportano a 0, dalla finestra principale.",
-                f"Adesso è di {valori.scrivi_tono(imp['tono'])}.", REGOLA_DEL_DOLLARO], valori.scrivi_tono(imp["tono"]).split()[0]
+                _("Il tono in semitoni, da -{massimo} a +{massimo}: 0 è il normale. La velocità non cambia, e l'equalizzatore segue il tono.").format(massimo=valori.TONO_MASSIMO),
+                _("Per esempio +2 per alzarlo di due semitoni, -3 per abbassarlo di tre."),
+                _("Anche Ctrl e Maiuscolo con F lo cambiano, e premuti insieme lo riportano a 0, dalla finestra principale."),
+                # Traduttori: tono e' come +2 semitoni.
+                _("Adesso è di {tono}.").format(tono=valori.scrivi_tono(imp["tono"])), REGOLA_DEL_DOLLARO], valori.scrivi_tono(imp["tono"]).split()[0]
         if chiave == "bande":
             frequenze = ", ".join(str(f) for f in valori.FREQUENZE_DELLE_BANDE[:-1])
             return valori.leggi_bande, [
-                f"I guadagni delle {len(valori.FREQUENZE_DELLE_BANDE)} bande dell'equalizzatore, in dB interi da -{valori.GUADAGNO_MASSIMO} a +{valori.GUADAGNO_MASSIMO}, "
-                f"separati da spazi, dalla banda più bassa alla più alta: {frequenze} e {valori.FREQUENZE_DELLE_BANDE[-1]} Hz.",
-                "Un numero solo vale per tutte le bande, e il campo vuoto le riporta tutte a 0. Per esempio 0 0 +2 0 0 0 -3, oppure 3.",
-                "Contro la saturazione il volume scende da solo quanto la banda più alzata: con una banda sola il suono non satura, "
-                "con più bande vicine alzate, o tutte, sale fino a circa 5.6 dB oltre, e dal volume 80 o 90 in su conviene abbassare il volume.",
-                "Anche Ctrl e Maiuscolo con U scelgono la banda, Ctrl e Maiuscolo con O la abbassano e la alzano, e premuti insieme la azzerano; Ctrl e Maiuscolo con P le azzerano tutte, dalla finestra principale.",
-                f"Adesso: {self._bande_da_leggere()}.", REGOLA_DEL_DOLLARO], valori.scrivi_bande(imp["bande"])
+                # Traduttori: frequenze sono quelle delle bande prima dell'ultima, come 60, 150, 400; ultima e' quella dell'ultima banda.
+                ngettext("I guadagni della {n} banda dell'equalizzatore, in dB interi da -{massimo} a +{massimo}, "
+                    "separati da spazi, dalla banda più bassa alla più alta: {frequenze} e {ultima} Hz.",
+                    "I guadagni delle {n} bande dell'equalizzatore, in dB interi da -{massimo} a +{massimo}, "
+                    "separati da spazi, dalla banda più bassa alla più alta: {frequenze} e {ultima} Hz.", len(valori.FREQUENZE_DELLE_BANDE)).format(
+                    n=len(valori.FREQUENZE_DELLE_BANDE), massimo=valori.GUADAGNO_MASSIMO, frequenze=frequenze, ultima=valori.FREQUENZE_DELLE_BANDE[-1]),
+                _("Un numero solo vale per tutte le bande, e il campo vuoto le riporta tutte a 0. Per esempio 0 0 +2 0 0 0 -3, oppure 3."),
+                _("Contro la saturazione il volume scende da solo quanto la banda più alzata: con una banda sola il suono non satura, "
+                    "con più bande vicine alzate, o tutte, sale fino a circa 5.6 dB oltre, e dal volume 80 o 90 in su conviene abbassare il volume."),
+                _("Anche Ctrl e Maiuscolo con U scelgono la banda, Ctrl e Maiuscolo con O la abbassano e la alzano, e premuti insieme la azzerano; "
+                    "Ctrl e Maiuscolo con P le azzerano tutte, dalla finestra principale."),
+                # Traduttori: valore e' il valore di adesso della voce, come piatto, tutte le bande a 0 dB.
+                _("Adesso: {valore}.").format(valore=self._bande_da_leggere()), REGOLA_DEL_DOLLARO], valori.scrivi_bande(imp["bande"])
         if chiave == "dissolvenza":
             secondi = imp["dissolvenza"]["secondi"]
             minima, massima = (valori.scrivi_durata(s).split()[0] for s in (valori.DISSOLVENZA_MINIMA, valori.DISSOLVENZA_MASSIMA))
             return (lambda testo: valori.leggi_dissolvenza(testo, secondi)), [
-                "La dissolvenza incrociata: il brano che finisce sfuma mentre il seguente entra. Vale a ogni cambio di brano, da solo o con i tasti.",
-                f"Scrivi no per spegnerla, sì per accenderla, oppure i secondi, da {minima} a {massima}, anche con i decimali, per accenderla con quella durata. Per esempio 4 o 2.5.",
-                "Anche Maiuscolo con L la accende e Ctrl con L la spegne, e Ctrl e Maiuscolo con K ne cambiano la durata, dalla finestra principale.",
-                f"Adesso è {valori.scrivi_dissolvenza(imp['dissolvenza'])}.", REGOLA_DEL_DOLLARO], valori.scrivi_dissolvenza(imp["dissolvenza"])
+                _("La dissolvenza incrociata: il brano che finisce sfuma mentre il seguente entra. Vale a ogni cambio di brano, da solo o con i tasti."),
+                # Traduttori: no e sì sono le risposte che il campo accetta, come nelle altre voci.
+                _("Scrivi no per spegnerla, sì per accenderla, oppure i secondi, da {minima} a {massima}, anche con i decimali, per accenderla con quella durata. "
+                    "Per esempio 4 o 2.5.").format(minima=minima, massima=massima),
+                _("Anche Maiuscolo con L la accende e Ctrl con L la spegne, e Ctrl e Maiuscolo con K ne cambiano la durata, dalla finestra principale."),
+                # Traduttori: valore e' come accesa, 4 secondi, oppure spenta.
+                _("Adesso è {valore}.").format(valore=valori.scrivi_dissolvenza(imp["dissolvenza"])), REGOLA_DEL_DOLLARO], valori.scrivi_dissolvenza(imp["dissolvenza"])
+        # Le voci sì o no: il campo parte dalla risposta di adesso, una di
+        # quelle che valori.leggi_si_no accetta.
         if chiave == "casuale":
-            return (lambda testo: valori.leggi_si_no(testo, "Riproduzione casuale")), [
-                "Con la riproduzione casuale accesa, quando un brano finisce da solo il seguente si sceglie a caso, fra quelli che l'avanzamento automatico "
-                "potrebbe suonare: le voci che si vedono nella plancia, oppure la lista, il loop o la selezione da cui si suona. Z, B e gli altri tasti restano come sono.",
-                "Scrivi sì per accenderla, no per spegnerla; valgono anche s, n, 1, 0, acceso e spento. Anche Maiuscolo con N la accende, e Ctrl con N la spegne.",
-                f"Adesso è {'accesa' if imp['casuale'] else 'spenta'}.", REGOLA_DEL_DOLLARO], "sì" if imp["casuale"] else "no"
+            # Traduttori: il nome della voce nei messaggi d'errore del campo, come Riproduzione casuale: manca la risposta.
+            return (lambda testo: valori.leggi_si_no(testo, _("Riproduzione casuale"))), [
+                _("Con la riproduzione casuale accesa, quando un brano finisce da solo il seguente si sceglie a caso, fra quelli che l'avanzamento automatico "
+                    "potrebbe suonare: le voci che si vedono nella plancia, oppure la lista, il loop o la selezione da cui si suona. Z, B e gli altri tasti restano come sono."),
+                # Traduttori: sì, no, s, n, 1, 0, acceso e spento sono le risposte che il campo accetta.
+                _("Scrivi sì per accenderla, no per spegnerla; valgono anche s, n, 1, 0, acceso e spento. Anche Maiuscolo con N la accende, e Ctrl con N la spegne."),
+                _("Adesso è accesa.") if imp["casuale"] else _("Adesso è spenta."), REGOLA_DEL_DOLLARO], _("sì") if imp["casuale"] else _("no")
         if chiave == "video":
-            return (lambda testo: valori.leggi_si_no(testo, "Video")), [
-                "Con il video acceso, quando parte un brano con il video si apre la sua finestra, sopra MeTeOra; allo stop sparisce. Spento, dei video si sente solo l'audio.",
-                "Scrivi sì per accenderlo, no per spegnerlo; valgono anche s, n, 1, 0, acceso e spento. Anche Maiuscolo con F1 lo accende, e Ctrl con F1 lo spegne.",
-                f"Adesso è {'acceso' if imp['video'] else 'spento'}.", REGOLA_DEL_DOLLARO], "sì" if imp["video"] else "no"
+            # Traduttori: il nome della voce nei messaggi d'errore del campo, come Video: manca la risposta.
+            return (lambda testo: valori.leggi_si_no(testo, _("Video"))), [
+                _("Con il video acceso, quando parte un brano con il video si apre la sua finestra, sopra MeTeOra; allo stop sparisce. Spento, dei video si sente solo l'audio."),
+                # Traduttori: sì, no, s, n, 1, 0, acceso e spento sono le risposte che il campo accetta.
+                _("Scrivi sì per accenderlo, no per spegnerlo; valgono anche s, n, 1, 0, acceso e spento. Anche Maiuscolo con F1 lo accende, e Ctrl con F1 lo spegne."),
+                _("Adesso è acceso.") if imp["video"] else _("Adesso è spento."), REGOLA_DEL_DOLLARO], _("sì") if imp["video"] else _("no")
         if chiave == "sottotitoli":
-            return (lambda testo: valori.leggi_si_no(testo, "Sottotitoli letti")), [
-                "Con i sottotitoli letti accesi, ogni sottotitolo dei video va alla sintesi scelta qui sotto e si scrive nella console, anche con il video spento.",
-                "Scrivi sì per accenderli, no per spegnerli; valgono anche s, n, 1, 0, acceso e spento. Maiuscolo con D li accende e sceglie la traccia seguente, Ctrl con D la precedente.",
-                f"Adesso sono {'accesi' if imp['sottotitoli'] else 'spenti'}.", REGOLA_DEL_DOLLARO], "sì" if imp["sottotitoli"] else "no"
+            # Traduttori: il nome della voce nei messaggi d'errore del campo, come Sottotitoli letti: manca la risposta.
+            return (lambda testo: valori.leggi_si_no(testo, _("Sottotitoli letti"))), [
+                _("Con i sottotitoli letti accesi, ogni sottotitolo dei video va alla sintesi scelta qui sotto e si scrive nella console, anche con il video spento."),
+                # Traduttori: sì, no, s, n, 1, 0, acceso e spento sono le risposte che il campo accetta.
+                _("Scrivi sì per accenderli, no per spegnerli; valgono anche s, n, 1, 0, acceso e spento. Maiuscolo con D li accende e sceglie la traccia seguente, "
+                    "Ctrl con D la precedente."),
+                _("Adesso sono accesi.") if imp["sottotitoli"] else _("Adesso sono spenti."), REGOLA_DEL_DOLLARO], _("sì") if imp["sottotitoli"] else _("no")
         if chiave == "barra_dei_comandi":
-            return (lambda testo: valori.leggi_si_no(testo, "Barra dei comandi per il mouse")), [
-                "Per chi vede: con la barra accesa, quando il mouse si muove sopra MeTeOra compare in basso una barra con i comandi della riproduzione, "
-                "del volume, della velocità e del tono; sparisce dopo qualche secondo di mouse fermo.",
-                "Non prende mai il fuoco e non si raggiunge con Tab: con la tastiera e lo screen reader non cambia niente.",
-                "Scrivi sì per accenderla, no per spegnerla; valgono anche s, n, 1, 0, acceso e spento.",
-                f"Adesso è {'accesa' if imp['barra_dei_comandi'] else 'spenta'}.", REGOLA_DEL_DOLLARO], "sì" if imp["barra_dei_comandi"] else "no"
+            # Traduttori: il nome della voce nei messaggi d'errore del campo, come Barra dei comandi per il mouse: manca la risposta.
+            return (lambda testo: valori.leggi_si_no(testo, _("Barra dei comandi per il mouse"))), [
+                _("Per chi vede: con la barra accesa, quando il mouse si muove sopra MeTeOra compare in basso una barra con i comandi della riproduzione, "
+                    "del volume, della velocità e del tono; sparisce dopo qualche secondo di mouse fermo."),
+                _("Non prende mai il fuoco e non si raggiunge con Tab: con la tastiera e lo screen reader non cambia niente."),
+                # Traduttori: sì, no, s, n, 1, 0, acceso e spento sono le risposte che il campo accetta.
+                _("Scrivi sì per accenderla, no per spegnerla; valgono anche s, n, 1, 0, acceso e spento."),
+                _("Adesso è accesa.") if imp["barra_dei_comandi"] else _("Adesso è spenta."), REGOLA_DEL_DOLLARO], _("sì") if imp["barra_dei_comandi"] else _("no")
         if chiave == "stato_della_selezione":
-            return (lambda testo: valori.leggi_si_no(testo, "Stato della selezione per lo screen reader")), [
-                "Con lo stato acceso, nella plancia NVDA dice non selezionato sulle voci che non sono nella selezione multipla, come in Esplora risorse, "
-                "per esempio quando Ctrl con le frecce porta il fuoco fuori dalla selezione; con Ctrl e la barra spaziatrice dice selezionato o non selezionato.",
-                "Spento, la plancia risponde a NVDA come un albero di Windows, e se una voce è selezionata lo dice solo la console.",
-                "Scrivi sì per accenderlo, no per spegnerlo; valgono anche s, n, 1, 0, acceso e spento.",
-                f"Adesso è {'acceso' if imp['stato_della_selezione'] else 'spento'}.", REGOLA_DEL_DOLLARO], "sì" if imp["stato_della_selezione"] else "no"
+            # Traduttori: il nome della voce nei messaggi d'errore del campo, come Stato della selezione per lo screen reader: manca la risposta.
+            return (lambda testo: valori.leggi_si_no(testo, _("Stato della selezione per lo screen reader"))), [
+                _("Con lo stato acceso, nella plancia NVDA dice non selezionato sulle voci che non sono nella selezione multipla, come in Esplora risorse, "
+                    "per esempio quando Ctrl con le frecce porta il fuoco fuori dalla selezione; con Ctrl e la barra spaziatrice dice selezionato o non selezionato."),
+                _("Spento, la plancia risponde a NVDA come un albero di Windows, e se una voce è selezionata lo dice solo la console."),
+                # Traduttori: sì, no, s, n, 1, 0, acceso e spento sono le risposte che il campo accetta.
+                _("Scrivi sì per accenderlo, no per spegnerlo; valgono anche s, n, 1, 0, acceso e spento."),
+                _("Adesso è acceso.") if imp["stato_della_selezione"] else _("Adesso è spento."), REGOLA_DEL_DOLLARO], _("sì") if imp["stato_della_selezione"] else _("no")
         if chiave == "insegui":
-            return (lambda testo: valori.leggi_si_no(testo, "Inseguimento della plancia")), [
-                "Con l'inseguimento agganciato, a ogni cambio di brano la selezione della plancia va da sola su ciò che suona, senza spostare il fuoco.",
-                "Scrivi sì per agganciarlo, no per sganciarlo; valgono anche s, n, 1, 0, acceso e spento. Anche Maiuscolo con F8 lo aggancia, e Ctrl con F8 lo sgancia.",
-                f"Adesso è {'agganciato' if imp['insegui'] else 'sganciato'}.", REGOLA_DEL_DOLLARO], "sì" if imp["insegui"] else "no"
+            # Traduttori: il nome della voce nei messaggi d'errore del campo, come Inseguimento della plancia: manca la risposta.
+            return (lambda testo: valori.leggi_si_no(testo, _("Inseguimento della plancia"))), [
+                _("Con l'inseguimento agganciato, a ogni cambio di brano la selezione della plancia va da sola su ciò che suona, senza spostare il fuoco."),
+                # Traduttori: sì, no, s, n, 1, 0, acceso e spento sono le risposte che il campo accetta.
+                _("Scrivi sì per agganciarlo, no per sganciarlo; valgono anche s, n, 1, 0, acceso e spento. Anche Maiuscolo con F8 lo aggancia, e Ctrl con F8 lo sgancia."),
+                _("Adesso è agganciato.") if imp["insegui"] else _("Adesso è sganciato."), REGOLA_DEL_DOLLARO], _("sì") if imp["insegui"] else _("no")
         if chiave == "caratteri":
             caratteri = imp["caratteri"]
             di_sistema = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT).GetPointSize()
             attuale = " ".join(str(caratteri.get(area, di_sistema)) for area in AREE) if caratteri else ""
             return valori.leggi_caratteri, [
-                f"La dimensione dei caratteri in punti, da {valori.CARATTERI_MINIMI} a {valori.CARATTERI_MASSIMI}: tre numeri separati da spazi, per plancia, console e cruscotto.",
-                f"Un numero solo vale per tutte e tre le aree. Per esempio 12, oppure 12 14 12. Il carattere di Windows è di {di_sistema} punti.",
-                "Il campo vuoto torna al carattere di Windows in tutte e tre le aree.",
-                f"Adesso: {self._caratteri_da_leggere()}.", REGOLA_DEL_DOLLARO], attuale
+                _("La dimensione dei caratteri in punti, da {minima} a {massima}: tre numeri separati da spazi, per plancia, console e cruscotto.").format(
+                    minima=valori.CARATTERI_MINIMI, massima=valori.CARATTERI_MASSIMI),
+                ngettext("Un numero solo vale per tutte e tre le aree. Per esempio 12, oppure 12 14 12. Il carattere di Windows è di {n} punto.",
+                    "Un numero solo vale per tutte e tre le aree. Per esempio 12, oppure 12 14 12. Il carattere di Windows è di {n} punti.", di_sistema).format(n=di_sistema),
+                _("Il campo vuoto torna al carattere di Windows in tutte e tre le aree."),
+                # Traduttori: valore e' il valore di adesso della voce, come plancia 12, console di Windows.
+                _("Adesso: {valore}.").format(valore=self._caratteri_da_leggere()), REGOLA_DEL_DOLLARO], attuale
         if chiave in ("colori_testo", "colori_sfondo"):
             nome = VOCI_DELLE_IMPOSTAZIONI[chiave][0]
-            cosa, esempi = ("dei caratteri", "p31.31.31 è un grigio scuro, c100.100.100 il bianco") if chiave == "colori_testo" else (
-                "dello sfondo", "t0.0.0 è il nero, c100.100.80 un giallo chiaro")
+            if chiave == "colori_testo":
+                # Traduttori: p, c e t sono le lettere delle aree che il campo accetta.
+                spiegazione = [_("Il colore dei caratteri di ogni area: la lettera dell'area, p plancia, c console, t cruscotto, e tre percentuali da 0 a 100 "
+                    "di rosso, verde e blu, separate dal punto."), _("Più aree si separano con lo spazio. Per esempio p31.31.31 è un grigio scuro, c100.100.100 il bianco.")]
+            else:
+                # Traduttori: p, c e t sono le lettere delle aree che il campo accetta.
+                spiegazione = [_("Il colore dello sfondo di ogni area: la lettera dell'area, p plancia, c console, t cruscotto, e tre percentuali da 0 a 100 "
+                    "di rosso, verde e blu, separate dal punto."), _("Più aree si separano con lo spazio. Per esempio t0.0.0 è il nero, c100.100.80 un giallo chiaro.")]
             return (lambda testo: valori.leggi_colori(testo, nome)), [
-                f"Il colore {cosa} di ogni area: la lettera dell'area, p plancia, c console, t cruscotto, e tre percentuali da 0 a 100 di rosso, verde e blu, separate dal punto.",
-                f"Più aree si separano con lo spazio. Per esempio {esempi}.",
-                "La lettera da sola torna ai colori di Windows; le aree che non scrivi restano come sono.",
-                f"Adesso: {self._colori_da_leggere(chiave)}.", REGOLA_DEL_DOLLARO], valori.scrivi_colori(imp[chiave])
+                *spiegazione,
+                _("La lettera da sola torna ai colori di Windows; le aree che non scrivi restano come sono."),
+                # Traduttori: valore e' il valore di adesso della voce, come plancia 31.31.31.
+                _("Adesso: {valore}.").format(valore=self._colori_da_leggere(chiave)), REGOLA_DEL_DOLLARO], valori.scrivi_colori(imp[chiave])
         if chiave == "ripresa_oltre":
             return valori.leggi_ripresa_oltre, [
-                f"I file più lunghi di tanti minuti, da 0 a {valori.RIPRESA_MASSIMA}, riprendono dal punto in cui li hai lasciati: audiolibri, podcast, film.",
-                "I file più corti, come le canzoni, ripartono da capo. 0 vuol dire mai. Su un file ripreso, X lo fa ripartire da capo.",
-                f"Adesso: {imp['ripresa_oltre']}.", REGOLA_DEL_DOLLARO], str(imp["ripresa_oltre"])
+                _("I file più lunghi di tanti minuti, da 0 a {massimo}, riprendono dal punto in cui li hai lasciati: audiolibri, podcast, film.").format(
+                    massimo=valori.RIPRESA_MASSIMA),
+                _("I file più corti, come le canzoni, ripartono da capo. 0 vuol dire mai. Su un file ripreso, X lo fa ripartire da capo."),
+                _("Adesso: {valore}.").format(valore=imp["ripresa_oltre"]), REGOLA_DEL_DOLLARO], str(imp["ripresa_oltre"])
         if chiave == "anticipo_karaoke":
             return valori.leggi_anticipo_del_karaoke, [
-                f"Quanti millesimi di secondo prima del canto arriva il testo del karaoke: da 0 a {valori.ANTICIPO_MASSIMO_DEL_KARAOKE}.",
-                "Per esempio 500, mezzo secondo prima. Vale per i MIDI, i file LRC e i testi nei tag, non per i sottotitoli dei video.",
-                f"Adesso: {imp['anticipo_karaoke']}.", REGOLA_DEL_DOLLARO], str(imp["anticipo_karaoke"])
+                _("Quanti millesimi di secondo prima del canto arriva il testo del karaoke: da 0 a {massimo}.").format(massimo=valori.ANTICIPO_MASSIMO_DEL_KARAOKE),
+                _("Per esempio 500, mezzo secondo prima. Vale per i MIDI, i file LRC e i testi nei tag, non per i sottotitoli dei video."),
+                _("Adesso: {valore}.").format(valore=imp["anticipo_karaoke"]), REGOLA_DEL_DOLLARO], str(imp["anticipo_karaoke"])
         if chiave == "celle_braille":
             return valori.leggi_celle_braille, [
-                f"Quante celle ha la tua barra braille, da 0 a {valori.CELLE_MASSIME}: sottotitoli e karaoke arrivano in blocchi lunghi al più così, spezzati fra le parole.",
-                "Ogni carattere conta una cella, come nel braille informatico a otto punti: con le tabelle a sei punti, dove maiuscole e numeri prendono più celle, scrivi qualche cella in meno.",
-                "Per esempio 40; 0 manda il testo intero, senza dividerlo.",
-                f"Adesso: {imp['celle_braille']}.", REGOLA_DEL_DOLLARO], str(imp["celle_braille"])
+                _("Quante celle ha la tua barra braille, da 0 a {massimo}: sottotitoli e karaoke arrivano in blocchi lunghi al più così, spezzati fra le parole.").format(
+                    massimo=valori.CELLE_MASSIME),
+                _("Ogni carattere conta una cella, come nel braille informatico a otto punti: con le tabelle a sei punti, dove maiuscole e numeri prendono più celle, "
+                    "scrivi qualche cella in meno."),
+                _("Per esempio 40; 0 manda il testo intero, senza dividerlo."),
+                _("Adesso: {valore}.").format(valore=imp["celle_braille"]), REGOLA_DEL_DOLLARO], str(imp["celle_braille"])
         if chiave == "lettura_minima":
             return valori.leggi_lettura_minima, [
-                f"Per quanti millesimi di secondo resta almeno ogni blocco sulla barra braille: da {valori.LETTURA_MINIMA} a {valori.LETTURA_MASSIMA}.",
-                "Per esempio 2000, il valore di partenza. I testi che arrivano prima aspettano il loro turno.",
-                f"Adesso: {imp['lettura_minima']}.", REGOLA_DEL_DOLLARO], str(imp["lettura_minima"])
+                _("Per quanti millesimi di secondo resta almeno ogni blocco sulla barra braille: da {minima} a {massima}.").format(
+                    minima=valori.LETTURA_MINIMA, massima=valori.LETTURA_MASSIMA),
+                _("Per esempio 2000, il valore di partenza. I testi che arrivano prima aspettano il loro turno."),
+                _("Adesso: {valore}.").format(valore=imp["lettura_minima"]), REGOLA_DEL_DOLLARO], str(imp["lettura_minima"])
         return valori.leggi_righe_della_console, [
-            f"Quante righe tiene la console: da {valori.RIGHE_MINIME} in su. Le più vecchie si tolgono dalla cima.",
-            "Per esempio 2000, il valore di partenza. Un testo lungo, come le novità di F2, resta comunque intero.",
-            f"Adesso ne tiene {imp['righe_della_console']}.", REGOLA_DEL_DOLLARO], str(imp["righe_della_console"])
+            _("Quante righe tiene la console: da {minimo} in su. Le più vecchie si tolgono dalla cima.").format(minimo=valori.RIGHE_MINIME),
+            _("Per esempio 2000, il valore di partenza. Un testo lungo, come le novità di F2, resta comunque intero."),
+            ngettext("Adesso ne tiene {n}.", "Adesso ne tiene {n}.", imp["righe_della_console"]).format(n=imp["righe_della_console"]), REGOLA_DEL_DOLLARO], str(imp["righe_della_console"])
 
     def _applica_l_impostazione(self, chiave, valore):
         """Applica il valore letto dal campo e restituisce la frase che lo dice."""
