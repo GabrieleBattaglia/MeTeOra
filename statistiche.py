@@ -49,6 +49,7 @@ from collections import Counter
 
 import formati
 import valori
+from lingua import _, ngettext, plurale
 
 VERSIONE_DEL_FILE = 1
 # Quanti brani ricorda lo storico dei brani: oltre, escono i meno ascoltati,
@@ -67,19 +68,22 @@ POSTI = 20
 # Quanti sottobrani diversi si ricordano per ogni file.
 MASSIMO_DEI_SOTTOBRANI = 256
 
-MESI = ("gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre")
-GIORNI = ("lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato", "domenica")
+MESI = (_("gennaio"), _("febbraio"), _("marzo"), _("aprile"), _("maggio"), _("giugno"), _("luglio"), _("agosto"), _("settembre"), _("ottobre"),
+    _("novembre"), _("dicembre"))
+GIORNI = (_("lunedì"), _("martedì"), _("mercoledì"), _("giovedì"), _("venerdì"), _("sabato"), _("domenica"))
 
 # Le famiglie dei formati, nell'ordine in cui si dicono a parita' di tempo.
+# MIDI e SID sono nomi, e non si traducono.
 FAMIGLIE = {
-    "audio": "Audio, MP3, FLAC e gli altri",
-    "sid": "SID del Commodore 64",
-    "video": "Video",
+    "audio": _("Audio, MP3, FLAC e gli altri"),
+    "sid": _("SID del Commodore 64"),
+    "video": _("Video"),
     "midi": "MIDI",
-    "tracker": "Moduli dei tracker",
-    "console": "Musica delle console",
+    "tracker": _("Moduli dei tracker"),
+    "console": _("Musica delle console"),
 }
-NOMI_BREVI_DELLE_FAMIGLIE = {"audio": "audio", "sid": "SID", "video": "video", "midi": "MIDI", "tracker": "tracker", "console": "console"}
+# Traduttori: le famiglie dei formati con un nome breve, nelle righe della libreria come «audio 2, 50.0%».
+NOMI_BREVI_DELLE_FAMIGLIE = {"audio": _("audio"), "sid": "SID", "video": _("video"), "midi": "MIDI", "tracker": _("tracker"), "console": _("console")}
 
 
 def famiglia(percorso):
@@ -112,158 +116,178 @@ MODI = {
 
 # Le descrizioni dei comandi dei tasti a carattere, per la classifica dei tasti.
 DESCRIZIONI_DEI_COMANDI = {
-    "precedente": "brano precedente", "play": "suona", "playlist_precedente": "playlist precedente", "playlist_successiva": "playlist successiva",
-    "loop": "loop A-B", "pausa": "pausa", "stop": "stop", "ripetizione": "ripetizione", "timer": "timer di spegnimento",
-    "successivo": "brano successivo", "casuale": "brano a caso", "riproduzione_casuale": "riproduzione casuale", "muto": "muto",
-    "indietro": "indietro nel brano", "avanti": "avanti nel brano", "passo_indietro": "secondi del salto indietro",
-    "passo_avanti": "secondi del salto avanti", "vai_a_tempo": "vai a un tempo", "capitolo_precedente": "capitolo precedente",
-    "capitolo_successivo": "capitolo successivo", "volume_su": "volume su", "volume_giu": "volume giù", "ricerca": "ricerca",
-    "filtro": "filtro", "passo_volume": "passo del volume", "marker": "marker", "marker_precedente": "marker precedente",
-    "marker_successivo": "marker successivo", "togli_i_marker": "toglie i marker", "togli_i_marker_prima": "toglie i marker prima",
-    "togli_i_marker_dopo": "toglie i marker dopo", "velocita_giu": "più lento", "velocita_normale": "velocità normale",
-    "velocita_su": "più veloce", "tono_giu": "tono giù", "tono_normale": "tono normale", "tono_su": "tono su",
-    "banda_precedente": "banda precedente", "banda_successiva": "banda successiva", "banda_giu": "banda giù", "banda_su": "banda su",
-    "azzera_la_banda": "azzera la banda", "azzera_le_bande": "azzera le bande", "dissolvenza": "dissolvenza",
-    "durata_della_dissolvenza": "durata della dissolvenza", "dove_sono": "dove sono", "durata_residua": "durata residua",
+    # Traduttori: da qui, che cosa fa un tasto, nella classifica dei tasti premuti: «X, suona: 3.».
+    "precedente": _("brano precedente"), "play": _("suona"), "playlist_precedente": _("playlist precedente"), "playlist_successiva": _("playlist successiva"),
+    "loop": _("loop A-B"), "pausa": _("pausa"), "stop": _("stop"), "ripetizione": _("ripetizione"), "timer": _("timer di spegnimento"),
+    "successivo": _("brano successivo"), "casuale": _("brano a caso"), "riproduzione_casuale": _("riproduzione casuale"), "muto": _("muto"),
+    "indietro": _("indietro nel brano"), "avanti": _("avanti nel brano"), "passo_indietro": _("secondi del salto indietro"),
+    "passo_avanti": _("secondi del salto avanti"), "vai_a_tempo": _("vai a un tempo"), "capitolo_precedente": _("capitolo precedente"),
+    "capitolo_successivo": _("capitolo successivo"), "volume_su": _("volume su"), "volume_giu": _("volume giù"), "ricerca": _("ricerca"),
+    "filtro": _("filtro"), "passo_volume": _("passo del volume"), "marker": _("marker"), "marker_precedente": _("marker precedente"),
+    "marker_successivo": _("marker successivo"), "togli_i_marker": _("toglie i marker"), "togli_i_marker_prima": _("toglie i marker prima"),
+    "togli_i_marker_dopo": _("toglie i marker dopo"), "velocita_giu": _("più lento"), "velocita_normale": _("velocità normale"),
+    "velocita_su": _("più veloce"), "tono_giu": _("tono giù"), "tono_normale": _("tono normale"), "tono_su": _("tono su"),
+    "banda_precedente": _("banda precedente"), "banda_successiva": _("banda successiva"), "banda_giu": _("banda giù"), "banda_su": _("banda su"),
+    "azzera_la_banda": _("azzera la banda"), "azzera_le_bande": _("azzera le bande"), "dissolvenza": _("dissolvenza"),
+    "durata_della_dissolvenza": _("durata della dissolvenza"), "dove_sono": _("dove sono"), "durata_residua": _("durata residua"),
     # I comandi della nuova mappa, issue 38 (2.0.0).
-    "segnalibro": "il segnalibro", "vai_al_segnalibro": "al segnalibro", "togli_il_segnalibro": "toglie il segnalibro",
-    "metti_il_segnalibro": "mette il segnalibro",
+    "segnalibro": _("il segnalibro"), "vai_al_segnalibro": _("al segnalibro"), "togli_il_segnalibro": _("toglie il segnalibro"),
+    "metti_il_segnalibro": _("mette il segnalibro"),
     # Il piu' e Ctrl e Maiuscolo con X (2.6.0).
-    "impostazioni": "le impostazioni", "scheda_audio": "la scheda audio",
-    "posizione": "il punto del brano", "verso_la_fine": "gli ultimi secondi", "all_inizio": "l'inizio del brano",
-    "passi_dei_salti": "i passi dei salti", "passi_predefiniti": "salti predefiniti", "marker_attuale": "il marker",
-    "ultimo_marker": "ultimo marker", "primo_marker": "primo marker", "conta_i_marker": "quanti marker", "velocita": "la velocità",
-    "velocita_massima": "velocità massima", "velocita_minima": "velocità minima", "timer_attuale": "il timer", "togli_il_timer": "toglie il timer",
-    "timer_a_fine_brano": "timer a fine brano", "sottotitoli": "i sottotitoli", "sottotitoli_precedenti": "sottotitoli precedenti",
-    "sottotitoli_successivi": "sottotitoli successivi", "ultimi_sottotitoli": "ultimi sottotitoli", "sottotitoli_spenti": "sottotitoli spenti",
-    "tono": "il tono", "tono_massimo": "tono massimo", "tono_minimo": "tono minimo", "traccia_audio": "la traccia audio",
-    "traccia_audio_precedente": "traccia audio precedente", "traccia_audio_successiva": "traccia audio successiva",
-    "ultima_traccia_audio": "ultima traccia audio", "prima_traccia_audio": "prima traccia audio", "rapporto": "il rapporto dell'immagine",
-    "rapporto_precedente": "rapporto precedente", "rapporto_successivo": "rapporto successivo", "rapporto_del_video": "rapporto del video",
-    "ultimo_rapporto": "ultimo rapporto", "primo_rapporto": "primo rapporto", "banda": "la banda", "ultima_banda": "ultima banda",
-    "prima_banda": "prima banda", "guadagno": "il guadagno", "guadagno_massimo": "guadagno massimo", "guadagno_minimo": "guadagno minimo",
-    "curva": "tutte le bande", "playlist": "la playlist", "ultima_playlist": "ultima playlist", "prima_playlist": "prima playlist",
-    "dissolvenza_piu_breve": "dissolvenza più breve", "dissolvenza_piu_lunga": "dissolvenza più lunga", "durata_predefinita": "dissolvenza predefinita",
-    "dissolvenza_massima": "dissolvenza massima", "dissolvenza_minima": "dissolvenza minima", "spegni_la_dissolvenza": "spegne la dissolvenza",
-    "accendi_la_dissolvenza": "accende la dissolvenza", "spegni_la_casuale": "spegne la casuale", "accendi_la_casuale": "accende la casuale",
-    "volume": "il volume", "volume_di_prima": "volume di prima", "volume_massimo": "volume massimo", "volume_minimo": "volume a zero",
-    "capitolo": "il capitolo", "ultimo_capitolo": "ultimo capitolo", "primo_capitolo": "primo capitolo", "passo_volume_giu": "passo del volume giù",
-    "passo_volume_su": "passo del volume su", "passo_volume_predefinito": "passo del volume predefinito", "passo_volume_massimo": "passo del volume massimo",
-    "passo_volume_minimo": "passo del volume minimo",
+    "impostazioni": _("le impostazioni"), "scheda_audio": _("la scheda audio"),
+    "posizione": _("il punto del brano"), "verso_la_fine": _("gli ultimi secondi"), "all_inizio": _("l'inizio del brano"),
+    "passi_dei_salti": _("i passi dei salti"), "passi_predefiniti": _("salti predefiniti"), "marker_attuale": _("il marker"),
+    "ultimo_marker": _("ultimo marker"), "primo_marker": _("primo marker"), "conta_i_marker": _("quanti marker"), "velocita": _("la velocità"),
+    "velocita_massima": _("velocità massima"), "velocita_minima": _("velocità minima"), "timer_attuale": _("il timer"), "togli_il_timer": _("toglie il timer"),
+    "timer_a_fine_brano": _("timer a fine brano"), "sottotitoli": _("i sottotitoli"), "sottotitoli_precedenti": _("sottotitoli precedenti"),
+    "sottotitoli_successivi": _("sottotitoli successivi"), "ultimi_sottotitoli": _("ultimi sottotitoli"), "sottotitoli_spenti": _("sottotitoli spenti"),
+    "tono": _("il tono"), "tono_massimo": _("tono massimo"), "tono_minimo": _("tono minimo"), "traccia_audio": _("la traccia audio"),
+    "traccia_audio_precedente": _("traccia audio precedente"), "traccia_audio_successiva": _("traccia audio successiva"),
+    "ultima_traccia_audio": _("ultima traccia audio"), "prima_traccia_audio": _("prima traccia audio"), "rapporto": _("il rapporto dell'immagine"),
+    "rapporto_precedente": _("rapporto precedente"), "rapporto_successivo": _("rapporto successivo"), "rapporto_del_video": _("rapporto del video"),
+    "ultimo_rapporto": _("ultimo rapporto"), "primo_rapporto": _("primo rapporto"), "banda": _("la banda"), "ultima_banda": _("ultima banda"),
+    "prima_banda": _("prima banda"), "guadagno": _("il guadagno"), "guadagno_massimo": _("guadagno massimo"), "guadagno_minimo": _("guadagno minimo"),
+    "curva": _("tutte le bande"), "playlist": _("la playlist"), "ultima_playlist": _("ultima playlist"), "prima_playlist": _("prima playlist"),
+    "dissolvenza_piu_breve": _("dissolvenza più breve"), "dissolvenza_piu_lunga": _("dissolvenza più lunga"), "durata_predefinita": _("dissolvenza predefinita"),
+    "dissolvenza_massima": _("dissolvenza massima"), "dissolvenza_minima": _("dissolvenza minima"), "spegni_la_dissolvenza": _("spegne la dissolvenza"),
+    "accendi_la_dissolvenza": _("accende la dissolvenza"), "spegni_la_casuale": _("spegne la casuale"), "accendi_la_casuale": _("accende la casuale"),
+    "volume": _("il volume"), "volume_di_prima": _("volume di prima"), "volume_massimo": _("volume massimo"), "volume_minimo": _("volume a zero"),
+    "capitolo": _("il capitolo"), "ultimo_capitolo": _("ultimo capitolo"), "primo_capitolo": _("primo capitolo"), "passo_volume_giu": _("passo del volume giù"),
+    "passo_volume_su": _("passo del volume su"), "passo_volume_predefinito": _("passo del volume predefinito"), "passo_volume_massimo": _("passo del volume massimo"),
+    "passo_volume_minimo": _("passo del volume minimo"),
 }
 # Le descrizioni degli altri tasti, per nome.
 DESCRIZIONI_DEI_TASTI = {
-    "F1": "il manuale", "F2": "le novità", "F3": "i crediti", "F4": "nei Preferiti", "F5": "alla plancia", "F6": "alla console",
-    "F7": "al cruscotto", "F8": "al brano che suona", "F9": "lo stato del ramo", "F10": "nessun comando, fino alla 2.6 apriva il ramo", "F11": "tag e dettagli",
-    "F12": "la guida rapida", "Esc": "esce", "Maiuscolo con F1": "il video", "Maiuscolo con F2": "i sottotitoli",
-    "Maiuscolo con F3": "la traccia audio", "Maiuscolo con F5": "lo schermo intero", "Maiuscolo con F6": "il rapporto dell'immagine",
-    "Maiuscolo con F7": "le statistiche", "Maiuscolo con F8": "l'inseguimento",
-    "Ctrl con F1": "spegne il video", "Ctrl con F5": "il video in finestra", "Ctrl con F8": "sgancia l'inseguimento", "Ctrl con F12": "spegne i tasti rapidi", "Maiuscolo con F9": "apre il ramo",
-    "Ctrl con F9": "chiude il ramo", "Alt con F9": "apre tutta la plancia", "Ctrl e Alt con F9": "chiude tutta la plancia",
-    "Ctrl e Maiuscolo con F9": "ferma l'apertura", "Maiuscolo con F10": "il menu della voce, fino alla 2.6 apriva tutta la plancia", "Maiuscolo con F11": "il menu dei tag", "Maiuscolo con F12": "i tasti rapidi",
-    "Ctrl con barra rovesciata": "la ricerca in tutto MeTeOra", "Backspace": "risale", "Maiuscolo con Backspace": "risale all'antenato",
-    "Barra spaziatrice": "il menu", "Invio": "il menu, o il comando", "Applicazioni": "il menu", "Canc": "toglie",
-    "Maiuscolo con Canc": "nel cestino", "Ctrl con Barra spaziatrice": "seleziona",
+    # Traduttori: da qui, che cosa fa un tasto, nella classifica dei tasti premuti: «F1, il manuale: 3.».
+    "F1": _("il manuale"), "F2": _("le novità"), "F3": _("i crediti"), "F4": _("nei Preferiti"), "F5": _("alla plancia"), "F6": _("alla console"),
+    "F7": _("al cruscotto"), "F8": _("al brano che suona"), "F9": _("lo stato del ramo"), "F10": _("nessun comando, fino alla 2.6 apriva il ramo"), "F11": _("tag e dettagli"),
+    "F12": _("la guida rapida"), "Esc": _("esce"), "Maiuscolo con F1": _("il video"), "Maiuscolo con F2": _("i sottotitoli"),
+    "Maiuscolo con F3": _("la traccia audio"), "Maiuscolo con F5": _("lo schermo intero"), "Maiuscolo con F6": _("il rapporto dell'immagine"),
+    "Maiuscolo con F7": _("le statistiche"), "Maiuscolo con F8": _("l'inseguimento"),
+    "Ctrl con F1": _("spegne il video"), "Ctrl con F5": _("il video in finestra"), "Ctrl con F8": _("sgancia l'inseguimento"), "Ctrl con F12": _("spegne i tasti rapidi"), "Maiuscolo con F9": _("apre il ramo"),
+    "Ctrl con F9": _("chiude il ramo"), "Alt con F9": _("apre tutta la plancia"), "Ctrl e Alt con F9": _("chiude tutta la plancia"),
+    "Ctrl e Maiuscolo con F9": _("ferma l'apertura"), "Maiuscolo con F10": _("il menu della voce, fino alla 2.6 apriva tutta la plancia"), "Maiuscolo con F11": _("il menu dei tag"), "Maiuscolo con F12": _("i tasti rapidi"),
+    "Ctrl con barra rovesciata": _("la ricerca in tutto MeTeOra"), "Backspace": _("risale"), "Maiuscolo con Backspace": _("risale all'antenato"),
+    "Barra spaziatrice": _("il menu"), "Invio": _("il menu, o il comando"), "Applicazioni": _("il menu"), "Canc": _("toglie"),
+    "Maiuscolo con Canc": _("nel cestino"), "Ctrl con Barra spaziatrice": _("seleziona"),
 }
 
 # I nomi degli eventi, per la sezione di tutti gli eventi e per il suono piu'
 # suonato. Un evento senza nome, per esempio uno nuovo, si dice com'e'.
 NOMI_DEGLI_EVENTI = {
-    "avvio": "avvio di MeTeOra", "uscita": "uscita da MeTeOra", "donazione": "invito a offrire un caffè",
-    "pub_entra": "Entra al PUB", "pub_aiuto": "Chiedi aiuto al PUB",
-    "segnalibro_messo": "segnalibro messo", "segnalibro_tolto": "segnalibro tolto", "al_segnalibro": "brano ripreso dal segnalibro",
-    "dettagli": "dettagli di un contenitore, con F11", "chiudi_la_plancia": "tutta la plancia chiusa",
-    "apri_la_plancia": "apertura di tutta la plancia", "plancia_aperta": "tutta la plancia aperta",
-    "passata_avviata": "passata degli impressi avviata", "passata_finita": "passata degli impressi finita",
-    "plancia": "alla plancia, con F5", "console": "alla console, con F6", "cruscotto": "al cruscotto, con F7",
-    "manuale": "manuale, con F1", "changelog": "novità, con F2", "crediti": "crediti, con F3",
-    "play": "riproduzione avviata", "pausa": "pausa", "ripresa": "ripresa dalla pausa", "stop": "stop", "da_capo": "da capo",
-    "successivo": "brano successivo", "precedente": "brano precedente", "casuale": "brano a caso",
-    "casuale_acceso": "riproduzione casuale accesa", "casuale_spento": "riproduzione casuale spenta",
-    "video_acceso": "video acceso", "video_spento": "video spento", "sottotitoli_accesi": "sottotitoli accesi",
-    "sottotitoli_spenti": "sottotitoli spenti", "traccia_audio": "traccia audio cambiata", "schermo_intero": "schermo intero",
-    "schermo_in_finestra": "video in finestra", "rapporto": "rapporto dell'immagine cambiato", "video_nascosto": "video nascosto",
-    "percorso_aggiunto": "percorso di rete aggiunto", "percorso_tolto": "percorso di rete tolto",
-    "scaricamento_avviato": "scaricamento avviato", "scaricamento_finito": "scaricamento finito",
-    "brano_seguente_da_solo": "brano seguente partito da solo", "fine_playlist": "fine della lista",
-    "avanti": "salto avanti", "indietro": "salto indietro", "vai_a_tempo": "vai a un tempo",
-    "passo_di_salto": "passo di salto cambiato", "passo_del_volume": "passo del volume cambiato",
-    "volume_su": "volume su", "volume_giu": "volume giù", "volume_al_limite": "volume già al limite",
-    "muto_acceso": "muto acceso", "muto_spento": "muto spento", "menu": "menu aperto",
-    "nuova_playlist": "nuova playlist vuota", "playlist_creata": "playlist creata",
+    # Traduttori: da qui, i nomi degli eventi, cioè delle azioni che hanno un suono, nella sezione di tutti gli eventi: «Avvio di MeTeOra: 3.».
+    "avvio": _("avvio di MeTeOra"), "uscita": _("uscita da MeTeOra"), "donazione": _("invito a offrire un caffè"),
+    "pub_entra": _("Entra al PUB"), "pub_aiuto": _("Chiedi aiuto al PUB"),
+    "segnalibro_messo": _("segnalibro messo"), "segnalibro_tolto": _("segnalibro tolto"), "al_segnalibro": _("brano ripreso dal segnalibro"),
+    "dettagli": _("dettagli di un contenitore, con F11"), "chiudi_la_plancia": _("tutta la plancia chiusa"),
+    "apri_la_plancia": _("apertura di tutta la plancia"), "plancia_aperta": _("tutta la plancia aperta"),
+    "passata_avviata": _("passata degli impressi avviata"), "passata_finita": _("passata degli impressi finita"),
+    "plancia": _("alla plancia, con F5"), "console": _("alla console, con F6"), "cruscotto": _("al cruscotto, con F7"),
+    "manuale": _("manuale, con F1"), "changelog": _("novità, con F2"), "crediti": _("crediti, con F3"),
+    "play": _("riproduzione avviata"), "pausa": _("pausa"), "ripresa": _("ripresa dalla pausa"), "stop": _("stop"), "da_capo": _("da capo"),
+    "successivo": _("brano successivo"), "precedente": _("brano precedente"), "casuale": _("brano a caso"),
+    "casuale_acceso": _("riproduzione casuale accesa"), "casuale_spento": _("riproduzione casuale spenta"),
+    "video_acceso": _("video acceso"), "video_spento": _("video spento"), "sottotitoli_accesi": _("sottotitoli accesi"),
+    "sottotitoli_spenti": _("sottotitoli spenti"), "traccia_audio": _("traccia audio cambiata"), "schermo_intero": _("schermo intero"),
+    "schermo_in_finestra": _("video in finestra"), "rapporto": _("rapporto dell'immagine cambiato"), "video_nascosto": _("video nascosto"),
+    "percorso_aggiunto": _("percorso di rete aggiunto"), "percorso_tolto": _("percorso di rete tolto"),
+    "scaricamento_avviato": _("scaricamento avviato"), "scaricamento_finito": _("scaricamento finito"),
+    "brano_seguente_da_solo": _("brano seguente partito da solo"), "fine_playlist": _("fine della lista"),
+    "avanti": _("salto avanti"), "indietro": _("salto indietro"), "vai_a_tempo": _("vai a un tempo"),
+    "passo_di_salto": _("passo di salto cambiato"), "passo_del_volume": _("passo del volume cambiato"),
+    "volume_su": _("volume su"), "volume_giu": _("volume giù"), "volume_al_limite": _("volume già al limite"),
+    "muto_acceso": _("muto acceso"), "muto_spento": _("muto spento"), "menu": _("menu aperto"),
+    "nuova_playlist": _("nuova playlist vuota"), "playlist_creata": _("playlist creata"),
     # Nella 1.113.0, accanto alla playlist creata come in suoni.EVENTI.
-    "playlist_gia_importata": "playlist importata arrivata di nuovo", "playlist_riletta": "playlist riletta dal suo file",
-    "playlist_eliminata": "playlist eliminata",
-    "playlist_rinominata": "playlist rinominata", "file_rinominato": "file rinominato", "tag_letti": "tag letti",
-    "tag_cambiato": "tag cambiati", "tag_cancellato": "tag cancellati", "brano_aggiunto": "brani aggiunti a una playlist",
-    "preferito_aggiunto": "brano messo nei Preferiti", "filtro_messo": "filtro messo", "ricerca_avviata": "ricerca avviata",
-    "ricerca_finita": "ricerca finita", "ricerca_fermata": "ricerca fermata", "altri_risultati": "altri risultati mostrati",
-    "filtro_tolto": "filtro tolto", "gia_nei_preferiti": "brano già nei Preferiti", "brano_tolto": "brani tolti da una playlist",
-    "cestino": "nel cestino", "brano_spostato": "brano spostato", "playlist_ordinata": "playlist ordinata",
-    "ordine_invertito": "ordine di una playlist invertito", "playlist_mescolata": "playlist mescolata",
-    "ordine_ripristinato": "playlist rimessa nell'ordine di prima", "saltato_acceso": "brano segnato come saltato",
-    "saltato_spento": "brano non più saltato", "ramo_aperto": "ramo aperto", "ramo_chiuso": "ramo chiuso",
-    "file_aperto": "file aperto", "vai_al_brano": "al brano che suona, con F8", "playlist_precedente": "playlist precedente",
-    "playlist_successiva": "playlist successiva", "playlist_numero": "playlist con una cifra",
-    "ripresa_all_avvio": "ripresa all'avvio", "insegui_acceso": "inseguimento acceso", "insegui_spento": "inseguimento spento",
-    "elenco_dei_tasti": "guida rapida, con F12", "trovato_in_console": "trovato nella console",
-    "ripartito_in_console": "ricerca nella console ripartita dall'inizio", "non_trovato_in_console": "non trovato nella console",
-    "chiudi_tutto": "ramo chiuso con Ctrl e F9", "marker_messo": "marker messo", "marker_rinominato": "marker rinominato",
-    "marker_indietro": "al marker precedente", "marker_avanti": "al marker successivo",
-    "marker_tolti_prima": "marker tolti prima del punto", "marker_tolti_dopo": "marker tolti dopo il punto",
-    "marker_tolti_tutti": "tutti i marker del brano tolti", "marker_eliminato": "marker eliminati",
-    "risali": "risalita con Backspace", "risali_all_antenato": "risalita all'antenato", "apri_tutto": "ramo aperto con Maiuscolo e F9",
-    "impostazioni": "impostazioni aperte", "impostazione_cambiata": "impostazione cambiata", "console_salvata": "console salvata",
-    "scheda_audio": "scheda audio cambiata", "scheda_sparita": "scheda audio scelta sparita", "scheda_tornata": "scheda audio scelta tornata",
-    "scheda_di_windows": "scheda audio di Windows cambiata", "marcatori": "finestra dei marcatori aperta",
-    "marcatori_esportati": "marcatori esportati", "marcatori_importati": "marcatori importati",
-    "marcatori_cancellati": "tutti i marcatori cancellati", "trovato_nei_marcatori": "trovato nei marcatori",
-    "ripartito_nei_marcatori": "ricerca nei marcatori ripartita dall'inizio", "non_trovato_nei_marcatori": "non trovato nei marcatori",
-    "domanda": "domanda", "aggiornamento": "aggiornamento proposto", "tasti_spenti": "tasti rapidi spenti",
-    "tasti_accesi": "tasti rapidi accesi", "capitolo_precedente": "capitolo precedente", "capitolo_successivo": "capitolo successivo",
-    "ripetizione_spenta": "ripetizione spenta", "ripetizione_brano": "ripetizione del brano", "ripetizione_lista": "ripetizione della lista",
-    "timer_impostato": "timer impostato", "timer_tolto": "timer tolto", "timer_scaduto": "timer scaduto",
-    "annullamento": "annullamento", "ramo_aggiornato": "ramo aggiornato", "non_disponibile": "comando che lì non vale",
-    "errore": "errore", "problema": "problema interno", "niente_da_suonare": "niente da suonare",
-    "loop_a_messo": "punto A del loop", "loop_b_messo": "punto B del loop", "loop_tolto": "loop tolto",
-    "loop_non_qui": "loop che lì non si mette", "fuori_dal_loop": "brano fuori dal loop", "ritorno_al_punto_a": "ritorno al punto A",
-    "nessun_altro_brano": "niente oltre", "velocita_su": "più veloce", "velocita_giu": "più lento",
-    "velocita_normale": "velocità normale", "velocita_al_limite": "velocità al limite", "tono_su": "tono su", "tono_giu": "tono giù",
-    "tono_normale": "tono normale", "tono_al_limite": "tono al limite", "banda_al_limite": "banda al limite",
-    "guadagno_al_limite": "guadagno al limite", "banda_azzerata": "banda azzerata", "bande_azzerate": "equalizzatore azzerato",
-    "dissolvenza_accesa": "dissolvenza accesa", "dissolvenza_spenta": "dissolvenza spenta",
-    "dissolvenza_durata": "durata della dissolvenza cambiata", "statistiche": "statistiche aperte",
-    "statistiche_azzerate": "statistiche azzerate", "trovato_nelle_statistiche": "trovato nelle statistiche",
-    "ripartito_nelle_statistiche": "ricerca nelle statistiche ripartita dall'inizio",
-    "non_trovato_nelle_statistiche": "non trovato nelle statistiche",
+    "playlist_gia_importata": _("playlist importata arrivata di nuovo"), "playlist_riletta": _("playlist riletta dal suo file"),
+    "playlist_eliminata": _("playlist eliminata"),
+    "playlist_rinominata": _("playlist rinominata"), "file_rinominato": _("file rinominato"), "tag_letti": _("tag letti"),
+    "tag_cambiato": _("tag cambiati"), "tag_cancellato": _("tag cancellati"), "brano_aggiunto": _("brani aggiunti a una playlist"),
+    "preferito_aggiunto": _("brano messo nei Preferiti"), "filtro_messo": _("filtro messo"), "ricerca_avviata": _("ricerca avviata"),
+    "ricerca_finita": _("ricerca finita"), "ricerca_fermata": _("ricerca fermata"), "altri_risultati": _("altri risultati mostrati"),
+    "filtro_tolto": _("filtro tolto"), "gia_nei_preferiti": _("brano già nei Preferiti"), "brano_tolto": _("brani tolti da una playlist"),
+    "cestino": _("nel cestino"), "brano_spostato": _("brano spostato"), "playlist_ordinata": _("playlist ordinata"),
+    "ordine_invertito": _("ordine di una playlist invertito"), "playlist_mescolata": _("playlist mescolata"),
+    "ordine_ripristinato": _("playlist rimessa nell'ordine di prima"), "saltato_acceso": _("brano segnato come saltato"),
+    "saltato_spento": _("brano non più saltato"), "ramo_aperto": _("ramo aperto"), "ramo_chiuso": _("ramo chiuso"),
+    "file_aperto": _("file aperto"), "vai_al_brano": _("al brano che suona, con F8"), "playlist_precedente": _("playlist precedente"),
+    "playlist_successiva": _("playlist successiva"), "playlist_numero": _("playlist con una cifra"),
+    "ripresa_all_avvio": _("ripresa all'avvio"), "insegui_acceso": _("inseguimento acceso"), "insegui_spento": _("inseguimento spento"),
+    "elenco_dei_tasti": _("guida rapida, con F12"), "trovato_in_console": _("trovato nella console"),
+    "ripartito_in_console": _("ricerca nella console ripartita dall'inizio"), "non_trovato_in_console": _("non trovato nella console"),
+    "chiudi_tutto": _("ramo chiuso con Ctrl e F9"), "marker_messo": _("marker messo"), "marker_rinominato": _("marker rinominato"),
+    "marker_indietro": _("al marker precedente"), "marker_avanti": _("al marker successivo"),
+    "marker_tolti_prima": _("marker tolti prima del punto"), "marker_tolti_dopo": _("marker tolti dopo il punto"),
+    "marker_tolti_tutti": _("tutti i marker del brano tolti"), "marker_eliminato": _("marker eliminati"),
+    "risali": _("risalita con Backspace"), "risali_all_antenato": _("risalita all'antenato"), "apri_tutto": _("ramo aperto con Maiuscolo e F9"),
+    "impostazioni": _("impostazioni aperte"), "impostazione_cambiata": _("impostazione cambiata"), "console_salvata": _("console salvata"),
+    "scheda_audio": _("scheda audio cambiata"), "scheda_sparita": _("scheda audio scelta sparita"), "scheda_tornata": _("scheda audio scelta tornata"),
+    "scheda_di_windows": _("scheda audio di Windows cambiata"), "marcatori": _("finestra dei marcatori aperta"),
+    "marcatori_esportati": _("marcatori esportati"), "marcatori_importati": _("marcatori importati"),
+    "marcatori_cancellati": _("tutti i marcatori cancellati"), "trovato_nei_marcatori": _("trovato nei marcatori"),
+    "ripartito_nei_marcatori": _("ricerca nei marcatori ripartita dall'inizio"), "non_trovato_nei_marcatori": _("non trovato nei marcatori"),
+    "domanda": _("domanda"), "aggiornamento": _("aggiornamento proposto"), "tasti_spenti": _("tasti rapidi spenti"),
+    "tasti_accesi": _("tasti rapidi accesi"), "capitolo_precedente": _("capitolo precedente"), "capitolo_successivo": _("capitolo successivo"),
+    "ripetizione_spenta": _("ripetizione spenta"), "ripetizione_brano": _("ripetizione del brano"), "ripetizione_lista": _("ripetizione della lista"),
+    "timer_impostato": _("timer impostato"), "timer_tolto": _("timer tolto"), "timer_scaduto": _("timer scaduto"),
+    "annullamento": _("annullamento"), "ramo_aggiornato": _("ramo aggiornato"), "non_disponibile": _("comando che lì non vale"),
+    "errore": _("errore"), "problema": _("problema interno"), "niente_da_suonare": _("niente da suonare"),
+    "loop_a_messo": _("punto A del loop"), "loop_b_messo": _("punto B del loop"), "loop_tolto": _("loop tolto"),
+    "loop_non_qui": _("loop che lì non si mette"), "fuori_dal_loop": _("brano fuori dal loop"), "ritorno_al_punto_a": _("ritorno al punto A"),
+    "nessun_altro_brano": _("niente oltre"), "velocita_su": _("più veloce"), "velocita_giu": _("più lento"),
+    "velocita_normale": _("velocità normale"), "velocita_al_limite": _("velocità al limite"), "tono_su": _("tono su"), "tono_giu": _("tono giù"),
+    "tono_normale": _("tono normale"), "tono_al_limite": _("tono al limite"), "banda_al_limite": _("banda al limite"),
+    "guadagno_al_limite": _("guadagno al limite"), "banda_azzerata": _("banda azzerata"), "bande_azzerate": _("equalizzatore azzerato"),
+    "dissolvenza_accesa": _("dissolvenza accesa"), "dissolvenza_spenta": _("dissolvenza spenta"),
+    "dissolvenza_durata": _("durata della dissolvenza cambiata"), "statistiche": _("statistiche aperte"),
+    "statistiche_azzerate": _("statistiche azzerate"), "trovato_nelle_statistiche": _("trovato nelle statistiche"),
+    "ripartito_nelle_statistiche": _("ricerca nelle statistiche ripartita dall'inizio"),
+    "non_trovato_nelle_statistiche": _("non trovato nelle statistiche"),
     # Nella 1.104.0, nell'ordine di suoni.EVENTI.
-    "pulizia_avviata": "pulizia all'avvio cominciata", "pulizia_finita": "pulizia all'avvio finita",
+    "pulizia_avviata": _("pulizia all'avvio cominciata"), "pulizia_finita": _("pulizia all'avvio finita"),
     # Nella 1.105.0.
-    "dove_sono": "dove sono, con l'apostrofo",
+    "dove_sono": _("dove sono, con l'apostrofo"),
     # Nella 1.110.0.
-    "durata_residua": "durata residua, con Maiuscolo e l'apostrofo",
+    "durata_residua": _("durata residua, con Maiuscolo e l'apostrofo"),
     # Nella 1.112.0, nell'ordine di suoni.EVENTI.
-    "disco_riconosciuto": "disco riconosciuto a mano", "disco_diverso": "lettera resa contesa dalla Sentinella",
+    "disco_riconosciuto": _("disco riconosciuto a mano"), "disco_diverso": _("lettera resa contesa dalla Sentinella"),
 }
 
-# Che cosa ha tolto la pulizia all'avvio: il conto, il singolare, il plurale
-# e se e' femminile, per l'accordo di tolto (1.104.0). pulizia_schede sono i
-# file spariti; pulizia_doppioni le schede doppie, che differiscono solo per
-# le maiuscole, tolte quando c'e' quella scritta come sul disco.
+# Che cosa ha tolto la pulizia all'avvio: il conto; la frase della voce da
+# sola, con tolto accordato; la voce in un elenco; e se e' femminile, per
+# l'accordo di tolti quando le voci sono piu' d'una (1.104.0; dalla 3.0.0
+# frasi intere, da tradurre). pulizia_schede sono i file spariti;
+# pulizia_doppioni le schede doppie, che differiscono solo per le
+# maiuscole, tolte quando c'e' quella scritta come sul disco.
 TOLTI_DALLA_PULIZIA = (
-    ("pulizia_schede", "file dallo schedario", "file dallo schedario", False),
-    ("pulizia_doppioni", "scheda doppia dello schedario", "schede doppie dello schedario", True),
-    ("pulizia_brani", "brano da playlist e Preferiti", "brani da playlist e Preferiti", False),
-    ("pulizia_marker", "voce dei marker", "voci dei marker", True),
-    ("pulizia_punti", "punto da riprendere", "punti da riprendere", False),
-    ("pulizia_storico", "brano dallo storico", "brani dallo storico", False),
+    ("pulizia_schede", lambda n: ngettext("; tolto {n} file dallo schedario", "; tolti {n} file dallo schedario", n).format(n=n),
+        lambda n: plurale(n, "{n} file dallo schedario", "{n} file dallo schedario"), False),
+    ("pulizia_doppioni", lambda n: ngettext("; tolta {n} scheda doppia dello schedario", "; tolte {n} schede doppie dello schedario", n).format(n=n),
+        lambda n: plurale(n, "{n} scheda doppia dello schedario", "{n} schede doppie dello schedario"), True),
+    ("pulizia_brani", lambda n: ngettext("; tolto {n} brano da playlist e Preferiti", "; tolti {n} brani da playlist e Preferiti", n).format(n=n),
+        lambda n: plurale(n, "{n} brano da playlist e Preferiti", "{n} brani da playlist e Preferiti"), False),
+    ("pulizia_marker", lambda n: ngettext("; tolta {n} voce dei marker", "; tolte {n} voci dei marker", n).format(n=n),
+        lambda n: plurale(n, "{n} voce dei marker", "{n} voci dei marker"), True),
+    ("pulizia_punti", lambda n: ngettext("; tolto {n} punto da riprendere", "; tolti {n} punti da riprendere", n).format(n=n),
+        lambda n: plurale(n, "{n} punto da riprendere", "{n} punti da riprendere"), False),
+    ("pulizia_storico", lambda n: ngettext("; tolto {n} brano dallo storico", "; tolti {n} brani dallo storico", n).format(n=n),
+        lambda n: plurale(n, "{n} brano dallo storico", "{n} brani dallo storico"), False),
 )
+# La chiave dei formati senza estensione, nel file e nei conti dello
+# schedario: si traduce solo quando si dice, con estensione_da_dire() (3.0.0).
+SENZA_ESTENSIONE = "senza estensione"
 
 
 # Le parole.
 
-def al_plurale(n, singolare, plurale):
-    return f"{n} {singolare if n == 1 else plurale}"
+def _volte(n):
+    return plurale(n, "{n} volta", "{n} volte")
+
+
+def estensione_da_dire(estensione):
+    """Un'estensione come si dice: senza il punto, e quella dei file senza
+    estensione nella lingua di MeTeOra."""
+    return _("senza estensione") if estensione == SENZA_ESTENSIONE else estensione.lstrip(".")
 
 
 def elenco(parti):
@@ -271,7 +295,11 @@ def elenco(parti):
     parti = [p for p in parti if p]
     if len(parti) <= 1:
         return "".join(parti)
-    return f"{', '.join(parti[:-1])} e {parti[-1]}"
+    if len(parti) == 2:
+        # Traduttori: un elenco di due voci, come «1 minuto e 5 secondi».
+        return _("{prima} e {seconda}").format(prima=parti[0], seconda=parti[1])
+    # Traduttori: un elenco di tre voci o più: prime sono tutte le voci meno l'ultima, separate da virgole, come in «2 giorni, 19 ore e 40 minuti».
+    return _("{prime} e {ultima}").format(prime=", ".join(parti[:-1]), ultima=parti[-1])
 
 
 def durata(secondi):
@@ -280,16 +308,16 @@ def durata(secondi):
     minuti."""
     secondi = max(0.0, float(secondi or 0))
     if secondi == 0:
-        return "0 secondi"
+        return plurale(0, "{n} secondo", "{n} secondi")
     if secondi < 1:
-        return "meno di un secondo"
+        return _("meno di un secondo")
     if round(secondi) < 3600:
         minuti, resto = divmod(round(secondi), 60)
-        return elenco([al_plurale(minuti, "minuto", "minuti") if minuti else "", al_plurale(resto, "secondo", "secondi") if resto else ""])
+        return elenco([plurale(minuti, "{n} minuto", "{n} minuti") if minuti else "", plurale(resto, "{n} secondo", "{n} secondi") if resto else ""])
     giorni, resto = divmod(round(secondi / 60), 1440)
     ore, minuti = divmod(resto, 60)
-    return elenco([al_plurale(giorni, "giorno", "giorni") if giorni else "", al_plurale(ore, "ora", "ore") if ore else "",
-        al_plurale(minuti, "minuto", "minuti") if minuti else ""])
+    return elenco([plurale(giorni, "{n} giorno", "{n} giorni") if giorni else "", plurale(ore, "{n} ora", "{n} ore") if ore else "",
+        plurale(minuti, "{n} minuto", "{n} minuti") if minuti else ""])
 
 
 def anni_e_mesi(giorni):
@@ -297,9 +325,9 @@ def anni_e_mesi(giorni):
     sotto il mese i giorni."""
     mesi_in_tutto = round(giorni / 30.4375)
     if mesi_in_tutto < 1:
-        return al_plurale(max(1, round(giorni)), "giorno", "giorni")
+        return plurale(max(1, round(giorni)), "{n} giorno", "{n} giorni")
     anni, mesi = divmod(mesi_in_tutto, 12)
-    return elenco([al_plurale(anni, "anno", "anni") if anni else "", al_plurale(mesi, "mese", "mesi") if mesi else ""])
+    return elenco([plurale(anni, "{n} anno", "{n} anni") if anni else "", plurale(mesi, "{n} mese", "{n} mesi") if mesi else ""])
 
 
 def percentuale(parte, tutto):
@@ -312,7 +340,8 @@ def percentuale(parte, tutto):
     valore = 100 * parte / tutto
     arrotondato = round(valore, 2)
     if valore > 0 and arrotondato < 0.01:
-        return "meno di 0.01%"
+        # Traduttori: una percentuale piccolissima; percentuale è 0.01%, scritta sempre con il punto.
+        return _("meno di {percentuale}").format(percentuale="0.01%")
     return f"{valore:.2f}%" if 0 < arrotondato < 0.1 else f"{valore:.1f}%"
 
 
@@ -327,22 +356,50 @@ def _ora(quando):
 
 def _alle(quando):
     """alle 10:12, all'1:16."""
-    return f"all'{_ora(quando)}" if quando.hour == 1 else f"alle {_ora(quando)}"
+    if quando.hour == 1:
+        # Traduttori: il momento di un giorno, quando l'ora è l'una: all'1:16.
+        return _("all'{orario}").format(orario=_ora(quando))
+    # Traduttori: il momento di un giorno, con ore e minuti: alle 10:12.
+    return _("alle {orario}").format(orario=_ora(quando))
 
 
 def _con(preposizione, testo):
-    """La preposizione davanti, se c'e', scritta com'e': da, a, di. Le date
-    cominciano con il giorno della settimana, e non si elide mai (1.104.0)."""
+    """La preposizione davanti, se c'e': da, a o di, che qui sono codici. Le
+    date cominciano con il giorno della settimana, e non si elide mai
+    (1.104.0); dalla 3.0.0 preposizione e data sono una frase da tradurre."""
+    if preposizione == "da":
+        # Traduttori: l'inizio di un periodo; data è come «lunedì 19 ottobre 2026», a volte con l'ora, o «una data che non si legge».
+        return _("da {data}").format(data=testo)
+    if preposizione == "a":
+        # Traduttori: la fine di un periodo che comincia con «da»: «da domenica 1 novembre 2026 a martedì 3 novembre 2026».
+        return _("a {data}").format(data=testo)
+    if preposizione == "di":
+        # Traduttori: il momento di un salvataggio: «dopo il salvataggio di lunedì 19 ottobre 2026 alle 18:03».
+        return _("di {data}").format(data=testo)
     return f"{preposizione} {testo}" if preposizione else testo
 
 
 def dalle(ora):
     """L'inizio di un'ora: da mezzanotte, dall'una, dalle 13."""
-    return {0: "da mezzanotte", 1: "dall'una"}.get(ora, f"dalle {ora}")
+    if ora == 0:
+        # Traduttori: l'inizio di un'ora del giorno: «da mezzanotte all'una».
+        return _("da mezzanotte")
+    if ora == 1:
+        # Traduttori: l'inizio di un'ora del giorno, quando è l'una: «dall'una alle 2».
+        return _("dall'una")
+    # Traduttori: l'inizio di un'ora del giorno, senza i minuti: «dalle 13 alle 14».
+    return _("dalle {ora}").format(ora=ora)
 
 
 def alle(ora):
-    return {0: "a mezzanotte", 1: "all'una"}.get(ora, f"alle {ora}")
+    if ora == 0:
+        # Traduttori: la fine di un'ora del giorno: «dalle 23 a mezzanotte».
+        return _("a mezzanotte")
+    if ora == 1:
+        # Traduttori: la fine di un'ora del giorno, quando è l'una: «da mezzanotte all'una».
+        return _("all'una")
+    # Traduttori: la fine di un'ora del giorno, senza i minuti: «dalle 13 alle 14».
+    return _("alle {ora}").format(ora=ora)
 
 
 def _leggi_data(testo):
@@ -357,7 +414,10 @@ def data(quando, preposizione=None):
     """Una data, sempre con il giorno della settimana, e la preposizione
     davanti se c'e': lunedi' 19 ottobre 2026, da lunedi' 19 ottobre 2026.
     Dalla 1.104.0 tutte le date sono cosi'."""
-    return _con(preposizione, f"{GIORNI[quando.weekday()]} {quando.day} {MESI[quando.month - 1]} {quando.year}")
+    # Traduttori: una data; giorno_della_settimana e mese sono nomi: «lunedì 19 ottobre 2026».
+    testo = _("{giorno_della_settimana} {giorno} {mese} {anno}").format(giorno_della_settimana=GIORNI[quando.weekday()], giorno=quando.day,
+        mese=MESI[quando.month - 1], anno=quando.year)
+    return _con(preposizione, testo)
 
 
 def data_e_ora(testo, preposizione=None):
@@ -365,17 +425,24 @@ def data_e_ora(testo, preposizione=None):
     data che non si legge" se non e' una data, con la preposizione anche
     davanti a questa."""
     quando = _leggi_data(testo)
-    return f"{data(quando, preposizione)} {_alle(quando)}" if quando else _con(preposizione, "una data che non si legge")
+    if not quando:
+        return _con(preposizione, _("una data che non si legge"))
+    # Traduttori: una data con l'ora: data è come «lunedì 19 ottobre 2026», alle_ore come «alle 18:03».
+    return _con(preposizione, _("{data} {alle_ore}").format(data=data(quando), alle_ore=_alle(quando)))
 
 
 def solo_la_data(testo, preposizione=None):
     quando = _leggi_data(testo)
-    return data(quando, preposizione) if quando else _con(preposizione, "una data che non si legge")
+    return data(quando, preposizione) if quando else _con(preposizione, _("una data che non si legge"))
 
 
 def _decennio(anno):
     decennio = anno // 10 * 10
-    return f"anni '{decennio % 100:02d}" if 1920 <= decennio < 2000 else f"anni {decennio}"
+    if 1920 <= decennio < 2000:
+        # Traduttori: un decennio del Novecento, con le ultime due cifre: «anni '80».
+        return _("anni '{decennio:02d}").format(decennio=decennio % 100)
+    # Traduttori: un decennio con tutte le cifre: «anni 2020».
+    return _("anni {decennio}").format(decennio=decennio)
 
 
 def _nome(percorso):
@@ -395,7 +462,7 @@ def unita_di(percorso):
     if percorso.startswith("\\\\"):
         return "\\\\" + percorso[2:].split("\\", 1)[0]
     lettera = ntpath.splitdrive(percorso)[0]
-    return lettera.upper() if lettera else "senza unità"
+    return lettera.upper() if lettera else _("senza unità")
 
 
 def _numero(valore):
@@ -590,7 +657,8 @@ class Statistiche:
         with open(percorso, encoding="utf-8") as f:
             dati = json.load(f)
         if not isinstance(dati, dict):
-            raise ValueError("il file non contiene le statistiche")
+            # Il messaggio finisce nell'avviso all'avvio (3.0.0).
+            raise ValueError(_("il file non contiene le statistiche"))
         return dati
 
     def _testo(self):
@@ -735,7 +803,7 @@ class Statistiche:
         return self.dati["giorni"].setdefault(quando.date().isoformat(), {})
 
     def _formato(self, estensione):
-        return self.dati["formati"].setdefault(estensione or "senza estensione", {})
+        return self.dati["formati"].setdefault(estensione or SENZA_ESTENSIONE, {})
 
     def _del_brano(self, percorso):
         """La voce del brano nello storico; oltre il massimo escono i meno
@@ -1056,51 +1124,61 @@ class Pagina:
         return sum(self.c(f"marker_tolti_{come}") for come in ("uno", "prima", "dopo", "tutti", "selezione", "finestra"))
 
     def sezioni(self):
+        """I titoli delle sezioni e le loro funzioni. I titoli hanno
+        l'iniziale minuscola, come nella riga che apre la sezione; l'elenco
+        delle sezioni la fa maiuscola (3.0.0: minuscola non si puo' fare in
+        tutte le lingue, maiuscola si')."""
         return [
-            ("In breve", self.in_breve),
-            ("Le sessioni", self.le_sessioni),
-            ("Il tempo", self.il_tempo),
-            ("Il tempo per famiglia", self.per_famiglia),
-            ("Il tempo per formato", self.per_formato),
-            ("Come hai ascoltato", self.come_hai_ascoltato),
-            ("I brani", self.i_brani),
-            ("Le classifiche", self.le_classifiche),
-            ("Il calendario", self.il_calendario),
-            ("I record", self.i_record),
-            ("Muoversi nel brano", self.muoversi),
-            ("I marker", self.i_marker),
-            ("Playlist e Preferiti", self.le_playlist),
-            ("Ricerca e filtri", self.la_ricerca),
-            ("File e tag", self.file_e_tag),
-            ("Video, sottotitoli e karaoke", self.il_video),
-            ("Plancia e tastiera", self.la_tastiera),
-            ("Console e aiuto", self.la_console),
-            ("Impostazioni, rete e MIDI", self.le_impostazioni),
-            ("La salute", self.la_salute),
-            ("La libreria di adesso", self.la_libreria),
-            ("Curiosità", self.curiosita),
-            ("Tutti gli eventi", self.tutti_gli_eventi),
+            # Traduttori: da qui, i titoli delle sezioni delle statistiche, con l'iniziale minuscola: «Sezione 1 di 23, in breve.».
+            (_("in breve"), self.in_breve),
+            (_("le sessioni"), self.le_sessioni),
+            (_("il tempo"), self.il_tempo),
+            (_("il tempo per famiglia"), self.per_famiglia),
+            (_("il tempo per formato"), self.per_formato),
+            (_("come hai ascoltato"), self.come_hai_ascoltato),
+            (_("i brani"), self.i_brani),
+            (_("le classifiche"), self.le_classifiche),
+            (_("il calendario"), self.il_calendario),
+            (_("i record"), self.i_record),
+            (_("muoversi nel brano"), self.muoversi),
+            (_("i marker"), self.i_marker),
+            (_("playlist e Preferiti"), self.le_playlist),
+            (_("ricerca e filtri"), self.la_ricerca),
+            (_("file e tag"), self.file_e_tag),
+            (_("video, sottotitoli e karaoke"), self.il_video),
+            (_("plancia e tastiera"), self.la_tastiera),
+            (_("console e aiuto"), self.la_console),
+            (_("impostazioni, rete e MIDI"), self.le_impostazioni),
+            (_("la salute"), self.la_salute),
+            (_("la libreria di adesso"), self.la_libreria),
+            (_("curiosità"), self.curiosita),
+            (_("tutti gli eventi"), self.tutti_gli_eventi),
         ]
 
     def righe(self):
         sezioni = self.sezioni()
         dal = _leggi_data(self.d["dal"]) or self.oggi
         giorni = max(1, (self.oggi.date() - dal.date()).days + 1)
-        righe = [f"Statistiche di MeTeOra {self.versione}, raccolte {data_e_ora(self.d['dal'], 'da')}: {al_plurale(giorni, 'giorno', 'giorni')}, oggi compreso."]
+        # Traduttori: da_quando è la data con la preposizione, come «da domenica 1 novembre 2026 alle 10:00»; giorni come «5 giorni».
+        righe = [_("Statistiche di MeTeOra {versione}, raccolte {da_quando}: {giorni}, oggi compreso.").format(versione=self.versione,
+            da_quando=data_e_ora(self.d["dal"], "da"), giorni=plurale(giorni, "{n} giorno", "{n} giorni"))]
         if self.d["azzeramenti"]:
-            righe.append(f"Prima raccolta: {data_e_ora(self.d['prima_raccolta'])}. Azzerate {al_plurale(self.d['azzeramenti'], 'volta', 'volte')}, "
-                f"l'ultima {data_e_ora(self.d['ultimo_azzeramento'])}.")
-        righe.append("La barra rovesciata cerca nel testo, e Invio passa all'occorrenza seguente; senza una ricerca, Invio ed Esc chiudono. "
-            "Azzera le statistiche le riporta a zero.")
-        righe.append("Le sezioni: " + "; ".join(f"{n} {titolo}" for n, (titolo, _f) in enumerate(sezioni, 1)) + ".")
+            # Traduttori: Azzerate sono le statistiche; prima e ultima sono date con l'ora; volte come «2 volte».
+            righe.append(_("Prima raccolta: {prima}. Azzerate {volte}, l'ultima {ultima}.").format(prima=data_e_ora(self.d["prima_raccolta"]),
+                volte=_volte(self.d["azzeramenti"]), ultima=data_e_ora(self.d["ultimo_azzeramento"])))
+        righe.append(_("La barra rovesciata cerca nel testo, e Invio passa all'occorrenza seguente; senza una ricerca, Invio ed Esc chiudono. "
+            "Azzera le statistiche le riporta a zero."))
+        elenco_delle_sezioni = "; ".join(f"{n} {titolo[0].upper()}{titolo[1:]}" for n, (titolo, _f) in enumerate(sezioni, 1))
+        righe.append(_("Le sezioni: {sezioni}.").format(sezioni=elenco_delle_sezioni))
         for n, (titolo, funzione) in enumerate(sezioni, 1):
             righe.append("")
-            righe.append(f"Sezione {n} di {len(sezioni)}, {titolo[0].lower()}{titolo[1:]}.")
+            righe.append(_("Sezione {n} di {totale}, {titolo}.").format(n=n, totale=len(sezioni), titolo=titolo))
             try:
                 contenuto = [r for r in funzione() if r]
             except Exception as e:  # noqa: BLE001 - una sezione che non si compone non deve togliere le altre
-                contenuto = [f"Questa sezione non si è potuta comporre: {type(e).__name__}, {e}."]
-            righe.extend(contenuto or ["Ancora niente da dire."])
+                # Traduttori: tipo è il nome dell'errore, come ZeroDivisionError; errore il suo messaggio.
+                contenuto = [_("Questa sezione non si è potuta comporre: {tipo}, {errore}.").format(tipo=type(e).__name__, errore=e)]
+            righe.extend(contenuto or [_("Ancora niente da dire.")])
         return righe
 
     # 1.
@@ -1108,28 +1186,33 @@ class Pagina:
     def in_breve(self):
         avviati, finiti = self.avviati(), self.c("finiti")
         righe = [
-            f"Avvii di MeTeOra: {self.c('avvii')}.",
-            f"MeTeOra aperto: {durata(self.t('aperto'))}.",
-            f"In riproduzione: {durata(self.play)}, {percentuale(self.play, self.t('aperto'))} del tempo aperto.",
-            f"Brani avviati: {avviati}; ascoltati fino alla fine: {finiti}, {percentuale(finiti, avviati)}.",
+            _("Avvii di MeTeOra: {n}.").format(n=self.c("avvii")),
+            _("MeTeOra aperto: {durata}.").format(durata=durata(self.t("aperto"))),
+            _("In riproduzione: {durata}, {percentuale} del tempo aperto.").format(durata=durata(self.play), percentuale=percentuale(self.play, self.t("aperto"))),
+            _("Brani avviati: {avviati}; ascoltati fino alla fine: {finiti}, {percentuale}.").format(avviati=avviati, finiti=finiti,
+                percentuale=percentuale(finiti, avviati)),
             self.riga_dei_file_diversi(),
         ]
         formato = self.formati_in_ordine()
         if formato:
             estensione, voce = formato[0]
-            righe.append(f"Il formato più ascoltato: {estensione.lstrip('.')}, {durata(voce.get('secondi', 0))}, {percentuale(voce.get('secondi', 0), self.play)} della riproduzione.")
+            # Traduttori: formato è un'estensione, come mp3.
+            righe.append(_("Il formato più ascoltato: {formato}, {durata}, {percentuale} della riproduzione.").format(formato=estensione_da_dire(estensione),
+                durata=durata(voce.get("secondi", 0)), percentuale=percentuale(voce.get("secondi", 0), self.play)))
         primo = self.brani_per_volte()[:1]
         if primo:
             percorso, voce = primo[0]
-            righe.append(f"Il brano più ascoltato: {_nome(percorso)}, {al_plurale(int(voce.get('volte', 0)), 'volta', 'volte')}.")
-        righe.append(f"Marker messi: {self.e('marker_messo')}; eliminati: {self.marker_eliminati()}.")
+            righe.append(_("Il brano più ascoltato: {nome}, {volte}.").format(nome=_nome(percorso), volte=_volte(int(voce.get("volte", 0)))))
+        righe.append(_("Marker messi: {messi}; eliminati: {eliminati}.").format(messi=self.e("marker_messo"), eliminati=self.marker_eliminati()))
         return righe
 
     def riga_dei_file_diversi(self):
         diversi = sum(1 for voce in self.d["brani"].values() if voce.get("volte"))
         if self.file_nella_libreria:
-            return f"File diversi ascoltati: {diversi}, {percentuale(diversi, self.file_nella_libreria)} dei {self.file_nella_libreria} file dello schedario."
-        return f"File diversi ascoltati: {diversi}."
+            return ngettext("File diversi ascoltati: {diversi}, {percentuale} dei {file} file dello schedario.",
+                "File diversi ascoltati: {diversi}, {percentuale} dei {file} file dello schedario.", self.file_nella_libreria).format(diversi=diversi,
+                percentuale=percentuale(diversi, self.file_nella_libreria), file=self.file_nella_libreria)
+        return _("File diversi ascoltati: {n}.").format(n=diversi)
 
     # 2.
 
@@ -1137,29 +1220,35 @@ class Pagina:
         s = self.s.sessione
         record = self.d["record"]
         avvii = self.c("avvii")
-        righe = [f"Questa è la sessione numero {s['numero']}, aperta {data_e_ora(s['inizio'])}: da {durata(s['aperto'])}."]
+        righe = [_("Questa è la sessione numero {numero}, aperta {quando}: da {durata}.").format(numero=s["numero"], quando=data_e_ora(s["inizio"]),
+            durata=durata(s["aperto"]))]
         if avvii:
-            righe.append(f"Durata media di una sessione: {durata(self.t('aperto') / avvii)}.")
+            righe.append(_("Durata media di una sessione: {durata}.").format(durata=durata(self.t("aperto") / avvii)))
         if "sessione_piu_lunga" in record:
-            righe.append(f"La sessione più lunga: {durata(record['sessione_piu_lunga']['valore'])}, cominciata {data_e_ora(record['sessione_piu_lunga']['quando'])}.")
+            righe.append(_("La sessione più lunga: {durata}, cominciata {quando}.").format(durata=durata(record["sessione_piu_lunga"]["valore"]),
+                quando=data_e_ora(record["sessione_piu_lunga"]["quando"])))
         if "sessione_piu_breve" in record:
-            righe.append(f"La sessione più breve: {durata(record['sessione_piu_breve']['valore'])}, cominciata {data_e_ora(record['sessione_piu_breve']['quando'])}.")
+            righe.append(_("La sessione più breve: {durata}, cominciata {quando}.").format(durata=durata(record["sessione_piu_breve"]["valore"]),
+                quando=data_e_ora(record["sessione_piu_breve"]["quando"])))
         if "brani_in_una_sessione" in record:
-            righe.append(f"Più brani in una sessione: {record['brani_in_una_sessione']['valore']}, nella sessione cominciata {data_e_ora(record['brani_in_una_sessione']['quando'])}.")
-        righe.append(f"Chiusure regolari: {self.c('chiusure_regolari')}.")
+            righe.append(_("Più brani in una sessione: {n}, nella sessione cominciata {quando}.").format(n=record["brani_in_una_sessione"]["valore"],
+                quando=data_e_ora(record["brani_in_una_sessione"]["quando"])))
+        righe.append(_("Chiusure regolari: {n}.").format(n=self.c("chiusure_regolari")))
         non_regolari = self.c("chiusure_non_regolari")
-        riga = f"Chiusure non regolari, con MeTeOra caduto, chiuso a forza o il PC spento: {non_regolari}"
+        riga = _("Chiusure non regolari, con MeTeOra caduto, chiuso a forza o il PC spento: {n}").format(n=non_regolari)
         if non_regolari and "chiusura_non_regolare" in record:
-            riga += f"; l'ultima dopo il salvataggio {data_e_ora(record['chiusura_non_regolare']['quando'], 'di')}"
+            # Traduttori: di_quando è la data con la preposizione, come «di lunedì 19 ottobre 2026 alle 18:03».
+            riga += _("; l'ultima dopo il salvataggio {di_quando}").format(di_quando=data_e_ora(record["chiusura_non_regolare"]["quando"], "di"))
         righe.append(riga + ".")
-        righe.append(f"Avvii con un file aperto da Windows: {self.c('aperti_all_avvio')}.")
-        righe.append(f"File e cartelle passati a MeTeOra già aperto, da Windows o da un'altra copia: {self.c('aperti_da_un_altra_copia')}.")
-        righe.append(f"File e cartelle trascinati sulla finestra: {self.c('aperti_col_trascinamento')}.")
-        righe.append(f"Avvii con la ripresa del brano lasciato: {self.e('ripresa_all_avvio')}.")
-        righe.append(f"Aggiornamenti di MeTeOra: {self.c('aggiornamenti')}.")
+        righe.append(_("Avvii con un file aperto da Windows: {n}.").format(n=self.c("aperti_all_avvio")))
+        righe.append(_("File e cartelle passati a MeTeOra già aperto, da Windows o da un'altra copia: {n}.").format(n=self.c("aperti_da_un_altra_copia")))
+        righe.append(_("File e cartelle trascinati sulla finestra: {n}.").format(n=self.c("aperti_col_trascinamento")))
+        righe.append(_("Avvii con la ripresa del brano lasciato: {n}.").format(n=self.e("ripresa_all_avvio")))
+        righe.append(_("Aggiornamenti di MeTeOra: {n}.").format(n=self.c("aggiornamenti")))
         versioni = sorted(self.d["versioni"].items(), key=lambda v: v[1])
         if versioni:
-            righe.append("Versioni usate: " + ", ".join(f"{v} {solo_la_data(quando, 'da')}" for v, quando in versioni) + ".")
+            # Traduttori: le versioni con la data del primo avvio, come «1.103.0 da domenica 1 novembre 2026, 1.104.0 da lunedì 2 novembre 2026».
+            righe.append(_("Versioni usate: {versioni}.").format(versioni=", ".join(f"{v} {solo_la_data(quando, 'da')}" for v, quando in versioni)))
         return righe
 
     # 3.
@@ -1168,28 +1257,31 @@ class Pagina:
         aperto = self.t("aperto")
         video = self.t("play_video")
         righe = [
-            f"MeTeOra aperto: {durata(aperto)}.",
-            f"In riproduzione: {durata(self.play)}, {percentuale(self.play, aperto)} del tempo aperto.",
-            f"In pausa: {durata(self.t('pausa'))}, {percentuale(self.t('pausa'), aperto)}.",
-            f"Fermo, senza niente che suona: {durata(self.t('fermo'))}, {percentuale(self.t('fermo'), aperto)}.",
-            f"Riproduzione di audio: {durata(self.t('play_audio'))}, {percentuale(self.t('play_audio'), self.play)} della riproduzione.",
-            f"Riproduzione di video: {durata(video)}, {percentuale(video, self.play)}.",
+            _("MeTeOra aperto: {durata}.").format(durata=durata(aperto)),
+            _("In riproduzione: {durata}, {percentuale} del tempo aperto.").format(durata=durata(self.play), percentuale=percentuale(self.play, aperto)),
+            _("In pausa: {durata}, {percentuale}.").format(durata=durata(self.t("pausa")), percentuale=percentuale(self.t("pausa"), aperto)),
+            _("Fermo, senza niente che suona: {durata}, {percentuale}.").format(durata=durata(self.t("fermo")), percentuale=percentuale(self.t("fermo"), aperto)),
+            _("Riproduzione di audio: {durata}, {percentuale} della riproduzione.").format(durata=durata(self.t("play_audio")),
+                percentuale=percentuale(self.t("play_audio"), self.play)),
+            _("Riproduzione di video: {durata}, {percentuale}.").format(durata=durata(video), percentuale=percentuale(video, self.play)),
         ]
         if video:
-            righe.append(f"Video con l'immagine: {durata(self.t('video_immagine'))}, {percentuale(self.t('video_immagine'), video)} del tempo dei video.")
-            righe.append(f"Video con l'immagine spenta, solo l'audio: {durata(self.t('video_senza_immagine'))}, {percentuale(self.t('video_senza_immagine'), video)}.")
-            righe.append(f"Video a schermo intero: {durata(self.t('schermo_intero'))}.")
+            righe.append(_("Video con l'immagine: {durata}, {percentuale} del tempo dei video.").format(durata=durata(self.t("video_immagine")),
+                percentuale=percentuale(self.t("video_immagine"), video)))
+            righe.append(_("Video con l'immagine spenta, solo l'audio: {durata}, {percentuale}.").format(durata=durata(self.t("video_senza_immagine")),
+                percentuale=percentuale(self.t("video_senza_immagine"), video)))
+            righe.append(_("Video a schermo intero: {durata}.").format(durata=durata(self.t("schermo_intero"))))
         pause = self.c("pause")
-        riga = f"Pause: {pause}"
+        riga = _("Pause: {n}").format(n=pause)
         if pause:
-            riga += f", lunghe in media {durata(self.t('pausa') / pause)}"
+            riga += _(", lunghe in media {durata}").format(durata=durata(self.t("pausa") / pause))
         if "pausa_piu_lunga" in self.d["record"]:
-            riga += f"; la più lunga: {durata(self.d['record']['pausa_piu_lunga']['valore'])}"
+            riga += _("; la più lunga: {durata}").format(durata=durata(self.d["record"]["pausa_piu_lunga"]["valore"]))
         righe.append(riga + ".")
         filata = self.d["record"].get("filata")
         if filata:
-            righe.append(f"La riproduzione più lunga senza fermarsi: {durata(filata['valore'])}, {al_plurale(int(filata.get('brani', 1)), 'brano', 'brani di fila')}, "
-                f"cominciata {data_e_ora(filata['quando'])}.")
+            righe.append(_("La riproduzione più lunga senza fermarsi: {durata}, {brani}, cominciata {quando}.").format(durata=durata(filata["valore"]),
+                brani=plurale(int(filata.get("brani", 1)), "{n} brano", "{n} brani di fila"), quando=data_e_ora(filata["quando"])))
         return righe
 
     # 4 e 5.
@@ -1211,24 +1303,25 @@ class Pagina:
         suonate = [f for f in famiglie if famiglie[f]["secondi"] or famiglie[f]["avvii"]]
         for chiave in sorted(suonate, key=lambda f: (-famiglie[f]["secondi"], -famiglie[f]["avvii"], ordine.index(f))):
             f = famiglie[chiave]
-            righe.append(f"{FAMIGLIE[chiave]}: {durata(f['secondi'])}, {percentuale(f['secondi'], self.play)} della riproduzione; "
-                f"{al_plurale(int(f['avvii']), 'avvio', 'avvii')}.")
+            righe.append(_("{famiglia}: {durata}, {percentuale} della riproduzione; {avvii}.").format(famiglia=FAMIGLIE[chiave], durata=durata(f["secondi"]),
+                percentuale=percentuale(f["secondi"], self.play), avvii=plurale(int(f["avvii"]), "{n} avvio", "{n} avvii")))
         return righe
 
     def per_formato(self):
         voci = self.formati_in_ordine()
         suonati = {e for e, _v in voci}
-        righe = [f"Formati suonati: {len(voci)} dei {len(formati.TUTTI)} che MeTeOra conosce."]
+        righe = [_("Formati suonati: {n} dei {totale} che MeTeOra conosce.").format(n=len(voci), totale=len(formati.TUTTI))]
         for estensione, voce in voci:
             avvii = int(voce.get("avvii", 0))
-            riga = f"{estensione.lstrip('.')}: {durata(voce.get('secondi', 0))}, {percentuale(voce.get('secondi', 0), self.play)}; {al_plurale(avvii, 'avvio', 'avvii')}"
+            quanti = plurale(avvii, "{n} avvio", "{n} avvii")
+            riga = f"{estensione_da_dire(estensione)}: {durata(voce.get('secondi', 0))}, {percentuale(voce.get('secondi', 0), self.play)}; {quanti}"
             if avvii:
-                riga += f", {percentuale(voce.get('finiti', 0), avvii)} fino alla fine"
+                riga += _(", {percentuale} fino alla fine").format(percentuale=percentuale(voce.get("finiti", 0), avvii))
             righe.append(riga + ".")
         # Solo quanti sono, senza l'elenco dei nomi (1.104.0).
         mai = len(formati.TUTTI - suonati)
         if mai:
-            righe.append(f"Formati mai suonati: {mai}.")
+            righe.append(_("Formati mai suonati: {n}.").format(n=mai))
         return righe
 
     # 6.
@@ -1237,52 +1330,65 @@ class Pagina:
         record = self.d["record"]
         righe = []
         if self.play:
-            riga = f"Volume medio, pesato sul tempo: {round(self.t('volume_pesato') / self.play)}"
+            riga = _("Volume medio, pesato sul tempo: {volume}").format(volume=round(self.t("volume_pesato") / self.play))
             if "volume_piu_alto" in record:
-                riga += f"; il più alto raggiunto: {record['volume_piu_alto']['valore']}"
+                riga += _("; il più alto raggiunto: {volume}").format(volume=record["volume_piu_alto"]["valore"])
             righe.append(riga + ".")
-        righe.append(f"Volume oltre 100, con il limitatore: {durata(self.t('oltre_100'))}, {percentuale(self.t('oltre_100'), self.play)} della riproduzione.")
-        righe.append(f"In muto mentre suonava: {durata(self.t('muto'))}.")
+        righe.append(_("Volume oltre 100, con il limitatore: {durata}, {percentuale} della riproduzione.").format(durata=durata(self.t("oltre_100")),
+            percentuale=percentuale(self.t("oltre_100"), self.play)))
+        righe.append(_("In muto mentre suonava: {durata}.").format(durata=durata(self.t("muto"))))
         cambiata = self.t("velocita_cambiata")
-        riga = f"Velocità diversa dal normale: {durata(cambiata)}, {percentuale(cambiata, self.play)}"
+        riga = _("Velocità diversa dal normale: {durata}, {percentuale}").format(durata=durata(cambiata), percentuale=percentuale(cambiata, self.play))
         if cambiata and "velocita_piu_alta" in record:
-            riga += f"; la più alta {numero_decimale(record['velocita_piu_alta']['valore'])}, la più bassa {numero_decimale(record.get('velocita_piu_bassa', {}).get('valore', 1))}"
+            riga += _("; la più alta {alta}, la più bassa {bassa}").format(alta=numero_decimale(record["velocita_piu_alta"]["valore"]),
+                bassa=numero_decimale(record.get("velocita_piu_bassa", {}).get("valore", 1)))
         righe.append(riga + ".")
         if cambiata:
             contenuto = self.t("contenuto_a_velocita_cambiata")
             guadagno = contenuto - cambiata
             if guadagno >= 0:
-                righe.append(f"Tempo guadagnato con la velocità: {durata(guadagno)}; brani che duravano {durata(contenuto)} ascoltati in {durata(cambiata)}.")
+                righe.append(_("Tempo guadagnato con la velocità: {durata}; brani che duravano {contenuto} ascoltati in {ascolto}.").format(durata=durata(guadagno),
+                    contenuto=durata(contenuto), ascolto=durata(cambiata)))
             else:
-                righe.append(f"Tempo in più con la velocità: {durata(-guadagno)}; brani che duravano {durata(contenuto)} ascoltati in {durata(cambiata)}.")
-        riga = f"Tono cambiato: {durata(self.t('tono_cambiato'))}"
+                righe.append(_("Tempo in più con la velocità: {durata}; brani che duravano {contenuto} ascoltati in {ascolto}.").format(durata=durata(-guadagno),
+                    contenuto=durata(contenuto), ascolto=durata(cambiata)))
+        riga = _("Tono cambiato: {durata}").format(durata=durata(self.t("tono_cambiato")))
         if self.t("tono_cambiato") and "tono_piu_alto" in record:
             alto, basso = int(record["tono_piu_alto"]["valore"]), int(record.get("tono_piu_basso", {}).get("valore", 0))
-            riga += f"; il più alto {alto:+d} {'semitono' if abs(alto) == 1 else 'semitoni'}, il più basso {basso:+d}"
+            # Traduttori: alto e basso sono semitoni con il segno, come +3 e -2; la forma la sceglie alto.
+            riga += ngettext("; il più alto {alto:+d} semitono, il più basso {basso:+d}", "; il più alto {alto:+d} semitoni, il più basso {basso:+d}",
+                abs(alto)).format(alto=alto, basso=basso)
         righe.append(riga + ".")
-        righe.append(f"Equalizzatore con almeno una banda fuori dallo zero: {durata(self.t('eq'))}, {percentuale(self.t('eq'), self.play)}.")
+        righe.append(_("Equalizzatore con almeno una banda fuori dallo zero: {durata}, {percentuale}.").format(durata=durata(self.t("eq")),
+            percentuale=percentuale(self.t("eq"), self.play)))
         bande = self.d["bande"]
         if any(bande):
             indice = max(range(len(bande)), key=lambda i: bande[i])
-            righe.append(f"La banda più ritoccata: {valori.nome_della_banda(indice)}, {al_plurale(int(bande[indice]), 'volta', 'volte')}; "
-                f"in tutto {al_plurale(int(sum(bande)), 'ritocco', 'ritocchi')}.")
-        righe.append(f"Dissolvenza incrociata accesa: {durata(self.t('dissolvenza'))}, {percentuale(self.t('dissolvenza'), self.play)}; passaggi sfumati: {self.c('passaggi_sfumati')}.")
-        righe.append(f"Riproduzione casuale accesa: {durata(self.t('casuale'))}, {percentuale(self.t('casuale'), self.play)}; brani scelti a caso: {self.c('a_caso')}.")
-        righe.append(f"Ripetizione del brano: {durata(self.t('ripetizione_brano'))}; ripetizione della lista: {durata(self.t('ripetizione_lista'))}.")
-        righe.append(f"Volume uniforme con ReplayGain: per brano {durata(self.t('replaygain_brano'))}, per album {durata(self.t('replaygain_album'))}.")
+            righe.append(_("La banda più ritoccata: {banda}, {volte}; in tutto {ritocchi}.").format(banda=valori.nome_della_banda(indice),
+                volte=_volte(int(bande[indice])), ritocchi=plurale(int(sum(bande)), "{n} ritocco", "{n} ritocchi")))
+        righe.append(_("Dissolvenza incrociata accesa: {durata}, {percentuale}; passaggi sfumati: {n}.").format(durata=durata(self.t("dissolvenza")),
+            percentuale=percentuale(self.t("dissolvenza"), self.play), n=self.c("passaggi_sfumati")))
+        righe.append(_("Riproduzione casuale accesa: {durata}, {percentuale}; brani scelti a caso: {n}.").format(durata=durata(self.t("casuale")),
+            percentuale=percentuale(self.t("casuale"), self.play), n=self.c("a_caso")))
+        righe.append(_("Ripetizione del brano: {brano}; ripetizione della lista: {lista}.").format(brano=durata(self.t("ripetizione_brano")),
+            lista=durata(self.t("ripetizione_lista"))))
+        righe.append(_("Volume uniforme con ReplayGain: per brano {brano}, per album {album}.").format(brano=durata(self.t("replaygain_brano")),
+            album=durata(self.t("replaygain_album"))))
         schede = sorted(((nome, secondi) for nome, secondi in self.d["schede_audio"].items() if secondi), key=lambda s: -s[1])
         if schede:
-            righe.append("Schede audio: " + "; ".join(f"{nome}, {percentuale(secondi, self.play)}" for nome, secondi in schede) + ".")
+            righe.append(_("Schede audio: {schede}.").format(schede="; ".join(f"{nome}, {percentuale(secondi, self.play)}" for nome, secondi in schede)))
         return righe
 
     def _riga_delle_uscite(self):
         """Le schede e gli speaker che vanno e tornano (issue 31, 1.119.0)."""
-        riga = (f"Uscite: la scelta sparita {al_plurale(self.e('scheda_sparita'), 'volta', 'volte')} e tornata {al_plurale(self.e('scheda_tornata'), 'volta', 'volte')}; "
-                f"la scheda di Windows cambiata da sola {al_plurale(self.e('scheda_di_windows'), 'volta', 'volte')}; "
-                f"brani ripresi dopo un'uscita persa: {self.c('brani_ripresi_dopo_l_uscita_persa')}; speaker Cast scelti: {self.c('speaker_scelti')}")
+        # Traduttori: la scelta è la scheda audio o lo speaker scelti; sparita, tornata e cambiata come «2 volte».
+        riga = _("Uscite: la scelta sparita {sparita} e tornata {tornata}; la scheda di Windows cambiata da sola {cambiata}; "
+            "brani ripresi dopo un'uscita persa: {ripresi}; speaker Cast scelti: {speaker}").format(sparita=_volte(self.e("scheda_sparita")),
+            tornata=_volte(self.e("scheda_tornata")), cambiata=_volte(self.e("scheda_di_windows")), ripresi=self.c("brani_ripresi_dopo_l_uscita_persa"),
+            speaker=self.c("speaker_scelti"))
         assenza = self.d["record"].get("assenza_della_scelta")
         if assenza:
-            riga += f"; l'assenza più lunga della scelta: {durata(assenza['valore'])}, cominciata {data_e_ora(assenza['quando'])}"
+            riga += _("; l'assenza più lunga della scelta: {durata}, cominciata {quando}").format(durata=durata(assenza["valore"]), quando=data_e_ora(assenza["quando"]))
         return riga + "."
 
     # 7.
@@ -1294,29 +1400,32 @@ class Pagina:
         avviati = self.avviati()
         finiti, lasciati, errori = self.c("finiti"), self.c("lasciati"), self.c("errori_di_riproduzione")
         righe = [
-            f"Brani avviati: {avviati}.",
-            f"Scelti da te, con X, Invio, il menu, un marker o un capitolo: {modi['scelti']}.",
-            f"Partiti da soli, alla fine del brano prima: {modi['da_soli']}; di questi, tornando al punto A del loop: {int(self.d['modi'].get('ritorno_al_punto_a', 0))}.",
-            f"Con B: {modi['b']}; con Z: {modi['z']}; con N, a caso: {modi['n']}.",
-            f"Aprendo una playlist con J, K o le cifre: {modi['playlist']}.",
-            f"Ripresi all'avvio: {modi['ripresa']}.",
-            f"Ascoltati fino alla fine: {finiti}, {percentuale(finiti, avviati)}.",
-            f"Lasciati prima della fine: {lasciati}, {percentuale(lasciati, avviati)}; di questi, nei primi {int(SUBITO)} secondi: {self.c('lasciati_subito')}.",
-            f"Non suonati per un errore: {errori}, {percentuale(errori, avviati)}.",
-            f"Ancora in corso quando hai chiuso MeTeOra: {self.c('in_corso_alla_chiusura')}.",
-            f"Ripartiti da capo con X, non contati come avvii: {self.e('da_capo')}.",
+            _("Brani avviati: {n}.").format(n=avviati),
+            _("Scelti da te, con X, Invio, il menu, un marker o un capitolo: {n}.").format(n=modi["scelti"]),
+            _("Partiti da soli, alla fine del brano prima: {da_soli}; di questi, tornando al punto A del loop: {al_punto_a}.").format(da_soli=modi["da_soli"],
+                al_punto_a=int(self.d["modi"].get("ritorno_al_punto_a", 0))),
+            _("Con B: {b}; con Z: {z}; con N, a caso: {n}.").format(b=modi["b"], z=modi["z"], n=modi["n"]),
+            _("Aprendo una playlist con J, K o le cifre: {n}.").format(n=modi["playlist"]),
+            _("Ripresi all'avvio: {n}.").format(n=modi["ripresa"]),
+            _("Ascoltati fino alla fine: {n}, {percentuale}.").format(n=finiti, percentuale=percentuale(finiti, avviati)),
+            _("Lasciati prima della fine: {n}, {percentuale}; di questi, nei primi {secondi} secondi: {subito}.").format(n=lasciati,
+                percentuale=percentuale(lasciati, avviati), secondi=int(SUBITO), subito=self.c("lasciati_subito")),
+            _("Non suonati per un errore: {n}, {percentuale}.").format(n=errori, percentuale=percentuale(errori, avviati)),
+            _("Ancora in corso quando hai chiuso MeTeOra: {n}.").format(n=self.c("in_corso_alla_chiusura")),
+            _("Ripartiti da capo con X, non contati come avvii: {n}.").format(n=self.e("da_capo")),
             self.riga_dei_file_diversi(),
         ]
         brani = self.d["brani"].values()
-        righe.append(f"Ascoltati una volta sola: {sum(1 for v in brani if v.get('volte') == 1)}; più di 10 volte: {sum(1 for v in brani if v.get('volte', 0) > 10)}.")
-        righe.append(f"Sottobrani diversi dei SID e delle console: {sum(len(v.get('sotto', [])) for v in brani)}.")
+        righe.append(_("Ascoltati una volta sola: {una}; più di 10 volte: {piu_di_10}.").format(una=sum(1 for v in brani if v.get("volte") == 1),
+            piu_di_10=sum(1 for v in brani if v.get("volte", 0) > 10)))
+        righe.append(_("Sottobrani diversi dei SID e delle console: {n}.").format(n=sum(len(v.get("sotto", [])) for v in brani)))
         durate = [(v.get("volte", 0), self.tag(p)[1]) for p, v in self.d["brani"].items() if v.get("volte")]
         note = [(volte, d) for volte, d in durate if _numero(d) and 0 < d < DURATA_CREDIBILE]
         if note:
-            righe.append(f"Durata media dei brani avviati, dallo schedario: {durata(sum(v * d for v, d in note) / sum(v for v, _d in note))}.")
+            righe.append(_("Durata media dei brani avviati, dallo schedario: {durata}.").format(durata=durata(sum(v * d for v, d in note) / sum(v for v, _d in note))))
         if lasciati:
-            righe.append(f"Ascolto medio prima di lasciare un brano: {durata(self.c('secondi_dei_lasciati') / lasciati)}.")
-        righe.append(f"File lunghi ripresi dal punto lasciato: {self.c('ripresi_dal_punto')}.")
+            righe.append(_("Ascolto medio prima di lasciare un brano: {durata}.").format(durata=durata(self.c("secondi_dei_lasciati") / lasciati)))
+        righe.append(_("File lunghi ripresi dal punto lasciato: {n}.").format(n=self.c("ripresi_dal_punto")))
         return righe
 
     # 8.
@@ -1327,7 +1436,8 @@ class Pagina:
 
     def di_chi(self, percorso):
         autore = self.tag(percorso)[0].get("autore")
-        return f", di {autore}" if autore and autore != "<?>" else ""
+        # Traduttori: l'autore di un brano, dopo il suo nome: «Commando.sid, di Rob Hubbard».
+        return _(", di {autore}").format(autore=autore) if autore and autore != "<?>" else ""
 
     def classifica(self, titolo, conti, scrivi, posti=POSTI):
         """Le righe di una classifica: il titolo e i primi posti, gia' in ordine."""
@@ -1338,13 +1448,17 @@ class Pagina:
 
     def le_classifiche(self):
         righe = []
-        righe += self.classifica(f"I {POSTI} brani ascoltati più volte", self.brani_per_volte(),
-            lambda p, v: f"{_nome(p)}{self.di_chi(p)}: {al_plurale(int(v.get('volte', 0)), 'volta', 'volte')}, {durata(v.get('secondi', 0))}.")
+        righe += self.classifica(_("I {posti} brani ascoltati più volte").format(posti=POSTI), self.brani_per_volte(),
+            lambda p, v: f"{_nome(p)}{self.di_chi(p)}: {_volte(int(v.get('volte', 0)))}, {durata(v.get('secondi', 0))}.")
         per_tempo = sorted(((p, v) for p, v in self.d["brani"].items() if v.get("secondi")), key=lambda pv: (-pv[1]["secondi"], pv[0]))
-        righe += self.classifica(f"I {POSTI} brani ascoltati più a lungo", per_tempo,
-            lambda p, v: f"{_nome(p)}{self.di_chi(p)}: {durata(v['secondi'])}, in {al_plurale(int(v.get('volte', 0)), 'volta', 'volte')}.")
+        righe += self.classifica(_("I {posti} brani ascoltati più a lungo").format(posti=POSTI), per_tempo,
+            # Traduttori: nome è il nome di un file; di_chi è vuoto o l'autore, come «, di Rob Hubbard»; volte come «3 volte».
+            lambda p, v: _("{nome}{di_chi}: {durata}, in {volte}.").format(nome=_nome(p), di_chi=self.di_chi(p), durata=durata(v["secondi"]),
+                volte=_volte(int(v.get("volte", 0)))))
         tempo_dei_brani = sum(v.get("secondi", 0) for v in self.d["brani"].values())
-        for chiave, titolo, senza in (("autore", "autori", "Senza autore nei tag"), ("album", "album", "Senza album nei tag"), ("genere", "generi", "Senza genere nei tag")):
+        for chiave, titolo, senza in (("autore", _("I {posti} autori più ascoltati, dai tag").format(posti=POSTI), _("Senza autore nei tag")),
+                ("album", _("I {posti} album più ascoltati, dai tag").format(posti=POSTI), _("Senza album nei tag")),
+                ("genere", _("I {posti} generi più ascoltati, dai tag").format(posti=POSTI), _("Senza genere nei tag"))):
             secondi, avvii, file = Counter(), Counter(), Counter()
             senza_tag = 0
             for p, v in self.d["brani"].items():
@@ -1361,9 +1475,11 @@ class Pagina:
             ordine = sorted((k for k in secondi if secondi[k] or avvii[k]), key=lambda k: (-secondi[k], k))
             if not ordine:
                 continue
-            righe += self.classifica(f"I {POSTI} {titolo} più ascoltati, dai tag", ordine,
-                lambda k, secondi=secondi, avvii=avvii, file=file: f"{k}: {durata(secondi[k])}, {percentuale(secondi[k], tempo_dei_brani)}; "
-                    f"{al_plurale(int(avvii[k]), 'avvio', 'avvii')} di {al_plurale(file[k], 'file', 'file')}.")
+            righe += self.classifica(titolo, ordine,
+                # Traduttori: nome è un autore, un album o un genere; avvii e file come «3 avvii» e «2 file».
+                lambda k, secondi=secondi, avvii=avvii, file=file: _("{nome}: {durata}, {percentuale}; {avvii} di {file}.").format(nome=k,
+                    durata=durata(secondi[k]), percentuale=percentuale(secondi[k], tempo_dei_brani), avvii=plurale(int(avvii[k]), "{n} avvio", "{n} avvii"),
+                    file=plurale(file[k], "{n} file", "{n} file")))
             righe.append(f"{senza}: {durata(senza_tag)}, {percentuale(senza_tag, tempo_dei_brani)}.")
         decenni, anni = Counter(), Counter()
         senza_anno = 0
@@ -1382,21 +1498,21 @@ class Pagina:
         if decenni:
             parti = [f"{k} {percentuale(s, tempo_dei_brani)}" for k, s in sorted(decenni.items(), key=lambda ks: -ks[1])]
             if senza_anno:
-                parti.append(f"senza anno {percentuale(senza_anno, tempo_dei_brani)}")
-            righe.append(f"Per decennio, dall'anno dei tag: {'; '.join(parti)}.")
+                parti.append(_("senza anno {percentuale}").format(percentuale=percentuale(senza_anno, tempo_dei_brani)))
+            righe.append(_("Per decennio, dall'anno dei tag: {decenni}.").format(decenni="; ".join(parti)))
             anno = max(anni, key=lambda a: (anni[a], -a))
-            righe.append(f"L'anno più ascoltato: {anno}, {percentuale(anni[anno], tempo_dei_brani)}.")
+            righe.append(_("L'anno più ascoltato: {anno}, {percentuale}.").format(anno=anno, percentuale=percentuale(anni[anno], tempo_dei_brani)))
         cartelle, unita = Counter(), Counter()
         for p, v in self.d["brani"].items():
             cartelle[ntpath.dirname(p) or p] += v.get("secondi", 0)
             unita[unita_di(p)] += v.get("secondi", 0)
-        righe += self.classifica(f"Le {POSTI} cartelle più ascoltate", sorted(((k, s) for k, s in cartelle.items() if s), key=lambda ks: -ks[1]),
+        righe += self.classifica(_("Le {posti} cartelle più ascoltate").format(posti=POSTI), sorted(((k, s) for k, s in cartelle.items() if s), key=lambda ks: -ks[1]),
             lambda k, s: f"{k}: {durata(s)}, {percentuale(s, tempo_dei_brani)}.")
         if any(unita.values()):
-            righe.append("Per unità: " + "; ".join(f"{k} {percentuale(s, tempo_dei_brani)}" for k, s in sorted(unita.items(), key=lambda ks: -ks[1]) if s) + ".")
+            righe.append(_("Per unità: {unita}.").format(unita="; ".join(f"{k} {percentuale(s, tempo_dei_brani)}" for k, s in sorted(unita.items(), key=lambda ks: -ks[1]) if s)))
         sorgenti = sorted(((nome, secondi) for nome, secondi in self.d["sorgenti"].items() if secondi), key=lambda s: -s[1])
         if sorgenti:
-            righe.append("Da dove: " + "; ".join(f"{nome} {percentuale(secondi, self.play)}" for nome, secondi in sorgenti) + ".")
+            righe.append(_("Da dove: {sorgenti}.").format(sorgenti="; ".join(f"{nome} {percentuale(secondi, self.play)}" for nome, secondi in sorgenti)))
         return righe
 
     # 9.
@@ -1412,12 +1528,14 @@ class Pagina:
         di_calendario = max(1, (self.oggi.date() - dal).days + 1)
         aperti = [g for g, v in giorni.items() if v.get("aperto")]
         con_ascolto = sorted(g for g, v in giorni.items() if v.get("play"))
-        righe = [f"Giorni con MeTeOra aperto: {len(aperti)} su {di_calendario}; con almeno un brano ascoltato: {len(con_ascolto)}."]
+        # Traduttori: aperti è quanti giorni MeTeOra è stato aperto, su tutti quelli della raccolta.
+        righe = [_("Giorni con MeTeOra aperto: {aperti} su {di_calendario}; con almeno un brano ascoltato: {con_ascolto}.").format(aperti=len(aperti),
+            di_calendario=di_calendario, con_ascolto=len(con_ascolto))]
         if con_ascolto:
             totale = sum(giorni[g]["play"] for g in con_ascolto)
-            righe.append(f"Ascolto medio nei giorni con ascolto: {durata(totale / len(con_ascolto))}.")
+            righe.append(_("Ascolto medio nei giorni con ascolto: {durata}.").format(durata=durata(totale / len(con_ascolto))))
             record = max(con_ascolto, key=lambda g: giorni[g]["play"])
-            righe.append(f"Il giorno con più ascolto: {data(record)}, {durata(giorni[record]['play'])}.")
+            righe.append(_("Il giorno con più ascolto: {data}, {durata}.").format(data=data(record), durata=durata(giorni[record]["play"])))
             serie, inizio, migliore = 1, con_ascolto[0], (1, con_ascolto[0], con_ascolto[0])
             for prima, dopo in itertools.pairwise(con_ascolto):
                 if (dopo - prima).days == 1:
@@ -1427,15 +1545,17 @@ class Pagina:
                 if serie > migliore[0]:
                     migliore = (serie, inizio, dopo)
             if migliore[0] > 1:
-                righe.append(f"La serie più lunga di giorni di fila con ascolto: {migliore[0]}, {data(migliore[1], 'da')} {data(migliore[2], 'a')}.")
+                # Traduttori: da_quando e a_quando sono date con la preposizione, come «da domenica 1 novembre 2026» e «a martedì 3 novembre 2026».
+                righe.append(_("La serie più lunga di giorni di fila con ascolto: {n}, {da_quando} {a_quando}.").format(n=migliore[0],
+                    da_quando=data(migliore[1], "da"), a_quando=data(migliore[2], "a")))
             else:
-                righe.append("La serie più lunga di giorni di fila con ascolto: 1.")
+                righe.append(_("La serie più lunga di giorni di fila con ascolto: 1."))
             fine = self.oggi.date() if self.oggi.date() in giorni and giorni[self.oggi.date()].get("play") else self.oggi.date() - datetime.timedelta(days=1)
             di_adesso = 0
             presenti = set(con_ascolto)
             while fine - datetime.timedelta(days=di_adesso) in presenti:
                 di_adesso += 1
-            righe.append(f"La serie di adesso: {al_plurale(di_adesso, 'giorno', 'giorni')}.")
+            righe.append(_("La serie di adesso: {giorni}.").format(giorni=plurale(di_adesso, "{n} giorno", "{n} giorni")))
         # Negli elenchi per mese, per giorno, per fascia e per ora solo le voci
         # con un po' d'ascolto: senza nessun mese d'ascolto la riga dei mesi
         # non si scrive, perche' la prima riga gia' dice zero giorni (1.104.0).
@@ -1444,26 +1564,32 @@ class Pagina:
             mesi[(g.year, g.month)] += v.get("play", 0)
         mesi = sorted((am, s) for am, s in mesi.items() if s)
         if mesi:
-            righe.append("Per mese: " + "; ".join(f"{MESI[m - 1]} {a}, {durata(s)}" for (a, m), s in mesi) + ".")
+            righe.append(_("Per mese: {mesi}.").format(mesi="; ".join(f"{MESI[m - 1]} {a}, {durata(s)}" for (a, m), s in mesi)))
         settimana = self.d["settimana"]
         totale = sum(settimana)
         if totale:
             ordine = sorted((i for i in range(7) if settimana[i]), key=lambda i: -settimana[i])
-            righe.append("Per giorno della settimana: " + "; ".join(f"{GIORNI[i]} {percentuale(settimana[i], totale)}" for i in ordine) + ".")
+            righe.append(_("Per giorno della settimana: {giorni}.").format(giorni="; ".join(f"{GIORNI[i]} {percentuale(settimana[i], totale)}" for i in ordine)))
         ore = self.d["ore"]
         totale = sum(ore)
         if totale:
-            fasce = [("sera, dalle 18", range(18, 24)), ("pomeriggio, dalle 12", range(12, 18)), ("mattina, dalle 6", range(6, 12)), ("notte, da mezzanotte alle 6", range(0, 6))]
+            # Traduttori: le fasce del giorno, con l'ora in cui cominciano, nella riga «Per fascia: sera, dalle 18: 60.0%; mattina, dalle 6: 40.0%.».
+            fasce = [(_("sera, dalle 18"), range(18, 24)), (_("pomeriggio, dalle 12"), range(12, 18)), (_("mattina, dalle 6"), range(6, 12)),
+                (_("notte, da mezzanotte alle 6"), range(0, 6))]
             fasce = [(nome, sum(ore[h] for h in fascia)) for nome, fascia in fasce]
             fasce = sorted((f for f in fasce if f[1]), key=lambda f: -f[1])
-            righe.append("Per fascia: " + "; ".join(f"{nome}: {percentuale(secondi, totale)}" for nome, secondi in fasce) + ".")
+            righe.append(_("Per fascia: {fasce}.").format(fasce="; ".join(f"{nome}: {percentuale(secondi, totale)}" for nome, secondi in fasce)))
             ora = max(range(24), key=lambda h: ore[h])
-            righe.append(f"L'ora con più ascolto: {dalle(ora)} {alle((ora + 1) % 24)}, {percentuale(ore[ora], totale)}, {durata(ore[ora])}.")
-            righe.append("Per ora: " + "; ".join(f"ore {h}: {percentuale(ore[h], totale)}" for h in range(24) if ore[h]) + ".")
+            # Traduttori: dalle e alle sono l'inizio e la fine dell'ora, come «dalle 13» e «alle 14»; durata come «2 minuti».
+            righe.append(_("L'ora con più ascolto: {dalle} {alle}, {percentuale}, {durata}.").format(dalle=dalle(ora), alle=alle((ora + 1) % 24),
+                percentuale=percentuale(ore[ora], totale), durata=durata(ore[ora])))
+            # Traduttori: un'ora del giorno con la sua parte d'ascolto: «ore 10: 60.0%» dice dalle 10 alle 11.
+            per_ora = "; ".join(_("ore {ora}: {percentuale}").format(ora=h, percentuale=percentuale(ore[h], totale)) for h in range(24) if ore[h])
+            righe.append(_("Per ora: {ore}.").format(ore=per_ora))
         con_marker = [g for g, v in giorni.items() if v.get("marker")]
         if con_marker:
             g = max(con_marker, key=lambda g: giorni[g]["marker"])
-            righe.append(f"Il giorno con più marker messi: {data(g)}, {int(giorni[g]['marker'])}.")
+            righe.append(_("Il giorno con più marker messi: {data}, {n}.").format(data=data(g), n=int(giorni[g]["marker"])))
         return righe
 
     # 10.
@@ -1472,70 +1598,84 @@ class Pagina:
         r = self.d["record"]
         righe = []
         if "sessione_piu_lunga" in r:
-            righe.append(f"La sessione più lunga: {durata(r['sessione_piu_lunga']['valore'])}, cominciata {data_e_ora(r['sessione_piu_lunga']['quando'])}.")
+            righe.append(_("La sessione più lunga: {durata}, cominciata {quando}.").format(durata=durata(r["sessione_piu_lunga"]["valore"]),
+                quando=data_e_ora(r["sessione_piu_lunga"]["quando"])))
         if "filata" in r:
-            righe.append(f"La riproduzione più lunga senza fermarsi: {durata(r['filata']['valore'])}, {al_plurale(int(r['filata'].get('brani', 1)), 'brano', 'brani di fila')}.")
+            righe.append(_("La riproduzione più lunga senza fermarsi: {durata}, {brani}.").format(durata=durata(r["filata"]["valore"]),
+                brani=plurale(int(r["filata"].get("brani", 1)), "{n} brano", "{n} brani di fila")))
         if "pausa_piu_lunga" in r:
-            righe.append(f"La pausa più lunga: {durata(r['pausa_piu_lunga']['valore'])}, {data_e_ora(r['pausa_piu_lunga']['quando'])}.")
+            righe.append(_("La pausa più lunga: {durata}, {quando}.").format(durata=durata(r["pausa_piu_lunga"]["valore"]),
+                quando=data_e_ora(r["pausa_piu_lunga"]["quando"])))
         if "finito_piu_lungo" in r:
-            righe.append(f"Il brano più lungo ascoltato fino alla fine: {_nome(r['finito_piu_lungo'].get('cosa', ''))}, {durata(r['finito_piu_lungo']['valore'])}.")
+            righe.append(_("Il brano più lungo ascoltato fino alla fine: {nome}, {durata}.").format(nome=_nome(r["finito_piu_lungo"].get("cosa", "")),
+                durata=durata(r["finito_piu_lungo"]["valore"])))
         if "finito_piu_breve" in r:
-            righe.append(f"Il brano più breve ascoltato fino alla fine: {_nome(r['finito_piu_breve'].get('cosa', ''))}, {durata(r['finito_piu_breve']['valore'])}.")
+            righe.append(_("Il brano più breve ascoltato fino alla fine: {nome}, {durata}.").format(nome=_nome(r["finito_piu_breve"].get("cosa", "")),
+                durata=durata(r["finito_piu_breve"]["valore"])))
         if "volume_piu_alto" in r:
-            righe.append(f"Il volume più alto: {r['volume_piu_alto']['valore']}, {data_e_ora(r['volume_piu_alto']['quando'])}.")
+            righe.append(_("Il volume più alto: {volume}, {quando}.").format(volume=r["volume_piu_alto"]["valore"], quando=data_e_ora(r["volume_piu_alto"]["quando"])))
         alta, bassa = r.get("velocita_piu_alta", {}).get("valore", 1), r.get("velocita_piu_bassa", {}).get("valore", 1)
         if alta != 1 or bassa != 1:
-            righe.append(f"La velocità più alta: {numero_decimale(alta)}; la più bassa: {numero_decimale(bassa)}.")
+            righe.append(_("La velocità più alta: {alta}; la più bassa: {bassa}.").format(alta=numero_decimale(alta), bassa=numero_decimale(bassa)))
         if "risultati" in r:
-            righe.append(f"La ricerca con più risultati: {r['risultati'].get('cosa', '')}, {r['risultati']['valore']}.")
+            # Traduttori: ricerca è quello che si è cercato, e dove, come «hubbard in tutto MeTeOra»; n quanti risultati.
+            righe.append(_("La ricerca con più risultati: {ricerca}, {n}.").format(ricerca=r["risultati"].get("cosa", ""), n=r["risultati"]["valore"]))
         if "ricerca_piu_lunga" in r:
-            righe.append(f"La ricerca più lunga: {durata(r['ricerca_piu_lunga']['valore'])}, {r['ricerca_piu_lunga'].get('cosa', '')}.")
+            # Traduttori: ricerca è quello che si è cercato, e dove, come «hubbard in tutto MeTeOra».
+            righe.append(_("La ricerca più lunga: {durata}, {ricerca}.").format(durata=durata(r["ricerca_piu_lunga"]["valore"]),
+                ricerca=r["ricerca_piu_lunga"].get("cosa", "")))
         if "selezione" in r:
-            righe.append(f"La selezione più grande della plancia: {al_plurale(int(r['selezione']['valore']), 'voce', 'voci')}.")
+            righe.append(_("La selezione più grande della plancia: {voci}.").format(voci=plurale(int(r["selezione"]["valore"]), "{n} voce", "{n} voci")))
         if "tasti_in_una_sessione" in r:
-            righe.append(f"Più tasti in una sessione: {r['tasti_in_una_sessione']['valore']}.")
+            righe.append(_("Più tasti in una sessione: {n}.").format(n=r["tasti_in_una_sessione"]["valore"]))
         if "brani_in_una_sessione" in r:
-            righe.append(f"Più brani in una sessione: {r['brani_in_una_sessione']['valore']}.")
+            righe.append(_("Più brani in una sessione: {n}.").format(n=r["brani_in_una_sessione"]["valore"]))
         return righe
 
     # 11.
 
     def muoversi(self):
         return [
-            f"Salti in avanti con E: {self.e('avanti')}, per {durata(self.c('secondi_avanti'))} in tutto.",
-            f"Salti indietro con Q: {self.e('indietro')}, per {durata(self.c('secondi_indietro'))} in tutto.",
-            f"Secondi dei salti cambiati, con Maiuscolo e Q o E: {self.e('passo_di_salto')}.",
-            f"Vai a un tempo, con W o con la linea del tempo: {self.e('vai_a_tempo')}.",
-            f"Capitoli: avanti con il punto {self.e('capitolo_successivo')}, indietro con la virgola {self.e('capitolo_precedente')}.",
-            f"Loop A-B: punti A {self.e('loop_a_messo')}, punti B {self.e('loop_b_messo')}, tolti {self.e('loop_tolto')}; ritorni al punto A {self.e('ritorno_al_punto_a')}.",
-            f"Timer di spegnimento: {self.e('timer_impostato')} impostati, di cui a fine brano {self.c('timer_a_fine_brano')}; "
-                f"{self.e('timer_scaduto')} scaduti, {self.e('timer_tolto')} tolti.",
+            _("Salti in avanti con E: {n}, per {durata} in tutto.").format(n=self.e("avanti"), durata=durata(self.c("secondi_avanti"))),
+            _("Salti indietro con Q: {n}, per {durata} in tutto.").format(n=self.e("indietro"), durata=durata(self.c("secondi_indietro"))),
+            _("Secondi dei salti cambiati, con Maiuscolo e Q o E: {n}.").format(n=self.e("passo_di_salto")),
+            _("Vai a un tempo, con W o con la linea del tempo: {n}.").format(n=self.e("vai_a_tempo")),
+            _("Capitoli: avanti con il punto {avanti}, indietro con la virgola {indietro}.").format(avanti=self.e("capitolo_successivo"),
+                indietro=self.e("capitolo_precedente")),
+            _("Loop A-B: punti A {a}, punti B {b}, tolti {tolti}; ritorni al punto A {ritorni}.").format(a=self.e("loop_a_messo"), b=self.e("loop_b_messo"),
+                tolti=self.e("loop_tolto"), ritorni=self.e("ritorno_al_punto_a")),
+            # Traduttori: i numeri dei timer; a_fine_brano è quanti di quelli impostati erano a fine brano.
+            _("Timer di spegnimento: {impostati} impostati, di cui a fine brano {a_fine_brano}; {scaduti} scaduti, {tolti} tolti.").format(
+                impostati=self.e("timer_impostato"), a_fine_brano=self.c("timer_a_fine_brano"), scaduti=self.e("timer_scaduto"), tolti=self.e("timer_tolto")),
         ]
 
     # 12.
 
     def i_marker(self):
         righe = [
-            f"Marker messi, con T: {self.e('marker_messo')}.",
-            f"Marker rinominati: {self.e('marker_rinominato')}.",
-            f"Marker eliminati: {self.marker_eliminati()}.",
-            f"Uno per uno, con Canc o dal menu: {self.c('marker_tolti_uno')}.",
-            f"Prima del punto, con Ctrl e R: {self.c('marker_tolti_prima')}, in {al_plurale(self.e('marker_tolti_prima'), 'volta', 'volte')}.",
-            f"Dopo il punto, con Maiuscolo e R: {self.c('marker_tolti_dopo')}, in {al_plurale(self.e('marker_tolti_dopo'), 'volta', 'volte')}.",
-            f"Tutti quelli del brano, con Maiuscolo e T: {self.c('marker_tolti_tutti')}, in {al_plurale(self.e('marker_tolti_tutti'), 'volta', 'volte')}.",
-            f"Con la selezione multipla della plancia: {self.c('marker_tolti_selezione')}.",
-            f"Dalla finestra dei marcatori: {self.c('marker_tolti_finestra')}.",
-            f"Salti ai marker: con Y {self.e('marker_indietro') + self.e('marker_avanti')}; con Maiuscolo e le cifre {self.c('marker_con_le_cifre')}; "
-                f"dalla plancia, con Vai al marker o X {max(0, self.c('vai_al_marker') - self.c('marker_con_le_cifre'))}.",
-            f"Finestra dei marcatori aperta: {al_plurale(self.e('marcatori'), 'volta', 'volte')}; esportazioni {self.e('marcatori_esportati')}; "
-                f"importazioni {self.e('marcatori_importati')}; cancellazioni di tutto {self.e('marcatori_cancellati')}.",
-            f"Segnalibro messo, con Ctrl e Maiuscolo e H: {al_plurale(self.e('segnalibro_messo'), 'volta', 'volte')}; ripreso, con Maiuscolo e H: "
-                f"{al_plurale(self.e('al_segnalibro'), 'volta', 'volte')}; tolto, con Ctrl e H: {al_plurale(self.e('segnalibro_tolto'), 'volta', 'volte')}.",
+            _("Marker messi, con T: {n}.").format(n=self.e("marker_messo")),
+            _("Marker rinominati: {n}.").format(n=self.e("marker_rinominato")),
+            _("Marker eliminati: {n}.").format(n=self.marker_eliminati()),
+            _("Uno per uno, con Canc o dal menu: {n}.").format(n=self.c("marker_tolti_uno")),
+            # Traduttori: n è quanti marker sono stati tolti; volte come «2 volte».
+            _("Prima del punto, con Ctrl e R: {n}, in {volte}.").format(n=self.c("marker_tolti_prima"), volte=_volte(self.e("marker_tolti_prima"))),
+            _("Dopo il punto, con Maiuscolo e R: {n}, in {volte}.").format(n=self.c("marker_tolti_dopo"), volte=_volte(self.e("marker_tolti_dopo"))),
+            _("Tutti quelli del brano, con Maiuscolo e T: {n}, in {volte}.").format(n=self.c("marker_tolti_tutti"), volte=_volte(self.e("marker_tolti_tutti"))),
+            _("Con la selezione multipla della plancia: {n}.").format(n=self.c("marker_tolti_selezione")),
+            _("Dalla finestra dei marcatori: {n}.").format(n=self.c("marker_tolti_finestra")),
+            _("Salti ai marker: con Y {con_y}; con Maiuscolo e le cifre {con_le_cifre}; dalla plancia, con Vai al marker o X {dalla_plancia}.").format(
+                con_y=self.e("marker_indietro") + self.e("marker_avanti"), con_le_cifre=self.c("marker_con_le_cifre"),
+                dalla_plancia=max(0, self.c("vai_al_marker") - self.c("marker_con_le_cifre"))),
+            _("Finestra dei marcatori aperta: {volte}; esportazioni {esportazioni}; importazioni {importazioni}; cancellazioni di tutto {cancellazioni}.").format(
+                volte=_volte(self.e("marcatori")), esportazioni=self.e("marcatori_esportati"), importazioni=self.e("marcatori_importati"),
+                cancellazioni=self.e("marcatori_cancellati")),
+            _("Segnalibro messo, con Ctrl e Maiuscolo e H: {messo}; ripreso, con Maiuscolo e H: {ripreso}; tolto, con Ctrl e H: {tolto}.").format(
+                messo=_volte(self.e("segnalibro_messo")), ripreso=_volte(self.e("al_segnalibro")), tolto=_volte(self.e("segnalibro_tolto"))),
         ]
         con_marker = sorted(((p, v) for p, v in self.d["brani"].items() if v.get("marker")), key=lambda pv: (-pv[1]["marker"], pv[0]))
         if con_marker:
             p, v = con_marker[0]
-            righe.append(f"Il brano con più marker messi: {_nome(p)}, {int(v['marker'])}.")
+            righe.append(_("Il brano con più marker messi: {nome}, {n}.").format(nome=_nome(p), n=int(v["marker"])))
         return righe
 
     # 13.
@@ -1547,16 +1687,21 @@ class Pagina:
         importate = self.c("playlist_importate")
         altre = max(0, self.e("playlist_creata") - dalla_ricerca - da_cartella - importate)
         return [
-            f"Playlist create: {create}; da una cartella {da_cartella}, dai risultati della ricerca {dalla_ricerca}, "
-            f"importate {importate}, da una selezione o dal menu {altre}, vuote {self.e('nuova_playlist')}.",
-            f"Playlist importate da un M3U o da un PLS: {importate}, con {al_plurale(self.c('brani_importati'), 'brano', 'brani')}; "
-            f"arrivate di nuovo con il loro file com'era: {self.e('playlist_gia_importata')}; rilette dal loro file cambiato: {self.e('playlist_riletta')}.",
-            f"Playlist rinominate: {self.e('playlist_rinominata')}; eliminate: {self.e('playlist_eliminata')}; ordinate: {self.e('playlist_ordinata')}; "
-            f"invertite: {self.e('ordine_invertito')}; mescolate: {self.e('playlist_mescolata')}; rimesse nell'ordine di prima: {self.e('ordine_ripristinato')}.",
-            f"Brani aggiunti alle playlist: {self.c('brani_aggiunti')}, in {al_plurale(self.c('aggiunte'), 'volta', 'volte')}.",
-            f"Brani tolti: {self.c('brani_tolti')}; spostati: {self.e('brano_spostato')}; segnati come saltati: {self.e('saltato_acceso')}, e tornati: {self.e('saltato_spento')}.",
-            f"Brani messi nei Preferiti: {self.e('preferito_aggiunto')}; c'erano già: {self.e('gia_nei_preferiti')}.",
-            f"Filtri messi: {self.e('filtro_messo')}; tolti: {self.e('filtro_tolto')}.",
+            _("Playlist create: {create}; da una cartella {da_cartella}, dai risultati della ricerca {dalla_ricerca}, "
+                "importate {importate}, da una selezione o dal menu {altre}, vuote {vuote}.").format(create=create, da_cartella=da_cartella,
+                dalla_ricerca=dalla_ricerca, importate=importate, altre=altre, vuote=self.e("nuova_playlist")),
+            _("Playlist importate da un M3U o da un PLS: {importate}, con {brani}; "
+                "arrivate di nuovo con il loro file com'era: {di_nuovo}; rilette dal loro file cambiato: {rilette}.").format(importate=importate,
+                brani=plurale(self.c("brani_importati"), "{n} brano", "{n} brani"), di_nuovo=self.e("playlist_gia_importata"), rilette=self.e("playlist_riletta")),
+            _("Playlist rinominate: {rinominate}; eliminate: {eliminate}; ordinate: {ordinate}; "
+                "invertite: {invertite}; mescolate: {mescolate}; rimesse nell'ordine di prima: {rimesse}.").format(rinominate=self.e("playlist_rinominata"),
+                eliminate=self.e("playlist_eliminata"), ordinate=self.e("playlist_ordinata"), invertite=self.e("ordine_invertito"),
+                mescolate=self.e("playlist_mescolata"), rimesse=self.e("ordine_ripristinato")),
+            _("Brani aggiunti alle playlist: {n}, in {volte}.").format(n=self.c("brani_aggiunti"), volte=_volte(self.c("aggiunte"))),
+            _("Brani tolti: {tolti}; spostati: {spostati}; segnati come saltati: {saltati}, e tornati: {tornati}.").format(tolti=self.c("brani_tolti"),
+                spostati=self.e("brano_spostato"), saltati=self.e("saltato_acceso"), tornati=self.e("saltato_spento")),
+            _("Brani messi nei Preferiti: {messi}; c'erano già: {gia}.").format(messi=self.e("preferito_aggiunto"), gia=self.e("gia_nei_preferiti")),
+            _("Filtri messi: {messi}; tolti: {tolti}.").format(messi=self.e("filtro_messo"), tolti=self.e("filtro_tolto")),
         ]
 
     # 14.
@@ -1565,27 +1710,33 @@ class Pagina:
         ricerche = self.c("ricerche_nel_ramo") + self.c("ricerche_ovunque")
         risultati = self.c("risultati")
         finite = self.e("ricerca_finita")
-        righe = [f"Ricerche: {ricerche}; nel ramo {self.c('ricerche_nel_ramo')}, in tutto MeTeOra {self.c('ricerche_ovunque')}."]
-        riga = f"Risultati trovati dalle ricerche finite: {risultati}"
+        righe = [_("Ricerche: {n}; nel ramo {nel_ramo}, in tutto MeTeOra {ovunque}.").format(n=ricerche, nel_ramo=self.c("ricerche_nel_ramo"),
+            ovunque=self.c("ricerche_ovunque"))]
+        riga = _("Risultati trovati dalle ricerche finite: {n}").format(n=risultati)
         if finite:
-            riga += f", in media {round(risultati / finite)} per ricerca"
+            riga += _(", in media {n} per ricerca").format(n=round(risultati / finite))
         righe.append(riga + ".")
-        righe.append(f"Ricerche senza risultati: {self.c('ricerche_senza_risultati')}; fermate prima della fine: {self.e('ricerca_fermata')}.")
-        righe.append(f"Altri risultati mostrati: {self.e('altri_risultati')}; risultati salvati come playlist: {self.c('playlist_dalla_ricerca')}.")
-        for dove, chiave in (("nella console", "in_console"), ("nella finestra dei marcatori", "nei_marcatori"), ("nelle statistiche", "nelle_statistiche")):
-            righe.append(f"Ricerche {dove}, contando anche Invio: trovate {self.e('trovato_' + chiave)}, ripartite dall'inizio {self.e('ripartito_' + chiave)}, "
-                f"non trovate {self.e('non_trovato_' + chiave)}.")
+        righe.append(_("Ricerche senza risultati: {senza}; fermate prima della fine: {fermate}.").format(senza=self.c("ricerche_senza_risultati"),
+            fermate=self.e("ricerca_fermata")))
+        righe.append(_("Altri risultati mostrati: {altri}; risultati salvati come playlist: {salvati}.").format(altri=self.e("altri_risultati"),
+            salvati=self.c("playlist_dalla_ricerca")))
+        # Traduttori: dove si cerca, nella riga «Ricerche nella console, contando anche Invio: ...».
+        for dove, chiave in ((_("nella console"), "in_console"), (_("nella finestra dei marcatori"), "nei_marcatori"), (_("nelle statistiche"), "nelle_statistiche")):
+            # Traduttori: dove è «nella console», «nella finestra dei marcatori» o «nelle statistiche»; gli altri sono numeri di ricerche.
+            righe.append(_("Ricerche {dove}, contando anche Invio: trovate {trovate}, ripartite dall'inizio {ripartite}, non trovate {non_trovate}.").format(
+                dove=dove, trovate=self.e("trovato_" + chiave), ripartite=self.e("ripartito_" + chiave), non_trovate=self.e("non_trovato_" + chiave)))
         return righe
 
     # 15.
 
     def file_e_tag(self):
         return [
-            f"File rinominati: {self.e('file_rinominato')}.",
-            f"Mandati nel cestino: {al_plurale(self.c('file_nel_cestino'), 'file', 'file')} e {al_plurale(self.c('cartelle_nel_cestino'), 'cartella', 'cartelle')}.",
-            f"Tag letti con F11: {self.e('tag_letti')}; dettagli di cartelle, unità e playlist: {self.e('dettagli')}.",
-            f"Tag cambiati: {al_plurale(self.e('tag_cambiato'), 'volta', 'volte')}, su {al_plurale(self.c('file_dei_tag_cambiati'), 'file', 'file')}; "
-                f"tag cancellati: {self.e('tag_cancellato')}.",
+            _("File rinominati: {n}.").format(n=self.e("file_rinominato")),
+            _("Mandati nel cestino: {file} e {cartelle}.").format(file=plurale(self.c("file_nel_cestino"), "{n} file", "{n} file"),
+                cartelle=plurale(self.c("cartelle_nel_cestino"), "{n} cartella", "{n} cartelle")),
+            _("Tag letti con F11: {letti}; dettagli di cartelle, unità e playlist: {dettagli}.").format(letti=self.e("tag_letti"), dettagli=self.e("dettagli")),
+            _("Tag cambiati: {volte}, su {file}; tag cancellati: {cancellati}.").format(volte=_volte(self.e("tag_cambiato")),
+                file=plurale(self.c("file_dei_tag_cambiati"), "{n} file", "{n} file"), cancellati=self.e("tag_cancellato")),
         ]
 
     # 16.
@@ -1593,16 +1744,17 @@ class Pagina:
     def il_video(self):
         video = sum(int(v.get("avvii", 0)) for e, v in self.d["formati"].items() if famiglia(f"x{e}") == "video")
         return [
-            f"Video avviati: {video}.",
-            f"Immagine accesa con Maiuscolo e F1 e spenta con Ctrl e F1: accesa {self.e('video_acceso')}, spenta {self.e('video_spento')}.",
-            f"Schermo intero: {al_plurale(self.e('schermo_intero'), 'volta', 'volte')}, per {durata(self.t('schermo_intero'))}.",
-            f"Finestra del video nascosta: {self.e('video_nascosto')}.",
-            f"Tracce audio cambiate: {self.e('traccia_audio')}; rapporto dell'immagine cambiato: {self.e('rapporto')}.",
-            f"Sottotitoli accesi: {self.e('sottotitoli_accesi')}; spenti: {self.e('sottotitoli_spenti')}.",
-            f"Righe di sottotitoli e karaoke lette: {self.c('righe_dei_sottotitoli')}.",
-            f"Di queste, lette dalle immagini con il riconoscimento dei caratteri: {self.c('righe_riconosciute')}.",
-            f"Di queste, del karaoke: {self.c('righe_del_karaoke')}.",
-            f"Passate in anticipo degli impressi: avviate {self.e('passata_avviata')}, finite {self.e('passata_finita')}.",
+            _("Video avviati: {n}.").format(n=video),
+            _("Immagine accesa con Maiuscolo e F1 e spenta con Ctrl e F1: accesa {accesa}, spenta {spenta}.").format(accesa=self.e("video_acceso"),
+                spenta=self.e("video_spento")),
+            _("Schermo intero: {volte}, per {durata}.").format(volte=_volte(self.e("schermo_intero")), durata=durata(self.t("schermo_intero"))),
+            _("Finestra del video nascosta: {n}.").format(n=self.e("video_nascosto")),
+            _("Tracce audio cambiate: {tracce}; rapporto dell'immagine cambiato: {rapporto}.").format(tracce=self.e("traccia_audio"), rapporto=self.e("rapporto")),
+            _("Sottotitoli accesi: {accesi}; spenti: {spenti}.").format(accesi=self.e("sottotitoli_accesi"), spenti=self.e("sottotitoli_spenti")),
+            _("Righe di sottotitoli e karaoke lette: {n}.").format(n=self.c("righe_dei_sottotitoli")),
+            _("Di queste, lette dalle immagini con il riconoscimento dei caratteri: {n}.").format(n=self.c("righe_riconosciute")),
+            _("Di queste, del karaoke: {n}.").format(n=self.c("righe_del_karaoke")),
+            _("Passate in anticipo degli impressi: avviate {avviate}, finite {finite}.").format(avviate=self.e("passata_avviata"), finite=self.e("passata_finita")),
         ]
 
     # 17.
@@ -1614,23 +1766,26 @@ class Pagina:
         if nome in DESCRIZIONI_DEI_TASTI:
             return DESCRIZIONI_DEI_TASTI[nome]
         if nome.isdigit():
-            return "una delle prime dieci playlist"
+            return _("una delle prime dieci playlist")
+        # I nomi dei tasti sono chiavi del file, in italiano.
         if nome.startswith("Maiuscolo con ") and nome.removeprefix("Maiuscolo con ").isdigit():
-            return "uno dei primi dieci marker"
+            return _("uno dei primi dieci marker")
         return ""
 
     def la_tastiera(self):
         tasti = self.d["tasti"]
         totale = int(sum(tasti.values()))
         ore = self.t("aperto") / 3600
-        riga = f"Tasti premuti: {totale}"
+        riga = _("Tasti premuti: {n}").format(n=totale)
         # Senza tasti premuti, il conto per ora non si dice (1.104.0).
         if ore >= 0.1 and totale:
-            riga += f", cioè {round(totale / ore)} per ogni ora di MeTeOra aperto"
+            riga += _(", cioè {n} per ogni ora di MeTeOra aperto").format(n=round(totale / ore))
         righe = [riga + "."]
         frecce = {k: v for k, v in tasti.items() if k.startswith("Freccia ") and v}
         if frecce:
-            righe.append(f"Frecce: {int(sum(frecce.values()))}; " + "; ".join(f"{k[0].lower()}{k[1:]} {int(v)}" for k, v in sorted(frecce.items(), key=lambda kv: -kv[1])) + ".")
+            per_freccia = "; ".join(f"{k[0].lower()}{k[1:]} {int(v)}" for k, v in sorted(frecce.items(), key=lambda kv: -kv[1]))
+            # Traduttori: n è quante frecce in tutto; frecce le frecce una per una, come «freccia giù 3; freccia su 1».
+            righe.append(_("Frecce: {n}; {frecce}.").format(n=int(sum(frecce.values())), frecce=per_freccia))
 
         def scrivi(nome, quanti):
             descrizione = self.descrizione_del_tasto(nome)
@@ -1639,22 +1794,26 @@ class Pagina:
         # Nella classifica e nei piu' frequenti solo le voci diverse da zero,
         # che un file toccato a mano puo' avere (1.104.0).
         premuti = [(k, v) for k, v in tasti.items() if v]
-        righe += self.classifica(f"I {POSTI} tasti più premuti", sorted(premuti, key=lambda kv: (-kv[1], kv[0])), scrivi)
+        righe += self.classifica(_("I {posti} tasti più premuti").format(posti=POSTI), sorted(premuti, key=lambda kv: (-kv[1], kv[0])), scrivi)
         senza = {k: v for k, v in self.d["senza_comando"].items() if v}
-        riga = f"Tasti senza comando: {int(sum(senza.values()))}"
+        riga = _("Tasti senza comando: {n}").format(n=int(sum(senza.values())))
         if senza:
             nome, quanti = max(senza.items(), key=lambda kv: (kv[1], kv[0]))
-            riga += f"; il più frequente: {nome}, {al_plurale(int(quanti), 'volta', 'volte')}"
+            # Traduttori: nome è il nome di un tasto, come «U accentata»; volte come «3 volte».
+            riga += _("; il più frequente: {nome}, {volte}").format(nome=nome, volte=_volte(int(quanti)))
         righe.append(riga + ".")
         righe += [
-            f"Rami aperti: {self.e('ramo_aperto')}; chiusi: {self.e('ramo_chiuso')}.",
-            f"F8, al brano che suona: {self.e('vai_al_brano')}; inseguimento acceso con Maiuscolo e F8: {self.e('insegui_acceso')}, spento con Ctrl e F8: {self.e('insegui_spento')}.",
-            f"Maiuscolo e Ctrl con F9 sul ramo, aperto e chiuso: {self.e('apri_tutto')} e {self.e('chiudi_tutto')}; "
-            f"Alt e Ctrl e Alt con F9 su tutta la plancia: {self.e('plancia_aperta')} e {self.e('chiudi_la_plancia')}.",
-            f"Backspace, risali: {self.e('risali')}; Maiuscolo con Backspace, all'antenato: {self.e('risali_all_antenato')}.",
-            f"Menu aperti: {self.e('menu')}.",
-            f"Tasti rapidi spenti con Ctrl e F12: {self.e('tasti_spenti')}.",
-            f"Clic sulla barra dei comandi: {self.c('clic_sulla_barra')}.",
+            _("Rami aperti: {aperti}; chiusi: {chiusi}.").format(aperti=self.e("ramo_aperto"), chiusi=self.e("ramo_chiuso")),
+            _("F8, al brano che suona: {f8}; inseguimento acceso con Maiuscolo e F8: {acceso}, spento con Ctrl e F8: {spento}.").format(f8=self.e("vai_al_brano"),
+                acceso=self.e("insegui_acceso"), spento=self.e("insegui_spento")),
+            # Traduttori: ramo_aperto e ramo_chiuso vanno con Maiuscolo e Ctrl, plancia_aperta e plancia_chiusa con Alt e Ctrl e Alt.
+            _("Maiuscolo e Ctrl con F9 sul ramo, aperto e chiuso: {ramo_aperto} e {ramo_chiuso}; "
+                "Alt e Ctrl e Alt con F9 su tutta la plancia: {plancia_aperta} e {plancia_chiusa}.").format(ramo_aperto=self.e("apri_tutto"),
+                ramo_chiuso=self.e("chiudi_tutto"), plancia_aperta=self.e("plancia_aperta"), plancia_chiusa=self.e("chiudi_la_plancia")),
+            _("Backspace, risali: {risali}; Maiuscolo con Backspace, all'antenato: {antenato}.").format(risali=self.e("risali"), antenato=self.e("risali_all_antenato")),
+            _("Menu aperti: {n}.").format(n=self.e("menu")),
+            _("Tasti rapidi spenti con Ctrl e F12: {n}.").format(n=self.e("tasti_spenti")),
+            _("Clic sulla barra dei comandi: {n}.").format(n=self.c("clic_sulla_barra")),
         ]
         return righe
 
@@ -1662,21 +1821,24 @@ class Pagina:
 
     def la_console(self):
         righe = [
-            f"Righe scritte nella console: {self.c('righe_della_console')}; riscritte al loro posto, come quelle del volume: {self.c('righe_riscritte')}.",
-            f"Alla plancia con F5: {self.e('plancia')}; alla console con F6: {self.e('console')}; al cruscotto con F7: {self.e('cruscotto')}.",
-            f"Manuale con F1: {self.e('manuale')}; novità con F2: {self.e('changelog')}; crediti con F3: {self.e('crediti')}; guida rapida con F12: {self.e('elenco_dei_tasti')}.",
-            f"Console salvata: {self.e('console_salvata')}.",
-            f"Statistiche aperte: {self.e('statistiche')}.",
+            _("Righe scritte nella console: {scritte}; riscritte al loro posto, come quelle del volume: {riscritte}.").format(scritte=self.c("righe_della_console"),
+                riscritte=self.c("righe_riscritte")),
+            _("Alla plancia con F5: {plancia}; alla console con F6: {console}; al cruscotto con F7: {cruscotto}.").format(plancia=self.e("plancia"),
+                console=self.e("console"), cruscotto=self.e("cruscotto")),
+            _("Manuale con F1: {manuale}; novità con F2: {novita}; crediti con F3: {crediti}; guida rapida con F12: {guida}.").format(manuale=self.e("manuale"),
+                novita=self.e("changelog"), crediti=self.e("crediti"), guida=self.e("elenco_dei_tasti")),
+            _("Console salvata: {n}.").format(n=self.e("console_salvata")),
+            _("Statistiche aperte: {n}.").format(n=self.e("statistiche")),
         ]
         totale = int(sum(self.eventi.values()))
-        riga = f"Effetti sonori, contati anche con il volume degli effetti a zero: {totale}"
+        riga = _("Effetti sonori, contati anche con il volume degli effetti a zero: {n}").format(n=totale)
         # Il piu' suonato solo fra gli eventi accaduti (1.104.0).
         accaduti = {k: v for k, v in self.eventi.items() if v}
         if accaduti:
             evento, quanti = max(accaduti.items(), key=lambda kv: (kv[1], kv[0]))
-            riga += f"; il più suonato: {NOMI_DEGLI_EVENTI.get(evento, evento.replace('_', ' '))}, {al_plurale(int(quanti), 'volta', 'volte')}"
+            riga += _("; il più suonato: {evento}, {volte}").format(evento=NOMI_DEGLI_EVENTI.get(evento, evento.replace("_", " ")), volte=_volte(int(quanti)))
         righe.append(riga + ".")
-        righe.append(f"Domande, con il loro suono: {self.e('domanda')}; annullate: {self.e('annullamento')}.")
+        righe.append(_("Domande, con il loro suono: {domande}; annullate: {annullate}.").format(domande=self.e("domanda"), annullate=self.e("annullamento")))
         return righe
 
     # 19.
@@ -1684,44 +1846,50 @@ class Pagina:
     def le_impostazioni(self):
         # La piu' usata solo fra le voci aperte almeno una volta (1.104.0).
         voci = {k: v for k, v in self.d["impostazioni"].items() if v}
-        riga = f"Voci delle impostazioni aperte con Invio: {int(sum(voci.values()))}"
+        riga = _("Voci delle impostazioni aperte con Invio: {n}").format(n=int(sum(voci.values())))
         if voci:
             chiave, quante = max(voci.items(), key=lambda kv: (kv[1], kv[0]))
-            riga += f"; la più usata: {self.nomi_delle_impostazioni.get(chiave, chiave)}, {al_plurale(int(quante), 'volta', 'volte')}"
+            # Traduttori: voce è il nome di una voce delle impostazioni, come «Volume degli effetti»; volte come «3 volte».
+            riga += _("; la più usata: {voce}, {volte}").format(voce=self.nomi_delle_impostazioni.get(chiave, chiave), volte=_volte(int(quante)))
         return [
-            f"Finestra delle impostazioni aperta: {al_plurale(self.e('impostazioni'), 'volta', 'volte')}; impostazioni cambiate: {self.e('impostazione_cambiata')}.",
+            _("Finestra delle impostazioni aperta: {volte}; impostazioni cambiate: {cambiate}.").format(volte=_volte(self.e("impostazioni")),
+                cambiate=self.e("impostazione_cambiata")),
             riga + ".",
-            f"Scheda audio cambiata: {al_plurale(self.e('scheda_audio'), 'volta', 'volte')}.",
+            _("Scheda audio cambiata: {volte}.").format(volte=_volte(self.e("scheda_audio"))),
             self._riga_delle_uscite(),
-            f"Percorsi di rete aggiunti: {self.e('percorso_aggiunto')}; tolti: {self.e('percorso_tolto')}; ricerche dei computer della rete: {self.c('ricerche_della_rete')}.",
-            f"Banco dei suoni MIDI scelto: {al_plurale(self.c('banchi_scelti'), 'volta', 'volte')}; scaricamenti avviati: {self.e('scaricamento_avviato')}, finiti: {self.e('scaricamento_finito')}.",
-            f"Aggiornamenti proposti: {self.e('aggiornamento')}.",
-            f"Dona per questo progetto aperto: {al_plurale(self.e('donazione'), 'volta', 'volte')}.",
-            f"Entra al PUB aperto: {al_plurale(self.e('pub_entra'), 'volta', 'volte')}; Chiedi aiuto al PUB: "
-            f"{al_plurale(self.e('pub_aiuto'), 'volta', 'volte')}; mail pronte: {self.c('mail_al_pub_pronte')}, con i registri allegati: "
-            f"{self.c('registri_al_pub')}.",
+            _("Percorsi di rete aggiunti: {aggiunti}; tolti: {tolti}; ricerche dei computer della rete: {ricerche}.").format(aggiunti=self.e("percorso_aggiunto"),
+                tolti=self.e("percorso_tolto"), ricerche=self.c("ricerche_della_rete")),
+            _("Banco dei suoni MIDI scelto: {volte}; scaricamenti avviati: {avviati}, finiti: {finiti}.").format(volte=_volte(self.c("banchi_scelti")),
+                avviati=self.e("scaricamento_avviato"), finiti=self.e("scaricamento_finito")),
+            _("Aggiornamenti proposti: {n}.").format(n=self.e("aggiornamento")),
+            # Traduttori: Dona per questo progetto è il nome di una voce del menu; volte come «2 volte».
+            _("Dona per questo progetto aperto: {volte}.").format(volte=_volte(self.e("donazione"))),
+            # Traduttori: Entra al PUB e Chiedi aiuto al PUB sono voci del menu; entra e aiuto come «2 volte»; pronte e registri sono numeri.
+            _("Entra al PUB aperto: {entra}; Chiedi aiuto al PUB: {aiuto}; mail pronte: {pronte}, con i registri allegati: {registri}.").format(
+                entra=_volte(self.e("pub_entra")), aiuto=_volte(self.e("pub_aiuto")), pronte=self.c("mail_al_pub_pronte"), registri=self.c("registri_al_pub")),
         ]
 
     # 20.
 
     def la_salute(self):
         errori = sorted(((e, int(v.get("errori", 0))) for e, v in self.d["formati"].items() if v.get("errori")), key=lambda ev: (-ev[1], ev[0]))
-        riga = f"Brani non suonati per un errore: {self.c('errori_di_riproduzione')}"
+        riga = _("Brani non suonati per un errore: {n}").format(n=self.c("errori_di_riproduzione"))
         if errori:
-            riga += "; per formato: " + ", ".join(f"{e.lstrip('.')} {n}" for e, n in errori)
+            riga += _("; per formato: {formati}").format(formati=", ".join(f"{estensione_da_dire(e)} {n}" for e, n in errori))
         righe = [riga + "."]
         righe += [
-            f"Messaggi d'errore nella console: {self.e('errore')}.",
-            f"Problemi interni scritti nella console: {self.c('problemi_interni')}.",
-            f"Avvii dopo un errore grave, con il resoconto da mandare: {self.c('crash')}.",
-            f"Chiusure non regolari: {self.c('chiusure_non_regolari')}.",
-            f"Salvataggi non riusciti: {self.c('salvataggi_non_riusciti')}.",
-            f"Cartelle di rete che non hanno risposto nella plancia: {self.c('rete_muta')}.",
+            _("Messaggi d'errore nella console: {n}.").format(n=self.e("errore")),
+            _("Problemi interni scritti nella console: {n}.").format(n=self.c("problemi_interni")),
+            _("Avvii dopo un errore grave, con il resoconto da mandare: {n}.").format(n=self.c("crash")),
+            _("Chiusure non regolari: {n}.").format(n=self.c("chiusure_non_regolari")),
+            _("Salvataggi non riusciti: {n}.").format(n=self.c("salvataggi_non_riusciti")),
+            _("Cartelle di rete che non hanno risposto nella plancia: {n}.").format(n=self.c("rete_muta")),
             self.riga_delle_pulizie(),
             # Dalla 1.112.0: Riconosci questo disco e la Sentinella che rende contesa una lettera, contati dai loro eventi.
-            f"Dischi riconosciuti a mano: {self.e('disco_riconosciuto')}; lettere rese contese dalla Sentinella, a MeTeOra aperto: {self.e('disco_diverso')}.",
-            f"Attese dei SID, dei MIDI e delle console oltre un secondo e mezzo, dopo un salto: {self.c('attese_lunghe')}.",
-            f"Comandi che lì non valgono: {self.e('non_disponibile')}; niente da suonare: {self.e('niente_da_suonare')}.",
+            _("Dischi riconosciuti a mano: {riconosciuti}; lettere rese contese dalla Sentinella, a MeTeOra aperto: {contese}.").format(
+                riconosciuti=self.e("disco_riconosciuto"), contese=self.e("disco_diverso")),
+            _("Attese dei SID, dei MIDI e delle console oltre un secondo e mezzo, dopo un salto: {n}.").format(n=self.c("attese_lunghe")),
+            _("Comandi che lì non valgono: {non_validi}; niente da suonare: {niente}.").format(non_validi=self.e("non_disponibile"), niente=self.e("niente_da_suonare")),
         ]
         return righe
 
@@ -1735,36 +1903,46 @@ class Pagina:
         riuscite, non_riuscite = self.c("pulizie"), self.c("pulizie_non_riuscite")
         totale = riuscite + non_riuscite
         if not totale:
-            return "Pulizie all'avvio: nessuna."
-        riga = f"Pulizie all'avvio: {totale}"
+            return _("Pulizie all'avvio: nessuna.")
+        riga = _("Pulizie all'avvio: {n}").format(n=totale)
         if non_riuscite == totale:
-            riga += ", non riuscita per un errore" if totale == 1 else ", tutte non riuscite per un errore"
+            # Traduttori: dopo «Pulizie all'avvio: 1», la sola pulizia che c'è stata.
+            riga += _(", non riuscita per un errore") if totale == 1 else _(", tutte non riuscite per un errore")
         elif non_riuscite:
-            riga += f", di cui {al_plurale(non_riuscite, 'non riuscita', 'non riuscite')} per un errore"
-        tolti = [(self.c(conto), singolare, plurale, femminile) for conto, singolare, plurale, femminile in TOLTI_DALLA_PULIZIA if self.c(conto)]
-        if tolti:
-            primo, _singolare, _plurale, femminile = tolti[0]
-            if len(tolti) > 1:
-                # Femminile solo se lo sono tutte le voci.
-                participio = "tolte" if all(f for *_resto, f in tolti) else "tolti"
-            elif femminile:
-                participio = "tolta" if primo == 1 else "tolte"
+            # Traduttori: dopo «Pulizie all'avvio: 4», quante di quelle pulizie non sono riuscite.
+            riga += ngettext(", di cui {n} non riuscita per un errore", ", di cui {n} non riuscite per un errore", non_riuscite).format(n=non_riuscite)
+        tolti = [(self.c(conto), da_sola, in_elenco, femminile) for conto, da_sola, in_elenco, femminile in TOLTI_DALLA_PULIZIA if self.c(conto)]
+        if len(tolti) == 1:
+            n, da_sola, _in_elenco, _femminile = tolti[0]
+            riga += da_sola(n)
+        elif tolti:
+            voci = ", ".join(in_elenco(n) for n, _da_sola, in_elenco, _f in tolti)
+            # Femminile solo se lo sono tutte le voci.
+            if all(f for *_resto, f in tolti):
+                # Traduttori: voci sono due o più voci femminili, come «3 schede doppie dello schedario, 2 voci dei marker».
+                riga += _("; tolte {voci}").format(voci=voci)
             else:
-                participio = "tolto" if primo == 1 else "tolti"
-            riga += f"; {participio} " + ", ".join(al_plurale(n, singolare, plurale) for n, singolare, plurale, _f in tolti)
+                # Traduttori: voci sono due o più voci, come «4 file dallo schedario, 2 voci dei marker».
+                riga += _("; tolti {voci}").format(voci=voci)
         elif riuscite:
-            riga += "; niente da togliere"
-        perche = [f"{motivo}: {self.c(conto)}" for conto, motivo in (("pulizia_radici_saltate", "non rispondevano"),
-            ("pulizia_dischi_diversi", "usate da dischi diversi"), ("pulizia_dischi_non_riconosciuti", "il disco che rispondeva non si riconosceva"))
-            if self.c(conto)]
+            riga += _("; niente da togliere")
+        perche = []
+        if self.c("pulizia_radici_saltate"):
+            # Traduttori: da qui, i motivi per cui la pulizia ha saltato delle unità, con quante: «unità saltate perché non rispondevano: 2».
+            perche.append(_("non rispondevano: {n}").format(n=self.c("pulizia_radici_saltate")))
+        if self.c("pulizia_dischi_diversi"):
+            perche.append(_("usate da dischi diversi: {n}").format(n=self.c("pulizia_dischi_diversi")))
+        if self.c("pulizia_dischi_non_riconosciuti"):
+            perche.append(_("il disco che rispondeva non si riconosceva: {n}").format(n=self.c("pulizia_dischi_non_riconosciuti")))
         if perche:
-            riga += "; unità saltate perché " + "; perché ".join(perche)
+            # Traduttori: motivo è come «non rispondevano: 2»; gli altri motivi seguono con «; perché».
+            riga += _("; unità saltate perché {motivo}").format(motivo=perche[0]) + "".join(_("; perché {motivo}").format(motivo=m) for m in perche[1:])
         return riga + "."
 
     # 21.
 
     def la_libreria(self):
-        return list(self.libreria) if self.libreria else ["La libreria di adesso non si è potuta contare."]
+        return list(self.libreria) if self.libreria else [_("La libreria di adesso non si è potuta contare.")]
 
     # 22.
 
@@ -1775,21 +1953,30 @@ class Pagina:
         durata_della_libreria = self.numeri_della_libreria.get("durata")
         if self.play and durata_della_libreria:
             al_giorno = self.play / giorni
-            ritmo = "di oggi" if giorni == 1 else f"di questi {giorni} giorni"
-            righe.append(f"Al ritmo {ritmo}, per ascoltare tutta la libreria servirebbero {anni_e_mesi(durata_della_libreria / al_giorno)}.")
+            tempo = anni_e_mesi(durata_della_libreria / al_giorno)
+            if giorni == 1:
+                righe.append(_("Al ritmo di oggi, per ascoltare tutta la libreria servirebbero {tempo}.").format(tempo=tempo))
+            else:
+                # Traduttori: giorni è sempre almeno 2, perché con un giorno solo la frase è quella di oggi; tempo è come «9 anni e 7 mesi».
+                righe.append(ngettext("Al ritmo di questi {giorni} giorni, per ascoltare tutta la libreria servirebbero {tempo}.",
+                    "Al ritmo di questi {giorni} giorni, per ascoltare tutta la libreria servirebbero {tempo}.", giorni).format(giorni=giorni, tempo=tempo))
         if self.play >= 74 * 60:
-            righe.append(f"La riproduzione equivale a {round(self.play / (74 * 60))} CD da 74 minuti, o {round(self.play / (90 * 60))} cassette da 90.")
+            righe.append(_("La riproduzione equivale a {cd} CD da 74 minuti, o {cassette} cassette da 90.").format(cd=round(self.play / (74 * 60)),
+                cassette=round(self.play / (90 * 60))))
         if self.t("pausa") and self.play:
-            righe.append(f"Per ogni ora in pausa, {numero_decimale(self.play / self.t('pausa'))} ore in riproduzione.")
+            # Traduttori: ore è un numero con i decimali, come 1.5.
+            righe.append(_("Per ogni ora in pausa, {ore} ore in riproduzione.").format(ore=numero_decimale(self.play / self.t("pausa"))))
         avviati = self.avviati()
         if avviati >= 10:
-            righe.append(f"Ogni 100 brani avviati, {round(100 * self.c('lasciati') / avviati)} lasciati prima della fine, {round(100 * self.c('lasciati_subito') / avviati)} nei primi {int(SUBITO)} secondi.")
+            righe.append(_("Ogni 100 brani avviati, {lasciati} lasciati prima della fine, {subito} nei primi {secondi} secondi.").format(
+                lasciati=round(100 * self.c("lasciati") / avviati), subito=round(100 * self.c("lasciati_subito") / avviati), secondi=int(SUBITO)))
         if self.c("secondi_avanti"):
-            righe.append(f"Se i salti in avanti con E fossero un brano, durerebbe {durata(self.c('secondi_avanti'))}.")
+            righe.append(_("Se i salti in avanti con E fossero un brano, durerebbe {durata}.").format(durata=durata(self.c("secondi_avanti"))))
         sid = sum(v.get("secondi", 0) for e, v in self.d["formati"].items() if e == ".sid")
         sid_della_libreria = self.numeri_della_libreria.get("sid")
         if sid and sid_della_libreria:
-            righe.append(f"I SID ascoltati sono {percentuale(sid, sid_della_libreria)} dei {durata(sid_della_libreria)} di SID della libreria.")
+            righe.append(_("I SID ascoltati sono {percentuale} dei {durata} di SID della libreria.").format(percentuale=percentuale(sid, sid_della_libreria),
+                durata=durata(sid_della_libreria)))
         return righe
 
     # 23.
@@ -1797,7 +1984,7 @@ class Pagina:
     def tutti_gli_eventi(self):
         # Un evento a zero, da un file toccato a mano, non e' accaduto (1.104.0).
         eventi = sorted(((evento, quante) for evento, quante in self.eventi.items() if quante), key=lambda kv: (-kv[1], kv[0]))
-        righe = [f"Eventi diversi accaduti: {len(eventi)} su {len(NOMI_DEGLI_EVENTI)} che MeTeOra conosce."]
+        righe = [_("Eventi diversi accaduti: {n} su {totale} che MeTeOra conosce.").format(n=len(eventi), totale=len(NOMI_DEGLI_EVENTI))]
         for evento, quante in eventi:
             nome = NOMI_DEGLI_EVENTI.get(evento, evento.replace("_", " "))
             righe.append(f"{nome[0].upper()}{nome[1:]}: {int(quante)}.")
@@ -1825,7 +2012,7 @@ def censisci_la_libreria(schede, anno_di_adesso=None):
         if _numero(dimensione) and dimensione > 0:
             c["byte"] += dimensione
             f["byte"] += dimensione
-        c["estensioni"][formati.estensione(percorso) or "senza estensione"] += 1
+        c["estensioni"][formati.estensione(percorso) or SENZA_ESTENSIONE] += 1
         c["unita"][unita_di(percorso)] += 1
         d = scheda.get("durata")
         if not _numero(d) or d < 0:
@@ -1869,51 +2056,63 @@ def righe_della_libreria(c, dimensione):
     righe = []
     totale = c["file"]
     if not totale:
-        righe.append("Schedario: ancora vuoto.")
+        righe.append(_("Schedario: ancora vuoto."))
         return righe
-    righe.append(f"Schedario: {al_plurale(totale, 'file conosciuto', 'file conosciuti')}, {dimensione(c['byte'])}.")
-    righe.append(f"Durata di tutta la libreria: {durata(c['durata'])}.")
+    righe.append(_("Schedario: {file}, {dimensione}.").format(file=plurale(totale, "{n} file conosciuto", "{n} file conosciuti"), dimensione=dimensione(c["byte"])))
+    righe.append(_("Durata di tutta la libreria: {durata}.").format(durata=durata(c["durata"])))
     ordine = list(FAMIGLIE)
     # Solo le famiglie che hanno dei file: con lo schedario non vuoto, almeno
     # una c'e' (1.104.0).
     famiglie = sorted((kv for kv in c["famiglie"].items() if kv[1]["file"]), key=lambda kv: (-kv[1]["file"], ordine.index(kv[0])))
-    righe.append("Per numero di file: " + "; ".join(f"{NOMI_BREVI_DELLE_FAMIGLIE[k]} {v['file']}, {percentuale(v['file'], totale)}" for k, v in famiglie) + ".")
+    per_numero = "; ".join(f"{NOMI_BREVI_DELLE_FAMIGLIE[k]} {v['file']}, {percentuale(v['file'], totale)}" for k, v in famiglie)
+    righe.append(_("Per numero di file: {famiglie}.").format(famiglie=per_numero))
     con_durata = sorted((kv for kv in c["famiglie"].items() if kv[1]["durata"]), key=lambda kv: -kv[1]["durata"])
     if con_durata:
-        righe.append("Per durata: " + "; ".join(f"{NOMI_BREVI_DELLE_FAMIGLIE[k]} {durata(v['durata'])}, {percentuale(v['durata'], c['durata'])}" for k, v in con_durata) + ".")
+        per_durata = "; ".join(f"{NOMI_BREVI_DELLE_FAMIGLIE[k]} {durata(v['durata'])}, {percentuale(v['durata'], c['durata'])}" for k, v in con_durata)
+        righe.append(_("Per durata: {famiglie}.").format(famiglie=per_durata))
     con_spazio = sorted((kv for kv in c["famiglie"].items() if kv[1]["byte"]), key=lambda kv: -kv[1]["byte"])
     if con_spazio:
-        righe.append("Per spazio: " + "; ".join(f"{NOMI_BREVI_DELLE_FAMIGLIE[k]} {dimensione(v['byte'])}" for k, v in con_spazio) + ".")
+        per_spazio = "; ".join(f"{NOMI_BREVI_DELLE_FAMIGLIE[k]} {dimensione(v['byte'])}" for k, v in con_spazio)
+        righe.append(_("Per spazio: {famiglie}.").format(famiglie=per_spazio))
     if c["file_sid"]:
-        righe.append(f"Sottobrani dei SID: {c['sottobrani_sid']}, in {al_plurale(c['file_sid'], 'file', 'file')}.")
+        righe.append(_("Sottobrani dei SID: {n}, in {file}.").format(n=c["sottobrani_sid"], file=plurale(c["file_sid"], "{n} file", "{n} file")))
     presenti = [e for e in c["estensioni"] if e in formati.TUTTI]
-    piu = ", ".join(f"{e.lstrip('.')} {n}" for e, n in c["estensioni"].most_common(5))
-    righe.append(f"Formati presenti: {len(presenti)} dei {len(formati.TUTTI)}; i più numerosi: {piu}.")
-    righe.append("Per unità: " + "; ".join(f"{k} {al_plurale(n, 'file', 'file')}, {percentuale(n, totale)}" for k, n in c["unita"].most_common()) + ".")
+    piu = ", ".join(f"{estensione_da_dire(e)} {n}" for e, n in c["estensioni"].most_common(5))
+    righe.append(_("Formati presenti: {n} dei {totale}; i più numerosi: {numerosi}.").format(n=len(presenti), totale=len(formati.TUTTI), numerosi=piu))
+    per_unita = []
+    for unita, n in c["unita"].most_common():
+        quanti = plurale(n, "{n} file", "{n} file")
+        per_unita.append(f"{unita} {quanti}, {percentuale(n, totale)}")
+    righe.append(_("Per unità: {unita}.").format(unita="; ".join(per_unita)))
     if c["lungo"]:
-        righe.append(f"Il file più lungo: {_nome(c['lungo'][1])}, {durata(c['lungo'][0])}.")
+        righe.append(_("Il file più lungo: {nome}, {durata}.").format(nome=_nome(c["lungo"][1]), durata=durata(c["lungo"][0])))
     if c["corto"]:
-        righe.append(f"Il file più corto: {_nome(c['corto'][1])}, {durata(c['corto'][0])}.")
+        righe.append(_("Il file più corto: {nome}, {durata}.").format(nome=_nome(c["corto"][1]), durata=durata(c["corto"][0])))
     # Dai tag, solo cio' che c'e'; senza niente, una frase che lo dice (1.104.0).
     parti = []
     if c["autori"]:
-        parti.append(al_plurale(len(c["autori"]), "autore", "autori"))
+        parti.append(plurale(len(c["autori"]), "{n} autore", "{n} autori"))
     if c["album"]:
-        parti.append(f"{len(c['album'])} album")
+        parti.append(plurale(len(c["album"]), "{n} album", "{n} album"))
     if c["generi"]:
-        parti.append(al_plurale(len(c["generi"]), "genere", "generi"))
+        parti.append(plurale(len(c["generi"]), "{n} genere", "{n} generi"))
     testo = ", ".join(parti)
     if c["anni"]:
-        anni = f"anni dal {min(c['anni'])} al {max(c['anni'])}"
+        anni = _("anni dal {primo} al {ultimo}").format(primo=min(c["anni"]), ultimo=max(c["anni"]))
         testo = f"{testo}; {anni}" if testo else anni
-    righe.append(f"Dai tag: {testo or 'nessun autore, album, genere o anno'}.")
+    if testo:
+        # Traduttori: tag è come «1 autore, 1 album, 1 genere; anni dal 1985 al 1991».
+        righe.append(_("Dai tag: {tag}.").format(tag=testo))
+    else:
+        righe.append(_("Dai tag: nessun autore, album, genere o anno."))
     if c["autori"]:
         autore, quanti = max(c["autori"].items(), key=lambda kv: (kv[1], kv[0]))
-        righe.append(f"L'autore con più file: {autore}, {quanti}.")
+        righe.append(_("L'autore con più file: {autore}, {n}.").format(autore=autore, n=quanti))
     if c["decenni"]:
         decennio, quanti = max(c["decenni"].items(), key=lambda kv: (kv[1], kv[0]))
-        righe.append(f"Il decennio con più file: gli {decennio}, {quanti}.")
-    righe.append(f"File di cui la durata non si sa: {c['senza_durata']}.")
+        # Traduttori: decennio è come «anni '80» o «anni 2020»; n è quanti file.
+        righe.append(_("Il decennio con più file: gli {decennio}, {n}.").format(decennio=decennio, n=quanti))
+    righe.append(_("File di cui la durata non si sa: {n}.").format(n=c["senza_durata"]))
     if c["non_credibili"]:
-        righe.append(f"Durate non credibili, oltre una settimana, lasciate fuori dai conti: {al_plurale(c['non_credibili'], 'file', 'file')}.")
+        righe.append(_("Durate non credibili, oltre una settimana, lasciate fuori dai conti: {file}.").format(file=plurale(c["non_credibili"], "{n} file", "{n} file")))
     return righe
