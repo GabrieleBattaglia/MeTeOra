@@ -97,3 +97,32 @@
    24.665 Speaker: fermo dopo 6.88 s dall'ultimo salto, a 10.0 s dalla fine; motivo FINISHED.
    24.809 Stato: {'stato': 'UNKNOWN', 'posizione': 0.0, 'durata': None, 'motivo': None, 'indirizzo': None}.
    24.811 Riassunto: 17.8 MB convertiti, 0 ripartenze, 0 attese dei byte oltre 50 ms, la piu' lunga 0.00 s.
+    0.000 Prova del 05/11/2026 08:12, su GabryBat.
+    0.143 Finestra di 512 MB, 2796 secondi, con 699 dietro; brano di 10664.7 secondi, 1952.8 MB di PCM.
+    0.143 Conversione 1 da 0.00 s.
+    2.059 Server su http://192.168.1.171:60828/brano.wav.
+    3.933 Stato: {'stato': 'UNKNOWN', 'posizione': 0.0, 'durata': None, 'motivo': None, 'indirizzo': None}.
+    3.993 Stato: {'stato': 'IDLE', 'posizione': 0, 'durata': None, 'motivo': None, 'indirizzo': 'http://192.168.1.171:60828/brano.wav'}.
+    4.003 Richiesta 1: GET tutto, da 0.00 s.
+    4.003 192.168.1.172: "GET /brano.wav HTTP/1.1" 200 -
+    4.134 Stato: {'stato': 'PLAYING', 'posizione': 0, 'durata': 10664.67, 'motivo': None, 'indirizzo': 'http://192.168.1.171:60828/brano.wav'}.
+    4.134 Speaker: suona dopo 1.635 s.
+    5.874 Richiesta 1: 12.00 MB in 1.87 s, fino a 65.54 s; chiusa dall'apparecchio.
+   12.154 Stato: {'stato': 'PLAYING', 'posizione': 5332.335, 'durata': 10664.67, 'motivo': None, 'indirizzo': 'http://192.168.1.171:60828/brano.wav'}.
+   12.176 Richiesta 2: GET bytes=1023808364-, da 5332.34 s.
+   12.176 192.168.1.172: "GET /brano.wav HTTP/1.1" 206 -
+   12.176 Fuori dalla finestra a 5332.34 s: si riparte.
+   12.190 Conversione 2 da 5332.34 s.
+   12.455 Speaker: salto a 5332.3 s, di nuovo in riproduzione dopo 0.02 s.
+   14.175 Richiesta 2: 11.00 MB in 2.00 s, fino a 5392.41 s; chiusa dall'apparecchio.
+   15.472 Stato: {'stato': 'PLAYING', 'posizione': 10654.67, 'durata': 10664.67, 'motivo': None, 'indirizzo': 'http://192.168.1.171:60828/brano.wav'}.
+   15.490 Richiesta 3: GET bytes=2045696684-, da 10654.67 s.
+   15.490 192.168.1.172: "GET /brano.wav HTTP/1.1" 206 -
+   15.490 Fuori dalla finestra a 10654.67 s: si riparte.
+   15.502 Conversione 3 da 10654.67 s.
+   15.733 Richiesta 3: 1.83 MB in 0.24 s, fino a 10664.67 s; fine.
+   15.772 Speaker: salto a 10654.7 s, di nuovo in riproduzione dopo 0.017 s.
+   25.877 Stato: {'stato': 'IDLE', 'posizione': 0, 'durata': 10664.67, 'motivo': 'FINISHED', 'indirizzo': 'http://192.168.1.171:60828/brano.wav'}.
+   25.887 Speaker: fermo dopo 7.1 s dall'ultimo salto, a 10.0 s dalla fine; motivo FINISHED.
+   26.041 Stato: {'stato': 'UNKNOWN', 'posizione': 0.0, 'durata': None, 'motivo': None, 'indirizzo': None}.
+   26.043 Riassunto: 793.0 MB convertiti, 2 ripartenze, 0 attese dei byte oltre 50 ms, la piu' lunga 0.00 s.
