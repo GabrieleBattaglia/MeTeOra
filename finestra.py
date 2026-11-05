@@ -144,7 +144,7 @@ GIRI_PER_SALVARE = 12
 # Il nome proposto per l'esportazione dei marcatori, e il filtro dei dialoghi
 # che la scrivono e la leggono.
 FILE_DELL_ESPORTAZIONE = "MeTeOra - Marcatori esportati.json"
-FILTRO_DEI_MARCATORI = "Marcatori di MeTeOra (*.json)|*.json"
+FILTRO_DEI_MARCATORI = _("Marcatori di MeTeOra (*.json)") + "|*.json"
 # I dialoghi dei file passano da questo nome, che le prove sostituiscono.
 DialogoDiFile = wx.FileDialog
 # I messaggi dell'albero di Windows che wx non espone come servono: spostare
@@ -441,76 +441,77 @@ def carattere_del_tasto(evento):
 
 
 TASTI_COMUNI = [
-    "La regola dei tasti a lettera: il tasto da solo dice il valore del suo controllo, con i limiti, nella console e alla sintesi e al braille dei sottotitoli; "
-    "con Ctrl va indietro, abbassa o spegne; con Maiuscolo va avanti, alza o accende; con Ctrl e Maiuscolo torna al valore predefinito; con Alt va al massimo, con Ctrl e Alt al minimo.",
-    "X suona la voce selezionata, riprende dalla pausa o fa ripartire da capo il brano che suona già; C pausa, V stop, Z e B brano precedente e successivo. "
-    "Maiuscolo con V la ripetizione, a giro: del brano, della lista, spenta. Maiuscolo con X, a giro: punto A del loop sul brano selezionato, poi punto B, poi toglie il loop.",
-    "N la riproduzione casuale: Ctrl la spegne, Maiuscolo la accende, e con lei B sceglie a caso e Z torna ai brani suonati prima; Alt con N suona subito un brano a caso. "
-    "S il timer di spegnimento: Ctrl lo toglie, Maiuscolo lo chiede in minuti, Alt lo mette alla fine del brano.",
-    "L'apostrofo dice dove sei: il tempo del brano che suona, il suo nome, il posto nella lista e quello che c'è di particolare, come la pausa; "
-    "lo scrive nella console e lo manda alla sintesi e al braille dei sottotitoli, senza spostare il fuoco.",
-    "Maiuscolo con l'apostrofo dice la durata residua: quanto manca e quanto è passato di ciò che suonerà, anche nei rami aperti dopo nella plancia, "
-    "la percentuale ascoltata e l'ora in cui finisce; anche lei va nella console, alla sintesi e al braille dei sottotitoli.",
-    "H il segnalibro, uno per tutto MeTeOra, che resta anche chiudendo: Ctrl con H lo toglie, Maiuscolo con H ci torna, aprendo la plancia fino al brano "
-    "e suonandolo da lì, Ctrl e Maiuscolo con H lo mettono sul brano che suona, al punto in cui è.",
-    "Q il punto del brano: Ctrl e Maiuscolo indietro e avanti di un salto, Alt agli ultimi secondi, Ctrl e Alt all'inizio. "
-    "E i passi dei salti: Ctrl e Maiuscolo chiedono quello indietro e quello avanti, Ctrl e Maiuscolo insieme li riportano ai predefiniti. W va a un tempo.",
-    "M il volume: Ctrl e Maiuscolo lo abbassano e lo alzano di un passo, Ctrl e Maiuscolo insieme lo riportano a quello di prima del massimo o dello zero, "
-    "Alt lo porta al massimo, Ctrl e Alt a zero, che fa da muto. Il punto: il passo del volume.",
-    "La virgola, i capitoli degli audiolibri e dei film: Ctrl e Maiuscolo il precedente e il successivo, Alt l'ultimo, Ctrl e Alt il primo; "
-    "Ctrl con la virgola, oltre i primi secondi di un capitolo, torna al suo inizio.",
-    "A la velocità, F il tono, di un semitono: Ctrl abbassa, Maiuscolo alza, Ctrl e Maiuscolo insieme tornano al normale, Alt al massimo, Ctrl e Alt al minimo.",
-    "U la banda dell'equalizzatore: Ctrl e Maiuscolo la precedente e la seguente, Alt l'ultima, Ctrl e Alt la prima. "
-    "O il suo guadagno, di un dB, e Ctrl e Maiuscolo insieme la azzerano; P tutte le bande, e Ctrl e Maiuscolo insieme le azzerano.",
-    "L la dissolvenza incrociata, con cui sfumano i cambi di brano, lo stop, la pausa, X da capo e i marker: Ctrl la spegne, Maiuscolo la accende. "
-    "K la sua durata, di mezzo secondo alla volta.",
-    "Il video: Ctrl con F1 lo spegne, Maiuscolo con F1 lo accende; Ctrl con F5 lo rimette in finestra, Maiuscolo con F5 a schermo intero. D i sottotitoli letti, G la traccia audio, I il rapporto dell'immagine: "
-    "Ctrl e Maiuscolo il precedente e il seguente, Alt l'ultimo, Ctrl e Alt il primo, che per i sottotitoli è spenti.",
-    "J la playlist: Ctrl e Maiuscolo aprono e suonano la precedente e la successiva, Alt l'ultima, Ctrl e Alt la prima; le cifre da 1 a 0 le prime dieci playlist.",
-    "Nella plancia Backspace chiude il ramo in cui sei e risale di un livello, Maiuscolo con Backspace risale di colpo all'unità o alla playlist, Preferiti compresi, e chiude i rami al suo interno.",
-    "T mette un marker dove sei, o rinomina quello su cui sei; Maiuscolo con T li toglie tutti. Y il marker su cui sei o quello prima: Ctrl e Maiuscolo il precedente e il successivo, "
-    "Alt l'ultimo, Ctrl e Alt il primo. R quanti marker ha il brano: Ctrl e Maiuscolo tolgono quelli prima e quelli dopo. Maiuscolo con le cifre da 1 a 0 va ai primi dieci marker del brano della plancia.",
-    "F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, Maiuscolo con F7 le statistiche, F8 porta la selezione e il fuoco della plancia sul brano in riproduzione, Ctrl con F8 la sgancia e Maiuscolo con F8 ce la tiene agganciata, "
+    _("La regola dei tasti a lettera: il tasto da solo dice il valore del suo controllo, con i limiti, nella console e alla sintesi e al braille dei sottotitoli; "
+    "con Ctrl va indietro, abbassa o spegne; con Maiuscolo va avanti, alza o accende; con Ctrl e Maiuscolo torna al valore predefinito; con Alt va al massimo, con Ctrl e Alt al minimo."),
+    _("X suona la voce selezionata, riprende dalla pausa o fa ripartire da capo il brano che suona già; C pausa, V stop, Z e B brano precedente e successivo. "
+    "Maiuscolo con V la ripetizione, a giro: del brano, della lista, spenta. Maiuscolo con X, a giro: punto A del loop sul brano selezionato, poi punto B, poi toglie il loop."),
+    _("N la riproduzione casuale: Ctrl la spegne, Maiuscolo la accende, e con lei B sceglie a caso e Z torna ai brani suonati prima; Alt con N suona subito un brano a caso. "
+    "S il timer di spegnimento: Ctrl lo toglie, Maiuscolo lo chiede in minuti, Alt lo mette alla fine del brano."),
+    _("L'apostrofo dice dove sei: il tempo del brano che suona, il suo nome, il posto nella lista e quello che c'è di particolare, come la pausa; "
+    "lo scrive nella console e lo manda alla sintesi e al braille dei sottotitoli, senza spostare il fuoco."),
+    _("Maiuscolo con l'apostrofo dice la durata residua: quanto manca e quanto è passato di ciò che suonerà, anche nei rami aperti dopo nella plancia, "
+    "la percentuale ascoltata e l'ora in cui finisce; anche lei va nella console, alla sintesi e al braille dei sottotitoli."),
+    _("H il segnalibro, uno per tutto MeTeOra, che resta anche chiudendo: Ctrl con H lo toglie, Maiuscolo con H ci torna, aprendo la plancia fino al brano "
+    "e suonandolo da lì, Ctrl e Maiuscolo con H lo mettono sul brano che suona, al punto in cui è."),
+    _("Q il punto del brano: Ctrl e Maiuscolo indietro e avanti di un salto, Alt agli ultimi secondi, Ctrl e Alt all'inizio. "
+    "E i passi dei salti: Ctrl e Maiuscolo chiedono quello indietro e quello avanti, Ctrl e Maiuscolo insieme li riportano ai predefiniti. W va a un tempo."),
+    _("M il volume: Ctrl e Maiuscolo lo abbassano e lo alzano di un passo, Ctrl e Maiuscolo insieme lo riportano a quello di prima del massimo o dello zero, "
+    "Alt lo porta al massimo, Ctrl e Alt a zero, che fa da muto. Il punto: il passo del volume."),
+    _("La virgola, i capitoli degli audiolibri e dei film: Ctrl e Maiuscolo il precedente e il successivo, Alt l'ultimo, Ctrl e Alt il primo; "
+    "Ctrl con la virgola, oltre i primi secondi di un capitolo, torna al suo inizio."),
+    _("A la velocità, F il tono, di un semitono: Ctrl abbassa, Maiuscolo alza, Ctrl e Maiuscolo insieme tornano al normale, Alt al massimo, Ctrl e Alt al minimo."),
+    _("U la banda dell'equalizzatore: Ctrl e Maiuscolo la precedente e la seguente, Alt l'ultima, Ctrl e Alt la prima. "
+    "O il suo guadagno, di un dB, e Ctrl e Maiuscolo insieme la azzerano; P tutte le bande, e Ctrl e Maiuscolo insieme le azzerano."),
+    _("L la dissolvenza incrociata, con cui sfumano i cambi di brano, lo stop, la pausa, X da capo e i marker: Ctrl la spegne, Maiuscolo la accende. "
+    "K la sua durata, di mezzo secondo alla volta."),
+    _("Il video: Ctrl con F1 lo spegne, Maiuscolo con F1 lo accende; Ctrl con F5 lo rimette in finestra, Maiuscolo con F5 a schermo intero. D i sottotitoli letti, G la traccia audio, I il rapporto dell'immagine: "
+    "Ctrl e Maiuscolo il precedente e il seguente, Alt l'ultimo, Ctrl e Alt il primo, che per i sottotitoli è spenti."),
+    _("J la playlist: Ctrl e Maiuscolo aprono e suonano la precedente e la successiva, Alt l'ultima, Ctrl e Alt la prima; le cifre da 1 a 0 le prime dieci playlist."),
+    _("Nella plancia Backspace chiude il ramo in cui sei e risale di un livello, Maiuscolo con Backspace risale di colpo all'unità o alla playlist, Preferiti compresi, e chiude i rami al suo interno."),
+    _("T mette un marker dove sei, o rinomina quello su cui sei; Maiuscolo con T li toglie tutti. Y il marker su cui sei o quello prima: Ctrl e Maiuscolo il precedente e il successivo, "
+    "Alt l'ultimo, Ctrl e Alt il primo. R quanti marker ha il brano: Ctrl e Maiuscolo tolgono quelli prima e quelli dopo. Maiuscolo con le cifre da 1 a 0 va ai primi dieci marker del brano della plancia."),
+    _("F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, Maiuscolo con F7 le statistiche, F8 porta la selezione e il fuoco della plancia sul brano in riproduzione, Ctrl con F8 la sgancia e Maiuscolo con F8 ce la tiene agganciata, "
     "F9 dice se il ramo col fuoco è aperto, e quante voci ha aperte dentro: Ctrl con F9 lo chiude e Maiuscolo con F9 lo apre con tutto quello che ha dentro, "
     "Ctrl e Maiuscolo con F9 fermano un'apertura, Alt con F9 apre tutta la plancia e Ctrl e Alt con F9 la chiude; mentre si apre puoi navigare; "
-    "F11 legge i tag del brano selezionato, o i dettagli di una cartella, di un'unità o di una playlist, e Maiuscolo con F11 apre il menu dei tag.",
-    "Barra rovesciata: nella console cerca nella console, altrove nel ramo della plancia in cui sei, e da Apri file, Statistiche o Impostazioni in tutto MeTeOra; Ctrl con la barra rovesciata cerca in tutto MeTeOra, anche dalla console. "
-    "Barra verticale: il filtro della playlist o dei Preferiti in cui sta la plancia, anche dalla console.",
-    "F1 apre il manuale nel browser; F12 scrive nella console la guida rapida dei tasti, F2 le novità e F3 i crediti, sempre nella console. Esc esce salvando tutto. "
-    "Il più apre le impostazioni, Ctrl e Maiuscolo con X la lista della scheda audio, con le cuffie Bluetooth e gli speaker Cast.",
-    "Ctrl con F12 spegne i tasti rapidi a carattere e Maiuscolo con F12 li riaccende: spenti, lettere, cifre e segni vanno alla plancia, che salta alla voce che comincia con ciò che scrivi; "
-    "i tasti funzione, Esc e le combinazioni con Ctrl e con Alt restano. Gli interruttori dei tasti funzione seguono la regola: Ctrl spegne, Maiuscolo accende, il tasto da solo fa il suo lavoro.",
+    "F11 legge i tag del brano selezionato, o i dettagli di una cartella, di un'unità o di una playlist, e Maiuscolo con F11 apre il menu dei tag."),
+    _("Barra rovesciata: nella console cerca nella console, altrove nel ramo della plancia in cui sei, e da Apri file, Statistiche o Impostazioni in tutto MeTeOra; Ctrl con la barra rovesciata cerca in tutto MeTeOra, anche dalla console. "
+    "Barra verticale: il filtro della playlist o dei Preferiti in cui sta la plancia, anche dalla console."),
+    _("F1 apre il manuale nel browser; F12 scrive nella console la guida rapida dei tasti, F2 le novità e F3 i crediti, sempre nella console. Esc esce salvando tutto. "
+    "Il più apre le impostazioni, Ctrl e Maiuscolo con X la lista della scheda audio, con le cuffie Bluetooth e gli speaker Cast."),
+    _("Ctrl con F12 spegne i tasti rapidi a carattere e Maiuscolo con F12 li riaccende: spenti, lettere, cifre e segni vanno alla plancia, che salta alla voce che comincia con ciò che scrivi; "
+    "i tasti funzione, Esc e le combinazioni con Ctrl e con Alt restano. Gli interruttori dei tasti funzione seguono la regola: Ctrl spegne, Maiuscolo accende, il tasto da solo fa il suo lavoro."),
 ]
 # Chi sostiene MeTeOra con una donazione, nei crediti di F3, nell'ordine in
 # cui arriva: i nomi li dice Gabriele, via via (2.4.0).
 SOSTENITORI = ("Massimo Diana",)
 # Le righe del cruscotto proprie di ogni tipo di voce della plancia.
 TASTI_DEL_CONTESTO = {
-    "risultati": ("i Risultati della ricerca", "Invio, Applicazioni o Spazio: menu con Riproduci, Salva come playlist, Nuova ricerca, che cerca in tutto MeTeOra, e Ferma la ricerca."),
-    "altri": ("la voce che mostra altri risultati", "Invio mostra i risultati seguenti."),
-    "gruppo_risultati": ("un ramo dei Risultati", "Freccia destra lo apre: i risultati stanno come stavano, sotto la loro playlist o lungo il percorso della loro cartella. Invio, Applicazioni o Spazio: menu con Salva come playlist."),
-    "preferiti": ("i Preferiti", "Invio, Applicazioni o Spazio: menu con Riproduci, Filtro e, se c'è un filtro, Togli il filtro; Ordina, un sottomenu con i criteri, poi, dopo un riordino, Ordine di prima, e in fondo Inverti l'ordine; e Mescola. "
-        "Barra verticale: il filtro. Canc su un loro brano lo toglie dai Preferiti."),
-    "radice_playlist": ("il ramo Playlist", "Invio, Applicazioni o Spazio: menu con Nuova playlist e Importa playlist, che importa le playlist M3U, M3U8 e PLS di altri programmi."),
-    "playlist": ("una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Filtro, Togli il filtro se c'è un filtro, Rinomina, Ordina, Mescola ed Elimina. "
-        "Ordina è un sottomenu con i criteri, poi, dopo un riordino, Ordine di prima, e in fondo Inverti l'ordine. Barra verticale: il filtro. Canc elimina la playlist, dopo una conferma."),
-    "brano": ("un brano di una playlist", "Invio, Applicazioni o Spazio: menu con Riproduci, Sposta su, giù, in cima e in fondo, Saltato, Togli dalla playlist, Aggiungi ai preferiti, Rinomina file, Leggi i tag e Tag per i formati che li hanno, e Manda nel cestino. "
-        "Canc toglie il brano dalla playlist, Maiuscolo con Canc manda il file nel cestino. Un SID o un file delle console con più sottobrani, o un brano con dei marker, si apre con freccia destra."),
-    "pc": ("Questo PC", "Freccia destra mostra le unità. Invio, Applicazioni o Spazio: menu con Aggiorna."),
-    "rete": ("Questa rete", "Freccia destra mostra i percorsi di rete, i computer della rete e il comando per aggiungere un percorso. Invio, Applicazioni o Spazio: menu con Aggiungi un percorso di rete e Aggiorna."),
-    "computer_della_rete": ("i computer della rete", "Freccia destra li cerca, in disparte: può volerci qualche secondo. Invio, Applicazioni o Spazio: menu con Cerca di nuovo."),
-    "computer": ("un computer della rete", "Freccia destra mostra le sue cartelle condivise. Invio, Applicazioni o Spazio: menu con Aggiorna."),
-    "attesa": ("una ricerca in corso", "Aspetta: la voce sparisce quando la ricerca finisce."),
-    "unita": ("un'unità", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Riproduci, Crea playlist da qui, Aggiungi alla playlist, Aggiorna e, "
-        "se la pulizia all'avvio la salta per il disco che risponde, Riconosci questo disco, che prima chiede conferma dicendo quante voci la pulizia toglierà."),
-    "cartella": ("una cartella", "Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Riproduci, Crea playlist da qui, Aggiungi alla playlist e Aggiorna. "
-        "Maiuscolo con Canc la manda nel cestino, se è vuota."),
-    "file": ("un file", "Invio, Applicazioni o Spazio: menu con Riproduci, Aggiungi alla playlist, Aggiungi ai preferiti, Rinomina file, Leggi i tag e Tag per i formati che li hanno, e Manda nel cestino. "
-        "Maiuscolo con Canc manda il file nel cestino. Un SID o un file delle console con più sottobrani, o un file con dei marker, si apre con freccia destra."),
-    "sottobrano": ("un sottobrano di un SID o di un file delle console", "Invio, Applicazioni o Spazio: menu con Riproduci, Aggiungi alla playlist e Aggiungi ai preferiti. Se ha dei marker, freccia destra li mostra."),
-    "capitolo": ("un capitolo", "X, Invio, Applicazioni o Spazio suonano il file da questo capitolo. Ctrl e Maiuscolo con la virgola, mentre suona, vanno al capitolo precedente e successivo."),
-    "marker": ("un marker", "Invio rinomina il marker, Canc lo elimina, X fa come sul suo brano. Applicazioni o Spazio: menu con Vai al marker, che suona il brano da lì, Rinomina ed Elimina."),
-    "comando": ("un comando", "Invio esegue il comando."),
+    # Traduttori: per ogni tipo di voce della plancia, il nome che completa la riga Tasti per..., come i Risultati della ricerca, e la riga dei suoi tasti.
+    "risultati": (_("i Risultati della ricerca"), _("Invio, Applicazioni o Spazio: menu con Riproduci, Salva come playlist, Nuova ricerca, che cerca in tutto MeTeOra, e Ferma la ricerca.")),
+    "altri": (_("la voce che mostra altri risultati"), _("Invio mostra i risultati seguenti.")),
+    "gruppo_risultati": (_("un ramo dei Risultati"), _("Freccia destra lo apre: i risultati stanno come stavano, sotto la loro playlist o lungo il percorso della loro cartella. Invio, Applicazioni o Spazio: menu con Salva come playlist.")),
+    "preferiti": (_("i Preferiti"), _("Invio, Applicazioni o Spazio: menu con Riproduci, Filtro e, se c'è un filtro, Togli il filtro; Ordina, un sottomenu con i criteri, poi, dopo un riordino, Ordine di prima, e in fondo Inverti l'ordine; e Mescola. "
+        "Barra verticale: il filtro. Canc su un loro brano lo toglie dai Preferiti.")),
+    "radice_playlist": (_("il ramo Playlist"), _("Invio, Applicazioni o Spazio: menu con Nuova playlist e Importa playlist, che importa le playlist M3U, M3U8 e PLS di altri programmi.")),
+    "playlist": (_("una playlist"), _("Invio, Applicazioni o Spazio: menu con Riproduci, Filtro, Togli il filtro se c'è un filtro, Rinomina, Ordina, Mescola ed Elimina. "
+        "Ordina è un sottomenu con i criteri, poi, dopo un riordino, Ordine di prima, e in fondo Inverti l'ordine. Barra verticale: il filtro. Canc elimina la playlist, dopo una conferma.")),
+    "brano": (_("un brano di una playlist"), _("Invio, Applicazioni o Spazio: menu con Riproduci, Sposta su, giù, in cima e in fondo, Saltato, Togli dalla playlist, Aggiungi ai preferiti, Rinomina file, Leggi i tag e Tag per i formati che li hanno, e Manda nel cestino. "
+        "Canc toglie il brano dalla playlist, Maiuscolo con Canc manda il file nel cestino. Un SID o un file delle console con più sottobrani, o un brano con dei marker, si apre con freccia destra.")),
+    "pc": (_("Questo PC"), _("Freccia destra mostra le unità. Invio, Applicazioni o Spazio: menu con Aggiorna.")),
+    "rete": (_("Questa rete"), _("Freccia destra mostra i percorsi di rete, i computer della rete e il comando per aggiungere un percorso. Invio, Applicazioni o Spazio: menu con Aggiungi un percorso di rete e Aggiorna.")),
+    "computer_della_rete": (_("i computer della rete"), _("Freccia destra li cerca, in disparte: può volerci qualche secondo. Invio, Applicazioni o Spazio: menu con Cerca di nuovo.")),
+    "computer": (_("un computer della rete"), _("Freccia destra mostra le sue cartelle condivise. Invio, Applicazioni o Spazio: menu con Aggiorna.")),
+    "attesa": (_("una ricerca in corso"), _("Aspetta: la voce sparisce quando la ricerca finisce.")),
+    "unita": (_("un'unità"), _("Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Riproduci, Crea playlist da qui, Aggiungi alla playlist, Aggiorna e, "
+        "se la pulizia all'avvio la salta per il disco che risponde, Riconosci questo disco, che prima chiede conferma dicendo quante voci la pulizia toglierà.")),
+    "cartella": (_("una cartella"), _("Freccia destra mostra il contenuto. Invio, Applicazioni o Spazio: menu con Riproduci, Crea playlist da qui, Aggiungi alla playlist e Aggiorna. "
+        "Maiuscolo con Canc la manda nel cestino, se è vuota.")),
+    "file": (_("un file"), _("Invio, Applicazioni o Spazio: menu con Riproduci, Aggiungi alla playlist, Aggiungi ai preferiti, Rinomina file, Leggi i tag e Tag per i formati che li hanno, e Manda nel cestino. "
+        "Maiuscolo con Canc manda il file nel cestino. Un SID o un file delle console con più sottobrani, o un file con dei marker, si apre con freccia destra.")),
+    "sottobrano": (_("un sottobrano di un SID o di un file delle console"), _("Invio, Applicazioni o Spazio: menu con Riproduci, Aggiungi alla playlist e Aggiungi ai preferiti. Se ha dei marker, freccia destra li mostra.")),
+    "capitolo": (_("un capitolo"), _("X, Invio, Applicazioni o Spazio suonano il file da questo capitolo. Ctrl e Maiuscolo con la virgola, mentre suona, vanno al capitolo precedente e successivo.")),
+    "marker": (_("un marker"), _("Invio rinomina il marker, Canc lo elimina, X fa come sul suo brano. Applicazioni o Spazio: menu con Vai al marker, che suona il brano da lì, Rinomina ed Elimina.")),
+    "comando": (_("un comando"), _("Invio esegue il comando.")),
 }
 # Le voci della finestra delle impostazioni, in ordine: chiave -> (etichetta,
 # participio per dire che non e' cambiata; None per le voci che fanno
@@ -522,7 +523,7 @@ def _stesso_posto(a, b):
 
 
 def _minuti(numero):
-    return "1 minuto" if numero == 1 else f"{numero} minuti"
+    return plurale(numero, "{n} minuto", "{n} minuti")
 
 
 def _frase_della_ripetizione(ripetizione):
@@ -532,8 +533,8 @@ def _frase_della_ripetizione(ripetizione):
 
 def _frase_della_casuale(accesa, modello):
     if accesa:
-        return f"Riproduzione casuale accesa: {valori.MODELLI_CASUALI[modello]}."
-    return "Riproduzione casuale spenta: a fine brano si va avanti in ordine."
+        return _("Riproduzione casuale accesa: {modello}.").format(modello=valori.MODELLI_CASUALI[modello])
+    return _("Riproduzione casuale spenta: a fine brano si va avanti in ordine.")
 
 
 # Le righe della lista dei modelli della riproduzione casuale.
@@ -549,19 +550,19 @@ SOLO_SUL_PC = ("velocita", "tono", "banda", "dissolvenza")
 SFUMATURA_DEL_TIMER = 20.0
 PASSO_DELLA_SFUMATURA = 100
 FRASI_DEL_VOLUME_UNIFORME = {
-    "spento": "Volume uniforme spento: ogni file suona con il volume con cui è registrato.",
-    "brano": "Volume uniforme per brano: i file con i tag ReplayGain si avvicinano allo stesso volume; quelli forti scendono, e quelli piani salgono fin dove i loro picchi lo permettono.",
-    "album": "Volume uniforme per album: ogni disco con i tag ReplayGain suona allo stesso volume, e dentro il disco restano le differenze volute.",
+    "spento": _("Volume uniforme spento: ogni file suona con il volume con cui è registrato."),
+    "brano": _("Volume uniforme per brano: i file con i tag ReplayGain si avvicinano allo stesso volume; quelli forti scendono, e quelli piani salgono fin dove i loro picchi lo permettono."),
+    "album": _("Volume uniforme per album: ogni disco con i tag ReplayGain suona allo stesso volume, e dentro il disco restano le differenze volute."),
 }
 FRASI_DELLA_RIPETIZIONE = {
-    "spenta": "Ripetizione spenta.",
-    "brano": "Ripetizione del brano: quando finisce, ricomincia.",
-    "lista": "Ripetizione della lista: dopo l'ultimo brano, si riparte dal primo.",
+    "spenta": _("Ripetizione spenta."),
+    "brano": _("Ripetizione del brano: quando finisce, ricomincia."),
+    "lista": _("Ripetizione della lista: dopo l'ultimo brano, si riparte dal primo."),
 }
 SPIEGAZIONI_DEI_MODELLI = {
-    "totale": "ogni volta un brano qualsiasi, mai lo stesso due volte di fila",
-    "una_volta": "ogni brano suona una volta, poi la riproduzione finisce",
-    "a_giro": "ogni brano suona una volta, poi si rimescola e si ricomincia",
+    "totale": _("ogni volta un brano qualsiasi, mai lo stesso due volte di fila"),
+    "una_volta": _("ogni brano suona una volta, poi la riproduzione finisce"),
+    "a_giro": _("ogni brano suona una volta, poi si rimescola e si ricomincia"),
 }
 # Quanti secondi la plancia aspetta una cartella di rete senza che arrivi
 # niente: la finestra intanto e' ferma, quindi meno della ricerca (1.77.1).
@@ -578,7 +579,7 @@ FINE_DEL_MAZZO = object()
 # Su quanti file insieme si leggono e si modificano i tag.
 MASSIMO_DI_FILE_PER_I_TAG = 1000
 # La frase dei MIDI lasciati da preparare, con un No a una delle domande.
-MIDI_DA_PREPARARE = "I MIDI restano da preparare: si può fare anche dalle impostazioni, con Banco dei suoni MIDI."
+MIDI_DA_PREPARARE = _("I MIDI restano da preparare: si può fare anche dalle impostazioni, con Banco dei suoni MIDI.")
 # Da quanti secondi d'attesa in su la console dice che il SID, il MIDI o il
 # brano della console si prepara.
 ATTESA_DA_DIRE = 1.5
@@ -595,24 +596,29 @@ def riga_dello_speaker(voce):
     voce di trasmissione.Ricerca.apparecchi: "Cucina, speaker Cast, Google
     Home Speaker"; un gruppo di Google Home "ovunque, gruppo Cast"."""
     if voce["tipo"] == trasmissione.TIPO_GRUPPO:
-        return f"{voce['nome']}, gruppo Cast"
-    return f"{voce['nome']}, speaker Cast, {voce['modello']}" if voce["modello"] else f"{voce['nome']}, speaker Cast"
+        return _("{nome}, gruppo Cast").format(nome=voce["nome"])
+    if voce["modello"]:
+        return _("{nome}, speaker Cast, {modello}").format(nome=voce["nome"], modello=voce["modello"])
+    return _("{nome}, speaker Cast").format(nome=voce["nome"])
 
 
 # I rapporti dell'immagine di I, dal primo all'ultimo (issue 38): il valore per mpv e
 # il nome da leggere. -1 e' quello del file.
-RAPPORTI = (("-1", "quello del video"), ("16:9", "16:9"), ("4:3", "4:3"), ("2.33:1", "21:9"))
+# Traduttori: il rapporto dell'immagine che ha il video stesso, come in Rapporto dell'immagine: quello del video, 1 di 4.
+RAPPORTI = (("-1", _("quello del video")), ("16:9", "16:9"), ("4:3", "4:3"), ("2.33:1", "21:9"))
 # I nomi delle lingue piu' comuni nelle tracce, dai codici di tre lettere.
-LINGUE = {"ita": "italiano", "eng": "inglese", "fre": "francese", "fra": "francese", "ger": "tedesco", "deu": "tedesco", "spa": "spagnolo",
-    "por": "portoghese", "jpn": "giapponese", "chi": "cinese", "zho": "cinese", "rus": "russo", "dut": "olandese", "nld": "olandese",
-    "swe": "svedese", "pol": "polacco", "kor": "coreano", "ara": "arabo", "und": None}
+# Traduttori: i nomi delle lingue delle tracce audio e dei sottotitoli, come in 2 di 3, italiano, ac3.
+LINGUE = {"ita": _("italiano"), "eng": _("inglese"), "fre": _("francese"), "fra": _("francese"), "ger": _("tedesco"), "deu": _("tedesco"), "spa": _("spagnolo"),
+    "por": _("portoghese"), "jpn": _("giapponese"), "chi": _("cinese"), "zho": _("cinese"), "rus": _("russo"), "dut": _("olandese"), "nld": _("olandese"),
+    "swe": _("svedese"), "pol": _("polacco"), "kor": _("coreano"), "ara": _("arabo"), "und": None}
 
 
 def _descrivi_traccia(traccia, indice, totale):
     """Una traccia audio o di sottotitoli da leggere: "2 di 3, italiano,
     Commento del regista, ac3"."""
     lingua = traccia.get("lang")
-    parti = [f"{indice + 1} di {totale}", LINGUE.get(lingua, lingua), traccia.get("title"), traccia.get("codec")]
+    # Traduttori: il numero della traccia e quante sono, come in Traccia audio 2 di 3, italiano, ac3.
+    parti = [_("{numero} di {totale}").format(numero=indice + 1, totale=totale), LINGUE.get(lingua, lingua), traccia.get("title"), traccia.get("codec")]
     return ", ".join(str(parte) for parte in parti if parte)
 
 
@@ -624,66 +630,69 @@ def midi_in_disparte(lavoro, al_termine):
 
 def _frase_del_video(acceso):
     if acceso:
-        return "Video acceso: i video si vedono in una finestra sopra MeTeOra."
-    return "Video spento: dei video si sente solo l'audio."
+        return _("Video acceso: i video si vedono in una finestra sopra MeTeOra.")
+    return _("Video spento: dei video si sente solo l'audio.")
 
 
 VOCI_DELLE_IMPOSTAZIONI = {
-    "volume": ("Volume della musica", "cambiato"),
-    "passo_volume": ("Passo del volume", "cambiato"),
-    "volume_effetti": ("Volume degli effetti", "cambiato"),
-    "replaygain": ("Volume uniforme (ReplayGain)", "cambiato"),
-    "scheda_audio": ("Scheda audio", "cambiata"),
-    "passo_indietro": ("Salto indietro di Ctrl+Q", "cambiato"),
-    "passo_avanti": ("Salto avanti di Maiuscolo+Q", "cambiato"),
-    "velocita": ("Velocità", "cambiata"),
-    "tono": ("Tono", "cambiato"),
-    "bande": ("Equalizzatore", "cambiato"),
-    "dissolvenza": ("Dissolvenza", "cambiata"),
-    "casuale": ("Riproduzione casuale (Ctrl+N, Maiuscolo+N)", "cambiata"),
-    "modello_casuale": ("Modello della riproduzione casuale", "cambiato"),
-    "ripetizione": ("Ripetizione (Maiuscolo+V)", "cambiata"),
-    "video": ("Video (Ctrl+F1, Maiuscolo+F1)", "cambiato"),
-    "sottotitoli": ("Sottotitoli letti (D)", "cambiati"),
-    "sintesi": ("Sintesi di sottotitoli e karaoke", "cambiata"),
-    "destinazione": ("Dove vanno sottotitoli e karaoke", "cambiato"),
-    "karaoke": ("Testo del karaoke", "cambiato"),
-    "anticipo_karaoke": ("Anticipo del karaoke", "cambiato"),
-    "celle_braille": ("Celle della barra braille", "cambiate"),
-    "lettura_minima": ("Tempo minimo di lettura in braille", "cambiato"),
-    "banco_midi": ("Banco dei suoni MIDI", "cambiato"),
-    "insegui": ("Inseguimento della plancia (Ctrl+F8, Maiuscolo+F8)", "cambiato"),
-    "ripresa_oltre": ("Punto lasciato dei file lunghi", "cambiato"),
+    # Traduttori: il nome della voce, e il participio che chiude la frase di Esc nel suo campo: Volume della musica non cambiato.
+    "volume": (_("Volume della musica"), _("cambiato")),
+    "passo_volume": (_("Passo del volume"), _("cambiato")),
+    "volume_effetti": (_("Volume degli effetti"), _("cambiato")),
+    "replaygain": (_("Volume uniforme (ReplayGain)"), _("cambiato")),
+    "scheda_audio": (_("Scheda audio"), _("cambiata")),
+    "passo_indietro": (_("Salto indietro di Ctrl+Q"), _("cambiato")),
+    "passo_avanti": (_("Salto avanti di Maiuscolo+Q"), _("cambiato")),
+    "velocita": (_("Velocità"), _("cambiata")),
+    "tono": (_("Tono"), _("cambiato")),
+    "bande": (_("Equalizzatore"), _("cambiato")),
+    "dissolvenza": (_("Dissolvenza"), _("cambiata")),
+    "casuale": (_("Riproduzione casuale (Ctrl+N, Maiuscolo+N)"), _("cambiata")),
+    "modello_casuale": (_("Modello della riproduzione casuale"), _("cambiato")),
+    "ripetizione": (_("Ripetizione (Maiuscolo+V)"), _("cambiata")),
+    "video": (_("Video (Ctrl+F1, Maiuscolo+F1)"), _("cambiato")),
+    "sottotitoli": (_("Sottotitoli letti (D)"), _("cambiati")),
+    "sintesi": (_("Sintesi di sottotitoli e karaoke"), _("cambiata")),
+    "destinazione": (_("Dove vanno sottotitoli e karaoke"), _("cambiato")),
+    "karaoke": (_("Testo del karaoke"), _("cambiato")),
+    "anticipo_karaoke": (_("Anticipo del karaoke"), _("cambiato")),
+    "celle_braille": (_("Celle della barra braille"), _("cambiate")),
+    "lettura_minima": (_("Tempo minimo di lettura in braille"), _("cambiato")),
+    "banco_midi": (_("Banco dei suoni MIDI"), _("cambiato")),
+    "insegui": (_("Inseguimento della plancia (Ctrl+F8, Maiuscolo+F8)"), _("cambiato")),
+    "ripresa_oltre": (_("Punto lasciato dei file lunghi"), _("cambiato")),
     # La lingua di MeTeOra, fra quelle con un catalogo (3.0.0).
     "lingua": (_("Lingua"), _("cambiata")),
-    "caratteri": ("Dimensioni dei caratteri", "cambiate"),
-    "colori_testo": ("Colori dei caratteri", "cambiati"),
-    "colori_sfondo": ("Colori dello sfondo", "cambiati"),
-    "barra_dei_comandi": ("Barra dei comandi per il mouse", "cambiata"),
-    "stato_della_selezione": ("Stato della selezione per lo screen reader", "cambiato"),
-    "righe_della_console": ("Righe della console", "cambiate"),
-    "salva_console": ("Salva console", None),
-    "marcatori": ("Marcatori", None),
-    "importa_marcatori": ("Importa marcatori", None),
-    "associazioni": ("Associazioni dei formati", None),
-    "impressi": ("Sottotitoli impressi", "cambiati"),
-    "dona": ("Dona per questo progetto", None),
+    "caratteri": (_("Dimensioni dei caratteri"), _("cambiate")),
+    "colori_testo": (_("Colori dei caratteri"), _("cambiati")),
+    "colori_sfondo": (_("Colori dello sfondo"), _("cambiati")),
+    "barra_dei_comandi": (_("Barra dei comandi per il mouse"), _("cambiata")),
+    "stato_della_selezione": (_("Stato della selezione per lo screen reader"), _("cambiato")),
+    "righe_della_console": (_("Righe della console"), _("cambiate")),
+    "salva_console": (_("Salva console"), None),
+    "marcatori": (_("Marcatori"), None),
+    "importa_marcatori": (_("Importa marcatori"), None),
+    "associazioni": (_("Associazioni dei formati"), None),
+    "impressi": (_("Sottotitoli impressi"), _("cambiati")),
+    "dona": (_("Dona per questo progetto"), None),
     # Il PUB, il gruppo di supporto, accanto al dono (issue 30, 2.1.0).
-    "entra_al_pub": ("Entra al PUB (gruppo di supporto)", None),
-    "chiedi_aiuto_al_pub": ("Chiedi aiuto al PUB", None),
+    "entra_al_pub": (_("Entra al PUB (gruppo di supporto)"), None),
+    "chiedi_aiuto_al_pub": (_("Chiedi aiuto al PUB"), None),
 }
 # Come si leggono i sottotitoli impressi nel video, 1.80.0: le righe della scelta.
 MODI_DEGLI_IMPRESSI = {
-    "al_volo": "letti al volo, mentre il video suona, con circa mezzo secondo di ritardo",
-    "passata": "letti prima, con una passata che salva accanto al video un file usato le volte dopo",
+    # Traduttori: completano la frase I sottotitoli impressi ora sono letti al volo, ...
+    "al_volo": _("letti al volo, mentre il video suona, con circa mezzo secondo di ritardo"),
+    "passata": _("letti prima, con una passata che salva accanto al video un file usato le volte dopo"),
 }
 # Il testo del karaoke, 1.82.0: le righe della scelta.
 MODI_DEL_KARAOKE = {
-    "riga": "per riga",
-    "strofa": "per strofa, dove il file le segna; altrimenti per riga",
+    # Traduttori: come si mostra il testo del karaoke, una riga alla volta.
+    "riga": _("per riga"),
+    "strofa": _("per strofa, dove il file le segna; altrimenti per riga"),
 }
 # Il titolo della traccia che fa un file scritto dalla passata.
-TITOLO_DELLA_PASSATA = "Sottotitoli impressi"
+TITOLO_DELLA_PASSATA = _("Sottotitoli impressi")
 # Per _aggiorna_la_lettura: la traccia scelta la dicono le tracce.
 _DALLE_TRACCE = object()
 
@@ -692,15 +701,17 @@ def _traccia_della_passata(tracce):
     """La traccia del file di una passata dei sottotitoli impressi, o None."""
     return next((t for t in tracce["sub"] if t.get("title") == TITOLO_DELLA_PASSATA), None) if tracce else None
 # L'ultima riga delle istruzioni di ogni campo.
-REGOLA_DEL_DOLLARO = "Le righe che cominciano con il dollaro non contano: scrivi nell'ultima riga."
+REGOLA_DEL_DOLLARO = _("Le righe che cominciano con il dollaro non contano: scrivi nell'ultima riga.")
 # La prova della scheda audio degli effetti: un centesimo di secondo di
 # silenzio alla frequenza del mixer, 44100, che la apre senza suonare niente,
 # anche con il volume degli effetti a zero.
 SILENZIO_DI_PROVA = 441
 # Perche' la scheda audio scelta non e' quella in uso, come lo dice la riga
 # della finestra delle impostazioni: si usa l'automatica, e la scelta resta.
-SCHEDA_MANCANTE = "non c'è"
-SCHEDA_CHE_NON_SI_APRE = "non si apre"
+# Traduttori: la scheda audio scelta, come in Scheda audio: Cuffie USB, non c'è: uso quella automatica.
+SCHEDA_MANCANTE = _("non c'è")
+# Traduttori: la scheda audio scelta, come in Scheda audio: Cuffie USB, non si apre: uso quella automatica.
+SCHEDA_CHE_NON_SI_APRE = _("non si apre")
 # Quanto si aspetta dopo l'ultimo cambio delle uscite audio, prima di
 # rileggerle (1.116.0), in millesimi: connettendo delle cuffie Bluetooth
 # Windows aggiunge l'uscita e poi ne fa la predefinita, e gli avvisi
@@ -816,9 +827,16 @@ CHANGELOG_SU_GITHUB = "https://github.com/GabrieleBattaglia/MeTeOra/blob/main/CH
 RITORNO_AL_CAPITOLO = 3.0
 
 
-def frase_del_capitolo(numero, totale, titolo, secondi):
-    """Capitolo 3 di 12: Il titolo, 23:10."""
-    return f"Capitolo {numero} di {totale}{f': {titolo}' if titolo else ''}, {tempo(secondi)}"
+def frase_del_capitolo(numero, totale, titolo, secondi, dal=False):
+    """Capitolo 3 di 12: Il titolo, 23:10. Con dal, per il file fatto
+    partire da li': Dal capitolo 3 di 12: Il titolo, 23:10."""
+    if dal and titolo:
+        return _("Dal capitolo {numero} di {totale}: {titolo}, {tempo}").format(numero=numero, totale=totale, titolo=titolo, tempo=tempo(secondi))
+    if dal:
+        return _("Dal capitolo {numero} di {totale}, {tempo}").format(numero=numero, totale=totale, tempo=tempo(secondi))
+    if titolo:
+        return _("Capitolo {numero} di {totale}: {titolo}, {tempo}").format(numero=numero, totale=totale, titolo=titolo, tempo=tempo(secondi))
+    return _("Capitolo {numero} di {totale}, {tempo}").format(numero=numero, totale=totale, tempo=tempo(secondi))
 
 
 def capitolo_attuale(elenco, posizione):
@@ -886,23 +904,26 @@ def frase_delle_saltate(scartate):
     motivo solo il numero non si ripete: Saltate 2 voci: file che non ci sono."""
     if not scartate:
         return ""
-    testa = "Saltata 1 voce" if len(scartate) == 1 else f"Saltate {len(scartate)} voci"
     motivi = importazione.conta_i_motivi(scartate)
     if len(motivi) == 1:
         motivo, quante = motivi[0]
-        return f"{testa}: {importazione.MOTIVI[motivo][0 if quante == 1 else 1]}."
-    return f"{testa}: {', '.join(al_plurale(quante, *importazione.MOTIVI[motivo]) for motivo, quante in motivi)}."
+        elenco = importazione.motivo(motivo, quante)
+    else:
+        elenco = ", ".join(importazione.motivo(motivo, quante, numero=True) for motivo, quante in motivi)
+    # Traduttori: motivi e' l'elenco dei motivi per cui le voci della playlist si saltano, come 2 indirizzi in rete, 1 cartella.
+    return ngettext("Saltata {n} voce: {motivi}.", "Saltate {n} voci: {motivi}.", len(scartate)).format(n=len(scartate), motivi=elenco)
 
 
 def righe_delle_saltate(scartate, massimo=MASSIMO_DELLE_VOCI_SALTATE):
     """Una riga per ogni voce saltata, con il motivo, fino a massimo; poi
     quante altre ce ne sono."""
-    righe = [f"Saltata {voce.leggibile}: {importazione.MOTIVI[voce.motivo][0]}." for voce in scartate[:massimo]]
+    righe = [_("Saltata {voce}: {motivo}.").format(voce=voce.leggibile, motivo=importazione.motivo(voce.motivo)) for voce in scartate[:massimo]]
     altre = len(scartate) - massimo
     if altre == 1:
-        righe.append("E un'altra voce saltata.")
+        righe.append(_("E un'altra voce saltata."))
     elif altre > 1:
-        righe.append(f"E altre {altre} voci saltate.")
+        # Traduttori: sempre piu' di una voce; una sola ha la sua frase, E un'altra voce saltata.
+        righe.append(plurale(altre, "E altre {n} voci saltate.", "E altre {n} voci saltate."))
     return righe
 
 
@@ -913,9 +934,11 @@ def frase_delle_tenute(tenute):
     if not tenute:
         return ""
     quante, radici = sum(tenute.values()), sorted(tenute)
-    elenco = radici[0] if len(radici) == 1 else f"{', '.join(radici[:-1])} e {radici[-1]}"
-    voci = "Tenuta senza controllo 1 voce" if quante == 1 else f"Tenute senza controllo {quante} voci"
-    return f"{voci} di {elenco}, che {'non risponde' if len(radici) == 1 else 'non rispondono'}."
+    # Traduttori: l'ultima unita' di un elenco, come in F:, G: e H:.
+    elenco = radici[0] if len(radici) == 1 else _("{prime} e {ultima}").format(prime=", ".join(radici[:-1]), ultima=radici[-1])
+    voci = ngettext("Tenuta senza controllo {n} voce", "Tenute senza controllo {n} voci", quante).format(n=quante)
+    # Traduttori: voci e' Tenute senza controllo 30 voci, radici le unita' che non rispondono, come F: e G:.
+    return ngettext("{voci} di {radici}, che non risponde.", "{voci} di {radici}, che non rispondono.", len(radici)).format(voci=voci, radici=elenco)
 
 
 def _passo_nostro(nome_del_file):
@@ -947,10 +970,11 @@ def riga_dell_avviso(messaggio):
     avviso: la prima riga del suo testo e il punto del codice di MeTeOra da
     cui viene, se la traccia ci passa."""
     testo = str(messaggio)
-    riga = f"Problema interno nel motore: {_breve(testo.splitlines()[0] if testo else '')}"
+    riga = _("Problema interno nel motore: {messaggio}").format(messaggio=_breve(testo.splitlines()[0] if testo else ""))
     passi = [p for p in _PASSO_NEL_TESTO.finditer(testo) if _passo_nostro(p.group(1))]
     if passi:
-        riga += f", in {os.path.basename(passi[-1].group(1))} alla riga {passi[-1].group(2)}, {passi[-1].group(3)}"
+        # Traduttori: dove e' successo un problema interno: il file del codice, il numero della riga e la funzione.
+        riga += _(", in {file} alla riga {numero}, {funzione}").format(file=os.path.basename(passi[-1].group(1)), numero=passi[-1].group(2), funzione=passi[-1].group(3))
     return riga + "."
 
 
@@ -960,7 +984,7 @@ def riga_del_problema(tipo, valore, traccia):
     passi = traceback.extract_tb(traccia) if traccia else []
     nostri = [p for p in passi if _passo_nostro(p.filename)]
     passo = (nostri or passi or [None])[-1]
-    testo = f"Problema interno: {tipo.__name__}"
+    testo = _("Problema interno: {tipo}").format(tipo=tipo.__name__)
     # Anche un messaggio che non si lascia scrivere non deve fermare la riga.
     messaggio = ""
     with contextlib.suppress(Exception):
@@ -968,56 +992,59 @@ def riga_del_problema(tipo, valore, traccia):
     if messaggio:
         testo += f", {messaggio}"
     if passo is not None:
-        testo += f", in {os.path.basename(passo.filename)} alla riga {passo.lineno}, {passo.name}"
+        # Traduttori: dove e' successo un problema interno: il file del codice, il numero della riga e la funzione.
+        testo += _(", in {file} alla riga {numero}, {funzione}").format(file=os.path.basename(passo.filename), numero=passo.lineno, funzione=passo.name)
     return testo + "."
 
 
 # Le istruzioni in cima ai campi dei filtri e delle ricerche, scritte come
 # righe di commento, che cominciano con il dollaro e non contano.
 _GRAMMATICA_DEL_FILTRO = [
-    "Spazio: tutti i termini insieme, come rob hubbard. Andare a capo vale come uno spazio.",
-    "Barra verticale: l'uno o l'altro, come hubbard|galway.",
-    "Meno davanti a un termine: escluso, come -remix.",
-    "Asterisco: qualsiasi testo, come comm*do. Cancelletto: una o più cifre, come vol#.",
-    'Virgolette: la sequenza esatta, spazi compresi, come "last ninja".',
-    "Maiuscole e accenti non contano. Un termine senza comando cerca nel nome del file e nei tag.",
-    "I comandi sono una lettera, un segno fra < > = <= >= e un valore:",
-    "t tempo, come t<=3:00 o t>90.",
-    "d dimensione, come d>5m o d<700k.",
-    "y anno, come y<1990.",
-    "r sottobrani dei SID e della musica delle console, come r>1.",
-    "Questi solo con l'uguale:",
-    "k tipo: k=sid, k=audio, k=video, k=tracker, k=midi, k=chip, o un'estensione come k=flac.",
-    "a autore, come a=hubbard.",
-    "n titolo, come n=commando.",
-    "l album.",
-    "g genere.",
-    "p percorso della cartella, come p=c64music.",
-    "s saltato: s=1 i brani saltati, s=0 gli altri.",
+    _("Spazio: tutti i termini insieme, come rob hubbard. Andare a capo vale come uno spazio."),
+    _("Barra verticale: l'uno o l'altro, come hubbard|galway."),
+    _("Meno davanti a un termine: escluso, come -remix."),
+    _("Asterisco: qualsiasi testo, come comm*do. Cancelletto: una o più cifre, come vol#."),
+    _('Virgolette: la sequenza esatta, spazi compresi, come "last ninja".'),
+    _("Maiuscole e accenti non contano. Un termine senza comando cerca nel nome del file e nei tag."),
+    _("I comandi sono una lettera, un segno fra < > = <= >= e un valore:"),
+    # Traduttori: le lettere, i segni e i valori dopo l'uguale sono i comandi del filtro, e restano come sono.
+    _("t tempo, come t<=3:00 o t>90."),
+    _("d dimensione, come d>5m o d<700k."),
+    _("y anno, come y<1990."),
+    _("r sottobrani dei SID e della musica delle console, come r>1."),
+    _("Questi solo con l'uguale:"),
+    # Traduttori: le lettere, i segni e i valori dopo l'uguale sono i comandi del filtro, e restano come sono.
+    _("k tipo: k=sid, k=audio, k=video, k=tracker, k=midi, k=chip, o un'estensione come k=flac."),
+    _("a autore, come a=hubbard."),
+    _("n titolo, come n=commando."),
+    _("l album."),
+    _("g genere."),
+    _("p percorso della cartella, come p=c64music."),
+    _("s saltato: s=1 i brani saltati, s=0 gli altri."),
     REGOLA_DEL_DOLLARO,
 ]
-ISTRUZIONI_DEL_FILTRO = ["Puoi usare questi comandi per comporre il filtro.", *_GRAMMATICA_DEL_FILTRO]
-ISTRUZIONI_DELLA_RICERCA = ["Puoi usare questi comandi per comporre la ricerca, in tutte le playlist, in tutte le unità e nei percorsi di rete aggiunti a mano.", *_GRAMMATICA_DEL_FILTRO]
+ISTRUZIONI_DEL_FILTRO = [_("Puoi usare questi comandi per comporre il filtro."), *_GRAMMATICA_DEL_FILTRO]
+ISTRUZIONI_DELLA_RICERCA = [_("Puoi usare questi comandi per comporre la ricerca, in tutte le playlist, in tutte le unità e nei percorsi di rete aggiunti a mano."), *_GRAMMATICA_DEL_FILTRO]
 # Dove cerca Ctrl con la barra rovesciata, la ricerca in tutto MeTeOra.
 OVUNQUE = "nelle playlist, nei dischi e in rete"
 ISTRUZIONI_DELLA_CONSOLE = [
-    "Puoi usare questi segni per comporre la ricerca nella console.",
-    "Il testo si cerca così com'è, spazi compresi; maiuscole e minuscole non contano. Andare a capo vale come uno spazio.",
-    "Asterisco: qualsiasi testo nella stessa riga, come non*suonare.",
-    "Cancelletto: una o più cifre, come volume #.",
-    'Virgolette: la sequenza esatta, maiuscole comprese, come "SID".',
-    "I messaggi finiscono con l'ora: 07:13 trova ciò che è accaduto alle 7 e 13, e 07:# tutta l'ora delle 7; trovano anche i tempi dei brani che contengono quelle cifre, come 1:07:13.",
-    "Invio, dalla console, passa all'occorrenza seguente.",
+    _("Puoi usare questi segni per comporre la ricerca nella console."),
+    _("Il testo si cerca così com'è, spazi compresi; maiuscole e minuscole non contano. Andare a capo vale come uno spazio."),
+    _("Asterisco: qualsiasi testo nella stessa riga, come non*suonare."),
+    _("Cancelletto: una o più cifre, come volume #."),
+    _('Virgolette: la sequenza esatta, maiuscole comprese, come "SID".'),
+    _("I messaggi finiscono con l'ora: 07:13 trova ciò che è accaduto alle 7 e 13, e 07:# tutta l'ora delle 7; trovano anche i tempi dei brani che contengono quelle cifre, come 1:07:13."),
+    _("Invio, dalla console, passa all'occorrenza seguente."),
     REGOLA_DEL_DOLLARO,
 ]
 ISTRUZIONI_DELLE_STATISTICHE = [
-    "Puoi usare questi segni per comporre la ricerca nelle statistiche.",
-    "Il testo si cerca così com'è, spazi compresi; maiuscole e minuscole non contano. Andare a capo vale come uno spazio.",
-    "Asterisco: qualsiasi testo nella stessa riga, come brani*fine.",
-    "Cancelletto: una o più cifre, come sezione # di.",
-    'Virgolette: la sequenza esatta, maiuscole comprese, come "SID".',
-    "Sezione 12 porta all'inizio della dodicesima sezione; le sezioni le elenca la riga che comincia con Le sezioni.",
-    "Invio, dal testo delle statistiche, passa all'occorrenza seguente.",
+    _("Puoi usare questi segni per comporre la ricerca nelle statistiche."),
+    _("Il testo si cerca così com'è, spazi compresi; maiuscole e minuscole non contano. Andare a capo vale come uno spazio."),
+    _("Asterisco: qualsiasi testo nella stessa riga, come brani*fine."),
+    _("Cancelletto: una o più cifre, come sezione # di."),
+    _('Virgolette: la sequenza esatta, maiuscole comprese, come "SID".'),
+    _("Sezione 12 porta all'inizio della dodicesima sezione; le sezioni le elenca la riga che comincia con Le sezioni."),
+    _("Invio, dal testo delle statistiche, passa all'occorrenza seguente."),
     REGOLA_DEL_DOLLARO,
 ]
 
@@ -1035,7 +1062,7 @@ class FinestraFiltro(wx.Dialog):
         super().__init__(genitore, title=titolo, style=STILE_ADATTABILE)
         pannello = pannello_scorrevole(self)
         sizer = wx.BoxSizer(wx.VERTICAL)
-        etichetta = wx.StaticText(pannello, label=f"{titolo}. Invio conferma, Ctrl+Invio va a capo, Esc annulla.")
+        etichetta = wx.StaticText(pannello, label=_("{titolo}. Invio conferma, Ctrl+Invio va a capo, Esc annulla.").format(titolo=titolo))
         self._commenti = sorted((f"{COMMENTO} {riga}" for riga in istruzioni), key=len, reverse=True)
         # Senza a capo automatici: ogni istruzione resta una riga intera, con
         # il suo dollaro, quando NVDA e il display braille la leggono.
@@ -1047,8 +1074,8 @@ class FinestraFiltro(wx.Dialog):
         self._inizio = self.campo.GetLastPosition()
         self.campo.AppendText(testo)
         pulsanti = wx.StdDialogButtonSizer()
-        pulsanti.AddButton(wx.Button(pannello, wx.ID_OK, "Conferma"))
-        pulsanti.AddButton(wx.Button(pannello, wx.ID_CANCEL, "Annulla"))
+        pulsanti.AddButton(wx.Button(pannello, wx.ID_OK, _("Conferma")))
+        pulsanti.AddButton(wx.Button(pannello, wx.ID_CANCEL, _("Annulla")))
         pulsanti.Realize()
         sizer.Add(etichetta, 0, wx.ALL, 5)
         sizer.Add(self.campo, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
@@ -1463,11 +1490,12 @@ class Finestra(wx.Frame):
         # La barra dei comandi per il mouse, per chi vede (Gabriele, 1.87.0):
         # non prende mai il fuoco e non e' nell'ordine di tabulazione.
         self.barra = BarraDeiComandi(self, acceso=self.impostazioni["barra_dei_comandi"])
-        self.scrivi(f"MeTeOra {version.VERSION} del {version.DATE}. Pronto: F1 apre il manuale nel browser, F12 scrive nella console la guida rapida dei tasti, F7 apre il cruscotto con i tasti del punto in cui ti trovi.")
+        self.scrivi(_("MeTeOra {versione} del {data}. Pronto: F1 apre il manuale nel browser, F12 scrive nella console la guida rapida dei tasti, "
+            "F7 apre il cruscotto con i tasti del punto in cui ti trovi.").format(versione=version.VERSION, data=version.DATE))
         # Dopo un aggiornamento la versione e' cambiata: lo si dice (1.84.0).
         prima = self.impostazioni["versione"]
         if prima and prima != version.VERSION:
-            self.scrivi(f"MeTeOra è stato aggiornato dalla {prima} alla {version.VERSION}: F2 scrive nella console le novità.")
+            self.scrivi(_("MeTeOra è stato aggiornato dalla {prima} alla {versione}: F2 scrive nella console le novità.").format(prima=prima, versione=version.VERSION))
         if prima != version.VERSION:
             self.impostazioni["versione"] = version.VERSION
             self._salva_impostazioni()
@@ -1480,27 +1508,30 @@ class Finestra(wx.Frame):
         if self.impostazioni.errore:
             nuovo = os.path.basename(self.impostazioni.percorso)
             if self.impostazioni.da_nuovo:
-                testo = f"Il file delle impostazioni non si legge: {self.impostazioni.errore}. Riparto da quelle salvate in {nuovo}."
+                testo = _("Il file delle impostazioni non si legge: {errore}. Riparto da quelle salvate in {nuovo}.").format(errore=self.impostazioni.errore, nuovo=nuovo)
             else:
-                testo = f"Il file delle impostazioni non si legge, e parto con quelle predefinite: {self.impostazioni.errore}. Le impostazioni nuove vanno in {nuovo}."
+                testo = _("Il file delle impostazioni non si legge, e parto con quelle predefinite: {errore}. Le impostazioni nuove vanno in {nuovo}.").format(
+                    errore=self.impostazioni.errore, nuovo=nuovo)
             self._avviso_all_avvio("errore", testo)
         if errore_archivio:
-            self._avviso_all_avvio("errore", f"Il file delle playlist non si legge, e parto senza playlist: {errore_archivio}")
+            self._avviso_all_avvio("errore", _("Il file delle playlist non si legge, e parto senza playlist: {errore}").format(errore=errore_archivio))
             # Il file illeggibile non va sovrascritto alla prima modifica.
             self.archivio.percorso += ".nuovo"
         if self.marcatori.errore:
-            self._avviso_all_avvio("errore", f"Il file dei marker non si legge, e resta com'è: {self.marcatori.errore}. I marker nuovi vanno in {os.path.basename(self.marcatori.percorso)}.")
+            self._avviso_all_avvio("errore", _("Il file dei marker non si legge, e resta com'è: {errore}. I marker nuovi vanno in {nuovo}.").format(
+                errore=self.marcatori.errore, nuovo=os.path.basename(self.marcatori.percorso)))
         if self._statistiche.errore:
             nuovo = os.path.basename(self._statistiche.percorso)
             if self._statistiche.da_nuovo:
-                testo = f"Il file delle statistiche non si legge: {self._statistiche.errore}. Riparto da quelle salvate in {nuovo}."
+                testo = _("Il file delle statistiche non si legge: {errore}. Riparto da quelle salvate in {nuovo}.").format(errore=self._statistiche.errore, nuovo=nuovo)
             else:
-                testo = f"Il file delle statistiche non si legge, e resta com'è: {self._statistiche.errore}. Le statistiche nuove vanno in {nuovo}."
+                testo = _("Il file delle statistiche non si legge, e resta com'è: {errore}. Le statistiche nuove vanno in {nuovo}.").format(
+                    errore=self._statistiche.errore, nuovo=nuovo)
             self._avviso_all_avvio("errore", testo)
         if self.dischi.errore:
             # Le lettere contese non si rileggono da nessuna parte: niente .nuovo, la pulizia non impara niente (1.112.0).
-            self._avviso_all_avvio("errore", f"Il file dei dischi della pulizia non si legge, e resta com'è: {self.dischi.errore}. "
-                "Finché non si legge, la pulizia all'avvio salta tutte le unità con la lettera.")
+            self._avviso_all_avvio("errore", _("Il file dei dischi della pulizia non si legge, e resta com'è: {errore}. "
+                "Finché non si legge, la pulizia all'avvio salta tutte le unità con la lettera.").format(errore=self.dischi.errore))
         self._scrivi_la_scheda_all_avvio(esito_della_scheda, errore_della_scheda)
         self._chiedi_schede(*self.archivio.playlist, self.archivio.preferiti)
         self._orologio_pronto = True
@@ -1512,7 +1543,7 @@ class Finestra(wx.Frame):
         pannello = wx.Panel(self)
         sopra = wx.BoxSizer(wx.HORIZONTAL)
         colonna_sinistra = wx.BoxSizer(wx.VERTICAL)
-        colonna_sinistra.Add(wx.StaticText(pannello, label="Plancia dei comandi"), 0, wx.ALL, 2)
+        colonna_sinistra.Add(wx.StaticText(pannello, label=_("Plancia dei comandi")), 0, wx.ALL, 2)
         # A selezione singola, nativa, come l'albero di Esplora risorse. Con
         # wx.TR_MULTIPLE wx simula la selezione multipla, e a ogni freccia
         # manda a NVDA anche fuochi sulla voce di prima, che NVDA a volte
@@ -1522,7 +1553,7 @@ class Finestra(wx.Frame):
         # spegne la voce col fuoco, e i clic con Ctrl e Maiuscolo fanno lo
         # stesso con il mouse.
         self.albero = wx.TreeCtrl(pannello, style=wx.TR_DEFAULT_STYLE | wx.TR_HIDE_ROOT)
-        self.albero.SetName("Plancia dei comandi")
+        self.albero.SetName(_("Plancia dei comandi"))
         # Lo stato della selezione per lo screen reader (issue 21): l'oggetto
         # si attacca solo con la voce delle impostazioni accesa all'avvio, o
         # quando la si accende; spenta, risponde come Windows, e non si stacca
@@ -1531,17 +1562,18 @@ class Finestra(wx.Frame):
             self._attacca_lo_stato_della_selezione()
         colonna_sinistra.Add(self.albero, 1, wx.EXPAND)
         colonna_destra = wx.BoxSizer(wx.VERTICAL)
-        colonna_destra.Add(wx.StaticText(pannello, label="Console"), 0, wx.ALL, 2)
+        colonna_destra.Add(wx.StaticText(pannello, label=_("Console")), 0, wx.ALL, 2)
         self.console = wx.TextCtrl(pannello, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2)
-        self.console.SetName("Console")
+        self.console.SetName(_("Console"))
         colonna_destra.Add(self.console, 1, wx.EXPAND)
         sopra.Add(colonna_sinistra, 1, wx.EXPAND | wx.ALL, 4)
         sopra.Add(colonna_destra, 1, wx.EXPAND | wx.ALL, 4)
         tutto = wx.BoxSizer(wx.VERTICAL)
         tutto.Add(sopra, 1, wx.EXPAND)
-        tutto.Add(wx.StaticText(pannello, label="Cruscotto"), 0, wx.LEFT | wx.RIGHT, 6)
+        # Traduttori: il nome dell'area in basso della finestra, che mostra i tasti del punto in cui si e'.
+        tutto.Add(wx.StaticText(pannello, label=_("Cruscotto")), 0, wx.LEFT | wx.RIGHT, 6)
         self.cruscotto = wx.TextCtrl(pannello, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2)
-        self.cruscotto.SetName("Cruscotto")
+        self.cruscotto.SetName(_("Cruscotto"))
         # Caratteri e colori delle impostazioni, prima di misurare il
         # cruscotto: la sua misura la calcola _applica_aspetto.
         self._applica_aspetto()
@@ -1636,16 +1668,16 @@ class Finestra(wx.Frame):
 
     def _popola_albero(self):
         radice = self.albero.AddRoot("MeTeOra")
-        self.nodo_preferiti = self.albero.AppendItem(radice, "Preferiti", data={"tipo": "playlist", "playlist": self.archivio.preferiti, "caricato": False})
-        self.nodo_playlist = self.albero.AppendItem(radice, "Playlist", data={"tipo": "radice_playlist"})
-        self.nodo_pc = self.albero.AppendItem(radice, "Questo PC", data={"tipo": "pc", "caricato": False})
+        self.nodo_preferiti = self.albero.AppendItem(radice, _("Preferiti"), data={"tipo": "playlist", "playlist": self.archivio.preferiti, "caricato": False})
+        self.nodo_playlist = self.albero.AppendItem(radice, _("Playlist"), data={"tipo": "radice_playlist"})
+        self.nodo_pc = self.albero.AppendItem(radice, _("Questo PC"), data={"tipo": "pc", "caricato": False})
         self.albero.SetItemHasChildren(self.nodo_pc, True)
-        self.nodo_rete = self.albero.AppendItem(radice, "Questa rete", data={"tipo": "rete", "caricato": False})
+        self.nodo_rete = self.albero.AppendItem(radice, _("Questa rete"), data={"tipo": "rete", "caricato": False})
         self.albero.SetItemHasChildren(self.nodo_rete, True)
-        self.albero.AppendItem(radice, "Apri file", data={"tipo": "comando", "comando": "apri_file"})
+        self.albero.AppendItem(radice, _("Apri file"), data={"tipo": "comando", "comando": "apri_file"})
         # Le statistiche, prima delle impostazioni (Gabriele, 1.103.0).
-        self.albero.AppendItem(radice, "Statistiche", data={"tipo": "comando", "comando": "statistiche"})
-        self.albero.AppendItem(radice, "Impostazioni", data={"tipo": "comando", "comando": "impostazioni"})
+        self.albero.AppendItem(radice, _("Statistiche"), data={"tipo": "comando", "comando": "statistiche"})
+        self.albero.AppendItem(radice, _("Impostazioni"), data={"tipo": "comando", "comando": "impostazioni"})
         self._popola_playlist()
         self._seleziona(self.nodo_preferiti)
 
@@ -1847,15 +1879,16 @@ class Finestra(wx.Frame):
             else:
                 scartati.append(os.path.basename(percorso.rstrip("\\")) or percorso)
         if scartati:
-            self.scrivi(f"MeTeOra non suona {', '.join(scartati)}: non è un formato che conosce, o non c'è.")
+            self.scrivi(_("MeTeOra non suona {file}: non è un formato che conosce, o non c'è.").format(file=", ".join(scartati)))
         self._importa_le_playlist(liste, None if brani else "suona")
         if not brani:
             if not liste:
-                self._riscontro("niente_da_suonare", "Niente da suonare in quello che arriva da Windows.")
+                self._riscontro("niente_da_suonare", _("Niente da suonare in quello che arriva da Windows."))
             return
         # Come Apri file: la lista non entra fra le playlist, e la sua
         # cartella vuota la tiene fuori da Questo PC.
-        pl = Playlist("file aperti" if len(brani) > 1 else "file aperto", brani, cartella="")
+        # Traduttori: il nome della lista, che non entra fra le playlist, dei file aperti da Windows.
+        pl = Playlist(_("file aperti") if len(brani) > 1 else _("file aperto"), brani, cartella="")
         self._suona(pl, pl.brani[0], "file_aperto")
 
     # I punti dei file lunghi (Gabriele, 4 ottobre 2026, 1.92.0).
@@ -1886,7 +1919,7 @@ class Finestra(wx.Frame):
             self._statistiche.conta("salvataggi_non_riusciti")
             if not self._posizioni_non_salvate:
                 self._posizioni_non_salvate = True
-                self._riscontro("errore", f"Non riesco a salvare le posizioni dei file lunghi: {e.strerror or e}.")
+                self._riscontro("errore", _("Non riesco a salvare le posizioni dei file lunghi: {errore}.").format(errore=e.strerror or e))
 
     # I capitoli (Gabriele, 4 ottobre 2026, 1.93.0).
 
@@ -1913,7 +1946,7 @@ class Finestra(wx.Frame):
             return
         elenco = self._capitoli_in_corso()
         if not elenco:
-            self._riporta(f"{os.path.basename(self.motore.in_corso)} non ha capitoli.", "capitolo")
+            self._riporta(_("{file} non ha capitoli.").format(file=os.path.basename(self.motore.in_corso)), "capitolo")
             return
         indice = capitolo_attuale(elenco, self.motore.posizione or 0.0)
         secondi, titolo = elenco[indice]
@@ -1932,13 +1965,13 @@ class Finestra(wx.Frame):
             return
         elenco = self._capitoli_in_corso()
         if not elenco:
-            self._riscontro("non_disponibile", f"{os.path.basename(self.motore.in_corso)} non ha capitoli.")
+            self._riscontro("non_disponibile", _("{file} non ha capitoli.").format(file=os.path.basename(self.motore.in_corso)))
             return
         posizione = self.motore.posizione or 0.0
         attuale = capitolo_attuale(elenco, posizione)
         indice = len(elenco) - 1 if ultimo else 0
         if attuale == indice and (ultimo or posizione - elenco[0][0] <= RITORNO_AL_CAPITOLO):
-            self._riscontro("nessun_altro_brano", "Sei già nell'ultimo capitolo." if ultimo else "È il primo capitolo.")
+            self._riscontro("nessun_altro_brano", _("Sei già nell'ultimo capitolo.") if ultimo else _("È il primo capitolo."))
             return
         secondi, titolo = elenco[indice]
         self.motore.vai_a(secondi)
@@ -1957,19 +1990,19 @@ class Finestra(wx.Frame):
             return
         elenco = self._capitoli_in_corso()
         if not elenco:
-            self._riscontro("non_disponibile", f"{os.path.basename(self.motore.in_corso)} non ha capitoli.")
+            self._riscontro("non_disponibile", _("{file} non ha capitoli.").format(file=os.path.basename(self.motore.in_corso)))
             return
         posizione = self.motore.posizione or 0.0
         attuale = capitolo_attuale(elenco, posizione)
         if passo < 0:
             indice = attuale if posizione - elenco[attuale][0] > RITORNO_AL_CAPITOLO else attuale - 1
             if indice < 0:
-                self._riscontro("nessun_altro_brano", "È il primo capitolo.")
+                self._riscontro("nessun_altro_brano", _("È il primo capitolo."))
                 return
         else:
             indice = attuale + 1
             if indice >= len(elenco):
-                self._riscontro("nessun_altro_brano", "È l'ultimo capitolo.")
+                self._riscontro("nessun_altro_brano", _("È l'ultimo capitolo."))
                 return
         secondi, titolo = elenco[indice]
         self.motore.vai_a(secondi)
@@ -1984,18 +2017,19 @@ class Finestra(wx.Frame):
             self._riscontro("capitolo_successivo", frase)
             return
         self._suona(dati["playlist"], dati["brano"], inizio=dati["secondi"])
-        self.scrivi(f"Dal {frase[0].lower()}{frase[1:]}")
+        self.scrivi(f"{frase_del_capitolo(dati['numero'], dati['totale'], dati['titolo'], dati['secondi'], dal=True)}.")
 
     def copie_mancate(self, nomi):
         """All'avvio, se una copia dei dati non e' riuscita (1.90.0)."""
-        self._riscontro("errore", f"Non riesco a fare la copia di {', '.join(nomi)} nella cartella copie: forse il disco è pieno o protetto.")
+        self._riscontro("errore", _("Non riesco a fare la copia di {file} nella cartella copie: forse il disco è pieno o protetto.").format(file=", ".join(nomi)))
 
     def crash_precedente(self, percorso):
         """All'avvio dopo un crash (1.89.0): la console dice dove sta il
         resoconto, da mandare a chi sviluppa."""
         self._statistiche.conta("crash")
-        self._riscontro("problema", f"L'ultima volta MeTeOra si è chiuso per un errore grave. Il resoconto è nel file {os.path.basename(percorso)}, "
-            f"nella cartella {os.path.dirname(percorso)}: mandalo a chi sviluppa, insieme a MeTeOra - Errori.log.")
+        # Traduttori: MeTeOra - Errori.log e' il nome di un file, e resta com'e'.
+        self._riscontro("problema", _("L'ultima volta MeTeOra si è chiuso per un errore grave. Il resoconto è nel file {file}, "
+            "nella cartella {cartella}: mandalo a chi sviluppa, insieme a MeTeOra - Errori.log.").format(file=os.path.basename(percorso), cartella=os.path.dirname(percorso)))
 
     def _problema(self, tipo, valore, traccia):
         self._scrivi_il_problema(riga_del_problema(tipo, valore, traccia))
@@ -2010,7 +2044,8 @@ class Finestra(wx.Frame):
         categoria = ("problema", riga)
         if self._categoria == categoria:
             self._ripetizioni += 1
-            self.scrivi(f"{riga[:-1]}, {self._ripetizioni} volte.", categoria)
+            # Traduttori: riga e' la riga di un problema interno, senza il punto finale; n quante volte e' arrivato di seguito.
+            self.scrivi(ngettext("{riga}, {n} volta.", "{riga}, {n} volte.", self._ripetizioni).format(riga=riga[:-1], n=self._ripetizioni), categoria)
             return
         self._ripetizioni = 1
         # Se il problema sta nei suoni, la riga arriva lo stesso.
@@ -2066,28 +2101,31 @@ class Finestra(wx.Frame):
     def righe_del_cruscotto(self):
         """Le righe del cruscotto per l'area da cui si arriva."""
         if self._area_precedente == "console":
-            righe = ["Tasti per la console.", "Frecce, Pagina su e giù, Inizio e Fine per leggere; i messaggi nuovi arrivano in fondo, con l'ora. "
-                "La barra rovesciata cerca nella console, anche con i jolly e le virgolette, e Invio passa all'occorrenza seguente."]
+            righe = [_("Tasti per la console."), _("Frecce, Pagina su e giù, Inizio e Fine per leggere; i messaggi nuovi arrivano in fondo, con l'ora. "
+                "La barra rovesciata cerca nella console, anche con i jolly e le virgolette, e Invio passa all'occorrenza seguente.")]
         elif len(self._voci_selezionate()) > 1:
-            righe = [f"Tasti per {len(self._voci_selezionate())} voci selezionate: un ramo selezionato vale per tutto ciò che contiene.",
-                "X suona la selezione come una playlist invisibile, che resta finché non premi V. Invio, Applicazioni o Spazio: menu della selezione, con Leggi i tag e Modifica i tag. "
-                "Canc toglie i brani dalle playlist ed elimina le playlist e i marker, Maiuscolo con Canc manda i file nel cestino, F4 li mette nei Preferiti.",
-                "Maiuscolo con le frecce allarga la selezione, Ctrl con le frecce muove il fuoco senza selezionare, Ctrl con Spazio accende e spegne la voce col fuoco."]
+            quante = len(self._voci_selezionate())
+            righe = [ngettext("Tasti per {n} voce selezionata: un ramo selezionato vale per tutto ciò che contiene.",
+                    "Tasti per {n} voci selezionate: un ramo selezionato vale per tutto ciò che contiene.", quante).format(n=quante),
+                _("X suona la selezione come una playlist invisibile, che resta finché non premi V. Invio, Applicazioni o Spazio: menu della selezione, con Leggi i tag e Modifica i tag. "
+                "Canc toglie i brani dalle playlist ed elimina le playlist e i marker, Maiuscolo con Canc manda i file nel cestino, F4 li mette nei Preferiti."),
+                _("Maiuscolo con le frecce allarga la selezione, Ctrl con le frecce muove il fuoco senza selezionare, Ctrl con Spazio accende e spegne la voce col fuoco.")]
         else:
             # La voce su cui agiscono Canc, X, F4 e il menu, che puo' non
             # essere quella col fuoco (tappa 9).
             voce = self._voce_di_lavoro()
             dati = self._dati(voce) or {}
             tipo = "preferiti" if dati.get("tipo") == "playlist" and dati["playlist"] is self.archivio.preferiti else dati.get("tipo")
-            nome, riga = TASTI_DEL_CONTESTO.get(tipo, ("la plancia", ""))
-            righe = [f"Tasti per {nome}."] + ([riga] if riga else [])
+            nome, riga = TASTI_DEL_CONTESTO.get(tipo, (_("la plancia"), ""))
+            # Traduttori: nome e' il tipo di voce della plancia, con l'articolo, come i Preferiti o una cartella.
+            righe = [_("Tasti per {nome}.").format(nome=nome)] + ([riga] if riga else [])
             if tipo == "cartella" and dati.get("a_mano"):
-                righe.append("Canc, o Togli il percorso nel menu, lo toglie da Questa rete; i file restano dove sono.")
+                righe.append(_("Canc, o Togli il percorso nel menu, lo toglie da Questa rete; i file restano dove sono."))
             if voce != self._voce_corrente():
-                righe.append("Il fuoco è su un'altra voce: le frecce, F9 con i suoi comandi, J, K e la barra verticale partono da lì; Canc, Maiuscolo con Canc, X, Maiuscolo con X, F4, F11, "
-                    "Maiuscolo con F11, Maiuscolo con le cifre, la barra rovesciata e il menu agiscono sulla voce selezionata.")
+                righe.append(_("Il fuoco è su un'altra voce: le frecce, F9 con i suoi comandi, J, K e la barra verticale partono da lì; Canc, Maiuscolo con Canc, X, Maiuscolo con X, F4, F11, "
+                    "Maiuscolo con F11, Maiuscolo con le cifre, la barra rovesciata e il menu agiscono sulla voce selezionata."))
         if not self._tasti_rapidi:
-            righe = ["Tasti rapidi spenti: lettere, cifre e segni vanno alla plancia, che cerca per iniziale; Maiuscolo con F12 li riaccende.", *righe]
+            righe = [_("Tasti rapidi spenti: lettere, cifre e segni vanno alla plancia, che cerca per iniziale; Maiuscolo con F12 li riaccende."), *righe]
         return righe + TASTI_COMUNI
 
     def _vai(self, controllo, evento):
@@ -2170,7 +2208,7 @@ class Finestra(wx.Frame):
             if self._fuoco_nella_plancia():
                 evento.Skip()
                 return False
-            self._riscontro("non_disponibile", "Tasti rapidi spenti: le lettere cercano solo nella plancia, F5. Maiuscolo con F12 li riaccende.",
+            self._riscontro("non_disponibile", _("Tasti rapidi spenti: le lettere cercano solo nella plancia, F5. Maiuscolo con F12 li riaccende."),
                 "tasti_spenti")
             return True
         maiuscolo = modificatori == MAIUSCOLO
@@ -2190,7 +2228,10 @@ class Finestra(wx.Frame):
         # farebbe la sua ricerca per iniziale spostando il fuoco (tappa 9).
         nome = NOMI_DEI_SEGNI.get(carattere, carattere.upper() if carattere.isalpha() else carattere)
         self._statistiche.senza_comando(f"{'Maiuscolo con ' if maiuscolo else ''}{nome}")
-        self._riscontro("non_disponibile", f"{'Maiuscolo+' if maiuscolo else 'Il tasto '}{nome} non ha un comando.")
+        if maiuscolo:
+            self._riscontro("non_disponibile", _("Maiuscolo+{tasto} non ha un comando.").format(tasto=nome))
+        else:
+            self._riscontro("non_disponibile", _("Il tasto {tasto} non ha un comando.").format(tasto=nome))
         return True
 
     def _metti_i_tasti_rapidi(self, accesi):
@@ -2202,9 +2243,10 @@ class Finestra(wx.Frame):
         funzione, Esc e Ctrl con la barra rovesciata restano; a ogni avvio i
         tasti rapidi sono accesi."""
         evento = "tasti_accesi" if accesi else "tasti_spenti"
-        frase = "Tasti rapidi accesi." if accesi else "Tasti rapidi spenti: le lettere cercano nella plancia per iniziale. Maiuscolo con F12 li riaccende."
+        frase = _("Tasti rapidi accesi.") if accesi else _("Tasti rapidi spenti: le lettere cercano nella plancia per iniziale. Maiuscolo con F12 li riaccende.")
         if self._tasti_rapidi == accesi:
-            self._riscontro(evento, f"Già così. {frase}")
+            # Traduttori: frase e' lo stato che il comando chiedeva, ed era gia' quello.
+            self._riscontro(evento, _("Già così. {frase}").format(frase=frase))
             return
         self._tasti_rapidi = accesi
         self._riscontro(evento, frase)
@@ -2323,16 +2365,16 @@ class Finestra(wx.Frame):
         if tipo == "cartella":
             return dati.get("nome") or os.path.basename(dati["percorso"].rstrip("\\")) or dati["percorso"]
         if tipo in ("brano", "file"):
-            brano = dati["brano"]
-            return f"{brano.nome_del_file}, sottobrano {brano.sottobrano}" if brano.sottobrano else brano.nome_del_file
+            return self._nome_del_brano(dati["brano"])
         if tipo == "sottobrano":
-            return f"sottobrano {dati['numero']} di {dati['brano'].nome_del_file}"
+            # Traduttori: il nome di un sottobrano nelle frasi della console, come in Chiuso sottobrano 3 di gioco.sid.
+            return _("sottobrano {numero} di {file}").format(numero=dati["numero"], file=dati["brano"].nome_del_file)
         if tipo == "marker":
-            return f"il marker {dati['marker']['nome']}"
+            return _("il marker {nome}").format(nome=dati["marker"]["nome"])
         if tipo == "capitolo":
-            return f"il capitolo {dati['numero']} di {dati['brano'].nome_del_file}"
+            return _("il capitolo {numero} di {file}").format(numero=dati["numero"], file=dati["brano"].nome_del_file)
         if tipo == "risultati":
-            return f"Risultati di {self._testo_della_ricerca}"
+            return _("Risultati di {ricerca}").format(ricerca=self._testo_della_ricerca)
         if tipo == "gruppo_risultati":
             return dati["gruppo"].nome
         return self.albero.GetItemText(voce)
@@ -2469,11 +2511,12 @@ class Finestra(wx.Frame):
         voce = self._voce_corrente()
         ramo = self.albero.GetItemParent(voce) if voce.IsOk() else None
         if ramo is None or not ramo.IsOk() or ramo == self.albero.GetRootItem():
-            self._riscontro("nessun_altro_brano", "Sei già al primo livello della plancia.")
+            self._riscontro("nessun_altro_brano", _("Sei già al primo livello della plancia."))
             return
         self.albero.Collapse(ramo)
         self._seleziona(ramo)
-        self._riscontro("risali", f"Chiuso {self._nome_della_voce(ramo)}.", "risali")
+        # Traduttori: nome e' il ramo della plancia appena chiuso, come una playlist, una cartella o il marker X.
+        self._riscontro("risali", _("Chiuso {nome}.").format(nome=self._nome_della_voce(ramo)), "risali")
 
     def _risali_all_antenato(self):
         """Maiuscolo con Backspace: risale di colpo al ramo antenato, quello
@@ -2485,7 +2528,7 @@ class Finestra(wx.Frame):
         della 1.42.2)."""
         voce = self._voce_corrente()
         if not voce.IsOk() or self._profondita(voce) < 2:
-            self._riscontro("nessun_altro_brano", "Sei già al primo livello della plancia.")
+            self._riscontro("nessun_altro_brano", _("Sei già al primo livello della plancia."))
             return
         antenato = voce
         while self._profondita(antenato) > 2:
@@ -2504,10 +2547,12 @@ class Finestra(wx.Frame):
         nome = self._nome_della_voce(antenato)
         if antenato == voce:
             # Gia' sull'antenato: non si sale, si chiudono solo i rami dentro.
-            dentro = " Chiusi i rami aperti al suo interno." if chiusi else ""
-            self._riscontro("nessun_altro_brano", f"Sei già su {nome}, non si risale oltre.{dentro}")
+            if chiusi:
+                self._riscontro("nessun_altro_brano", _("Sei già su {nome}, non si risale oltre. Chiusi i rami aperti al suo interno.").format(nome=nome))
+            else:
+                self._riscontro("nessun_altro_brano", _("Sei già su {nome}, non si risale oltre.").format(nome=nome))
             return
-        self._riscontro("risali_all_antenato", f"Risalito a {nome}.", "risali")
+        self._riscontro("risali_all_antenato", _("Risalito a {nome}.").format(nome=nome), "risali")
 
     def _seleziona(self, voce):
         """Seleziona soltanto questa voce e le da' il fuoco, come una freccia:
@@ -2630,9 +2675,13 @@ class Finestra(wx.Frame):
             return
         quante = len(self._voci_selezionate())
         self._statistiche.massimo("selezione", quante)
-        totale = "nessuna voce selezionata" if quante == 0 else "1 voce selezionata" if quante == 1 else f"{quante} voci selezionate"
-        stato = "Selezionata" if self._e_selezionata(voce) else "Non selezionata"
-        self.scrivi(f"{stato}: {self._nome_della_voce(voce)}. {totale.capitalize()}.", "selezione")
+        totale = _("Nessuna voce selezionata") if quante == 0 else plurale(quante, "{n} voce selezionata", "{n} voci selezionate")
+        if self._e_selezionata(voce):
+            # Traduttori: nome e' la voce col fuoco, totale quante voci sono selezionate, come 3 voci selezionate.
+            testo = _("Selezionata: {nome}. {totale}.").format(nome=self._nome_della_voce(voce), totale=totale)
+        else:
+            testo = _("Non selezionata: {nome}. {totale}.").format(nome=self._nome_della_voce(voce), totale=totale)
+        self.scrivi(testo, "selezione")
 
     def _dopo_la_freccia(self, prima):
         """Sinistra o destra hanno spostato il fuoco: come le altre frecce,
@@ -2789,29 +2838,36 @@ class Finestra(wx.Frame):
         if dati["tipo"] == "sottobrano":
             n = dati["numero"]
             titoli = (sottobrani.info(brano.percorso) or {}).get("titoli") or []
-            titolo = f", {titoli[n - 1]}" if n <= len(titoli) and titoli[n - 1] else ""
-            parti = [f"Sottobrano {n} di {dati['totale']}{titolo}, {tempo(durata_del_sottobrano(brano.percorso, n))}"]
+            durata = tempo(durata_del_sottobrano(brano.percorso, n))
+            if n <= len(titoli) and titoli[n - 1]:
+                parti = [_("Sottobrano {numero} di {totale}, {titolo}, {durata}").format(numero=n, totale=dati["totale"], titolo=titoli[n - 1], durata=durata)]
+            else:
+                parti = [_("Sottobrano {numero} di {totale}, {durata}").format(numero=n, totale=dati["totale"], durata=durata)]
             if quanti:
-                parti.append(f"{quanti} marker")
+                parti.append(plurale(quanti, "{n} marker", "{n} marker"))
             if suona and self.motore.sottobrano == n:
-                parti.append("in riproduzione")
+                parti.append(_("in riproduzione"))
             return ", ".join(parti)
-        parti = [brano.percorso if dati.get("completo") else brano.nome_del_file]
+        nome = brano.percorso if dati.get("completo") else brano.nome_del_file
         if brano.sottobrano:
             info = sottobrani.info(brano.percorso)
-            parti[0] += f", sottobrano {brano.sottobrano}" + (f" di {info['sottobrani']}" if info else "")
-        parti.extend(self._durata_nella_plancia(brano))
+            if info:
+                nome = _("{nome}, sottobrano {numero} di {totale}").format(nome=nome, numero=brano.sottobrano, totale=info["sottobrani"])
+            else:
+                nome = _("{nome}, sottobrano {numero}").format(nome=nome, numero=brano.sottobrano)
+        parti = [nome, *self._durata_nella_plancia(brano)]
         if quanti:
-            parti.append(f"{quanti} marker")
+            parti.append(plurale(quanti, "{n} marker", "{n} marker"))
         if brano.saltato:
-            parti.append("saltato")
+            # Traduttori: nell'etichetta di un brano segnato come saltato, che l'avanzamento non suona.
+            parti.append(_("saltato"))
         if self.coda.loop_playlist is dati["playlist"]:
             if brano is self.coda.punto_a:
-                parti.append("punto A del loop")
+                parti.append(_("punto A del loop"))
             if brano is self.coda.punto_b:
-                parti.append("punto B del loop")
+                parti.append(_("punto B del loop"))
         if suona:
-            parti.append("in riproduzione")
+            parti.append(_("in riproduzione"))
         return ", ".join(parti)
 
     def _durata_nella_plancia(self, brano):
@@ -2824,12 +2880,12 @@ class Finestra(wx.Frame):
             totale = sottobrani.info(brano.percorso)["sottobrani"]
             durate = (self.schedario.scheda(brano.percorso) or {}).get("durate_sid") or []
             note = [d for d in durate if d is not None]
-            testo = f"{totale} sottobrani"
-            if note:
-                testo += f", {durata_lunga(sum(note))} in tutto"
-                if len(note) < totale:
-                    testo += f", {totale - len(note)} senza durata"
-            return [testo]
+            if not note:
+                return [plurale(totale, "{n} sottobrano", "{n} sottobrani")]
+            if len(note) < totale:
+                return [ngettext("{n} sottobrano, {durata} in tutto, {senza} senza durata", "{n} sottobrani, {durata} in tutto, {senza} senza durata", totale).format(
+                    n=totale, durata=durata_lunga(sum(note)), senza=totale - len(note))]
+            return [ngettext("{n} sottobrano, {durata} in tutto", "{n} sottobrani, {durata} in tutto", totale).format(n=totale, durata=durata_lunga(sum(note)))]
         durata = self.schedario.durata(brano)
         return [durata_lunga(durata)] if durata is not None else []
 
@@ -2939,22 +2995,22 @@ class Finestra(wx.Frame):
                 self._modifica_filtro(dati["playlist"])
                 return
             voce = self.albero.GetItemParent(voce)
-        self._riscontro("non_disponibile", "Il filtro c'è nelle playlist e nei Preferiti: porta la plancia su una playlist o su un suo brano.")
+        self._riscontro("non_disponibile", _("Il filtro c'è nelle playlist e nei Preferiti: porta la plancia su una playlist o su un suo brano."))
 
     def _modifica_filtro(self, pl):
         """Il campo del filtro; se il testo non si capisce lo spiega e lo ripropone."""
         testo = pl.filtro
         while True:
             self._domanda()
-            with FinestraFiltro(self, f"Filtro di {pl.nome}", testo, ISTRUZIONI_DEL_FILTRO) as dialogo:
+            with FinestraFiltro(self, _("Filtro di {nome}").format(nome=pl.nome), testo, ISTRUZIONI_DEL_FILTRO) as dialogo:
                 if dialogo.ShowModal() != wx.ID_OK:
-                    self._annullato("Filtro non cambiato.")
+                    self._annullato(_("Filtro non cambiato."))
                     return
                 testo = " ".join(dialogo.testo.split())
             try:
                 Filtro(testo)
             except ErroreFiltro as e:
-                self._riscontro("errore", f"Nel filtro non capisco: {e}")
+                self._riscontro("errore", _("Nel filtro non capisco: {errore}").format(errore=e))
                 continue
             break
         self._imposta_filtro(pl, testo)
@@ -2975,11 +3031,18 @@ class Finestra(wx.Frame):
             self._popola_playlist(seleziona=pl if dentro else None)
         passano = sum(1 for b in pl.brani if self._ammesso(pl, b))
         if testo:
-            self._riscontro("filtro_messo", f"Filtro di {pl.nome}: {testo}. {'Passa' if passano == 1 else 'Passano'} {brani_al_plurale(passano)} su {len(pl.brani)}.")
+            self._riscontro("filtro_messo", ngettext("Filtro di {nome}: {filtro}. Passa {n} brano su {totale}.", "Filtro di {nome}: {filtro}. Passano {n} brani su {totale}.", passano).format(
+                nome=pl.nome, filtro=testo, n=passano, totale=len(pl.brani)))
         else:
             totale = len(pl.brani)
-            quanti = "la playlist è vuota" if not totale else "passa l'unico brano" if totale == 1 else f"passano tutti i {totale} brani"
-            self._riscontro("filtro_tolto", f"Filtro di {pl.nome} svuotato: {quanti}.")
+            if not totale:
+                frase = _("Filtro di {nome} svuotato: la playlist è vuota.").format(nome=pl.nome)
+            elif totale == 1:
+                frase = _("Filtro di {nome} svuotato: passa l'unico brano.").format(nome=pl.nome)
+            else:
+                # Traduttori: sempre almeno due brani; uno solo ha la sua frase, passa l'unico brano.
+                frase = ngettext("Filtro di {nome} svuotato: passano tutti i {n} brani.", "Filtro di {nome} svuotato: passano tutti i {n} brani.", totale).format(nome=pl.nome, n=totale)
+            self._riscontro("filtro_tolto", frase)
 
     def _conto(self, brani):
         """'numero (durata)' di una lista di brani; i brani di cui la durata
@@ -2989,9 +3052,13 @@ class Finestra(wx.Frame):
         durate = [self.schedario.durata(b) for b in brani]
         note = [d for d in durate if d is not None]
         if not note:
-            return f"{len(brani)} (senza durata)"
+            # Traduttori: n e' quanti brani ha la playlist, nella sua etichetta: Rock, brani: 12 (senza durata), totali: ...
+            return _("{n} (senza durata)").format(n=len(brani))
         ignote = len(durate) - len(note)
-        return f"{len(brani)} ({durata_lunga(sum(note))}{f', {ignote} senza durata' if ignote else ''})"
+        if ignote:
+            # Traduttori: n brani, che durano in tutto durata, e di ignote brani la durata non si sa.
+            return _("{n} ({durata}, {ignote} senza durata)").format(n=len(brani), durata=durata_lunga(sum(note)), ignote=ignote)
+        return f"{len(brani)} ({durata_lunga(sum(note))})"
 
     def _etichetta_della_cartella(self, cartella, nome=None, vuota=None):
         """Il nome della cartella con quanti file suonabili ha, sottocartelle
@@ -3006,12 +3073,13 @@ class Finestra(wx.Frame):
             # Il conto ha saltato una cartella di rete che non rispondeva: non
             # e' la rete intera a tacere (collaudo della 1.85.2).
             if not files:
-                return f"{nome} (conto incompleto: una cartella di rete non risponde)"
-            return f"{nome}, almeno {len(files)} file: una cartella di rete non risponde"
+                return _("{nome} (conto incompleto: una cartella di rete non risponde)").format(nome=nome)
+            return ngettext("{nome}, almeno {n} file: una cartella di rete non risponde", "{nome}, almeno {n} file: una cartella di rete non risponde", len(files)).format(
+                nome=nome, n=len(files))
         if files == []:
             if vuota is None:
                 vuota = self._e_vuota(cartella)
-            return f"{nome} (vuota)" if vuota else f"{nome} (niente da suonare)"
+            return _("{nome} (vuota)").format(nome=nome) if vuota else _("{nome} (niente da suonare)").format(nome=nome)
         if not files:
             return nome
         # Il totale si somma una volta; poi lo aggiornano le variazioni dello
@@ -3021,12 +3089,13 @@ class Finestra(wx.Frame):
         if totale is None or totale[0] is not files:
             totale = self._totali[cartella] = [files, *self.schedario.totale_delle_durate(files)]
         con_durata, somma = totale[1], totale[2]
-        testo = f"{nome}, {len(files)} file"
-        if con_durata:
-            testo += f", {durata_lunga(max(0.0, somma))} in tutto"
-            if con_durata < len(files):
-                testo += f", {len(files) - con_durata} senza durata"
-        return testo
+        quanti = len(files)
+        if not con_durata:
+            return ngettext("{nome}, {n} file", "{nome}, {n} file", quanti).format(nome=nome, n=quanti)
+        if con_durata < quanti:
+            return ngettext("{nome}, {n} file, {durata} in tutto, {senza} senza durata", "{nome}, {n} file, {durata} in tutto, {senza} senza durata", quanti).format(
+                nome=nome, n=quanti, durata=durata_lunga(max(0.0, somma)), senza=quanti - con_durata)
+        return ngettext("{nome}, {n} file, {durata} in tutto", "{nome}, {n} file, {durata} in tutto", quanti).format(nome=nome, n=quanti, durata=durata_lunga(max(0.0, somma)))
 
     def _applica_le_variazioni(self):
         """Le durate arrivate allo schedario aggiornano i totali delle
@@ -3123,9 +3192,10 @@ class Finestra(wx.Frame):
         if errore is not None:
             motivo = f"{str(errore.strerror or errore).rstrip('.')}."
         else:
-            motivo = "il computer o il disco di rete sono spenti, la rete non c'è, o la condivisione si è fermata."
+            motivo = _("il computer o il disco di rete sono spenti, la rete non c'è, o la condivisione si è fermata.")
         self._statistiche.conta("rete_muta")
-        self._riscontro("errore", f"{dati['percorso']} non risponde: {motivo} Riaprendo il ramo si riprova.")
+        # Traduttori: motivo e' il perche', una frase con il suo punto: il testo dell'errore di Windows o quello di MeTeOra.
+        self._riscontro("errore", _("{percorso} non risponde: {motivo} Riaprendo il ramo si riprova.").format(percorso=dati["percorso"], motivo=motivo))
 
     def _riconta(self, *cartelle):
         """Dopo un file o una cartella mandati nel cestino (Gabriele, 4
@@ -3240,8 +3310,11 @@ class Finestra(wx.Frame):
         c'e': il filtro non e' una voce della playlist, cosi' NVDA conta solo
         i brani."""
         filtrati = [b for b in pl.brani if self._ammesso(pl, b)]
-        etichetta = f"{pl.nome}, brani: {self._conto(filtrati)}, totali: {self._conto(pl.brani)}"
-        return f"{etichetta}, filtro: {pl.filtro}" if pl.filtro else etichetta
+        if pl.filtro:
+            # Traduttori: i brani che passano il filtro e quelli della playlist, ciascuno come 12 (40:00).
+            return _("{nome}, brani: {filtrati}, totali: {totali}, filtro: {filtro}").format(nome=pl.nome, filtrati=self._conto(filtrati), totali=self._conto(pl.brani),
+                filtro=pl.filtro)
+        return _("{nome}, brani: {filtrati}, totali: {totali}").format(nome=pl.nome, filtrati=self._conto(filtrati), totali=self._conto(pl.brani))
 
     def _chiedi_schede(self, *playlist):
         """Chiede allo schedario le schede dei brani delle playlist date."""
@@ -3272,7 +3345,7 @@ class Finestra(wx.Frame):
             try:
                 self.schedario.salva()
             except OSError as e:
-                self._riscontro("errore", f"Non riesco a salvare lo schedario: {e}")
+                self._riscontro("errore", _("Non riesco a salvare lo schedario: {errore}").format(errore=e))
 
     def _sotto(self, voce, radice):
         """Vero se la voce sta dentro il ramo radice."""
@@ -3367,7 +3440,7 @@ class Finestra(wx.Frame):
                     da_selezionare = next((v for v in self._figli(nodo) if self._dati(v).get("brano") is selezionato), da_selezionare)
         # In fondo i comandi del ramo: Nuova playlist e, dalla 1.113.0,
         # Importa playlist. Uno dei due col fuoco lo ritrova dal suo nome.
-        for etichetta, nome in (("Nuova playlist", "nuova_playlist"), ("Importa playlist", "importa_playlist")):
+        for etichetta, nome in ((_("Nuova playlist"), "nuova_playlist"), (_("Importa playlist"), "importa_playlist")):
             comando = self.albero.AppendItem(self.nodo_playlist, etichetta, data={"tipo": "comando", "comando": nome})
             if selezionato == nome:
                 da_selezionare = comando
@@ -3534,7 +3607,7 @@ class Finestra(wx.Frame):
                 # 1.85.5; prima ci pensava la prova dei tre secondi).
                 self._ramo_di_rete_muto(voce, dati, e)
                 return
-            self._riscontro("errore", f"Non riesco a leggere {dati['percorso']}: {e.strerror or e}")
+            self._riscontro("errore", _("Non riesco a leggere {percorso}: {errore}").format(percorso=dati["percorso"], errore=e.strerror or e))
             self.albero.SetItemHasChildren(voce, False)
             return
         # La cartella aperta: il disco della sua lettera (1.112.0).
@@ -3563,7 +3636,7 @@ class Finestra(wx.Frame):
             self._aggiungi_voce(voce, "file", pl, brano)
         if not cartelle and not files:
             self.albero.SetItemHasChildren(voce, False)
-            self._riscontro("niente_da_suonare", "Niente da suonare qui dentro.")
+            self._riscontro("niente_da_suonare", _("Niente da suonare qui dentro."))
 
     # Questa rete, 1.64.0.
 
@@ -3585,17 +3658,17 @@ class Finestra(wx.Frame):
             self._voce_di_rete(voce, nome, percorso)
         for percorso in self.impostazioni["percorsi_di_rete"]:
             self._voce_di_rete(voce, percorso, percorso, a_mano=True)
-        computer = self.albero.AppendItem(voce, "Computer della rete", data={"tipo": "computer_della_rete", "caricato": False})
+        computer = self.albero.AppendItem(voce, _("Computer della rete"), data={"tipo": "computer_della_rete", "caricato": False})
         self.albero.SetItemHasChildren(computer, True)
-        self.albero.AppendItem(voce, "Aggiungi un percorso di rete", data={"tipo": "comando", "comando": "aggiungi_percorso_di_rete"})
+        self.albero.AppendItem(voce, _("Aggiungi un percorso di rete"), data={"tipo": "comando", "comando": "aggiungi_percorso_di_rete"})
 
     def _cerca_nella_rete(self, voce, dati):
         """I computer della rete, o le cartelle condivise di un computer: la
         ricerca va in disparte, e intanto il ramo mostra una voce d'attesa."""
         computer = dati["tipo"] == "computer_della_rete"
         self._statistiche.conta("ricerche_della_rete")
-        self.albero.AppendItem(voce, "Cerco i computer della rete..." if computer else "Cerco le cartelle condivise...", data={"tipo": "attesa"})
-        testo = "Cerco i computer della rete: può volerci qualche secondo." if computer else f"Cerco le cartelle condivise di {dati['nome']}."
+        self.albero.AppendItem(voce, _("Cerco i computer della rete...") if computer else _("Cerco le cartelle condivise..."), data={"tipo": "attesa"})
+        testo = _("Cerco i computer della rete: può volerci qualche secondo.") if computer else _("Cerco le cartelle condivise di {nome}.").format(nome=dati["nome"])
         if self._freccia_nell_albero:
             # Il ramo aperto con la freccia suona dopo questo gestore: la
             # ricerca suona finito lui.
@@ -3624,38 +3697,40 @@ class Finestra(wx.Frame):
         if not trovati:
             self.albero.SetItemHasChildren(voce, False)
             dati["caricato"] = False
-            self._riscontro("non_disponibile", "Nella rete non ho trovato computer." if computer else f"{dati['nome']} non mostra cartelle condivise.")
+            self._riscontro("non_disponibile", _("Nella rete non ho trovato computer.") if computer else _("{nome} non mostra cartelle condivise.").format(nome=dati["nome"]))
             return
         quanti = len(trovati)
         if computer:
-            testo = "Trovato 1 computer nella rete." if quanti == 1 else f"Trovati {quanti} computer nella rete."
+            testo = ngettext("Trovato {n} computer nella rete.", "Trovati {n} computer nella rete.", quanti).format(n=quanti)
         else:
-            testo = f"{dati['nome']}: 1 cartella condivisa." if quanti == 1 else f"{dati['nome']}: {quanti} cartelle condivise."
+            testo = ngettext("{nome}: {n} cartella condivisa.", "{nome}: {n} cartelle condivise.", quanti).format(nome=dati["nome"], n=quanti)
         self._riscontro("ricerca_finita", testo)
 
     def _comando_aggiungi_percorso_di_rete(self):
         """Chiede un percorso di rete, lo ricorda e lo mette in Questa rete,
         anche se adesso non risponde."""
         self._domanda()
-        with DialogoTesto(self, "Il percorso di rete da aggiungere a Questa rete, per esempio \\\\server\\cartella.", "Aggiungi un percorso di rete") as dialogo:
+        with DialogoTesto(self, _("Il percorso di rete da aggiungere a Questa rete, per esempio \\\\server\\cartella."), _("Aggiungi un percorso di rete")) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
-                self._annullato("Nessun percorso aggiunto.")
+                self._annullato(_("Nessun percorso aggiunto."))
                 return
             testo = dialogo.GetValue()
         percorso = testo.strip().replace("/", "\\").rstrip("\\")
         parti = percorso[2:].split("\\") if questa_rete.e_di_rete(percorso) else []
         if len(parti) < 2 or not all(parti):
-            self._riscontro("errore", f"{testo.strip()} non è un percorso di rete: si scrive come \\\\server\\cartella.")
+            self._riscontro("errore", _("{testo} non è un percorso di rete: si scrive come \\\\server\\cartella.").format(testo=testo.strip()))
             return
         presenti = [p.casefold() for p in self.impostazioni["percorsi_di_rete"]] + [p.casefold() for _n, p in questa_rete.percorsi_salvati()]
         if percorso.casefold() in presenti:
-            self._riscontro("non_disponibile", f"{percorso} è già in Questa rete.")
+            self._riscontro("non_disponibile", _("{percorso} è già in Questa rete.").format(percorso=percorso))
             return
         self.impostazioni["percorsi_di_rete"].append(percorso)
         self._salva_impostazioni()
         self._ricarica_la_rete(percorso)
-        avviso = "" if questa_rete.raggiungibile(percorso) else " Adesso non risponde, ma lo tengo."
-        self._riscontro("percorso_aggiunto", f"Aggiunto a Questa rete {percorso}.{avviso}")
+        if questa_rete.raggiungibile(percorso):
+            self._riscontro("percorso_aggiunto", _("Aggiunto a Questa rete {percorso}.").format(percorso=percorso))
+        else:
+            self._riscontro("percorso_aggiunto", _("Aggiunto a Questa rete {percorso}. Adesso non risponde, ma lo tengo.").format(percorso=percorso))
 
     def _togli_percorso_di_rete(self, percorso):
         """Toglie un percorso scritto a mano: dalle impostazioni e dalla
@@ -3665,7 +3740,7 @@ class Finestra(wx.Frame):
         voce = next((v for v in self._figli(self.nodo_rete) if (self._dati(v) or {}).get("percorso") == percorso), None)
         if voce is not None:
             self._togli_dalla_plancia({voce})
-        self._riscontro("percorso_tolto", f"Tolto da Questa rete {percorso}. I file restano dove sono.")
+        self._riscontro("percorso_tolto", _("Tolto da Questa rete {percorso}. I file restano dove sono.").format(percorso=percorso))
 
     def _ricarica_la_rete(self, da_selezionare=None):
         """Rifa' i figli di Questa rete se e' gia' stata aperta, e porta la
@@ -3688,7 +3763,7 @@ class Finestra(wx.Frame):
         radice = self.nodo_rete if questa_rete.e_di_rete(cartella) else self.nodo_pc
         voce = next((v for v in self._tutte_le_voci(radice) if (self._dati(v) or {}).get("percorso") == cartella), None)
         if voce is None:
-            self._riscontro("non_disponibile", f"{cartella} non è più nella plancia: dentro non c'è niente da suonare.")
+            self._riscontro("non_disponibile", _("{cartella} non è più nella plancia: dentro non c'è niente da suonare.").format(cartella=cartella))
             return
         self._aggiorna_ramo(voce)
 
@@ -3715,7 +3790,8 @@ class Finestra(wx.Frame):
         self.albero.SetItemHasChildren(voce, True)
         if aperto:
             self.albero.Expand(voce)
-        self._riscontro("ramo_aggiornato", f"Aggiornato {self._nome_della_voce(voce)}.")
+        # Traduttori: nome e' il ramo della plancia appena riletto, come Questo PC o una cartella.
+        self._riscontro("ramo_aggiornato", _("Aggiornato {nome}.").format(nome=self._nome_della_voce(voce)))
 
     # Invio, menu contestuale e Canc.
 
@@ -3765,13 +3841,13 @@ class Finestra(wx.Frame):
         if not voci:
             # Spazio, Applicazioni o Invio non restano muti (tappa 9).
             if selezione:
-                testo = "La selezione non ha un menu."
+                testo = _("La selezione non ha un menu.")
             elif dati.get("tipo") == "comando":
-                testo = f"{self.albero.GetItemText(voce)} non ha un menu: Invio lo esegue."
+                testo = _("{voce} non ha un menu: Invio lo esegue.").format(voce=self.albero.GetItemText(voce))
             elif dati.get("tipo") == "attesa":
-                testo = "Ricerca in corso: la voce sparisce quando finisce."
+                testo = _("Ricerca in corso: la voce sparisce quando finisce.")
             else:
-                testo = f"{self.albero.GetItemText(voce)} non ha un menu."
+                testo = _("{voce} non ha un menu.").format(voce=self.albero.GetItemText(voce))
             self._riscontro("non_disponibile", testo)
             return
         menu = wx.Menu()
@@ -3806,79 +3882,79 @@ class Finestra(wx.Frame):
         nuova. brani_da_aggiungere e' una funzione che da' i brani, chiamata
         solo quando la voce viene scelta."""
         voci = [(pl.nome, lambda pl=pl: self._aggiungi(pl, brani_da_aggiungere())) for pl in self.archivio.playlist]
-        voci.append(("Nuova playlist", lambda: self._aggiungi(None, brani_da_aggiungere())))
+        voci.append((_("Nuova playlist"), lambda: self._aggiungi(None, brani_da_aggiungere())))
         return voci
 
     def _voci_del_menu(self, dati):
         tipo = dati["tipo"]
         # I dettagli della voce del menu, anche se intanto il fuoco si sposta.
-        dettagli_della_voce = ("Leggi i dettagli", lambda: self._leggi_i_dettagli(dati))
+        dettagli_della_voce = (_("Leggi i dettagli"), lambda: self._leggi_i_dettagli(dati))
         if tipo == "radice_playlist":
-            return [("Nuova playlist", self._comando_nuova_playlist), ("Importa playlist", self._comando_importa_playlist), dettagli_della_voce]
+            return [(_("Nuova playlist"), self._comando_nuova_playlist), (_("Importa playlist"), self._comando_importa_playlist), dettagli_della_voce]
         if tipo == "risultati":
-            return [("Riproduci", lambda: self._riproduci_playlist(self.risultati)), ("Salva come playlist", self._salva_risultati),
-                ("Nuova ricerca", self._ricerca_globale), ("Ferma la ricerca", self._ferma_ricerca), dettagli_della_voce]
+            return [(_("Riproduci"), lambda: self._riproduci_playlist(self.risultati)), (_("Salva come playlist"), self._salva_risultati),
+                (_("Nuova ricerca"), self._ricerca_globale), (_("Ferma la ricerca"), self._ferma_ricerca), dettagli_della_voce]
         if tipo == "altri":
-            return [("Mostra altri risultati", lambda: self._altri_risultati(dati))]
+            return [(_("Mostra altri risultati"), lambda: self._altri_risultati(dati))]
         if tipo == "gruppo_risultati":
             gruppo = dati["gruppo"]
-            return [("Salva come playlist", lambda: self._salva_risultati(gruppo)), dettagli_della_voce]
+            return [(_("Salva come playlist"), lambda: self._salva_risultati(gruppo)), dettagli_della_voce]
         if tipo == "playlist":
             pl = dati["playlist"]
-            voci = [("Riproduci", lambda: self._riproduci_playlist(pl)), ("Filtro", lambda: self._modifica_filtro(pl))]
+            voci = [(_("Riproduci"), lambda: self._riproduci_playlist(pl)), (_("Filtro"), lambda: self._modifica_filtro(pl))]
             if pl.filtro:
-                voci.append(("Togli il filtro", lambda: self._imposta_filtro(pl, "")))
+                voci.append((_("Togli il filtro"), lambda: self._imposta_filtro(pl, "")))
             # Il posto di Ordina e Mescola e' quello del punto 3.10 del piano;
             # i Preferiti non si rinominano e non si eliminano (tappa 14 c).
             preferiti = pl is self.archivio.preferiti
             if not preferiti:
-                voci.append(("Rinomina", lambda: self._rinomina(pl)))
-            voci += [("Ordina", self._voci_dell_ordine(pl)), ("Mescola", lambda: self._mescola(pl))]
+                voci.append((_("Rinomina"), lambda: self._rinomina(pl)))
+            voci += [(_("Ordina"), self._voci_dell_ordine(pl)), (_("Mescola"), lambda: self._mescola(pl))]
             if not preferiti:
-                voci.append(("Elimina", lambda: self._elimina_playlist(pl)))
+                voci.append((_("Elimina"), lambda: self._elimina_playlist(pl)))
             return [*voci, dettagli_della_voce]
         if tipo == "brano":
             pl, brano = dati["playlist"], dati["brano"]
-            return [("Riproduci", lambda: self._riproduci(pl, brano)),
-                ("Sposta su", lambda: self._sposta(pl, brano, "su")), ("Sposta giù", lambda: self._sposta(pl, brano, "giu")),
-                ("Sposta in cima", lambda: self._sposta(pl, brano, "cima")), ("Sposta in fondo", lambda: self._sposta(pl, brano, "fondo")),
-                ("Saltato", (lambda: self._salta(pl, brano), brano.saltato)), ("Togli dalla playlist", lambda: self._togli(pl, brano)),
-                ("Aggiungi ai preferiti", lambda: self._ai_preferiti(brano)), ("Rinomina file", lambda: self._rinomina_file(brano)),
-                *self._voci_dei_tag([brano.percorso]), ("Manda nel cestino", lambda: self._al_cestino(self._voce_di_lavoro()))]
+            return [(_("Riproduci"), lambda: self._riproduci(pl, brano)),
+                (_("Sposta su"), lambda: self._sposta(pl, brano, "su")), (_("Sposta giù"), lambda: self._sposta(pl, brano, "giu")),
+                (_("Sposta in cima"), lambda: self._sposta(pl, brano, "cima")), (_("Sposta in fondo"), lambda: self._sposta(pl, brano, "fondo")),
+                (_("Saltato"), (lambda: self._salta(pl, brano), brano.saltato)), (_("Togli dalla playlist"), lambda: self._togli(pl, brano)),
+                (_("Aggiungi ai preferiti"), lambda: self._ai_preferiti(brano)), (_("Rinomina file"), lambda: self._rinomina_file(brano)),
+                *self._voci_dei_tag([brano.percorso]), (_("Manda nel cestino"), lambda: self._al_cestino(self._voce_di_lavoro()))]
         if tipo == "pc":
-            return [("Aggiorna", lambda: self._aggiorna_ramo(self.nodo_pc)), dettagli_della_voce]
+            return [(_("Aggiorna"), lambda: self._aggiorna_ramo(self.nodo_pc)), dettagli_della_voce]
         if tipo == "rete":
-            return [("Aggiungi un percorso di rete", self._comando_aggiungi_percorso_di_rete), ("Aggiorna", lambda: self._aggiorna_ramo(self.nodo_rete))]
+            return [(_("Aggiungi un percorso di rete"), self._comando_aggiungi_percorso_di_rete), (_("Aggiorna"), lambda: self._aggiorna_ramo(self.nodo_rete))]
         if tipo in ("computer_della_rete", "computer"):
             voce = self._voce_di_lavoro()
-            return [("Cerca di nuovo" if tipo == "computer_della_rete" else "Aggiorna", lambda: self._aggiorna_ramo(voce))]
+            return [(_("Cerca di nuovo") if tipo == "computer_della_rete" else _("Aggiorna"), lambda: self._aggiorna_ramo(voce))]
         if tipo in ("unita", "cartella"):
             cartella = dati["percorso"]
             nome = dati.get("etichetta", "").split("\\", 1)[-1] if tipo == "unita" else dati.get("nome") or os.path.basename(cartella)
-            voci = [("Riproduci", lambda: self._riproduci_cartella(cartella)), ("Crea playlist da qui", lambda: self._crea_da_qui(cartella, nome)),
-                ("Aggiungi alla playlist", self._menu_aggiungi(lambda: [Brano(p) for p in questo_pc.file_ricorsivi(cartella)])),
-                ("Aggiorna", lambda: self._aggiorna_cartella(cartella))]
+            voci = [(_("Riproduci"), lambda: self._riproduci_cartella(cartella)), (_("Crea playlist da qui"), lambda: self._crea_da_qui(cartella, nome)),
+                (_("Aggiungi alla playlist"), self._menu_aggiungi(lambda: [Brano(p) for p in questo_pc.file_ricorsivi(cartella)])),
+                (_("Aggiorna"), lambda: self._aggiorna_cartella(cartella))]
             if dati.get("a_mano"):
-                voci.append(("Togli il percorso", lambda: self._togli_percorso_di_rete(cartella)))
+                voci.append((_("Togli il percorso"), lambda: self._togli_percorso_di_rete(cartella)))
             if tipo == "unita" and self.dischi.contesa(pulizia.lettera_di(cartella)):
                 # Solo dove serve: sulle lettere contese, che la pulizia salta (1.112.0, Gabriele).
-                voci.append(("Riconosci questo disco", lambda: self._riconosci_il_disco(cartella)))
+                voci.append((_("Riconosci questo disco"), lambda: self._riconosci_il_disco(cartella)))
             return [*voci, dettagli_della_voce]
         if tipo == "file":
             pl, brano = dati["playlist"], dati["brano"]
-            return [("Riproduci", lambda: self._riproduci(pl, brano)), ("Aggiungi alla playlist", self._menu_aggiungi(lambda: [Brano(brano.percorso)])),
-                ("Aggiungi ai preferiti", lambda: self._ai_preferiti(brano)), ("Rinomina file", lambda: self._rinomina_file(brano)),
-                *self._voci_dei_tag([brano.percorso]), ("Manda nel cestino", lambda: self._al_cestino(self._voce_di_lavoro()))]
+            return [(_("Riproduci"), lambda: self._riproduci(pl, brano)), (_("Aggiungi alla playlist"), self._menu_aggiungi(lambda: [Brano(brano.percorso)])),
+                (_("Aggiungi ai preferiti"), lambda: self._ai_preferiti(brano)), (_("Rinomina file"), lambda: self._rinomina_file(brano)),
+                *self._voci_dei_tag([brano.percorso]), (_("Manda nel cestino"), lambda: self._al_cestino(self._voce_di_lavoro()))]
         if tipo == "capitolo":
-            return [("Suona da questo capitolo", lambda: self._suona_il_capitolo(dati))]
+            return [(_("Suona da questo capitolo"), lambda: self._suona_il_capitolo(dati))]
         if tipo == "marker":
-            return [("Vai al marker", lambda: self._vai_al_marker(dati)), ("Rinomina", lambda: self._rinomina_il_marker(dati["chiave"], dati["marker"])),
-                ("Elimina", lambda: self._elimina_il_marker(dati["chiave"], dati["marker"], self._voce_di_lavoro()))]
+            return [(_("Vai al marker"), lambda: self._vai_al_marker(dati)), (_("Rinomina"), lambda: self._rinomina_il_marker(dati["chiave"], dati["marker"])),
+                (_("Elimina"), lambda: self._elimina_il_marker(dati["chiave"], dati["marker"], self._voce_di_lavoro()))]
         if tipo == "sottobrano":
             pl, brano, n = dati["playlist"], dati["brano"], dati["numero"]
-            return [("Riproduci", lambda: self._riproduci(pl, brano, n)),
-                ("Aggiungi alla playlist", self._menu_aggiungi(lambda: [Brano(brano.percorso, sottobrano=n)])),
-                ("Aggiungi ai preferiti", lambda: self._ai_preferiti(Brano(brano.percorso, sottobrano=n)))]
+            return [(_("Riproduci"), lambda: self._riproduci(pl, brano, n)),
+                (_("Aggiungi alla playlist"), self._menu_aggiungi(lambda: [Brano(brano.percorso, sottobrano=n)])),
+                (_("Aggiungi ai preferiti"), lambda: self._ai_preferiti(Brano(brano.percorso, sottobrano=n)))]
         return []
 
     def _conferma(self, domanda, titolo, genitore=None):
@@ -3898,15 +3974,18 @@ class Finestra(wx.Frame):
         (Gabriele, 3 ottobre 2026, 1.67.0)."""
         vecchio = brano.percorso
         if not os.path.isfile(vecchio):
-            self._riscontro("errore", f"Non trovo {vecchio} sul disco.")
+            self._riscontro("errore", _("Non trovo {percorso} sul disco.").format(percorso=vecchio))
             return
         cartella, nome_del_file = os.path.split(vecchio)
         nome, estensione = os.path.splitext(nome_del_file)
-        resta = f" L'estensione {estensione} resta." if estensione else ""
+        if estensione:
+            domanda = _("Nuovo nome del file {file}. L'estensione {estensione} resta.").format(file=nome_del_file, estensione=estensione)
+        else:
+            domanda = _("Nuovo nome del file {file}.").format(file=nome_del_file)
         self._domanda()
-        with DialogoTesto(self, f"Nuovo nome del file {nome_del_file}.{resta}", "Rinomina file", nome) as dialogo:
+        with DialogoTesto(self, domanda, _("Rinomina file"), nome) as dialogo:
             if dialogo.ShowModal() != wx.ID_OK:
-                self._annullato("Nome del file non cambiato.")
+                self._annullato(_("Nome del file non cambiato."))
                 return
             # Windows toglie da se' punti e spazi in fondo al nome.
             scritto = dialogo.GetValue().strip().rstrip(". ")
@@ -3914,17 +3993,18 @@ class Finestra(wx.Frame):
             # L'estensione scritta per abitudine non si raddoppia.
             scritto = scritto[:-len(estensione)].rstrip(". ")
         if not scritto or scritto == nome:
-            self._annullato("Nome del file non cambiato.")
+            self._annullato(_("Nome del file non cambiato."))
             return
         problema = questo_pc.nome_non_valido(scritto)
         if problema:
-            self._riscontro("errore", f"{problema} Il nome resta {nome_del_file}.")
+            # Traduttori: problema e' la frase, con il suo punto, che dice perche' Windows non vuole il nome scritto.
+            self._riscontro("errore", _("{problema} Il nome resta {file}.").format(problema=problema, file=nome_del_file))
             return
         nuovo = os.path.join(cartella, scritto + estensione)
         compagni = [(p, os.path.join(cartella, scritto + coda)) for p, coda in questo_pc.file_compagni(vecchio, m3u=formati.e_chip(vecchio))]
         occupati = [os.path.basename(d) for o, d in ((vecchio, nuovo), *compagni) if os.path.exists(d) and os.path.normcase(d) != os.path.normcase(o)]
         if occupati:
-            self._riscontro("errore", f"In {cartella} c'è già {', '.join(occupati)}: il nome resta {nome_del_file}.")
+            self._riscontro("errore", _("In {cartella} c'è già {occupati}: il nome resta {file}.").format(cartella=cartella, occupati=", ".join(occupati), file=nome_del_file))
             return
         # Le durate con cui il file si riconosce per i marker, prima che cambi nome.
         if formati.ha_sottobrani(vecchio):
@@ -3934,7 +4014,7 @@ class Finestra(wx.Frame):
         try:
             ripresa = self._rinomina_sul_disco(vecchio, nuovo)
         except OSError as e:
-            self._riscontro("errore", f"Non riesco a rinominare {nome_del_file}: {e.strerror or e}.")
+            self._riscontro("errore", _("Non riesco a rinominare {file}: {errore}.").format(file=nome_del_file, errore=e.strerror or e))
             return
         rinominati, falliti = [], []
         for o, d in compagni:
@@ -3948,11 +4028,12 @@ class Finestra(wx.Frame):
             posizione, in_pausa, sottobrano = ripresa
             self.motore.suona(nuovo, sottobrano, inizio=posizione, in_pausa=in_pausa)
             self._aggiorna_etichette()
-        testo = f"{nome_del_file} ora si chiama {scritto + estensione}."
+        testo = _("{vecchio} ora si chiama {nuovo}.").format(vecchio=nome_del_file, nuovo=scritto + estensione)
         if rinominati:
-            testo += f" Con lui anche {', '.join(rinominati)}."
+            # Traduttori: i file accanto con lo stesso nome, come i sottotitoli, rinominati insieme al file.
+            testo += " " + _("Con lui anche {file}.").format(file=", ".join(rinominati))
         if falliti:
-            testo += f" Non ho potuto rinominare {', '.join(falliti)}."
+            testo += " " + _("Non ho potuto rinominare {file}.").format(file=", ".join(falliti))
         self._riscontro("file_rinominato", testo)
 
     def _rinomina_sul_disco(self, vecchio, nuovo):
@@ -4053,7 +4134,7 @@ class Finestra(wx.Frame):
         return list({os.path.normcase(p): p for p in percorsi if tag.modificabile(p)}.values())
 
     def _di_chi(self, percorsi):
-        return os.path.basename(percorsi[0]) if len(percorsi) == 1 else f"{len(percorsi)} file"
+        return os.path.basename(percorsi[0]) if len(percorsi) == 1 else plurale(len(percorsi), "{n} file", "{n} file")
 
     def _voci_dei_tag(self, percorsi):
         """Le voci Leggi i tag e Tag del menu, per i file di cui MeTeOra sa
@@ -4061,7 +4142,7 @@ class Finestra(wx.Frame):
         percorsi = [p for p in percorsi if tag.modificabile(p)]
         if not percorsi:
             return []
-        return [("Leggi i tag", lambda: self._leggi_i_tag(percorsi)), ("Tag", self._sottomenu_dei_tag(percorsi))]
+        return [(_("Leggi i tag"), lambda: self._leggi_i_tag(percorsi)), (_("Tag"), self._sottomenu_dei_tag(percorsi))]
 
     def _sottomenu_dei_tag(self, percorsi):
         """Il sottomenu Tag: una voce per tag, "Titolo: Love Song", che con
@@ -4070,10 +4151,11 @@ class Finestra(wx.Frame):
         with wx.BusyCursor():
             letti, errori = tag.leggi_insieme(percorsi)
         if not letti:
-            return [((errori or ["I tag non si leggono."])[0].replace("&", "&&"), None)]
+            return [((errori or [_("I tag non si leggono.")])[0].replace("&", "&&"), None)]
         voci = []
         for t in letti:
-            valore = "valori diversi" if t.get("diversi") else t["valore"] or "vuoto"
+            # Traduttori: il valore di un tag su piu' file che non ce l'hanno uguale, o di un tag vuoto, come in Titolo: vuoto.
+            valore = _("valori diversi") if t.get("diversi") else t["valore"] or _("vuoto")
             if len(valore) > 80:
                 valore = valore[:80].rstrip() + "..."
             etichetta = f"{t['nome']}: {valore}".replace("&", "&&")
@@ -4093,8 +4175,8 @@ class Finestra(wx.Frame):
         with wx.BusyCursor():
             percorsi = self._file_dei_tag()
         if not percorsi:
-            self._riscontro("non_disponibile", "F11 legge i tag di un brano o di un file audio o video, e i dettagli di una cartella, di un'unità o di una playlist: scegline uno nella plancia. "
-                "I SID, i MIDI, i tracker e MKV non hanno tag che MeTeOra sappia leggere.")
+            self._riscontro("non_disponibile", _("F11 legge i tag di un brano o di un file audio o video, e i dettagli di una cartella, di un'unità o di una playlist: scegline uno nella plancia. "
+                "I SID, i MIDI, i tracker e MKV non hanno tag che MeTeOra sappia leggere."))
             return
         if self._troppi_per_i_tag(percorsi):
             return
@@ -4114,7 +4196,7 @@ class Finestra(wx.Frame):
             try:
                 esito = lavoro()
             except Exception as errore:
-                wx.CallAfter(al_termine, guasto(errore) if guasto else [f"Non riesco a raccogliere i dettagli: {errore}"])
+                wx.CallAfter(al_termine, guasto(errore) if guasto else [_("Non riesco a raccogliere i dettagli: {errore}").format(errore=errore)])
                 raise
             wx.CallAfter(al_termine, esito)
 
@@ -4130,13 +4212,14 @@ class Finestra(wx.Frame):
             return dati.get("nome") or os.path.basename(dati["percorso"].rstrip("\\")) or dati["percorso"]
         if tipo == "unita":
             return dati.get("etichetta") or dati["percorso"]
+        # Traduttori: i nomi dei contenitori, con l'articolo, come in Raccolgo i dettagli di la playlist Rock: ci vuole qualche secondo.
         if tipo == "playlist":
-            return "i Preferiti" if dati["playlist"] is self.archivio.preferiti else f"la playlist {dati['playlist'].nome}"
+            return _("i Preferiti") if dati["playlist"] is self.archivio.preferiti else _("la playlist {nome}").format(nome=dati["playlist"].nome)
         if tipo == "risultati":
-            return "i Risultati"
+            return _("i Risultati")
         if tipo == "gruppo_risultati":
             return dati["gruppo"].nome
-        return "Questo PC" if tipo == "pc" else "le playlist"
+        return _("Questo PC") if tipo == "pc" else _("le playlist")
 
     def _leggi_i_dettagli(self, dati):
         """F11 su un contenitore, o Leggi i dettagli nel suo menu: tutti i
@@ -4147,7 +4230,7 @@ class Finestra(wx.Frame):
         fuoco, intanto, puo' spostarsi."""
         tipo = (dati or {}).get("tipo")
         if tipo not in TIPI_CON_I_DETTAGLI:
-            self._riscontro("non_disponibile", "I dettagli ci sono per le cartelle, le unità, Questo PC e le playlist.")
+            self._riscontro("non_disponibile", _("I dettagli ci sono per le cartelle, le unità, Questo PC e le playlist."))
             return
         segno = self._dettagli_attesi = object()
 
@@ -4168,7 +4251,8 @@ class Finestra(wx.Frame):
 
         def se_tarda():
             if segno is self._dettagli_attesi and not self._chiusa:
-                self.scrivi(f"Raccolgo i dettagli di {nome}: ci vuole qualche secondo.")
+                # Traduttori: nome e' il contenitore, con l'articolo, come la playlist Rock o una cartella.
+                self.scrivi(_("Raccolgo i dettagli di {nome}: ci vuole qualche secondo.").format(nome=nome))
 
         wx.CallLater(800, se_tarda)
         self._in_disparte(lavoro, lambda righe: self._dettagli_pronti(segno, dati, righe))
@@ -4188,11 +4272,11 @@ class Finestra(wx.Frame):
         tipo = dati["tipo"]
         if tipo == "playlist":
             pl = dati["playlist"]
-            return ("Preferiti" if pl is self.archivio.preferiti else f"Playlist {pl.nome}"), list(pl.brani), pl
+            return (_("Preferiti") if pl is self.archivio.preferiti else _("Playlist {nome}").format(nome=pl.nome)), list(pl.brani), pl
         if tipo == "risultati":
-            return f"Risultati di {self._testo_della_ricerca}", list(self.risultati.brani), None
+            return _("Risultati di {ricerca}").format(ricerca=self._testo_della_ricerca), list(self.risultati.brani), None
         gruppo = dati["gruppo"]
-        return f"Ramo {gruppo.nome} dei Risultati", self._brani_del_gruppo(gruppo), None
+        return _("Ramo {nome} dei Risultati").format(nome=gruppo.nome), self._brani_del_gruppo(gruppo), None
 
     def _dettagli_della_cartella(self, percorso, e_un_unita, fermo):
         righe = []
@@ -4202,7 +4286,7 @@ class Finestra(wx.Frame):
             if not unita["pronta"]:
                 return righe
         if in_rete(percorso) and not questa_rete.raggiungibile(percorso, attesa=questa_rete.ATTESA_IN_SOTTOFONDO):
-            return [*righe, f"{percorso} non risponde: la rete o il disco sono spenti, o lontani."]
+            return [*righe, _("{percorso} non risponde: la rete o il disco sono spenti, o lontani.").format(percorso=percorso)]
         censimento = dettagli.censisci(percorso, fermo)
         sconosciuti = [p for p in censimento["suonabili"] if self._durata_del_percorso(p) is None]
         if sconosciuti:
@@ -4226,64 +4310,76 @@ class Finestra(wx.Frame):
         for radice, nome in unita:
             d = dettagli.dati_dell_unita(radice)
             if not d["pronta"]:
-                righe.append(f"{nome}: {d['tipo']}, non risponde o non ha un disco.")
+                # Traduttori: nome e' l'unita', con la lettera; tipo il suo tipo, come disco locale o unita' di rete.
+                righe.append(_("{nome}: {tipo}, non risponde o non ha un disco.").format(nome=nome, tipo=d["tipo"]))
                 continue
             if d["tipo"] != dettagli.TIPI_DI_UNITA[4] and d["volume"] not in visti:
                 visti.add(d["volume"])
                 totale, libero = totale + d["totale"], libero + d["libero"]
-            righe.append(f"{nome}: {d['tipo']}, liberi {dettagli.dimensione(d['libero'])} di {dettagli.dimensione(d['totale'])}, {dettagli.percentuale(d['libero'], d['totale'])} del totale.")
-        testa = [f"Questo PC: {len(unita)} unità."]
+            # Traduttori: lo spazio libero dell'unita', come in C:, disco locale, liberi 120 GB di 500 GB, 24.0% del totale.
+            righe.append(_("{nome}: {tipo}, liberi {libero} di {totale}, {percentuale} del totale.").format(nome=nome, tipo=d["tipo"], libero=dettagli.dimensione(d["libero"]),
+                totale=dettagli.dimensione(d["totale"]), percentuale=dettagli.percentuale(d["libero"], d["totale"])))
+        testa = [plurale(len(unita), "Questo PC: {n} unità.", "Questo PC: {n} unità.")]
         if totale:
-            testa.append(f"Dischi del PC, in tutto: liberi {dettagli.dimensione(libero)} di {dettagli.dimensione(totale)}, {dettagli.percentuale(libero, totale)} del totale.")
+            testa.append(_("Dischi del PC, in tutto: liberi {libero} di {totale}, {percentuale} del totale.").format(libero=dettagli.dimensione(libero),
+                totale=dettagli.dimensione(totale), percentuale=dettagli.percentuale(libero, totale)))
         return testa + righe
 
     def _nome_del_brano(self, brano):
-        return f"{brano.nome_del_file}, sottobrano {brano.sottobrano}" if brano.sottobrano else brano.nome_del_file
+        if brano.sottobrano:
+            return _("{nome}, sottobrano {numero}").format(nome=brano.nome_del_file, numero=brano.sottobrano)
+        return brano.nome_del_file
 
     def _dettagli_dei_brani(self, titolo, brani, pl=None, fermo=None):
         """Le righe di una playlist, dei Preferiti, dei Risultati o di un loro ramo."""
-        righe = [f"{titolo}: {al_plurale(len(brani), 'brano', 'brani')}."]
+        # Traduttori: nome e' il contenitore, come Preferiti o Playlist Rock.
+        righe = [ngettext("{nome}: {n} brano.", "{nome}: {n} brani.", len(brani)).format(nome=titolo, n=len(brani))]
         if pl is not None and pl.origine:
-            righe.append(f"Importata da {pl.origine['percorso']}.")
+            righe.append(_("Importata da {percorso}.").format(percorso=pl.origine["percorso"]))
         if not brani:
             return righe
         censimento = dettagli.censisci_brani([b.percorso for b in brani], fermo)
-        righe.append(f"Sul disco: {dettagli.dimensione(censimento['byte'])}.")
+        righe.append(_("Sul disco: {dimensione}.").format(dimensione=dettagli.dimensione(censimento["byte"])))
         self.schedario.chiedi([b.percorso for b in brani if self.schedario.durata(b) is None])
         righe += dettagli.righe_dei_brani(brani, self.schedario.durata, durata_lunga, nome_di=self._nome_del_brano, percorso_di=lambda b: b.percorso)
         saltati = sum(1 for b in brani if b.saltato)
         if saltati:
-            righe.append(f"Saltati: {saltati}.")
+            # Traduttori: quanti brani sono segnati come saltati.
+            righe.append(plurale(saltati, "Saltati: {n}.", "Saltati: {n}."))
         mancanti = censimento["mancanti"]
         if mancanti:
-            righe.append(f"Mancanti sul disco: {len(mancanti)}; il primo è {mancanti[0]}.")
+            righe.append(ngettext("Mancanti sul disco: {n}; il primo è {primo}.", "Mancanti sul disco: {n}; il primo è {primo}.", len(mancanti)).format(n=len(mancanti), primo=mancanti[0]))
         if censimento["lontani"]:
-            righe.append(f"In rete, senza risposta: {censimento['lontani']} file, che i conti non comprendono.")
+            righe.append(plurale(censimento["lontani"], "In rete, senza risposta: {n} file, che i conti non comprendono.", "In rete, senza risposta: {n} file, che i conti non comprendono."))
         if censimento["interrotto"]:
-            righe.append("Conto interrotto: i numeri valgono per la parte letta.")
+            righe.append(_("Conto interrotto: i numeri valgono per la parte letta."))
         if pl is not None and pl.filtro:
             passano = sum(1 for b in brani if self._ammesso(pl, b))
-            righe.append(f"Filtro: {pl.filtro}; lo {'passa' if passano == 1 else 'passano'} {al_plurale(passano, 'brano', 'brani')}.")
+            righe.append(ngettext("Filtro: {filtro}; lo passa {n} brano.", "Filtro: {filtro}; lo passano {n} brani.", passano).format(filtro=pl.filtro, n=passano))
         return righe
 
     def _dettagli_delle_playlist(self, elenco, fermo=None):
         """Il ramo Playlist: quante, quanti brani in tutto, e una riga per playlist."""
         tutti = [b for _pl, brani in elenco for b in brani]
-        righe = [f"Playlist: {len(elenco)}, con {al_plurale(len(tutti), 'brano', 'brani')} in tutto."]
+        # Traduttori: quante playlist ci sono, e quanti brani hanno in tutto, come 3 brani.
+        righe = [_("Playlist: {quante}, con {brani} in tutto.").format(quante=len(elenco), brani=plurale(len(tutti), "{n} brano", "{n} brani"))]
         if tutti:
             censimento = dettagli.censisci_brani([b.percorso for b in tutti], fermo)
-            righe.append(f"Sul disco: {dettagli.dimensione(censimento['byte'])}.")
+            righe.append(_("Sul disco: {dimensione}.").format(dimensione=dettagli.dimensione(censimento["byte"])))
         for pl, brani in elenco:
             durate = [self.schedario.durata(b) for b in brani]
             note = [d for d in durate if d is not None]
-            durata = f", {durata_lunga(sum(note))}" if note else ""
-            righe.append(f"{pl.nome}: {al_plurale(len(brani), 'brano', 'brani')}{durata}.")
+            if note:
+                righe.append(ngettext("{nome}: {n} brano, {durata}.", "{nome}: {n} brani, {durata}.", len(brani)).format(nome=pl.nome, n=len(brani), durata=durata_lunga(sum(note))))
+            else:
+                righe.append(ngettext("{nome}: {n} brano.", "{nome}: {n} brani.", len(brani)).format(nome=pl.nome, n=len(brani)))
         return righe
 
     def _troppi_per_i_tag(self, percorsi):
         if len(percorsi) <= MASSIMO_DI_FILE_PER_I_TAG:
             return False
-        self._riscontro("non_disponibile", f"I tag si leggono e si modificano al massimo su {MASSIMO_DI_FILE_PER_I_TAG} file insieme: la selezione ne ha {len(percorsi)}.")
+        self._riscontro("non_disponibile", ngettext("I tag si leggono e si modificano al massimo su {massimo} file insieme: la selezione ne ha {n}.",
+            "I tag si leggono e si modificano al massimo su {massimo} file insieme: la selezione ne ha {n}.", len(percorsi)).format(massimo=MASSIMO_DI_FILE_PER_I_TAG, n=len(percorsi)))
         return True
 
     def _leggi_i_tag(self, percorsi):
@@ -4292,8 +4388,11 @@ class Finestra(wx.Frame):
         if not letti:
             self._riscontro("errore", " ".join(errori))
             return
-        righe = [f"Tag di {self._di_chi(percorsi)}."]
-        righe += [f"{t['nome']}: {'valori diversi' if t.get('diversi') else t['valore'] or 'vuoto'}." for t in letti]
+        # Traduttori: chi e' il nome del file, o quanti file, come 3 file.
+        righe = [_("Tag di {chi}.").format(chi=self._di_chi(percorsi))]
+        for t in letti:
+            valore = _("valori diversi") if t.get("diversi") else t["valore"] or _("vuoto")
+            righe.append(f"{t['nome']}: {valore}.")
         self._stampa("tag_letti", righe + errori)
 
     def _comando_modifica_i_tag(self):
@@ -4302,7 +4401,7 @@ class Finestra(wx.Frame):
         with wx.BusyCursor():
             percorsi = self._file_dei_tag()
         if not percorsi:
-            self._riscontro("non_disponibile", "Maiuscolo+F11 modifica i tag di un brano o di un file audio o video: scegline uno nella plancia.")
+            self._riscontro("non_disponibile", _("Maiuscolo+F11 modifica i tag di un brano o di un file audio o video: scegline uno nella plancia."))
             return
         if self._troppi_per_i_tag(percorsi):
             return
