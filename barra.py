@@ -1,6 +1,6 @@
 # MeTeOra, la barra dei comandi per il mouse: i comandi principali, per chi vede, sopra la finestra quando il mouse si muove.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.87.0, chiesta da Gabriele per chi vede. Nella 1.88.0 anche sopra il video, con la linea del tempo. Nella 1.103.0 i clic contati nelle statistiche.
+# 04/10/2026: nasce con la 1.87.0, chiesta da Gabriele per chi vede. Nella 1.88.0 anche sopra il video, con la linea del tempo. Nella 1.103.0 i clic contati nelle statistiche. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
 
 """La barra dei comandi per il mouse (1.87.0).
 

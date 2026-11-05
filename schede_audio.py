@@ -1,6 +1,6 @@
 # MeTeOra, le schede audio: su quale uscita suonano musica ed effetti.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.51.0, tappa 3, piano 5.8.9: la scheda audio in uso fra le impostazioni. Nella 1.116.0 le schede arrivate dopo l'avvio, come le cuffie Bluetooth, rileggendo PortAudio con GBUtils V216, e l'avviso sul vivavoce.
+# 01/10/2026: nasce con la 1.51.0, tappa 3, piano 5.8.9: la scheda audio in uso fra le impostazioni. Nella 1.116.0 le schede arrivate dopo l'avvio, come le cuffie Bluetooth, rileggendo PortAudio con GBUtils V216, e l'avviso sul vivavoce. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
 
 """La scheda audio, una voce sola per la musica e per gli effetti.
 

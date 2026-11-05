@@ -1,6 +1,6 @@
 # MeTeOra, le associazioni dei formati: Apri con MeTeOra e le app predefinite di Windows.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.91.0, tappa 12 d del piano. Nella 1.113.0 le playlist M3U, M3U8 e PLS, con un ProgID loro.
+# 04/10/2026: nasce con la 1.91.0, tappa 12 d del piano. Nella 1.113.0 le playlist M3U, M3U8 e PLS, con un ProgID loro. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
 
 """Le associazioni dei formati (1.91.0).
 

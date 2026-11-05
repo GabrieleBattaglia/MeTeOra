@@ -1,6 +1,6 @@
 # MeTeOra, i sottotitoli fatti di immagini: le tracce dei DVD e dei Blu-ray, e quelli impressi nel video.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.80.0, dalla tappa 10 (punti a e b), con le decisioni di Gabriele del 4 ottobre 2026.
+# 04/10/2026: nasce con la 1.80.0, dalla tappa 10 (punti a e b), con le decisioni di Gabriele del 4 ottobre 2026. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
 
 """La lettura dei sottotitoli che non sono testo, con il riconoscimento di ocr.
 

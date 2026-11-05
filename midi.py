@@ -1,6 +1,6 @@
 # MeTeOra, i MIDI: FluidSynth con un banco di suoni General MIDI, resa in RAM come i SID.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/10/2026: nasce con la tappa 8 (issue 16). Nella 1.67.4 solo i banchi General MIDI, e la cartella dei temporanei saltata.
+# 03/10/2026: nasce con la tappa 8 (issue 16). Nella 1.67.4 solo i banchi General MIDI, e la cartella dei temporanei saltata. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
 
 """I MIDI di MeTeOra (tappa 8, issue 16).
 

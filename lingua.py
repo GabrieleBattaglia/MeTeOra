@@ -34,6 +34,10 @@ def cartella_dei_cataloghi():
 
 
 def _polipo(lingua=None):
+    if not os.path.isdir(cartella_dei_cataloghi()):
+        # Senza cataloghi, come nel pacchetto che non ne porta, c'e' solo
+        # l'italiano: polipo lo direbbe con un avviso a schermo.
+        return SORGENTE, lambda testo: testo, lambda singolare, plurale_, n: singolare if n == 1 else plurale_
     from GBUtils import polipo
 
     return polipo(domain=DOMINIO, localedir=cartella_dei_cataloghi(), source_language=SORGENTE, config_path=percorsi.cartella_programma(),

@@ -1,6 +1,6 @@
 # MeTeOra, il filtro delle playlist: dal testo scritto da chi ascolta a una funzione che dice si' o no a ogni brano.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la 1.8.0, issue 2. Nella 1.34.0 i commenti col dollaro e la grammatica della ricerca nella console.
+# 30/09/2026: nasce con la 1.8.0, issue 2. Nella 1.34.0 i commenti col dollaro e la grammatica della ricerca nella console. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
 
 """Il filtro delle playlist.
 

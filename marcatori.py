@@ -1,6 +1,6 @@
 # MeTeOra, i marker: punti con un nome dentro un brano, salvati in un file JSON.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.39.0, tappa 3, issue 12 e 14. Nella 1.51.0 l'elenco di tutti i marker, Cancella tutto, l'esportazione e l'importazione. Nella 1.67.0 i marker seguono un file rinominato. Nella 1.104.0 si tolgono i percorsi dei file spariti, e le voci che restano senza, se lo schedario non conosce una copia del file altrove.
+# 01/10/2026: nasce con la 1.39.0, tappa 3, issue 12 e 14. Nella 1.51.0 l'elenco di tutti i marker, Cancella tutto, l'esportazione e l'importazione. Nella 1.67.0 i marker seguono un file rinominato. Nella 1.104.0 si tolgono i percorsi dei file spariti, e le voci che restano senza, se lo schedario non conosce una copia del file altrove. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
 
 """I marker dei brani.
 

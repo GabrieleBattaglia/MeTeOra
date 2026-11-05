@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17). Nella 2.7.1 la precedenza ai tasti sul lavoro in disparte. Nella 2.7.2 i lettori di rete chiusi all'uscita. Nella 2.7.3 i tasti funzione nelle tabelle COMANDI_DEI_TASTI_FUNZIONE e INTERRUTTORI, lette dalla prova della guida rapida, e le righe del cruscotto nell'ordine della regola
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17). Nella 2.7.1 la precedenza ai tasti sul lavoro in disparte. Nella 2.7.2 i lettori di rete chiusi all'uscita. Nella 2.7.3 i tasti funzione nelle tabelle COMANDI_DEI_TASTI_FUNZIONE e INTERRUTTORI, lette dalla prova della guida rapida, e le righe del cruscotto nell'ordine della regola. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -513,9 +513,6 @@ TASTI_DEL_CONTESTO = {
     "marker": (_("un marker"), _("Invio rinomina il marker, Canc lo elimina, X fa come sul suo brano. Applicazioni o Spazio: menu con Vai al marker, che suona il brano da lì, Rinomina ed Elimina.")),
     "comando": (_("un comando"), _("Invio esegue il comando.")),
 }
-# Le voci della finestra delle impostazioni, in ordine: chiave -> (etichetta,
-# participio per dire che non e' cambiata; None per le voci che fanno
-# un'azione invece di cambiare un valore).
 def _stesso_posto(a, b):
     """Vero se due (playlist, brano, sottobrano) sono lo stesso posto: la
     stessa playlist e lo stesso brano, non due uguali, e lo stesso numero."""
@@ -634,46 +631,49 @@ def _frase_del_video(acceso):
     return _("Video spento: dei video si sente solo l'audio.")
 
 
+# Le voci della finestra delle impostazioni, in ordine: chiave -> (etichetta,
+# frase di Esc nel campo, che dice che non e' cambiata; None per le voci che
+# fanno un'azione invece di cambiare un valore). Dalla 3.0.0 la frase e' intera,
+# perche' le altre lingue non accordano il participio come l'italiano.
 VOCI_DELLE_IMPOSTAZIONI = {
-    # Traduttori: il nome della voce, e il participio che chiude la frase di Esc nel suo campo: Volume della musica non cambiato.
-    "volume": (_("Volume della musica"), _("cambiato")),
-    "passo_volume": (_("Passo del volume"), _("cambiato")),
-    "volume_effetti": (_("Volume degli effetti"), _("cambiato")),
-    "replaygain": (_("Volume uniforme (ReplayGain)"), _("cambiato")),
-    "scheda_audio": (_("Scheda audio"), _("cambiata")),
-    "passo_indietro": (_("Salto indietro di Ctrl+Q"), _("cambiato")),
-    "passo_avanti": (_("Salto avanti di Maiuscolo+Q"), _("cambiato")),
-    "velocita": (_("Velocità"), _("cambiata")),
-    "tono": (_("Tono"), _("cambiato")),
-    "bande": (_("Equalizzatore"), _("cambiato")),
-    "dissolvenza": (_("Dissolvenza"), _("cambiata")),
-    "casuale": (_("Riproduzione casuale (Ctrl+N, Maiuscolo+N)"), _("cambiata")),
-    "modello_casuale": (_("Modello della riproduzione casuale"), _("cambiato")),
-    "ripetizione": (_("Ripetizione (Maiuscolo+V)"), _("cambiata")),
-    "video": (_("Video (Ctrl+F1, Maiuscolo+F1)"), _("cambiato")),
-    "sottotitoli": (_("Sottotitoli letti (D)"), _("cambiati")),
-    "sintesi": (_("Sintesi di sottotitoli e karaoke"), _("cambiata")),
-    "destinazione": (_("Dove vanno sottotitoli e karaoke"), _("cambiato")),
-    "karaoke": (_("Testo del karaoke"), _("cambiato")),
-    "anticipo_karaoke": (_("Anticipo del karaoke"), _("cambiato")),
-    "celle_braille": (_("Celle della barra braille"), _("cambiate")),
-    "lettura_minima": (_("Tempo minimo di lettura in braille"), _("cambiato")),
-    "banco_midi": (_("Banco dei suoni MIDI"), _("cambiato")),
-    "insegui": (_("Inseguimento della plancia (Ctrl+F8, Maiuscolo+F8)"), _("cambiato")),
-    "ripresa_oltre": (_("Punto lasciato dei file lunghi"), _("cambiato")),
+    "volume": (_("Volume della musica"), _("Volume della musica non cambiato.")),
+    "passo_volume": (_("Passo del volume"), _("Passo del volume non cambiato.")),
+    "volume_effetti": (_("Volume degli effetti"), _("Volume degli effetti non cambiato.")),
+    "replaygain": (_("Volume uniforme (ReplayGain)"), _("Volume uniforme (ReplayGain) non cambiato.")),
+    "scheda_audio": (_("Scheda audio"), _("Scheda audio non cambiata.")),
+    "passo_indietro": (_("Salto indietro di Ctrl+Q"), _("Salto indietro di Ctrl+Q non cambiato.")),
+    "passo_avanti": (_("Salto avanti di Maiuscolo+Q"), _("Salto avanti di Maiuscolo+Q non cambiato.")),
+    "velocita": (_("Velocità"), _("Velocità non cambiata.")),
+    "tono": (_("Tono"), _("Tono non cambiato.")),
+    "bande": (_("Equalizzatore"), _("Equalizzatore non cambiato.")),
+    "dissolvenza": (_("Dissolvenza"), _("Dissolvenza non cambiata.")),
+    "casuale": (_("Riproduzione casuale (Ctrl+N, Maiuscolo+N)"), _("Riproduzione casuale (Ctrl+N, Maiuscolo+N) non cambiata.")),
+    "modello_casuale": (_("Modello della riproduzione casuale"), _("Modello della riproduzione casuale non cambiato.")),
+    "ripetizione": (_("Ripetizione (Maiuscolo+V)"), _("Ripetizione (Maiuscolo+V) non cambiata.")),
+    "video": (_("Video (Ctrl+F1, Maiuscolo+F1)"), _("Video (Ctrl+F1, Maiuscolo+F1) non cambiato.")),
+    "sottotitoli": (_("Sottotitoli letti (D)"), _("Sottotitoli letti (D) non cambiati.")),
+    "sintesi": (_("Sintesi di sottotitoli e karaoke"), _("Sintesi di sottotitoli e karaoke non cambiata.")),
+    "destinazione": (_("Dove vanno sottotitoli e karaoke"), _("Dove vanno sottotitoli e karaoke non cambiato.")),
+    "karaoke": (_("Testo del karaoke"), _("Testo del karaoke non cambiato.")),
+    "anticipo_karaoke": (_("Anticipo del karaoke"), _("Anticipo del karaoke non cambiato.")),
+    "celle_braille": (_("Celle della barra braille"), _("Celle della barra braille non cambiate.")),
+    "lettura_minima": (_("Tempo minimo di lettura in braille"), _("Tempo minimo di lettura in braille non cambiato.")),
+    "banco_midi": (_("Banco dei suoni MIDI"), _("Banco dei suoni MIDI non cambiato.")),
+    "insegui": (_("Inseguimento della plancia (Ctrl+F8, Maiuscolo+F8)"), _("Inseguimento della plancia (Ctrl+F8, Maiuscolo+F8) non cambiato.")),
+    "ripresa_oltre": (_("Punto lasciato dei file lunghi"), _("Punto lasciato dei file lunghi non cambiato.")),
     # La lingua di MeTeOra, fra quelle con un catalogo (3.0.0).
-    "lingua": (_("Lingua"), _("cambiata")),
-    "caratteri": (_("Dimensioni dei caratteri"), _("cambiate")),
-    "colori_testo": (_("Colori dei caratteri"), _("cambiati")),
-    "colori_sfondo": (_("Colori dello sfondo"), _("cambiati")),
-    "barra_dei_comandi": (_("Barra dei comandi per il mouse"), _("cambiata")),
-    "stato_della_selezione": (_("Stato della selezione per lo screen reader"), _("cambiato")),
-    "righe_della_console": (_("Righe della console"), _("cambiate")),
+    "lingua": (_("Lingua"), _("Lingua non cambiata.")),
+    "caratteri": (_("Dimensioni dei caratteri"), _("Dimensioni dei caratteri non cambiate.")),
+    "colori_testo": (_("Colori dei caratteri"), _("Colori dei caratteri non cambiati.")),
+    "colori_sfondo": (_("Colori dello sfondo"), _("Colori dello sfondo non cambiati.")),
+    "barra_dei_comandi": (_("Barra dei comandi per il mouse"), _("Barra dei comandi per il mouse non cambiata.")),
+    "stato_della_selezione": (_("Stato della selezione per lo screen reader"), _("Stato della selezione per lo screen reader non cambiato.")),
+    "righe_della_console": (_("Righe della console"), _("Righe della console non cambiate.")),
     "salva_console": (_("Salva console"), None),
     "marcatori": (_("Marcatori"), None),
     "importa_marcatori": (_("Importa marcatori"), None),
     "associazioni": (_("Associazioni dei formati"), None),
-    "impressi": (_("Sottotitoli impressi"), _("cambiati")),
+    "impressi": (_("Sottotitoli impressi"), _("Sottotitoli impressi non cambiati.")),
     "dona": (_("Dona per questo progetto"), None),
     # Il PUB, il gruppo di supporto, accanto al dono (issue 30, 2.1.0).
     "entra_al_pub": (_("Entra al PUB (gruppo di supporto)"), None),
@@ -882,15 +882,6 @@ def righe_del_changelog(testo):
         if riga:
             righe.append(riga)
     return righe
-
-
-def al_plurale(n, singolare, plurale):
-    """'1 brano', '3 brani': il numero con la parola giusta."""
-    return f"1 {singolare}" if n == 1 else f"{n} {plurale}"
-
-
-def brani_al_plurale(n):
-    return plurale(n, "{n} brano", "{n} brani")
 
 
 # Quante voci saltate la console elenca una per una, dopo l'importazione di
@@ -4205,21 +4196,29 @@ class Finestra(wx.Frame):
     def _durata_del_percorso(self, percorso):
         return (self.schedario.scheda(percorso) or {}).get("durata")
 
-    def _nome_del_contenitore(self, dati):
-        """Il nome di un contenitore per le frasi della console, dai suoi dati."""
+    def _attesa_dei_dettagli(self, dati):
+        """La frase della console quando i dettagli di un contenitore tardano,
+        dai suoi dati: intera per ogni contenitore, con la sua preposizione
+        (3.0.0; prima diceva di i Preferiti e di la playlist)."""
         tipo = dati.get("tipo")
-        if tipo == "cartella":
-            return dati.get("nome") or os.path.basename(dati["percorso"].rstrip("\\")) or dati["percorso"]
-        if tipo == "unita":
-            return dati.get("etichetta") or dati["percorso"]
-        # Traduttori: i nomi dei contenitori, con l'articolo, come in Raccolgo i dettagli di la playlist Rock: ci vuole qualche secondo.
+        if tipo == "playlist" and dati["playlist"] is self.archivio.preferiti:
+            return _("Raccolgo i dettagli dei Preferiti: ci vuole qualche secondo.")
         if tipo == "playlist":
-            return _("i Preferiti") if dati["playlist"] is self.archivio.preferiti else _("la playlist {nome}").format(nome=dati["playlist"].nome)
+            return _("Raccolgo i dettagli della playlist {nome}: ci vuole qualche secondo.").format(nome=dati["playlist"].nome)
         if tipo == "risultati":
-            return _("i Risultati")
-        if tipo == "gruppo_risultati":
-            return dati["gruppo"].nome
-        return _("Questo PC") if tipo == "pc" else _("le playlist")
+            return _("Raccolgo i dettagli dei Risultati: ci vuole qualche secondo.")
+        if tipo == "pc":
+            return _("Raccolgo i dettagli di Questo PC: ci vuole qualche secondo.")
+        if tipo == "cartella":
+            nome = dati.get("nome") or os.path.basename(dati["percorso"].rstrip("\\")) or dati["percorso"]
+        elif tipo == "unita":
+            nome = dati.get("etichetta") or dati["percorso"]
+        elif tipo == "gruppo_risultati":
+            nome = dati["gruppo"].nome
+        else:
+            return _("Raccolgo i dettagli delle playlist: ci vuole qualche secondo.")
+        # Traduttori: nome e' una cartella, un'unita' o un gruppo dei Risultati, senza articolo.
+        return _("Raccolgo i dettagli di {nome}: ci vuole qualche secondo.").format(nome=nome)
 
     def _leggi_i_dettagli(self, dati):
         """F11 su un contenitore, o Leggi i dettagli nel suo menu: tutti i
@@ -4247,12 +4246,11 @@ class Finestra(wx.Frame):
         else:
             titolo, brani, pl = self._contenuto_da_descrivere(dati)
             lavoro = lambda: self._dettagli_dei_brani(titolo, brani, pl, fermo)  # noqa: E731
-        nome = self._nome_del_contenitore(dati)
+        attesa = self._attesa_dei_dettagli(dati)
 
         def se_tarda():
             if segno is self._dettagli_attesi and not self._chiusa:
-                # Traduttori: nome e' il contenitore, con l'articolo, come la playlist Rock o una cartella.
-                self.scrivi(_("Raccolgo i dettagli di {nome}: ci vuole qualche secondo.").format(nome=nome))
+                self.scrivi(attesa)
 
         wx.CallLater(800, se_tarda)
         self._in_disparte(lavoro, lambda righe: self._dettagli_pronti(segno, dati, righe))
@@ -4292,12 +4290,9 @@ class Finestra(wx.Frame):
         if sconosciuti:
             # Le durate che mancano si leggono in sottofondo, per il prossimo F11.
             self.schedario.chiedi(sconosciuti)
-        cartella = dettagli.righe_della_cartella(percorso, censimento, self._durata_del_percorso, durata_lunga)
-        if e_un_unita:
-            # La riga col percorso, le date e gli attributi della radice, che
-            # e' sempre nascosta e di sistema, per un'unita' non servono.
-            cartella = [r for r in cartella[1:] if not r.startswith(("Creata il ", "Attributi: "))]
-        return righe + cartella
+        # Per un'unita' la riga col percorso, le date e gli attributi della
+        # radice, che e' sempre nascosta e di sistema, non servono.
+        return righe + dettagli.righe_della_cartella(percorso, censimento, self._durata_del_percorso, durata_lunga, radice=e_un_unita)
 
     def _dettagli_di_questo_pc(self):
         """Lo spazio di ogni unita', e in tutto quello dei dischi del PC:
@@ -5673,7 +5668,7 @@ class Finestra(wx.Frame):
             return
         preferiti = pl is self.archivio.preferiti
         if not pl.inverti():
-            self._riscontro("nessun_altro_brano", _("I Preferiti sono uguale anche al contrario.") if preferiti else _(
+            self._riscontro("nessun_altro_brano", _("I Preferiti sono uguali anche al contrario.") if preferiti else _(
                 "{nome} è uguale anche al contrario.").format(nome=pl.nome))
             return
         self._dopo_il_riordino(pl, "ordine_invertito", _("Preferiti in ordine inverso") if preferiti else _("{nome} in ordine inverso").format(nome=pl.nome))
@@ -5764,7 +5759,7 @@ class Finestra(wx.Frame):
         if annuncia:
             self._statistiche.conta("brani_tolti")
             # Traduttori: file e' il nome del file tolto, nome quello della playlist.
-            self._riscontro("brano_tolto", ngettext("Tolto {file}; nella playlist {nome} restano {n} brano.", "Tolto {file}; nella playlist {nome} restano {n} brani.",
+            self._riscontro("brano_tolto", ngettext("Tolto {file}; nella playlist {nome} resta {n} brano.", "Tolto {file}; nella playlist {nome} restano {n} brani.",
                 len(pl.brani)).format(file=brano.nome_del_file, nome=pl.nome, n=len(pl.brani)))
 
     # La riproduzione.
@@ -7795,7 +7790,7 @@ class Finestra(wx.Frame):
 
     def _testo_delle_statistiche(self, libreria, numeri):
         self._scatto_delle_statistiche()
-        nomi = {chiave: etichetta for chiave, (etichetta, _participio) in VOCI_DELLE_IMPOSTAZIONI.items()}
+        nomi = {chiave: etichetta for chiave, (etichetta, _annullata) in VOCI_DELLE_IMPOSTAZIONI.items()}
         return "\n".join(self._statistiche.righe(version.VERSION, scheda=self.schedario.scheda, libreria=libreria, numeri_della_libreria=numeri,
             comandi_dei_tasti=self._comandi_dei_tasti(), nomi_delle_impostazioni=nomi))
 
@@ -7920,7 +7915,7 @@ class Finestra(wx.Frame):
             "banco_midi": self._banco_da_leggere,
             "insegui": lambda: _("sì") if imp["insegui"] else _("no"),
             # Traduttori: la voce Punto lasciato dei file lunghi, come Punto lasciato dei file lunghi: oltre 30 minuti, oppure mai.
-            "ripresa_oltre": lambda: ngettext("oltre {n} minuti", "oltre {n} minuti", imp["ripresa_oltre"]).format(n=imp["ripresa_oltre"]) if imp["ripresa_oltre"] else _("mai"),
+            "ripresa_oltre": lambda: ngettext("oltre {n} minuto", "oltre {n} minuti", imp["ripresa_oltre"]).format(n=imp["ripresa_oltre"]) if imp["ripresa_oltre"] else _("mai"),
             "lingua": self._lingua_da_leggere,
             "caratteri": self._caratteri_da_leggere,
             "colori_testo": lambda: self._colori_da_leggere("colori_testo"),
@@ -8035,15 +8030,14 @@ class Finestra(wx.Frame):
         legge valori.py: se non va la console dice perche' e il campo si
         riapre, con l'errore in testa al titolo, che NVDA legge, e con il
         testo scritto. Un valore buono si applica e si salva subito."""
-        etichetta, participio = VOCI_DELLE_IMPOSTAZIONI[chiave]
+        etichetta, annullata = VOCI_DELLE_IMPOSTAZIONI[chiave]
         leggi, istruzioni, testo = self._campo(chiave)
         errore = ""
         while True:
             self._domanda()
             with FinestraFiltro(genitore, f"{errore} {etichetta}" if errore else etichetta, testo, istruzioni) as dialogo:
                 if dialogo.ShowModal() != wx.ID_OK:
-                    # Traduttori: etichetta e' la voce delle impostazioni, come Volume della musica, participio come cambiato.
-                    self._annullato(_("{etichetta} non {participio}.").format(etichetta=etichetta, participio=participio))
+                    self._annullato(annullata)
                     return
                 # Piu' righe valgono come una, unite da spazi.
                 testo = " ".join(dialogo.testo.splitlines()).strip()
@@ -8321,19 +8315,19 @@ class Finestra(wx.Frame):
             self._testo_superato()
         if chiave == "celle_braille":
             if valore:
-                return plurale(valore, "Sottotitoli e karaoke ora arrivano al braille in blocchi di {n} celle al più.",
+                return plurale(valore, "Sottotitoli e karaoke ora arrivano al braille in blocchi di {n} cella al più.",
                     "Sottotitoli e karaoke ora arrivano al braille in blocchi di {n} celle al più.")
             return _("Sottotitoli e karaoke ora arrivano al braille interi.")
         if chiave == "lettura_minima":
             return plurale(valore, "Ogni blocco ora resta sulla barra braille almeno {n} millesimo.", "Ogni blocco ora resta sulla barra braille almeno {n} millesimi.")
         if chiave == "ripresa_oltre":
             if valore:
-                return plurale(valore, "I file più lunghi di {n} minuti ora riprendono dal punto lasciato.", "I file più lunghi di {n} minuti ora riprendono dal punto lasciato.")
+                return plurale(valore, "I file più lunghi di {n} minuto ora riprendono dal punto lasciato.", "I file più lunghi di {n} minuti ora riprendono dal punto lasciato.")
             return _("I file ora ripartono sempre da capo.")
         if chiave == "anticipo_karaoke":
             self._applica_il_karaoke()
             if valore:
-                return plurale(valore, "Il testo del karaoke ora arriva {n} millesimi prima del canto.", "Il testo del karaoke ora arriva {n} millesimi prima del canto.")
+                return plurale(valore, "Il testo del karaoke ora arriva {n} millesimo prima del canto.", "Il testo del karaoke ora arriva {n} millesimi prima del canto.")
             return _("Il testo del karaoke ora arriva quando comincia il canto.")
         if chiave == "righe_della_console":
             # Il taglio e' subito, senza il margine che scrivi lascia.
@@ -9742,7 +9736,7 @@ class Finestra(wx.Frame):
         chiusa, wx.ID_YES se si e' aperto PayPal, o None se non si e' aperta."""
         from GBUtils import Donazione
 
-        testo = Donazione(lang="it", probabilita=100, stampa=False)
+        testo = Donazione(lang=lingua.CODICE, probabilita=100, stampa=False)
         if testo is None:
             return None
         self._suono("donazione")
@@ -9875,7 +9869,7 @@ class Finestra(wx.Frame):
         tolti = sum(self.marcatori.togli(k, m) for k, m in unici)
         self._salva_i_marker(*dict.fromkeys(k for k, _m in unici))
         self._statistiche.conta("marker_tolti_finestra", tolti)
-        self._riscontro("marker_eliminato", plurale(tolti, "Eliminati {n} marker.", "Eliminati {n} marker."))
+        self._riscontro("marker_eliminato", plurale(tolti, "Eliminato {n} marker.", "Eliminati {n} marker."))
 
     def _cancella_tutti_i_marcatori(self, genitore):
         """Cancella tutto nella finestra dei marcatori, dopo una conferma con

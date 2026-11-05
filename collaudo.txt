@@ -1,0 +1,7 @@
+Collaudo di MeTeOra 3.0.0: la localizzazione. La lingua di prova è già pronta in locales\prova.
+In italiano MeTeOra parla come la 2.7.4: un giro dei comandi di tutti i giorni, plancia, riproduzione, impostazioni, F11 e statistiche, senza frasi nuove o storte.
+Nelle impostazioni la voce Lingua dice Lingua: italiano, e Invio apre la lista con italiano e prova, ognuna con il suo codice.
+Scelta prova, la console dice che la lingua sarà prova dal prossimo avvio, e la riga diventa Lingua: italiano; dal riavvio prova.
+Riavviato MeTeOra, ogni testo comincia con il segno del paragrafo, §: annota qui ogni testo che senti o leggi senza segno, con dove l'hai trovato. Senza segno, di proposito: nomi dei tasti, registro degli errori, guida di F12, manuale e changelog.
+Con la lingua di prova i campi delle impostazioni accettano ancora sì, no, acceso e spento in italiano.
+Rimesso italiano nella voce Lingua e riavviato, tutto torna come prima, senza segni.

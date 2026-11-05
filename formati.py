@@ -1,6 +1,6 @@
 # MeTeOra, i formati: quali file il programma sa suonare.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.65.0 i MIDI e i tracker a parte, nella 1.66.0 la musica delle console. Nella 1.82.0 testo_srt, da sottotitoli_ocr.py, per la passata e il karaoke. Nella 1.104.0 i formati campionati, per le durate credibili dello schedario. Nella 1.113.0 le playlist di altri programmi, a parte.
+# 30/09/2026: nasce con la tappa 1. Nella 1.65.0 i MIDI e i tracker a parte, nella 1.66.0 la musica delle console. Nella 1.82.0 testo_srt, da sottotitoli_ocr.py, per la passata e il karaoke. Nella 1.104.0 i formati campionati, per le durate credibili dello schedario. Nella 1.113.0 le playlist di altri programmi, a parte. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
 
 """Le estensioni dei file supportati.
 

@@ -1,6 +1,6 @@
 # MeTeOra, Questo PC: unita', cartelle e file supportati.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.4.0 il cestino, nella 1.5.0 le cartelle ricorsive. Nella 1.67.0 i nomi validi e i file compagni, per Rinomina file. Nella 1.104.0 il nome del volume si legge senza la finestra di errore solo nel suo filo.
+# 30/09/2026: nasce con la tappa 1. Nella 1.4.0 il cestino, nella 1.5.0 le cartelle ricorsive. Nella 1.67.0 i nomi validi e i file compagni, per Rinomina file. Nella 1.104.0 il nome del volume si legge senza la finestra di errore solo nel suo filo. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
 
 """Cosa mostra il ramo Questo PC della plancia.
 

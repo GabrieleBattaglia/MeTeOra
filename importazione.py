@@ -1,6 +1,6 @@
 # MeTeOra, l'importazione delle playlist di altri programmi: M3U, M3U8 e PLS.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 20/10/2026: nasce con la 1.113.0, tappa 14 g del piano.
+# 20/10/2026: nasce con la 1.113.0, tappa 14 g del piano. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
 
 """L'importazione delle playlist di altri programmi, la parte senza wx.
 

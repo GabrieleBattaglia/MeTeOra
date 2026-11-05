@@ -1,6 +1,6 @@
 # MeTeOra, la finestra del video: due pannelli per i due lettori, e la barra dei comandi con la linea del tempo per chi vede.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/10/2026: nasce con la tappa 7. Nella 1.66.36 Esc a schermo intero ha il riscontro di Maiuscolo con F5. Nella 1.88.0 la barra dei comandi con la linea del tempo, al posto del cursore. Nella 2.0.2 lo schermo intero messo o tolto, non piu' a giro.
+# 03/10/2026: nasce con la tappa 7. Nella 1.66.36 Esc a schermo intero ha il riscontro di Maiuscolo con F5. Nella 1.88.0 la barra dei comandi con la linea del tempo, al posto del cursore. Nella 2.0.2 lo schermo intero messo o tolto, non piu' a giro. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
 
 """La finestra del video (tappa 7, piano 5.5).
 

@@ -1,6 +1,6 @@
 # MeTeOra, i dettagli dei contenitori: cartelle, unita', Questo PC e playlist, che F11 scrive nella console.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.77.0, chiesto da Gabriele: tutti i dati possibili del contenitore su cui si e'. Nella 1.104.1 lo 0.0% come le statistiche.
+# 04/10/2026: nasce con la 1.77.0, chiesto da Gabriele: tutti i dati possibili del contenitore su cui si e'. Nella 1.104.1 lo 0.0% come le statistiche. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
 
 """I dettagli di un contenitore, raccolti fuori dal filo della finestra.
 
@@ -248,10 +248,14 @@ def attributi(percorso):
     return [nome for bit, nome in nomi if valore & bit]
 
 
-def righe_della_cartella(percorso, censimento, durata_di, scrivi_durata):
-    """Le righe dei dettagli di una cartella, dal suo censimento."""
+def righe_della_cartella(percorso, censimento, durata_di, scrivi_durata, radice=False):
+    """Le righe dei dettagli di una cartella, dal suo censimento. Con radice,
+    la cartella e' la radice di un'unita': la riga col percorso, le date e gli
+    attributi, che per la radice, sempre nascosta e di sistema, non servono,
+    restano fuori (3.0.0: prima le toglieva la finestra, riconoscendole
+    dall'italiano)."""
     nome = os.path.basename(percorso.rstrip("\\")) or percorso
-    righe = [_("Cartella {nome}: {percorso}.").format(nome=nome, percorso=percorso)]
+    righe = [] if radice else [_("Cartella {nome}: {percorso}.").format(nome=nome, percorso=percorso)]
     if censimento["errore"]:
         # Traduttori: {errore} e' il perche' che dice Windows.
         return [*righe, _("Non riesco a leggerla: {errore}.").format(errore=censimento["errore"])]
@@ -273,15 +277,16 @@ def righe_della_cartella(percorso, censimento, durata_di, scrivi_durata):
     if censimento["file"]:
         # Traduttori: {n} e' il numero di tutti i file della cartella, {dimensione} quanto occupano.
         righe.append(_("Tutti i file: {n}, {dimensione}, nascosti e di ogni tipo compresi.").format(n=censimento["file"], dimensione=dimensione(censimento["byte"])))
-    with contextlib.suppress(OSError):
-        info = os.stat(percorso)
-        nascita = getattr(info, "st_birthtime", info.st_ctime)
-        # Traduttori: {creata} e {modificata} sono date con l'ora, come «4 ottobre 2026 alle 9:05».
-        righe.append(_("Creata il {creata}; modificata il {modificata}.").format(creata=quando(nascita), modificata=quando(info.st_mtime)))
+    if not radice:
+        with contextlib.suppress(OSError):
+            info = os.stat(percorso)
+            nascita = getattr(info, "st_birthtime", info.st_ctime)
+            # Traduttori: {creata} e {modificata} sono date con l'ora, come «4 ottobre 2026 alle 9:05».
+            righe.append(_("Creata il {creata}; modificata il {modificata}.").format(creata=quando(nascita), modificata=quando(info.st_mtime)))
     if censimento["piu_recente"]:
         istante, recente = censimento["piu_recente"]
         righe.append(_("Il file cambiato per ultimo: {percorso}, il {quando}.").format(percorso=os.path.relpath(recente, percorso), quando=quando(istante)))
-    segni = attributi(percorso)
+    segni = [] if radice else attributi(percorso)
     if segni:
         righe.append(_("Attributi: {attributi}.").format(attributi=", ".join(segni)))
     if censimento["illeggibili"]:

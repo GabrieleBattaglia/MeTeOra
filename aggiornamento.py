@@ -1,6 +1,6 @@
 # MeTeOra, l'aggiornamento automatico: il controllo all'avvio con l'auto updater di GBUtils, e le novita' dalla versione di chi aggiorna.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.84.0, condizione di Gabriele per il rilascio.
+# 04/10/2026: nasce con la 1.84.0, condizione di Gabriele per il rilascio. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
 
 """L'aggiornamento automatico di MeTeOra (1.84.0).
 

@@ -1,6 +1,6 @@
 # MeTeOra, una volta sola per macchina: cancella i dati di MeTeOra accanto ai sorgenti, perche' la 1.104.0 riparta da zero.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 20/10/2026: nasce con la 1.104.0, chiesto da Gabriele: si lancia prima di MeTeOra su ogni macchina, e poi si toglie dal progetto. Nella 1.112.0 anche i dischi della pulizia all'avvio.
+# 20/10/2026: nasce con la 1.104.0, chiesto da Gabriele: si lancia prima di MeTeOra su ogni macchina, e poi si toglie dal progetto. Nella 1.112.0 anche i dischi della pulizia all'avvio. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
 
 """Cancella per sempre, senza copie, i dati di MeTeOra nella cartella di questo
 script, cioe' quella dei sorgenti: impostazioni, playlist e Preferiti,

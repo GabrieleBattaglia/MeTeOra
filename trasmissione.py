@@ -1,6 +1,6 @@
 # MeTeOra, la trasmissione agli apparecchi Cast: la parte comune a tutte le strade del Chromecast.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 22/10/2026: nasce con la tappa 15 b del piano, prima che Gabriele scelga la strada: il programma ancora non lo usa. Nella 1.117.0 la usa lontano.py: il brano in pausa, l'indirizzo negli stati, il muto, la connessione che non risponde e quella che cade. Nella 2.7.0 gli M4B letti da se', e le sorgenti a intervalli per il WAV in RAM.
+# 22/10/2026: nasce con la tappa 15 b del piano, prima che Gabriele scelga la strada: il programma ancora non lo usa. Nella 1.117.0 la usa lontano.py: il brano in pausa, l'indirizzo negli stati, il muto, la connessione che non risponde e quella che cade. Nella 2.7.0 gli M4B letti da se', e le sorgenti a intervalli per il WAV in RAM. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
 
 """Gli apparecchi Cast: Chromecast, speaker Google, soundbar e televisori con
 Chromecast integrato, e i gruppi di altoparlanti di Google Home.

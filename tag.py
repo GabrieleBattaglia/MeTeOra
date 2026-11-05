@@ -1,6 +1,6 @@
 # MeTeOra, i tag dei file: letti, scritti e cancellati con mutagen.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/10/2026: nasce con la tappa 10, punto d. Nella 1.70.0 il blocco INFO dei WAV. Nella 1.83.3 TAK, DSF e DFF, e l'AUTHOR dei Speex. Nella 1.113.2 l'APEv2 dei TTA anche per lo schedario: comuni_del_file lo unisce all'ID3, con con_l_ape().
+# 03/10/2026: nasce con la tappa 10, punto d. Nella 1.70.0 il blocco INFO dei WAV. Nella 1.83.3 TAK, DSF e DFF, e l'AUTHOR dei Speex. Nella 1.113.2 l'APEv2 dei TTA anche per lo schedario: comuni_del_file lo unisce all'ID3, con con_l_ape(). Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
 
 """I tag dei file audio e video, con mutagen (tappa 10, 1.69.0).
 

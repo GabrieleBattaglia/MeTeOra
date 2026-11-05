@@ -2,6 +2,17 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.0.0] - 2026-11-05
+
+MeTeOra si può tradurre in qualsiasi lingua. Ogni testo che scrive nella console, nel cruscotto e nelle sue finestre passa da gettext, con l'italiano come lingua sorgente; traduzioni non ce ne sono ancora, e l'italiano che esce è lo stesso di prima, salvo le correzioni qui sotto. Il manuale e la guida rapida di F12 restano in italiano. La versione sale a 3.0.0 perché tocca ogni testo del programma. Con lei arrivano su GitHub anche le 2.7, che non avevano avuto una release.
+
+- La voce Lingua delle impostazioni elenca le lingue che hanno una traduzione, ognuna con il suo nome e il suo codice, e la scelta vale dal prossimo avvio; finché c'è solo l'italiano, lo dice. Al primo avvio MeTeOra parla la lingua di Windows, se qualcuno l'ha tradotta. Decisione di Gabriele: la voce serve anche al traduttore, per vedere il suo lavoro senza cambiare la lingua di Windows.
+- I plurali hanno le forme di ogni lingua, anche dove sono più di due, come in polacco e in russo: per questo polipo di GBUtils, dalla V243, dà anche ngettext, con il permesso di Gabriele. Le frasi fatte a pezzi, dove la grammatica italiana stava negli accordi, sono diventate frasi intere, anche le frasi di Esc nei campi delle impostazioni.
+- Le parole che si scrivono nei campi, come sì, no, acceso e spento, valgono in italiano e nella lingua scelta. Il registro degli errori resta in italiano, perché lo legge l'autore. L'invito al caffè segue la lingua di MeTeOra.
+- Nel manuale il capitolo nuovo Le lingue e le traduzioni: come si traduce MeTeOra, con il modello locales\messages.pot e un programma come Poedit, e come si propone una traduzione, con una pull request anche dal browser o con una mail al PUB.
+- Corretti alcuni testi italiani che uscivano storti: Raccolgo i dettagli dei Preferiti e della playlist, non più di i Preferiti e di la playlist; I Preferiti sono uguali anche al contrario; con uno, oltre 1 minuto, blocchi di 1 cella, 1 millesimo prima del canto, Eliminato 1 marker, resta 1 brano, 1 cassetta da 90 nelle statistiche, e 1 secondo nell'attesa della mail al PUB.
+- Dentro: lingua.py, che chiama polipo all'importazione, prima che i moduli costruiscano le tabelle dei testi, e dà _, ngettext e plurale. tests/test_lingua.py legge il codice di ogni modulo e controlla che pybabel possa leggere ogni testo e che i nomi fra graffe siano quelli passati a format, perché un segnaposto sbagliato si vedrebbe solo quando quel testo esce. strumenti/cataloghi.py estrae il modello, comincia, aggiorna, verifica e compila le traduzioni, trova i testi scoperti e prepara la lingua di prova del collaudo. Il pacchetto porta le traduzioni compilate. requirements-dev.txt, nuovo. I dettagli di un'unità non riconoscono più le loro righe dall'italiano: righe_della_cartella ha il parametro radice.
+
 ## [2.7.4] - 2026-11-05
 
 Una correzione, dal collaudo della 2.7.3: su GabryBar un brano a 24 bit e 96 kHz, un AIFF che lo speaker non legge da sé, partiva ma gracchiava, distorto e quasi incomprensibile.

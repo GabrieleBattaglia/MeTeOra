@@ -1,6 +1,6 @@
 # MeTeOra, i testi del karaoke: MIDI e .kar, .lrc accanto al brano, SYLT dei tag ID3, fatti traccia di sottotitoli.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.82.0, per la tappa 10, punto e.
+# 04/10/2026: nasce con la 1.82.0, per la tappa 10, punto e. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
 
 """I testi a tempo del karaoke (tappa 10, punto e).
 

@@ -1,6 +1,6 @@
 # MeTeOra, le parole delle due voci del PUB, il gruppo di supporto: la mail che iscrive e quella che chiede aiuto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/11/2026: nasce con la 2.1.0, issue 30. Nella 2.4.0 i registri degli errori, ripuliti, da allegare alla richiesta d'aiuto.
+# 03/11/2026: nasce con la 2.1.0, issue 30. Nella 2.4.0 i registri degli errori, ripuliti, da allegare alla richiesta d'aiuto. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
 
 """Entra al PUB e Chiedi aiuto al PUB, le voci delle impostazioni accanto a
 Dona per questo progetto (issue 30, richiesta di Gabriele del 21 ottobre

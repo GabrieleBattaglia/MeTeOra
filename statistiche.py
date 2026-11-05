@@ -1,6 +1,6 @@
 # MeTeOra, le statistiche: ogni sorta di conti, raccolti mentre lo si usa, e la pagina che li racconta.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (UltraCode).
-# 17/10/2026: nasce con la 1.103.0, chiesta da Gabriele: piu' dati ci sono, piu' e' contento. Nella 1.104.0 le righe che elencano voci tengono solo quelle diverse da zero, le percentuali uniformi, gli anni futuri dei tag ignorati, le date sempre con il giorno della settimana, e i brani dello storico tolti dalla pulizia all'avvio o rinominati, con i conti della pulizia nella salute. Nella 1.105.0 i nomi di Dove sono, il comando dell'apostrofo, e del suo suono. Nella 1.109.0 le playlist ordinate, invertite, mescolate e rimesse nell'ordine di prima. Nella 1.110.0 quelli della durata residua, Maiuscolo con l'apostrofo. Nella 1.112.0, nella salute, anche le unita' saltate dalla pulizia perche' usate da dischi diversi o perche' il disco che rispondeva non si riconosceva, i dischi riconosciuti a mano e le lettere rese contese dalla Sentinella. Nella 1.113.0 le playlist importate da un M3U o da un PLS, riaperte e rilette. Nella 1.113.5 il campo modificate, perche' la finestra scriva il file solo quando qualcosa e' cambiato davvero. Nella 1.116.0 i nomi delle schede audio che se ne vanno e tornano. Nella 1.119.0 le uscite: la scelta che va e torna, i brani ripresi, gli speaker Cast e l'assenza piu' lunga (issue 31).
+# 17/10/2026: nasce con la 1.103.0, chiesta da Gabriele: piu' dati ci sono, piu' e' contento. Nella 1.104.0 le righe che elencano voci tengono solo quelle diverse da zero, le percentuali uniformi, gli anni futuri dei tag ignorati, le date sempre con il giorno della settimana, e i brani dello storico tolti dalla pulizia all'avvio o rinominati, con i conti della pulizia nella salute. Nella 1.105.0 i nomi di Dove sono, il comando dell'apostrofo, e del suo suono. Nella 1.109.0 le playlist ordinate, invertite, mescolate e rimesse nell'ordine di prima. Nella 1.110.0 quelli della durata residua, Maiuscolo con l'apostrofo. Nella 1.112.0, nella salute, anche le unita' saltate dalla pulizia perche' usate da dischi diversi o perche' il disco che rispondeva non si riconosceva, i dischi riconosciuti a mano e le lettere rese contese dalla Sentinella. Nella 1.113.0 le playlist importate da un M3U o da un PLS, riaperte e rilette. Nella 1.113.5 il campo modificate, perche' la finestra scriva il file solo quando qualcosa e' cambiato davvero. Nella 1.116.0 i nomi delle schede audio che se ne vanno e tornano. Nella 1.119.0 le uscite: la scelta che va e torna, i brani ripresi, gli speaker Cast e l'assenza piu' lunga (issue 31). Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
 
 """Le statistiche di MeTeOra (1.103.0).
 
@@ -1961,8 +1961,10 @@ class Pagina:
                 righe.append(ngettext("Al ritmo di questi {giorni} giorni, per ascoltare tutta la libreria servirebbero {tempo}.",
                     "Al ritmo di questi {giorni} giorni, per ascoltare tutta la libreria servirebbero {tempo}.", giorni).format(giorni=giorni, tempo=tempo))
         if self.play >= 74 * 60:
-            righe.append(_("La riproduzione equivale a {cd} CD da 74 minuti, o {cassette} cassette da 90.").format(cd=round(self.play / (74 * 60)),
-                cassette=round(self.play / (90 * 60))))
+            cassette = round(self.play / (90 * 60))
+            # Traduttori: cd e cassette sono numeri interi; la forma la sceglie il numero delle cassette.
+            righe.append(ngettext("La riproduzione equivale a {cd} CD da 74 minuti, o {cassette} cassetta da 90.",
+                "La riproduzione equivale a {cd} CD da 74 minuti, o {cassette} cassette da 90.", cassette).format(cd=round(self.play / (74 * 60)), cassette=cassette))
         if self.t("pausa") and self.play:
             # Traduttori: ore è un numero con i decimali, come 1.5.
             righe.append(_("Per ogni ora in pausa, {ore} ore in riproduzione.").format(ore=numero_decimale(self.play / self.t("pausa"))))

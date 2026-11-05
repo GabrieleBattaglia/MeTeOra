@@ -1,6 +1,6 @@
 # MeTeOra, i nomi della sintesi dei sottotitoli: le uscite e le destinazioni, come si leggono all'utente.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/10/2026: nasce con la tappa 7, per i sottotitoli letti. Nella 1.82.0 dove vanno i testi, alla voce, al braille o a tutti e due, chiamati uno per uno. Nella 1.83.3 la voce di Windows aperta da MeTeOra quando accessible_output2 non ci riesce. Nella 1.85.0 fuori ZDSR, Dolphin, System Access e PC-Talker. Nella 1.105.0 dici puo' interrompere la voce che sta parlando, per Dove sono. Nella 1.113.6 le uscite, la voce di Windows e la barra braille a blocchi passano in GBsintesi di GBUtils V213, che serve anche a MESS: qui restano le parole da leggere.
+# 03/10/2026: nasce con la tappa 7, per i sottotitoli letti. Nella 1.82.0 dove vanno i testi, alla voce, al braille o a tutti e due, chiamati uno per uno. Nella 1.83.3 la voce di Windows aperta da MeTeOra quando accessible_output2 non ci riesce. Nella 1.85.0 fuori ZDSR, Dolphin, System Access e PC-Talker. Nella 1.105.0 dici puo' interrompere la voce che sta parlando, per Dove sono. Nella 1.113.6 le uscite, la voce di Windows e la barra braille a blocchi passano in GBsintesi di GBUtils V213, che serve anche a MESS: qui restano le parole da leggere. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
 
 """I nomi delle uscite e delle destinazioni della sintesi dei sottotitoli.
 

@@ -1,6 +1,6 @@
 # MeTeOra, le librerie native: rende visibili libmpv e la DLL dei SID.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1, da prototipi/ambiente.py. Nella 1.85.1 libmpv caricata qui, per dire perche' non si carica. Nella 1.97.9 python-mpv importato con il PATH ridotto a lib. Nella 1.99.0 vulkan-1.dll di scorta.
+# 30/09/2026: nasce con la tappa 1, da prototipi/ambiente.py. Nella 1.85.1 libmpv caricata qui, per dire perche' non si carica. Nella 1.97.9 python-mpv importato con il PATH ridotto a lib. Nella 1.99.0 vulkan-1.dll di scorta. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
 
 """Da importare prima di mpv e di sid.
 

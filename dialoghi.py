@@ -1,6 +1,6 @@
 # MeTeOra, i dialoghi: il campo da una riga, la domanda con Si' e No, la finestra delle impostazioni, la scelta da una lista, la finestra dei marcatori, l'invito a offrire un caffe' e le statistiche.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); DialogoTesto arriva da finestra.py. Nella 1.66.36 la domanda con Sì e No, che si chiude con Esc. Nella 1.75.0 l'invito a offrire un caffe', come in Tornello. Nella 1.81.0 il filtro delle impostazioni. Nella 1.84.0 la proposta dell'aggiornamento. Nella 1.103.0 la finestra delle statistiche. Nella 1.119.0 la scelta da una lista con il filtro, per le destinazioni.
+# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); DialogoTesto arriva da finestra.py. Nella 1.66.36 la domanda con Sì e No, che si chiude con Esc. Nella 1.75.0 l'invito a offrire un caffe', come in Tornello. Nella 1.81.0 il filtro delle impostazioni. Nella 1.84.0 la proposta dell'aggiornamento. Nella 1.103.0 la finestra delle statistiche. Nella 1.119.0 la scelta da una lista con il filtro, per le destinazioni. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
 
 """I dialoghi di MeTeOra, fuori dalla finestra principale.
 
