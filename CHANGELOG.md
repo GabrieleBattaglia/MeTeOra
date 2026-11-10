@@ -2,6 +2,22 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.5.0] - 2026-11-10
+
+Le registrazioni, issue 42: MeTeOra registra le radio e gli indirizzi in rete, con la famiglia di R e un ramo nuovo della plancia. Tasti, sorgenti e formati sono decisioni di Gabriele.
+
+- R dice com'è la registrazione: che cosa registra, da quanto, quanto pesa e in che formato, se è in pausa, o se c'è l'attesa di Alt con R. Maiuscolo con R comincia a registrare la radio o l'indirizzo che suona, e premuto ancora mette in pausa e riprende; Ctrl con R la ferma, e la console dice durata, peso e nome del file. Ctrl e Maiuscolo con R portano al ramo Registrazioni, Ctrl e Alt con R aprono la sua cartella in Esplora risorse.
+- Alt con R si mette in ascolto, e registra la prossima radio o il prossimo indirizzo in rete che parte, un paio di secondi dopo, il tempo di conoscere la sorgente. Alt e Maiuscolo con R tolgono l'attesa, o eliminano la registrazione in corso, dopo una domanda con No come risposta predefinita.
+- Si registrano le radio e gli indirizzi in rete, non i file, che sono già sul disco. La registrazione la fa un lettore a parte, che apre lo stesso flusso: si può cambiare brano, o fermare l'ascolto, e la registrazione va avanti. Chiudendo MeTeOra una registrazione in corso si chiude, e il file resta.
+- La pausa salta davvero il pezzo che non vuoi: le radio, a ogni connessione, mandano una riserva di qualche decina di secondi già trasmessi, che MeTeOra toglie alle riprese, e alla fine riscrive i pezzi in un file solo. Una puntata riprende dal punto in cui era, e la registrazione finisce da sola con lei.
+- I file vanno nella cartella Registrazioni, accanto al programma, con il nome di ciò che registri, la data e l'ora; il ramo Registrazioni, dopo Radio, li mostra dal più recente, e si suonano come i file di una cartella.
+- Due voci nuove nelle impostazioni: Formato delle registrazioni, MP3, il predefinito, Opus, AAC, e senza perdita FLAC e WAV; Qualità delle registrazioni, da 32 a 320 kbps, di partenza 128. La qualità si adatta alla sorgente, per risparmiare spazio: mono se la sorgente è mono, con metà dei kbps, mai più kbps di quelli della sorgente, e campioni al secondo fino ai suoi, al massimo 44.1 kHz; Opus usa sempre i 48 kHz, FLAC e WAV quelli della sorgente fino a 48.
+- I comandi dei marker che stavano su R passano a T, decisione di Gabriele: Alt con T dice quanti marker ha il brano, Ctrl con T toglie quelli prima del punto in cui sei, Ctrl e Maiuscolo con T quelli dopo. T e Maiuscolo con T restano come prima.
+- Le statistiche contano le registrazioni avviate, quelle con l'attesa di Alt con R, le finite con durata e peso, le pause, le interrotte dal flusso e le eliminate.
+- I suoni delle registrazioni sono per ora segnaposto, presi dalla collezione: quelli veri li sceglie Gabriele all'ascolto.
+- Nel manuale il capitolo nuovo Le registrazioni.
+- Dentro: registrazioni.py, nuovo, con libmpv in modo codifica, la registrazione a pezzi e l'unione con EDL; motore.caratteristiche, con kbps, canali e campioni al secondo della sorgente; suoni.SEGNAPOSTO. tests/test_registrazioni.py, nuovo, con libmpv vero su file locali e niente rete.
+
 ## [3.4.0] - 2026-11-10
 
 Le categorie dei Preferiti, issue 41: ora che i Preferiti possono avere anche indirizzi dei siti e radio, suonarli tutti di fila non ha più senso.

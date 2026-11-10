@@ -1,5 +1,6 @@
 # MeTeOra, le prove dei moduli senza finestre: formati, Questo PC, suoni, impostazioni, songlengths.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
+# 10/11/2026, 3.5.0: i segnaposto dei suoni non portano la firma di MeTeOra.
 
 import ctypes
 import json
@@ -128,8 +129,18 @@ def test_ogni_preset_porta_la_firma_di_meteora():
     # Chi crea un suono lo firma nel nome, chi lo usa e basta nella descrizione:
     # cosi' Gabriele lo ritrova in Acu_Maker cercando meteora.
     firma = re.compile(r"Usato da: [^.]*\bmeteora\b")
-    senza = [p for p in suoni.EVENTI.values() if not p.startswith("meteora_") and not firma.search(Acusticator.descrizione(p))]
+    # I segnaposto non si firmano: non sono di MeTeOra, e se ne vanno all'ascolto.
+    senza = [p for e, p in suoni.EVENTI.items() if e not in suoni.SEGNAPOSTO and not p.startswith("meteora_")
+        and not firma.search(Acusticator.descrizione(p))]
     assert not senza, f"preset senza la firma di MeTeOra: {senza}"
+
+
+def test_i_segnaposto_sono_eventi_e_non_suonano_altrove():
+    # Un segnaposto e' un evento vero, e il suo preset non e' gia' di MeTeOra.
+    assert set(suoni.EVENTI) >= suoni.SEGNAPOSTO
+    suoi = {p for e, p in suoni.EVENTI.items() if e not in suoni.SEGNAPOSTO}
+    assert not {suoni.EVENTI[e] for e in suoni.SEGNAPOSTO} & suoi
+    assert not any(suoni.EVENTI[e].startswith("meteora_") for e in suoni.SEGNAPOSTO)
 
 
 def test_impostazioni_scartano_i_valori_sbagliati(tmp_path):

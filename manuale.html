@@ -453,15 +453,25 @@ kbd {
 <h4>I marker</h4>
 <ul>
 <li><kbd>T</kbd>: mette un marker nel punto in cui sei del brano che suona, o rinomina quello su cui sei.</li>
+<li><kbd>Ctrl con T</kbd>: toglie i marker prima del punto in cui sei.</li>
 <li><kbd>Maiuscolo con T</kbd>: toglie tutti i marker del brano che suona.</li>
+<li><kbd>Ctrl e Maiuscolo con T</kbd>: toglie i marker dopo il punto in cui sei.</li>
+<li><kbd>Alt con T</kbd>: dice quanti marker ha il brano, prima e dopo il punto in cui sei.</li>
 <li><kbd>Y</kbd>: dice il marker su cui sei, o il più vicino prima, e quanti ne ha il brano.</li>
 <li><kbd>Ctrl con Y</kbd>: va al marker precedente del brano che suona, anche in pausa.</li>
 <li><kbd>Maiuscolo con Y</kbd>: va al marker successivo.</li>
 <li><kbd>Alt con Y</kbd>: va all'ultimo marker del brano che suona.</li>
 <li><kbd>Ctrl e Alt con Y</kbd>: va al primo marker.</li>
-<li><kbd>R</kbd>: dice quanti marker ha il brano, prima e dopo il punto in cui sei.</li>
-<li><kbd>Ctrl con R</kbd>: toglie i marker prima del punto in cui sei.</li>
-<li><kbd>Maiuscolo con R</kbd>: toglie i marker dopo il punto in cui sei.</li>
+</ul>
+<h4>Le registrazioni</h4>
+<ul>
+<li><kbd>R</kbd>: dice com'è la registrazione: che cosa registra, da quanto, quanto pesa e in che formato, se è in pausa, o se c'è l'attesa di Alt con R.</li>
+<li><kbd>Ctrl con R</kbd>: ferma la registrazione e chiude il file, che va nel ramo Registrazioni.</li>
+<li><kbd>Maiuscolo con R</kbd>: comincia a registrare la radio o l'indirizzo in rete che suona; premuto ancora la mette in pausa, e poi la riprende.</li>
+<li><kbd>Ctrl e Maiuscolo con R</kbd>: porta la plancia sul ramo Registrazioni.</li>
+<li><kbd>Alt con R</kbd>: si mette in ascolto, e registra la prossima radio o il prossimo indirizzo in rete che parte.</li>
+<li><kbd>Ctrl e Alt con R</kbd>: apre la cartella delle registrazioni in Esplora risorse.</li>
+<li><kbd>Alt e Maiuscolo con R</kbd>: elimina la registrazione in corso, dopo una domanda, o toglie l'attesa di Alt con R.</li>
 </ul>
 <h4>I tag</h4>
 <ul>
@@ -664,7 +674,7 @@ kbd {
 <li>Il cruscotto, F7: i tasti del punto da cui arrivi.</li>
 </ul>
 <h3 id="plancia">La plancia dei comandi</h3>
-<p>La plancia è un albero. Al primo livello ci sono, nell'ordine: i Preferiti; i Risultati, che compaiono dopo la prima ricerca; il ramo Playlist; Questo PC; Questa rete; gli Indirizzi, le pagine dei siti che hai aperto; la Radio, con le radio di tutto il mondo; i comandi Apri file, Statistiche e Impostazioni. Ogni capitolo di questo manuale ne descrive uno.</p>
+<p>La plancia è un albero. Al primo livello ci sono, nell'ordine: i Preferiti; i Risultati, che compaiono dopo la prima ricerca; il ramo Playlist; Questo PC; Questa rete; gli Indirizzi, le pagine dei siti che hai aperto; la Radio, con le radio di tutto il mondo; le Registrazioni; i comandi Apri file, Statistiche e Impostazioni. Ogni capitolo di questo manuale ne descrive uno.</p>
 <h4>Muoversi nella plancia</h4>
 <p>Le frecce su e giù, Inizio, Fine, Pagina su e Pagina giù muovono il fuoco come in ogni albero di Windows. I rami si aprono con freccia destra e si chiudono con freccia sinistra, ciascuno con il suo suono: un fruscio che sale quando si apre, uno più scuro che scende quando si chiude. Aprendosi, un ramo si carica: le unità, le cartelle, i brani di una playlist, i sottobrani di un SID, i marker di un brano. Freccia destra su un ramo già aperto porta alla prima voce che contiene; freccia sinistra su una voce chiusa porta il fuoco sul ramo che la contiene, senza chiuderlo.</p>
 <p>Quando un tasto porta il fuoco a un livello diverso dell'albero, un beep breve ne dice la profondità: do al primo livello, e tre semitoni più su per ogni livello in più, fino al do 8 del diciassettesimo, oltre il quale resta lì. Vale per le frecce e per ogni comando, anche quando passa da un dialogo, come Ctrl con F9, Ctrl e Maiuscolo con J o Maiuscolo con Canc; scorrendo voci dello stesso livello, o lavorando nella console o nel cruscotto, il beep tace. Se il comando ha un suono suo, il beep aspetta che finisca.</p>
@@ -1058,6 +1068,32 @@ kbd {
 <li>Scrivi deejay e premi Invio: la console dice quante radio ha trovato, e la selezione va sul ramo Ricerca di deejay, già aperto.</li>
 <li>Scendi sulla radio che cerchi e premi X.</li>
 </ol>
+<h2 id="registrazioni">Le registrazioni</h2>
+<h3 id="registrazioni-concetto">Che cosa si registra</h3>
+<p>MeTeOra registra ciò che arriva dalla rete: le radio e gli indirizzi dei siti, come una diretta di Rai Radio 3 o una puntata di RaiPlay Sound. I file no, perché sono già sul disco: su un file Maiuscolo con R lo dice. La registrazione la fa un lettore a parte, che apre lo stesso flusso e lo scrive nella cartella Registrazioni, accanto al programma: puoi cambiare brano, o fermare l'ascolto, e la registrazione va avanti finché non la fermi.</p>
+<p>Il file prende il nome di ciò che registri, con la data e l'ora, per esempio Rai Radio 3 2026-11-10 16.05.12.mp3, e compare nel ramo Registrazioni della plancia, dopo Radio, quando la registrazione è finita. Le registrazioni si suonano e si trattano come i file di una cartella, con i loro menu; Maiuscolo con Canc le manda nel cestino.</p>
+<h3 id="registrazioni-tasti">I tasti</h3>
+<p>Tutta la famiglia di R è delle registrazioni. R da sola dice com'è: per esempio Registro Rai Radio 3, 12:34, 11.5 MB, in MP3 a 128 kbps, stereo, 44.1 kHz. Maiuscolo con R comincia a registrare la radio o l'indirizzo che suona; premuto ancora mette in pausa la registrazione, e poi la riprende. Ctrl con R la ferma: il file si chiude, e la console dice quanto dura, quanto pesa e come si chiama. Ctrl e Maiuscolo con R portano la plancia sul ramo Registrazioni, e Ctrl e Alt con R aprono la loro cartella in Esplora risorse.</p>
+<p>Alt con R si mette in ascolto: la prossima radio, o il prossimo indirizzo in rete, che parte si registra da solo, un paio di secondi dopo la partenza, il tempo di sapere com'è la sorgente. Alt e Maiuscolo con R tolgono l'attesa, o eliminano la registrazione in corso, dopo una domanda con No come risposta predefinita: il file si cancella.</p>
+<p>La pausa salta davvero il pezzo che non vuoi: alla ripresa la registrazione continua dalla diretta di quel momento. Le radio, a ogni connessione, mandano subito una riserva di qualche decina di secondi già trasmessi, che MeTeOra toglie alle riprese; per questo una registrazione ripresa, alla fine, si riscrive in un file solo, e ci vuole qualche secondo. Una puntata, che si può saltare, riprende invece dal punto a cui era arrivata, e la registrazione finisce da sola quando finisce lei: la console dice che è arrivata alla fine. Se una radio cade, la console lo dice, e quello che è arrivato resta nel file.</p>
+<p>Il primo pezzo di una registrazione di una radio comincia con la sua riserva: qualche decina di secondi prima di Maiuscolo con R. Chiudendo MeTeOra, una registrazione in corso si chiude, e il file resta.</p>
+<h3 id="registrazioni-formati">Formato e qualità</h3>
+<p>Il formato e la qualità si scelgono nelle impostazioni, con le voci Formato delle registrazioni e Qualità delle registrazioni. I formati sono MP3, il predefinito e il più diffuso; Opus, il più piccolo a parità di qualità; AAC; e senza perdita FLAC, compresso, e WAV, senza compressione, che pesa circa dieci MB al minuto. La qualità va da 32 a 320 kbps, e di partenza è 128, per i formati con perdita: FLAC e WAV non la usano.</p>
+<p>La qualità si adatta alla sorgente, per risparmiare spazio: una sorgente mono si registra mono, con metà dei kbps; i kbps non sono mai più di quelli della sorgente, come i 64 di Radio 24; e i campioni al secondo non sono più di quelli della sorgente, fino a 44.1 kHz. Opus vuole sempre i 48 kHz, e FLAC e WAV tengono quelli della sorgente, fino a 48. R e la riga della registrazione avviata dicono il formato che ne è venuto fuori.</p>
+<h3 id="esempi-registrazioni">Esempi</h3>
+<h4>Registrare un programma alla radio</h4>
+<ol>
+<li>Suona la radio, per esempio dal ramo Radio, e premi Maiuscolo con R: la console dice Registro, con il nome della radio e il formato.</li>
+<li>Durante la pubblicità premi Maiuscolo con R: la registrazione va in pausa; alla fine della pubblicità premi ancora Maiuscolo con R, e riprende.</li>
+<li>Quando il programma finisce premi Ctrl con R: la console dice quanto dura e quanto pesa la registrazione.</li>
+<li>Ctrl e Maiuscolo con R portano sul ramo Registrazioni: freccia destra, e la registrazione è la prima.</li>
+</ol>
+<h4>Registrare la prossima radio che parte</h4>
+<ol>
+<li>Premi Alt con R: la console dice In ascolto.</li>
+<li>Fai partire una radio: dopo un paio di secondi la console dice Registro, con il suo nome.</li>
+<li>Se cambi idea prima, Alt e Maiuscolo con R tolgono l'attesa.</li>
+</ol>
 <h2 id="ricerca-e-filtro">La ricerca e il filtro</h2>
 <p>Il filtro sceglie quali brani di una playlist si vedono e si suonano; la ricerca trova i brani in un ramo della plancia, o in tutto MeTeOra, e li mette nei Risultati. Si scrivono tutti e due allo stesso modo. La console ha una ricerca sua, più semplice, e la finestra dei marcatori un'altra ancora, descritta nel capitolo I marker.</p>
 <h3 id="grammatica">Come si scrivono il filtro e la ricerca</h3>
@@ -1345,15 +1381,15 @@ kbd {
 </ol>
 <h2 id="marker">I marker</h2>
 <h3 id="marker-concetto">Che cos'è un marker</h3>
-<p>Un marker è un punto con un nome dentro un brano: T lo mette dove sei, Y ci salta, Maiuscolo con le cifre da 1 a 0 va ai primi dieci, Ctrl e Maiuscolo con R e Maiuscolo con T li tolgono. I nomi automatici sono M1, M2 e così via; per cambiarli si preme T fermi sul marker, o Invio sulla sua voce nella plancia. Tutti i marker insieme si vedono, si cercano, si esportano e si importano dalla finestra delle impostazioni, con le voci Marcatori e Importa marcatori.</p>
+<p>Un marker è un punto con un nome dentro un brano: T lo mette dove sei, Y ci salta, Maiuscolo con le cifre da 1 a 0 va ai primi dieci, Ctrl con T, Maiuscolo con T e Ctrl e Maiuscolo con T li tolgono. I nomi automatici sono M1, M2 e così via; per cambiarli si preme T fermi sul marker, o Invio sulla sua voce nella plancia. Tutti i marker insieme si vedono, si cercano, si esportano e si importano dalla finestra delle impostazioni, con le voci Marcatori e Importa marcatori.</p>
 <p>Un marker sta con il file, non con la playlist: lo ritrovi in ogni playlist e in ogni cartella in cui c'è lo stesso file, anche in una copia identica che sta altrove. MeTeOra riconosce il file dal nome e dalla durata, al millesimo; per i file di cui non conosce la durata vale il percorso, e così anche per i SID che non stanno in una collezione HVSC, che una durata vera non ce l'hanno. In un SID con più sottobrani ogni sottobrano ha i suoi marker. Se rinomini il file con Rinomina file, i suoi marker lo seguono.</p>
 <p>I marker si salvano da soli, a ogni cambiamento, nel file MeTeOra - Marcatori.json; se una volta il salvataggio non riesce, MeTeOra lo dice e riprova all'uscita. Se il file non si legge, all'avvio la console lo dice: il file resta com'è, e i marker nuovi vanno in MeTeOra - Marcatori.json.nuovo, che MeTeOra rilegge le volte dopo finché il file vero resta illeggibile.</p>
 <h3 id="marker-tasti">I tasti dei marker</h3>
 <ul>
 <li>T mette un marker nel punto del brano che suona in cui sei, anche in pausa, con un nome automatico, e la console dice il nome e il tempo, con i millesimi. Se lì c'è già un marker, a meno di cinque millesimi di secondo, chiede invece il suo nuovo nome. Senza niente in corso, la console lo dice.</li>
 <li>Ctrl con Y e Maiuscolo con Y vanno al marker precedente e al successivo del brano che suona, anche in pausa, e portano la selezione della plancia sul marker, se il brano si trova nella plancia; Ctrl con Y si ferma al primo, Maiuscolo con Y all'ultimo, e la console lo dice. Mentre il brano suona, Ctrl con Y salta il marker superato da meno di un secondo e mezzo: premuto subito dopo un salto, va al marker prima. Alt con Y va all'ultimo marker, Ctrl e Alt con Y al primo.</li>
-<li>Y da sola dice il marker su cui sei, o il più vicino prima, con il suo numero fra quelli del brano; R dice quanti marker ha il brano, prima e dopo il punto in cui sei.</li>
-<li>Ctrl con R toglie i marker prima del punto in cui sei; Maiuscolo con R quelli dopo. Il marker su cui sei, se ci sei sopra, resta. Maiuscolo con T toglie tutti i marker del brano, compreso quello. Valgono per il brano che suona; i marker di un altro brano si tolgono con Canc sulla loro voce nella plancia.</li>
+<li>Y da sola dice il marker su cui sei, o il più vicino prima, con il suo numero fra quelli del brano; Alt con T dice quanti marker ha il brano, prima e dopo il punto in cui sei. Fino alla 3.4 lo faceva R, che dalla 3.5.0 è delle registrazioni.</li>
+<li>Ctrl con T toglie i marker prima del punto in cui sei; Ctrl e Maiuscolo con T quelli dopo. Il marker su cui sei, se ci sei sopra, resta. Maiuscolo con T toglie tutti i marker del brano, compreso quello. Valgono per il brano che suona; i marker di un altro brano si tolgono con Canc sulla loro voce nella plancia.</li>
 <li>Maiuscolo con le cifre da 1 a 0, cioè i tasti del punto esclamativo, delle virgolette, della sterlina, del dollaro, del percento, della e commerciale, della barra, delle parentesi e dell'uguale, vanno ai primi dieci marker, in ordine di tempo, del brano su cui sta la plancia, o del brano del marker o del sottobrano su cui sta. Su un SID o un file delle console con più sottobrani, chiuso, vale il sottobrano che suona, o se non suona l'iniziale. Suonano il brano da lì, come Vai al marker, rispettando il loop A-B. Il fuoco della plancia resta dov'è: X sul brano continua a farlo ripartire da capo. Se il marker con quel numero non c'è, la console dice quanti marker ha il brano.</li>
 </ul>
 <p>Con la dissolvenza accesa, i salti ai marker dello stesso brano con Y e Maiuscolo con le cifre sfumano: il punto di partenza e quello d'arrivo si incrociano.</p>
@@ -1713,6 +1749,10 @@ kbd {
 <p>Invio apre la lista di ciò che MeTeOra scarica quando serve, una riga per componente: il nome, se è da installare, installato, in uso per i MIDI o da aggiornare, a che cosa serve, la licenza e il peso. Oggi sono sei: FluidSynth, il sintetizzatore dei MIDI, e tre banchi di suoni General MIDI liberi, FluidR3 GM, il banco storico di FluidSynth, circa 148 MB; GeneralUser GS, leggero e curato, circa 32 MB; MS Basic, il banco di MuseScore, circa 51 MB, compresso, che al primo MIDI si carica in una decina di secondi. Poi yt-dlp, circa 24 MB, che apre gli indirizzi dei siti, con la sua versione, e QuickJS, circa 2 MB, che gli serve per YouTube: il capitolo Gli indirizzi in rete spiega.</p>
 <p>Invio su un componente apre le sue azioni: Installa per quello che manca; per quello che c'è, Usa per i MIDI, se è un banco diverso da quello in uso, Aggiorna, se la versione non è quella di questo MeTeOra, Cerca un aggiornamento, per yt-dlp, che guarda subito se su GitHub ce n'è uno nuovo, e Togli, che prima chiede conferma. Lo scaricamento va in sottofondo, uno alla volta, con l'avanzamento nella console a passi del 10%, e ogni file si controlla prima di installarlo: uno che non è quello atteso non si installa. Un banco nuovo vale subito se i MIDI non ne hanno uno; altrimenti MeTeOra chiede se usarlo al posto di quello in uso.</p>
 <p>Togliere il banco in uso lascia i MIDI senza banco, che si sceglie al prossimo MIDI. FluidSynth, dopo che un MIDI ha suonato, si toglie solo dopo aver chiuso e riaperto MeTeOra. GeneralUser GS si scarica da una copia fra i file della pagina delle release di MeTeOra su GitHub, come chiede il suo autore. La riga della voce dice quanti componenti sono installati.</p>
+<h4>Formato delle registrazioni</h4>
+<p>Invio apre la lista dei formati delle registrazioni: MP3, il predefinito, Opus, AAC, FLAC e WAV. Il capitolo Le registrazioni spiega come sono.</p>
+<h4>Qualità delle registrazioni</h4>
+<p>Invio apre la lista dei kbps, da 32 a 320, per i formati con perdita: di partenza 128. La qualità si adatta alla sorgente, e non supera mai la sua; con FLAC e WAV la riga dice che non conta.</p>
 <h4>Inseguimento della plancia</h4>
 <p>Sì o no, come Maiuscolo con F8 e Ctrl con F8. Di partenza è sganciato.</p>
 <h4>Punto lasciato dei file lunghi</h4>
@@ -1860,6 +1900,7 @@ kbd {
 <li>_internal: il programma, con Python, le sue librerie, il manuale e il changelog; non va toccata. Dentro c'è la cartella lib, con le librerie che suonano, fra cui libmpv-2.dll per quasi tutti i formati e sidshim.dll per i SID: senza queste due MeTeOra non parte. Avviando MeTeOra dai sorgenti, lib sta invece accanto a meteora.py.</li>
 <li>fluidsynth: FluidSynth, scaricato al primo MIDI.</li>
 <li>banchi: i banchi di suoni scaricati, come FluidR3 GM.</li>
+<li>Registrazioni: le registrazioni delle radio e degli indirizzi in rete; mentre una si scrive, i suoi pezzi hanno in fondo .parziale e un numero.</li>
 <li>yt-dlp e quickjs: i componenti degli indirizzi in rete, se li hai scaricati. Durante l'aggiornamento di yt-dlp compaiono per un momento anche yt-dlp.nuova e yt-dlp.vecchia.</li>
 <li>licenze: i testi delle licenze dei componenti, con LEGGIMI.txt e SORGENTI.txt; accanto c'è il file LICENSE, la licenza di MeTeOra. Il capitolo Licenze e crediti spiega.</li>
 </ul>

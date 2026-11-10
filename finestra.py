@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17). Nella 2.7.1 la precedenza ai tasti sul lavoro in disparte. Nella 2.7.2 i lettori di rete chiusi all'uscita. Nella 2.7.3 i tasti funzione nelle tabelle COMANDI_DEI_TASTI_FUNZIONE e INTERRUTTORI, lette dalla prova della guida rapida, e le righe del cruscotto nell'ordine della regola. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.1.0 la voce Componenti aggiuntivi delle impostazioni, e gli altri banchi liberi da scaricare. Nella 3.2.0 gli indirizzi in rete: Ctrl con V, Apri un indirizzo, il ramo Indirizzi, il flusso chiesto prima di suonare e in anticipo per il seguente, e yt-dlp aggiornato ogni giorno. Nella 3.3.0 il ramo Radio, con la ricerca delle radio, il titolo in onda, le dirette che non si saltano e i contatori di radio, componenti e lingua. Nella 3.3.1 la voce Lingua con la sua lista anche con una lingua sola. Nella 3.4.0 i Preferiti in rete, un ramo in cima ai Preferiti, con F4 che sceglie la categoria (issue 41).
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17). Nella 2.7.1 la precedenza ai tasti sul lavoro in disparte. Nella 2.7.2 i lettori di rete chiusi all'uscita. Nella 2.7.3 i tasti funzione nelle tabelle COMANDI_DEI_TASTI_FUNZIONE e INTERRUTTORI, lette dalla prova della guida rapida, e le righe del cruscotto nell'ordine della regola. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.1.0 la voce Componenti aggiuntivi delle impostazioni, e gli altri banchi liberi da scaricare. Nella 3.2.0 gli indirizzi in rete: Ctrl con V, Apri un indirizzo, il ramo Indirizzi, il flusso chiesto prima di suonare e in anticipo per il seguente, e yt-dlp aggiornato ogni giorno. Nella 3.3.0 il ramo Radio, con la ricerca delle radio, il titolo in onda, le dirette che non si saltano e i contatori di radio, componenti e lingua. Nella 3.3.1 la voce Lingua con la sua lista anche con una lingua sola. Nella 3.4.0 i Preferiti in rete, un ramo in cima ai Preferiti, con F4 che sceglie la categoria (issue 41). Nella 3.5.0 le registrazioni, con la famiglia di R e il ramo Registrazioni, e i comandi dei marker su T (issue 42).
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -74,6 +74,7 @@ import pulizia
 import questa_rete
 import questo_pc
 import radio
+import registrazioni
 import registro
 import schede_audio
 import sintesi
@@ -202,6 +203,8 @@ MAIUSCOLO = wx.MOD_SHIFT
 CTRL_MAIUSCOLO = wx.MOD_CONTROL | wx.MOD_SHIFT
 ALT = wx.MOD_ALT
 CTRL_ALT = wx.MOD_CONTROL | wx.MOD_ALT
+# Alt e Maiuscolo, la settima combinazione, delle registrazioni (3.5.0).
+ALT_MAIUSCOLO = wx.MOD_ALT | wx.MOD_SHIFT
 # I tasti funzione ed Esc, con i modificatori: (tasto, modificatori) -> il
 # metodo del comando. La prova della guida rapida li legge da qui, cosi' una
 # combinazione nuova senza la sua riga non passa (2.7.3). Maiuscolo con F7
@@ -259,7 +262,13 @@ TASTI = {
     ("\\", MAIUSCOLO): "filtro",
     # T mette un marker o lo rinomina, Maiuscolo con T li toglie tutti (issue 12).
     ("t", SOLO): "marker",
+    # Dalla 3.5.0 T ha anche i marker che erano su R, che va alle
+    # registrazioni (Gabriele, issue 42): Ctrl toglie quelli prima, Ctrl e
+    # Maiuscolo quelli dopo, Alt dice quanti sono.
+    ("t", CTRL): "togli_i_marker_prima",
     ("t", MAIUSCOLO): "togli_i_marker",
+    ("t", CTRL_MAIUSCOLO): "togli_i_marker_dopo",
+    ("t", ALT): "conta_i_marker",
     # H, il segnalibro, uno per tutto MeTeOra (Gabriele, issue 37, 2.2.0): da
     # solo lo dice, con Maiuscolo ci va e suona, con Ctrl lo toglie, con Ctrl
     # e Maiuscolo lo mette dove si e', riscrivendo quello di prima.
@@ -278,10 +287,18 @@ TASTI = {
     ("e", CTRL): "passo_indietro",
     ("e", MAIUSCOLO): "passo_avanti",
     ("e", CTRL_MAIUSCOLO): "passi_predefiniti",
-    # R, accanto a T: quanti marker, e toglierli prima e dopo il punto.
-    ("r", SOLO): "conta_i_marker",
-    ("r", CTRL): "togli_i_marker_prima",
-    ("r", MAIUSCOLO): "togli_i_marker_dopo",
+    # R, le registrazioni delle radio e degli indirizzi in rete (Gabriele,
+    # issue 42, 3.5.0): da sola dice com'e', Maiuscolo registra, mette in
+    # pausa e riprende, Ctrl ferma, Ctrl e Maiuscolo porta al ramo, Alt
+    # registra la prossima radio che parte, Ctrl e Alt apre la cartella, Alt
+    # e Maiuscolo elimina la registrazione in corso o l'attesa.
+    ("r", SOLO): "registrazione",
+    ("r", CTRL): "ferma_la_registrazione",
+    ("r", MAIUSCOLO): "registra",
+    ("r", CTRL_MAIUSCOLO): "vai_alle_registrazioni",
+    ("r", ALT): "registra_quando_parte",
+    ("r", CTRL_ALT): "apri_la_cartella_delle_registrazioni",
+    ("r", ALT_MAIUSCOLO): "elimina_la_registrazione",
     # Y, i marker del brano: con Alt l'ultimo, come Gabriele propone nella issue.
     ("y", SOLO): "marker_attuale",
     ("y", CTRL): "marker_precedente",
@@ -476,8 +493,11 @@ TASTI_COMUNI = [
     "Ctrl e Maiuscolo il precedente e il seguente, Alt l'ultimo, Ctrl e Alt il primo, che per i sottotitoli è spenti."),
     _("J la playlist: Ctrl e Maiuscolo aprono e suonano la precedente e la successiva, Alt l'ultima, Ctrl e Alt la prima; le cifre da 1 a 0 le prime dieci playlist."),
     _("Nella plancia Backspace chiude il ramo in cui sei e risale di un livello, Maiuscolo con Backspace risale di colpo all'unità o alla playlist, Preferiti compresi, e chiude i rami al suo interno."),
-    _("T mette un marker dove sei, o rinomina quello su cui sei; Maiuscolo con T li toglie tutti. Y il marker su cui sei o quello prima: Ctrl e Maiuscolo il precedente e il successivo, "
-    "Alt l'ultimo, Ctrl e Alt il primo. R quanti marker ha il brano: Ctrl e Maiuscolo tolgono quelli prima e quelli dopo. Maiuscolo con le cifre da 1 a 0 va ai primi dieci marker del brano della plancia."),
+    _("T mette un marker dove sei, o rinomina quello su cui sei; Ctrl con T toglie quelli prima del punto, Maiuscolo con T li toglie tutti, Ctrl e Maiuscolo con T quelli dopo, "
+    "Alt con T dice quanti sono. Y il marker su cui sei o quello prima: Ctrl e Maiuscolo il precedente e il successivo, Alt l'ultimo, Ctrl e Alt il primo. "
+    "Maiuscolo con le cifre da 1 a 0 va ai primi dieci marker del brano della plancia."),
+    _("R la registrazione della radio o dell'indirizzo che suona: da sola dice com'è; Ctrl con R la ferma; Maiuscolo con R la comincia, la mette in pausa e la riprende; "
+    "Ctrl e Maiuscolo con R portano alle Registrazioni; Alt con R registra la prossima radio che parte; Ctrl e Alt con R aprono la loro cartella; Alt e Maiuscolo con R eliminano la registrazione in corso o l'attesa."),
     _("F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, Maiuscolo con F7 le statistiche, F8 porta la selezione e il fuoco della plancia sul brano in riproduzione, Ctrl con F8 la sgancia e Maiuscolo con F8 ce la tiene agganciata, "
     "F9 dice se il ramo col fuoco è aperto, e quante voci ha aperte dentro: Ctrl con F9 lo chiude e Maiuscolo con F9 lo apre con tutto quello che ha dentro, "
     "Ctrl e Maiuscolo con F9 fermano un'apertura, Alt con F9 apre tutta la plancia e Ctrl e Alt con F9 la chiude; mentre si apre puoi navigare; "
@@ -523,6 +543,8 @@ TASTI_DEL_CONTESTO = {
     # Gli Indirizzi e i loro brani (3.2.0).
     "indirizzi": (_("gli Indirizzi"), _("Freccia destra mostra le playlist dei siti e i brani aperti da soli, dal più recente. Invio, Applicazioni o Spazio: menu con Riproduci, "
         "Apri un indirizzo, Filtro, Ordina e Mescola. Ctrl con V apre l'indirizzo degli appunti. Canc su un loro brano o su una loro playlist la toglie.")),
+    "registrazioni": (_("il ramo Registrazioni"), _("Freccia destra mostra le registrazioni, dalla più recente: si suonano e si trattano come i file. "
+        "Invio, Applicazioni o Spazio: menu con Riproduci, Apri la cartella e Aggiorna. Ctrl e Maiuscolo con R portano qui da tutta la finestra.")),
     "radio": (_("il ramo Radio"), _("Freccia destra mostra le radio ascoltate di recente, poi Per paese, Per genere e Per lingua, e i risultati dell'ultima ricerca. "
         "Invio, Applicazioni o Spazio: menu con Riproduci e Cerca una radio. La barra rovesciata cerca una radio per nome fra quelle di radio-browser.")),
     "radio_elenco": (_("un elenco delle radio"), _("Freccia destra chiede a radio-browser i paesi, i generi o le lingue, ognuno con quante radio ha. "
@@ -646,6 +668,26 @@ def midi_in_disparte(lavoro, al_termine):
     threading.Thread(target=lambda: al_termine(lavoro()), name="MeTeOra, preparazione dei MIDI", daemon=True).start()
 
 
+# Le registrazioni (3.5.0): i formati e le qualita' da scegliere nelle
+# impostazioni, e quanto si aspetta che libmpv apra il flusso, prima di
+# registrare una radio partita con l'attesa di Alt con R.
+FORMATI_DELLE_REGISTRAZIONI = {
+    # Traduttori: i formati delle registrazioni nelle impostazioni.
+    "mp3": _("MP3, il più diffuso"),
+    "opus": _("Opus, il più piccolo a parità di qualità"),
+    "aac": _("AAC"),
+    "flac": _("FLAC, senza perdita e compresso"),
+    "wav": _("WAV, senza perdita e senza compressione"),
+}
+QUALITA_DELLE_REGISTRAZIONI = {kbps: f"{kbps} kbps" for kbps in registrazioni.QUALITA}
+ATTESA_DELLA_SORGENTE = 2500
+
+
+def registrazioni_in_disparte(lavoro, al_termine):
+    """Come midi_in_disparte, per i comandi delle registrazioni che aspettano libmpv (3.5.0)."""
+    threading.Thread(target=lambda: al_termine(lavoro()), name="MeTeOra, registrazione", daemon=True).start()
+
+
 def radio_in_disparte(lavoro, al_termine):
     """Come midi_in_disparte, per le domande a radio-browser (3.3.0)."""
     threading.Thread(target=lambda: al_termine(lavoro()), name="MeTeOra, radio in rete", daemon=True).start()
@@ -693,6 +735,9 @@ VOCI_DELLE_IMPOSTAZIONI = {
     "banco_midi": (_("Banco dei suoni MIDI"), _("Banco dei suoni MIDI non cambiato.")),
     # I componenti aggiuntivi da scaricare, tappa 19 a (3.1.0, issue 40).
     "componenti": (_("Componenti aggiuntivi"), None),
+    # Le registrazioni (issue 42, 3.5.0).
+    "formato_registrazioni": (_("Formato delle registrazioni"), _("Formato delle registrazioni non cambiato.")),
+    "qualita_registrazioni": (_("Qualità delle registrazioni"), _("Qualità delle registrazioni non cambiata.")),
     "insegui": (_("Inseguimento della plancia (Ctrl+F8, Maiuscolo+F8)"), _("Inseguimento della plancia (Ctrl+F8, Maiuscolo+F8) non cambiato.")),
     "ripresa_oltre": (_("Punto lasciato dei file lunghi"), _("Punto lasciato dei file lunghi non cambiato.")),
     # La lingua di MeTeOra, fra quelle con un catalogo (3.0.0).
@@ -1337,6 +1382,11 @@ class Finestra(wx.Frame):
         # Le radio (3.3.0): la playlist dell'ultima ricerca per nome, con il
         # testo cercato, o None.
         self._radio_trovate = None
+        # Le registrazioni (3.5.0): quella in corso o in pausa, l'attesa di
+        # Alt con R, e se un comando che aspetta libmpv e' in volo.
+        self._registrazione = None
+        self._in_ascolto = False
+        self._registrazione_occupata = False
         self._video = None
         self._video_nel_motore = False
         # Il brano su cui la finestra del video e' stata nascosta a mano, con
@@ -1721,6 +1771,9 @@ class Finestra(wx.Frame):
         # Le radio di radio-browser, dopo gli Indirizzi (Gabriele, 3.3.0).
         self.nodo_radio = self.albero.AppendItem(radice, _("Radio"), data={"tipo": "radio", "caricato": False})
         self.albero.SetItemHasChildren(self.nodo_radio, True)
+        # Le registrazioni, i file della loro cartella, dopo Radio (Gabriele, issue 42, 3.5.0).
+        self.nodo_registrazioni = self.albero.AppendItem(radice, _("Registrazioni"), data={"tipo": "registrazioni", "caricato": False})
+        self.albero.SetItemHasChildren(self.nodo_registrazioni, True)
         self.albero.AppendItem(radice, _("Apri file"), data={"tipo": "comando", "comando": "apri_file"})
         # Le statistiche, prima delle impostazioni (Gabriele, 1.103.0).
         self.albero.AppendItem(radice, _("Statistiche"), data={"tipo": "comando", "comando": "statistiche"})
@@ -3627,7 +3680,7 @@ class Finestra(wx.Frame):
         evento.Skip()
         dati = self._dati(evento.GetItem()) or {}
         # Anche il ramo Radio, che riaprendosi mostra le ascoltate di adesso (3.3.0).
-        if dati.get("tipo") in ("playlist", "radio"):
+        if dati.get("tipo") in ("playlist", "radio", "registrazioni"):
             dati["caricato"] = False
         if self._apertura is not None:
             self._apertura.chiusi_a_mano.add(int(evento.GetItem().GetID()))
@@ -3661,6 +3714,9 @@ class Finestra(wx.Frame):
             return
         if tipo in ("radio", "radio_elenco", "radio_gruppo"):
             self._carica_le_radio(voce, dati)
+            return
+        if tipo == "registrazioni":
+            self._carica_le_registrazioni(voce)
             return
         if tipo in ("computer_della_rete", "computer"):
             self._cerca_nella_rete(voce, dati)
@@ -4045,6 +4101,9 @@ class Finestra(wx.Frame):
             if not preferiti:
                 voci.append((_("Elimina"), lambda: self._elimina_playlist(pl)))
             return [*voci, dettagli_della_voce]
+        if tipo == "registrazioni":
+            return [(_("Riproduci"), lambda: self._riproduci_playlist(self._playlist_delle_registrazioni())),
+                (_("Apri la cartella"), self._comando_apri_la_cartella_delle_registrazioni), (_("Aggiorna"), lambda: self._aggiorna_ramo(self.nodo_registrazioni))]
         if tipo in ("radio", "radio_elenco", "radio_gruppo") or (tipo == "brano" and dati["brano"].radio and self._lista_delle_radio(dati["playlist"])):
             return self._voci_del_menu_delle_radio(dati)
         if tipo == "brano" and formati.e_indirizzo(dati["brano"].percorso):
@@ -6014,6 +6073,9 @@ class Finestra(wx.Frame):
         self._annuncia(pl, brano, evento)
         if brano.radio:
             self._radio_partita(brano)
+        if self._in_ascolto and self._registrazione is None and formati.e_indirizzo(brano.percorso):
+            # Un momento, perche' libmpv apra il flusso e ne dica canali e kbps.
+            wx.CallLater(ATTESA_DELLA_SORGENTE, self._registra_se_suona, brano)
         if ripresa:
             self._statistiche.conta("ripresi_dal_punto")
             self.scrivi(_("Riprendo da {tempo}, dove l'avevi lasciato: X lo fa ripartire da capo.").format(tempo=tempo(ripresa)))
@@ -8151,6 +8213,8 @@ class Finestra(wx.Frame):
             "lettura_minima": lambda: f"{imp['lettura_minima']} ms",
             "banco_midi": self._banco_da_leggere,
             "componenti": self._componenti_da_leggere,
+            "formato_registrazioni": lambda: FORMATI_DELLE_REGISTRAZIONI[imp["formato_registrazioni"]],
+            "qualita_registrazioni": self._qualita_da_leggere,
             "insegui": lambda: _("sì") if imp["insegui"] else _("no"),
             # Traduttori: la voce Punto lasciato dei file lunghi, come Punto lasciato dei file lunghi: oltre 30 minuti, oppure mai.
             "ripresa_oltre": lambda: ngettext("oltre {n} minuto", "oltre {n} minuti", imp["ripresa_oltre"]).format(n=imp["ripresa_oltre"]) if imp["ripresa_oltre"] else _("mai"),
@@ -8248,6 +8312,10 @@ class Finestra(wx.Frame):
             "sintesi": self._scegli_la_sintesi,
             "banco_midi": self._scegli_il_banco,
             "componenti": self._scegli_un_componente,
+            "formato_registrazioni": lambda genitore: self._scegli_da_una_lista(genitore, "formato_registrazioni", FORMATI_DELLE_REGISTRAZIONI,
+                lambda chiave: _("Le registrazioni ora sono in {formato}.").format(formato=FORMATI_DELLE_REGISTRAZIONI[chiave])),
+            "qualita_registrazioni": lambda genitore: self._scegli_da_una_lista(genitore, "qualita_registrazioni", QUALITA_DELLE_REGISTRAZIONI,
+                lambda chiave: _("Le registrazioni con perdita ora sono a {qualita} al massimo.").format(qualita=QUALITA_DELLE_REGISTRAZIONI[chiave])),
             "salva_console": lambda _genitore: self._salva_console(),
             "marcatori": self._finestra_dei_marcatori,
             "importa_marcatori": self._importa_i_marcatori,
@@ -9521,6 +9589,261 @@ class Finestra(wx.Frame):
             self._scrivi_il_banco(genitore)
         else:
             self._installa_il_componente(da_scaricare[indice - 2], genitore)
+
+    # Le registrazioni, issue 42 (3.5.0).
+
+    def _qualita_da_leggere(self):
+        imp = self.impostazioni
+        if not registrazioni.FORMATI[imp["formato_registrazioni"]][4]:
+            # Traduttori: la riga della qualita' delle registrazioni quando il formato e' senza perdita.
+            return _("{qualita}, che non conta per {formato}").format(qualita=QUALITA_DELLE_REGISTRAZIONI[imp["qualita_registrazioni"]],
+                formato=registrazioni.FORMATI[imp["formato_registrazioni"]][0])
+        return QUALITA_DELLE_REGISTRAZIONI[imp["qualita_registrazioni"]]
+
+    def _playlist_delle_registrazioni(self):
+        """I file della cartella delle registrazioni, dal piu' recente, come
+        una playlist temporanea, come una cartella di Questo PC."""
+        cartella = registrazioni.cartella()
+        try:
+            file = list(questo_pc.contenuto(cartella)[1])
+        except OSError:
+            file = []
+        file.sort(key=lambda f: os.path.getmtime(f) if os.path.exists(f) else 0.0, reverse=True)
+        return self._temporanea(cartella, file)
+
+    def _carica_le_registrazioni(self, voce):
+        pl = self._playlist_delle_registrazioni()
+        for brano in pl.brani:
+            self._aggiungi_voce(voce, "file", pl, brano)
+        if not pl.brani:
+            self.albero.SetItemHasChildren(voce, False)
+
+    def _rinfresca_le_registrazioni(self):
+        """Una registrazione nuova: il ramo si rifa' se e' aperto e il fuoco non
+        e' dentro di lui; altrimenti mostra quella nuova quando si riapre."""
+        dati = self._dati(self.nodo_registrazioni)
+        if self.albero.IsExpanded(self.nodo_registrazioni) and not self._sotto(self._voce_corrente(), self.nodo_registrazioni):
+            self._carica(self.nodo_registrazioni, dati)
+        else:
+            dati["caricato"] = False
+            self.albero.SetItemHasChildren(self.nodo_registrazioni, True)
+
+    def _sorgente_da_registrare(self):
+        """Il brano che suona, se e' una radio o un indirizzo in rete, o None,
+        con il riscontro del perche'."""
+        brano = self.coda.corrente
+        if not self.motore.in_corso or brano is None or brano.percorso != self.motore.in_corso:
+            self._riscontro("non_disponibile", _("Non suona niente da registrare: Maiuscolo con R registra la radio o l'indirizzo in rete che suona, "
+                "Alt con R il prossimo che parte."))
+            return None
+        if not formati.e_indirizzo(brano.percorso):
+            self._riscontro("non_disponibile", _("{nome} è un file, già sul disco: si registrano le radio e gli indirizzi in rete.").format(nome=brano.nome_del_file))
+            return None
+        return brano
+
+    def _avvia_la_registrazione(self, brano):
+        """Comincia a registrare la radio o l'indirizzo che suona, con il
+        formato e la qualita' delle impostazioni, adattati alla sorgente."""
+        flusso = indirizzi.pronto(brano.percorso)
+        if flusso is None:
+            self._riscontro("errore", _("Il flusso di {nome} non è più pronto: fallo ripartire con X, e registra di nuovo.").format(nome=brano.nome_del_file))
+            return
+        imp = self.impostazioni
+        sorgente_kbps, canali, frequenza = self.motore.caratteristiche()
+        if brano.radio and brano.radio.get("bitrate"):
+            sorgente_kbps = brano.radio["bitrate"]
+        kbps, canali, frequenza = registrazioni.parametri(imp["formato_registrazioni"], imp["qualita_registrazioni"], sorgente_kbps, canali, frequenza)
+        registrazione = registrazioni.Registrazione(brano.percorso, brano.nome_del_file, flusso, imp["formato_registrazioni"], kbps, canali, frequenza,
+            al_termine=lambda r: wx.CallAfter(self._registrazione_finita_da_se, r))
+        try:
+            registrazione.avvia()
+        except OSError as e:
+            self._riscontro("errore", _("La registrazione di {nome} non parte: {errore}").format(nome=brano.nome_del_file, errore=e))
+            return
+        self._registrazione, self._in_ascolto = registrazione, False
+        self._statistiche.conta("registrazioni_avviate")
+        self._riscontro("registrazione_avviata", _("Registro {nome}, in {formato}. Ctrl con R la ferma.").format(nome=brano.nome_del_file,
+            formato=registrazione.descrizione))
+
+    def _registra_se_suona(self, brano):
+        """Con l'attesa di Alt con R: la radio o l'indirizzo partito si
+        registra, se suona ancora e l'attesa c'e' ancora."""
+        if self._chiusa or not self._in_ascolto or self._registrazione is not None:
+            return
+        if self.coda.corrente is brano and self.motore.in_corso == brano.percorso:
+            self._avvia_la_registrazione(brano)
+
+    def _frase_della_registrazione(self, registrazione):
+        """Il titolo, i secondi e il peso di una registrazione."""
+        # Traduttori: una registrazione, come Rai Radio 3, 12:34, 11.5 MB.
+        return _("{nome}, {durata}, {peso}").format(nome=registrazione.titolo, durata=tempo(registrazione.secondi),
+            peso=midi.dimensione_da_leggere(registrazione.byte))
+
+    def _comando_registrazione(self):
+        """R (Gabriele, issue 42): com'e' la registrazione, o l'attesa; nella
+        console, alla sintesi e al braille, come gli altri tasti da soli."""
+        reg = self._registrazione
+        if reg is None and self._in_ascolto:
+            testo = _("In ascolto: registro la prossima radio o il prossimo indirizzo in rete che parte. Alt e Maiuscolo con R tolgono l'attesa.")
+        elif reg is None:
+            testo = _("Nessuna registrazione. Maiuscolo con R registra la radio o l'indirizzo in rete che suona, Alt con R il prossimo che parte.")
+        elif reg.stato == "in_pausa":
+            testo = _("Registrazione in pausa: {registrazione}. Maiuscolo con R riprende, Ctrl con R la ferma.").format(registrazione=self._frase_della_registrazione(reg))
+        else:
+            testo = _("Registro {registrazione}, in {formato}. Maiuscolo con R la mette in pausa, Ctrl con R la ferma.").format(
+                registrazione=self._frase_della_registrazione(reg), formato=reg.descrizione)
+        self._riporta(testo, "registrazione")
+
+    def _comando_registra(self):
+        """Maiuscolo con R: comincia a registrare cio' che suona, o mette in
+        pausa la registrazione, o la riprende."""
+        if self._registrazione_occupata:
+            self._riscontro("non_disponibile", _("Un momento: la registrazione sta chiudendo un pezzo."))
+            return
+        reg = self._registrazione
+        if reg is None:
+            brano = self._sorgente_da_registrare()
+            if brano is not None:
+                self._avvia_la_registrazione(brano)
+            return
+        pausa = reg.stato == "in_corso"
+        self._registrazione_occupata = True
+
+        def lavoro():
+            try:
+                reg.pausa(pausa)
+            except OSError as e:
+                return e
+            return None
+
+        registrazioni_in_disparte(lavoro, lambda esito: wx.CallAfter(self._pausa_della_registrazione, reg, pausa, esito))
+
+    def _pausa_della_registrazione(self, reg, pausa, esito):
+        self._registrazione_occupata = False
+        if self._chiusa or reg is not self._registrazione:
+            return
+        if esito is not None:
+            self._riscontro("errore", _("La registrazione di {nome} non riprende: {errore}").format(nome=reg.titolo, errore=esito))
+            return
+        if pausa:
+            self._statistiche.conta("registrazioni_in_pausa")
+            self._riscontro("registrazione_in_pausa", _("Registrazione in pausa: {registrazione}. Maiuscolo con R riprende.").format(
+                registrazione=self._frase_della_registrazione(reg)))
+        else:
+            self._riscontro("registrazione_ripresa", _("Registrazione ripresa: {registrazione}.").format(registrazione=self._frase_della_registrazione(reg)))
+
+    def _comando_ferma_la_registrazione(self):
+        """Ctrl con R: ferma la registrazione e chiude il file, in disparte."""
+        reg = self._registrazione
+        if reg is None:
+            testo = _("Non c'è una registrazione da fermare: Alt e Maiuscolo con R tolgono l'attesa.") if self._in_ascolto else _("Non c'è una registrazione da fermare.")
+            self._riscontro("non_disponibile", testo)
+            return
+        if self._registrazione_occupata:
+            self._riscontro("non_disponibile", _("Un momento: la registrazione sta chiudendo un pezzo."))
+            return
+        self._registrazione_occupata = True
+        self.scrivi(_("Chiudo la registrazione di {nome}.").format(nome=reg.titolo), "registrazione")
+        registrazioni_in_disparte(reg.ferma, lambda percorso: wx.CallAfter(self._registrazione_fermata, reg, percorso))
+
+    def _registrazione_fermata(self, reg, percorso):
+        self._registrazione_occupata = False
+        if reg is self._registrazione:
+            self._registrazione = None
+        if self._chiusa:
+            return
+        self._conta_la_registrazione(reg)
+        self._rinfresca_le_registrazioni()
+        if percorso is None:
+            self._riscontro("registrazione_fermata", _("Registrazione di {nome} fermata: non era arrivato niente da scrivere.").format(nome=reg.titolo))
+            return
+        self._riscontro("registrazione_fermata", _("Registrazione finita: {registrazione}. È nel ramo Registrazioni, come {file}.").format(
+            registrazione=self._frase_della_registrazione(reg), file=os.path.basename(percorso)))
+
+    def _registrazione_finita_da_se(self, reg):
+        """Il flusso registrato e' finito da se': una puntata tutta, o una
+        radio caduta. Il file e' gia' chiuso."""
+        if reg is self._registrazione:
+            self._registrazione = None
+        if self._chiusa:
+            return
+        self._conta_la_registrazione(reg)
+        self._rinfresca_le_registrazioni()
+        if reg.stato == "completa":
+            self._riscontro("registrazione_fermata", _("Registrazione finita: {registrazione}, è arrivata alla fine. È nel ramo Registrazioni.").format(
+                registrazione=self._frase_della_registrazione(reg)))
+        else:
+            self._statistiche.conta("registrazioni_interrotte")
+            self._riscontro("errore", _("La registrazione di {nome} si è interrotta: il flusso si è chiuso. Quello che è arrivato è nel ramo Registrazioni.").format(
+                nome=reg.titolo))
+
+    def _conta_la_registrazione(self, reg):
+        self._statistiche.conta("registrazioni_finite")
+        self._statistiche.conta("secondi_registrati", round(reg.secondi))
+        self._statistiche.conta("byte_registrati", reg.byte)
+
+    def _comando_vai_alle_registrazioni(self):
+        """Ctrl e Maiuscolo con R: la plancia sul ramo Registrazioni."""
+        self._seleziona(self.nodo_registrazioni)
+        self.albero.SetFocus()
+        n = len(self._playlist_delle_registrazioni().brani)
+        self._riscontro("alle_registrazioni", ngettext("Registrazioni: {n} file.", "Registrazioni: {n} file.", n).format(n=n) if n else _(
+            "Registrazioni: ancora nessuna."))
+
+    def _comando_registra_quando_parte(self):
+        """Alt con R: l'attesa; la prossima radio o il prossimo indirizzo in
+        rete che parte si registra."""
+        if self._registrazione is not None:
+            self._riscontro("non_disponibile", _("Sto già registrando {nome}: Ctrl con R la ferma.").format(nome=self._registrazione.titolo))
+            return
+        if self._in_ascolto:
+            self._riscontro("non_disponibile", _("Sono già in ascolto: Alt e Maiuscolo con R tolgono l'attesa."))
+            return
+        self._in_ascolto = True
+        self._statistiche.conta("registrazioni_in_ascolto")
+        self._riscontro("registrazione_in_ascolto", _("In ascolto: registro la prossima radio o il prossimo indirizzo in rete che parte. "
+            "Alt e Maiuscolo con R tolgono l'attesa."))
+
+    def _comando_apri_la_cartella_delle_registrazioni(self):
+        """Ctrl e Alt con R: la cartella delle registrazioni in Esplora risorse."""
+        cartella = registrazioni.cartella()
+        try:
+            os.makedirs(cartella, exist_ok=True)
+            os.startfile(cartella)  # noqa: S606 - la cartella delle registrazioni di MeTeOra
+        except OSError as e:
+            self._riscontro("errore", _("La cartella delle registrazioni non si apre: {errore}").format(errore=e.strerror or e))
+            return
+        self._riscontro("cartella_delle_registrazioni", _("Apro la cartella delle registrazioni: {cartella}").format(cartella=cartella))
+
+    def _comando_elimina_la_registrazione(self):
+        """Alt e Maiuscolo con R: elimina la registrazione in corso, dopo una
+        domanda, o toglie l'attesa."""
+        reg = self._registrazione
+        if reg is None and self._in_ascolto:
+            self._in_ascolto = False
+            self._riscontro("registrazione_eliminata", _("Niente più attesa: la prossima radio non si registra."))
+            return
+        if reg is None:
+            self._riscontro("non_disponibile", _("Non c'è una registrazione in corso, né un'attesa, da eliminare."))
+            return
+        if self._registrazione_occupata:
+            self._riscontro("non_disponibile", _("Un momento: la registrazione sta chiudendo un pezzo."))
+            return
+        if not self._conferma(_("Elimino la registrazione in corso di {registrazione}? Il file si cancella.").format(registrazione=self._frase_della_registrazione(reg)),
+                _("Registrazioni")):
+            self._annullato(_("La registrazione continua."))
+            return
+        self._registrazione_occupata = True
+        registrazioni_in_disparte(reg.elimina, lambda _esito: wx.CallAfter(self._registrazione_eliminata, reg))
+
+    def _registrazione_eliminata(self, reg):
+        self._registrazione_occupata = False
+        if reg is self._registrazione:
+            self._registrazione = None
+        if self._chiusa:
+            return
+        self._statistiche.conta("registrazioni_eliminate")
+        self._riscontro("registrazione_eliminata", _("Registrazione di {nome} eliminata.").format(nome=reg.titolo))
 
     # Le radio in rete, tappa 19 c (3.3.0, issue 40).
 
@@ -11060,8 +11383,8 @@ class Finestra(wx.Frame):
         self._al_marker(k, elenco[-1] if ultimo else elenco[0], 1 if ultimo else -1)
 
     def _comando_conta_i_marker(self):
-        """R (issue 38): quanti marker ha il brano, prima e dopo il punto."""
-        contesto = self._contesto_dei_marker(_("R conta i marker del brano che suona."), risveglia=True)
+        """Alt con T (dalla 3.5.0; prima R, issue 38): quanti marker ha il brano, prima e dopo il punto."""
+        contesto = self._contesto_dei_marker(_("Alt con T conta i marker del brano che suona."), risveglia=True)
         if contesto is None:
             return
         elenco = self.marcatori.elenco(contesto[0])
@@ -11126,7 +11449,7 @@ class Finestra(wx.Frame):
         self._vai_al_marker({"playlist": dati["playlist"], "brano": brano, "numero": sottobrano, "marker": elenco[numero - 1]})
 
     def _togli_i_marker(self, quali):
-        contesto = self._contesto_dei_marker(_("Ctrl e Maiuscolo con R, e Maiuscolo con T, tolgono i marker del brano che suona; "
+        contesto = self._contesto_dei_marker(_("Ctrl con T, Maiuscolo con T e Ctrl e Maiuscolo con T tolgono i marker del brano che suona; "
             "quelli di un altro brano si tolgono con Canc sulla loro voce nella plancia."))
         if contesto is None:
             return
@@ -13338,6 +13661,10 @@ class Finestra(wx.Frame):
         lettore_di_rete.lettori.chiudi()
         # Le chiamate a yt-dlp in corso si fermano (3.2.0).
         indirizzi.chiudi()
+        # Una registrazione in corso si chiude, e il file resta (3.5.0).
+        if self._registrazione is not None:
+            with contextlib.suppress(Exception):
+                self._registrazione.ferma()
         if self._ricerca_cast is not None:
             # La ricerca chiude il suo zeroconf: in disparte, come lo speaker,
             # che il motore chiude con se'.

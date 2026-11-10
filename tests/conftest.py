@@ -1,6 +1,7 @@
 # MeTeOra, le prove: desktop nascosto, suoni muti, cartelle temporanee.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 # 30/09/2026: nasce con la tappa 1, sul modello di tests/conftest.py di Tornello.
+# 10/11/2026, 3.5.0: la cartella delle registrazioni nella cartella della prova.
 # 03/10/2026, 1.72.0: os.startfile vietato, perche' F1 apre il manuale nel browser.
 # 04/10/2026, 1.75.0: il browser vietato e Donazione muta, per l'invito a offrire un caffe'.
 # 20/10/2026, 1.105.0: la sintesi finta annota anche i testi che interrompono la voce, per Dove sono.
@@ -10,6 +11,7 @@
 # 03/11/2026, 1.119.0: la ricerca degli speaker Cast non parte, come se pychromecast non ci fosse.
 # 05/11/2026, 3.2.0: yt-dlp e QuickJS nella cartella della prova, e mai chiamati davvero.
 # 06/11/2026, 3.3.0: radio-browser mai interrogato, e gli indirizzi diretti di ogni prova per conto loro.
+# 10/11/2026, 3.5.0: le registrazioni nella cartella della prova.
 
 """Le regole comuni delle prove.
 
@@ -151,6 +153,14 @@ def indirizzi_senza_rete(monkeypatch, tmp_path):
     monkeypatch.setattr(indirizzi, "ultima_versione", senza_github)
     monkeypatch.setattr(indirizzi, "_flussi", {})
     monkeypatch.setattr(indirizzi, "_diretti", {})
+
+
+@pytest.fixture(autouse=True)
+def registrazioni_nella_prova(monkeypatch, tmp_path):
+    """Le registrazioni (3.5.0) vanno nella cartella della prova, non accanto ai sorgenti."""
+    import registrazioni
+
+    monkeypatch.setattr(registrazioni, "cartella", lambda: str(tmp_path / "Registrazioni"))
 
 
 @pytest.fixture(autouse=True)
