@@ -2,6 +2,14 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.5.2] - 2026-11-11
+
+I suoni delle registrazioni, scelti da Gabriele all'ascolto alla cieca della notte fra il 10 e l'11 novembre 2026, al posto dei segnaposto della 3.5.0.
+
+- Per ogni evento tre candidati, in tre stili: nastro, triangolo che scivola; spia, seno che lampeggia; soffio, rumore filtrato. Ha vinto il nastro in sette eventi su otto: l'avvio, la pausa, la fine, l'attesa di Alt con R, l'eliminazione, il ramo Registrazioni e la cartella. La ripresa dalla pausa è della spia, che lampeggia sempre più forte e sale.
+- I suoni nuovi sono nella collezione di GBUtils, dalla V250, con il prefisso meteora_. Gli altri sedici candidati ci sono entrati con un nome neutro, come spia_che_si_accende, per altri usi.
+- Gli esiti dell'ascolto sono in prototipi/ascolto_registrazioni_esiti.txt.
+
 ## [3.5.1] - 2026-11-10
 
 Dal collaudo di Gabriele delle versioni 3.3.1, 3.4.0 e 3.5.0, passate tutte, tranne un punto.

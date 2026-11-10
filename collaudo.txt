@@ -1,3 +1,5 @@
 Collaudo di MeTeOra 3.5.1.
 Copia www.raiplaysound.it/radio2, senza https, e premi Ctrl con V nella plancia: la diretta di Rai Radio 2 suona subito, senza il campo.
 Copia il nome di un file, come brano.mp3, e premi Ctrl con V: si apre il campo Apri un indirizzo, vuoto.
+Collaudo di MeTeOra 3.5.2.
+Registrando una radio, Maiuscolo con R, la pausa, la ripresa, Ctrl con R, Alt con R, Alt e Maiuscolo con R, Ctrl e Maiuscolo con R e Ctrl e Alt con R suonano i suoni scelti all'ascolto, e nessuno somiglia troppo a un altro suono di MeTeOra.
