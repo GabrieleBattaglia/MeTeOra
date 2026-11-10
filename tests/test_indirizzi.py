@@ -1,5 +1,6 @@
 # MeTeOra, le prove degli indirizzi in rete: yt-dlp finto, niente rete.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
+# 10/11/2026, 3.5.1: gli appunti con un indirizzo senza https://.
 # 05/11/2026: nasce con la 3.2.0, tappa 19 b del piano, issue 40. Nella 3.4.0 le prove dei Preferiti in rete (issue 41).
 
 import datetime
@@ -74,6 +75,14 @@ def test_l_indirizzo_degli_appunti_e_quello_scritto():
     assert indirizzi.dagli_appunti("guarda qui: <https://www.raiplaysound.it/audio/x.html> bello") == "https://www.raiplaysound.it/audio/x.html"
     assert indirizzi.dagli_appunti("niente di utile") is None and indirizzi.dagli_appunti("") is None and indirizzi.dagli_appunti(None) is None
     assert indirizzi.dagli_appunti("https://") is None
+    # Senza https:// (3.5.1, dal collaudo): il sito con www. o con una barra
+    # dopo; non il nome di un file, un numero di versione o un percorso.
+    assert indirizzi.dagli_appunti("www.raiplaysound.it/radio2") == "https://www.raiplaysound.it/radio2"
+    assert indirizzi.dagli_appunti("raiplaysound.it/radio2") == "https://raiplaysound.it/radio2"
+    assert indirizzi.dagli_appunti("(www.raiplaysound.it)") == "https://www.raiplaysound.it"
+    assert indirizzi.dagli_appunti("www.b.it e poi https://a.it/x") == "https://a.it/x"
+    for testo in ("brano.mp3", "raiplaysound.it", "3.5.1", "1.5/2", r"C:\Musica\brano.mp3", "e.g.", "ecc."):
+        assert indirizzi.dagli_appunti(testo) is None, testo
     assert indirizzi.indirizzo_scritto("www.youtube.com/watch?v=1") == "https://www.youtube.com/watch?v=1"
     assert indirizzi.indirizzo_scritto("  http://radio.example:8000/flusso ") == "http://radio.example:8000/flusso"
     assert indirizzi.indirizzo_scritto("una frase con spazi") is None and indirizzi.indirizzo_scritto("parola") is None
@@ -376,6 +385,18 @@ def _appunti(finestra, monkeypatch, testo):
 
 def _ultime(finestra, n=3):
     return [r.rsplit(" ", 1)[0] for r in finestra._righe[-n:]]
+
+
+def test_ctrl_con_v_apre_l_indirizzo_copiato_senza_https(finestra, con_ytdlp, monkeypatch):
+    # Dal collaudo della 3.3.1: www.raiplaysound.it/radio2 copiato senza
+    # https:// apriva il campo vuoto, invece di suonare (3.5.1).
+    from test_finestra import _premi
+
+    _risposte(monkeypatch, {YOUTUBE: INFO_YOUTUBE})
+    _appunti(finestra, monkeypatch, YOUTUBE.removeprefix("https://"))
+    _premi(finestra, "v", ctrl=True)
+    assert con_ytdlp == [(YOUTUBE, None, False)]
+    assert finestra.archivio.indirizzi.brani[0].titolo == "Me at the zoo"
 
 
 def test_ctrl_con_v_apre_l_indirizzo_degli_appunti_e_lo_suona(finestra, con_ytdlp, monkeypatch, suoni_annotati):

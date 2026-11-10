@@ -1,3 +1,3 @@
-Collaudo di MeTeOra 3.3.1: dal collaudo di prima.
-Ctrl con V con l'indirizzo di una puntata di RaiPlay Sound copiato dal browser, mentre la ascolti lì: la puntata suona, in cima agli Indirizzi, con il titolo e la durata. Se non si apre, scrivi qui sotto l'indirizzo che hai copiato.
-* copiato www.raiplaysound.it/radio2 Faccio ctrl+v sul ramo indirizzi e si apre un campo vuoto dove devo incollare l'url. Dopo parte.
+Collaudo di MeTeOra 3.5.1.
+Copia www.raiplaysound.it/radio2, senza https, e premi Ctrl con V nella plancia: la diretta di Rai Radio 2 suona subito, senza il campo.
+Copia il nome di un file, come brano.mp3, e premi Ctrl con V: si apre il campo Apri un indirizzo, vuoto.

@@ -1,6 +1,6 @@
 # MeTeOra, gli indirizzi in rete: le pagine dei siti, aperte con yt-dlp.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 05/11/2026: nasce con la 3.2.0, tappa 19 b del piano, issue 40. Nella 3.3.0 le dirette, senza durata, e gli indirizzi diretti, che libmpv apre senza yt-dlp. Nella 3.3.1 la pagina che non c'e', il 404, e il 403 detti per chi ascolta.
+# 05/11/2026: nasce con la 3.2.0, tappa 19 b del piano, issue 40. Nella 3.3.0 le dirette, senza durata, e gli indirizzi diretti, che libmpv apre senza yt-dlp. Nella 3.3.1 la pagina che non c'e', il 404, e il 403 detti per chi ascolta. Nella 3.5.1 gli appunti con un indirizzo senza https://.
 
 """Gli indirizzi in rete (3.2.0, issue 40).
 
@@ -88,12 +88,35 @@ def e_indirizzo(percorso):
 
 def dagli_appunti(testo):
     """Il primo indirizzo http o https di un testo, come quello degli appunti;
-    None se non ce n'e'. Le virgolette e le parentesi attorno si tolgono."""
-    for parola in (testo or "").split():
-        parola = parola.strip("<>\"'()[]")
+    se non ce n'e', il primo copiato senza https://, come
+    www.raiplaysound.it/radio2, con https:// davanti (3.5.1, dal collaudo di
+    Gabriele); None se non c'e' nessuno dei due. Le virgolette e le parentesi
+    attorno si tolgono."""
+    parole = [parola.strip("<>\"'()[]") for parola in (testo or "").split()]
+    for parola in parole:
         if formati.e_indirizzo(parola) and urllib.parse.urlsplit(parola).hostname:
             return parola
+    for parola in parole:
+        indirizzo = _senza_https(parola)
+        if indirizzo is not None:
+            return indirizzo
     return None
+
+
+def _senza_https(parola):
+    """Un indirizzo copiato senza https://, con https:// davanti, o None. Negli
+    appunti puo' esserci di tutto, come il nome di un file, brano.mp3: vale
+    solo un sito che finisce con un dominio di lettere, come .it o .com, e
+    comincia con www. o ha una barra dopo di se', come raiplaysound.it/radio2."""
+    sito_scritto, barra, _resto = parola.partition("/")
+    if not re.fullmatch(r"[\w-]+(\.[\w-]+)+(:\d+)?", sito_scritto):
+        return None
+    nome = sito_scritto.split(":", 1)[0]
+    dominio = nome.rsplit(".", 1)[-1]
+    if not (dominio.isalpha() and len(dominio) >= 2) or not (barra or nome.lower().startswith("www.")):
+        return None
+    indirizzo = "https://" + parola
+    return indirizzo if urllib.parse.urlsplit(indirizzo).hostname else None
 
 
 def indirizzo_scritto(testo):

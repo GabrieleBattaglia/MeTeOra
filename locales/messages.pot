@@ -6,10 +6,10 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: MeTeOra 3.5.0\n"
+"Project-Id-Version: MeTeOra 3.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/GabrieleBattaglia/MeTeOra/issues"
 "\n"
-"POT-Creation-Date: 2026-11-10 16:45+0100\n"
+"POT-Creation-Date: 2026-11-10 18:03+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -8748,74 +8748,74 @@ msgstr ""
 msgid "il file non contiene le impostazioni"
 msgstr ""
 
-#: indirizzi.py:186
+#: indirizzi.py:209
 msgid "yt-dlp non conosce questo sito"
 msgstr ""
 
-#: indirizzi.py:190
+#: indirizzi.py:213
 msgid "la pagina non c'è: l'indirizzo è sbagliato, o il sito l'ha tolta"
 msgstr ""
 
-#: indirizzi.py:192
+#: indirizzi.py:215
 msgid "il sito non lascia aprire la pagina"
 msgstr ""
 
-#: indirizzi.py:193
+#: indirizzi.py:216
 msgid "yt-dlp non ha detto perché"
 msgstr ""
 
-#: indirizzi.py:200
+#: indirizzi.py:223
 msgid "yt-dlp non è installato"
 msgstr ""
 
-#: indirizzi.py:208
+#: indirizzi.py:231
 #, python-brace-format
 msgid "yt-dlp non parte: {errore}"
 msgstr ""
 
-#: indirizzi.py:215
+#: indirizzi.py:238
 #, python-brace-format
 msgid "il sito non ha risposto in {secondi} secondi"
 msgstr ""
 
-#: indirizzi.py:225
+#: indirizzi.py:248
 msgid "yt-dlp ha risposto in un modo che non capisco"
 msgstr ""
 
-#: indirizzi.py:281
+#: indirizzi.py:304
 msgid "il sito non dà un flusso da suonare"
 msgstr ""
 
-#: indirizzi.py:414
+#: indirizzi.py:437
 msgid "è una playlist, non un brano"
 msgstr ""
 
-#: indirizzi.py:435
+#: indirizzi.py:458
 msgid "GitHub non dice l'ultima versione di yt-dlp"
 msgstr ""
 
-#: indirizzi.py:459
+#: indirizzi.py:482
 #, python-brace-format
 msgid "la release {versione} di yt-dlp non ha l'impronta di {nome}"
 msgstr ""
 
-#: indirizzi.py:462
+#: indirizzi.py:485
 msgid "lo zip di yt-dlp scaricato non è quello atteso"
 msgstr ""
 
-#: indirizzi.py:470
+#: indirizzi.py:493
 msgid "nello zip di yt-dlp manca yt-dlp.exe"
 msgstr ""
 
-#: indirizzi.py:493
+#: indirizzi.py:516
 msgid "yt-dlp è al lavoro: si toglie fra poco"
 msgstr ""
 
-#: indirizzi.py:509
+#: indirizzi.py:532
 msgid "QuickJS scaricato non è quello atteso"
 msgstr ""
 
-#: indirizzi.py:520
+#: indirizzi.py:543
 msgid "yt-dlp lo sta usando: si toglie fra poco"
 msgstr ""
 

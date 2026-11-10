@@ -1,0 +1,770 @@
+{
+    "candidato_registrazione_avviata_nastro": {
+        "descrizione": "MeTeOra, comincia una registrazione, con Maiuscolo e R: triangolo, un motore che parte scivolando da la 3 a mi 4, poi mi 5 e si 5, una quinta che sale e si accende; 215 ms.",
+        "score": [
+            [
+                "a3.e4",
+                0.07,
+                0.0,
+                0.0
+            ],
+            [
+                "p",
+                0.015,
+                0.0,
+                0.0
+            ],
+            [
+                "e5",
+                0.05,
+                0.0,
+                -0.03
+            ],
+            [
+                "b5",
+                0.08,
+                0.0,
+                0.0
+            ]
+        ],
+        "kind": 3,
+        "adsr": [
+            4.0,
+            10.0,
+            75.0,
+            30.0
+        ]
+    },
+    "candidato_registrazione_avviata_spia": {
+        "descrizione": "MeTeOra, comincia una registrazione, con Maiuscolo e R: seno, la spia rossa che lampeggia due volte su si 5, un po' a sinistra e un po' a destra, poi fa diesis 6 tenuto al centro, una quinta sopra; 225 ms.",
+        "score": [
+            [
+                "b5",
+                0.035,
+                -0.2,
+                -0.04
+            ],
+            [
+                "p",
+                0.035,
+                0.0,
+                0.0
+            ],
+            [
+                "b5",
+                0.035,
+                0.2,
+                -0.04
+            ],
+            [
+                "p",
+                0.02,
+                0.0,
+                0.0
+            ],
+            [
+                "f#6",
+                0.1,
+                0.0,
+                0.0
+            ]
+        ],
+        "kind": 1,
+        "adsr": [
+            2.0,
+            10.0,
+            80.0,
+            30.0
+        ]
+    },
+    "candidato_registrazione_avviata_soffio": {
+        "descrizione": "MeTeOra, comincia una registrazione, con Maiuscolo e R: rumore rosa, un soffio che sale da 300-1200 a 1500-5000 Hz, come un nastro che prende velocita', e uno scatto breve alto; 180 ms.",
+        "score": [
+            [
+                "300-1200.1500-5000",
+                0.12,
+                0.0,
+                0.3
+            ],
+            [
+                "p",
+                0.02,
+                0.0,
+                0.0
+            ],
+            [
+                "2000-6000",
+                0.04,
+                0.0,
+                0.25
+            ]
+        ],
+        "kind": 6,
+        "adsr": [
+            10.0,
+            0.0,
+            100.0,
+            40.0
+        ]
+    },
+    "candidato_registrazione_in_pausa_nastro": {
+        "descrizione": "MeTeOra, la registrazione va in pausa, con Maiuscolo e R: triangolo, scivola giu' di una quarta da la 5 a mi 5, e un'eco piano del mi, come un nastro che rallenta e resta sospeso; 160 ms. Lo specchio e' la ripresa.",
+        "score": [
+            [
+                "a5.e5",
+                0.09,
+                0.0,
+                0.0
+            ],
+            [
+                "p",
+                0.02,
+                0.0,
+                0.0
+            ],
+            [
+                "e5",
+                0.05,
+                0.0,
+                -0.08
+            ]
+        ],
+        "kind": 3,
+        "adsr": [
+            4.0,
+            10.0,
+            75.0,
+            30.0
+        ]
+    },
+    "candidato_registrazione_in_pausa_spia": {
+        "descrizione": "MeTeOra, la registrazione va in pausa, con Maiuscolo e R: seno, la spia che lampeggia tre volte su mi 6 e si affievolisce; 210 ms. Lo specchio e' la ripresa.",
+        "score": [
+            [
+                "e6",
+                0.03,
+                0.0,
+                0.0
+            ],
+            [
+                "p",
+                0.06,
+                0.0,
+                0.0
+            ],
+            [
+                "e6",
+                0.03,
+                0.0,
+                -0.03
+            ],
+            [
+                "p",
+                0.06,
+                0.0,
+                0.0
+            ],
+            [
+                "e6",
+                0.03,
+                0.0,
+                -0.06
+            ]
+        ],
+        "kind": 1,
+        "adsr": [
+            2.0,
+            10.0,
+            80.0,
+            30.0
+        ]
+    },
+    "candidato_registrazione_in_pausa_soffio": {
+        "descrizione": "MeTeOra, la registrazione va in pausa, con Maiuscolo e R: rumore rosa, un soffio che scende da 1500-5000 a 400-1500 Hz, e un'eco piano in basso; 160 ms. Lo specchio e' la ripresa.",
+        "score": [
+            [
+                "1500-5000.400-1500",
+                0.1,
+                0.0,
+                0.3
+            ],
+            [
+                "p",
+                0.03,
+                0.0,
+                0.0
+            ],
+            [
+                "400-1500",
+                0.03,
+                0.0,
+                0.15
+            ]
+        ],
+        "kind": 6,
+        "adsr": [
+            10.0,
+            0.0,
+            100.0,
+            40.0
+        ]
+    },
+    "candidato_registrazione_ripresa_nastro": {
+        "descrizione": "MeTeOra, la registrazione riprende dalla pausa, con Maiuscolo e R: triangolo, mi 5 piano e poi scivola su di una quarta fino a la 5, il nastro che riparte; 160 ms. Lo specchio della pausa.",
+        "score": [
+            [
+                "e5",
+                0.05,
+                0.0,
+                -0.08
+            ],
+            [
+                "p",
+                0.02,
+                0.0,
+                0.0
+            ],
+            [
+                "e5.a5",
+                0.09,
+                0.0,
+                0.0
+            ]
+        ],
+        "kind": 3,
+        "adsr": [
+            4.0,
+            10.0,
+            75.0,
+            30.0
+        ]
+    },
+    "candidato_registrazione_ripresa_spia": {
+        "descrizione": "MeTeOra, la registrazione riprende dalla pausa, con Maiuscolo e R: seno, la spia che lampeggia su mi 6 sempre piu' forte, e l'ultimo lampo sale a la 6; 240 ms. Lo specchio della pausa.",
+        "score": [
+            [
+                "e6",
+                0.03,
+                0.0,
+                -0.06
+            ],
+            [
+                "p",
+                0.06,
+                0.0,
+                0.0
+            ],
+            [
+                "e6",
+                0.03,
+                0.0,
+                -0.03
+            ],
+            [
+                "p",
+                0.06,
+                0.0,
+                0.0
+            ],
+            [
+                "e6.a6",
+                0.06,
+                0.0,
+                0.0
+            ]
+        ],
+        "kind": 1,
+        "adsr": [
+            2.0,
+            10.0,
+            80.0,
+            30.0
+        ]
+    },
+    "candidato_registrazione_ripresa_soffio": {
+        "descrizione": "MeTeOra, la registrazione riprende dalla pausa, con Maiuscolo e R: rumore rosa, un soffio piano in basso, poi uno che sale da 400-1500 a 1500-5000 Hz; 160 ms. Lo specchio della pausa.",
+        "score": [
+            [
+                "400-1500",
+                0.03,
+                0.0,
+                0.15
+            ],
+            [
+                "p",
+                0.03,
+                0.0,
+                0.0
+            ],
+            [
+                "400-1500.1500-5000",
+                0.1,
+                0.0,
+                0.3
+            ]
+        ],
+        "kind": 6,
+        "adsr": [
+            10.0,
+            0.0,
+            100.0,
+            40.0
+        ]
+    },
+    "candidato_registrazione_fermata_nastro": {
+        "descrizione": "MeTeOra, la registrazione si ferma e il file si chiude, con Ctrl e R o da sola: triangolo, la 5 e mi 5, poi scivola da la 4 a re 4, un nastro che si ferma; 280 ms.",
+        "score": [
+            [
+                "a5",
+                0.06,
+                0.0,
+                0.0
+            ],
+            [
+                "e5",
+                0.06,
+                0.0,
+                -0.02
+            ],
+            [
+                "a4.d4",
+                0.16,
+                0.0,
+                0.0
+            ]
+        ],
+        "kind": 3,
+        "adsr": [
+            4.0,
+            10.0,
+            75.0,
+            40.0
+        ]
+    },
+    "candidato_registrazione_fermata_spia": {
+        "descrizione": "MeTeOra, la registrazione si ferma e il file si chiude, con Ctrl e R o da sola: seno, la spia lampeggia due volte su si 5 e poi il suono scende da mi 5 a si 4, la spia che si spegne; 270 ms.",
+        "score": [
+            [
+                "b5",
+                0.04,
+                0.0,
+                -0.04
+            ],
+            [
+                "p",
+                0.02,
+                0.0,
+                0.0
+            ],
+            [
+                "b5",
+                0.04,
+                0.0,
+                -0.04
+            ],
+            [
+                "p",
+                0.03,
+                0.0,
+                0.0
+            ],
+            [
+                "e5.b4",
+                0.14,
+                0.0,
+                0.0
+            ]
+        ],
+        "kind": 1,
+        "adsr": [
+            2.0,
+            10.0,
+            80.0,
+            30.0
+        ]
+    },
+    "candidato_registrazione_fermata_soffio": {
+        "descrizione": "MeTeOra, la registrazione si ferma e il file si chiude, con Ctrl e R o da sola: rumore rosa, un soffio lungo che scende da 3000-8000 a 150-600 Hz, il nastro che si ferma; 240 ms.",
+        "score": [
+            [
+                "3000-8000.150-600",
+                0.24,
+                0.0,
+                0.35
+            ]
+        ],
+        "kind": 6,
+        "adsr": [
+            10.0,
+            0.0,
+            100.0,
+            40.0
+        ]
+    },
+    "candidato_registrazione_in_ascolto_nastro": {
+        "descrizione": "MeTeOra, MeTeOra si mette in ascolto, con Alt e R, e registrera' la prossima radio che parte: triangolo, re 5 due volte piano, poi una domanda che sale da re 5 a sol 5; 290 ms.",
+        "score": [
+            [
+                "d5",
+                0.04,
+                0.0,
+                -0.03
+            ],
+            [
+                "p",
+                0.07,
+                0.0,
+                0.0
+            ],
+            [
+                "d5",
+                0.04,
+                0.0,
+                -0.03
+            ],
+            [
+                "p",
+                0.07,
+                0.0,
+                0.0
+            ],
+            [
+                "d5.g5",
+                0.07,
+                0.0,
+                0.0
+            ]
+        ],
+        "kind": 3,
+        "adsr": [
+            4.0,
+            10.0,
+            75.0,
+            30.0
+        ]
+    },
+    "candidato_registrazione_in_ascolto_spia": {
+        "descrizione": "MeTeOra, MeTeOra si mette in ascolto, con Alt e R, e registrera' la prossima radio che parte: seno, un segnale di sonar su la 5 con due echi, a destra e a sinistra, sempre piu' piano; 270 ms.",
+        "score": [
+            [
+                "a5",
+                0.05,
+                0.0,
+                0.0
+            ],
+            [
+                "p",
+                0.09,
+                0.0,
+                0.0
+            ],
+            [
+                "a5",
+                0.04,
+                0.4,
+                -0.05
+            ],
+            [
+                "p",
+                0.06,
+                0.0,
+                0.0
+            ],
+            [
+                "a5",
+                0.03,
+                -0.4,
+                -0.08
+            ]
+        ],
+        "kind": 1,
+        "adsr": [
+            2.0,
+            10.0,
+            80.0,
+            30.0
+        ]
+    },
+    "candidato_registrazione_in_ascolto_soffio": {
+        "descrizione": "MeTeOra, MeTeOra si mette in ascolto, con Alt e R, e registrera' la prossima radio che parte: rumore azzurro, tre fruscii brevi, a sinistra, a destra e al centro, come un orecchio che cerca; 270 ms.",
+        "score": [
+            [
+                "4000-9000",
+                0.03,
+                -0.5,
+                0.25
+            ],
+            [
+                "p",
+                0.08,
+                0.0,
+                0.0
+            ],
+            [
+                "4000-9000",
+                0.03,
+                0.5,
+                0.25
+            ],
+            [
+                "p",
+                0.08,
+                0.0,
+                0.0
+            ],
+            [
+                "2500-9000",
+                0.05,
+                0.0,
+                0.3
+            ]
+        ],
+        "kind": 8,
+        "adsr": [
+            10.0,
+            0.0,
+            100.0,
+            40.0
+        ]
+    },
+    "candidato_registrazione_eliminata_nastro": {
+        "descrizione": "MeTeOra, la registrazione in corso si elimina e il file si cancella, con Alt, Maiuscolo e R: triangolo, scivola giu' di un'ottava da fa 5 a fa 4 passando da destra a sinistra, e un do 4 basso; 230 ms.",
+        "score": [
+            [
+                "f5.f4",
+                0.14,
+                "0.3.-0.3",
+                0.0
+            ],
+            [
+                "p",
+                0.02,
+                0.0,
+                0.0
+            ],
+            [
+                "c4",
+                0.07,
+                -0.3,
+                -0.03
+            ]
+        ],
+        "kind": 3,
+        "adsr": [
+            4.0,
+            10.0,
+            75.0,
+            40.0
+        ]
+    },
+    "candidato_registrazione_eliminata_spia": {
+        "descrizione": "MeTeOra, la registrazione in corso si elimina e il file si cancella, con Alt, Maiuscolo e R: seno, due cadute di una quinta, da re 6 a sol 5 e da sol 5 a do 5; 200 ms.",
+        "score": [
+            [
+                "d6.g5",
+                0.07,
+                0.0,
+                -0.02
+            ],
+            [
+                "p",
+                0.02,
+                0.0,
+                0.0
+            ],
+            [
+                "g5.c5",
+                0.11,
+                0.0,
+                -0.04
+            ]
+        ],
+        "kind": 1,
+        "adsr": [
+            2.0,
+            10.0,
+            80.0,
+            30.0
+        ]
+    },
+    "candidato_registrazione_eliminata_soffio": {
+        "descrizione": "MeTeOra, la registrazione in corso si elimina e il file si cancella, con Alt, Maiuscolo e R: rumore bianco, un foglio buttato via, la banda che scende da 2000-9000 a 300-1500 Hz passando da destra a sinistra; 160 ms.",
+        "score": [
+            [
+                "2000-9000.300-1500",
+                0.16,
+                "0.5.-0.5",
+                0.25
+            ]
+        ],
+        "kind": 5,
+        "adsr": [
+            10.0,
+            0.0,
+            100.0,
+            40.0
+        ]
+    },
+    "candidato_alle_registrazioni_nastro": {
+        "descrizione": "MeTeOra, la plancia va al ramo Registrazioni, con Ctrl, Maiuscolo e R: triangolo, un volo che sale da sol 4 a re 6 passando da sinistra a destra, e si posa sul re; 150 ms.",
+        "score": [
+            [
+                "g4.d6",
+                0.1,
+                "-0.5.0.5",
+                -0.02
+            ],
+            [
+                "d6",
+                0.05,
+                0.5,
+                -0.06
+            ]
+        ],
+        "kind": 3,
+        "adsr": [
+            4.0,
+            10.0,
+            75.0,
+            30.0
+        ]
+    },
+    "candidato_alle_registrazioni_spia": {
+        "descrizione": "MeTeOra, la plancia va al ramo Registrazioni, con Ctrl, Maiuscolo e R: seno, mi 5, si 5, mi 6 e di nuovo si 5, quattro passi da sinistra a destra; 150 ms.",
+        "score": [
+            [
+                "e5",
+                0.03,
+                -0.6,
+                -0.06
+            ],
+            [
+                "b5",
+                0.03,
+                -0.2,
+                -0.06
+            ],
+            [
+                "e6",
+                0.03,
+                0.2,
+                -0.06
+            ],
+            [
+                "b5",
+                0.06,
+                0.6,
+                -0.02
+            ]
+        ],
+        "kind": 1,
+        "adsr": [
+            2.0,
+            10.0,
+            80.0,
+            30.0
+        ]
+    },
+    "candidato_alle_registrazioni_soffio": {
+        "descrizione": "MeTeOra, la plancia va al ramo Registrazioni, con Ctrl, Maiuscolo e R: rumore rosa, una folata che sale da 500-2000 a 3000-9000 Hz passando da sinistra a destra; 90 ms.",
+        "score": [
+            [
+                "500-2000.3000-9000",
+                0.09,
+                "-0.7.0.7",
+                0.25
+            ]
+        ],
+        "kind": 6,
+        "adsr": [
+            10.0,
+            0.0,
+            100.0,
+            40.0
+        ]
+    },
+    "candidato_cartella_delle_registrazioni_nastro": {
+        "descrizione": "MeTeOra, si apre la cartella delle registrazioni in Esplora risorse, con Ctrl, Alt e R: triangolo, re 5 a sinistra, la 5 a destra e re 6 al centro, una porta che si apre larga; 190 ms.",
+        "score": [
+            [
+                "d5",
+                0.05,
+                -0.5,
+                -0.02
+            ],
+            [
+                "a5",
+                0.05,
+                0.5,
+                -0.02
+            ],
+            [
+                "d6",
+                0.09,
+                0.0,
+                0.0
+            ]
+        ],
+        "kind": 3,
+        "adsr": [
+            4.0,
+            10.0,
+            75.0,
+            30.0
+        ]
+    },
+    "candidato_cartella_delle_registrazioni_spia": {
+        "descrizione": "MeTeOra, si apre la cartella delle registrazioni in Esplora risorse, con Ctrl, Alt e R: seno, due scivolate da mi 5 a si 5, una a sinistra e una a destra, come due ante, poi mi 6 al centro; 220 ms.",
+        "score": [
+            [
+                "e5.b5",
+                0.06,
+                -0.6,
+                -0.03
+            ],
+            [
+                "p",
+                0.02,
+                0.0,
+                0.0
+            ],
+            [
+                "e5.b5",
+                0.06,
+                0.6,
+                -0.03
+            ],
+            [
+                "e6",
+                0.08,
+                0.0,
+                0.0
+            ]
+        ],
+        "kind": 1,
+        "adsr": [
+            2.0,
+            10.0,
+            80.0,
+            30.0
+        ]
+    },
+    "candidato_cartella_delle_registrazioni_soffio": {
+        "descrizione": "MeTeOra, si apre la cartella delle registrazioni in Esplora risorse, con Ctrl, Alt e R: rumore rosa, una banda che si allarga da 200-800 a 200-6000 Hz, qualcosa che si apre; 140 ms.",
+        "score": [
+            [
+                "200-800.200-6000",
+                0.14,
+                0.0,
+                0.3
+            ]
+        ],
+        "kind": 6,
+        "adsr": [
+            10.0,
+            0.0,
+            100.0,
+            40.0
+        ]
+    }
+}

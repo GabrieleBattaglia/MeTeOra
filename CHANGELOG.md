@@ -2,6 +2,13 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.5.1] - 2026-11-10
+
+Dal collaudo di Gabriele delle versioni 3.3.1, 3.4.0 e 3.5.0, passate tutte, tranne un punto.
+
+- Ctrl con V riconosce negli appunti anche un indirizzo copiato senza https davanti, come www.raiplaysound.it/radio2, e lo suona subito: prima apriva il campo vuoto di Apri un indirizzo. Senza https vale un sito che comincia con www., o che ha una barra dopo di sé, come raiplaysound.it/radio2: il nome di un file, come brano.mp3, resta un nome.
+- Nei prototipi l'ascolto alla cieca dei suoni candidati delle registrazioni, tre per evento, per sceglierli al posto dei segnaposto: prototipi/ascolto_registrazioni.py, con i candidati in prototipi/ascolto_registrazioni.json.
+
 ## [3.5.0] - 2026-11-10
 
 Le registrazioni, issue 42: MeTeOra registra le radio e gli indirizzi in rete, con la famiglia di R e un ramo nuovo della plancia. Tasti, sorgenti e formati sono decisioni di Gabriele.
