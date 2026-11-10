@@ -1,27 +1,3 @@
 Collaudo di MeTeOra 3.3.1: dal collaudo di prima.
-Nelle impostazioni la voce Lingua dice Lingua: italiano; Invio apre la lista con il solo italiano, e Invio sulla lista dice che la lingua resta l'italiano, con il suono dell'impostazione, non quello del rifiuto.
 Ctrl con V con l'indirizzo di una puntata di RaiPlay Sound copiato dal browser, mentre la ascolti lì: la puntata suona, in cima agli Indirizzi, con il titolo e la durata. Se non si apre, scrivi qui sotto l'indirizzo che hai copiato.
-Ctrl con V senza un indirizzo negli appunti apre il campo Apri un indirizzo; scritto senza https, www.raiplaysound.it/radio2 apre la diretta di Rai Radio 2.
-Un indirizzo che non c'è, come www.raiplaysound.it/audio/niente, dice che la pagina non c'è, con il suono dell'errore.
-Collaudo di MeTeOra 3.4.0: i Preferiti in rete, issue 41.
-Alla prima apertura gli indirizzi e le radio che avevi nei Preferiti sono passati nei Preferiti in rete, un ramo in cima ai Preferiti; nei Preferiti restano i brani dei file.
-L'etichetta dei Preferiti finisce con e quanti sono in rete, come e 3 in rete.
-F4 su una radio o su un brano degli Indirizzi dice che è nei Preferiti in rete; F4 su un file lo mette nei Preferiti, come sempre.
-X sui Preferiti suona solo i brani dei file; X sui Preferiti in rete suona indirizzi e radio, uno dopo l'altro.
-Canc sui Preferiti in rete dice che non si eliminano; Canc su un loro brano lo toglie.
-Collaudo di MeTeOra 3.5.0: le registrazioni, issue 42. I suoni sono segnaposto: non serve giudicarli.
-R senza una registrazione dice che non registri niente; Maiuscolo con R su un file dice che i file non si registrano.
-Suona una radio, per esempio Rai Radio 3, e premi Maiuscolo con R: la console dice Registro, il nome della radio e il formato, MP3 a 128 kbps, stereo, 44.1 kHz.
-Durante la registrazione R dice che cosa registri, da quanto, quanto pesa e il formato.
-Maiuscolo con R mette in pausa, R lo dice, e Maiuscolo con R riprende; nel file finito il pezzo della pausa non c'è, e alla ripresa non si sentono secondi ripetuti.
-Ctrl con R ferma: la console dice durata, peso e nome; il file è il primo del ramo Registrazioni, e suona.
-Ctrl e Maiuscolo con R portano la plancia al ramo Registrazioni, dopo Radio; Ctrl e Alt con R aprono la cartella Registrazioni in Esplora risorse.
-Alt con R dice In ascolto; facendo partire una radio, dopo un paio di secondi la console dice Registro, con il suo nome.
-Alt e Maiuscolo con R durante l'attesa la tolgono; durante una registrazione chiedono se eliminarla, con No predefinito, e Sì cancella il file.
-Una radio a 64 kbps, come Radio 24, registrata in MP3 a 128 dice 64 kbps; una sorgente mono si registra mono.
-Nelle impostazioni Formato delle registrazioni e Qualità delle registrazioni aprono le loro liste; una registrazione in Opus, in FLAC e in WAV suona.
-Con un'altra radio, o fermando l'ascolto, la registrazione va avanti.
-Una puntata breve di RaiPlay Sound registrata fino in fondo finisce da sola, e la console dice che è arrivata alla fine.
-Chiudendo MeTeOra con una registrazione in corso il file resta nel ramo Registrazioni.
-I marker su T: Alt con T li conta, Ctrl con T toglie quelli prima, Ctrl e Maiuscolo con T quelli dopo; T e Maiuscolo con T come prima.
-Le statistiche hanno la riga delle registrazioni.
+* copiato www.raiplaysound.it/radio2 Faccio ctrl+v sul ramo indirizzi e si apre un campo vuoto dove devo incollare l'url. Dopo parte.
