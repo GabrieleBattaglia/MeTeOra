@@ -1,0 +1,54 @@
+MeTeOra: ascolto alla cieca dei suoni delle registrazioni, issue 42.
+
+Sessione del 2026-11-11 00:14, volume 15%
+
+GRUPPO: 1 di 8, la registrazione comincia, con Maiuscolo e R, evento registrazione_avviata
+Data: 2026-11-11 00:17
+Misura: A soffio, voto 3; B nastro, voto 5; C spia, voto 4
+Commento di Gabriele: Sono tutti e 3 belli.
+
+GRUPPO: 2 di 8, la registrazione va in pausa, con Maiuscolo e R, evento registrazione_in_pausa
+Data: 2026-11-11 00:17
+Misura: A spia, voto 2; B nastro, voto 5; C soffio, voto 3
+Commento di Gabriele: test superato, nessun commento
+
+GRUPPO: 3 di 8, la registrazione riprende dalla pausa, con Maiuscolo e R, evento registrazione_ripresa
+Data: 2026-11-11 00:18
+Misura: A spia, voto 5; B nastro, voto 4; C soffio, voto 2
+Commento di Gabriele: test superato, nessun commento
+
+GRUPPO: 4 di 8, la registrazione si ferma e il file si chiude, con Ctrl e R, evento registrazione_fermata
+Data: 2026-11-11 00:19
+Misura: A nastro, voto 5; B soffio, voto 4; C spia, voto 3
+Commento di Gabriele: test superato, nessun commento
+
+GRUPPO: 5 di 8, in ascolto per registrare la prossima radio che parte, con Alt e R, evento registrazione_in_ascolto
+Data: 2026-11-11 00:20
+Misura: A nastro, voto 4; B spia, voto 2; C soffio, voto 3
+Commento di Gabriele: test superato, nessun commento
+
+GRUPPO: 6 di 8, la registrazione in corso si elimina, con Alt, Maiuscolo e R, evento registrazione_eliminata
+Data: 2026-11-11 00:21
+Misura: A spia, voto 2; B nastro, voto 4; C soffio, voto 3
+Commento di Gabriele: test superato, nessun commento
+
+GRUPPO: 7 di 8, la plancia va al ramo Registrazioni, con Ctrl, Maiuscolo e R, evento alle_registrazioni
+Data: 2026-11-11 00:21
+Misura: A nastro, voto 5; B spia, voto 4; C soffio, voto 3
+Commento di Gabriele: test superato, nessun commento
+
+GRUPPO: 8 di 8, si apre la cartella delle registrazioni, con Ctrl, Alt e R, evento cartella_delle_registrazioni
+Data: 2026-11-11 00:22
+Misura: A nastro, voto 5; B spia, voto 3; C soffio, voto 3
+Commento di Gabriele: test superato, nessun commento
+
+RIEPILOGO DEI VOTI, sessione del 2026-11-11 00:14
+registrazione_avviata: nastro 5, spia 4, soffio 3.
+registrazione_in_pausa: nastro 5, soffio 3, spia 2.
+registrazione_ripresa: spia 5, nastro 4, soffio 2.
+registrazione_fermata: nastro 5, soffio 4, spia 3.
+registrazione_in_ascolto: nastro 4, soffio 3, spia 2.
+registrazione_eliminata: nastro 4, soffio 3, spia 2.
+alle_registrazioni: nastro 5, spia 4, soffio 3.
+cartella_delle_registrazioni: nastro 5, spia 3, soffio 3.
+Somme: nastro 37, spia 25, soffio 24.
