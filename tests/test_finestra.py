@@ -10332,17 +10332,21 @@ def test_q_dice_il_punto_e_va_alla_fine_e_all_inizio(finestra, monkeypatch):
     assert salti == [140.0, -170.0]
 
 def test_la_voce_lingua(finestra, monkeypatch, suoni_annotati):
-    """La voce Lingua della 3.0.0: con il solo italiano lo dice; con piu'
-    lingue la lista, e la scelta vale dal riavvio."""
+    """La voce Lingua della 3.0.0: con il solo italiano la lista con lui, e
+    la scelta lo dice; con piu' lingue la lista, e la scelta vale dal riavvio."""
     import lingua
 
     lista = _ListaFinta()
     monkeypatch.setattr(lingua, "lingue", lambda: ["it"])
     monkeypatch.setattr(lingua, "prossima", None)
     assert finestra._riga_dell_impostazione("lingua") == "Lingua: italiano"
+    # Con una lingua sola la lista si apre lo stesso, senza il suono del rifiuto (3.3.1).
+    sola = _SceltaFinta(0)
+    monkeypatch.setattr(modulo, "FinestraScelta", sola)
     finestra._cambia_impostazione("lingua", lista)
-    assert suoni_annotati[-1] == "non_disponibile"
-    assert _ultima(finestra) == "Per ora MeTeOra parla solo italiano: le altre lingue arrivano con le traduzioni, come spiega il manuale."
+    assert sola.aperture == [("Lingua", ["italiano, codice it"], 0)] and suoni_annotati[-1] == "impostazione_cambiata"
+    assert _ultima(finestra) == ("La lingua resta italiano: per ora MeTeOra parla solo questa, e le altre lingue arrivano con le traduzioni, "
+        "come spiega il manuale.")
     scelte = []
     monkeypatch.setattr(lingua, "lingue", lambda: ["en", "it"])
     monkeypatch.setattr(lingua, "_polipo", lambda codice=None: scelte.append(codice))

@@ -1,6 +1,6 @@
 # MeTeOra, gli indirizzi in rete: le pagine dei siti, aperte con yt-dlp.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 05/11/2026: nasce con la 3.2.0, tappa 19 b del piano, issue 40. Nella 3.3.0 le dirette, senza durata, e gli indirizzi diretti, che libmpv apre senza yt-dlp.
+# 05/11/2026: nasce con la 3.2.0, tappa 19 b del piano, issue 40. Nella 3.3.0 le dirette, senza durata, e gli indirizzi diretti, che libmpv apre senza yt-dlp. Nella 3.3.1 la pagina che non c'e', il 404, e il 403 detti per chi ascolta.
 
 """Gli indirizzi in rete (3.2.0, issue 40).
 
@@ -184,6 +184,12 @@ def _motivo(errore):
     riga = riga.split("; please report this issue", 1)[0].strip()
     if riga.startswith("Unsupported URL"):
         return _("yt-dlp non conosce questo sito")
+    # Una pagina che non c'e', come un indirizzo scritto a meta' o tolto dal
+    # sito (collaudo della 3.2.0): il 404 di HTTP, detto per chi ascolta.
+    if "HTTP Error 404" in riga:
+        return _("la pagina non c'è: l'indirizzo è sbagliato, o il sito l'ha tolta")
+    if "HTTP Error 403" in riga:
+        return _("il sito non lascia aprire la pagina")
     return riga.rstrip(".") or _("yt-dlp non ha detto perché")
 
 
@@ -278,11 +284,19 @@ def flusso_dell_info(info):
     return Flusso(principale, [f"{nome}: {valore}" for nome, valore in intestazioni.items()], audio, dal_vivo=bool(info.get("is_live")))
 
 
+def _titolo(info):
+    """Il titolo di un brano; di una diretta senza la data e l'ora che yt-dlp
+    gli aggiunge, come Rai Radio 2 invece di Rai Radio 2 2026-11-10 15:38 (3.3.1)."""
+    if info.get("is_live") and info.get("fulltitle"):
+        return info["fulltitle"]
+    return info.get("title")
+
+
 def scheda_dell_info(info):
     """La scheda di un brano di un sito per lo schedario, come quelle dei
     file: durata, tag e capitoli, senza dimensione e data."""
     anno = info.get("release_year") or str(info.get("upload_date") or "")[:4]
-    tag = {"titolo": info.get("track") or info.get("title"), "autore": info.get("artist") or info.get("creator") or info.get("uploader") or info.get("channel"),
+    tag = {"titolo": info.get("track") or _titolo(info), "autore": info.get("artist") or info.get("creator") or info.get("uploader") or info.get("channel"),
         "album": info.get("album"), "genere": info.get("genre"), "anno": int(anno) if str(anno).isdigit() else None}
     scheda = {"dim": None, "mod": None, "durata": _durata(info.get("duration")), "tag": {k: str(v) if k != "anno" else v for k, v in tag.items() if v},
         "sottobrani": None, "durate_sid": None, "indirizzo": True}
@@ -316,7 +330,7 @@ def _voci(info):
 def _pagina(indirizzo, info):
     if info.get("_type") == "playlist":
         return Pagina(indirizzo, info.get("title") or sito(indirizzo), voci=_voci(info))
-    return Pagina(indirizzo, info.get("title") or sito(indirizzo), _durata(info.get("duration")), scheda_dell_info(info), flusso_dell_info(info))
+    return Pagina(indirizzo, _titolo(info) or sito(indirizzo), _durata(info.get("duration")), scheda_dell_info(info), flusso_dell_info(info))
 
 
 # I flussi trovati: indirizzo -> (Flusso, scadenza in monotonic, con il video).

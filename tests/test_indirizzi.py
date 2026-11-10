@@ -94,6 +94,10 @@ def test_il_motivo_di_yt_dlp():
     assert indirizzi._motivo("ERROR: Unsupported URL: https://example.com/") == "yt-dlp non conosce questo sito"
     assert indirizzi._motivo("ERROR: [youtube] abc: Video unavailable. This video is private.") == "Video unavailable. This video is private"
     assert indirizzi._motivo("") == "yt-dlp non ha detto perché"
+    # La pagina che non c'e', come quella del collaudo della 3.2.0.
+    assert indirizzi._motivo("ERROR: [generic] audio: Unable to download webpage: HTTP Error 404: Not Found (caused by <HTTPError 404: Not Found>)") == (
+        "la pagina non c'è: l'indirizzo è sbagliato, o il sito l'ha tolta")
+    assert indirizzi._motivo("ERROR: [x] y: HTTP Error 403: Forbidden") == "il sito non lascia aprire la pagina"
 
 
 def test_il_flusso_e_la_scheda_di_un_brano():
@@ -111,6 +115,11 @@ def test_il_flusso_e_la_scheda_di_un_brano():
     assert indirizzi.scheda_dell_info(MIXCLOUD)["tag"] == {"titolo": "Cryptkeeper", "autore": "Vari", "anno": 2017} and "capitoli" not in indirizzi.scheda_dell_info(MIXCLOUD)
     with pytest.raises(indirizzi.ErroreIndirizzo):
         indirizzi.flusso_dell_info({"title": "senza flusso"})
+    # Una diretta ha il titolo senza la data e l'ora di yt-dlp (3.3.1).
+    diretta = {"title": "Rai Radio 2 2026-11-10 15:38", "fulltitle": "Rai Radio 2", "is_live": True, "url": "https://x/live.m3u8"}
+    assert indirizzi._pagina("https://www.raiplaysound.it/radio2", diretta).titolo == "Rai Radio 2"
+    assert indirizzi.scheda_dell_info(diretta)["tag"]["titolo"] == "Rai Radio 2"
+    assert indirizzi._pagina(YOUTUBE, {**INFO_YOUTUBE, "fulltitle": "altro"}).titolo == "Me at the zoo"
 
 
 def test_esplora_una_playlist_e_risolve_le_sue_voci(monkeypatch):

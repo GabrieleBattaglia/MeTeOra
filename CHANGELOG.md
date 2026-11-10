@@ -2,6 +2,14 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.3.1] - 2026-11-10
+
+Due correzioni, dal collaudo di Gabriele delle versioni da 3.0.0 a 3.3.0: la 3.1.0 e la 3.3.0 sono passate intere, e della 3.2.0 tutto tranne RaiPlay Sound.
+
+- La voce Lingua, con il solo italiano, suonava il rifiuto, come una voce senza comando. Ora apre la sua lista anche con una lingua sola, come ogni voce delle impostazioni, e la scelta dice che la lingua resta l'italiano, con il suono dell'impostazione.
+- RaiPlay Sound: la pagina provata nel collaudo rispondeva 404, e la console lo diceva con il messaggio inglese di yt-dlp. Provate il 10 novembre 2026 le pagine vere di RaiPlay Sound, puntate, programmi, playlist e dirette come raiplaysound.it/radio2: si aprono tutte. Il 404 viene da una pagina che il sito non ha, per esempio un indirizzo copiato a metà o l'esempio del collaudo scritto alla lettera; ora la console dice che la pagina non c'è, e per il 403 che il sito non la lascia aprire.
+- Una diretta aperta come indirizzo ha il suo titolo pulito, Rai Radio 2, e non più quello con la data e l'ora che yt-dlp gli aggiunge.
+
 ## [3.3.0] - 2026-11-06
 
 Le radio in rete, la terza tappa dei plugin della issue 40: più di sessantamila radio di tutto il mondo, dall'elenco libero di radio-browser.info, in un ramo nuovo della plancia.

@@ -1,17 +1,5 @@
-Collaudo di MeTeOra 3.0.0: la localizzazione.
-Nelle impostazioni la voce Lingua dice Lingua: italiano, e Invio dice che per ora MeTeOra parla solo italiano.
-* Invio mi fa ascoltare il suono che indica nessuna funzione.
-
-Collaudo di MeTeOra 3.1.0: i componenti aggiuntivi.
-
-Collaudo di MeTeOra 3.2.0: gli indirizzi in rete.
-La prima volta, Ctrl con V con l'indirizzo di una puntata di RaiPlay Sound negli appunti chiede se scaricare yt-dlp e QuickJS: con Sì li scarica, poi la puntata suona, in cima agli Indirizzi, con il titolo e la durata.
-Ctrl con V senza un indirizzo negli appunti apre il campo Apri un indirizzo; scritto senza https, come www.raiplaysound.it/audio/..., si apre lo stesso.
-* mi dice:
-Scarico QuickJS, circa 1.9 MB. 08:09
-QuickJS: 100%. 08:09
-QuickJS scaricato. 08:09
-Apro un indirizzo di raiplaysound.it: ci vuole qualche secondo. 08:09
-L'indirizzo di raiplaysound.it non si apre: Unable to download webpage: HTTP Error 404: Not Found (caused by <HTTPError 404: Not Found>). 08:09
-
-Collaudo di MeTeOra 3.3.0: le radio in rete.
+Collaudo di MeTeOra 3.3.1: dal collaudo di prima.
+Nelle impostazioni la voce Lingua dice Lingua: italiano; Invio apre la lista con il solo italiano, e Invio sulla lista dice che la lingua resta l'italiano, con il suono dell'impostazione, non quello del rifiuto.
+Ctrl con V con l'indirizzo di una puntata di RaiPlay Sound copiato dal browser, mentre la ascolti lì: la puntata suona, in cima agli Indirizzi, con il titolo e la durata. Se non si apre, scrivi qui sotto l'indirizzo che hai copiato.
+Ctrl con V senza un indirizzo negli appunti apre il campo Apri un indirizzo; scritto senza https, www.raiplaysound.it/radio2 apre la diretta di Rai Radio 2.
+Un indirizzo che non c'è, come www.raiplaysound.it/audio/niente, dice che la pagina non c'è, con il suono dell'errore.
