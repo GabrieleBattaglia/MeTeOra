@@ -1,38 +1,17 @@
 Collaudo di MeTeOra 3.0.0: la localizzazione.
-In italiano MeTeOra parla come la 2.7.4: un giro dei comandi di tutti i giorni, plancia, riproduzione, impostazioni, F11 e statistiche, senza frasi nuove o storte.
 Nelle impostazioni la voce Lingua dice Lingua: italiano, e Invio dice che per ora MeTeOra parla solo italiano.
+* Invio mi fa ascoltare il suono che indica nessuna funzione.
+
 Collaudo di MeTeOra 3.1.0: i componenti aggiuntivi.
-Nelle impostazioni la voce Componenti aggiuntivi, dopo Banco dei suoni MIDI, dice quanti sono installati, e Invio apre la lista dei componenti, con stato, uso, licenza e peso.
-Installa MS Basic dalla lista: la console dice l'avanzamento a passi del 10% e poi MS Basic scaricato, e chiede se usarlo al posto del banco che hai; un MIDI con MS Basic la prima volta parte dopo una decina di secondi, e suona bene.
-Togli MS Basic: prima la domanda, poi MS Basic tolto; se era il banco in uso, la console dice che i MIDI non hanno più un banco, e il primo MIDI lo fa scegliere.
-Banco dei suoni MIDI: la lista ha in fondo lo scaricamento dei banchi liberi che non hai.
-GeneralUser GS si installa dalla lista, dalla copia di MeTeOra su GitHub, e un MIDI suona bene con lui.
+
 Collaudo di MeTeOra 3.2.0: gli indirizzi in rete.
 La prima volta, Ctrl con V con l'indirizzo di una puntata di RaiPlay Sound negli appunti chiede se scaricare yt-dlp e QuickJS: con Sì li scarica, poi la puntata suona, in cima agli Indirizzi, con il titolo e la durata.
 Ctrl con V senza un indirizzo negli appunti apre il campo Apri un indirizzo; scritto senza https, come www.raiplaysound.it/audio/..., si apre lo stesso.
-Un video di YouTube parte dopo circa cinque secondi, con il titolo; se ha i capitoli, freccia destra li mostra e la virgola ci salta.
-Un album di Bandcamp diventa un ramo dentro gli Indirizzi, con i suoi brani, e suona dal primo; B passa al seguente senza attesa.
-Q, Alt con Q e i salti avanti e indietro funzionano anche sui brani dei siti, e una puntata lunga, fermata a metà, riprende dal suo punto.
-V mentre la console dice Apro, prima che il brano parta, dice Stop: l'indirizzo non suona, e non parte niente.
-F4 su un brano degli Indirizzi lo mette nei Preferiti con il suo titolo, e da lì suona anche dopo aver chiuso e riaperto MeTeOra.
-Il menu di un brano di un sito ha Copia l'indirizzo, che mette negli appunti la sua pagina; quello di una playlist di un sito ha Rileggi dal sito.
-Canc su una playlist di un sito chiede conferma e la toglie dagli Indirizzi; Canc su un brano lo toglie subito.
-Un indirizzo che non si apre, come un video tolto, dice il motivo con il suono dell'errore.
-Con il video acceso, un video di YouTube si vede nella finestra del video, e si sente.
-Chiudendo MeTeOra mentre suona un brano di un sito, alla riapertura il brano torna in pausa al suo punto, dopo qualche secondo.
-Su GabryBar un brano di un sito con la durata, come una puntata di RaiPlay Sound, suona dallo speaker e si salta.
-NVDA legge le righe Apro e In riproduzione con il titolo e il sito, non l'indirizzo intero.
-Nelle impostazioni Componenti aggiuntivi elenca sei componenti, yt-dlp con la sua versione; Cerca un aggiornamento dice che è già all'ultima versione.
-Il giorno dopo, al primo indirizzo, se c'è una versione nuova di yt-dlp la console dice yt-dlp aggiornato, con la versione; se non c'è non dice niente.
+* mi dice:
+Scarico QuickJS, circa 1.9 MB. 08:09
+QuickJS: 100%. 08:09
+QuickJS scaricato. 08:09
+Apro un indirizzo di raiplaysound.it: ci vuole qualche secondo. 08:09
+L'indirizzo di raiplaysound.it non si apre: Unable to download webpage: HTTP Error 404: Not Found (caused by <HTTPError 404: Not Found>). 08:09
+
 Collaudo di MeTeOra 3.3.0: le radio in rete.
-Nella plancia, dopo gli Indirizzi, il ramo Radio; aperto, Per paese ha l'Italia in cima e poi i paesi dalla A alla Z, con i nomi in italiano e quante radio hanno.
-Italia aperta mostra le radio dalle più ascoltate, con nome, paese, formato e qualità, come Rai Radio 3, Italia, MP3 a 320 kbps; Per genere e Per lingua si aprono allo stesso modo.
-X su una radio la suona; la console dice In onda con il titolo quando la radio lo manda, sulla stessa riga a ogni brano nuovo, e NVDA lo legge come i sottotitoli.
-L'apostrofo su una radio dice il tempo, in diretta, e il titolo in onda; Q, Alt con Q e W dicono che una diretta non si salta.
-Con la dissolvenza accesa una radio suona per minuti senza passare da sola al brano seguente.
-La barra rovesciata nel ramo Radio chiede il nome: con deejay la console dice quante radio ha trovato, e la selezione va sul ramo Ricerca di deejay, aperto.
-Richiuso e riaperto il ramo Radio, in cima ci sono le radio ascoltate, dalla più recente; Canc su una di loro la toglie, su una radio di un paese dice che non si toglie.
-F4 su una radio la mette nei Preferiti, e da lì suona anche dopo aver chiuso e riaperto MeTeOra.
-Una radio aperta con Ctrl con V, come http://icestreaming.rai.it/1.mp3, dice in diretta e non passa da sola al seguente.
-Un file M3U o PLS di radio di un altro programma si importa con i nomi delle radio, e le radio suonano.
-Le statistiche hanno la riga delle radio, e nelle impostazioni quella dei componenti aggiuntivi installati e della lingua cambiata.
