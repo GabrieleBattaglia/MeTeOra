@@ -221,7 +221,7 @@ def test_il_ramo_radio_per_paese_e_una_radio_che_suona(finestra, con_le_radio, m
     voci = [etichetta for etichetta, _azione in finestra._voci_del_menu(dati)]
     assert voci == ["Riproduci", "Aggiungi alla playlist", "Aggiungi ai preferiti", "Copia l'indirizzo", "Cerca una radio"]
     finestra._ai_preferiti(dati["brano"])
-    assert finestra.archivio.preferiti.brani[0].radio["uuid"] == "uuid-rai3"
+    assert finestra.archivio.preferiti_in_rete.brani[0].radio["uuid"] == "uuid-rai3"
     finestra._cancella(voce)
     assert "Le radio di radio-browser non si tolgono" in finestra._righe[-1]
     # Riaperto, il ramo Radio ha in cima le ascoltate di recente.

@@ -1,6 +1,6 @@
 # MeTeOra, le playlist: brani, playlist, archivio e coda di riproduzione.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 il sottobrano dei SID, nella 1.3.0 il loop A-B, nella 1.6.0 i Preferiti, nella 1.8.0 il filtro. Nella 1.59.0 Coda.altri, per la riproduzione casuale. Nella 1.104.0 si tolgono i brani dei file spariti, per la pulizia all'avvio. Nella 1.109.0 Ordina, Inverti l'ordine, Mescola e Ordine di prima. Nella 1.113.0 l'origine delle playlist importate da un M3U o da un PLS di altri programmi. Nella 1.113.1 un file con piu' sottobrani di cui nessuno ha la durata va in fondo con i brani senza durata, non in cima come se durasse zero (issue 24). Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 il titolo dei brani dei siti, Brano.copia, e gli Indirizzi nell'archivio, con le playlist dei siti. Nella 3.3.0 le radio e gli indirizzi diretti nei brani, e le radio ascoltate di recente.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 il sottobrano dei SID, nella 1.3.0 il loop A-B, nella 1.6.0 i Preferiti, nella 1.8.0 il filtro. Nella 1.59.0 Coda.altri, per la riproduzione casuale. Nella 1.104.0 si tolgono i brani dei file spariti, per la pulizia all'avvio. Nella 1.109.0 Ordina, Inverti l'ordine, Mescola e Ordine di prima. Nella 1.113.0 l'origine delle playlist importate da un M3U o da un PLS di altri programmi. Nella 1.113.1 un file con piu' sottobrani di cui nessuno ha la durata va in fondo con i brani senza durata, non in cima come se durasse zero (issue 24). Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 il titolo dei brani dei siti, Brano.copia, e gli Indirizzi nell'archivio, con le playlist dei siti. Nella 3.3.0 le radio e gli indirizzi diretti nei brani, e le radio ascoltate di recente. Nella 3.4.0 i Preferiti in rete, con preferiti_per, e gli indirizzi dei Preferiti di prima che ci passano da soli (issue 41).
 
 """Il modello dei dati, senza finestre e senza suono.
 
@@ -31,6 +31,8 @@ VERSIONE_DEL_FILE = 1
 # Il nome dei Preferiti, e quello di una playlist nuova senza nome.
 # Traduttori: il nome della playlist speciale dei brani preferiti.
 NOME_DEI_PREFERITI = _("Preferiti")
+# Traduttori: il nome dei preferiti che arrivano dalla rete, indirizzi dei siti e radio, un ramo dentro i Preferiti.
+NOME_DEI_PREFERITI_IN_RETE = _("Preferiti in rete")
 # Traduttori: il nome di una playlist nuova senza nome; se c'e' gia', diventa "Playlist 2", "Playlist 3".
 NOME_DELLA_NUOVA = _("Playlist")
 # Traduttori: il nome del ramo della plancia con gli indirizzi in rete aperti, le pagine dei siti.
@@ -420,6 +422,11 @@ class Playlist:
 class Archivio:
     """Le playlist salvate, nell'ordine in cui compaiono nella plancia, e i
     Preferiti, una playlist speciale che non si rinomina e non si elimina.
+    Dalla 3.4.0 (issue 41) i Preferiti hanno due categorie, per il tipo di
+    media: i brani dei file restano nei Preferiti, e cio' che arriva dalla
+    rete, indirizzi dei siti e radio, va nei Preferiti in rete, che la
+    plancia mostra come un ramo dentro i Preferiti (Gabriele: le categorie
+    il meno possibile).
     Dalla 3.2.0 anche gli indirizzi in rete aperti, del ramo Indirizzi: le
     playlist dei siti, in_rete, e i brani da soli, nella playlist speciale
     indirizzi; gli uni e gli altri dal piu' recente."""
@@ -428,6 +435,7 @@ class Archivio:
         self.percorso = percorso
         self.playlist = []
         self.preferiti = Playlist(NOME_DEI_PREFERITI)
+        self.preferiti_in_rete = Playlist(NOME_DEI_PREFERITI_IN_RETE)
         self.indirizzi = Playlist(NOME_DEGLI_INDIRIZZI)
         self.in_rete = []
         # Le radio ascoltate di recente, dalla piu' recente (3.3.0).
@@ -436,6 +444,7 @@ class Archivio:
     def carica(self):
         """Legge il file; se non c'e' l'archivio resta vuoto."""
         self.preferiti = Playlist(NOME_DEI_PREFERITI)
+        self.preferiti_in_rete = Playlist(NOME_DEI_PREFERITI_IN_RETE)
         self.indirizzi = Playlist(NOME_DEGLI_INDIRIZZI)
         self.in_rete = []
         self.radio = Playlist(NOME_DELLE_RADIO)
@@ -448,6 +457,15 @@ class Archivio:
         if isinstance(dati.get("preferiti"), dict):
             self.preferiti = Playlist.da_dati(dati["preferiti"])
             self.preferiti.nome = NOME_DEI_PREFERITI
+        if isinstance(dati.get("preferiti_in_rete"), dict):
+            self.preferiti_in_rete = Playlist.da_dati(dati["preferiti_in_rete"])
+            self.preferiti_in_rete.nome = NOME_DEI_PREFERITI_IN_RETE
+        # Gli indirizzi messi nei Preferiti con la 3.2.0 e la 3.3.0 passano
+        # da se' ai Preferiti in rete, in fondo, nel loro ordine.
+        dalla_rete = [b for b in self.preferiti.brani if formati.e_indirizzo(b.percorso)]
+        if dalla_rete:
+            self.preferiti.brani = [b for b in self.preferiti.brani if not formati.e_indirizzo(b.percorso)]
+            self.preferiti_in_rete.brani.extend(dalla_rete)
         indirizzi = dati.get("indirizzi")
         if isinstance(indirizzi, dict):
             self.indirizzi.brani = [Brano.da_dati(b) for b in indirizzi.get("brani", []) if formati.e_indirizzo(b.get("percorso"))]
@@ -456,14 +474,21 @@ class Archivio:
         if isinstance(radio, dict):
             self.radio.brani = [b for b in (Brano.da_dati(d) for d in radio.get("brani", []) if formati.e_indirizzo(d.get("percorso"))) if b.radio][:RADIO_RECENTI]
 
+    def preferiti_per(self, brano):
+        """I Preferiti in cui va un brano: quelli in rete per un indirizzo o una radio (3.4.0)."""
+        return self.preferiti_in_rete if formati.e_indirizzo(brano.percorso) else self.preferiti
+
     def nei_preferiti(self, brano):
-        """Il brano dei Preferiti con lo stesso file e sottobrano, o None."""
-        return next((b for b in self.preferiti.brani if b.percorso == brano.percorso and b.sottobrano == brano.sottobrano), None)
+        """Il brano dei Preferiti con lo stesso file e sottobrano, o None; per
+        un indirizzo, nei Preferiti in rete."""
+        return next((b for b in self.preferiti_per(brano).brani if b.percorso == brano.percorso and b.sottobrano == brano.sottobrano), None)
 
     def salva(self):
         """Scrive su un file accanto e poi lo sostituisce, cosi' un'uscita a
         meta' scrittura non lascia un archivio troncato."""
         dati = {"versione": VERSIONE_DEL_FILE, "playlist": [p.come_dati() for p in self.playlist], "preferiti": self.preferiti.come_dati()}
+        if self.preferiti_in_rete.brani or self.preferiti_in_rete.filtro:
+            dati["preferiti_in_rete"] = self.preferiti_in_rete.come_dati()
         if self.indirizzi.brani or self.in_rete:
             dati["indirizzi"] = {"brani": [b.come_dati() for b in self.indirizzi.brani], "playlist": [p.come_dati() for p in self.in_rete]}
         if self.radio.brani:
@@ -536,14 +561,14 @@ class Archivio:
     def percorsi(self):
         """I percorsi dei brani di tutte le playlist e dei Preferiti, cosi'
         come sono scritti, per la pulizia all'avvio (1.104.0)."""
-        return {b.percorso for pl in (*self.playlist, self.preferiti) for b in pl.brani}
+        return {b.percorso for pl in (*self.playlist, self.preferiti, self.preferiti_in_rete) for b in pl.brani}
 
     def togli_i_percorsi(self, spariti):
         """Toglie i brani dei file spariti da tutte le playlist e dai
         Preferiti, come Playlist.togli_i_percorsi, e restituisce le coppie
         (playlist, brano) dei tolti. Una playlist rimasta vuota resta: la
         si elimina a mano (1.104.0). Non salva: salva chi chiama."""
-        return [(pl, b) for pl in (*self.playlist, self.preferiti) for b in pl.togli_i_percorsi(spariti)]
+        return [(pl, b) for pl in (*self.playlist, self.preferiti, self.preferiti_in_rete) for b in pl.togli_i_percorsi(spariti)]
 
 
 class Coda:

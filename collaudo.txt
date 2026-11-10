@@ -3,3 +3,9 @@ Nelle impostazioni la voce Lingua dice Lingua: italiano; Invio apre la lista con
 Ctrl con V con l'indirizzo di una puntata di RaiPlay Sound copiato dal browser, mentre la ascolti lì: la puntata suona, in cima agli Indirizzi, con il titolo e la durata. Se non si apre, scrivi qui sotto l'indirizzo che hai copiato.
 Ctrl con V senza un indirizzo negli appunti apre il campo Apri un indirizzo; scritto senza https, www.raiplaysound.it/radio2 apre la diretta di Rai Radio 2.
 Un indirizzo che non c'è, come www.raiplaysound.it/audio/niente, dice che la pagina non c'è, con il suono dell'errore.
+Collaudo di MeTeOra 3.4.0: i Preferiti in rete, issue 41.
+Alla prima apertura gli indirizzi e le radio che avevi nei Preferiti sono passati nei Preferiti in rete, un ramo in cima ai Preferiti; nei Preferiti restano i brani dei file.
+L'etichetta dei Preferiti finisce con e quanti sono in rete, come e 3 in rete.
+F4 su una radio o su un brano degli Indirizzi dice che è nei Preferiti in rete; F4 su un file lo mette nei Preferiti, come sempre.
+X sui Preferiti suona solo i brani dei file; X sui Preferiti in rete suona indirizzi e radio, uno dopo l'altro.
+Canc sui Preferiti in rete dice che non si eliminano; Canc su un loro brano lo toglie.

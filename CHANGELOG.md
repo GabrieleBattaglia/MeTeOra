@@ -2,6 +2,16 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.4.0] - 2026-11-10
+
+Le categorie dei Preferiti, issue 41: ora che i Preferiti possono avere anche indirizzi dei siti e radio, suonarli tutti di fila non ha più senso.
+
+- I Preferiti hanno due categorie, per il tipo di media, il meno possibile, come ha chiesto Gabriele: i brani dei file restano nei Preferiti, e ciò che arriva dalla rete, indirizzi e radio, va nei Preferiti in rete, un ramo in cima ai Preferiti che c'è solo quando ne hai. F4 mette ogni cosa nella sua categoria, anche dalla selezione; X sui Preferiti suona i soli brani dei file, X sui Preferiti in rete i loro indirizzi e radio.
+- L'etichetta dei Preferiti dice anche quanti sono in rete, come Preferiti, brani: 12 (48:05.250), totali: 12 (48:05.250), e 3 in rete. I Preferiti in rete non si rinominano e non si eliminano, e hanno filtro, Ordina e Mescola; la barra rovesciata sui Preferiti cerca in tutte e due le categorie.
+- Gli indirizzi e le radio messi nei Preferiti con la 3.2 e la 3.3 passano da soli nei Preferiti in rete, nel loro ordine, la prima volta che MeTeOra si apre.
+- Segnalibro, ripresa all'avvio, Dove sono, ricerca e statistiche conoscono i Preferiti in rete.
+- Dentro: Archivio.preferiti_in_rete e preferiti_per, con nei_preferiti che guarda la categoria giusta; il segnalibro ha la lista preferiti_in_rete. Le prove nuove in tests/test_indirizzi.py.
+
 ## [3.3.1] - 2026-11-10
 
 Due correzioni, dal collaudo di Gabriele delle versioni da 3.0.0 a 3.3.0: la 3.1.0 e la 3.3.0 sono passate intere, e della 3.2.0 tutto tranne RaiPlay Sound.

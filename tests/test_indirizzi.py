@@ -1,6 +1,6 @@
 # MeTeOra, le prove degli indirizzi in rete: yt-dlp finto, niente rete.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 05/11/2026: nasce con la 3.2.0, tappa 19 b del piano, issue 40.
+# 05/11/2026: nasce con la 3.2.0, tappa 19 b del piano, issue 40. Nella 3.4.0 le prove dei Preferiti in rete (issue 41).
 
 import datetime
 import hashlib
@@ -557,7 +557,8 @@ def test_i_menu_e_le_copie_degli_indirizzi(finestra, con_ytdlp, monkeypatch):
     assert voci[:3] == ["Riproduci", "Rileggi dal sito", "Copia l'indirizzo"] and "Elimina" in voci
     # F4 e Aggiungi alla playlist tengono il titolo.
     finestra._ai_preferiti(brano)
-    assert finestra.archivio.preferiti.brani[0].titolo == "Me at the zoo" and finestra.archivio.preferiti.brani[0] is not brano
+    preferito = finestra.archivio.preferiti_in_rete.brani[0]
+    assert preferito.titolo == "Me at the zoo" and preferito is not brano and finestra.archivio.preferiti.brani == []
     finestra._aggiungi(None, [brano.copia()], nome="Dal sito")
     assert finestra.archivio.playlist[-1].brani[0].titolo == "Me at the zoo"
     # La ricerca trova il titolo negli Indirizzi.
@@ -582,3 +583,59 @@ def test_il_segnalibro_e_la_ripresa_di_un_indirizzo(finestra, con_ytdlp, monkeyp
     finestra.impostazioni["ripresa"] = {**stato, "posizione": 7.0}
     finestra.riprendi()
     assert con_ytdlp[-1] == (YOUTUBE, 7.0, True) and finestra.coda.corrente is brano
+
+
+# I Preferiti in rete, issue 41 (3.4.0).
+
+
+def test_i_preferiti_in_rete_nell_archivio(tmp_path):
+    """Indirizzi e radio hanno la loro categoria; quelli messi nei Preferiti
+    prima della 3.4.0 ci passano da soli, e il file li ricorda."""
+    archivio = Archivio(str(tmp_path / "Playlist.json"))
+    with open(archivio.percorso, "w", encoding="utf-8") as f:
+        json.dump({"versione": 1, "playlist": [], "preferiti": {"nome": "Preferiti", "brani": [{"percorso": r"C:\a.mp3", "saltato": False},
+            {"percorso": YOUTUBE, "saltato": False, "titolo": "Me at the zoo"}, {"percorso": r"C:\b.mp3", "saltato": False}]}}, f)
+    archivio.carica()
+    assert [b.percorso for b in archivio.preferiti.brani] == [r"C:\a.mp3", r"C:\b.mp3"]
+    assert [b.titolo for b in archivio.preferiti_in_rete.brani] == ["Me at the zoo"] and archivio.preferiti_in_rete.nome == "Preferiti in rete"
+    assert archivio.preferiti_per(Brano(ALBUM)) is archivio.preferiti_in_rete and archivio.preferiti_per(Brano(r"C:\c.mp3")) is archivio.preferiti
+    assert archivio.nei_preferiti(Brano(YOUTUBE)) is archivio.preferiti_in_rete.brani[0] and archivio.nei_preferiti(Brano(r"C:\a.mp3")) is not None
+    archivio.salva()
+    di_nuovo = Archivio(archivio.percorso)
+    di_nuovo.carica()
+    assert [b.titolo for b in di_nuovo.preferiti_in_rete.brani] == ["Me at the zoo"] and len(di_nuovo.preferiti.brani) == 2
+    assert YOUTUBE in di_nuovo.percorsi()
+
+
+def test_i_preferiti_in_rete_nella_plancia(finestra, con_ytdlp, monkeypatch, suoni_annotati):
+    _risposte(monkeypatch, {YOUTUBE: INFO_YOUTUBE})
+    finestra.archivio.preferiti.brani.append(Brano(r"C:\musica\a.mp3"))
+    finestra._apri_l_indirizzo(YOUTUBE)
+    brano = finestra.archivio.indirizzi.brani[0]
+    finestra._ai_preferiti(brano)
+    assert finestra._righe[-1].startswith("Me at the zoo è nei Preferiti in rete, che ora hanno 1 brano.") and suoni_annotati[-1] == "preferito_aggiunto"
+    assert [b.percorso for b in finestra.archivio.preferiti.brani] == [r"C:\musica\a.mp3"]
+    finestra._ai_preferiti(brano)
+    assert "è già nei Preferiti" in finestra._righe[-1] and len(finestra.archivio.preferiti_in_rete.brani) == 1
+    # Nei Preferiti, in cima, il ramo dei Preferiti in rete; l'etichetta dice quanti sono.
+    assert finestra.albero.GetItemText(finestra.nodo_preferiti).endswith(", e 1 in rete")
+    finestra.albero.Expand(finestra.nodo_preferiti)
+    figli = list(finestra._figli(finestra.nodo_preferiti))
+    assert finestra.albero.GetItemText(figli[0]).startswith("Preferiti in rete, brani: 1") and finestra.albero.GetItemText(figli[1]) == "a.mp3"
+    in_rete = finestra._dati(figli[0])
+    assert in_rete["playlist"] is finestra.archivio.preferiti_in_rete and finestra._nodo_della_playlist(in_rete["playlist"]) == figli[0]
+    voci = [etichetta for etichetta, _azione in finestra._voci_del_menu(in_rete)]
+    assert "Rinomina" not in voci and "Elimina" not in voci
+    finestra._cancella(figli[0])
+    assert finestra._righe[-1].startswith("I Preferiti non si eliminano") and finestra.archivio.preferiti_in_rete.brani
+    # X sui Preferiti suona i brani dei file; quelli in rete li suona il loro ramo.
+    assert [b.percorso for _pl, b, _n in finestra._brani_della_voce(finestra.nodo_preferiti)] == [r"C:\musica\a.mp3"]
+    finestra._riproduci_playlist(finestra.archivio.preferiti_in_rete)
+    assert con_ytdlp[-1][0] == YOUTUBE and finestra.coda.playlist is finestra.archivio.preferiti_in_rete
+    assert finestra._nome_della_lista(finestra.archivio.preferiti_in_rete) == "Preferiti in rete"
+    assert finestra._stato_da_riprendere()["tipo"] == "preferiti_in_rete"
+    assert finestra._lista_da_riprendere({"tipo": "preferiti_in_rete"}) is finestra.archivio.preferiti_in_rete
+    # La ricerca nei Preferiti in rete trova i loro brani.
+    finestra._seleziona(finestra._nodo_della_playlist(finestra.archivio.preferiti_in_rete))
+    dove, brani, _cartelle = finestra._ramo_della_ricerca()
+    assert dove == "nei Preferiti in rete" and [b.percorso for b, _nome in brani] == [YOUTUBE]

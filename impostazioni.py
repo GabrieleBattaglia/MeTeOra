@@ -1,6 +1,6 @@
 # MeTeOra, le impostazioni: i valori che il programma ricorda fra un avvio e l'altro.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 le righe della console. Nella 1.51.0 caratteri, colori e scheda audio, e i limiti controllati alla lettura del file. Nella 1.51.2 un file con un JSON che non e' un dizionario non ferma l'avvio. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza (tappa 4, issue 15). Nella 1.59.0 la riproduzione casuale (issue 17). Nella 1.61.0 il modello della riproduzione casuale. Nella 1.63.0 video, sottotitoli letti e sintesi (tappa 7). Nella 1.64.0 i percorsi di rete scritti a mano. Nella 1.65.0 il banco dei suoni MIDI. Nella 1.66.36 un file illeggibile non si sovrascrive: si salva accanto, con .nuovo. Nella 1.82.0 destinazione, karaoke e anticipo del karaoke. Nella 1.83.0 celle della barra braille e tempo minimo di lettura. Nella 1.84.0 la versione dell'ultimo avvio. Nella 1.102.2 il volume di partenza e' 100, il livello originale dei file (issue 22). Nella 1.111.0 lo stato della selezione per lo screen reader, acceso di partenza (issue 21). Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 il segnalibro sugli Indirizzi e il giorno del controllo di yt-dlp.
+# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 le righe della console. Nella 1.51.0 caratteri, colori e scheda audio, e i limiti controllati alla lettura del file. Nella 1.51.2 un file con un JSON che non e' un dizionario non ferma l'avvio. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza (tappa 4, issue 15). Nella 1.59.0 la riproduzione casuale (issue 17). Nella 1.61.0 il modello della riproduzione casuale. Nella 1.63.0 video, sottotitoli letti e sintesi (tappa 7). Nella 1.64.0 i percorsi di rete scritti a mano. Nella 1.65.0 il banco dei suoni MIDI. Nella 1.66.36 un file illeggibile non si sovrascrive: si salva accanto, con .nuovo. Nella 1.82.0 destinazione, karaoke e anticipo del karaoke. Nella 1.83.0 celle della barra braille e tempo minimo di lettura. Nella 1.84.0 la versione dell'ultimo avvio. Nella 1.102.2 il volume di partenza e' 100, il livello originale dei file (issue 22). Nella 1.111.0 lo stato della selezione per lo screen reader, acceso di partenza (issue 21). Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 il segnalibro sugli Indirizzi e il giorno del controllo di yt-dlp. Nella 3.4.0 il segnalibro sui Preferiti in rete.
 
 """Le impostazioni, in un file JSON accanto al programma.
 
@@ -144,7 +144,9 @@ PREDEFINITE = {
     # del file; indice e' il posto del brano nella playlist, -1 fuori. Dalla
     # 3.2.0 anche gli indirizzi in rete: la lista indirizzi, o in_rete con la
     # pagina della playlist del sito in nome e il suo titolo in
-    # titolo_della_lista; titolo e' quello del brano, che il sito dice.
+    # titolo_della_lista; titolo e' quello del brano, che il sito dice. Dalla
+    # 3.4.0 anche la lista preferiti_in_rete, la categoria degli indirizzi e
+    # delle radio nei Preferiti.
     "segnalibro": {},
     # Il giorno dell'ultimo controllo degli aggiornamenti di yt-dlp, come
     # 2026-11-05: si fa al primo indirizzo di ogni giorno (Gabriele, 3.2.0).
@@ -214,7 +216,7 @@ def _segnalibro_valido(valore):
     numero = _numero_fra(0)
     return (chiavi <= set(valore) <= chiavi | facoltative and isinstance(valore["percorso"], str) and bool(valore["percorso"]) and numero(valore["posizione"])
         and (valore["durata"] is None or numero(valore["durata"])) and (valore["sottobrano"] is None or _intero_fra(1)(valore["sottobrano"]))
-        and valore["lista"] in ("preferiti", "playlist", "cartella", "disco", "indirizzi", "in_rete") and isinstance(valore["nome"], str)
+        and valore["lista"] in ("preferiti", "playlist", "cartella", "disco", "indirizzi", "in_rete", "preferiti_in_rete") and isinstance(valore["nome"], str)
         and (valore["lista"] not in ("playlist", "cartella", "in_rete") or bool(valore["nome"])) and _intero_fra(-1)(valore["indice"])
         and all(isinstance(valore[chiave], str) for chiave in facoltative & set(valore)))
 

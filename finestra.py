@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17). Nella 2.7.1 la precedenza ai tasti sul lavoro in disparte. Nella 2.7.2 i lettori di rete chiusi all'uscita. Nella 2.7.3 i tasti funzione nelle tabelle COMANDI_DEI_TASTI_FUNZIONE e INTERRUTTORI, lette dalla prova della guida rapida, e le righe del cruscotto nell'ordine della regola. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.1.0 la voce Componenti aggiuntivi delle impostazioni, e gli altri banchi liberi da scaricare. Nella 3.2.0 gli indirizzi in rete: Ctrl con V, Apri un indirizzo, il ramo Indirizzi, il flusso chiesto prima di suonare e in anticipo per il seguente, e yt-dlp aggiornato ogni giorno. Nella 3.3.0 il ramo Radio, con la ricerca delle radio, il titolo in onda, le dirette che non si saltano e i contatori di radio, componenti e lingua. Nella 3.3.1 la voce Lingua con la sua lista anche con una lingua sola.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17). Nella 2.7.1 la precedenza ai tasti sul lavoro in disparte. Nella 2.7.2 i lettori di rete chiusi all'uscita. Nella 2.7.3 i tasti funzione nelle tabelle COMANDI_DEI_TASTI_FUNZIONE e INTERRUTTORI, lette dalla prova della guida rapida, e le righe del cruscotto nell'ordine della regola. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.1.0 la voce Componenti aggiuntivi delle impostazioni, e gli altri banchi liberi da scaricare. Nella 3.2.0 gli indirizzi in rete: Ctrl con V, Apri un indirizzo, il ramo Indirizzi, il flusso chiesto prima di suonare e in anticipo per il seguente, e yt-dlp aggiornato ogni giorno. Nella 3.3.0 il ramo Radio, con la ricerca delle radio, il titolo in onda, le dirette che non si saltano e i contatori di radio, componenti e lingua. Nella 3.3.1 la voce Lingua con la sua lista anche con una lingua sola. Nella 3.4.0 i Preferiti in rete, un ramo in cima ai Preferiti, con F4 che sceglie la categoria (issue 41).
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -499,7 +499,7 @@ TASTI_DEL_CONTESTO = {
     "altri": (_("la voce che mostra altri risultati"), _("Invio mostra i risultati seguenti.")),
     "gruppo_risultati": (_("un ramo dei Risultati"), _("Freccia destra lo apre: i risultati stanno come stavano, sotto la loro playlist o lungo il percorso della loro cartella. Invio, Applicazioni o Spazio: menu con Salva come playlist.")),
     "preferiti": (_("i Preferiti"), _("Invio, Applicazioni o Spazio: menu con Riproduci, Filtro e, se c'è un filtro, Togli il filtro; Ordina, un sottomenu con i criteri, poi, dopo un riordino, Ordine di prima, e in fondo Inverti l'ordine; e Mescola. "
-        "Barra verticale: il filtro. Canc su un loro brano lo toglie dai Preferiti.")),
+        "Barra verticale: il filtro. Canc su un loro brano lo toglie dai Preferiti. Gli indirizzi dei siti e le radio stanno nei Preferiti in rete, un ramo in cima ai Preferiti.")),
     "radice_playlist": (_("il ramo Playlist"), _("Invio, Applicazioni o Spazio: menu con Nuova playlist e Importa playlist, che importa le playlist M3U, M3U8 e PLS di altri programmi.")),
     "playlist": (_("una playlist"), _("Invio, Applicazioni o Spazio: menu con Riproduci, Filtro, Togli il filtro se c'è un filtro, Rinomina, Ordina, Mescola ed Elimina. "
         "Ordina è un sottomenu con i criteri, poi, dopo un riordino, Ordine di prima, e in fondo Inverti l'ordine. Barra verticale: il filtro. Canc elimina la playlist, dopo una conferma.")),
@@ -2162,7 +2162,7 @@ class Finestra(wx.Frame):
             # essere quella col fuoco (tappa 9).
             voce = self._voce_di_lavoro()
             dati = self._dati(voce) or {}
-            tipo = "preferiti" if dati.get("tipo") == "playlist" and dati["playlist"] is self.archivio.preferiti else dati.get("tipo")
+            tipo = "preferiti" if dati.get("tipo") == "playlist" and dati["playlist"] in (self.archivio.preferiti, self.archivio.preferiti_in_rete) else dati.get("tipo")
             if dati.get("tipo") == "playlist" and dati["playlist"] is self.archivio.indirizzi:
                 tipo = "indirizzi"
             elif dati.get("tipo") == "brano" and dati["brano"].radio and self._lista_delle_radio(dati["playlist"]):
@@ -2587,8 +2587,7 @@ class Finestra(wx.Frame):
         while self._profondita(antenato) > 2:
             antenato = self.albero.GetItemParent(antenato)
         # Dagli Indirizzi un brano risale a loro, e una playlist di un sito resta lei (3.2.0).
-        if self.albero.GetItemParent(antenato) == self.nodo_preferiti or (
-                self.albero.GetItemParent(antenato) == self.nodo_indirizzi and (self._dati(antenato) or {}).get("tipo") != "playlist"):
+        if self.albero.GetItemParent(antenato) in (self.nodo_preferiti, self.nodo_indirizzi) and (self._dati(antenato) or {}).get("tipo") != "playlist":
             antenato = self.albero.GetItemParent(antenato)
         # Il fuoco va sull'antenato prima di chiudere i rami in cui stava.
         self._seleziona(antenato)
@@ -3365,6 +3364,11 @@ class Finestra(wx.Frame):
         c'e': il filtro non e' una voce della playlist, cosi' NVDA conta solo
         i brani."""
         filtrati = [b for b in pl.brani if self._ammesso(pl, b)]
+        if pl is self.archivio.preferiti and self.archivio.preferiti_in_rete.brani:
+            in_rete = len(self.archivio.preferiti_in_rete.brani)
+            # Traduttori: etichetta e' quella dei Preferiti, come Preferiti, brani: 12 (40:00), totali: 12 (40:00); n i preferiti dalla rete.
+            return ngettext("{etichetta}, e {n} in rete", "{etichetta}, e {n} in rete", in_rete).format(etichetta=self._etichetta_della_playlist_semplice(pl, filtrati),
+                n=in_rete)
         if pl is self.archivio.indirizzi and self.archivio.in_rete:
             # Gli Indirizzi dicono anche quante playlist dei siti hanno dentro (3.2.0).
             nome = plurale(len(self.archivio.in_rete), "{n} playlist", "{n} playlist")
@@ -3374,6 +3378,9 @@ class Finestra(wx.Frame):
                     totali=self._conto(pl.brani), filtro=pl.filtro)
             # Traduttori: playlist e' come 2 playlist; i brani da soli, ciascuno come 12 (40:00).
             return _("Indirizzi, {playlist}, brani: {filtrati}, totali: {totali}").format(playlist=nome, filtrati=self._conto(filtrati), totali=self._conto(pl.brani))
+        return self._etichetta_della_playlist_semplice(pl, filtrati)
+
+    def _etichetta_della_playlist_semplice(self, pl, filtrati):
         if pl.filtro:
             # Traduttori: i brani che passano il filtro e quelli della playlist, ciascuno come 12 (40:00).
             return _("{nome}, brani: {filtrati}, totali: {totali}, filtro: {filtro}").format(nome=pl.nome, filtrati=self._conto(filtrati), totali=self._conto(pl.brani),
@@ -3415,7 +3422,7 @@ class Finestra(wx.Frame):
         """Le voci delle playlist salvate nella plancia: i Preferiti, quelle del
         ramo Playlist e, dalla 3.2.0, gli Indirizzi con le playlist dei siti."""
         nodi = [self.nodo_preferiti, *self._figli(self.nodo_playlist), self.nodo_indirizzi]
-        nodi += [v for v in self._figli(self.nodo_indirizzi) if (self._dati(v) or {}).get("tipo") == "playlist"]
+        nodi += [v for radice in (self.nodo_preferiti, self.nodo_indirizzi) for v in self._figli(radice) if (self._dati(v) or {}).get("tipo") == "playlist"]
         return nodi
 
     def _sotto(self, voce, radice):
@@ -3495,7 +3502,12 @@ class Finestra(wx.Frame):
             self.albero.SetItemHasChildren(nodo, True)
             if selezionato is pl:
                 da_selezionare = nodo
-            dentro_di_lui = [pl, *self.archivio.in_rete] if pl is self.archivio.indirizzi else [pl]
+            if pl is self.archivio.indirizzi:
+                dentro_di_lui = [pl, *self.archivio.in_rete]
+            elif pl is self.archivio.preferiti:
+                dentro_di_lui = [pl, self.archivio.preferiti_in_rete]
+            else:
+                dentro_di_lui = [pl]
             contiene = any(p is selezionato for p in dentro_di_lui[1:]) or (isinstance(selezionato, Brano) and any(p.indice(selezionato) is not None for p in dentro_di_lui))
             if not (aperto or contiene):
                 continue
@@ -3665,6 +3677,11 @@ class Finestra(wx.Frame):
             return
         if tipo == "playlist":
             pl = dati["playlist"]
+            if pl is self.archivio.preferiti and self.archivio.preferiti_in_rete.brani:
+                # Gli indirizzi e le radio, una categoria sola, in cima (issue 41, 3.4.0).
+                della_rete = self.archivio.preferiti_in_rete
+                nodo = self.albero.AppendItem(voce, self._etichetta_della_playlist(della_rete), data={"tipo": "playlist", "playlist": della_rete, "caricato": False})
+                self.albero.SetItemHasChildren(nodo, True)
             if pl is self.archivio.indirizzi:
                 # Prima le playlist dei siti, come le cartelle prima dei file (3.2.0).
                 for del_sito in self.archivio.in_rete:
@@ -4021,7 +4038,7 @@ class Finestra(wx.Frame):
             # Il posto di Ordina e Mescola e' quello del punto 3.10 del piano;
             # i Preferiti non si rinominano e non si eliminano (tappa 14 c), e
             # nemmeno gli Indirizzi (3.2.0).
-            preferiti = pl is self.archivio.preferiti or pl is self.archivio.indirizzi
+            preferiti = pl in (self.archivio.preferiti, self.archivio.indirizzi, self.archivio.preferiti_in_rete)
             if not preferiti:
                 voci.append((_("Rinomina"), lambda: self._rinomina(pl)))
             voci += [(_("Ordina"), self._voci_dell_ordine(pl)), (_("Mescola"), lambda: self._mescola(pl))]
@@ -4409,6 +4426,8 @@ class Finestra(wx.Frame):
             pl = dati["playlist"]
             if pl is self.archivio.indirizzi:
                 return _("Indirizzi"), list(pl.brani), pl
+            if pl is self.archivio.preferiti_in_rete:
+                return pl.nome, list(pl.brani), pl
             return (_("Preferiti") if pl is self.archivio.preferiti else _("Playlist {nome}").format(nome=pl.nome)), list(pl.brani), pl
         if tipo == "risultati":
             return _("Risultati di {ricerca}").format(ricerca=self._testo_della_ricerca), list(self.risultati.brani), None
@@ -4696,7 +4715,7 @@ class Finestra(wx.Frame):
 
     def _cancella(self, voce):
         dati = self._dati(voce) or {}
-        if dati.get("tipo") == "playlist" and dati["playlist"] is self.archivio.preferiti:
+        if dati.get("tipo") == "playlist" and dati["playlist"] in (self.archivio.preferiti, self.archivio.preferiti_in_rete):
             self._riscontro("non_disponibile", _("I Preferiti non si eliminano; Canc su un loro brano lo toglie."))
         elif dati.get("tipo") == "playlist" and dati["playlist"] is self.archivio.indirizzi:
             self._riscontro("non_disponibile", _("Gli Indirizzi non si eliminano; Canc su un loro brano o su una loro playlist la toglie."))
@@ -4809,7 +4828,8 @@ class Finestra(wx.Frame):
         if not nuovi:
             self._riscontro("gia_nei_preferiti", _("I brani selezionati sono già tutti nei Preferiti."))
             return
-        self.archivio.preferiti.brani.extend(nuovi)
+        for brano in nuovi:
+            self.archivio.preferiti_per(brano).brani.append(brano)
         self._sentinella.guarda(*(b.percorso for b in nuovi))
         self._chiedi_schede(self.archivio.preferiti)
         self._salva_archivio()
@@ -5288,12 +5308,18 @@ class Finestra(wx.Frame):
         if self.archivio.nei_preferiti(brano):
             self._riscontro("gia_nei_preferiti", _("{nome} è già nei Preferiti.").format(nome=brano.nome_del_file))
             return
-        self.archivio.preferiti.brani.append(brano.copia())
+        dove = self.archivio.preferiti_per(brano)
+        dove.brani.append(brano.copia())
         self._sentinella.guarda(brano.percorso)
-        self._chiedi_schede(self.archivio.preferiti)
+        self._chiedi_schede(dove)
         self._salva_archivio()
         self._popola_playlist()
-        n = len(self.archivio.preferiti.brani)
+        n = len(dove.brani)
+        if dove is self.archivio.preferiti_in_rete:
+            # Un indirizzo o una radio, nella loro categoria (issue 41, 3.4.0).
+            self._riscontro("preferito_aggiunto", ngettext("{nome} è nei Preferiti in rete, che ora hanno {n} brano.", "{nome} è nei Preferiti in rete, che ora hanno {n} brani.",
+                n).format(nome=brano.nome_del_file, n=n))
+            return
         self._riscontro("preferito_aggiunto", ngettext("{nome} è nei Preferiti, che ora hanno {n} brano.", "{nome} è nei Preferiti, che ora hanno {n} brani.", n).format(
             nome=brano.nome_del_file, n=n))
 
@@ -5366,7 +5392,11 @@ class Finestra(wx.Frame):
                     continue
                 if pl is self.archivio.preferiti:
                     # Traduttori: dove si cerca, come in Ricerca nei Preferiti.
-                    return _("nei Preferiti"), [(b, _("Preferiti")) for b in pl.brani], []
+                    return _("nei Preferiti"), [(b, _("Preferiti")) for b in pl.brani] + [
+                        (b, self.archivio.preferiti_in_rete.nome) for b in self.archivio.preferiti_in_rete.brani], []
+                if pl is self.archivio.preferiti_in_rete:
+                    # Traduttori: dove si cerca, come in Ricerca nei Preferiti in rete.
+                    return _("nei Preferiti in rete"), [(b, pl.nome) for b in pl.brani], []
                 if pl is self.archivio.indirizzi:
                     # Traduttori: dove si cerca, come in Ricerca negli Indirizzi, il ramo degli indirizzi in rete.
                     return _("negli Indirizzi"), self._brani_degli_indirizzi(), []
@@ -5428,6 +5458,7 @@ class Finestra(wx.Frame):
         self._testo_della_ricerca = testo
         if brani is None:
             brani = [(b, _("Preferiti")) for b in self.archivio.preferiti.brani]
+            brani += [(b, self.archivio.preferiti_in_rete.nome) for b in self.archivio.preferiti_in_rete.brani]
             brani += [(b, _("Playlist {nome}").format(nome=pl.nome)) for pl in self.archivio.playlist for b in pl.brani]
             brani += self._brani_degli_indirizzi()
         else:
@@ -6671,6 +6702,10 @@ class Finestra(wx.Frame):
         Indirizzi caricati."""
         if pl is self.archivio.indirizzi:
             return self.nodo_indirizzi
+        if pl is self.archivio.preferiti_in_rete:
+            if self._dati(self.nodo_preferiti).get("caricato") is False:
+                self._carica(self.nodo_preferiti, self._dati(self.nodo_preferiti))
+            return next((v for v in self._figli(self.nodo_preferiti) if (self._dati(v) or {}).get("playlist") is pl), None)
         if pl in self.archivio.in_rete:
             if self._dati(self.nodo_indirizzi).get("caricato") is False:
                 self._carica(self.nodo_indirizzi, self._dati(self.nodo_indirizzi))
@@ -7838,7 +7873,7 @@ class Finestra(wx.Frame):
         pl = self.coda.playlist
         if pl is None:
             return "altro"
-        if pl is self.archivio.preferiti:
+        if pl is self.archivio.preferiti or pl is self.archivio.preferiti_in_rete:
             return "Preferiti"
         if pl is self.archivio.indirizzi:
             return "Indirizzi"
@@ -8003,7 +8038,9 @@ class Finestra(wx.Frame):
         # Traduttori: brani e' come 12 brani, 45 minuti.
         righe = [_("Playlist: {n}, con {brani}.").format(n=len(playlist), brani=self._brani_e_durata(brani)) if playlist else _("Playlist: nessuna, oltre ai Preferiti."),
             # Traduttori: brani e' come 12 brani, 45 minuti.
-            _("Preferiti: {brani}.").format(brani=self._brani_e_durata(self.archivio.preferiti.brani))]
+            _("Preferiti: {brani}.").format(brani=self._brani_e_durata(self.archivio.preferiti.brani)),
+            # Traduttori: brani e' come 3 brani, 2 ore.
+            _("Preferiti in rete: {brani}.").format(brani=self._brani_e_durata(self.archivio.preferiti_in_rete.brani))]
         if playlist:
             lunga = max(playlist, key=lambda pl: len(pl.brani))
             righe.append(ngettext("La playlist più lunga: {nome}, {n} brano.", "La playlist più lunga: {nome}, {n} brani.", len(lunga.brani)).format(
@@ -11348,6 +11385,8 @@ class Finestra(wx.Frame):
             parti.append(_("nella playlist {nome}").format(nome=segno["nome"]))
         elif segno["lista"] == "indirizzi":
             parti.append(_("negli Indirizzi"))
+        elif segno["lista"] == "preferiti_in_rete":
+            parti.append(_("nei Preferiti in rete"))
         elif segno["lista"] == "in_rete":
             parti.append(_("nella playlist {nome}").format(nome=segno.get("titolo_della_lista") or segno["nome"]))
         elif segno["lista"] == "cartella":
@@ -11391,6 +11430,9 @@ class Finestra(wx.Frame):
             indice = pl.indice(brano)
             segno.update(lista="preferiti" if pl is self.archivio.preferiti else "playlist", nome="" if pl is self.archivio.preferiti else pl.nome,
                 indice=-1 if indice is None else indice)
+        elif pl is self.archivio.preferiti_in_rete:
+            indice = pl.indice(brano)
+            segno.update(lista="preferiti_in_rete", nome="", indice=-1 if indice is None else indice)
         elif pl is self.archivio.indirizzi or (pl is not None and pl in self.archivio.in_rete):
             # Gli Indirizzi e le playlist dei siti, che si riconoscono dalla pagina (3.2.0).
             indice = pl.indice(brano)
@@ -11454,9 +11496,11 @@ class Finestra(wx.Frame):
         dalla cartella del file, aperta nella plancia, e con le sottocartelle
         se suonava cosi'. La voce e' None se la plancia non lo mostra."""
         chiave = pulizia.norm(segno["percorso"])
-        if segno["lista"] in ("preferiti", "playlist", "indirizzi", "in_rete"):
+        if segno["lista"] in ("preferiti", "playlist", "indirizzi", "in_rete", "preferiti_in_rete"):
             if segno["lista"] == "preferiti":
                 pl = self.archivio.preferiti
+            elif segno["lista"] == "preferiti_in_rete":
+                pl = self.archivio.preferiti_in_rete
             elif segno["lista"] == "indirizzi":
                 pl = self.archivio.indirizzi
             elif segno["lista"] == "in_rete":
@@ -11474,7 +11518,8 @@ class Finestra(wx.Frame):
                 nodo = self.nodo_preferiti if pl is self.archivio.preferiti else self._nodo_della_playlist(pl)
                 voce = None
                 if nodo is not None:
-                    self.albero.Expand(self.nodo_indirizzi if self._sotto(nodo, self.nodo_indirizzi) else self.nodo_playlist)
+                    self.albero.Expand(self.nodo_indirizzi if self._sotto(nodo, self.nodo_indirizzi) else self.nodo_preferiti if self._sotto(nodo, self.nodo_preferiti)
+                        else self.nodo_playlist)
                     if self._dati(nodo).get("caricato") is False:
                         self._carica(nodo, self._dati(nodo))
                     self.albero.Expand(nodo)
@@ -11615,6 +11660,8 @@ class Finestra(wx.Frame):
         sottocartelle falso: con le sottocartelle lo dice solo Dove sono."""
         if pl is self.archivio.preferiti:
             return _("Preferiti")
+        if pl is self.archivio.preferiti_in_rete:
+            return pl.nome
         if pl is self.archivio.indirizzi:
             return _("Indirizzi")
         if not pl.temporanea:
@@ -12773,6 +12820,8 @@ class Finestra(wx.Frame):
             "numero": pl.indice(brano), "posizione": (self.motore.posizione or 0) if self.motore.in_corso else 0}
         if pl is self.archivio.preferiti:
             stato["tipo"] = "preferiti"
+        elif pl is self.archivio.preferiti_in_rete:
+            stato["tipo"] = "preferiti_in_rete"
         elif pl is self.archivio.indirizzi:
             stato["tipo"] = "indirizzi"
         elif pl in self.archivio.in_rete:
@@ -12789,6 +12838,8 @@ class Finestra(wx.Frame):
         tipo = stato.get("tipo")
         if tipo == "preferiti":
             return self.archivio.preferiti
+        if tipo == "preferiti_in_rete":
+            return self.archivio.preferiti_in_rete
         if tipo == "indirizzi":
             return self.archivio.indirizzi
         if tipo == "in_rete":
