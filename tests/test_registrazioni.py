@@ -156,6 +156,7 @@ class _Finta:
     def __init__(self, sorgente, titolo, flusso, formato, kbps, canali, frequenza, al_termine=None):
         self.sorgente, self.titolo, self.flusso = sorgente, titolo, flusso
         self.formato, self.kbps, self.canali, self.frequenza, self.al_termine = formato, kbps, canali, frequenza, al_termine
+        self.dal_vivo = getattr(flusso, "dal_vivo", True)
         self.stato, self.secondi, self.byte, self.comandi = "pronta", 754.0, 11_534_336, []
         self.percorso = os.path.join(registrazioni.cartella(), f"{titolo}.mp3")
         _Finta.create.append(self)
@@ -236,8 +237,13 @@ def test_registrare_una_radio(finestra, con_registrazioni, suoni_annotati):
     assert finestra._voce_corrente() == finestra.nodo_registrazioni and suoni_annotati[-1] == "alle_registrazioni"
     finestra.albero.Expand(finestra.nodo_registrazioni)
     assert [finestra.albero.GetItemText(v) for v in finestra._figli(finestra.nodo_registrazioni)] == ["Rai Radio 3.mp3"]
-    righe = statistiche.Pagina(finestra._statistiche, "", None, None, {}, {}, {}).le_playlist()
-    assert any(r.startswith("Registrazioni avviate: 1") for r in righe)
+    # La sezione Le registrazioni delle statistiche (3.9.2).
+    righe = statistiche.Pagina(finestra._statistiche, "", None, None, {}, {}, {}).le_registrazioni()
+    assert righe[0] == "Registrazioni avviate: 1, di cui con l'attesa di Alt con R 0; file prodotti: 1, con 12 minuti e 34 secondi e 12 MB."
+    assert "In media una registrazione dura 12 minuti e 34 secondi e pesa 12 MB." in righe
+    assert "Dalle dirette, come le radio: 1; dalle puntate e dai video, che finiscono da soli: 0." in righe
+    assert "Per formato: MP3 1." in righe and any(r.startswith("La registrazione più lunga: 12 minuti e 34 secondi, di Rai Radio 3") for r in righe)
+    assert not any(r.startswith("Registrazioni avviate") for r in statistiche.Pagina(finestra._statistiche, "", None, None, {}, {}, {}).le_playlist())
 
 
 def test_l_attesa_di_alt_con_r_e_l_eliminazione(finestra, con_registrazioni, monkeypatch, suoni_annotati):

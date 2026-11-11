@@ -1,6 +1,6 @@
 # MeTeOra, le statistiche: ogni sorta di conti, raccolti mentre lo si usa, e la pagina che li racconta.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (UltraCode).
-# 17/10/2026: nasce con la 1.103.0, chiesta da Gabriele: piu' dati ci sono, piu' e' contento. Nella 1.104.0 le righe che elencano voci tengono solo quelle diverse da zero, le percentuali uniformi, gli anni futuri dei tag ignorati, le date sempre con il giorno della settimana, e i brani dello storico tolti dalla pulizia all'avvio o rinominati, con i conti della pulizia nella salute. Nella 1.105.0 i nomi di Dove sono, il comando dell'apostrofo, e del suo suono. Nella 1.109.0 le playlist ordinate, invertite, mescolate e rimesse nell'ordine di prima. Nella 1.110.0 quelli della durata residua, Maiuscolo con l'apostrofo. Nella 1.112.0, nella salute, anche le unita' saltate dalla pulizia perche' usate da dischi diversi o perche' il disco che rispondeva non si riconosceva, i dischi riconosciuti a mano e le lettere rese contese dalla Sentinella. Nella 1.113.0 le playlist importate da un M3U o da un PLS, riaperte e rilette. Nella 1.113.5 il campo modificate, perche' la finestra scriva il file solo quando qualcosa e' cambiato davvero. Nella 1.116.0 i nomi delle schede audio che se ne vanno e tornano. Nella 1.119.0 le uscite: la scelta che va e torna, i brani ripresi, gli speaker Cast e l'assenza piu' lunga (issue 31). Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 i brani dei siti fra i formati, e la riga degli indirizzi in rete. Nella 3.3.0 le radio fra i formati, la riga delle radio, e i componenti aggiuntivi e la lingua. Nella 3.5.0 la riga delle registrazioni, e i nomi dei loro eventi. Nella 3.7.0 le righe lette da sole e i nomi della famiglia di F10. Nella 3.8.0 i capitoli detti suonando. Nella 3.9.0 la riga della ricerca dei contenuti.
+# 17/10/2026: nasce con la 1.103.0, chiesta da Gabriele: piu' dati ci sono, piu' e' contento. Nella 1.104.0 le righe che elencano voci tengono solo quelle diverse da zero, le percentuali uniformi, gli anni futuri dei tag ignorati, le date sempre con il giorno della settimana, e i brani dello storico tolti dalla pulizia all'avvio o rinominati, con i conti della pulizia nella salute. Nella 1.105.0 i nomi di Dove sono, il comando dell'apostrofo, e del suo suono. Nella 1.109.0 le playlist ordinate, invertite, mescolate e rimesse nell'ordine di prima. Nella 1.110.0 quelli della durata residua, Maiuscolo con l'apostrofo. Nella 1.112.0, nella salute, anche le unita' saltate dalla pulizia perche' usate da dischi diversi o perche' il disco che rispondeva non si riconosceva, i dischi riconosciuti a mano e le lettere rese contese dalla Sentinella. Nella 1.113.0 le playlist importate da un M3U o da un PLS, riaperte e rilette. Nella 1.113.5 il campo modificate, perche' la finestra scriva il file solo quando qualcosa e' cambiato davvero. Nella 1.116.0 i nomi delle schede audio che se ne vanno e tornano. Nella 1.119.0 le uscite: la scelta che va e torna, i brani ripresi, gli speaker Cast e l'assenza piu' lunga (issue 31). Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 i brani dei siti fra i formati, e la riga degli indirizzi in rete. Nella 3.3.0 le radio fra i formati, la riga delle radio, e i componenti aggiuntivi e la lingua. Nella 3.5.0 la riga delle registrazioni, e i nomi dei loro eventi. Nella 3.7.0 le righe lette da sole e i nomi della famiglia di F10. Nella 3.8.0 i capitoli detti suonando. Nella 3.9.0 la riga della ricerca dei contenuti. Nella 3.9.2 la sezione Le registrazioni, con media, dirette e puntate, formati e primati.
 
 """Le statistiche di MeTeOra (1.103.0).
 
@@ -1174,6 +1174,7 @@ class Pagina:
             (_("muoversi nel brano"), self.muoversi),
             (_("i marker"), self.i_marker),
             (_("playlist e Preferiti"), self.le_playlist),
+            (_("le registrazioni"), self.le_registrazioni),
             (_("ricerca e filtri"), self.la_ricerca),
             (_("file e tag"), self.file_e_tag),
             (_("video, sottotitoli e karaoke"), self.il_video),
@@ -1737,12 +1738,6 @@ class Pagina:
                 aggiornato=_volte(self.c("ytdlp_aggiornato"))),
             _("Radio ascoltate: {ascoltate}; cercate per nome: {cercate}; titoli in onda arrivati: {titoli}.").format(ascoltate=self.c("radio_ascoltate"),
                 cercate=_volte(self.c("radio_cercate")), titoli=self.c("titoli_in_onda")),
-            # Le registrazioni (issue 42, 3.5.0).
-            _("Registrazioni avviate: {avviate}, di cui con l'attesa di Alt con R {attese}; finite: {finite}, con {durata} e {peso}; "
-                "in pausa: {pause}; interrotte dal flusso: {interrotte}; eliminate: {eliminate}.").format(avviate=self.c("registrazioni_avviate"),
-                attese=self.c("registrazioni_in_ascolto"), finite=self.c("registrazioni_finite"), durata=durata(self.c("secondi_registrati")),
-                peso=_peso(self.c("byte_registrati")), pause=_volte(self.c("registrazioni_in_pausa")), interrotte=self.c("registrazioni_interrotte"),
-                eliminate=self.c("registrazioni_eliminate")),
             _("Playlist rinominate: {rinominate}; eliminate: {eliminate}; ordinate: {ordinate}; "
                 "invertite: {invertite}; mescolate: {mescolate}; rimesse nell'ordine di prima: {rimesse}.").format(rinominate=self.e("playlist_rinominata"),
                 eliminate=self.e("playlist_eliminata"), ordinate=self.e("playlist_ordinata"), invertite=self.e("ordine_invertito"),
@@ -1755,6 +1750,34 @@ class Pagina:
         ]
 
     # 14.
+
+    def le_registrazioni(self):
+        """Le registrazioni delle radio e degli indirizzi in rete (issue 42,
+        3.5.0): dalla 3.9.2 una sezione loro, come le altre raccolte, con la
+        media, le dirette e le puntate, i formati e i primati."""
+        r = self.d["record"]
+        finite, secondi, byte = self.c("registrazioni_finite"), self.c("secondi_registrati"), self.c("byte_registrati")
+        righe = [_("Registrazioni avviate: {avviate}, di cui con l'attesa di Alt con R {attese}; file prodotti: {finite}, con {durata} e {peso}.").format(
+            avviate=self.c("registrazioni_avviate"), attese=self.c("registrazioni_in_ascolto"), finite=finite, durata=durata(secondi), peso=_peso(byte))]
+        if finite:
+            righe.append(_("In media una registrazione dura {durata} e pesa {peso}.").format(durata=durata(secondi / finite), peso=_peso(byte / finite)))
+        dirette, puntate = self.c("registrazioni_di_dirette"), self.c("registrazioni_di_puntate")
+        if dirette or puntate:
+            righe.append(_("Dalle dirette, come le radio: {dirette}; dalle puntate e dai video, che finiscono da soli: {puntate}.").format(dirette=dirette, puntate=puntate))
+        formati = sorted(((nome, self.c(f"registrazioni_in_{chiave}")) for chiave, nome in (("mp3", "MP3"), ("opus", "Opus"), ("aac", "AAC"), ("flac", "FLAC"), ("wav", "WAV"))),
+            key=lambda voce: -voce[1])
+        if any(quante for _nome, quante in formati):
+            # Traduttori: formati e' un elenco come MP3 12, Opus 3.
+            righe.append(_("Per formato: {formati}.").format(formati=", ".join(f"{nome} {quante}" for nome, quante in formati if quante)))
+        if "registrazione_piu_lunga" in r:
+            righe.append(_("La registrazione più lunga: {durata}, di {cosa}, {quando}.").format(durata=durata(r["registrazione_piu_lunga"]["valore"]),
+                cosa=r["registrazione_piu_lunga"].get("cosa", ""), quando=data_e_ora(r["registrazione_piu_lunga"]["quando"])))
+        if "registrazione_piu_pesante" in r:
+            righe.append(_("La registrazione più pesante: {peso}, di {cosa}, {quando}.").format(peso=_peso(r["registrazione_piu_pesante"]["valore"]),
+                cosa=r["registrazione_piu_pesante"].get("cosa", ""), quando=data_e_ora(r["registrazione_piu_pesante"]["quando"])))
+        righe.append(_("In pausa: {pause}; interrotte dal flusso: {interrotte}; eliminate: {eliminate}.").format(pause=_volte(self.c("registrazioni_in_pausa")),
+            interrotte=self.c("registrazioni_interrotte"), eliminate=self.c("registrazioni_eliminate")))
+        return righe
 
     def la_ricerca(self):
         ricerche = self.c("ricerche_nel_ramo") + self.c("ricerche_ovunque")

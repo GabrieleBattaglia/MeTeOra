@@ -7959,7 +7959,7 @@ def test_la_voce_statistiche_apre_la_pagina_e_maiuscolo_con_f7_anche(finestra, m
     righe = testo.split("\n")
     # Raccolte da un giorno della settimana, come da lunedì 19 ottobre (1.104.0).
     assert righe[0].startswith(f"Statistiche di MeTeOra {modulo.version.VERSION}, raccolte da ")
-    assert "Sezione 1 di 23, in breve." in righe and "Sezione 23 di 23, tutti gli eventi." in righe
+    assert "Sezione 1 di 24, in breve." in righe and "Sezione 24 di 24, tutti gli eventi." in righe
     assert "Avvii di MeTeOra: 1." in righe
     assert "Playlist: nessuna, oltre ai Preferiti." in righe and "Preferiti: 0 brani." in righe and "Schedario: ancora vuoto." in righe
     # Maiuscolo con F7, da tutta la finestra; il tasto si conta.

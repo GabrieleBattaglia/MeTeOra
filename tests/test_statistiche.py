@@ -219,8 +219,8 @@ def test_la_pagina_ha_tutte_le_sezioni_e_i_tag(tmp_path):
         comandi_dei_tasti={"X": "play"}, nomi_delle_impostazioni={"volume_effetti": "Volume degli effetti"})
     testo = "\n".join(righe)
     titoli = [r for r in righe if r.startswith("Sezione ")]
-    assert len(titoli) == len(statistiche.Pagina(s, "", None, None, {}, {}, {}).sezioni()) == 23
-    assert titoli[0] == "Sezione 1 di 23, in breve." and titoli[-1] == "Sezione 23 di 23, tutti gli eventi."
+    assert len(titoli) == len(statistiche.Pagina(s, "", None, None, {}, {}, {}).sezioni()) == 24
+    assert titoli[0] == "Sezione 1 di 24, in breve." and titoli[-1] == "Sezione 24 di 24, tutti gli eventi."
     assert "Brani avviati: 2; ascoltati fino alla fine: 2, 100.0%." in testo
     assert "File diversi ascoltati: 2, 100.0% dei 2 file dello schedario." in testo
     assert "1. Afterburner.sid, di Jeroen Tel: 1 volta, 1 minuto." in testo or "1. Commando.sid, di Rob Hubbard: 1 volta, 1 minuto." in testo
@@ -270,9 +270,9 @@ def test_una_sezione_rotta_non_ferma_la_pagina(tmp_path, monkeypatch):
     s, _o = _nuove(tmp_path)
     monkeypatch.setattr(statistiche.Pagina, "il_tempo", lambda _self: 1 / 0)
     righe = s.righe("1.103.0")
-    i = righe.index("Sezione 3 di 23, il tempo.")
+    i = righe.index("Sezione 3 di 24, il tempo.")
     assert righe[i + 1].startswith("Questa sezione non si è potuta comporre: ZeroDivisionError")
-    assert "Sezione 4 di 23, il tempo per famiglia." in righe
+    assert "Sezione 4 di 24, il tempo per famiglia." in righe
 
 
 def test_ogni_sezione_si_compone_con_tanti_dati(tmp_path):
@@ -309,7 +309,7 @@ def test_ogni_sezione_si_compone_con_tanti_dati(tmp_path):
         numeri_della_libreria=statistiche.numeri_della_libreria(c), comandi_dei_tasti={"X": "play"}, nomi_delle_impostazioni={"volume": "Volume della musica"})
     testo = "\n".join(righe)
     assert "non si è potuta comporre" not in testo and "Ancora niente da dire." not in testo
-    assert "Sezione 22 di 23, curiosità." in righe
+    assert "Sezione 23 di 24, curiosità." in righe
     # Nessun numero con il separatore delle migliaia all'italiana.
     import re
 
@@ -371,7 +371,7 @@ def test_le_righe_elenco_tengono_solo_le_voci_diverse_da_zero(tmp_path):
     # le righe per ora, giorno, fascia e mese non ci sono.
     s.dati["giorni"]["2026-10-15"] = {"aperto": 30}
     righe = s.righe("1.104.0")
-    i = righe.index("Sezione 4 di 23, il tempo per famiglia.")
+    i = righe.index("Sezione 4 di 24, il tempo per famiglia.")
     assert righe[i + 1] == "Ancora niente da dire."
     testo = "\n".join(righe)
     assert "Per mese:" not in testo and "Per ora:" not in testo and "Per fascia:" not in testo and "Per giorno della settimana:" not in testo
@@ -389,7 +389,7 @@ def test_le_righe_elenco_tengono_solo_le_voci_diverse_da_zero(tmp_path):
     assert "Per mese: novembre 2026, 30 secondi." in testo
     assert "Per giorno della settimana: domenica 100.0%." in testo and "Per fascia: mattina, dalle 6: 100.0%." in testo
     assert "Per ora: ore 10: 100.0%." in testo
-    i = righe.index("Sezione 4 di 23, il tempo per famiglia.")
+    i = righe.index("Sezione 4 di 24, il tempo per famiglia.")
     assert righe[i + 1] == "Audio, MP3, FLAC e gli altri: 30 secondi, 100.0% della riproduzione; 1 avvio." and righe[i + 2] == ""
     assert "Schede audio: Cuffie, 100.0%." in testo and "Da dove: Preferiti 100.0%." in testo
     assert "Frecce: 3; freccia su 3." in testo and "Muto acceso:" not in testo

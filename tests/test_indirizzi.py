@@ -763,6 +763,8 @@ def test_cerca_contenuti_negli_indirizzi_e_i_dieci_secondi(finestra, con_ytdlp, 
     secondi(1)
     assert [b.percorso for b in finestra.archivio.indirizzi.brani] == [brano.percorso]
     assert finestra._statistiche.dati["conti"]["indirizzi_tenuti"] == 1
+    # L'avviso nella console (3.9.1).
+    assert finestra._righe[-1].startswith("Caruso, Lucio Dalla: dieci secondi di ascolto di fila, ora è negli Indirizzi.")
     secondi(20)
     assert len(finestra.archivio.indirizzi.brani) == 1
     monkeypatch.undo()

@@ -2,6 +2,17 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.9.2] - 2026-11-11
+
+Le statistiche delle registrazioni, come le altre raccolte, su domanda di Gabriele.
+
+- Le registrazioni hanno una sezione loro, Le registrazioni, dopo Playlist e Preferiti, al posto della riga che stava lì: avviate e con l'attesa di Alt con R, i file prodotti con il tempo e il peso, la media per registrazione, quante dalle dirette e quante dalle puntate, i formati, la registrazione più lunga e la più pesante, con la sorgente e la data, poi pause, interruzioni ed eliminazioni.
+- Formato, sorgente e primati si contano dalle registrazioni finite da adesso: quelle di prima restano nei totali.
+
+## [3.9.1] - 2026-11-11
+
+- Un risultato della ricerca che entra negli Indirizzi dopo dieci secondi di ascolto di fila ora lo dice nella console, come Caruso, Lucio Dalla: dieci secondi di ascolto di fila, ora è negli Indirizzi; se c'era già, dice che torna in cima. Chiesto da Gabriele.
+
 ## [3.9.0] - 2026-11-11
 
 La ricerca dei contenuti in rete, issue 47, come l'ha chiesta Gabriele.

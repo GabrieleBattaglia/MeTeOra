@@ -10,3 +10,6 @@ I risultati hanno titolo, autore e durata, e si suonano con X; ce ne sono di You
 Un risultato ascoltato meno di dieci secondi non va negli Indirizzi; ascoltato dieci secondi di fila sì, e richiudendo e riaprendo gli Indirizzi è in cima.
 Una pausa, o un salto con le frecce, prima dei dieci secondi fa ricominciare il conto.
 Una seconda ricerca prende il posto della prima.
+Collaudo di MeTeOra 3.9.1 e 3.9.2.
+Dopo dieci secondi di ascolto di un risultato della ricerca, la console dice che ora è negli Indirizzi, o che torna in cima se c'era già.
+Fai una registrazione, poi apri le statistiche con Maiuscolo e F7: la sezione Le registrazioni ha file prodotti, tempo, peso, media, dirette e puntate, formati, la più lunga e la più pesante.
