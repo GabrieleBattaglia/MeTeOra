@@ -1,6 +1,6 @@
 # MeTeOra, i valori scritti nei campi delle impostazioni: dal testo al valore, con le correzioni dette a chi scrive.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); leggi_tempo e secondi_da_leggere arrivano da finestra.py. Nella 1.51.2 leggi_tempo accetta solo le cifre: prima passavano inf e 1e5. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza, con i loro limiti e le loro forme da leggere (tappa 4, issue 15). Nella 1.59.2 velocita' e dissolvenza si scrivono con il punto, come il resto di MeTeOra. Nella 1.60.0 leggi_tempo_nel_brano, per W, anche dalla fine. Nella 1.61.0 i modelli della riproduzione casuale. Nella 1.82.0 l'anticipo del karaoke. Nella 1.83.0 le celle della barra braille e il tempo minimo di lettura. Nella 1.88.0 tempo() arriva da finestra.py, per la linea del tempo della barra. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.5.0 i formati e i kbps delle registrazioni.
+# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); leggi_tempo e secondi_da_leggere arrivano da finestra.py. Nella 1.51.2 leggi_tempo accetta solo le cifre: prima passavano inf e 1e5. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza, con i loro limiti e le loro forme da leggere (tappa 4, issue 15). Nella 1.59.2 velocita' e dissolvenza si scrivono con il punto, come il resto di MeTeOra. Nella 1.60.0 leggi_tempo_nel_brano, per W, anche dalla fine. Nella 1.61.0 i modelli della riproduzione casuale. Nella 1.82.0 l'anticipo del karaoke. Nella 1.83.0 le celle della barra braille e il tempo minimo di lettura. Nella 1.88.0 tempo() arriva da finestra.py, per la linea del tempo della barra. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.5.0 i formati e i kbps delle registrazioni. Nella 3.7.0 le scelte della console letta.
 
 """I valori delle impostazioni, letti dal testo scritto nei campi.
 
@@ -49,6 +49,8 @@ RIPRESA_MASSIMA = 600
 # I formati e i kbps delle registrazioni (issue 42, 3.5.0), con quelli di partenza.
 FORMATI_DI_REGISTRAZIONE = ("mp3", "opus", "aac", "flac", "wav")
 QUALITA_DI_REGISTRAZIONE = (32, 48, 64, 96, 128, 160, 192, 256, 320)
+# La console letta da sola (issue 44, 3.7.0), dalla scelta piu' bassa.
+LETTURE_DELLA_CONSOLE = ("spenta", "braille", "entrambi")
 # Il timer di spegnimento (1.95.0): al massimo dieci ore; e la scelta della
 # fine del brano, scritta f o fine.
 TIMER_MASSIMO = 600

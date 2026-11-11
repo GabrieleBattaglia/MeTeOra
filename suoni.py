@@ -1,6 +1,6 @@
 # MeTeOra, gli effetti sonori: un suono per ogni azione, con Acusticator.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.51.0 i suoni delle impostazioni, della console salvata, della finestra dei marcatori, della sua ricerca e della scheda audio. Nella 1.55.0 quelli di velocita', tono, equalizzatore e dissolvenza. Nella 1.58.0 i suoni al volo dell'equalizzatore, e il loop con i soffi rimasti liberi. Nella 1.59.0 l'acceso e lo spento della riproduzione casuale. Nella 1.63.0 i suoni del video. Nella 1.64.0 quelli di Questa rete. Nella 1.65.0 quelli dello scaricamento. Nella 1.66.36 l'annullamento, il ramo aggiornato e il video nascosto, e la playlist creata con dei brani ha un suono solo. Nella 1.67.0 il file rinominato. Nella 1.69.0 i suoni dei tag. Nella 1.75.0 il suono dell'invito a offrire un caffe'. Nella 1.84.0 quello dell'aggiornamento accettato. Nella 1.86.0 i tasti rapidi spenti e accesi. Nella 1.93.0 i capitoli. Nella 1.103.0 i suoni delle statistiche, nella collezione dalla V206 di GBUtils. Nella 1.104.0 quelli della pulizia all'avvio, dalla V207. Nella 1.105.0 quello di Dove sono, dalla V208. Nella 1.109.0 quelli di Ordina, Inverti l'ordine, Mescola e Ordine di prima. Nella 1.110.0 quello della durata residua, dalla V209. Nella 1.112.0 quello di Riconosci questo disco e quello della Sentinella che rende contesa una lettera. Nella 1.113.0 quelli della playlist importata che c'e' gia' e di quella riletta dal suo file. Nella 1.116.0 quelli delle schede audio che se ne vanno e tornano, dalla V217. Nella 1.116.2 i suoni di piu' e meno fatti al volo, a frequenze, come quelli dell'equalizzatore. Nella 3.5.0 i segnaposto delle registrazioni, in SEGNAPOSTO. Nella 3.5.2 i loro suoni scelti all'ascolto, da GBUtils V250.
+# 30/09/2026: nasce con la tappa 1. Nella 1.51.0 i suoni delle impostazioni, della console salvata, della finestra dei marcatori, della sua ricerca e della scheda audio. Nella 1.55.0 quelli di velocita', tono, equalizzatore e dissolvenza. Nella 1.58.0 i suoni al volo dell'equalizzatore, e il loop con i soffi rimasti liberi. Nella 1.59.0 l'acceso e lo spento della riproduzione casuale. Nella 1.63.0 i suoni del video. Nella 1.64.0 quelli di Questa rete. Nella 1.65.0 quelli dello scaricamento. Nella 1.66.36 l'annullamento, il ramo aggiornato e il video nascosto, e la playlist creata con dei brani ha un suono solo. Nella 1.67.0 il file rinominato. Nella 1.69.0 i suoni dei tag. Nella 1.75.0 il suono dell'invito a offrire un caffe'. Nella 1.84.0 quello dell'aggiornamento accettato. Nella 1.86.0 i tasti rapidi spenti e accesi. Nella 1.93.0 i capitoli. Nella 1.103.0 i suoni delle statistiche, nella collezione dalla V206 di GBUtils. Nella 1.104.0 quelli della pulizia all'avvio, dalla V207. Nella 1.105.0 quello di Dove sono, dalla V208. Nella 1.109.0 quelli di Ordina, Inverti l'ordine, Mescola e Ordine di prima. Nella 1.110.0 quello della durata residua, dalla V209. Nella 1.112.0 quello di Riconosci questo disco e quello della Sentinella che rende contesa una lettera. Nella 1.113.0 quelli della playlist importata che c'e' gia' e di quella riletta dal suo file. Nella 1.116.0 quelli delle schede audio che se ne vanno e tornano, dalla V217. Nella 1.116.2 i suoni di piu' e meno fatti al volo, a frequenze, come quelli dell'equalizzatore. Nella 3.5.0 i segnaposto delle registrazioni, in SEGNAPOSTO. Nella 3.5.2 i loro suoni scelti all'ascolto, da GBUtils V250. Nella 3.8.0 i segnaposto della scheda degli effetti e della console letta.
 
 """La mappa degli eventi di MeTeOra sui preset della collezione di GBUtils.
 
@@ -88,6 +88,12 @@ EVENTI = {
     "alle_registrazioni": "meteora_alle_registrazioni",
     "cartella_delle_registrazioni": "meteora_cartella_delle_registrazioni",
     # I MIDI (1.65.0): la ricerca dei banchi usa i suoni della ricerca.
+    # La scheda degli effetti (issue 43, 3.6.0) e la console letta (issue 44,
+    # 3.7.0): segnaposto, fra i suoni senza firma della V250, finche' Gabriele
+    # non li sente al collaudo.
+    "scheda_degli_effetti": "folata_verso_destra",
+    "console_letta": "sonar_con_due_echi",
+    "console_letta_al_limite": "soffio_che_si_ferma",
     "scaricamento_avviato": "meteora_scaricamento_avviato",
     "scaricamento_finito": "meteora_scaricamento_finito",
     "brano_seguente_da_solo": "carta_giocata",
@@ -292,8 +298,9 @@ EVENTI = {
 # Gli eventi che suonano un segnaposto, un preset della collezione che MeTeOra
 # non firma perche' non e' suo, finche' Gabriele non sceglie all'ascolto i
 # suoni nuovi, che entrano nella collezione col prefisso meteora_. Lo sono
-# state le registrazioni nella 3.5.0; dalla 3.5.2 e' vuoto.
-SEGNAPOSTO = frozenset()
+# state le registrazioni nella 3.5.0, fino alla 3.5.2; dalla 3.8.0 la scheda
+# degli effetti e la console letta.
+SEGNAPOSTO = frozenset({"scheda_degli_effetti", "console_letta", "console_letta_al_limite"})
 
 # Gli eventi che le statistiche contano senza un preset della collezione: il
 # loro suono si fa al volo. Piu' e meno del volume dalla 1.116.2; prima

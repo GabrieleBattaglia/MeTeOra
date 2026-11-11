@@ -1,6 +1,6 @@
 # MeTeOra, gli indirizzi in rete: le pagine dei siti, aperte con yt-dlp.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 05/11/2026: nasce con la 3.2.0, tappa 19 b del piano, issue 40. Nella 3.3.0 le dirette, senza durata, e gli indirizzi diretti, che libmpv apre senza yt-dlp. Nella 3.3.1 la pagina che non c'e', il 404, e il 403 detti per chi ascolta. Nella 3.5.1 gli appunti con un indirizzo senza https://.
+# 05/11/2026: nasce con la 3.2.0, tappa 19 b del piano, issue 40. Nella 3.3.0 le dirette, senza durata, e gli indirizzi diretti, che libmpv apre senza yt-dlp. Nella 3.3.1 la pagina che non c'e', il 404, e il 403 detti per chi ascolta. Nella 3.5.1 gli appunti con un indirizzo senza https://. Nella 3.8.0 i sottotitoli dei siti.
 
 """Gli indirizzi in rete (3.2.0, issue 40).
 
@@ -264,8 +264,10 @@ class Flusso:
     righe Nome: valore, gli indirizzi delle tracce audio a parte, e se e' una
     diretta, che non ha durata ne' fine (3.3.0)."""
 
-    def __init__(self, indirizzo, intestazioni=(), audio=(), dal_vivo=False):
+    def __init__(self, indirizzo, intestazioni=(), audio=(), dal_vivo=False, sottotitoli=()):
         self.indirizzo, self.intestazioni, self.audio, self.dal_vivo = indirizzo, tuple(intestazioni), tuple(audio), dal_vivo
+        # Gli indirizzi dei sottotitoli in WebVTT (issue 45, 3.8.0).
+        self.sottotitoli = tuple(sottotitoli)
 
     def __repr__(self):
         return f"Flusso({self.indirizzo!r})"
@@ -296,6 +298,10 @@ def _diretto_del_formato(formato):
     return formato.get("url")
 
 
+# Quante tracce di sottotitoli, al piu', per un brano di un sito (3.8.0).
+SOTTOTITOLI_MASSIMI = 6
+
+
 def flusso_dell_info(info):
     """Il Flusso della risposta di yt-dlp per un brano."""
     formati_scelti = info.get("requested_formats") or [info]
@@ -304,7 +310,29 @@ def flusso_dell_info(info):
         raise ErroreIndirizzo(_("il sito non dà un flusso da suonare"))
     intestazioni = formati_scelti[0].get("http_headers") or info.get("http_headers") or {}
     audio = [a for a in (_diretto_del_formato(f) for f in formati_scelti[1:]) if a]
-    return Flusso(principale, [f"{nome}: {valore}" for nome, valore in intestazioni.items()], audio, dal_vivo=bool(info.get("is_live")))
+    return Flusso(principale, [f"{nome}: {valore}" for nome, valore in intestazioni.items()], audio, dal_vivo=bool(info.get("is_live")),
+        sottotitoli=sottotitoli_dell_info(info))
+
+
+def sottotitoli_dell_info(info):
+    """Gli indirizzi dei sottotitoli di un brano di un sito, in WebVTT, che
+    libmpv legge (Gabriele, issue 45, 3.8.0): quelli scritti, in tutte le
+    lingue, e quelli automatici, come quelli di YouTube, solo nella lingua del
+    brano e in quella di MeTeOra, che altrimenti sarebbero cento traduzioni.
+    Prima la lingua di MeTeOra, che libmpv sceglie per prima."""
+    import lingua
+
+    originale = str(info.get("language") or "").split("-")[0].lower()
+    tracce = []
+    for gruppo, automatici in ((info.get("subtitles"), False), (info.get("automatic_captions"), True)):
+        for codice, formati_della_lingua in (gruppo or {}).items():
+            base = str(codice).split("-")[0].lower()
+            if automatici and base not in (originale, lingua.CODICE):
+                continue
+            indirizzo = next((f.get("url") for f in formati_della_lingua or [] if f.get("ext") == "vtt" and f.get("url")), None)
+            if indirizzo and indirizzo not in (t[1] for t in tracce):
+                tracce.append((base != lingua.CODICE, indirizzo))
+    return [indirizzo for _altra, indirizzo in sorted(tracce, key=lambda t: t[0])][:SOTTOTITOLI_MASSIMI]
 
 
 def _titolo(info):

@@ -2,6 +2,33 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.8.0] - 2026-11-11
+
+Titoli, capitoli e sottotitoli dei contenuti in rete, issue 45.
+
+- D accende e spegne insieme i sottotitoli letti, i titoli in onda delle radio e i capitoli nuovi, che vanno dove dice Dove vanno sottotitoli e karaoke. Decisione di Gabriele: fino alla 3.7 il titolo in onda si leggeva anche con D spento.
+- Quando la riproduzione entra da sé in un capitolo nuovo, la console lo dice, come Capitolo 2 di 12: Il titolo, 3:10, e con D acceso anche la sintesi e il braille: nei file, come gli audiolibri, e negli indirizzi in rete, come i video di YouTube con i capitoli. Dopo un salto no, perché lo dicono già i comandi dei capitoli.
+- Gli indirizzi dei siti portano i loro sottotitoli, in WebVTT: quelli scritti, in tutte le lingue, e quelli automatici, come quelli di YouTube, nella lingua del video e in quella di MeTeOra, che libmpv sceglie per prima. Con D si leggono come quelli dei file.
+- Le statistiche contano i capitoli detti suonando.
+- Dentro: indirizzi.sottotitoli_dell_info, Flusso.sottotitoli e sub-files nel motore; il giro di ogni secondo guarda il capitolo.
+
+## [3.7.0] - 2026-11-11
+
+La console letta da sola, issue 44.
+
+- Una voce nuova delle impostazioni, Lettura della console: spenta, il modo di partenza, solo al braille, o al braille e alla sintesi. Accesa, ogni riga che la console scrive, l'esito dei comandi compreso, arriva da sola anche al braille, o al braille e alla sintesi, senza l'ora in fondo: per chi vuole sapere com'è andata senza andare con F6 nella console.
+- La famiglia di F10, come l'ha chiesta Gabriele: F10 dice com'è, Ctrl con F10 scende di un passo, Maiuscolo con F10 sale, Ctrl e Maiuscolo con F10 la accendono tutta, Ctrl e Alt con F10 la spengono. Maiuscolo con F10 non apre più il menu della voce, che resta su Invio, Applicazioni e Barra spaziatrice.
+- Le righe che vanno già alla sintesi e al braille dei sottotitoli, come Dove sono, non si leggono due volte; una riga che si riscrive, come quella del volume, interrompe la voce di quella di prima. Usa l'uscita della voce Sintesi dei sottotitoli.
+- Le statistiche contano le righe lette da sole.
+
+## [3.6.0] - 2026-11-11
+
+La scheda degli effetti, issue 43.
+
+- Una voce nuova delle impostazioni, Scheda degli effetti, accanto a Scheda audio: i suoni di MeTeOra possono andare su una scheda loro, per esempio nelle cuffie mentre la musica va alle casse. Di partenza è La stessa della musica. Ctrl e Maiuscolo con Z, che era libero, apre la sua lista da tutta la finestra, accanto a Ctrl e Maiuscolo con X della scheda audio.
+- Se la scheda scelta non c'è più, o non si apre, gli effetti tornano su quella della musica.
+- I suoni nuovi della scheda degli effetti e della lettura della console sono segnaposto, fra quelli della V250 senza firma: Gabriele li sente al collaudo.
+
 ## [3.5.2] - 2026-11-11
 
 I suoni delle registrazioni, scelti da Gabriele all'ascolto alla cieca della notte fra il 10 e l'11 novembre 2026, al posto dei segnaposto della 3.5.0.

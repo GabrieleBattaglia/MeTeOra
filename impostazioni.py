@@ -1,6 +1,6 @@
 # MeTeOra, le impostazioni: i valori che il programma ricorda fra un avvio e l'altro.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 le righe della console. Nella 1.51.0 caratteri, colori e scheda audio, e i limiti controllati alla lettura del file. Nella 1.51.2 un file con un JSON che non e' un dizionario non ferma l'avvio. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza (tappa 4, issue 15). Nella 1.59.0 la riproduzione casuale (issue 17). Nella 1.61.0 il modello della riproduzione casuale. Nella 1.63.0 video, sottotitoli letti e sintesi (tappa 7). Nella 1.64.0 i percorsi di rete scritti a mano. Nella 1.65.0 il banco dei suoni MIDI. Nella 1.66.36 un file illeggibile non si sovrascrive: si salva accanto, con .nuovo. Nella 1.82.0 destinazione, karaoke e anticipo del karaoke. Nella 1.83.0 celle della barra braille e tempo minimo di lettura. Nella 1.84.0 la versione dell'ultimo avvio. Nella 1.102.2 il volume di partenza e' 100, il livello originale dei file (issue 22). Nella 1.111.0 lo stato della selezione per lo screen reader, acceso di partenza (issue 21). Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 il segnalibro sugli Indirizzi e il giorno del controllo di yt-dlp. Nella 3.4.0 il segnalibro sui Preferiti in rete. Nella 3.5.0 il formato e la qualita' delle registrazioni.
+# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 le righe della console. Nella 1.51.0 caratteri, colori e scheda audio, e i limiti controllati alla lettura del file. Nella 1.51.2 un file con un JSON che non e' un dizionario non ferma l'avvio. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza (tappa 4, issue 15). Nella 1.59.0 la riproduzione casuale (issue 17). Nella 1.61.0 il modello della riproduzione casuale. Nella 1.63.0 video, sottotitoli letti e sintesi (tappa 7). Nella 1.64.0 i percorsi di rete scritti a mano. Nella 1.65.0 il banco dei suoni MIDI. Nella 1.66.36 un file illeggibile non si sovrascrive: si salva accanto, con .nuovo. Nella 1.82.0 destinazione, karaoke e anticipo del karaoke. Nella 1.83.0 celle della barra braille e tempo minimo di lettura. Nella 1.84.0 la versione dell'ultimo avvio. Nella 1.102.2 il volume di partenza e' 100, il livello originale dei file (issue 22). Nella 1.111.0 lo stato della selezione per lo screen reader, acceso di partenza (issue 21). Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 il segnalibro sugli Indirizzi e il giorno del controllo di yt-dlp. Nella 3.4.0 il segnalibro sui Preferiti in rete. Nella 3.5.0 il formato e la qualita' delle registrazioni. Nella 3.6.0 la scheda degli effetti. Nella 3.7.0 la console letta.
 
 """Le impostazioni, in un file JSON accanto al programma.
 
@@ -39,6 +39,7 @@ from valori import (
     GUADAGNO_MASSIMO,
     LETTURA_MASSIMA,
     LETTURA_MINIMA,
+    LETTURE_DELLA_CONSOLE,
     MODELLI_CASUALI,
     PASSO_VOLUME_MASSIMO,
     PASSO_VOLUME_MINIMO,
@@ -101,6 +102,8 @@ PREDEFINITE = {
     # testo del karaoke per riga o per strofa; e quanti millesimi prima del
     # canto arriva (1.82.0).
     "destinazione": "entrambi",
+    # La console letta da sola, con F10 (issue 44, 3.7.0): spenta di partenza.
+    "console_letta": "spenta",
     "karaoke": "riga",
     "anticipo_karaoke": 0,
     # La barra braille a blocchi (1.83.0): quante celle ha, 0 per il testo
@@ -143,6 +146,8 @@ PREDEFINITE = {
     # {"cast": uuid, "nome": nome, "pc": la scheda del PC, come sopra}, che
     # vale per gli effetti e per quando lo speaker manca.
     "scheda_audio": {},
+    # La scheda degli effetti (issue 43, 3.6.0): vuota, la stessa della musica.
+    "scheda_effetti": {},
     # Il segnalibro, su H (issue 37, 2.2.0): il dizionario vuoto se non c'e';
     # altrimenti il file, il punto e la durata in secondi, il sottobrano, e la
     # lista da cui suonava: preferiti, playlist con il suo nome, cartella con
@@ -255,6 +260,7 @@ CONTROLLI = {
     "colori_testo": _colori_validi,
     "colori_sfondo": _colori_validi,
     "scheda_audio": _scheda_valida,
+    "scheda_effetti": _scheda_valida,
     "segnalibro": _segnalibro_valido,
     "velocita": _numero_fra(VELOCITA_MINIMA, VELOCITA_MASSIMA),
     "tono": _intero_fra(-TONO_MASSIMO, TONO_MASSIMO),
@@ -266,6 +272,7 @@ CONTROLLI = {
     "impressi": lambda valore: valore in ("al_volo", "passata"),
     "sintesi": lambda valore: valore == "automatica" or valore in USCITE_DELLA_SINTESI,
     "destinazione": lambda valore: valore in DESTINAZIONI,
+    "console_letta": lambda valore: valore in LETTURE_DELLA_CONSOLE,
     "karaoke": lambda valore: valore in MODI_DEL_KARAOKE,
     "anticipo_karaoke": _intero_fra(0, ANTICIPO_MASSIMO_DEL_KARAOKE),
     "celle_braille": _intero_fra(0, CELLE_MASSIME),

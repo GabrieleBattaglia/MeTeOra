@@ -1,6 +1,6 @@
 # MeTeOra, le statistiche: ogni sorta di conti, raccolti mentre lo si usa, e la pagina che li racconta.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (UltraCode).
-# 17/10/2026: nasce con la 1.103.0, chiesta da Gabriele: piu' dati ci sono, piu' e' contento. Nella 1.104.0 le righe che elencano voci tengono solo quelle diverse da zero, le percentuali uniformi, gli anni futuri dei tag ignorati, le date sempre con il giorno della settimana, e i brani dello storico tolti dalla pulizia all'avvio o rinominati, con i conti della pulizia nella salute. Nella 1.105.0 i nomi di Dove sono, il comando dell'apostrofo, e del suo suono. Nella 1.109.0 le playlist ordinate, invertite, mescolate e rimesse nell'ordine di prima. Nella 1.110.0 quelli della durata residua, Maiuscolo con l'apostrofo. Nella 1.112.0, nella salute, anche le unita' saltate dalla pulizia perche' usate da dischi diversi o perche' il disco che rispondeva non si riconosceva, i dischi riconosciuti a mano e le lettere rese contese dalla Sentinella. Nella 1.113.0 le playlist importate da un M3U o da un PLS, riaperte e rilette. Nella 1.113.5 il campo modificate, perche' la finestra scriva il file solo quando qualcosa e' cambiato davvero. Nella 1.116.0 i nomi delle schede audio che se ne vanno e tornano. Nella 1.119.0 le uscite: la scelta che va e torna, i brani ripresi, gli speaker Cast e l'assenza piu' lunga (issue 31). Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 i brani dei siti fra i formati, e la riga degli indirizzi in rete. Nella 3.3.0 le radio fra i formati, la riga delle radio, e i componenti aggiuntivi e la lingua. Nella 3.5.0 la riga delle registrazioni, e i nomi dei loro eventi.
+# 17/10/2026: nasce con la 1.103.0, chiesta da Gabriele: piu' dati ci sono, piu' e' contento. Nella 1.104.0 le righe che elencano voci tengono solo quelle diverse da zero, le percentuali uniformi, gli anni futuri dei tag ignorati, le date sempre con il giorno della settimana, e i brani dello storico tolti dalla pulizia all'avvio o rinominati, con i conti della pulizia nella salute. Nella 1.105.0 i nomi di Dove sono, il comando dell'apostrofo, e del suo suono. Nella 1.109.0 le playlist ordinate, invertite, mescolate e rimesse nell'ordine di prima. Nella 1.110.0 quelli della durata residua, Maiuscolo con l'apostrofo. Nella 1.112.0, nella salute, anche le unita' saltate dalla pulizia perche' usate da dischi diversi o perche' il disco che rispondeva non si riconosceva, i dischi riconosciuti a mano e le lettere rese contese dalla Sentinella. Nella 1.113.0 le playlist importate da un M3U o da un PLS, riaperte e rilette. Nella 1.113.5 il campo modificate, perche' la finestra scriva il file solo quando qualcosa e' cambiato davvero. Nella 1.116.0 i nomi delle schede audio che se ne vanno e tornano. Nella 1.119.0 le uscite: la scelta che va e torna, i brani ripresi, gli speaker Cast e l'assenza piu' lunga (issue 31). Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 i brani dei siti fra i formati, e la riga degli indirizzi in rete. Nella 3.3.0 le radio fra i formati, la riga delle radio, e i componenti aggiuntivi e la lingua. Nella 3.5.0 la riga delle registrazioni, e i nomi dei loro eventi. Nella 3.7.0 le righe lette da sole e i nomi della famiglia di F10. Nella 3.8.0 i capitoli detti suonando.
 
 """Le statistiche di MeTeOra (1.103.0).
 
@@ -161,13 +161,15 @@ DESCRIZIONI_DEI_COMANDI = {
 DESCRIZIONI_DEI_TASTI = {
     # Traduttori: da qui, che cosa fa un tasto, nella classifica dei tasti premuti: «F1, il manuale: 3.».
     "F1": _("il manuale"), "F2": _("le novità"), "F3": _("i crediti"), "F4": _("nei Preferiti"), "F5": _("alla plancia"), "F6": _("alla console"),
-    "F7": _("al cruscotto"), "F8": _("al brano che suona"), "F9": _("lo stato del ramo"), "F10": _("nessun comando, fino alla 2.6 apriva il ramo"), "F11": _("tag e dettagli"),
+    "F7": _("al cruscotto"), "F8": _("al brano che suona"), "F9": _("lo stato del ramo"), "F10": _("la lettura della console, fino alla 3.6 nessun comando"), "F11": _("tag e dettagli"),
     "F12": _("la guida rapida"), "Esc": _("esce"), "Maiuscolo con F1": _("il video"), "Maiuscolo con F2": _("i sottotitoli"),
     "Maiuscolo con F3": _("la traccia audio"), "Maiuscolo con F5": _("lo schermo intero"), "Maiuscolo con F6": _("il rapporto dell'immagine"),
     "Maiuscolo con F7": _("le statistiche"), "Maiuscolo con F8": _("l'inseguimento"),
     "Ctrl con F1": _("spegne il video"), "Ctrl con F5": _("il video in finestra"), "Ctrl con F8": _("sgancia l'inseguimento"), "Ctrl con F12": _("spegne i tasti rapidi"), "Maiuscolo con F9": _("apre il ramo"),
     "Ctrl con F9": _("chiude il ramo"), "Alt con F9": _("apre tutta la plancia"), "Ctrl e Alt con F9": _("chiude tutta la plancia"),
-    "Ctrl e Maiuscolo con F9": _("ferma l'apertura"), "Maiuscolo con F10": _("il menu della voce, fino alla 2.6 apriva tutta la plancia"), "Maiuscolo con F11": _("il menu dei tag"), "Maiuscolo con F12": _("i tasti rapidi"),
+    "Ctrl e Maiuscolo con F9": _("ferma l'apertura"), "Maiuscolo con F10": _("la lettura della console sale, fino alla 3.6 il menu della voce"),
+    "Ctrl con F10": _("la lettura della console scende"), "Ctrl e Maiuscolo con F10": _("la console letta al braille e alla sintesi"),
+    "Ctrl e Alt con F10": _("la lettura della console spenta"), "Maiuscolo con F11": _("il menu dei tag"), "Maiuscolo con F12": _("i tasti rapidi"),
     "Ctrl con barra rovesciata": _("la ricerca in tutto MeTeOra"), "Backspace": _("risale"), "Maiuscolo con Backspace": _("risale all'antenato"),
     "Barra spaziatrice": _("il menu"), "Invio": _("il menu, o il comando"), "Applicazioni": _("il menu"), "Canc": _("toglie"),
     "Maiuscolo con Canc": _("nel cestino"), "Ctrl con Barra spaziatrice": _("seleziona"),
@@ -196,6 +198,8 @@ NOMI_DEGLI_EVENTI = {
     "registrazione_ripresa": _("registrazione ripresa"), "registrazione_fermata": _("registrazione fermata"),
     "registrazione_in_ascolto": _("in ascolto per registrare, con Alt e R"), "registrazione_eliminata": _("registrazione eliminata"),
     "alle_registrazioni": _("al ramo Registrazioni"), "cartella_delle_registrazioni": _("cartella delle registrazioni aperta"),
+    "scheda_degli_effetti": _("scheda degli effetti cambiata"), "console_letta": _("lettura della console cambiata, con F10"),
+    "console_letta_al_limite": _("lettura della console già al limite"),
     "scaricamento_avviato": _("scaricamento avviato"), "scaricamento_finito": _("scaricamento finito"),
     "brano_seguente_da_solo": _("brano seguente partito da solo"), "fine_playlist": _("fine della lista"),
     "avanti": _("salto avanti"), "indietro": _("salto indietro"), "vai_a_tempo": _("vai a un tempo"),
@@ -1795,6 +1799,9 @@ class Pagina:
             _("Tracce audio cambiate: {tracce}; rapporto dell'immagine cambiato: {rapporto}.").format(tracce=self.e("traccia_audio"), rapporto=self.e("rapporto")),
             _("Sottotitoli accesi: {accesi}; spenti: {spenti}.").format(accesi=self.e("sottotitoli_accesi"), spenti=self.e("sottotitoli_spenti")),
             _("Righe di sottotitoli e karaoke lette: {n}.").format(n=self.c("righe_dei_sottotitoli")),
+            # La console letta da sola (3.7.0) e i capitoli detti suonando (3.8.0).
+            _("Righe della console lette da sole: {righe}; capitoli nuovi detti suonando: {capitoli}.").format(righe=self.c("righe_lette"),
+                capitoli=self.c("capitoli_annunciati")),
             _("Di queste, lette dalle immagini con il riconoscimento dei caratteri: {n}.").format(n=self.c("righe_riconosciute")),
             _("Di queste, del karaoke: {n}.").format(n=self.c("righe_del_karaoke")),
             _("Passate in anticipo degli impressi: avviate {avviate}, finite {finite}.").format(avviate=self.e("passata_avviata"), finite=self.e("passata_finita")),

@@ -1,6 +1,6 @@
 # MeTeOra, le prove dei valori scritti nei campi delle impostazioni e dei controlli sul file delle impostazioni.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.51.0, insieme a valori.py. Nella 1.55.0 le prove di velocita', tono, bande dell'equalizzatore e dissolvenza. Nella 1.111.0 la voce dello stato della selezione per lo screen reader. Nella 3.2.0 il giorno del controllo di yt-dlp. Nella 3.5.0 il formato e la qualita' delle registrazioni.
+# 01/10/2026: nasce con la 1.51.0, insieme a valori.py. Nella 1.55.0 le prove di velocita', tono, bande dell'equalizzatore e dissolvenza. Nella 1.111.0 la voce dello stato della selezione per lo screen reader. Nella 3.2.0 il giorno del controllo di yt-dlp. Nella 3.5.0 il formato e la qualita' delle registrazioni. Nella 3.7.0 la console letta e la scheda degli effetti.
 
 import json
 import os
@@ -650,7 +650,8 @@ def test_carica_i_valori_buoni(tmp_path):
         "segnalibro": {"percorso": r"E:\libri\uno.mp3", "posizione": 75.5, "durata": 600.0, "sottobrano": None, "lista": "cartella",
             "nome": r"E:\libri", "indice": -1},
         "velocita": 1.05, "tono": -3, "bande": [0, 2, -12, 12, 0, 0, 1], "dissolvenza": {"accesa": True, "secondi": 2.5},
-        "ytdlp_controllato": "2026-11-05", "formato_registrazioni": "flac", "qualita_registrazioni": 320}
+        "ytdlp_controllato": "2026-11-05", "formato_registrazioni": "flac", "qualita_registrazioni": 320,
+            "console_letta": "braille", "scheda_effetti": {}}
     imp = _caricate(tmp_path, buoni)
     assert dict(imp) == buoni
     assert isinstance(imp["volume_effetti"], float)

@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17). Nella 2.7.1 la precedenza ai tasti sul lavoro in disparte. Nella 2.7.2 i lettori di rete chiusi all'uscita. Nella 2.7.3 i tasti funzione nelle tabelle COMANDI_DEI_TASTI_FUNZIONE e INTERRUTTORI, lette dalla prova della guida rapida, e le righe del cruscotto nell'ordine della regola. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.1.0 la voce Componenti aggiuntivi delle impostazioni, e gli altri banchi liberi da scaricare. Nella 3.2.0 gli indirizzi in rete: Ctrl con V, Apri un indirizzo, il ramo Indirizzi, il flusso chiesto prima di suonare e in anticipo per il seguente, e yt-dlp aggiornato ogni giorno. Nella 3.3.0 il ramo Radio, con la ricerca delle radio, il titolo in onda, le dirette che non si saltano e i contatori di radio, componenti e lingua. Nella 3.3.1 la voce Lingua con la sua lista anche con una lingua sola. Nella 3.4.0 i Preferiti in rete, un ramo in cima ai Preferiti, con F4 che sceglie la categoria (issue 41). Nella 3.5.0 le registrazioni, con la famiglia di R e il ramo Registrazioni, e i comandi dei marker su T (issue 42).
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17). Nella 2.7.1 la precedenza ai tasti sul lavoro in disparte. Nella 2.7.2 i lettori di rete chiusi all'uscita. Nella 2.7.3 i tasti funzione nelle tabelle COMANDI_DEI_TASTI_FUNZIONE e INTERRUTTORI, lette dalla prova della guida rapida, e le righe del cruscotto nell'ordine della regola. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.1.0 la voce Componenti aggiuntivi delle impostazioni, e gli altri banchi liberi da scaricare. Nella 3.2.0 gli indirizzi in rete: Ctrl con V, Apri un indirizzo, il ramo Indirizzi, il flusso chiesto prima di suonare e in anticipo per il seguente, e yt-dlp aggiornato ogni giorno. Nella 3.3.0 il ramo Radio, con la ricerca delle radio, il titolo in onda, le dirette che non si saltano e i contatori di radio, componenti e lingua. Nella 3.3.1 la voce Lingua con la sua lista anche con una lingua sola. Nella 3.4.0 i Preferiti in rete, un ramo in cima ai Preferiti, con F4 che sceglie la categoria (issue 41). Nella 3.5.0 le registrazioni, con la famiglia di R e il ramo Registrazioni, e i comandi dei marker su T (issue 42). Nella 3.6.0 la scheda degli effetti, con Ctrl e Maiuscolo con Z (issue 43). Nella 3.7.0 la console letta da sola, con la famiglia di F10 (issue 44). Nella 3.8.0 D per i titoli in onda e i capitoli, e il capitolo nuovo detto suonando (issue 45).
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -211,15 +211,19 @@ ALT_MAIUSCOLO = wx.MOD_ALT | wx.MOD_SHIFT
 # apre le statistiche da tutta la finestra (Gabriele, 1.103.0). F9 con i
 # modificatori (2.7.0): Maiuscolo apre il ramo con tutto dentro, Ctrl lo
 # chiude, Alt apre tutta la plancia, Ctrl e Alt la chiude, Ctrl e Maiuscolo
-# fermano l'apertura in corso; Maiuscolo con F10 resta a Windows, che apre il
-# menu della voce.
+# fermano l'apertura in corso. F10 la console letta (issue 44, 3.7.0): da solo
+# lo stato, Ctrl scende, Maiuscolo sale, Ctrl e Maiuscolo accende braille e
+# sintesi, Ctrl e Alt spegne; Maiuscolo con F10 non apre piu' il menu della
+# voce, scelta di Gabriele.
 COMANDI_DEI_TASTI_FUNZIONE = {
     (wx.WXK_F1, SOLO): "_manuale", (wx.WXK_F2, SOLO): "_changelog", (wx.WXK_F3, SOLO): "_crediti", (wx.WXK_F4, SOLO): "_f4",
     (wx.WXK_F5, SOLO): "_vai_alla_plancia", (wx.WXK_F6, SOLO): "_vai_alla_console", (wx.WXK_F7, SOLO): "_vai_al_cruscotto",
     (wx.WXK_F7, MAIUSCOLO): "_comando_statistiche", (wx.WXK_F8, SOLO): "_vai_al_brano",
     (wx.WXK_F9, SOLO): "_comando_stato_del_ramo", (wx.WXK_F9, CTRL): "_chiudi_tutto", (wx.WXK_F9, MAIUSCOLO): "_apri_tutto",
     (wx.WXK_F9, CTRL_MAIUSCOLO): "_ferma_l_apertura", (wx.WXK_F9, ALT): "_apri_la_plancia", (wx.WXK_F9, CTRL_ALT): "_chiudi_la_plancia",
-    (wx.WXK_F10, SOLO): "_f10", (wx.WXK_F11, SOLO): "_comando_leggi_i_tag", (wx.WXK_F11, MAIUSCOLO): "_comando_modifica_i_tag",
+    (wx.WXK_F10, SOLO): "_comando_lettura_della_console", (wx.WXK_F10, CTRL): "_scendi_con_la_console",
+    (wx.WXK_F10, MAIUSCOLO): "_sali_con_la_console", (wx.WXK_F10, CTRL_MAIUSCOLO): "_accendi_la_console_letta",
+    (wx.WXK_F10, CTRL_ALT): "_spegni_la_console_letta", (wx.WXK_F11, SOLO): "_comando_leggi_i_tag", (wx.WXK_F11, MAIUSCOLO): "_comando_modifica_i_tag",
     (wx.WXK_F12, SOLO): "_elenco_dei_tasti", (wx.WXK_ESCAPE, SOLO): "Close",
 }
 # Gli interruttori, con la regola della issue 38: Ctrl spegne, Maiuscolo
@@ -237,6 +241,8 @@ TASTI = {
     # Il cuore del lettore resta com'era, anche con i modificatori: Z, X, C,
     # V e B (Gabriele, 3 novembre 2026).
     ("z", SOLO): "precedente",
+    # La scheda degli effetti (Gabriele, issue 43, 3.6.0), accanto alla scheda audio.
+    ("z", CTRL_MAIUSCOLO): "scheda_degli_effetti",
     ("x", SOLO): "play",
     ("x", MAIUSCOLO): "loop",
     # Ctrl e Maiuscolo con X: la lista della voce Scheda audio, da tutta la
@@ -501,11 +507,14 @@ TASTI_COMUNI = [
     _("F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, Maiuscolo con F7 le statistiche, F8 porta la selezione e il fuoco della plancia sul brano in riproduzione, Ctrl con F8 la sgancia e Maiuscolo con F8 ce la tiene agganciata, "
     "F9 dice se il ramo col fuoco è aperto, e quante voci ha aperte dentro: Ctrl con F9 lo chiude e Maiuscolo con F9 lo apre con tutto quello che ha dentro, "
     "Ctrl e Maiuscolo con F9 fermano un'apertura, Alt con F9 apre tutta la plancia e Ctrl e Alt con F9 la chiude; mentre si apre puoi navigare; "
+    "F10 dice se la console si legge da sola: Ctrl con F10 scende, Maiuscolo con F10 sale, Ctrl e Maiuscolo con F10 la fa leggere al braille e alla sintesi, "
+    "Ctrl e Alt con F10 la spegne; "
     "F11 legge i tag del brano selezionato, o i dettagli di una cartella, di un'unità o di una playlist, e Maiuscolo con F11 apre il menu dei tag."),
     _("Barra rovesciata: nella console cerca nella console, altrove nel ramo della plancia in cui sei, e da Apri file, Statistiche o Impostazioni in tutto MeTeOra; Ctrl con la barra rovesciata cerca in tutto MeTeOra, anche dalla console. "
     "Barra verticale: il filtro della playlist o dei Preferiti in cui sta la plancia, anche dalla console."),
     _("F1 apre il manuale nel browser; F12 scrive nella console la guida rapida dei tasti, F2 le novità e F3 i crediti, sempre nella console. Esc esce salvando tutto. "
-    "Il più apre le impostazioni, Ctrl e Maiuscolo con X la lista della scheda audio, con le cuffie Bluetooth e gli speaker Cast."),
+    "Il più apre le impostazioni, Ctrl e Maiuscolo con X la lista della scheda audio, con le cuffie Bluetooth e gli speaker Cast, "
+    "e Ctrl e Maiuscolo con Z quella della scheda degli effetti."),
     _("Ctrl con F12 spegne i tasti rapidi a carattere e Maiuscolo con F12 li riaccende: spenti, lettere, cifre e segni vanno alla plancia, che salta alla voce che comincia con ciò che scrivi; "
     "i tasti funzione, Esc e le combinazioni con Ctrl e con Alt restano. Gli interruttori dei tasti funzione seguono la regola: Ctrl spegne, Maiuscolo accende, il tasto da solo fa il suo lavoro."),
 ]
@@ -681,6 +690,19 @@ FORMATI_DELLE_REGISTRAZIONI = {
 }
 QUALITA_DELLE_REGISTRAZIONI = {kbps: f"{kbps} kbps" for kbps in registrazioni.QUALITA}
 ATTESA_DELLA_SORGENTE = 2500
+# La console letta da sola (issue 44, 3.7.0): le scelte, dalla piu' bassa,
+# come le dice la riga della voce.
+LETTURE_DELLA_CONSOLE = {
+    # Traduttori: la lettura della console da sola, spenta; chiude la frase "Lettura della console: ...".
+    "spenta": _("spenta"),
+    # Traduttori: come sopra; chiude anche la frase "La console si legge da sola, ...".
+    "braille": _("solo al braille"),
+    # Traduttori: come sopra.
+    "entrambi": _("al braille e alla sintesi"),
+}
+# Un capitolo nuovo si dice se il punto e' corso al piu' tanto piu' del
+# tempo, la velocita' piu' alta: oltre e' un salto (issue 45, 3.8.0).
+VELOCITA_DEL_CAPITOLO = 4.0
 
 
 def registrazioni_in_disparte(lavoro, al_termine):
@@ -715,6 +737,7 @@ VOCI_DELLE_IMPOSTAZIONI = {
     "volume_effetti": (_("Volume degli effetti"), _("Volume degli effetti non cambiato.")),
     "replaygain": (_("Volume uniforme (ReplayGain)"), _("Volume uniforme (ReplayGain) non cambiato.")),
     "scheda_audio": (_("Scheda audio"), _("Scheda audio non cambiata.")),
+    "scheda_effetti": (_("Scheda degli effetti"), _("Scheda degli effetti non cambiata.")),
     "passo_indietro": (_("Salto indietro di Ctrl+Q"), _("Salto indietro di Ctrl+Q non cambiato.")),
     "passo_avanti": (_("Salto avanti di Maiuscolo+Q"), _("Salto avanti di Maiuscolo+Q non cambiato.")),
     "velocita": (_("Velocità"), _("Velocità non cambiata.")),
@@ -728,6 +751,7 @@ VOCI_DELLE_IMPOSTAZIONI = {
     "sottotitoli": (_("Sottotitoli letti (D)"), _("Sottotitoli letti (D) non cambiati.")),
     "sintesi": (_("Sintesi di sottotitoli e karaoke"), _("Sintesi di sottotitoli e karaoke non cambiata.")),
     "destinazione": (_("Dove vanno sottotitoli e karaoke"), _("Dove vanno sottotitoli e karaoke non cambiato.")),
+    "console_letta": (_("Lettura della console"), _("Lettura della console non cambiata.")),
     "karaoke": (_("Testo del karaoke"), _("Testo del karaoke non cambiato.")),
     "anticipo_karaoke": (_("Anticipo del karaoke"), _("Anticipo del karaoke non cambiato.")),
     "celle_braille": (_("Celle della barra braille"), _("Celle della barra braille non cambiate.")),
@@ -1552,6 +1576,9 @@ class Finestra(wx.Frame):
         self._accessibile = None
         self._fuoco_prima_della_freccia = None
         self._righe = []
+        # La console letta da sola (3.7.0) e il capitolo visto suonando (3.8.0).
+        self._in_lettura, self._letti_ora, self._lettura_in_fila = [], set(), False
+        self._capitolo_visto = None
         self._chiusa = False
         # Il turno dell'ultimo beep dei livelli: un beep rimandato che nel
         # frattempo e' stato superato da un altro non suona piu'.
@@ -1790,6 +1817,8 @@ class Finestra(wx.Frame):
         categoria la riga si riscrive invece di aggiungersene un'altra.
         In fondo alla riga va l'ora, ore e minuti; chi scrive piu' righe di
         seguito la chiede solo per l'ultima."""
+        # La console letta da sola (issue 44, 3.7.0): la riga senza l'ora.
+        self._da_leggere(testo, categoria is not None and categoria == self._categoria and bool(self._righe))
         if ora:
             testo = f"{testo} {datetime.datetime.now():%H:%M}"
         posizione = self.console.GetInsertionPoint()
@@ -7966,6 +7995,7 @@ class Finestra(wx.Frame):
         if self._chiusa:
             return
         self._scatto_delle_statistiche()
+        self._guarda_il_capitolo()
         self._annota_il_punto_di_ripresa()
         self._giri_delle_statistiche += 1
         if self._giri_delle_statistiche % GIRI_IN_UN_MINUTO == 1:
@@ -8192,6 +8222,7 @@ class Finestra(wx.Frame):
             "volume_effetti": lambda: f"{round(imp['volume_effetti'] * 100)}%",
             "replaygain": lambda: valori.VOLUMI_UNIFORMI[imp["replaygain"]],
             "scheda_audio": self._scheda_da_leggere,
+            "scheda_effetti": self._scheda_degli_effetti_da_leggere,
             "passo_indietro": lambda: valori.scrivi_durata(imp["passo_indietro"]),
             "passo_avanti": lambda: valori.scrivi_durata(imp["passo_avanti"]),
             "velocita": lambda: valori.scrivi_velocita(imp["velocita"]),
@@ -8206,6 +8237,7 @@ class Finestra(wx.Frame):
             "sottotitoli": lambda: _("sì") if imp["sottotitoli"] else _("no"),
             "sintesi": self._sintesi_da_leggere,
             "destinazione": lambda: sintesi.DESTINAZIONI[imp["destinazione"]],
+            "console_letta": lambda: LETTURE_DELLA_CONSOLE[imp["console_letta"]],
             "karaoke": lambda: MODI_DEL_KARAOKE[imp["karaoke"]],
             "anticipo_karaoke": lambda: f"{imp['anticipo_karaoke']} ms",
             # Traduttori: le celle della barra braille a 0, come Celle della barra braille: 0, il testo intero.
@@ -8306,6 +8338,7 @@ class Finestra(wx.Frame):
         voci di valore aprono il loro campo, le altre fanno la loro azione."""
         azioni = {
             "scheda_audio": self._scegli_la_scheda_audio,
+            "scheda_effetti": self._scegli_la_scheda_degli_effetti,
             "modello_casuale": self._scegli_il_modello_casuale,
             "ripetizione": lambda genitore: self._scegli_da_una_lista(genitore, "ripetizione", valori.RIPETIZIONI, _frase_della_ripetizione),
             "replaygain": self._scegli_il_volume_uniforme,
@@ -8325,6 +8358,7 @@ class Finestra(wx.Frame):
             "associazioni": self._associa_i_formati,
             "impressi": self._scegli_come_leggere_gli_impressi,
             "destinazione": self._scegli_la_destinazione,
+            "console_letta": self._scegli_la_lettura_della_console,
             "karaoke": self._scegli_il_modo_del_karaoke,
             "lingua": self._scegli_la_lingua,
         }
@@ -8659,9 +8693,13 @@ class Finestra(wx.Frame):
         impedire l'avvio ne' chiudere la finestra. Restituisce (esito,
         None), o (None, l'eccezione)."""
         try:
-            return schede_audio.applica(scelta, self.motore, avvio=avvio), None
+            esito = schede_audio.applica(scelta, self.motore, avvio=avvio)
         except Exception as e:  # noqa: BLE001 - la scheda audio fallisce in molti modi, e lo dice la console
             return None, e
+        # La scheda degli effetti, se e' un'altra (issue 43, 3.6.0).
+        if self.impostazioni["scheda_effetti"]:
+            self._applica_gli_effetti()
+        return esito, None
 
     def _applica_la_scheda_all_avvio(self):
         """La scheda scelta, appena c'e' il motore. Con la scelta automatica
@@ -9049,6 +9087,10 @@ class Finestra(wx.Frame):
         sottotitoli e Dove sono (tappa 14 b). Torna il numero del testo nella
         coda del braille, o None se al braille non va."""
         imp = self.impostazioni
+        # Letto qui, la console letta da sola non lo ripete (3.7.0).
+        if imp["console_letta"] != "spenta":
+            self._letti_ora.add(testo)
+            self._metti_in_fila_la_lettura()
         if imp["destinazione"] in ("entrambi", "sintesi"):
             self._sintesi.dici(testo, imp["sintesi"], "sintesi", interrompi=interrompi)
         if imp["destinazione"] in ("entrambi", "braille"):
@@ -9892,7 +9934,9 @@ class Finestra(wx.Frame):
             return
         self._statistiche.conta("titoli_in_onda")
         testo = _("In onda: {titolo}.").format(titolo=titolo)
-        self._ai_testi_letti(testo)
+        # Con D, come i sottotitoli e i capitoli (Gabriele, issue 45, 3.8.0).
+        if self.impostazioni["sottotitoli"]:
+            self._ai_testi_letti(testo)
         self.scrivi(testo, "in_onda")
 
     def _radio_partita(self, brano):
@@ -10652,6 +10696,82 @@ class Finestra(wx.Frame):
         """Ctrl e Maiuscolo con X: la lista della voce Scheda audio, senza
         passare dalle impostazioni (Gabriele, 2.6.0)."""
         self._scegli_la_scheda_audio(None)
+
+    # La scheda degli effetti (Gabriele, issue 43, 3.6.0): i suoni di MeTeOra
+    # su una scheda loro, o su quella della musica, la scelta di partenza.
+
+    def _comando_scheda_degli_effetti(self):
+        """Ctrl e Maiuscolo con Z: la lista della voce Scheda degli effetti,
+        da tutta la finestra, accanto a Ctrl e Maiuscolo con X."""
+        self._scegli_la_scheda_degli_effetti(None)
+
+    def _scheda_degli_effetti_da_leggere(self):
+        scelta = self.impostazioni["scheda_effetti"]
+        if not scelta:
+            # Traduttori: la scheda degli effetti di partenza, nella riga della voce.
+            return _("la stessa della musica")
+        return self._nome_della_scheda(scelta["dispositivo"], scelta["interfaccia"])
+
+    def _scegli_la_scheda_degli_effetti(self, genitore):
+        """La lista delle schede per gli effetti: in cima La stessa della
+        musica, poi le schede del PC come nella voce Scheda audio. Gli speaker
+        Cast no: gli effetti suonano sempre sul PC. Una scheda che non si apre
+        rimanda gli effetti su quella della musica, e la console lo dice."""
+        try:
+            schede_audio.rileggi_se_serve(self.motore)
+            elenco = schede_audio.uscite()
+        except Exception as e:  # noqa: BLE001 - PortAudio fallisce in molti modi, e lo dice la console
+            self._riscontro("errore", _("Non riesco a leggere le schede audio: {errore}.").format(errore=e))
+            return
+        scelta = self.impostazioni["scheda_effetti"]
+        attuale = schede_audio.ritrova(scelta, elenco) if scelta else None
+        righe = [_("La stessa della musica"), *(schede_audio.etichetta(u) for u in elenco)]
+        indice = elenco.index(attuale) + 1 if attuale is not None else 0
+        self._domanda()
+        with FinestraScelta(genitore or self, _("Scheda degli effetti"), righe, indice, con_filtro=True) as dialogo:
+            if dialogo.ShowModal() != wx.ID_OK or dialogo.GetSelection() < 0:
+                self._annullato(_("Scheda degli effetti non cambiata."))
+                return
+            indice = dialogo.GetSelection()
+        nuova = schede_audio.da_salvare(elenco[indice - 1]) if indice > 0 else {}
+        self.impostazioni["scheda_effetti"] = nuova
+        errore = self._applica_gli_effetti()
+        evento = "scheda_degli_effetti"
+        if errore is None and self._effetti_si_aprono():
+            testo = (_("Gli effetti suonano sulla scheda {scheda}.").format(scheda=self._scheda_degli_effetti_da_leggere()) if nuova
+                else _("Gli effetti suonano sulla stessa scheda della musica."))
+        else:
+            evento = "errore"
+            if nuova:
+                testo = _("La scheda {scheda} non si apre per gli effetti: tornano sulla scheda della musica.").format(
+                    scheda=self._nome_della_scheda(nuova["dispositivo"], nuova["interfaccia"]))
+                self.impostazioni["scheda_effetti"] = {}
+                self._applica_gli_effetti()
+            else:
+                testo = _("Gli effetti non riescono ad aprire la scheda della musica.")
+        self._salva_impostazioni()
+        if genitore:
+            genitore.aggiorna("scheda_effetti", self._riga_dell_impostazione("scheda_effetti"))
+        self._riscontro(evento, testo)
+
+    def _applica_gli_effetti(self):
+        """Gli effetti sulla loro scheda, se e' scelta e c'e', altrimenti su
+        quella della musica. None, o l'eccezione se la scheda non va."""
+        from GBUtils import Acusticator
+
+        try:
+            elenco = schede_audio.uscite()
+            scelta = self.impostazioni["scheda_effetti"]
+            uscita = schede_audio.ritrova(scelta, elenco) if scelta else None
+            if uscita is None:
+                musica = self._scelta_del_pc()
+                uscita = (schede_audio.ritrova(musica, elenco) if musica else None) or schede_audio.automatica()
+            if uscita is not None:
+                # int(): GBUtils riconosce l'indice solo come intero di Python.
+                Acusticator.setup(device=int(uscita["indice"]))
+        except Exception as e:  # noqa: BLE001 - la scheda audio fallisce in molti modi, e lo dice la console
+            return e
+        return None
 
     def _scegli_la_scheda_audio(self, genitore):
         """La scelta della destinazione, una lista sola con il filtro: in cima
@@ -12551,11 +12671,130 @@ class Finestra(wx.Frame):
         self._apri_in_blocco([voce], _("Apertura dentro {nome}").format(nome=nome), _("Apro tutto dentro {nome}").format(nome=nome),
             _("Aperto tutto dentro {nome}").format(nome=nome), "apri_tutto")
 
-    def _f10(self):
-        """F10 da solo non ha piu' un comando (2.7.0): lo dice, invece di
-        lasciarlo a Windows, che porterebbe il fuoco al menu di sistema."""
-        self._statistiche.senza_comando("F10")
-        self._riscontro("non_disponibile", _("Il tasto F10 non ha un comando."))
+    # La console letta da sola (Gabriele, issue 44, 3.7.0): ogni riga che la
+    # console scrive va anche al braille, o al braille e alla sintesi, senza
+    # l'ora in fondo, per chi vuole l'esito dei comandi senza andare con F6
+    # nella console. La famiglia di F10 la cambia come la regola della issue
+    # 38: da solo lo stato, Ctrl scende, Maiuscolo sale, Ctrl e Maiuscolo
+    # accende braille e sintesi, Ctrl e Alt spegne. Maiuscolo con F10 non apre
+    # piu' il menu della voce: scelta di Gabriele.
+
+    def _da_leggere(self, testo, riscritta=False):
+        """Una riga della console da leggere. Si legge dopo, quando il comando
+        ha finito, cosi' non si legge una seconda volta cio' che il comando
+        ha gia' mandato alla sintesi e al braille dei sottotitoli, come Dove
+        sono, prima o dopo averlo scritto. Una riga riscritta, come quella del
+        volume, interrompe la voce di quella di prima."""
+        if self.impostazioni["console_letta"] == "spenta" or self._chiusa:
+            return
+        self._in_lettura.append((testo, riscritta))
+        self._metti_in_fila_la_lettura()
+
+    def _metti_in_fila_la_lettura(self):
+        if not self._lettura_in_fila:
+            self._lettura_in_fila = True
+            wx.CallAfter(self._leggi_le_righe)
+
+    def _leggi_le_righe(self):
+        self._lettura_in_fila = False
+        righe, self._in_lettura = self._in_lettura, []
+        letti, self._letti_ora = self._letti_ora, set()
+        dove = self.impostazioni["console_letta"]
+        if dove == "spenta" or self._chiusa:
+            return
+        for testo, riscritta in righe:
+            if testo not in letti:
+                self._statistiche.conta("righe_lette")
+                self._leggi(testo, dove, riscritta)
+
+    def _leggi(self, testo, dove, interrompi=False):
+        """Il testo al braille, o al braille e alla sintesi, con l'uscita della
+        voce Sintesi dei sottotitoli."""
+        self._sintesi.dici(testo, self.impostazioni["sintesi"], dove, interrompi=interrompi)
+
+    def _frase_della_console_letta(self, chiave):
+        if chiave == "spenta":
+            return _("La console non si legge da sola.")
+        frase = _("La console si legge da sola, {dove}.").format(dove=LETTURE_DELLA_CONSOLE[chiave])
+        effettiva = self._sintesi.scelta(self.impostazioni["sintesi"])
+        if effettiva is not None and effettiva not in GBsintesi.CON_IL_BRAILLE:
+            frase += " " + _("Con {sintesi}, il braille non arriva: ce l'hanno NVDA e JAWS.").format(sintesi=sintesi.nome(effettiva))
+        return frase
+
+    def _comando_lettura_della_console(self):
+        """F10 da solo: com'e' la lettura della console."""
+        self._riporta(self._frase_della_console_letta(self.impostazioni["console_letta"]), "console_letta")
+
+    def _cambia_la_console_letta(self, nuova):
+        attuale = self.impostazioni["console_letta"]
+        if nuova == attuale:
+            testo = (_("La console si legge già al braille e alla sintesi.") if attuale == "entrambi"
+                else _("La lettura della console è già spenta."))
+            self._riscontro("console_letta_al_limite", testo, "console_letta")
+            return
+        self.impostazioni["console_letta"] = nuova
+        self._salva_impostazioni()
+        frase = self._frase_della_console_letta(nuova)
+        self._riscontro("console_letta", frase, "console_letta")
+        # Spenta, la riga non si legge piu' da sola: la si dice ancora una
+        # volta, dove andava prima.
+        if nuova == "spenta" and not self._chiusa:
+            self._leggi(frase, attuale, interrompi=True)
+
+    def _passo_della_console_letta(self, passo):
+        scelte = valori.LETTURE_DELLA_CONSOLE
+        indice = scelte.index(self.impostazioni["console_letta"]) + passo
+        self._cambia_la_console_letta(scelte[max(0, min(len(scelte) - 1, indice))])
+
+    def _scendi_con_la_console(self):
+        """Ctrl con F10: un passo verso spenta."""
+        self._passo_della_console_letta(-1)
+
+    def _sali_con_la_console(self):
+        """Maiuscolo con F10: un passo verso braille e sintesi."""
+        self._passo_della_console_letta(1)
+
+    def _accendi_la_console_letta(self):
+        """Ctrl e Maiuscolo con F10: braille e sintesi."""
+        self._cambia_la_console_letta("entrambi")
+
+    def _spegni_la_console_letta(self):
+        """Ctrl e Alt con F10: spenta."""
+        self._cambia_la_console_letta("spenta")
+
+    def _scegli_la_lettura_della_console(self, genitore):
+        """La voce Lettura della console delle impostazioni."""
+        self._scegli_da_una_lista(genitore, "console_letta", LETTURE_DELLA_CONSOLE, self._frase_della_console_letta)
+
+    # I capitoli nuovi detti suonando (Gabriele, issue 45, 3.8.0), con D come
+    # i sottotitoli, per i file e per i brani in rete.
+
+    def _guarda_il_capitolo(self):
+        """Ogni secondo: se la riproduzione e' entrata da se' in un capitolo
+        nuovo, lo dice nella console e, con i sottotitoli letti accesi, alla
+        sintesi e al braille dei sottotitoli. Non all'inizio del brano, e non
+        dopo un salto, che si riconosce dal punto che corre piu' del tempo:
+        i comandi dei capitoli lo dicono da se'."""
+        percorso, posizione, adesso = self.motore.in_corso, self.motore.posizione, time.monotonic()
+        visto, self._capitolo_visto = self._capitolo_visto, None
+        if not percorso or posizione is None:
+            return
+        elenco = self._capitoli_in_corso()
+        if len(elenco) < 2:
+            return
+        indice = capitolo_attuale(elenco, posizione)
+        self._capitolo_visto = (percorso, indice, posizione, adesso)
+        if visto is None or visto[0] != percorso or visto[1] == indice:
+            return
+        avanzato = posizione - visto[2]
+        if avanzato < 0 or avanzato > (adesso - visto[3]) * VELOCITA_DEL_CAPITOLO + 1.5:
+            return
+        secondi, titolo = elenco[indice]
+        testo = f"{frase_del_capitolo(indice + 1, len(elenco), titolo, secondi)}."
+        self._statistiche.conta("capitoli_annunciati")
+        if self.impostazioni["sottotitoli"]:
+            self._ai_testi_letti(testo)
+        self.scrivi(testo, "capitolo")
 
     def _ferma_l_apertura(self):
         """Ctrl e Maiuscolo con F9: ferma l'apertura in corso, e lascia aperto

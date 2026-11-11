@@ -1,5 +1,15 @@
-Collaudo di MeTeOra 3.5.1.
-Copia www.raiplaysound.it/radio2, senza https, e premi Ctrl con V nella plancia: la diretta di Rai Radio 2 suona subito, senza il campo.
-Copia il nome di un file, come brano.mp3, e premi Ctrl con V: si apre il campo Apri un indirizzo, vuoto.
-Collaudo di MeTeOra 3.5.2.
-Registrando una radio, Maiuscolo con R, la pausa, la ripresa, Ctrl con R, Alt con R, Alt e Maiuscolo con R, Ctrl e Maiuscolo con R e Ctrl e Alt con R suonano i suoni scelti all'ascolto, e nessuno somiglia troppo a un altro suono di MeTeOra.
+Collaudo di MeTeOra 3.6.0, la scheda degli effetti, issue 43.
+Ctrl e Maiuscolo con Z apre la lista Scheda degli effetti: in cima La stessa della musica, poi le schede del PC; scegline un'altra, per esempio le cuffie, e gli effetti suonano lì, la musica no.
+Nelle impostazioni la voce Scheda degli effetti dice la scheda scelta; La stessa della musica riporta gli effetti con la musica.
+Il suono della scheda degli effetti, preso dalla collezione, va bene? Scrivi qui sotto se sì o no.
+Collaudo di MeTeOra 3.7.0, la console letta, issue 44.
+F10 dice che la console non si legge da sola; Maiuscolo con F10 la accende solo al braille, ancora Maiuscolo con F10 al braille e alla sintesi, e una terza volta dice che è già al massimo.
+Accesa, i comandi, come il volume con O e P o lo stop, arrivano subito alla sintesi e al braille senza l'ora; il volume premuto più volte non si accoda.
+Dove sono, l'apostrofo, con la console letta accesa si sente una volta sola.
+Ctrl con F10 scende di un passo, Ctrl e Maiuscolo con F10 accende tutto, Ctrl e Alt con F10 spegne, e la riga si sente ancora una volta.
+Maiuscolo con F10 non apre più il menu della voce; Applicazioni, Barra spaziatrice e Invio sì.
+I due suoni della lettura della console, quando cambia e quando è già al limite, vanno bene? Scrivi qui sotto se sì o no.
+Collaudo di MeTeOra 3.8.0, titoli, capitoli e sottotitoli in rete, issue 45.
+Con D spento una radio non legge più il titolo in onda, che resta nella console; con D acceso lo legge.
+Un audiolibro o un video di YouTube con capitoli, ascoltato senza toccare niente: entrando in un capitolo nuovo la console dice Capitolo, con il numero e il titolo, e con D acceso anche la sintesi; dopo un salto con virgola e punto o con le frecce, una volta sola.
+Un video di YouTube con i sottotitoli, con D acceso: si leggono, in italiano se ci sono.

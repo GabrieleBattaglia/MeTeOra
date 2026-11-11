@@ -293,11 +293,16 @@ def test_il_titolo_in_onda_e_la_diretta_nella_finestra(finestra, con_le_radio, m
     monkeypatch.setattr(type(finestra.motore), "dal_vivo", property(lambda self: True))
     monkeypatch.setattr(type(finestra.motore), "titolo_in_onda", property(lambda self: "Lucio Dalla - Caruso"))
     monkeypatch.setattr(type(finestra.motore), "posizione", property(lambda self: 75.0))
+    # Con D spento il titolo va solo nella console (issue 45, 3.8.0).
+    finestra.impostazioni["sottotitoli"] = False
+    finestra._titolo_in_onda("Lucio Dalla -  Caruso")
+    assert finestra._righe[-1].startswith("In onda: Lucio Dalla - Caruso.") and ("nvda", "In onda: Lucio Dalla - Caruso.") not in sintesi_finta.detti
+    finestra.impostazioni["sottotitoli"] = True
     finestra._titolo_in_onda("Lucio Dalla -  Caruso")
     assert finestra._righe[-1].startswith("In onda: Lucio Dalla - Caruso.") and ("nvda", "In onda: Lucio Dalla - Caruso.") in sintesi_finta.detti
     finestra._titolo_in_onda("Mina - Se telefonando")
     # La riga del titolo si riscrive, non se ne aggiunge un'altra.
-    assert sum(1 for r in finestra._righe if r.startswith("In onda:")) == 1 and finestra._statistiche.dati["conti"]["titoli_in_onda"] == 2
+    assert sum(1 for r in finestra._righe if r.startswith("In onda:")) == 1 and finestra._statistiche.dati["conti"]["titoli_in_onda"] == 3
     finestra._comando_avanti()
     assert "Rai Radio 3 è una diretta: non si salta." in finestra._righe[-1]
     finestra._comando_dove_sono()
