@@ -2,6 +2,13 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.8.1] - 2026-11-11
+
+Dal collaudo di Gabriele della 3.8.0, passata intera, con i tre suoni nuovi.
+
+- NVDA, con Insert e F sulla console e sul cruscotto, diceva lo sfondo bianco anche con un altro colore nelle impostazioni: MeTeOra colorava lo sfondo del controllo, ma i caratteri restavano con lo sfondo automatico di Windows, che è quello che NVDA legge. Ora anche i caratteri hanno lo sfondo scelto.
+- I suoni della scheda degli effetti e della lettura della console sono quelli approvati da Gabriele: folata_verso_destra, sonar_con_due_echi e soffio_che_si_ferma, firmati da MeTeOra in GBUtils V251.
+
 ## [3.8.0] - 2026-11-11
 
 Titoli, capitoli e sottotitoli dei contenuti in rete, issue 45.
