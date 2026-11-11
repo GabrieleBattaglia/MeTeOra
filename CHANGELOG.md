@@ -4,6 +4,8 @@ Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
 ## [3.8.1] - 2026-11-11
 
+Pubblicata l'11 novembre 2026, con l'installatore e lo zip: la quinta release, che porta agli utenti tutto quello che è venuto dopo la 2.6.6, dalle aperture senza limiti della 2.7.0 alla localizzazione della 3.0.0, i componenti aggiuntivi, gli indirizzi dei siti, le radio, le registrazioni, la scheda degli effetti, la console letta e i capitoli detti suonando. Per scelta di Gabriele, senza il passaggio da VirusTotal, come le due release prima.
+
 Dal collaudo di Gabriele della 3.8.0, passata intera, con i tre suoni nuovi.
 
 - NVDA, con Insert e F sulla console e sul cruscotto, diceva lo sfondo bianco anche con un altro colore nelle impostazioni: MeTeOra colorava lo sfondo del controllo, ma i caratteri restavano con lo sfondo automatico di Windows, che è quello che NVDA legge. Ora anche i caratteri hanno lo sfondo scelto.
