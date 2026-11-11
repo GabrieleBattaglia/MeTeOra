@@ -1,6 +1,6 @@
 # MeTeOra, le prove delle radio in rete: radio-browser finto, niente rete.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 06/11/2026: nasce con la 3.3.0, tappa 19 c del piano, issue 40.
+# 06/11/2026: nasce con la 3.3.0, tappa 19 c del piano, issue 40. Nella 3.8.2 il sottoramo Recenti.
 
 import datetime
 import json
@@ -224,11 +224,17 @@ def test_il_ramo_radio_per_paese_e_una_radio_che_suona(finestra, con_le_radio, m
     assert finestra.archivio.preferiti_in_rete.brani[0].radio["uuid"] == "uuid-rai3"
     finestra._cancella(voce)
     assert "Le radio di radio-browser non si tolgono" in finestra._righe[-1]
-    # Riaperto, il ramo Radio ha in cima le ascoltate di recente.
+    # Riaperto, il ramo Radio ha in cima Recenti, con le ascoltate (3.8.2).
     finestra.albero.Collapse(finestra.nodo_radio)
     finestra.albero.Expand(finestra.nodo_radio)
-    assert _etichette(finestra, finestra.nodo_radio)[0] == "Rai Radio 3, Italia, MP3 a 320 kbps"
-    recente = next(iter(finestra._figli(finestra.nodo_radio)))
+    assert _etichette(finestra, finestra.nodo_radio) == ["Recenti, 1 radio", "Per paese", "Per genere", "Per lingua"]
+    recenti = _figlio(finestra, finestra.nodo_radio, "Recenti, 1 radio")
+    finestra.albero.Expand(recenti)
+    assert _etichette(finestra, recenti) == ["Rai Radio 3, Italia, MP3 a 320 kbps"]
+    finestra._seleziona(recenti)
+    assert [e for e, _a in finestra._voci_del_menu(finestra._dati(recenti))] == ["Riproduci", "Cerca una radio"]
+    assert finestra.righe_del_cruscotto()[0].startswith("Tasti per le radio recenti")
+    recente = next(iter(finestra._figli(recenti)))
     voci = [etichetta for etichetta, _azione in finestra._voci_del_menu(finestra._dati(recente))]
     assert "Togli dalle ascoltate" in voci
 

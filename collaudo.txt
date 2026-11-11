@@ -1,0 +1,5 @@
+Collaudo di MeTeOra 3.8.2: le radio recenti.
+Il ramo Radio ha in cima Recenti, con quante sono, come Recenti, 12 radio, e poi Per paese, Per genere e Per lingua; le radio che avevi ascoltato ci sono tutte, dalla più recente.
+Ascolta una radio che sta in fondo a Recenti, chiudi e riapri il ramo Radio: la radio è in cima a Recenti.
+Riproduci, nel menu di Recenti, le suona dalla più recente; Togli dalle ascoltate, sul menu di una radio, la toglie.
+Una ricerca con la barra rovesciata nel ramo Radio aggiunge il suo ramo in fondo, e Recenti resta.

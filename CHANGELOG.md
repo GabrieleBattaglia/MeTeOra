@@ -2,6 +2,14 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.8.2] - 2026-11-11
+
+Le radio ascoltate di recente, come ha chiesto Gabriele, perché il ramo Radio non si affolli.
+
+- Stanno in un sottoramo loro, Recenti, in cima al ramo Radio, prima di Per paese, Per genere e Per lingua; c'è solo quando ne hai ascoltata almeno una, e la sua riga dice quante sono, come Recenti, 12 radio.
+- Sono cento invece di cinquanta: riascoltarne una la riporta in cima, e alla centounesima esce quella ascoltata meno di recente.
+- Il menu di Recenti ha Riproduci, che le suona tutte dalla più recente, e Cerca una radio; una nuova ricerca non lo toglie.
+
 ## [3.8.1] - 2026-11-11
 
 Pubblicata l'11 novembre 2026, con l'installatore e lo zip: la quinta release, che porta agli utenti tutto quello che è venuto dopo la 2.6.6, dalle aperture senza limiti della 2.7.0 alla localizzazione della 3.0.0, i componenti aggiuntivi, gli indirizzi dei siti, le radio, le registrazioni, la scheda degli effetti, la console letta e i capitoli detti suonando. Senza il passaggio da VirusTotal, come le due release prima.
