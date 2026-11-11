@@ -1,2 +1,0 @@
-Collaudo di MeTeOra 3.8.1.
-Con un colore di sfondo per la console e uno per il cruscotto nelle impostazioni, Insert e F su ognuno dei due dice il colore scelto, non bianco, anche sulle righe scritte dopo.
