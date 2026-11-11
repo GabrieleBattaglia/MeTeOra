@@ -15,7 +15,7 @@ import indirizzi
 import motore
 import radio
 import statistiche
-from playlist import RADIO_RECENTI, Archivio, Brano
+from playlist import RADIO_RECENTI, Archivio, Brano, Playlist
 
 # La domanda vera a radio-browser, presa prima che il conftest la sostituisca.
 _CHIEDI_VERO = radio._chiedi
@@ -210,10 +210,13 @@ def test_il_ramo_radio_per_paese_e_una_radio_che_suona(finestra, con_le_radio, m
     voce = _figlio(finestra, italia, "Rai Radio 3")
     dati = finestra._dati(voce)
     finestra._riproduci(dati["playlist"], dati["brano"])
-    # La radio si apre senza yt-dlp, che qui non c'e', come diretta, e va fra le ascoltate.
+    # La radio si apre senza yt-dlp, che qui non c'e', come diretta; fra le
+    # ascoltate va dopo un minuto di fila (3.10.2), qui chiamato a mano.
     assert con_le_radio == [("http://icestreaming.rai.it/3.mp3", None, False)] and indirizzi.e_una_radio("http://icestreaming.rai.it/3.mp3")
     assert any("In riproduzione: Rai Radio 3, Italia, MP3 a 320 kbps" in r for r in finestra._righe)
-    assert [b.titolo for b in finestra.archivio.radio.brani] == ["Rai Radio 3"] and chieste[-1] == ("/json/url/uuid-rai3", {})
+    assert not finestra.archivio.radio.brani and chieste[-1] == ("/json/url/uuid-rai3", {})
+    finestra._radio_tenuta(dati["playlist"], dati["brano"])
+    assert [b.titolo for b in finestra.archivio.radio.brani] == ["Rai Radio 3"]
     assert finestra._statistiche.dati["conti"]["radio_ascoltate"] == 1
     with open(finestra.archivio.percorso, encoding="utf-8") as f:
         assert json.load(f)["radio"]["brani"][0]["radio"]["uuid"] == "uuid-rai3"
@@ -362,3 +365,33 @@ def test_mostra_altre_radio_in_fondo_alla_ricerca(finestra, con_le_radio, monkey
     finestra._altre_radio(finestra._dati(list(finestra._figli(voce))[-1]))
     assert len(chieste) == 3 and "si usa sulla sua voce" in finestra._righe[-1]
     assert finestra._statistiche.dati["conti"]["radio_altre"] == 2
+
+
+def test_una_radio_entra_fra_le_recenti_dopo_un_minuto(finestra, con_le_radio, monkeypatch):
+    # Il minuto di ascolto di fila anche per le radio (3.10.2).
+    import types
+
+    import finestra as modulo
+
+    brano = Brano("http://icestreaming.rai.it/3.mp3", titolo="Rai Radio 3", radio={"uuid": "uuid-rai3", "paese": "IT"})
+    gruppo = Playlist("Radio, Italia", [brano], cartella="")
+    gruppo.radio_gruppo = True
+    finestra._suona(gruppo, brano)
+    assert not finestra.archivio.radio.brani
+    finto = types.SimpleNamespace(in_corso=brano.percorso, posizione=0.0, in_pausa=False)
+    orologio = [100.0]
+    monkeypatch.setattr(finestra, "motore", finto)
+    monkeypatch.setattr(finestra, "coda", types.SimpleNamespace(playlist=gruppo, corrente=brano))
+    monkeypatch.setattr(modulo.time, "monotonic", lambda: orologio[0])
+    for _n in range(60):
+        orologio[0] += 1.0
+        finto.posizione += 1.0
+        finestra._guarda_l_indirizzo()
+    assert not finestra.archivio.radio.brani
+    orologio[0] += 1.0
+    finto.posizione += 1.0
+    finestra._guarda_l_indirizzo()
+    assert [b.radio["uuid"] for b in finestra.archivio.radio.brani] == ["uuid-rai3"]
+    assert finestra._righe[-1].startswith("Rai Radio 3: un minuto di ascolto di fila, ora è fra le Recenti.")
+    assert finestra._statistiche.dati["conti"]["radio_tenute"] == 1 and not finestra.archivio.indirizzi.brani
+    monkeypatch.undo()

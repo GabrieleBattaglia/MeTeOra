@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.10.2] - 2026-11-11
+
+- Anche le radio entrano fra le Recenti solo dopo un minuto di ascolto di fila, come gli indirizzi: le radio provate per pochi secondi non entrano più. Una pausa o uno stop fanno ricominciare il conto, e la console dice quando una radio entra, o torna in cima. Chiesto da Gabriele.
+- radio-browser sa comunque che una radio è partita, come chiede a chi lo usa; le statistiche contano anche le radio entrate fra le Recenti.
+
 ## [3.10.1] - 2026-11-11
 
 - Un risultato della ricerca dei contenuti entra negli Indirizzi dopo un minuto di ascolto di fila, invece di dieci secondi, e così un brano degli Indirizzi torna in cima; la console lo dice. Chiesto da Gabriele.

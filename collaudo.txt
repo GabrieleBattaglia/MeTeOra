@@ -17,3 +17,5 @@ Collaudo di MeTeOra 3.10.0: Mostra altri risultati e Mostra altre radio.
 Finita una ricerca dei contenuti, l'ultima voce del ramo è Mostra altri risultati: Invio porta altri risultati in fondo, il fuoco resta sull'ultimo di prima, e la console dice quanti sono arrivati.
 Ripetendo Mostra altri risultati finché finiscono, la console dice che non ce ne sono altri, e la voce sparisce.
 In un gruppo grande di radio, come Italia, e nella ricerca di una radio con molti risultati, l'ultima voce è Mostra altre radio, e Invio aggiunge le trecento seguenti in fondo.
+Collaudo di MeTeOra 3.10.2: il minuto anche per le radio.
+Una radio fatta suonare per pochi secondi non entra fra le Recenti; ascoltata un minuto di fila sì, e la console lo dice.

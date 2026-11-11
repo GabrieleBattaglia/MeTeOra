@@ -1736,8 +1736,9 @@ class Pagina:
                 "flussi chiesti a yt-dlp: {flussi}; yt-dlp aggiornato {aggiornato}.").format(aperti=self.c("indirizzi_aperti"), playlist=dai_siti,
                 brani=plurale(self.c("brani_dai_siti"), "{n} brano", "{n} brani"), rilette=rilette_dai_siti, flussi=self.c("flussi_chiesti"),
                 aggiornato=_volte(self.c("ytdlp_aggiornato"))),
-            _("Radio ascoltate: {ascoltate}; cercate per nome: {cercate}; altre radio chieste: {altre}; titoli in onda arrivati: {titoli}.").format(
-                ascoltate=self.c("radio_ascoltate"), cercate=_volte(self.c("radio_cercate")), altre=_volte(self.c("radio_altre")), titoli=self.c("titoli_in_onda")),
+            _("Radio ascoltate: {ascoltate}, entrate fra le Recenti dopo un minuto di ascolto {tenute}; cercate per nome: {cercate}; altre radio chieste: {altre}; "
+                "titoli in onda arrivati: {titoli}.").format(ascoltate=self.c("radio_ascoltate"), tenute=self.c("radio_tenute"), cercate=_volte(self.c("radio_cercate")),
+                altre=_volte(self.c("radio_altre")), titoli=self.c("titoli_in_onda")),
             _("Playlist rinominate: {rinominate}; eliminate: {eliminate}; ordinate: {ordinate}; "
                 "invertite: {invertite}; mescolate: {mescolate}; rimesse nell'ordine di prima: {rimesse}.").format(rinominate=self.e("playlist_rinominata"),
                 eliminate=self.e("playlist_eliminata"), ordinate=self.e("playlist_ordinata"), invertite=self.e("ordine_invertito"),
