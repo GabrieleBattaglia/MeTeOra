@@ -7,11 +7,11 @@ Collaudo di MeTeOra 3.9.0: la ricerca dei contenuti, issue 47.
 La prima voce degli Indirizzi è Cerca contenuti; Invio apre il campo, Esc annulla e la console lo dice.
 Cerca, per esempio, lucio dalla caruso: dopo Cerca contenuti compare Ricerca di lucio dalla caruso, i risultati arrivano mentre navighi, e alla fine la console dice quanti sono, con il suono della ricerca finita.
 I risultati hanno titolo, autore e durata, e si suonano con X; ce ne sono di YouTube e di SoundCloud.
-Un risultato ascoltato meno di dieci secondi non va negli Indirizzi; ascoltato dieci secondi di fila sì, e richiudendo e riaprendo gli Indirizzi è in cima.
-Una pausa, o un salto con le frecce, prima dei dieci secondi fa ricominciare il conto.
+Un risultato ascoltato meno di un minuto non va negli Indirizzi; ascoltato un minuto di fila sì, e richiudendo e riaprendo gli Indirizzi è in cima.
+Una pausa, o un salto con le frecce, prima del minuto fa ricominciare il conto.
 Una seconda ricerca prende il posto della prima.
 Collaudo di MeTeOra 3.9.1 e 3.9.2.
-Dopo dieci secondi di ascolto di un risultato della ricerca, la console dice che ora è negli Indirizzi, o che torna in cima se c'era già.
+Dopo un minuto di ascolto di un risultato della ricerca, la console dice che ora è negli Indirizzi, o che torna in cima se c'era già.
 Fai una registrazione, poi apri le statistiche con Maiuscolo e F7: la sezione Le registrazioni ha file prodotti, tempo, peso, media, dirette e puntate, formati, la più lunga e la più pesante.
 Collaudo di MeTeOra 3.10.0: Mostra altri risultati e Mostra altre radio.
 Finita una ricerca dei contenuti, l'ultima voce del ramo è Mostra altri risultati: Invio porta altri risultati in fondo, il fuoco resta sull'ultimo di prima, e la console dice quanti sono arrivati.

@@ -1730,7 +1730,7 @@ class Pagina:
                 brani=plurale(self.c("brani_importati"), "{n} brano", "{n} brani"), di_nuovo=self.e("playlist_gia_importata"),
                 rilette=max(0, self.e("playlist_riletta") - rilette_dai_siti)),
             # La ricerca dei contenuti (issue 47, 3.9.0).
-            _("Ricerche dei contenuti: {cercati}, con {trovati} risultati e altri risultati chiesti {altri}; entrati negli Indirizzi dopo dieci secondi di ascolto: {tenuti}.").format(
+            _("Ricerche dei contenuti: {cercati}, con {trovati} risultati e altri risultati chiesti {altri}; entrati negli Indirizzi dopo un minuto di ascolto: {tenuti}.").format(
                 cercati=self.c("contenuti_cercati"), trovati=self.c("contenuti_trovati"), altri=_volte(self.c("contenuti_altri")), tenuti=self.c("indirizzi_tenuti")),
             _("Indirizzi in rete aperti: {aperti}; playlist dei siti: {playlist}, con {brani}, e rilette dal sito {rilette}; "
                 "flussi chiesti a yt-dlp: {flussi}; yt-dlp aggiornato {aggiornato}.").format(aperti=self.c("indirizzi_aperti"), playlist=dai_siti,

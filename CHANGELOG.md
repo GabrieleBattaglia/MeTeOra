@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.10.1] - 2026-11-11
+
+- Un risultato della ricerca dei contenuti entra negli Indirizzi dopo un minuto di ascolto di fila, invece di dieci secondi, e così un brano degli Indirizzi torna in cima; la console lo dice. Chiesto da Gabriele.
+
 ## [3.10.0] - 2026-11-11
 
 Le ricerche che non si fermano, come ha chiesto Gabriele: dove una ricerca si fermava a un numero di risultati, in fondo c'è la voce che la continua, come fa da sempre la ricerca in tutto MeTeOra con Mostra altri risultati.

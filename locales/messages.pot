@@ -6,10 +6,10 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: MeTeOra 3.10.0\n"
+"Project-Id-Version: MeTeOra 3.10.1\n"
 "Report-Msgid-Bugs-To: https://github.com/GabrieleBattaglia/MeTeOra/issues"
 "\n"
-"POT-Creation-Date: 2026-11-11 16:49+0100\n"
+"POT-Creation-Date: 2026-11-11 17:59+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1313,9 +1313,9 @@ msgstr ""
 #: finestra.py:555
 msgid ""
 "Freccia destra mostra i risultati, prima quelli di YouTube e poi quelli "
-"di SoundCloud, man mano che arrivano. X ne suona uno; suonato per dieci "
-"secondi di fila entra negli Indirizzi. Invio, Applicazioni o Spazio: menu"
-" con Riproduci e Cerca contenuti."
+"di SoundCloud, man mano che arrivano. X ne suona uno; suonato per un "
+"minuto di fila entra negli Indirizzi. Invio, Applicazioni o Spazio: menu "
+"con Riproduci e Cerca contenuti."
 msgstr ""
 
 #: finestra.py:557
@@ -6908,12 +6908,12 @@ msgstr ""
 
 #: finestra.py:10486
 #, python-brace-format
-msgid "{titolo}: dieci secondi di ascolto di fila, torna in cima agli Indirizzi."
+msgid "{titolo}: un minuto di ascolto di fila, torna in cima agli Indirizzi."
 msgstr ""
 
 #: finestra.py:10488
 #, python-brace-format
-msgid "{titolo}: dieci secondi di ascolto di fila, ora è negli Indirizzi."
+msgid "{titolo}: un minuto di ascolto di fila, ora è negli Indirizzi."
 msgstr ""
 
 #: finestra.py:10504
@@ -12414,7 +12414,7 @@ msgstr ""
 #, python-brace-format
 msgid ""
 "Ricerche dei contenuti: {cercati}, con {trovati} risultati e altri "
-"risultati chiesti {altri}; entrati negli Indirizzi dopo dieci secondi di "
+"risultati chiesti {altri}; entrati negli Indirizzi dopo un minuto di "
 "ascolto: {tenuti}."
 msgstr ""
 

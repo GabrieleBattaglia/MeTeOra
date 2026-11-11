@@ -760,7 +760,7 @@ def test_cerca_contenuti_negli_indirizzi_e_i_dieci_secondi(finestra, con_ytdlp, 
     finestra._popola_playlist()
     finestra.albero.Expand(finestra.nodo_indirizzi)
     assert [finestra.albero.GetItemText(v) for v in finestra._figli(finestra.nodo_indirizzi)][:2] == ["Cerca contenuti", "Ricerca di lucio dalla, 3 risultati"]
-    # Suonato per dieci secondi di fila entra negli Indirizzi; una pausa fa ricominciare il conto.
+    # Suonato per un minuto di fila (3.10.1) entra negli Indirizzi; una pausa fa ricominciare il conto.
     pl = finestra._contenuti_trovati["playlist"]
     brano = pl.brani[0]
     finto = types.SimpleNamespace(in_corso=brano.percorso, posizione=0.0, in_pausa=False)
@@ -780,13 +780,13 @@ def test_cerca_contenuti_negli_indirizzi_e_i_dieci_secondi(finestra, con_ytdlp, 
     # La pausa al sesto secondo: il conto riparte dal settimo.
     secondi(8, pausa_a=5)
     assert not finestra.archivio.indirizzi.brani
-    secondi(8)
+    secondi(58)
     assert not finestra.archivio.indirizzi.brani
     secondi(1)
     assert [b.percorso for b in finestra.archivio.indirizzi.brani] == [brano.percorso]
     assert finestra._statistiche.dati["conti"]["indirizzi_tenuti"] == 1
     # L'avviso nella console (3.9.1).
-    assert finestra._righe[-1].startswith("Caruso, Lucio Dalla: dieci secondi di ascolto di fila, ora è negli Indirizzi.")
+    assert finestra._righe[-1].startswith("Caruso, Lucio Dalla: un minuto di ascolto di fila, ora è negli Indirizzi.")
     secondi(20)
     assert len(finestra.archivio.indirizzi.brani) == 1
     monkeypatch.undo()
