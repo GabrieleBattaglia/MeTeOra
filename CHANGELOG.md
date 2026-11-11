@@ -4,7 +4,7 @@ Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
 ## [3.8.1] - 2026-11-11
 
-Pubblicata l'11 novembre 2026, con l'installatore e lo zip: la quinta release, che porta agli utenti tutto quello che è venuto dopo la 2.6.6, dalle aperture senza limiti della 2.7.0 alla localizzazione della 3.0.0, i componenti aggiuntivi, gli indirizzi dei siti, le radio, le registrazioni, la scheda degli effetti, la console letta e i capitoli detti suonando. Per scelta di Gabriele, senza il passaggio da VirusTotal, come le due release prima.
+Pubblicata l'11 novembre 2026, con l'installatore e lo zip: la quinta release, che porta agli utenti tutto quello che è venuto dopo la 2.6.6, dalle aperture senza limiti della 2.7.0 alla localizzazione della 3.0.0, i componenti aggiuntivi, gli indirizzi dei siti, le radio, le registrazioni, la scheda degli effetti, la console letta e i capitoli detti suonando. Senza il passaggio da VirusTotal, come le due release prima.
 
 Dal collaudo di Gabriele della 3.8.0, passata intera, con i tre suoni nuovi.
 
