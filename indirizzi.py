@@ -1,6 +1,6 @@
 # MeTeOra, gli indirizzi in rete: le pagine dei siti, aperte con yt-dlp.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 05/11/2026: nasce con la 3.2.0, tappa 19 b del piano, issue 40. Nella 3.3.0 le dirette, senza durata, e gli indirizzi diretti, che libmpv apre senza yt-dlp. Nella 3.3.1 la pagina che non c'e', il 404, e il 403 detti per chi ascolta. Nella 3.5.1 gli appunti con un indirizzo senza https://. Nella 3.8.0 i sottotitoli dei siti.
+# 05/11/2026: nasce con la 3.2.0, tappa 19 b del piano, issue 40. Nella 3.3.0 le dirette, senza durata, e gli indirizzi diretti, che libmpv apre senza yt-dlp. Nella 3.3.1 la pagina che non c'e', il 404, e il 403 detti per chi ascolta. Nella 3.5.1 gli appunti con un indirizzo senza https://. Nella 3.8.0 i sottotitoli dei siti. Nella 3.9.0 la ricerca dei contenuti, issue 47.
 
 """Gli indirizzi in rete (3.2.0, issue 40).
 
@@ -246,6 +246,58 @@ def _esegui(argomenti, attesa=ATTESA):
         return json.loads(uscita.decode("utf-8", "replace"))
     except ValueError:
         raise ErroreIndirizzo(_("yt-dlp ha risposto in un modo che non capisco")) from None
+
+
+# La ricerca dei contenuti (Gabriele, issue 47, 3.9.0): i motori di yt-dlp,
+# nell'ordine in cui si cercano, con quanti risultati chiedere a ognuno.
+MOTORI_DELLA_RICERCA = (("ytsearch", 20), ("scsearch", 10))
+
+
+def cerca(testo, trovato, fermo=None, attesa=ATTESA):
+    """Cerca testo su YouTube e poi su SoundCloud con yt-dlp, e da' a trovato
+    ogni risultato appena arriva, come (indirizzo, titolo, durata, autore):
+    yt-dlp con -j ne scrive uno per riga. fermo(), vero, la interrompe.
+    Torna quanti ne ha trovati. SenzaYtDlp se yt-dlp non c'e',
+    ErroreIndirizzo se non parte, o se dice di no senza trovare niente."""
+    if not ytdlp_presente():
+        raise SenzaYtDlp(_("yt-dlp non è installato"))
+    comando = _comando(["--flat-playlist", "--ignore-errors", *(f"{motore}{quanti}:{testo}" for motore, quanti in MOTORI_DELLA_RICERCA)])
+    comando[comando.index("-J")] = "-j"
+    with _stato:
+        while _aggiornamento_in_corso:
+            _stato.wait()
+        try:
+            processo = subprocess.Popen(comando, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,  # noqa: S603 - yt-dlp installato da MeTeOra
+                creationflags=_SENZA_FINESTRA)
+        except OSError as e:
+            raise ErroreIndirizzo(_("yt-dlp non parte: {errore}").format(errore=e.strerror or e)) from e
+        _processi.add(processo)
+    sveglia = threading.Timer(attesa, processo.kill)
+    sveglia.start()
+    quanti = 0
+    try:
+        for riga in processo.stdout:
+            if fermo is not None and fermo():
+                processo.kill()
+                break
+            try:
+                voce = json.loads(riga.decode("utf-8", "replace"))
+            except ValueError:
+                continue
+            if not isinstance(voce, dict) or not voce.get("url"):
+                continue
+            quanti += 1
+            trovato((voce["url"], str(voce.get("title") or voce["url"]), _durata(voce.get("duration")), voce.get("uploader") or voce.get("channel")))
+        errore = processo.stderr.read().decode("utf-8", "replace")
+        processo.wait()
+    finally:
+        sveglia.cancel()
+        with _stato:
+            _processi.discard(processo)
+            _stato.notify_all()
+    if processo.returncode and not quanti and not (fermo is not None and fermo()):
+        raise ErroreIndirizzo(_motivo(errore))
+    return quanti
 
 
 def chiudi():

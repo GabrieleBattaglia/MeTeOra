@@ -80,6 +80,7 @@ def test_il_capitolo_nuovo_si_dice_suonando_ma_non_dopo_un_salto(finestra, monke
     finestra._guarda_il_capitolo()
     assert len(finestra._righe) == righe + 1
     assert finestra._statistiche.dati["conti"]["capitoli_annunciati"] == 1
+    monkeypatch.undo()
 
 
 def test_i_sottotitoli_di_un_sito():

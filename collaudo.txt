@@ -3,3 +3,10 @@ Il ramo Radio ha in cima Recenti, con quante sono, come Recenti, 12 radio, e poi
 Ascolta una radio che sta in fondo a Recenti, chiudi e riapri il ramo Radio: la radio è in cima a Recenti.
 Riproduci, nel menu di Recenti, le suona dalla più recente; Togli dalle ascoltate, sul menu di una radio, la toglie.
 Una ricerca con la barra rovesciata nel ramo Radio aggiunge il suo ramo in fondo, e Recenti resta.
+Collaudo di MeTeOra 3.9.0: la ricerca dei contenuti, issue 47.
+La prima voce degli Indirizzi è Cerca contenuti; Invio apre il campo, Esc annulla e la console lo dice.
+Cerca, per esempio, lucio dalla caruso: dopo Cerca contenuti compare Ricerca di lucio dalla caruso, i risultati arrivano mentre navighi, e alla fine la console dice quanti sono, con il suono della ricerca finita.
+I risultati hanno titolo, autore e durata, e si suonano con X; ce ne sono di YouTube e di SoundCloud.
+Un risultato ascoltato meno di dieci secondi non va negli Indirizzi; ascoltato dieci secondi di fila sì, e richiudendo e riaprendo gli Indirizzi è in cima.
+Una pausa, o un salto con le frecce, prima dei dieci secondi fa ricominciare il conto.
+Una seconda ricerca prende il posto della prima.

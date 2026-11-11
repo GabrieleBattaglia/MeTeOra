@@ -2,6 +2,18 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.9.0] - 2026-11-11
+
+La ricerca dei contenuti in rete, issue 47, come l'ha chiesta Gabriele.
+
+- La prima voce del ramo Indirizzi è Cerca contenuti: Invio chiede che cosa cercare, Esc annulla, e Invio fa partire la ricerca, con yt-dlp, prima su YouTube, venti risultati, e poi su SoundCloud, dieci, video e audio.
+- La ricerca lavora in disparte, e i risultati arrivano man mano nel ramo Ricerca di, subito dopo Cerca contenuti, con il titolo, l'autore e la durata; la riga del ramo dice quanti sono, e cerco ancora finché la ricerca va avanti. Una ricerca nuova prende il posto di quella di prima.
+- I risultati si navigano e si suonano come gli altri brani, e il loro menu ha Riproduci, Aggiungi alla playlist, Aggiungi ai preferiti, Copia l'indirizzo e Cerca contenuti.
+- Un risultato entra negli Indirizzi solo dopo dieci secondi di ascolto di fila: una pausa, uno stop o un salto fanno ricominciare il conto. Anche un brano degli Indirizzi, ascoltato dieci secondi di fila, torna in cima.
+- Gli Indirizzi tengono cento brani, dal più recente: al centounesimo esce quello ascoltato meno di recente, come le radio recenti.
+- Le statistiche contano le ricerche, i risultati e quelli entrati negli Indirizzi.
+- Dentro: indirizzi.cerca, che legge yt-dlp con -j una riga alla volta; il giro di ogni secondo guarda il brano in rete che suona.
+
 ## [3.8.2] - 2026-11-11
 
 Le radio ascoltate di recente, come ha chiesto Gabriele, perché il ramo Radio non si affolli.

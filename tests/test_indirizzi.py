@@ -1,6 +1,6 @@
 # MeTeOra, le prove degli indirizzi in rete: yt-dlp finto, niente rete.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 10/11/2026, 3.5.1: gli appunti con un indirizzo senza https://.
+# 10/11/2026, 3.5.1: gli appunti con un indirizzo senza https://. Nella 3.9.0 la ricerca dei contenuti, i dieci secondi e i cento Indirizzi.
 # 05/11/2026: nasce con la 3.2.0, tappa 19 b del piano, issue 40. Nella 3.4.0 le prove dei Preferiti in rete (issue 41).
 
 import datetime
@@ -411,10 +411,10 @@ def test_ctrl_con_v_apre_l_indirizzo_degli_appunti_e_lo_suona(finestra, con_ytdl
     assert any("Apro un indirizzo di youtube.com" in r for r in finestra._righe)
     assert any("In riproduzione: Me at the zoo, da youtube.com" in r for r in finestra._righe)
     assert finestra.schedario.scheda(YOUTUBE)["durata"] == 19.0 and "play" in suoni_annotati
-    # Il ramo Indirizzi ha il brano, con i capitoli del sito da aprire.
+    # Il ramo Indirizzi ha Cerca contenuti (3.9.0) e il brano, con i capitoli del sito da aprire.
     voci = list(finestra._figli(finestra.nodo_indirizzi))
-    assert len(voci) == 1 and finestra.albero.GetItemText(voci[0]).startswith("Me at the zoo")
-    assert finestra.albero.ItemHasChildren(voci[0])
+    assert len(voci) == 2 and finestra.albero.GetItemText(voci[0]) == "Cerca contenuti"
+    assert finestra.albero.GetItemText(voci[1]).startswith("Me at the zoo") and finestra.albero.ItemHasChildren(voci[1])
     with open(finestra.archivio.percorso, encoding="utf-8") as f:
         assert json.load(f)["indirizzi"]["brani"][0]["titolo"] == "Me at the zoo"
     assert finestra._statistiche.dati["conti"]["indirizzi_aperti"] == 1
@@ -660,3 +660,120 @@ def test_i_preferiti_in_rete_nella_plancia(finestra, con_ytdlp, monkeypatch, suo
     finestra._seleziona(finestra._nodo_della_playlist(finestra.archivio.preferiti_in_rete))
     dove, brani, _cartelle = finestra._ramo_della_ricerca()
     assert dove == "nei Preferiti in rete" and [b.percorso for b, _nome in brani] == [YOUTUBE]
+
+
+# La ricerca dei contenuti (issue 47, 3.9.0).
+
+
+def test_la_ricerca_legge_yt_dlp_una_riga_alla_volta(tmp_path, monkeypatch):
+    righe = [json.dumps({"url": "https://www.youtube.com/watch?v=a", "title": "Caruso", "duration": 340, "uploader": "Lucio Dalla"}).encode() + b"\n",
+        b"non json\n", json.dumps({"title": "senza indirizzo"}).encode() + b"\n",
+        json.dumps({"url": "https://api.soundcloud.com/tracks/1", "title": "Caruso live", "duration": 297.8}).encode() + b"\n"]
+    lanciati = []
+
+    class Processo:
+        def __init__(self, comando, **_chiavi):
+            lanciati.append(comando)
+            self.stdout, self.returncode = iter(righe), 0
+            self.stderr = io.BytesIO(b"")
+
+        def wait(self):
+            return 0
+
+        def kill(self):
+            pass
+
+    monkeypatch.setattr(indirizzi, "ytdlp_presente", lambda: True)
+    monkeypatch.setattr(indirizzi.subprocess, "Popen", Processo)
+    trovati = []
+    assert indirizzi.cerca("lucio dalla caruso", trovati.append) == 2
+    assert trovati == [("https://www.youtube.com/watch?v=a", "Caruso", 340.0, "Lucio Dalla"), ("https://api.soundcloud.com/tracks/1", "Caruso live", 297.8, None)]
+    assert "-j" in lanciati[0] and "-J" not in lanciati[0]
+    assert lanciati[0][-2:] == ["ytsearch20:lucio dalla caruso", "scsearch10:lucio dalla caruso"]
+
+
+def test_cerca_contenuti_negli_indirizzi_e_i_dieci_secondi(finestra, con_ytdlp, monkeypatch):
+    import types
+
+    import finestra as modulo
+
+    finestra.albero.Expand(finestra.nodo_indirizzi)
+    primo = next(iter(finestra._figli(finestra.nodo_indirizzi)))
+    assert finestra.albero.GetItemText(primo) == "Cerca contenuti"
+
+    class Campo:
+        def __init__(self, *argomenti):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *argomenti):
+            return False
+
+        def ShowModal(self):
+            return modulo.wx.ID_OK
+
+        def GetValue(self):
+            return "  lucio   dalla "
+
+    def cerca(testo, trovato, fermo=None):
+        assert testo == "lucio dalla" and not fermo()
+        trovato(("https://www.youtube.com/watch?v=a", "Caruso", 340.0, "Lucio Dalla"))
+        trovato(("https://www.youtube.com/watch?v=b", "Attenti al lupo", None, None))
+        return 2
+
+    monkeypatch.setattr(modulo, "DialogoTesto", Campo)
+    monkeypatch.setattr(modulo.indirizzi, "cerca", cerca)
+    finestra._comando_cerca_contenuti()
+    voce = finestra._voce_dei_contenuti()
+    assert finestra.albero.GetItemText(voce) == "Ricerca di lucio dalla, 2 risultati"
+    assert finestra.albero.GetItemParent(voce) == finestra.nodo_indirizzi and list(finestra._figli(finestra.nodo_indirizzi))[1] == voce
+    figli = list(finestra._figli(voce))
+    assert len(figli) == 2 and finestra.albero.GetItemText(figli[0]).startswith("Caruso, Lucio Dalla")
+    assert "Ricerca di lucio dalla finita: 2 risultati." in finestra._righe[-1]
+    assert [e for e, _a in finestra._voci_del_menu(finestra._dati(figli[0]))] == ["Riproduci", "Aggiungi alla playlist", "Aggiungi ai preferiti", "Copia l'indirizzo", "Cerca contenuti"]
+    assert finestra._statistiche.dati["conti"]["contenuti_trovati"] == 2
+    # Il ramo si rifa' con gli Indirizzi: Cerca contenuti e i risultati restano in cima.
+    finestra._popola_playlist()
+    finestra.albero.Expand(finestra.nodo_indirizzi)
+    assert [finestra.albero.GetItemText(v) for v in finestra._figli(finestra.nodo_indirizzi)][:2] == ["Cerca contenuti", "Ricerca di lucio dalla, 2 risultati"]
+    # Suonato per dieci secondi di fila entra negli Indirizzi; una pausa fa ricominciare il conto.
+    pl = finestra._contenuti_trovati["playlist"]
+    brano = pl.brani[0]
+    finto = types.SimpleNamespace(in_corso=brano.percorso, posizione=0.0, in_pausa=False)
+    orologio = [100.0]
+    monkeypatch.setattr(finestra, "motore", finto)
+    monkeypatch.setattr(finestra, "coda", types.SimpleNamespace(playlist=pl, corrente=brano))
+    monkeypatch.setattr(modulo.time, "monotonic", lambda: orologio[0])
+
+    def secondi(n, pausa_a=None):
+        for i in range(n):
+            orologio[0] += 1.0
+            finto.in_pausa = i == pausa_a
+            if not finto.in_pausa:
+                finto.posizione += 1.0
+            finestra._guarda_l_indirizzo()
+
+    # La pausa al sesto secondo: il conto riparte dal settimo.
+    secondi(8, pausa_a=5)
+    assert not finestra.archivio.indirizzi.brani
+    secondi(8)
+    assert not finestra.archivio.indirizzi.brani
+    secondi(1)
+    assert [b.percorso for b in finestra.archivio.indirizzi.brani] == [brano.percorso]
+    assert finestra._statistiche.dati["conti"]["indirizzi_tenuti"] == 1
+    secondi(20)
+    assert len(finestra.archivio.indirizzi.brani) == 1
+    monkeypatch.undo()
+
+
+def test_gli_indirizzi_sono_al_piu_cento():
+    from playlist import INDIRIZZI_MASSIMI, Archivio, Brano
+
+    archivio = Archivio("x.json")
+    for n in range(INDIRIZZI_MASSIMI + 3):
+        archivio.metti_l_indirizzo(Brano(f"https://x.it/{n}", titolo=str(n)))
+    archivio.metti_l_indirizzo(Brano("https://x.it/50", titolo="di nuovo"))
+    assert len(archivio.indirizzi.brani) == INDIRIZZI_MASSIMI and archivio.indirizzi.brani[0].titolo == "di nuovo"
+    assert archivio.indirizzi.brani[1].titolo == str(INDIRIZZI_MASSIMI + 2)

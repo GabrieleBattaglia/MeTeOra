@@ -1,6 +1,6 @@
 # MeTeOra, le playlist: brani, playlist, archivio e coda di riproduzione.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 il sottobrano dei SID, nella 1.3.0 il loop A-B, nella 1.6.0 i Preferiti, nella 1.8.0 il filtro. Nella 1.59.0 Coda.altri, per la riproduzione casuale. Nella 1.104.0 si tolgono i brani dei file spariti, per la pulizia all'avvio. Nella 1.109.0 Ordina, Inverti l'ordine, Mescola e Ordine di prima. Nella 1.113.0 l'origine delle playlist importate da un M3U o da un PLS di altri programmi. Nella 1.113.1 un file con piu' sottobrani di cui nessuno ha la durata va in fondo con i brani senza durata, non in cima come se durasse zero (issue 24). Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 il titolo dei brani dei siti, Brano.copia, e gli Indirizzi nell'archivio, con le playlist dei siti. Nella 3.3.0 le radio e gli indirizzi diretti nei brani, e le radio ascoltate di recente. Nella 3.4.0 i Preferiti in rete, con preferiti_per, e gli indirizzi dei Preferiti di prima che ci passano da soli (issue 41). Nella 3.8.2 cento radio recenti.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 il sottobrano dei SID, nella 1.3.0 il loop A-B, nella 1.6.0 i Preferiti, nella 1.8.0 il filtro. Nella 1.59.0 Coda.altri, per la riproduzione casuale. Nella 1.104.0 si tolgono i brani dei file spariti, per la pulizia all'avvio. Nella 1.109.0 Ordina, Inverti l'ordine, Mescola e Ordine di prima. Nella 1.113.0 l'origine delle playlist importate da un M3U o da un PLS di altri programmi. Nella 1.113.1 un file con piu' sottobrani di cui nessuno ha la durata va in fondo con i brani senza durata, non in cima come se durasse zero (issue 24). Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 il titolo dei brani dei siti, Brano.copia, e gli Indirizzi nell'archivio, con le playlist dei siti. Nella 3.3.0 le radio e gli indirizzi diretti nei brani, e le radio ascoltate di recente. Nella 3.4.0 i Preferiti in rete, con preferiti_per, e gli indirizzi dei Preferiti di prima che ci passano da soli (issue 41). Nella 3.8.2 cento radio recenti. Nella 3.9.0 cento Indirizzi.
 
 """Il modello dei dati, senza finestre e senza suono.
 
@@ -43,6 +43,8 @@ NOME_DELLE_RADIO = _("Radio ascoltate di recente")
 # nel sottoramo Recenti; alla centounesima esce quella ascoltata meno di
 # recente (Gabriele, 11 novembre 2026).
 RADIO_RECENTI = 100
+# Quanti brani tengono gli Indirizzi, dal piu' recente (issue 47, 3.9.0).
+INDIRIZZI_MASSIMI = 100
 # Le chiavi di una radio di radio-browser in un brano, con il loro tipo.
 _CHIAVI_DELLA_RADIO = {"uuid": str, "paese": str, "codec": str, "bitrate": int, "generi": str}
 
@@ -470,7 +472,7 @@ class Archivio:
             self.preferiti_in_rete.brani.extend(dalla_rete)
         indirizzi = dati.get("indirizzi")
         if isinstance(indirizzi, dict):
-            self.indirizzi.brani = [Brano.da_dati(b) for b in indirizzi.get("brani", []) if formati.e_indirizzo(b.get("percorso"))]
+            self.indirizzi.brani = [Brano.da_dati(b) for b in indirizzi.get("brani", []) if formati.e_indirizzo(b.get("percorso"))][:INDIRIZZI_MASSIMI]
             self.in_rete = [Playlist.da_dati(p) for p in indirizzi.get("playlist", [])]
         radio = dati.get("radio")
         if isinstance(radio, dict):
@@ -528,6 +530,8 @@ class Archivio:
             vecchio.titolo = brano.titolo or vecchio.titolo
             brano = vecchio
         self.indirizzi.brani.insert(0, brano)
+        # Al centounesimo esce quello ascoltato meno di recente (3.9.0).
+        del self.indirizzi.brani[INDIRIZZI_MASSIMI:]
         return brano
 
     def metti_la_playlist_in_rete(self, pl):
