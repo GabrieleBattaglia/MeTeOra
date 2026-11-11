@@ -1,6 +1,6 @@
 # MeTeOra, le prove delle radio in rete: radio-browser finto, niente rete.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 06/11/2026: nasce con la 3.3.0, tappa 19 c del piano, issue 40. Nella 3.8.2 il sottoramo Recenti.
+# 06/11/2026: nasce con la 3.3.0, tappa 19 c del piano, issue 40. Nella 3.8.2 il sottoramo Recenti. Nella 3.10.0 Mostra altre radio.
 
 import datetime
 import json
@@ -328,3 +328,37 @@ def test_una_playlist_m3u_di_radio_suona_senza_yt_dlp(finestra, con_le_radio, mo
     finestra._riproduci_playlist(pl)
     assert con_le_radio == [("http://icestreaming.rai.it/3.mp3", None, False)] and not indirizzi.ytdlp_presente()
     assert not indirizzi.e_una_radio("http://icestreaming.rai.it/3.mp3")
+
+
+def test_mostra_altre_radio_in_fondo_alla_ricerca(finestra, con_le_radio, monkeypatch, suoni_annotati):
+    # Mostra altre radio (3.10.0): la pagina seguente di radio-browser, in fondo al ramo.
+    import types
+
+    chieste = []
+
+    def stazioni(limite=radio.RADIO_PER_GRUPPO, inizio=0, **filtro):
+        chieste.append((inizio, filtro))
+        pagina = radio.Pagina([radio.Stazione({"stationuuid": f"u{inizio + n}", "name": f"Radio {inizio + n}", "url": f"http://x/{inizio + n}.mp3"})
+            for n in range(2 if inizio < 600 else 1)])
+        pagina.piena = inizio < 600
+        return pagina
+
+    monkeypatch.setattr(radio, "stazioni", stazioni)
+    monkeypatch.setattr(radio, "cerca", lambda testo, limite=radio.RADIO_PER_GRUPPO, inizio=0: stazioni(limite, inizio, name=testo))
+    finestra._radio_trovate_per_nome("deejay", radio.cerca("deejay"))
+    voce = next(v for v in finestra._figli(finestra.nodo_radio) if finestra.albero.GetItemText(v).startswith("Ricerca di deejay"))
+    finestra.albero.Expand(voce)
+    figli = list(finestra._figli(voce))
+    assert [finestra.albero.GetItemText(v).split(",")[0] for v in figli] == ["Radio 0", "Radio 1", "Mostra altre radio"]
+    finestra._seleziona(figli[-1])
+    finestra._invio(types.SimpleNamespace(GetItem=finestra._voce_corrente))
+    assert chieste[-1] == (300, {"name": "deejay"})
+    figli = list(finestra._figli(voce))
+    assert [finestra.albero.GetItemText(v).split(",")[0] for v in figli] == ["Radio 0", "Radio 1", "Radio 300", "Radio 301", "Mostra altre radio"]
+    assert finestra._voce_corrente() == figli[2] and "Altre 2 radio in deejay: ora sono 4." in finestra._righe[-1]
+    # La pagina da 600 non e' piena: la voce sparisce, e sull'ultima radio non chiede piu' niente.
+    finestra._altre_radio(finestra._dati(figli[-1]))
+    assert chieste[-1][0] == 600 and "Mostra altre radio" not in [finestra.albero.GetItemText(v) for v in finestra._figli(voce)]
+    finestra._altre_radio(finestra._dati(list(finestra._figli(voce))[-1]))
+    assert len(chieste) == 3 and "si usa sulla sua voce" in finestra._righe[-1]
+    assert finestra._statistiche.dati["conti"]["radio_altre"] == 2

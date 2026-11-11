@@ -253,15 +253,34 @@ def _esegui(argomenti, attesa=ATTESA):
 MOTORI_DELLA_RICERCA = (("ytsearch", 20), ("scsearch", 10))
 
 
-def cerca(testo, trovato, fermo=None, attesa=ATTESA):
+def cerca(testo, trovato, fermo=None, attesa=ATTESA, pagina=0):
     """Cerca testo su YouTube e poi su SoundCloud con yt-dlp, e da' a trovato
     ogni risultato appena arriva, come (indirizzo, titolo, durata, autore):
-    yt-dlp con -j ne scrive uno per riga. fermo(), vero, la interrompe.
-    Torna quanti ne ha trovati. SenzaYtDlp se yt-dlp non c'e',
-    ErroreIndirizzo se non parte, o se dice di no senza trovare niente."""
+    yt-dlp con -j ne scrive uno per riga. pagina 0 sono i primi di ogni
+    motore, quanti ne dice MOTORI_DELLA_RICERCA, la 1 i seguenti, per Mostra
+    altri risultati (3.10.0). fermo(), vero, la interrompe. Torna quanti ne
+    ha trovati. SenzaYtDlp se yt-dlp non c'e', ErroreIndirizzo se non parte,
+    o se dice di no senza trovare niente."""
     if not ytdlp_presente():
         raise SenzaYtDlp(_("yt-dlp non è installato"))
-    comando = _comando(["--flat-playlist", "--ignore-errors", *(f"{motore}{quanti}:{testo}" for motore, quanti in MOTORI_DELLA_RICERCA)])
+    quanti, errori = 0, []
+    for motore, per_pagina in MOTORI_DELLA_RICERCA:
+        if fermo is not None and fermo():
+            break
+        primo, ultimo = per_pagina * pagina + 1, per_pagina * (pagina + 1)
+        trovati, errore = _cerca_con(f"{motore}{ultimo}:{testo}", f"{primo}:{ultimo}", trovato, fermo, attesa)
+        quanti += trovati
+        if errore:
+            errori.append(errore)
+    if errori and not quanti and not (fermo is not None and fermo()):
+        raise ErroreIndirizzo(_motivo(errori[0]))
+    return quanti
+
+
+def _cerca_con(ricerca, voci, trovato, fermo, attesa):
+    """Una ricerca di yt-dlp, come ytsearch40:caruso, con le sole voci date,
+    come 21:40: (quanti risultati, il testo dell'errore se yt-dlp dice di no)."""
+    comando = _comando(["--flat-playlist", "--ignore-errors", "--playlist-items", voci, ricerca])
     comando[comando.index("-J")] = "-j"
     with _stato:
         while _aggiornamento_in_corso:
@@ -295,9 +314,7 @@ def cerca(testo, trovato, fermo=None, attesa=ATTESA):
         with _stato:
             _processi.discard(processo)
             _stato.notify_all()
-    if processo.returncode and not quanti and not (fermo is not None and fermo()):
-        raise ErroreIndirizzo(_motivo(errore))
-    return quanti
+    return quanti, (errore if processo.returncode else "")
 
 
 def chiudi():

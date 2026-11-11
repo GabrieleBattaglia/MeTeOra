@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17). Nella 2.7.1 la precedenza ai tasti sul lavoro in disparte. Nella 2.7.2 i lettori di rete chiusi all'uscita. Nella 2.7.3 i tasti funzione nelle tabelle COMANDI_DEI_TASTI_FUNZIONE e INTERRUTTORI, lette dalla prova della guida rapida, e le righe del cruscotto nell'ordine della regola. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.1.0 la voce Componenti aggiuntivi delle impostazioni, e gli altri banchi liberi da scaricare. Nella 3.2.0 gli indirizzi in rete: Ctrl con V, Apri un indirizzo, il ramo Indirizzi, il flusso chiesto prima di suonare e in anticipo per il seguente, e yt-dlp aggiornato ogni giorno. Nella 3.3.0 il ramo Radio, con la ricerca delle radio, il titolo in onda, le dirette che non si saltano e i contatori di radio, componenti e lingua. Nella 3.3.1 la voce Lingua con la sua lista anche con una lingua sola. Nella 3.4.0 i Preferiti in rete, un ramo in cima ai Preferiti, con F4 che sceglie la categoria (issue 41). Nella 3.5.0 le registrazioni, con la famiglia di R e il ramo Registrazioni, e i comandi dei marker su T (issue 42). Nella 3.6.0 la scheda degli effetti, con Ctrl e Maiuscolo con Z (issue 43). Nella 3.7.0 la console letta da sola, con la famiglia di F10 (issue 44). Nella 3.8.0 D per i titoli in onda e i capitoli, e il capitolo nuovo detto suonando (issue 45). Nella 3.8.1 anche i caratteri di console e cruscotto hanno lo sfondo scelto, che NVDA legge. Nella 3.8.2 le radio ascoltate di recente nel sottoramo Recenti. Nella 3.9.0 Cerca contenuti negli Indirizzi, i risultati man mano e i dieci secondi per entrare negli Indirizzi (issue 47). Nella 3.9.1 l'avviso dei dieci secondi. Nella 3.9.2 formato, sorgente e primati delle registrazioni per le statistiche.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17). Nella 2.7.1 la precedenza ai tasti sul lavoro in disparte. Nella 2.7.2 i lettori di rete chiusi all'uscita. Nella 2.7.3 i tasti funzione nelle tabelle COMANDI_DEI_TASTI_FUNZIONE e INTERRUTTORI, lette dalla prova della guida rapida, e le righe del cruscotto nell'ordine della regola. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.1.0 la voce Componenti aggiuntivi delle impostazioni, e gli altri banchi liberi da scaricare. Nella 3.2.0 gli indirizzi in rete: Ctrl con V, Apri un indirizzo, il ramo Indirizzi, il flusso chiesto prima di suonare e in anticipo per il seguente, e yt-dlp aggiornato ogni giorno. Nella 3.3.0 il ramo Radio, con la ricerca delle radio, il titolo in onda, le dirette che non si saltano e i contatori di radio, componenti e lingua. Nella 3.3.1 la voce Lingua con la sua lista anche con una lingua sola. Nella 3.4.0 i Preferiti in rete, un ramo in cima ai Preferiti, con F4 che sceglie la categoria (issue 41). Nella 3.5.0 le registrazioni, con la famiglia di R e il ramo Registrazioni, e i comandi dei marker su T (issue 42). Nella 3.6.0 la scheda degli effetti, con Ctrl e Maiuscolo con Z (issue 43). Nella 3.7.0 la console letta da sola, con la famiglia di F10 (issue 44). Nella 3.8.0 D per i titoli in onda e i capitoli, e il capitolo nuovo detto suonando (issue 45). Nella 3.8.1 anche i caratteri di console e cruscotto hanno lo sfondo scelto, che NVDA legge. Nella 3.8.2 le radio ascoltate di recente nel sottoramo Recenti. Nella 3.9.0 Cerca contenuti negli Indirizzi, i risultati man mano e i dieci secondi per entrare negli Indirizzi (issue 47). Nella 3.9.1 l'avviso dei dieci secondi. Nella 3.9.2 formato, sorgente e primati delle registrazioni per le statistiche. Nella 3.10.0 Mostra altri risultati dei contenuti e Mostra altre radio.
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -550,6 +550,8 @@ TASTI_DEL_CONTESTO = {
     "marker": (_("un marker"), _("Invio rinomina il marker, Canc lo elimina, X fa come sul suo brano. Applicazioni o Spazio: menu con Vai al marker, che suona il brano da lì, Rinomina ed Elimina.")),
     "comando": (_("un comando"), _("Invio esegue il comando.")),
     # Gli Indirizzi e i loro brani (3.2.0).
+    "altri_contenuti": (_("la voce Mostra altri risultati"), _("Invio cerca i risultati seguenti, venti di YouTube e dieci di SoundCloud, che arrivano in fondo al ramo.")),
+    "altre_radio": (_("la voce Mostra altre radio"), _("Invio chiede a radio-browser le trecento radio seguenti, che arrivano in fondo al ramo.")),
     "contenuti": (_("i risultati di una ricerca dei contenuti"), _("Freccia destra mostra i risultati, prima quelli di YouTube e poi quelli di SoundCloud, man mano che arrivano. "
         "X ne suona uno; suonato per dieci secondi di fila entra negli Indirizzi. Invio, Applicazioni o Spazio: menu con Riproduci e Cerca contenuti.")),
     "indirizzi": (_("gli Indirizzi"), _("Freccia destra mostra Cerca contenuti, i risultati dell'ultima ricerca, le playlist dei siti e i brani, fino a cento, dal più recente. Invio, Applicazioni o Spazio: menu con Riproduci, "
@@ -3761,6 +3763,8 @@ class Finestra(wx.Frame):
         if tipo == "contenuti":
             for brano in dati["playlist"].brani:
                 self._aggiungi_voce(voce, "brano", dati["playlist"], brano)
+            if self._contenuti_trovati and self._contenuti_trovati.get("altri") and not self._contenuti_trovati["in_corso"]:
+                self.albero.AppendItem(voce, _("Mostra altri risultati"), data={"tipo": "altri_contenuti"})
             return
         if tipo in ("radio", "radio_elenco", "radio_gruppo"):
             self._carica_le_radio(voce, dati)
@@ -4044,6 +4048,10 @@ class Finestra(wx.Frame):
             getattr(self, f"_comando_{dati['comando']}")()
         elif dati and dati["tipo"] == "altri":
             self._altri_risultati(dati)
+        elif dati and dati["tipo"] == "altri_contenuti":
+            self._altri_contenuti()
+        elif dati and dati["tipo"] == "altre_radio":
+            self._altre_radio(dati)
         elif dati and dati["tipo"] == "marker":
             self._rinomina_il_marker(dati["chiave"], dati["marker"])
         elif dati and dati["tipo"] == "capitolo":
@@ -4131,6 +4139,10 @@ class Finestra(wx.Frame):
                 (_("Nuova ricerca"), self._ricerca_globale), (_("Ferma la ricerca"), self._ferma_ricerca), dettagli_della_voce]
         if tipo == "altri":
             return [(_("Mostra altri risultati"), lambda: self._altri_risultati(dati))]
+        if tipo == "altri_contenuti":
+            return [(_("Mostra altri risultati"), self._altri_contenuti)]
+        if tipo == "altre_radio":
+            return [(_("Mostra altre radio"), lambda: self._altre_radio(dati))]
         if tipo == "gruppo_risultati":
             gruppo = dati["gruppo"]
             return [(_("Salva come playlist"), lambda: self._salva_risultati(gruppo)), dettagli_della_voce]
@@ -10081,6 +10093,8 @@ class Finestra(wx.Frame):
             return
         pl = Playlist(_("Radio, {gruppo}").format(gruppo=dati["nome"]), [s.come_brano() for s in esito], cartella="")
         pl.radio_gruppo = True
+        # Per Mostra altre radio (3.10.0): la domanda e da dove continuare.
+        pl.piena, pl.domanda, pl.inizio = bool(getattr(esito, "piena", False)), dict(dati["filtro"]), radio.RADIO_PER_GRUPPO
         dati["playlist"] = pl
         self._riempi_il_gruppo(voce, dati)
 
@@ -10088,6 +10102,9 @@ class Finestra(wx.Frame):
         pl = dati["playlist"]
         for brano in pl.brani:
             self._aggiungi_voce(voce, "brano", pl, brano)
+        # In fondo Mostra altre radio, se radio-browser ne ha altre (3.10.0).
+        if getattr(pl, "piena", False):
+            self.albero.AppendItem(voce, _("Mostra altre radio"), data={"tipo": "altre_radio", "ramo": voce})
         if not pl.brani:
             self.albero.SetItemHasChildren(voce, False)
             self._riscontro("niente_da_suonare", _("In {nome} non ci sono radio che funzionano.").format(nome=dati["nome"]))
@@ -10141,6 +10158,7 @@ class Finestra(wx.Frame):
             return
         pl = Playlist(_("Radio, ricerca di {testo}").format(testo=testo), [s.come_brano() for s in esito], cartella="")
         pl.radio_gruppo = True
+        pl.piena, pl.domanda, pl.inizio = bool(getattr(esito, "piena", False)), {"name": testo}, radio.RADIO_PER_GRUPPO
         self._radio_trovate = (pl, testo)
         if not esito:
             self._riscontro("non_disponibile", _("Nessuna radio con {testo} nel nome.").format(testo=testo))
@@ -10239,22 +10257,14 @@ class Finestra(wx.Frame):
         numero = self._numero_della_ricerca
         pl = Playlist(_("Ricerca di {testo}").format(testo=testo), [], cartella="")
         pl.contenuti = True
-        self._contenuti_trovati = {"playlist": pl, "testo": testo, "in_corso": True}
+        self._contenuti_trovati = {"playlist": pl, "testo": testo, "in_corso": True, "pagina": 0, "altri": False}
         self._statistiche.conta("contenuti_cercati")
         self._controlla_ytdlp()
         self._riscontro("ricerca_avviata", _("Cerco {testo} su YouTube e SoundCloud: i risultati arrivano man mano nel ramo Ricerca di {testo}, negli Indirizzi.").format(testo=testo))
         voce = self._metti_la_voce_dei_contenuti()
         if voce is not None:
             self._seleziona(voce)
-
-        def lavoro():
-            try:
-                return indirizzi.cerca(testo, lambda risultato: wx.CallAfter(self._contenuto_trovato, numero, risultato),
-                    fermo=lambda: self._chiusa or self._numero_della_ricerca != numero)
-            except indirizzi.ErroreIndirizzo as e:
-                return e
-
-        indirizzi_in_disparte(lavoro, lambda esito: wx.CallAfter(self._contenuti_finiti, numero, esito))
+        self._avvia_i_contenuti(numero, testo, 0)
 
     def _etichetta_dei_contenuti(self):
         dati = self._contenuti_trovati
@@ -10311,17 +10321,127 @@ class Finestra(wx.Frame):
     def _contenuti_finiti(self, numero, esito):
         if self._chiusa or numero != self._numero_della_ricerca or self._contenuti_trovati is None:
             return
-        self._contenuti_trovati["in_corso"] = False
+        dati = self._contenuti_trovati
+        dati["in_corso"] = False
+        # Mostra altri risultati, se questa pagina ne ha portati (3.10.0).
+        dati["altri"] = isinstance(esito, int) and esito > 0
         voce = self._voce_dei_contenuti()
         if voce is not None:
             self.albero.SetItemText(voce, self._etichetta_dei_contenuti())
-        testo, n = self._contenuti_trovati["testo"], len(self._contenuti_trovati["playlist"].brani)
+            if dati["altri"] and (self._dati(voce) or {}).get("caricato"):
+                self.albero.AppendItem(voce, _("Mostra altri risultati"), data={"tipo": "altri_contenuti"})
+        testo, n = dati["testo"], len(dati["playlist"].brani)
         if isinstance(esito, Exception):
             self._riscontro("errore", _("La ricerca di {testo} non riesce: {motivo}.").format(testo=testo, motivo=esito))
+        elif dati["pagina"] and not esito:
+            self._riscontro("niente_da_suonare", _("Non ci sono altri risultati per {testo}.").format(testo=testo))
+        elif dati["pagina"]:
+            self._riscontro("ricerca_finita", ngettext("Un altro risultato per {testo}: ora sono {totale}.", "Altri {n} risultati per {testo}: ora sono {totale}.", esito).format(
+                n=esito, testo=testo, totale=n))
         elif not n:
             self._riscontro("niente_da_suonare", _("Nessun contenuto trovato per {testo}.").format(testo=testo))
         else:
             self._riscontro("ricerca_finita", ngettext("Ricerca di {testo} finita: {n} risultato.", "Ricerca di {testo} finita: {n} risultati.", n).format(testo=testo, n=n))
+
+    def _avvia_i_contenuti(self, numero, testo, pagina):
+        """La ricerca dei contenuti in disparte, una pagina."""
+        def lavoro():
+            try:
+                return indirizzi.cerca(testo, lambda risultato: wx.CallAfter(self._contenuto_trovato, numero, risultato),
+                    fermo=lambda: self._chiusa or self._numero_della_ricerca != numero, pagina=pagina)
+            except indirizzi.ErroreIndirizzo as e:
+                return e
+
+        indirizzi_in_disparte(lavoro, lambda esito: wx.CallAfter(self._contenuti_finiti, numero, esito))
+
+    def _altri_contenuti(self):
+        """Mostra altri risultati, in fondo ai risultati della ricerca dei
+        contenuti (Gabriele, 3.10.0): la pagina seguente, in fondo al ramo."""
+        dati = self._contenuti_trovati
+        if dati is None or not dati.get("altri"):
+            self._riscontro("non_disponibile", _("Non ci sono altri risultati da cercare."))
+            return
+        if dati["in_corso"]:
+            self._riscontro("non_disponibile", _("La ricerca di {testo} va ancora avanti: un momento.").format(testo=dati["testo"]))
+            return
+        voce = self._voce_dei_contenuti()
+        if voce is not None:
+            self._togli_la_voce_degli_altri(voce, "altri_contenuti")
+        dati["pagina"] += 1
+        dati["in_corso"], dati["altri"] = True, False
+        self._numero_della_ricerca += 1
+        if voce is not None:
+            self.albero.SetItemText(voce, self._etichetta_dei_contenuti())
+        self._statistiche.conta("contenuti_altri")
+        self._riscontro("ricerca_avviata", _("Cerco altri risultati per {testo}: arrivano in fondo al ramo.").format(testo=dati["testo"]))
+        self._avvia_i_contenuti(self._numero_della_ricerca, dati["testo"], dati["pagina"])
+
+    def _togli_la_voce_degli_altri(self, voce, tipo):
+        """Toglie la voce Mostra altri da un ramo; se aveva il fuoco, lo passa
+        all'ultima voce prima di lei, dove i risultati nuovi arrivano dopo."""
+        altri = next((v for v in self._figli(voce) if (self._dati(v) or {}).get("tipo") == tipo), None)
+        if altri is None:
+            return
+        fuoco = altri == self._voce_corrente()
+        figli = [v for v in self._figli(voce) if v != altri]
+        self.albero.Delete(altri)
+        if fuoco:
+            self._seleziona(figli[-1] if figli else voce)
+
+    def _altre_radio(self, dati):
+        """Mostra altre radio, in fondo a una ricerca o a un gruppo di radio
+        (Gabriele, 3.10.0): le seguenti di radio-browser, in fondo al ramo."""
+        ramo = dati.get("ramo")
+        gruppo = self._dati(ramo) if ramo is not None and ramo.IsOk() else None
+        pl = (gruppo or {}).get("playlist")
+        if pl is None or not getattr(pl, "domanda", None):
+            self._riscontro("non_disponibile", _("Mostra altre radio si usa sulla sua voce, in fondo a un ramo di radio."))
+            return
+        if getattr(pl, "in_arrivo", False):
+            self._riscontro("non_disponibile", _("Sto già chiedendo altre radio a radio-browser: un momento."))
+            return
+        pl.in_arrivo = True
+        self._statistiche.conta("radio_altre")
+        self._riscontro("ricerca_avviata", _("Chiedo altre radio di {nome} a radio-browser.").format(nome=gruppo["nome"]))
+
+        def domanda():
+            try:
+                return radio.stazioni(radio.RADIO_PER_GRUPPO, pl.inizio, **pl.domanda)
+            except radio.ErroreRadio as e:
+                return e
+
+        radio_in_disparte(domanda, lambda esito: wx.CallAfter(self._altre_radio_arrivate, gruppo, esito))
+
+    def _altre_radio_arrivate(self, gruppo, esito):
+        pl = gruppo["playlist"]
+        pl.in_arrivo = False
+        if self._chiusa:
+            return
+        if isinstance(esito, Exception):
+            self._riscontro("errore", _("{errore}.").format(errore=esito))
+            return
+        viste = {(b.radio or {}).get("uuid") for b in pl.brani}
+        nuove = [s.come_brano() for s in esito if s.uuid not in viste]
+        prima = len(pl.brani)
+        pl.brani.extend(nuove)
+        pl.inizio += radio.RADIO_PER_GRUPPO
+        pl.piena = bool(getattr(esito, "piena", False)) and bool(nuove)
+        voce = next((v for v in self._tutte_le_voci(self.nodo_radio) if self._dati(v) is gruppo), None)
+        if voce is not None and gruppo.get("caricato") is not False:
+            fuoco = (self._dati(self._voce_corrente()) or {}).get("tipo") == "altre_radio" and self._sotto(self._voce_corrente(), voce)
+            self._togli_la_voce_degli_altri(voce, "altre_radio")
+            for brano in nuove:
+                self._aggiungi_voce(voce, "brano", pl, brano)
+            if pl.piena:
+                self.albero.AppendItem(voce, _("Mostra altre radio"), data={"tipo": "altre_radio", "ramo": voce})
+            figli = list(self._figli(voce))
+            if fuoco and nuove and len(figli) > prima:
+                self._seleziona(figli[prima])
+        if nuove:
+            self._riscontro("altri_risultati", ngettext("Un'altra radio in {nome}: ora sono {totale}.", "Altre {n} radio in {nome}: ora sono {totale}.", len(nuove)).format(
+                n=len(nuove), nome=gruppo["nome"], totale=len(pl.brani)))
+        else:
+            self._riscontro("niente_da_suonare", _("Non ci sono altre radio in {nome}.").format(nome=gruppo["nome"]))
 
     def _voci_del_menu_dei_contenuti(self, dati):
         cerca = (_("Cerca contenuti"), self._comando_cerca_contenuti)

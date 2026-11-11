@@ -2,6 +2,16 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.10.0] - 2026-11-11
+
+Le ricerche che non si fermano, come ha chiesto Gabriele: dove una ricerca si fermava a un numero di risultati, in fondo c'è la voce che la continua, come fa da sempre la ricerca in tutto MeTeOra con Mostra altri risultati.
+
+- Cerca contenuti: in fondo ai risultati, finita la ricerca, Mostra altri risultati cerca i trenta seguenti, venti di YouTube e dieci di SoundCloud, che arrivano man mano in fondo al ramo; la console dice quanti ne sono arrivati, o che non ce ne sono altri, e allora la voce sparisce.
+- Radio: in fondo alla ricerca per nome e ai gruppi per paese, genere e lingua, quando radio-browser ne ha altre, Mostra altre radio chiede le trecento seguenti, senza doppioni.
+- Invio e il menu della voce fanno lo stesso; il fuoco resta sull'ultimo risultato di prima, e i nuovi arrivano subito sotto.
+- Le statistiche contano gli altri risultati e le altre radio chiesti.
+- Dentro: indirizzi.cerca a pagine, un motore alla volta con --playlist-items; radio.stazioni con inizio, e la sua Pagina che sa se è piena.
+
 ## [3.9.2] - 2026-11-11
 
 Le statistiche delle registrazioni, come le altre raccolte, su domanda di Gabriele.

@@ -1,6 +1,6 @@
 # MeTeOra, le prove degli indirizzi in rete: yt-dlp finto, niente rete.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 10/11/2026, 3.5.1: gli appunti con un indirizzo senza https://. Nella 3.9.0 la ricerca dei contenuti, i dieci secondi e i cento Indirizzi.
+# 10/11/2026, 3.5.1: gli appunti con un indirizzo senza https://. Nella 3.9.0 la ricerca dei contenuti, i dieci secondi e i cento Indirizzi. Nella 3.10.0 la ricerca a pagine e Mostra altri risultati.
 # 05/11/2026: nasce con la 3.2.0, tappa 19 b del piano, issue 40. Nella 3.4.0 le prove dei Preferiti in rete (issue 41).
 
 import datetime
@@ -674,7 +674,8 @@ def test_la_ricerca_legge_yt_dlp_una_riga_alla_volta(tmp_path, monkeypatch):
     class Processo:
         def __init__(self, comando, **_chiavi):
             lanciati.append(comando)
-            self.stdout, self.returncode = iter(righe), 0
+            # YouTube risponde con le righe, SoundCloud con niente.
+            self.stdout, self.returncode = iter(righe if len(lanciati) == 1 else []), 0
             self.stderr = io.BytesIO(b"")
 
         def wait(self):
@@ -689,7 +690,12 @@ def test_la_ricerca_legge_yt_dlp_una_riga_alla_volta(tmp_path, monkeypatch):
     assert indirizzi.cerca("lucio dalla caruso", trovati.append) == 2
     assert trovati == [("https://www.youtube.com/watch?v=a", "Caruso", 340.0, "Lucio Dalla"), ("https://api.soundcloud.com/tracks/1", "Caruso live", 297.8, None)]
     assert "-j" in lanciati[0] and "-J" not in lanciati[0]
-    assert lanciati[0][-2:] == ["ytsearch20:lucio dalla caruso", "scsearch10:lucio dalla caruso"]
+    # Un motore alla volta, con le voci della pagina (3.10.0).
+    assert lanciati[0][-3:] == ["--playlist-items", "1:20", "ytsearch20:lucio dalla caruso"]
+    assert lanciati[1][-3:] == ["--playlist-items", "1:10", "scsearch10:lucio dalla caruso"]
+    lanciati.clear()
+    assert indirizzi.cerca("caruso", lambda _r: None, pagina=1) == 2
+    assert lanciati[0][-3:] == ["--playlist-items", "21:40", "ytsearch40:caruso"] and lanciati[1][-3:] == ["--playlist-items", "11:20", "scsearch20:caruso"]
 
 
 def test_cerca_contenuti_negli_indirizzi_e_i_dieci_secondi(finestra, con_ytdlp, monkeypatch):
@@ -717,11 +723,16 @@ def test_cerca_contenuti_negli_indirizzi_e_i_dieci_secondi(finestra, con_ytdlp, 
         def GetValue(self):
             return "  lucio   dalla "
 
-    def cerca(testo, trovato, fermo=None):
+    def cerca(testo, trovato, fermo=None, pagina=0):
         assert testo == "lucio dalla" and not fermo()
-        trovato(("https://www.youtube.com/watch?v=a", "Caruso", 340.0, "Lucio Dalla"))
-        trovato(("https://www.youtube.com/watch?v=b", "Attenti al lupo", None, None))
-        return 2
+        if pagina == 0:
+            trovato(("https://www.youtube.com/watch?v=a", "Caruso", 340.0, "Lucio Dalla"))
+            trovato(("https://www.youtube.com/watch?v=b", "Attenti al lupo", None, None))
+            return 2
+        if pagina == 1:
+            trovato(("https://www.youtube.com/watch?v=c", "Piazza grande", 260.0, "Lucio Dalla"))
+            return 1
+        return 0
 
     monkeypatch.setattr(modulo, "DialogoTesto", Campo)
     monkeypatch.setattr(modulo.indirizzi, "cerca", cerca)
@@ -730,14 +741,25 @@ def test_cerca_contenuti_negli_indirizzi_e_i_dieci_secondi(finestra, con_ytdlp, 
     assert finestra.albero.GetItemText(voce) == "Ricerca di lucio dalla, 2 risultati"
     assert finestra.albero.GetItemParent(voce) == finestra.nodo_indirizzi and list(finestra._figli(finestra.nodo_indirizzi))[1] == voce
     figli = list(finestra._figli(voce))
-    assert len(figli) == 2 and finestra.albero.GetItemText(figli[0]).startswith("Caruso, Lucio Dalla")
+    assert len(figli) == 3 and finestra.albero.GetItemText(figli[0]).startswith("Caruso, Lucio Dalla")
     assert "Ricerca di lucio dalla finita: 2 risultati." in finestra._righe[-1]
+    # In fondo Mostra altri risultati (3.10.0): la pagina seguente arriva in fondo.
+    assert finestra.albero.GetItemText(figli[2]) == "Mostra altri risultati"
+    finestra._seleziona(figli[2])
+    finestra._invio(types.SimpleNamespace(GetItem=finestra._voce_corrente))
+    figli = list(finestra._figli(voce))
+    assert [finestra.albero.GetItemText(v).split(",")[0] for v in figli] == ["Caruso", "Attenti al lupo", "Piazza grande", "Mostra altri risultati"]
+    assert "Un altro risultato per lucio dalla: ora sono 3." in finestra._righe[-1] and finestra._voce_corrente() == figli[1]
+    finestra._altri_contenuti()
+    assert "Non ci sono altri risultati per lucio dalla." in finestra._righe[-1]
+    assert [finestra.albero.GetItemText(v).split(",")[0] for v in finestra._figli(voce)] == ["Caruso", "Attenti al lupo", "Piazza grande"]
+    figli = list(finestra._figli(voce))[:2]
     assert [e for e, _a in finestra._voci_del_menu(finestra._dati(figli[0]))] == ["Riproduci", "Aggiungi alla playlist", "Aggiungi ai preferiti", "Copia l'indirizzo", "Cerca contenuti"]
-    assert finestra._statistiche.dati["conti"]["contenuti_trovati"] == 2
+    assert finestra._statistiche.dati["conti"]["contenuti_trovati"] == 3 and finestra._statistiche.dati["conti"]["contenuti_altri"] == 2
     # Il ramo si rifa' con gli Indirizzi: Cerca contenuti e i risultati restano in cima.
     finestra._popola_playlist()
     finestra.albero.Expand(finestra.nodo_indirizzi)
-    assert [finestra.albero.GetItemText(v) for v in finestra._figli(finestra.nodo_indirizzi)][:2] == ["Cerca contenuti", "Ricerca di lucio dalla, 2 risultati"]
+    assert [finestra.albero.GetItemText(v) for v in finestra._figli(finestra.nodo_indirizzi)][:2] == ["Cerca contenuti", "Ricerca di lucio dalla, 3 risultati"]
     # Suonato per dieci secondi di fila entra negli Indirizzi; una pausa fa ricominciare il conto.
     pl = finestra._contenuti_trovati["playlist"]
     brano = pl.brani[0]

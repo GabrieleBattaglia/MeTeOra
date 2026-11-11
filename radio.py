@@ -1,6 +1,6 @@
 # MeTeOra, le radio in rete: le stazioni di radio-browser.info.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 06/11/2026: nasce con la 3.3.0, tappa 19 c del piano, issue 40.
+# 06/11/2026: nasce con la 3.3.0, tappa 19 c del piano, issue 40. Nella 3.10.0 le pagine, per Mostra altre radio.
 
 """Le radio in rete (3.3.0, issue 40).
 
@@ -163,16 +163,27 @@ def _stazioni(risposta):
     return stazioni
 
 
-def stazioni(limite=RADIO_PER_GRUPPO, **filtro):
+class Pagina(list):
+    """Una pagina di radio (3.10.0): piena se radio-browser ne ha date quante
+    se ne chiedevano, e allora ce ne possono essere altre."""
+
+    piena = False
+
+
+def stazioni(limite=RADIO_PER_GRUPPO, inizio=0, **filtro):
     """Le radio che funzionano, dalle piu' ascoltate, con il filtro di
     radio-browser: countrycode, tag con tagExact, language con languageExact,
-    name."""
-    return _stazioni(_chiedi("/json/stations/search", hidebroken="true", order="clickcount", reverse="true", limit=limite, **filtro))
+    name. inizio salta le prime, per Mostra altre radio (3.10.0)."""
+    risposta = _chiedi("/json/stations/search", hidebroken="true", order="clickcount", reverse="true", limit=limite,
+        **({"offset": inizio} if inizio else {}), **filtro)
+    pagina = Pagina(_stazioni(risposta))
+    pagina.piena = len(risposta) >= limite
+    return pagina
 
 
-def cerca(testo, limite=RADIO_PER_GRUPPO):
+def cerca(testo, limite=RADIO_PER_GRUPPO, inizio=0):
     """Le radio che hanno testo nel nome, dalle piu' ascoltate."""
-    return stazioni(limite, name=testo)
+    return stazioni(limite, inizio, name=testo)
 
 
 def paesi():

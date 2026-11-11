@@ -13,3 +13,7 @@ Una seconda ricerca prende il posto della prima.
 Collaudo di MeTeOra 3.9.1 e 3.9.2.
 Dopo dieci secondi di ascolto di un risultato della ricerca, la console dice che ora è negli Indirizzi, o che torna in cima se c'era già.
 Fai una registrazione, poi apri le statistiche con Maiuscolo e F7: la sezione Le registrazioni ha file prodotti, tempo, peso, media, dirette e puntate, formati, la più lunga e la più pesante.
+Collaudo di MeTeOra 3.10.0: Mostra altri risultati e Mostra altre radio.
+Finita una ricerca dei contenuti, l'ultima voce del ramo è Mostra altri risultati: Invio porta altri risultati in fondo, il fuoco resta sull'ultimo di prima, e la console dice quanti sono arrivati.
+Ripetendo Mostra altri risultati finché finiscono, la console dice che non ce ne sono altri, e la voce sparisce.
+In un gruppo grande di radio, come Italia, e nella ricerca di una radio con molti risultati, l'ultima voce è Mostra altre radio, e Invio aggiunge le trecento seguenti in fondo.
