@@ -2,6 +2,15 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.11.4] - 2026-11-12
+
+La prova fallita del collaudo dalla 3.8.2 alla 3.11.3: Radio Armisa, ascoltata dal fondo delle Recenti, restava al suo posto.
+
+- Una radio delle Recenti, o un brano degli Indirizzi, ascoltato per un minuto di fila mentre suona dalla sua lista, sale subito in cima, e chiudendo e riaprendo il ramo lo trovi lì, anche mentre suona. La 3.11.3 lo portava in cima solo quando partiva il brano dopo, o alla chiusura di MeTeOra.
+- La fila non rimbalza fra due brani, come nella 3.11.2: finché suona il brano salito in cima, la coda conta il seguente, il precedente e il primo da cui ripartire con la ripetizione nell'ordine di prima.
+- La prova del collaudo, scritta per la 3.8.2, non diceva del minuto di ascolto che dalla 3.10.2 serve per entrare fra le Recenti: ora lo dice.
+- Le prove nuove sono in tests/test_playlist.py e in tests/test_verifica_3113.py.
+
 ## [3.11.3] - 2026-11-12
 
 Le correzioni della verifica delle novità dalla 3.6.0 alla 3.11.1, chiesta da Gabriele e fatta da due sottoagenti, ognuno su metà delle versioni, che hanno riprodotto i difetti con prove loro.

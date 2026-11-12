@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17). Nella 2.7.1 la precedenza ai tasti sul lavoro in disparte. Nella 2.7.2 i lettori di rete chiusi all'uscita. Nella 2.7.3 i tasti funzione nelle tabelle COMANDI_DEI_TASTI_FUNZIONE e INTERRUTTORI, lette dalla prova della guida rapida, e le righe del cruscotto nell'ordine della regola. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.1.0 la voce Componenti aggiuntivi delle impostazioni, e gli altri banchi liberi da scaricare. Nella 3.2.0 gli indirizzi in rete: Ctrl con V, Apri un indirizzo, il ramo Indirizzi, il flusso chiesto prima di suonare e in anticipo per il seguente, e yt-dlp aggiornato ogni giorno. Nella 3.3.0 il ramo Radio, con la ricerca delle radio, il titolo in onda, le dirette che non si saltano e i contatori di radio, componenti e lingua. Nella 3.3.1 la voce Lingua con la sua lista anche con una lingua sola. Nella 3.4.0 i Preferiti in rete, un ramo in cima ai Preferiti, con F4 che sceglie la categoria (issue 41). Nella 3.5.0 le registrazioni, con la famiglia di R e il ramo Registrazioni, e i comandi dei marker su T (issue 42). Nella 3.6.0 la scheda degli effetti, con Ctrl e Maiuscolo con Z (issue 43). Nella 3.7.0 la console letta da sola, con la famiglia di F10 (issue 44). Nella 3.8.0 D per i titoli in onda e i capitoli, e il capitolo nuovo detto suonando (issue 45). Nella 3.8.1 anche i caratteri di console e cruscotto hanno lo sfondo scelto, che NVDA legge. Nella 3.8.2 le radio ascoltate di recente nel sottoramo Recenti. Nella 3.9.0 Cerca contenuti negli Indirizzi, i risultati man mano e i dieci secondi per entrare negli Indirizzi (issue 47). Nella 3.9.1 l'avviso dei dieci secondi. Nella 3.9.2 formato, sorgente e primati delle registrazioni per le statistiche. Nella 3.10.0 Mostra altri risultati dei contenuti e Mostra altre radio. Nella 3.10.1 un minuto per entrare negli Indirizzi. Nella 3.10.2 un minuto anche per le radio Recenti. Nella 3.10.3 il suono della sorgente tenuta. Nella 3.11.2 il controllo di yt-dlp detto anche senza novità. Nella 3.11.3 le correzioni delle due verifiche delle novita' dalla 3.6.0 alla 3.11.1.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17). Nella 2.7.1 la precedenza ai tasti sul lavoro in disparte. Nella 2.7.2 i lettori di rete chiusi all'uscita. Nella 2.7.3 i tasti funzione nelle tabelle COMANDI_DEI_TASTI_FUNZIONE e INTERRUTTORI, lette dalla prova della guida rapida, e le righe del cruscotto nell'ordine della regola. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.1.0 la voce Componenti aggiuntivi delle impostazioni, e gli altri banchi liberi da scaricare. Nella 3.2.0 gli indirizzi in rete: Ctrl con V, Apri un indirizzo, il ramo Indirizzi, il flusso chiesto prima di suonare e in anticipo per il seguente, e yt-dlp aggiornato ogni giorno. Nella 3.3.0 il ramo Radio, con la ricerca delle radio, il titolo in onda, le dirette che non si saltano e i contatori di radio, componenti e lingua. Nella 3.3.1 la voce Lingua con la sua lista anche con una lingua sola. Nella 3.4.0 i Preferiti in rete, un ramo in cima ai Preferiti, con F4 che sceglie la categoria (issue 41). Nella 3.5.0 le registrazioni, con la famiglia di R e il ramo Registrazioni, e i comandi dei marker su T (issue 42). Nella 3.6.0 la scheda degli effetti, con Ctrl e Maiuscolo con Z (issue 43). Nella 3.7.0 la console letta da sola, con la famiglia di F10 (issue 44). Nella 3.8.0 D per i titoli in onda e i capitoli, e il capitolo nuovo detto suonando (issue 45). Nella 3.8.1 anche i caratteri di console e cruscotto hanno lo sfondo scelto, che NVDA legge. Nella 3.8.2 le radio ascoltate di recente nel sottoramo Recenti. Nella 3.9.0 Cerca contenuti negli Indirizzi, i risultati man mano e i dieci secondi per entrare negli Indirizzi (issue 47). Nella 3.9.1 l'avviso dei dieci secondi. Nella 3.9.2 formato, sorgente e primati delle registrazioni per le statistiche. Nella 3.10.0 Mostra altri risultati dei contenuti e Mostra altre radio. Nella 3.10.1 un minuto per entrare negli Indirizzi. Nella 3.10.2 un minuto anche per le radio Recenti. Nella 3.10.3 il suono della sorgente tenuta. Nella 3.11.2 il controllo di yt-dlp detto anche senza novità. Nella 3.11.3 le correzioni delle due verifiche delle novita' dalla 3.6.0 alla 3.11.1. Nella 3.11.4 la radio delle Recenti e il brano degli Indirizzi salgono subito in cima, con la coda che ricorda l'ordine di prima.
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -1418,10 +1418,8 @@ class Finestra(wx.Frame):
         self._radio_trovate = None
         # La ricerca dei contenuti (3.9.0): l'ultima, e il brano in rete che suona.
         self._contenuti_trovati, self._numero_della_ricerca, self._indirizzo_visto = None, 0, None
-        # L'uscita della musica, con gli effetti a parte (3.11.3); il brano
-        # degli Indirizzi o delle Recenti da portare in cima quando ne parte
-        # un altro, per non cambiare l'ordine della lista che suona.
-        self._uscita_della_musica, self._in_cima_dopo = None, None
+        # L'uscita della musica, con gli effetti a parte (3.11.3).
+        self._uscita_della_musica = None
         # Le registrazioni (3.5.0): quella in corso o in pausa, l'attesa di
         # Alt con R, e se un comando che aspetta libmpv e' in volo.
         self._registrazione = None
@@ -6170,8 +6168,6 @@ class Finestra(wx.Frame):
         self.coda.imposta(pl, brano)
         self._segna_nel_mazzo(pl, brano, sottobrano)
         self._sentinella.guarda(brano.percorso)
-        # Il brano di prima, ascoltato un minuto dalla sua lista, sale in cima ora (3.11.3).
-        self._porta_in_cima()
         self.motore.suona(brano.percorso, sottobrano or brano.sottobrano, inizio=inizio, sfuma_lo_stesso=sfuma_lo_stesso, a_volume_pieno=sveglio)
         self._annuncia(pl, brano, evento)
         if brano.radio:
@@ -6459,7 +6455,7 @@ class Finestra(wx.Frame):
             dati = self._dati(prima)
             return dati["playlist"], dati["brano"], dati.get("numero")
         pl = self.coda.playlist
-        primo = self.coda.primo(pl) if pl is not None else None
+        primo = self.coda.da_capo()
         return (pl, primo, None) if primo is not None else None
 
     def _candidati_in_plancia(self, voce):
@@ -10065,19 +10061,6 @@ class Finestra(wx.Frame):
         if uuid:
             radio_in_disparte(lambda: radio.clic(uuid), lambda _esito: None)
 
-    def _porta_in_cima(self):
-        """Il brano degli Indirizzi o delle Recenti ascoltato un minuto, in
-        cima alla sua lista: quando parte un altro brano, o alla chiusura."""
-        dati, self._in_cima_dopo = self._in_cima_dopo, None
-        if dati is None:
-            return
-        lista, brano = dati
-        if lista == "radio":
-            self.archivio.metti_la_radio(brano)
-        else:
-            self.archivio.metti_l_indirizzo(brano)
-        self._salva_archivio()
-
     def _radio_tenuta(self, pl, brano):
         """Una radio ascoltata per un minuto di fila (3.10.2): in cima alle
         Recenti, che il ramo Radio mostra quando si riapre. La console lo
@@ -10085,11 +10068,10 @@ class Finestra(wx.Frame):
         chiave = brano.radio.get("uuid") or brano.percorso
         gia = any((b.radio or {}).get("uuid", b.percorso) == chiave for b in self.archivio.radio.brani)
         if pl is self.archivio.radio:
-            # Come per gli Indirizzi: sale quando parte un'altra radio (3.11.3).
-            self._in_cima_dopo = ("radio", brano)
-        else:
-            self.archivio.metti_la_radio(brano.copia())
-            self._salva_archivio()
+            # Sale subito, e la coda continua nell'ordine di prima (3.11.4).
+            self.coda.ricorda_l_ordine()
+        self.archivio.metti_la_radio(brano if pl is self.archivio.radio else brano.copia())
+        self._salva_archivio()
         self._statistiche.conta("radio_tenute")
         if pl is not self.archivio.radio:
             nome = brano.titolo or brano.nome_del_file
@@ -10589,12 +10571,11 @@ class Finestra(wx.Frame):
             tenuto = True
             gia = any(b.percorso == percorso for b in self.archivio.indirizzi.brani)
             if pl is self.archivio.indirizzi:
-                # Dalla lista che suona sale in cima quando ne parte un altro:
-                # subito, il brano seguente sarebbe il primo (verifica della 3.11.3).
-                self._in_cima_dopo = ("indirizzi", brano)
-            else:
-                self.archivio.metti_l_indirizzo(brano.copia())
-                self._salva_archivio()
+                # Dalla lista che suona sale subito in cima, e la coda continua
+                # nell'ordine di prima: il seguente non e' il primo (3.11.4).
+                self.coda.ricorda_l_ordine()
+            self.archivio.metti_l_indirizzo(brano if pl is self.archivio.indirizzi else brano.copia())
+            self._salva_archivio()
             self._statistiche.conta("indirizzi_tenuti")
             # L'avviso, per un risultato della ricerca (Gabriele, 3.9.1): un
             # brano degli Indirizzi che risale in cima non lo dice.
@@ -14362,7 +14343,6 @@ class Finestra(wx.Frame):
             # La ricerca chiude il suo zeroconf: in disparte, come lo speaker,
             # che il motore chiude con se'.
             threading.Thread(target=self._ricerca_cast.ferma, daemon=True).start()
-        self._porta_in_cima()
         self.impostazioni["ripresa"] = self._stato_da_riprendere()
         self._orologio_delle_posizioni.Stop()
         self._orologio_delle_statistiche.Stop()

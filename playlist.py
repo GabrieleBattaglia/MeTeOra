@@ -1,6 +1,6 @@
 # MeTeOra, le playlist: brani, playlist, archivio e coda di riproduzione.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 il sottobrano dei SID, nella 1.3.0 il loop A-B, nella 1.6.0 i Preferiti, nella 1.8.0 il filtro. Nella 1.59.0 Coda.altri, per la riproduzione casuale. Nella 1.104.0 si tolgono i brani dei file spariti, per la pulizia all'avvio. Nella 1.109.0 Ordina, Inverti l'ordine, Mescola e Ordine di prima. Nella 1.113.0 l'origine delle playlist importate da un M3U o da un PLS di altri programmi. Nella 1.113.1 un file con piu' sottobrani di cui nessuno ha la durata va in fondo con i brani senza durata, non in cima come se durasse zero (issue 24). Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 il titolo dei brani dei siti, Brano.copia, e gli Indirizzi nell'archivio, con le playlist dei siti. Nella 3.3.0 le radio e gli indirizzi diretti nei brani, e le radio ascoltate di recente. Nella 3.4.0 i Preferiti in rete, con preferiti_per, e gli indirizzi dei Preferiti di prima che ci passano da soli (issue 41). Nella 3.8.2 cento radio recenti. Nella 3.9.0 cento Indirizzi.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 il sottobrano dei SID, nella 1.3.0 il loop A-B, nella 1.6.0 i Preferiti, nella 1.8.0 il filtro. Nella 1.59.0 Coda.altri, per la riproduzione casuale. Nella 1.104.0 si tolgono i brani dei file spariti, per la pulizia all'avvio. Nella 1.109.0 Ordina, Inverti l'ordine, Mescola e Ordine di prima. Nella 1.113.0 l'origine delle playlist importate da un M3U o da un PLS di altri programmi. Nella 1.113.1 un file con piu' sottobrani di cui nessuno ha la durata va in fondo con i brani senza durata, non in cima come se durasse zero (issue 24). Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 il titolo dei brani dei siti, Brano.copia, e gli Indirizzi nell'archivio, con le playlist dei siti. Nella 3.3.0 le radio e gli indirizzi diretti nei brani, e le radio ascoltate di recente. Nella 3.4.0 i Preferiti in rete, con preferiti_per, e gli indirizzi dei Preferiti di prima che ci passano da soli (issue 41). Nella 3.8.2 cento radio recenti. Nella 3.9.0 cento Indirizzi. Nella 3.11.4 Coda.ricorda_l_ordine e Coda.da_capo, per il brano corrente che sale in cima alla sua lista.
 
 """Il modello dei dati, senza finestre e senza suono.
 
@@ -591,13 +591,43 @@ class Coda:
         # Chi usa la coda puo' sostituirla con il filtro delle playlist: un
         # brano che non passa si comporta come un brano saltato.
         self.ammesso = lambda _playlist, _brano: True
+        # L'ordine della playlist prima che il brano corrente vi salisse in
+        # cima (3.11.4), finche' suona lui; None se non e' salito.
+        self._ordine = None
 
     def _suonabile(self, playlist, brano):
         return not brano.saltato and self.ammesso(playlist, brano)
 
     def imposta(self, playlist, brano):
+        if playlist is not self.playlist or brano is not self.corrente:
+            self._ordine = None
         self.playlist = playlist
         self.corrente = brano
+
+    def ricorda_l_ordine(self):
+        """Il brano corrente sta per salire in cima alla sua playlist, come un
+        indirizzo o una radio dopo un minuto di ascolto (3.11.4): finche'
+        suona lui, il seguente, il precedente e il primo da cui ripartire si
+        contano nell'ordine di prima. Nell'ordine nuovo il seguente sarebbe il
+        secondo, cioe' il primo di prima, e la fila rimbalzerebbe fra due brani."""
+        if self.playlist is not None and self._ordine is None:
+            self._ordine = list(self.playlist.brani)
+
+    def _ordine_di_prima(self):
+        """L'ordine ricordato, senza i brani tolti dopo e con quelli nuovi in fondo."""
+        presenti = {id(b) for b in self.playlist.brani}
+        ricordati = {id(b) for b in self._ordine}
+        return [b for b in self._ordine if id(b) in presenti] + [b for b in self.playlist.brani if id(b) not in ricordati]
+
+    def da_capo(self):
+        """Il brano da cui ripartire con la ripetizione della lista: il primo
+        della playlist, o del suo loop; se il brano corrente e' salito in
+        cima, il primo dell'ordine di prima, che non e' lui. None se non ce n'e'."""
+        if not self.playlist:
+            return None
+        if self._ordine is None or self.intervallo() is not None:
+            return self.primo(self.playlist)
+        return next((b for b in self._ordine_di_prima() if self._suonabile(self.playlist, b)), None)
 
     def togli_loop(self):
         self.loop_playlist = self.punto_a = self.punto_b = None
@@ -654,6 +684,10 @@ class Coda:
                 if self._suonabile(self.playlist, candidato):
                     return candidato
             return None
+        if self._ordine is not None:
+            # Il brano corrente e' salito in cima: si conta nell'ordine di prima.
+            brani = self._ordine_di_prima()
+            i = next((n for n, b in enumerate(brani) if b is self.corrente), None)
         if i is None:
             # Il brano corrente e' stato tolto: si riparte dal primo.
             return self.primo(self.playlist) if passo > 0 else None

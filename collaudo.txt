@@ -1,3 +1,4 @@
-Collaudo di MeTeOra 3.8.2: le radio recenti.
-Ascolta una radio che sta in fondo a Recenti, chiudi e riapri il ramo Radio: la radio è in cima a Recenti.
-* No. ho provato con radio armisa ed è rimasta al suo posto.
+Collaudo di MeTeOra 3.11.4: la prova fallita della 3.8.2.
+Ascolta per più di un minuto di fila una radio che sta in fondo a Recenti, poi, mentre suona ancora, chiudi e riapri il ramo Radio: la radio è in cima a Recenti.
+Fai lo stesso con un brano in fondo agli Indirizzi: dopo un minuto, richiudendo e riaprendo gli Indirizzi, il brano è in cima.
+Suona gli Indirizzi o le Recenti uno dopo l'altro, ascoltandone qualcuno per più di un minuto: la fila va avanti in ordine, senza tornare indietro fra due brani.

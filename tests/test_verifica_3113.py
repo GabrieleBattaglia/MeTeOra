@@ -1,11 +1,11 @@
 # MeTeOra, le prove dei difetti trovati dalle due verifiche del 12 novembre 2026.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 12/11/2026: nasce con la 3.11.3.
+# 12/11/2026: nasce con la 3.11.3. Nella 3.11.4 il brano sale subito in cima, e la coda ricorda l'ordine di prima.
 
 import types
 
 import finestra as modulo
-from playlist import Brano
+from playlist import Brano, Coda
 
 
 def _letti(finestra, monkeypatch):
@@ -21,7 +21,9 @@ def _minuto(finestra, monkeypatch, pl, brano, durata=None):
     orologio = [100.0]
     monkeypatch.setattr(finestra, "motore", finto)
     monkeypatch.setattr(finestra, "_scatto_delle_statistiche", lambda: None)
-    monkeypatch.setattr(finestra, "coda", types.SimpleNamespace(playlist=pl, corrente=brano))
+    coda = Coda()
+    coda.imposta(pl, brano)
+    monkeypatch.setattr(finestra, "coda", coda)
     monkeypatch.setattr(modulo.time, "monotonic", lambda: orologio[0])
 
     def secondi(n):
@@ -33,17 +35,32 @@ def _minuto(finestra, monkeypatch, pl, brano, durata=None):
     return secondi
 
 
-def test_la_lista_che_suona_non_cambia_ordine(finestra, monkeypatch):
-    # Un brano degli Indirizzi ascoltato un minuto sale in cima solo quando ne
-    # parte un altro: subito, il seguente sarebbe il primo, all'infinito.
+def test_la_lista_che_suona_non_rimbalza(finestra, monkeypatch):
+    # Un brano degli Indirizzi ascoltato un minuto sale subito in cima, e la
+    # coda continua nell'ordine di prima: il seguente non e' il primo, che
+    # farebbe rimbalzare la fila fra due brani (3.11.4).
     brani = [Brano(f"https://x.it/{n}", titolo=n) for n in "ABCD"]
     finestra.archivio.indirizzi.brani = list(brani)
     secondi = _minuto(finestra, monkeypatch, finestra.archivio.indirizzi, brani[1])
     secondi(62)
-    assert [b.titolo for b in finestra.archivio.indirizzi.brani] == ["A", "B", "C", "D"]
-    assert finestra._in_cima_dopo == ("indirizzi", brani[1])
-    finestra._porta_in_cima()
-    assert [b.titolo for b in finestra.archivio.indirizzi.brani] == ["B", "A", "C", "D"] and finestra._in_cima_dopo is None
+    assert [b.titolo for b in finestra.archivio.indirizzi.brani] == ["B", "A", "C", "D"]
+    assert finestra.coda.successivo() is brani[2] and finestra.coda.precedente() is brani[0]
+    monkeypatch.undo()
+
+
+def test_una_radio_delle_recenti_sale_subito_in_cima(finestra, monkeypatch):
+    # Il collaudo della 3.8.2, fallito nella 3.11.3: la radio ascoltata dal
+    # fondo delle Recenti e' in cima quando si riapre il ramo, anche se suona.
+    radio = [Brano(f"http://x/{n}.mp3", titolo=n, radio={"uuid": n, "paese": "IT"}) for n in "ABC"]
+    finestra.archivio.radio.brani = list(radio)
+    secondi = _minuto(finestra, monkeypatch, finestra.archivio.radio, radio[2])
+    secondi(59)
+    assert [b.titolo for b in finestra.archivio.radio.brani] == ["A", "B", "C"]
+    secondi(3)
+    assert [b.titolo for b in finestra.archivio.radio.brani] == ["C", "A", "B"]
+    assert finestra.coda.successivo() is None and finestra.coda.precedente() is radio[1]
+    # Con la ripetizione della lista si riparte dal primo di prima, non da lei.
+    assert finestra._da_capo(None) == (finestra.archivio.radio, radio[0], None)
     monkeypatch.undo()
 
 

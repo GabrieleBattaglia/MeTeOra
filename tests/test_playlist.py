@@ -3,6 +3,7 @@
 # Nella 1.109.0 le prove di Ordina, Inverti l'ordine, Mescola e Ordine di prima.
 # Nella 1.113.0 le prove dell'origine delle playlist importate.
 # Nella 1.113.1 quella di Ordina per durata con un file delle console senza durate (issue 24).
+# Nella 3.11.4 quelle della coda che ricorda l'ordine di prima.
 
 import json
 import os
@@ -365,3 +366,44 @@ def test_un_origine_scritta_male_si_ignora():
             {"percorso": "x.m3u", "data": 1.0, "dimensione": "1"}, {"percorso": "x.m3u", "dimensione": 1}):
         assert Playlist.da_dati({"nome": "x", "brani": [], "origine": origine}).origine is None
     assert Playlist.da_dati({"nome": "x", "origine": {"percorso": "x.m3u", "data": 3, "dimensione": 7}}).origine == {"percorso": "x.m3u", "data": 3.0, "dimensione": 7}
+
+
+def _sale_in_cima(pl, brano):
+    # Come metti_l_indirizzo e metti_la_radio dell'archivio.
+    pl.brani.remove(brano)
+    pl.brani.insert(0, brano)
+
+
+def test_il_corrente_salito_in_cima_conta_nell_ordine_di_prima():
+    # Un indirizzo o una radio dopo un minuto di ascolto (3.11.4).
+    pl = _pl(5, saltati=(3,))
+    a, b, c, _d, e = pl.brani
+    coda = Coda()
+    coda.imposta(pl, c)
+    coda.ricorda_l_ordine()
+    _sale_in_cima(pl, c)
+    assert coda.successivo() is e and coda.precedente() is b and coda.da_capo() is a
+    # Un brano tolto non conta piu', uno nuovo va in fondo.
+    pl.brani.remove(b)
+    nuovo = Brano("C:\\m\\nuovo.mp3")
+    pl.brani.append(nuovo)
+    assert coda.precedente() is a
+    coda.imposta(pl, e)
+    assert coda.successivo() is nuovo
+    # Con il brano seguente torna l'ordine vero: prima di e c'e' a, perche' d e' saltato.
+    assert coda.precedente() is a
+
+
+def test_senza_ricordare_l_ordine_la_coda_segue_quello_vero():
+    pl = _pl(4)
+    a, b, c, _d = pl.brani
+    coda = Coda()
+    coda.imposta(pl, b)
+    _sale_in_cima(pl, b)
+    assert coda.successivo() is a and coda.da_capo() is b
+    # Lo stesso brano reimpostato non dimentica l'ordine ricordato.
+    coda.imposta(pl, c)
+    coda.ricorda_l_ordine()
+    _sale_in_cima(pl, c)
+    coda.imposta(pl, c)
+    assert coda.successivo() is pl.brani[3] and coda.da_capo() is b
