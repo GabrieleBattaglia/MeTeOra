@@ -1,6 +1,6 @@
 # MeTeOra, il motore di riproduzione: libmpv, e i SID in tempo reale.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7). Nella 1.65.0 i MIDI resi da FluidSynth (tappa 8). Nella 1.66.0 la musica delle console con libgme. Nella 1.67.0 il file lasciato o rinominato per Rinomina file. Nella 1.82.0 il testo del karaoke come traccia in memoria, senza i .lrc caricati da mpv, e due sottotitoli uguali di fila detti tutti e due. Nella 1.83.0 il tempo che resta al sottotitolo, per la barra braille a blocchi. Nella 1.83.3 la durata vera di Musepack e DSF, da mutagen. Nella 1.93.0 i capitoli che libmpv vede. Nella 1.95.0 l'attenuazione, per la sfumatura del timer di spegnimento. Nella 1.96.0 il volume uniforme con ReplayGain. Nella 1.96.11 suona con a_volume_pieno. Nella 1.102.2 (issue 22) il ricampionamento con soxr, le bande compensate, il preamplificatore nella catena e il volume oltre 100 con il limitatore. Nella 1.102.3 rubberband quando velocita' o tono sono cambiati, con il tono fatto da lui (issue 20). Nella 1.116.0 alle_uscite, quando cambiano le uscite audio di mpv, e all_uscita_persa, quando il brano si ferma perche' l'uscita non si apre piu'. Nella 1.117.0 il lettore lontano, uno speaker Cast al posto delle schede, e converti_in_flac. Nella 2.7.0 sorgente_wav e passaggio_in_pcm, il WAV in RAM al posto del FLAC su disco. Nella 2.7.4 il WAV in RAM sempre a 16 bit, che lo speaker suona bene anche a 96 kHz. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 gli indirizzi in rete: il flusso di yt-dlp, con le intestazioni e l'audio a parte, anche per lo speaker. Nella 3.3.0 le dirette senza durata, riconosciute anche da sole, e il titolo in onda dai metadati ICY. Nella 3.5.0 caratteristiche(), per le registrazioni che si adattano alla sorgente. Nella 3.8.0 i sottotitoli dei siti, con sub-files.
+# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7). Nella 1.65.0 i MIDI resi da FluidSynth (tappa 8). Nella 1.66.0 la musica delle console con libgme. Nella 1.67.0 il file lasciato o rinominato per Rinomina file. Nella 1.82.0 il testo del karaoke come traccia in memoria, senza i .lrc caricati da mpv, e due sottotitoli uguali di fila detti tutti e due. Nella 1.83.0 il tempo che resta al sottotitolo, per la barra braille a blocchi. Nella 1.83.3 la durata vera di Musepack e DSF, da mutagen. Nella 1.93.0 i capitoli che libmpv vede. Nella 1.95.0 l'attenuazione, per la sfumatura del timer di spegnimento. Nella 1.96.0 il volume uniforme con ReplayGain. Nella 1.96.11 suona con a_volume_pieno. Nella 1.102.2 (issue 22) il ricampionamento con soxr, le bande compensate, il preamplificatore nella catena e il volume oltre 100 con il limitatore. Nella 1.102.3 rubberband quando velocita' o tono sono cambiati, con il tono fatto da lui (issue 20). Nella 1.116.0 alle_uscite, quando cambiano le uscite audio di mpv, e all_uscita_persa, quando il brano si ferma perche' l'uscita non si apre piu'. Nella 1.117.0 il lettore lontano, uno speaker Cast al posto delle schede, e converti_in_flac. Nella 2.7.0 sorgente_wav e passaggio_in_pcm, il WAV in RAM al posto del FLAC su disco. Nella 2.7.4 il WAV in RAM sempre a 16 bit, che lo speaker suona bene anche a 96 kHz. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 gli indirizzi in rete: il flusso di yt-dlp, con le intestazioni e l'audio a parte, anche per lo speaker. Nella 3.3.0 le dirette senza durata, riconosciute anche da sole, e il titolo in onda dai metadati ICY. Nella 3.5.0 caratteristiche(), per le registrazioni che si adattano alla sorgente. Nella 3.8.0 i sottotitoli dei siti, con sub-files. Nella 3.11.0 le dirette HTTP lette da diretta.py, con il protocollo diretta://, il titolo in onda da li' e il ripiego su libmpv.
 
 """Due lettori libmpv per tutti i formati.
 
@@ -61,6 +61,7 @@ import librerie  # noqa: F401
 import mpv
 
 import chip
+import diretta
 import formati
 import indirizzi
 import karaoke
@@ -320,6 +321,10 @@ def _indirizzo_nel_lettore(lettore, brano):
         lettore["http-header-fields"] = list(brano.intestazioni)
     if brano.audio:
         lettore["audio-files"] = list(brano.audio)
+    # Un lettore di passaggio non ha il protocollo delle dirette: apre
+    # l'indirizzo vero (3.11.0).
+    if brano.indirizzo.startswith(f"{diretta.SCHEMA}://"):
+        return diretta.indirizzo_vero(brano.indirizzo)
     return brano.indirizzo
 
 
@@ -355,6 +360,10 @@ class _Brano:
             flusso = indirizzi.pronto(percorso)
             if flusso is not None:
                 self.indirizzo, self.intestazioni, self.audio, self.dal_vivo = flusso.indirizzo, flusso.intestazioni, flusso.audio, flusso.dal_vivo
+                # Una diretta HTTP la legge MeTeOra, con diretta.py: la lettura
+                # di rete di libmpv rompeva i fotogrammi (issue 46, 3.11.0).
+                if self.dal_vivo and not self.intestazioni and diretta.da_leggere(self.indirizzo):
+                    self.indirizzo = diretta.indirizzo_per_mpv(self.indirizzo)
                 # I sottotitoli del sito, come quelli di YouTube (3.8.0).
                 self.sottotitoli = getattr(flusso, "sottotitoli", ())
         elif self.sottobrano is not None:
@@ -404,6 +413,11 @@ class _Lettore:
         # radio manda nei metadati ICY (3.3.0).
         self.dal_vivo = False
         self.titolo_in_onda = None
+        # Una diretta letta da diretta.py (3.11.0): il suo indirizzo vero, per
+        # riaprirlo con libmpv se diretta.py non la apre, e le opzioni.
+        self.diretta = False
+        self.indirizzo_vero = None
+        self.opzioni_caricate = ""
         self._avviata = None
         self._richieste = 0
         self.mpv = mpv.MPV(**{**OPZIONI_DI_BASE, "ao": ao, "keep_open": "no", "volume": volume, "volume_max": VOLUME_MASSIMO, "af": af, **opzioni})
@@ -413,6 +427,7 @@ class _Lettore:
         self.mpv.register_stream_protocol("sid", self._apri_sid)
         self.mpv.register_stream_protocol("midi", self._apri_midi)
         self.mpv.register_stream_protocol("chip", self._apri_chip)
+        self.mpv.register_stream_protocol(diretta.SCHEMA, self._apri_la_diretta)
         self.mpv.register_event_callback(functools.partial(motore._evento, self))
         # I .lrc accanto ai brani li legge karaoke.py, con le strofe e senza i
         # tempi per parola: mpv non li carica da se' (1.82.0). Una libmpv
@@ -435,6 +450,15 @@ class _Lettore:
         self.testo_visto = None
         self.testo_nuovo = False
         self.inizio_visto = None
+
+    def _apri_la_diretta(self, uri):
+        """Una diretta letta da MeTeOra (3.11.0); il titolo in onda arriva dai
+        suoi metadati ICY, che libmpv non vede piu'."""
+        try:
+            return diretta.Lettura(diretta.indirizzo_vero(uri), al_titolo=functools.partial(self._motore._titolo_nuovo, self))
+        except Exception as e:
+            # La rete fallisce in molti modi: per libmpv la diretta non si apre.
+            raise ValueError(str(e)) from e
 
     def _apri_sid(self, uri):
         flusso = _apri_sid(uri)
@@ -490,7 +514,21 @@ class _Lettore:
         self.imposta("af", af)
         self._metti_le_liste(brano)
         opzioni = ",".join(f"{chiave}={valore}" for chiave, valore in brano.opzioni.items())
+        self.diretta = brano.indirizzo.startswith(f"{diretta.SCHEMA}://")
+        self.indirizzo_vero = diretta.indirizzo_vero(brano.indirizzo) if self.diretta else None
+        self.opzioni_caricate = opzioni
         self.comando("loadfile", brano.indirizzo, "replace", "-1", opzioni, risposta=functools.partial(self._motore._caricato, self, numero))
+
+    def ripiega_su_libmpv(self):
+        """La diretta che diretta.py non ha aperto, per esempio perche'
+        l'indirizzo porta a una lista: la riapre libmpv con l'indirizzo vero,
+        che da qui resta a lui (3.11.0). Nel blocco del motore."""
+        indirizzo, self.indirizzo_vero, self.diretta = self.indirizzo_vero, None, False
+        diretta.a_libmpv(indirizzo)
+        self.voce = None
+        self._richieste += 1
+        numero = self._richieste
+        self.comando("loadfile", indirizzo, "replace", "-1", self.opzioni_caricate, risposta=functools.partial(self._motore._caricato, self, numero))
 
     def _metti_le_liste(self, brano):
         """Le intestazioni HTTP e l'audio a parte di un indirizzo in rete
@@ -756,7 +794,11 @@ class Motore:
                 # fine di un brano gia' sostituito da un altro non conta.
                 motivo = evento.data.reason
                 if motivo in (_FINE_NORMALE, _FINE_PER_ERRORE) and lettore.voce is not None and evento.data.playlist_entry_id == lettore.voce:
-                    avviso = self._fine_del_brano(lettore, motivo, uscita=evento.data.error == _USCITA_NON_APERTA)
+                    if motivo == _FINE_PER_ERRORE and not lettore.pronto and lettore.indirizzo_vero:
+                        # diretta.py non l'ha aperta: ci prova libmpv (3.11.0).
+                        lettore.ripiega_su_libmpv()
+                    else:
+                        avviso = self._fine_del_brano(lettore, motivo, uscita=evento.data.error == _USCITA_NON_APERTA)
             elif identita == mpv.MpvEventID.AUDIO_RECONFIG:
                 # mpv ha riaperto l'uscita o rifatto i filtri, anche da se':
                 # quando Windows cambia la scheda predefinita, o la scheda
@@ -1244,7 +1286,16 @@ class Motore:
         """metadata di un lettore, nel suo filo: il titolo in onda di una
         radio, l'icy-title, quando cambia; conta solo quello del brano in
         corso, e non vuoto (3.3.0)."""
+        # Di una diretta letta da diretta.py il titolo arriva da li': i
+        # metadati di libmpv, senza icy-title, lo cancellerebbero (3.11.0).
+        if getattr(lettore, "diretta", False):
+            return
         titolo = next((str(v).strip() for k, v in (metadati or {}).items() if str(k).lower() == "icy-title"), "") or None
+        self._titolo_nuovo(lettore, titolo)
+
+    def _titolo_nuovo(self, lettore, titolo):
+        """Il titolo in onda di un lettore, dai metadati di libmpv o, dalla
+        3.11.0, da quelli ICY che legge diretta.py."""
         with self._blocco:
             if self._chiuso or lettore is not self._attivo or not lettore.percorso or titolo == lettore.titolo_in_onda:
                 return

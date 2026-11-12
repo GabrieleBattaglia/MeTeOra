@@ -1,6 +1,6 @@
 # MeTeOra, le registrazioni: le radio e gli indirizzi in rete scritti su file.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 10/11/2026: nasce con la 3.5.0, issue 42.
+# 10/11/2026: nasce con la 3.5.0, issue 42. Nella 3.11.0 le dirette HTTP lette da diretta.py, senza riconnessioni.
 
 """Le registrazioni (3.5.0, issue 42).
 
@@ -34,6 +34,7 @@ import librerie  # noqa: F401
 # isort: split
 import mpv
 
+import diretta
 import motore
 import percorsi
 import valori
@@ -205,6 +206,10 @@ class Registrazione:
                 if valore is not None else None)
             # Di un video con l'audio a parte si registra l'audio.
             indirizzo = self.flusso.audio[0] if self.flusso.audio else self.flusso.indirizzo
+            # Una diretta HTTP la legge MeTeOra, come nel motore (issue 46, 3.11.0).
+            if self.dal_vivo and not self.flusso.intestazioni and not self.flusso.audio and diretta.da_leggere(indirizzo):
+                lettore.register_stream_protocol(diretta.SCHEMA, lambda uri: _lettura_della_diretta(uri))
+                indirizzo = diretta.indirizzo_per_mpv(indirizzo)
             if inizio:
                 lettore.command("loadfile", indirizzo, "replace", "-1", f"start={inizio:.3f}")
             else:
@@ -351,6 +356,18 @@ class Registrazione:
                 with contextlib.suppress(OSError):
                     os.remove(percorso)
             self._parti = []
+
+
+def _lettura_della_diretta(uri):
+    """La diretta letta da MeTeOra, per il protocollo del lettore della
+    registrazione; ValueError, per libmpv, se non si apre."""
+    try:
+        # Senza riconnessioni: una ricollegata infilerebbe nel file la riserva
+        # dei secondi gia' mandati, e la caduta si dice come prima.
+        return diretta.Lettura(diretta.indirizzo_vero(uri), riconnetti=False)
+    except Exception as e:
+        # La rete fallisce in molti modi.
+        raise ValueError(str(e)) from e
 
 
 def _durata_del_file(percorso):

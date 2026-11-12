@@ -6,10 +6,10 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: MeTeOra 3.10.3\n"
+"Project-Id-Version: MeTeOra 3.11.0\n"
 "Report-Msgid-Bugs-To: https://github.com/GabrieleBattaglia/MeTeOra/issues"
 "\n"
-"POT-Creation-Date: 2026-11-12 07:28+0100\n"
+"POT-Creation-Date: 2026-11-12 08:00+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1911,7 +1911,7 @@ msgstr ""
 #. Traduttori: il titolo della traccia di sottotitoli scritta dalla passata dei
 #. sottotitoli impressi nel video.
 #: finestra.py:789 finestra.py:808 finestra.py:9208 finestra.py:10952
-#: motore.py:1323
+#: motore.py:1374
 msgid "Sottotitoli impressi"
 msgstr ""
 
@@ -9798,34 +9798,34 @@ msgstr ""
 msgid "nessun server"
 msgstr ""
 
-#: registrazioni.py:77
+#: registrazioni.py:78
 msgid "Registrazione"
 msgstr ""
 
 #. Traduttori: i canali di una registrazione.
-#: registrazioni.py:105
+#: registrazioni.py:106
 msgid "mono"
 msgstr ""
 
-#: registrazioni.py:105
+#: registrazioni.py:106
 msgid "stereo"
 msgstr ""
 
 #. Traduttori: il formato di una registrazione, come MP3 a 128 kbps, stereo,
 #. 44.1 kHz; i decimali col punto.
-#: registrazioni.py:109
+#: registrazioni.py:110
 #, python-brace-format
 msgid "{nome} a {kbps} kbps, {canali}, {khz} kHz"
 msgstr ""
 
 #. Traduttori: il formato di una registrazione senza perdita, come FLAC,
 #. stereo, 48 kHz.
-#: registrazioni.py:111
+#: registrazioni.py:112
 #, python-brace-format
 msgid "{nome}, {canali}, {khz} kHz"
 msgstr ""
 
-#: registrazioni.py:396
+#: registrazioni.py:413
 msgid "le parti della registrazione non si uniscono"
 msgstr ""
 

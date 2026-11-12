@@ -21,3 +21,9 @@ Collaudo di MeTeOra 3.10.2: il minuto anche per le radio.
 Una radio fatta suonare per pochi secondi non entra fra le Recenti; ascoltata un minuto di fila sì, e la console lo dice.
 Collaudo di MeTeOra 3.10.3.
 Un indirizzo o una radio che dopo un minuto di ascolto di fila entra negli Indirizzi o fra le Recenti suona spia_che_si_accende, due lampi e una nota che sale.
+Collaudo di MeTeOra 3.11.0: le radio senza distorsioni, issue 46.
+Ascolta per qualche minuto le radio dove sentivi le distorsioni, come NFBRN o Cadena 100: i piccoli guasti a intervalli non ci sono più.
+Il titolo in onda arriva ancora, nella console e, con D acceso, alla sintesi.
+Una radio che cade si riprende da sola, o la console dice che si è interrotta.
+Una registrazione di una radio, riascoltata, è pulita anche lei.
+Le radio m3u8, come BBC News o RNE, suonano come prima.

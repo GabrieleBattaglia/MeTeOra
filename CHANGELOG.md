@@ -2,6 +2,19 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.11.0] - 2026-11-12
+
+Le radio senza distorsioni, issue 46: Gabriele sentiva in molte radio piccoli guasti nel suono, a intervalli più o meno regolari.
+
+- La causa, misurata l'11 novembre 2026: la lettura di rete di libmpv consegnava al decodificatore pezzi rotti dell'audio, fino a 56 errori in 25 secondi su Cadena 100 e 41 su NFBRN. I filtri di MeTeOra e la riserva della rete erano innocenti.
+- Ora le dirette HTTP e HTTPS, come le radio di Icecast e Shoutcast, le legge MeTeOra, e passa a libmpv solo l'audio: zero errori su NFBRN, Cadena 100 e BBC World Service, in quaranta secondi di prova ciascuna.
+- Il titolo in onda arriva come prima: MeTeOra chiede i metadati ICY, li toglie dall'audio e legge da sé il titolo. Se il server chiude, MeTeOra si ricollega qualche volta, come faceva libmpv.
+- Le registrazioni delle radio usano la stessa lettura, e anche i loro file escono senza errori.
+- Le dirette a pezzi, come le m3u8 della BBC e di RNE, restano a libmpv, e così un indirizzo che porta a una lista: MeTeOra lo riapre da sé con libmpv. Allo speaker Cast va ancora l'indirizzo vero.
+- Come faceva libmpv, i certificati HTTPS delle radio non si verificano: molte li hanno scaduti o incompleti.
+- La rilettura di un sottoagente ha trovato e fatto correggere, prima del rilascio: lo stop su una radio che tace, che aspettava fino a quindici secondi; una riconnessione fallita che chiudeva la radio; il titolo in onda cancellato dai metadati di libmpv; e le registrazioni, che ora a una caduta si interrompono invece di ricollegarsi e infilare nel file secondi già registrati.
+- Dentro: diretta.py, nuovo, con il protocollo diretta:// registrato nei lettori del motore e delle registrazioni; tests/test_diretta.py, con un server ICY finto in locale.
+
 ## [3.10.3] - 2026-11-12
 
 - Un indirizzo o una radio che, dopo un minuto di ascolto di fila, entra negli Indirizzi o fra le Recenti, o ci torna in cima, ora ha il suo suono, oltre alla riga della console: spia_che_si_accende, due lampi e una nota che sale e resta, votato 4 da Gabriele all'ascolto alla cieca dell'11 novembre 2026 e libero. Firmato da MeTeOra in GBUtils V252.

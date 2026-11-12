@@ -1,6 +1,6 @@
 # MeTeOra, le prove delle radio in rete: radio-browser finto, niente rete.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 06/11/2026: nasce con la 3.3.0, tappa 19 c del piano, issue 40. Nella 3.8.2 il sottoramo Recenti. Nella 3.10.0 Mostra altre radio.
+# 06/11/2026: nasce con la 3.3.0, tappa 19 c del piano, issue 40. Nella 3.8.2 il sottoramo Recenti. Nella 3.10.0 Mostra altre radio. Nella 3.11.0 le dirette con il protocollo diretta://.
 
 import datetime
 import json
@@ -131,7 +131,8 @@ def test_le_dirette_negli_indirizzi_e_nel_motore():
     assert indirizzi.pronto("http://icestreaming.rai.it/3.mp3").dal_vivo and not indirizzi.pronto("http://radio.example/flusso").dal_vivo
     assert indirizzi.flusso_dell_info({"url": "https://x/live.m3u8", "is_live": True}).dal_vivo
     brano = motore._Brano("http://icestreaming.rai.it/3.mp3")
-    assert brano.dal_vivo and brano.indirizzo == "http://icestreaming.rai.it/3.mp3"
+    # La diretta la legge MeTeOra, con il protocollo diretta:// (3.11.0).
+    assert brano.dal_vivo and brano.indirizzo == "diretta://http%3A%2F%2Ficestreaming.rai.it%2F3.mp3"
     # La durata di una diretta non conta: libmpv la fa crescere con lei.
     finto = types.SimpleNamespace(dal_vivo=True, durata_vera=None, mpv=types.SimpleNamespace(time_pos=12.0, duration=15.0))
     assert motore._Lettore.leggi(finto) == (12.0, None)
@@ -145,6 +146,7 @@ def test_il_titolo_in_onda_dai_metadati():
     arrivati = []
     lettore = types.SimpleNamespace(percorso="http://x/radio.mp3", titolo_in_onda=None)
     finto = types.SimpleNamespace(_blocco=threading.Lock(), _chiuso=False, _attivo=lettore, _al_titolo_in_onda=arrivati.append)
+    finto._titolo_nuovo = lambda lettore, titolo: motore.Motore._titolo_nuovo(finto, lettore, titolo)
     motore.Motore._metadati(finto, lettore, "metadata", {"icy-name": "Radio", "icy-title": " Lucio Dalla - Caruso "})
     motore.Motore._metadati(finto, lettore, "metadata", {"icy-title": "Lucio Dalla - Caruso"})
     motore.Motore._metadati(finto, lettore, "metadata", {"ICY-TITLE": "Mina - Se telefonando"})
