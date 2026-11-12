@@ -1,6 +1,6 @@
 # MeTeOra, le prove del lettore lontano: uno speaker Cast al posto della scheda audio.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/11/2026: nasce con lontano.py, nella 1.117.0. Nella 3.11.1 la radio allo speaker dal ripetitore. Nella 3.11.6 i fotogrammi interi allo speaker.
+# 03/11/2026: nasce con lontano.py, nella 1.117.0. Nella 3.11.1 la radio allo speaker dal ripetitore. Nella 3.11.6 i fotogrammi interi allo speaker. Nella 3.12.0 le TV convertite.
 
 """Le prove di lontano.py, con un apparecchio, un server e una sorgente del
 WAV in RAM finti: niente rete e niente libmpv. Gli stati dell'apparecchio si mandano
@@ -445,3 +445,66 @@ def test_una_radio_che_porta_a_una_lista_va_diretta_allo_speaker(banco):
     assert banco.aspetta_suona()
     chiamata = next(c for c in banco.apparecchio.chiamate if c[0] == "suona")
     assert chiamata[1] == url and chiamata[2] == "application/x-mpegURL" and not banco.server.flussi
+
+
+# Le TV sullo speaker, con l'audio convertito dal vivo (3.12.0).
+
+_LISTA = b"HTTP/1.0 200 OK\r\nContent-Type: application/vnd.apple.mpegurl\r\n\r\n#EXTM3U\n"
+
+
+def test_una_tv_va_allo_speaker_con_l_audio_convertito(banco):
+    import io
+
+    from test_diretta import _server
+    from test_wav_in_ram import _atteso, _DalVivo
+
+    import indirizzi
+
+    tv = _LISTA + b'#EXT-X-STREAM-INF:BANDWIDTH=2262829,CODECS="avc1.77.41,mp4a.40.2",RESOLUTION=1920x1080\nchunklist.m3u8\n'
+    porta, _richieste = _server([tv])
+    url = f"http://127.0.0.1:{porta}/bbstv/playlist.m3u8"
+    indirizzi.metti_il_diretto(url, dal_vivo=True)
+    chiesti, conti = [], []
+
+    def converti_dal_vivo(percorso, uscita, alla_fine):
+        chiesti.append(percorso)
+        return _DalVivo(10000)(uscita, alla_fine)
+
+    banco.lettore._converti_dal_vivo = converti_dal_vivo
+    banco.lettore._al_conto = lambda nome, quanto: conti.append((nome, quanto))
+    banco.lettore.suona(url)
+    assert banco.aspetta_suona()
+    chiamata = next(c for c in banco.apparecchio.chiamate if c[0] == "suona")
+    assert chiamata[1].startswith("http://pc/flusso/radio") and chiamata[1].endswith(".wav") and chiamata[2] == "audio/wav"
+    assert banco.apparecchio.in_diretta and conti == [("dirette_convertite_per_lo_speaker", 1)]
+    uscita = io.BytesIO()
+    banco.server.flussi[-1][1](uscita)
+    assert chiesti == [url] and uscita.getvalue().startswith(b"RIFF") and uscita.getvalue()[44:] == _atteso(0, 10000)
+    banco.lettore.stop()
+
+
+def test_una_lista_rifiutata_dallo_speaker_poi_va_convertita(banco, monkeypatch):
+    from test_diretta import _server
+    from test_wav_in_ram import _DalVivo
+
+    import indirizzi
+
+    monkeypatch.setattr(lontano, "_liste_da_convertire", set())
+    # Una lista di pezzi non dice se ha il video: va allo speaker com'e'.
+    porta, _richieste = _server([_LISTA + b"#EXTINF:6.0,\nseg1.ts\n"])
+    url = f"http://127.0.0.1:{porta}/tv.m3u8"
+    indirizzi.metti_il_diretto(url, dal_vivo=True)
+    conti = []
+    banco.lettore._converti_dal_vivo = lambda percorso, uscita, alla_fine: _DalVivo(100)(uscita, alla_fine)
+    banco.lettore._al_conto = lambda nome, quanto: conti.append((nome, quanto))
+    banco.lettore.suona(url)
+    assert banco.aspetta_suona()
+    assert banco.apparecchio.chiamate[-1][1:3] == (url, "application/x-mpegURL")
+    # Lo speaker la rifiuta: la riprova della finestra la manda convertita.
+    banco.stato(trasmissione.FERMO, motivo="ERROR")
+    assert banco.avvisi[-1] == ("errore", url) and url in lontano._liste_da_convertire
+    assert conti == [("liste_rifiutate_dallo_speaker", 1)]
+    banco.lettore.suona(url)
+    assert banco.aspetta_suona(2)
+    assert banco.apparecchio.chiamate[-1][2] == "audio/wav" and conti[-1] == ("dirette_convertite_per_lo_speaker", 1)
+    banco.lettore.stop()

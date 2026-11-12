@@ -1,6 +1,6 @@
 # MeTeOra, le dirette lette da MeTeOra: le radio HTTP passate a libmpv senza la sua lettura di rete.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 12/11/2026: nasce con la 3.11.0, issue 46, con le correzioni della rilettura di un sottoagente. Nella 3.11.1 il tipo, per lo speaker Cast. Nella 3.11.6 il filtro dei fotogrammi MP3 e AAC per lo speaker.
+# 12/11/2026: nasce con la 3.11.0, issue 46, con le correzioni della rilettura di un sottoagente. Nella 3.11.1 il tipo, per lo speaker Cast. Nella 3.11.6 il filtro dei fotogrammi MP3 e AAC per lo speaker. Nella 3.12.0 le liste con il video riconosciute.
 
 """Le dirette HTTP lette da MeTeOra (issue 46, 3.11.0).
 
@@ -32,6 +32,7 @@ import ssl
 import threading
 import time
 import urllib.parse
+import urllib.request
 
 import version
 
@@ -123,6 +124,31 @@ _KBPS_MPEG2 = {3: (0, 32, 48, 56, 64, 80, 96, 112, 128, 144, 160, 176, 192, 224,
 def da_filtrare(tipo):
     """Vero per il tipo di una diretta MP3 o AAC, come audio/mpeg."""
     return str(tipo or "").split(";", 1)[0].strip().lower() in TIPI_DA_FILTRARE
+
+
+# I codec video che le varianti di una lista HLS possono dire (3.12.0).
+_CODEC_VIDEO = ("avc1", "avc3", "hvc1", "hev1", "vp09", "vp8", "av01", "mp4v", "dvh1", "dvhe")
+
+
+def lista_con_video(indirizzo, attesa=ATTESA_DELL_APERTURA):
+    """Vero se la lista HLS dell'indirizzo ha varianti video, con
+    RESOLUTION o un codec video nelle righe EXT-X-STREAM-INF, come le TV che
+    radio-browser mette fra le radio (3.12.0). Falso se non ne ha, se e' una
+    lista di pezzi senza varianti, che non lo dice, o se non si legge."""
+    if urllib.parse.urlsplit(str(indirizzo or "")).scheme not in ("http", "https"):
+        return False
+    try:
+        richiesta = urllib.request.Request(indirizzo, headers={"User-Agent": f"MeTeOra/{version.VERSION}", "Accept": "*/*"})  # noqa: S310 - solo http e https, controllati sopra
+        with urllib.request.urlopen(richiesta, timeout=attesa, context=_contesto_tls()) as risposta:  # noqa: S310 - idem
+            testo = risposta.read(65536).decode("utf-8", "replace")
+    except (OSError, ValueError, http.client.HTTPException):
+        return False
+    for riga in testo.splitlines():
+        if riga.startswith("#EXT-X-STREAM-INF"):
+            valori = riga.lower()
+            if "resolution=" in valori or any(codec in valori for codec in _CODEC_VIDEO):
+                return True
+    return False
 
 
 def _testa(dati, i):

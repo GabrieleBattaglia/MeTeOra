@@ -2,6 +2,19 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.12.0] - 2026-11-13
+
+Le TV sugli speaker Cast. Le due TV coreane della ricerca buddhi, Buddhist Broadcasting System TV e Buddhist True Network TV, sono flussi video HLS, a 1080p e 720p, che radio-browser mette fra le radio: MeTeOra le mandava a GabryBar com'erano, e lo speaker, solo audio, le rifiutava dopo 7 e 13 secondi senza mai partire. Sul PC suonano.
+
+- Una lista HLS con varianti video, che lo dicono con RESOLUTION o con un codec video, va allo speaker con l'audio convertito dal vivo: la legge libmpv, in modo codifica, come per i video, e lo speaker riceve un WAV senza fine, a 48 kHz, 16 bit e stereo, senza perdita. Lo speaker la tiene come una diretta. Il WAV dice di durare più di sei ore, quanto la sua intestazione sa dire. Scelta di Gabriele.
+- Una lista che non dice se ha il video, come una lista di pezzi senza varianti, va allo speaker com'è. Se lo speaker la rifiuta, la riprova che MeTeOra fa dopo un errore la manda con l'audio convertito, e così da lì in poi, finché MeTeOra resta aperto.
+- La prova della conversione vera sul PC, con Buddhist Broadcasting System TV: l'audio arriva dopo circa cinque secondi, e in 40 secondi ne passano 60, perché la TV manda subito l'arretrato.
+- La prova su GabryBar del 13 novembre 2026, al 10% del volume, con il via di Gabriele, insieme alla 3.11.6: BBC World Service suona 150 secondi senza fermarsi, con 15 punti rotti tolti; le due TV partono dopo tre o cinque secondi e suonano i loro 70 secondi; Radio Armisa, per controllo, come sempre.
+- Nelle statistiche la riga delle radio ripetute a uno speaker conta anche le TV con l'audio convertito dal vivo e le liste rifiutate dallo speaker, poi convertite.
+- Dentro: wav_in_ram.FlussoPcm, il WAV senza fine riempito dalla pipe; diretta.lista_con_video; in lontano.py un giro solo, _passa, per la radio letta e per la TV convertita.
+- Corretta una gara della pipe con nome, che vale anche per il WAV in RAM dei brani: se il convertitore scriveva tutto e chiudeva prima che MeTeOra si mettesse in ascolto, Windows rispondeva ERROR_NO_DATA e i byte scritti si perdevano. Ci sono ancora, e ora si leggono. L'ha trovata la suite completa, girata mentre la prova su GabryBar caricava il PC.
+- Le prove nuove sono in tests/test_diretta.py, tests/test_wav_in_ram.py e tests/test_lontano.py.
+
 ## [3.11.6] - 2026-11-13
 
 Il collaudo della 3.11.4 e della 3.11.5, con le radio su GabryBar: BBC World Service si fermava con Non riesco a suonare, e le due TV coreane della ricerca buddhi non partivano.

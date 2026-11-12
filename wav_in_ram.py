@@ -1,6 +1,6 @@
 # MeTeOra, il WAV in RAM: la conversione per gli speaker Cast senza disco, servita a intervalli da una finestra di memoria.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 05/11/2026: nasce con la 2.7.0, tappa 17 del piano, dal prototipo prototipi/wav_a_finestra.py provato su GabryBar.
+# 05/11/2026: nasce con la 2.7.0, tappa 17 del piano, dal prototipo prototipi/wav_a_finestra.py provato su GabryBar. Nella 3.12.0 il WAV senza fine delle dirette, FlussoPcm.
 
 """Il WAV in RAM, per i brani che lo speaker Cast non legge da se'.
 
@@ -153,8 +153,10 @@ class Pipe:
             raise OSError(ctypes.get_last_error(), f"CreateNamedPipe {self.percorso}")
 
     def aspetta_chi_scrive(self):
-        # ERROR_PIPE_CONNECTED: chi scrive era gia' arrivato.
-        if not self._k.ConnectNamedPipe(self._maniglia, None) and ctypes.get_last_error() != 535:
+        # ERROR_PIPE_CONNECTED: chi scrive era gia' arrivato. ERROR_NO_DATA:
+        # era arrivato, ha scritto e ha gia' chiuso, e quello che ha scritto
+        # si legge ancora (prova del 13 novembre 2026, 3.12.0).
+        if not self._k.ConnectNamedPipe(self._maniglia, None) and ctypes.get_last_error() not in (535, 232):
             raise OSError(ctypes.get_last_error(), "ConnectNamedPipe")
 
     def sblocca(self):
@@ -373,3 +375,87 @@ class SorgenteWav:
             self._cond.notify_all()
         if vecchio is not None:
             vecchio.ferma()
+
+
+class FlussoPcm:
+    """L'audio di una diretta come WAV senza fine, per uno speaker Cast
+    (3.12.0): le TV del ramo Radio, flussi video che lo speaker, solo audio,
+    rifiuta. avvia(uscita, alla_fine) fa partire il convertitore, libmpv in
+    modo codifica, che scrive nella pipe uscita il PCM a 16 bit, stereo, a
+    FREQUENZA, chiama alla_fine quando smette, e torna un oggetto con
+    terminate(). read(quanti) va come quello di diretta.Lettura: prima
+    l'intestazione di un WAV lungo quanto il WAV sa dire, piu' di sei ore,
+    poi il PCM man mano che arriva, b"" quando il convertitore smette;
+    close() lo ferma in disparte e sveglia una lettura che aspetta.
+    scritti conta i byte di PCM passati."""
+
+    def __init__(self, avvia, frequenza=FREQUENZA):
+        self.frequenza = frequenza
+        self.tipo = TIPO
+        self.scritti = 0
+        self.pipe = Pipe(f"meteora_dal_vivo_{os.getpid()}_{next(_numeri)}")
+        self._testa = intestazione(MASSIMO_DEL_WAV // quadro(BIT) * quadro(BIT), frequenza)
+        self._blocco = threading.Lock()
+        self._collegata = self._chiusa = self._in_lettura = self._pipe_chiusa = False
+        try:
+            self._lettore = avvia(self.pipe.percorso, self._finito)
+        except Exception:
+            self.pipe.chiudi()
+            raise
+
+    def _finito(self):
+        # Se il convertitore non ha mai aperto la pipe, chi aspetta torna.
+        threading.Thread(target=self.pipe.sblocca, daemon=True).start()
+
+    def read(self, quanti):
+        with self._blocco:
+            if self._chiusa:
+                return b""
+            if self._testa:
+                testa, self._testa = self._testa, b""
+                return testa
+            self._in_lettura = True
+        dati = b""
+        try:
+            if not self._collegata:
+                self.pipe.aspetta_chi_scrive()
+                self._collegata = True
+            dati = self.pipe.leggi(quanti)
+        except OSError:
+            dati = b""
+        finally:
+            with self._blocco:
+                self._in_lettura = False
+                chiusa = self._chiusa
+                chiudere = chiusa and not self._pipe_chiusa
+                self._pipe_chiusa = self._pipe_chiusa or chiudere
+            if chiudere:
+                self.pipe.chiudi()
+            if chiusa:
+                dati = b""
+        self.scritti += len(dati)
+        return dati
+
+    def close(self):
+        with self._blocco:
+            if self._chiusa:
+                return
+            self._chiusa = True
+        threading.Thread(target=self._chiudi, name="MeTeOra, fine della diretta convertita", daemon=True).start()
+
+    def _chiudi(self):
+        try:
+            self._lettore.terminate()
+        except Exception:  # noqa: BLE001, S110 - un convertitore gia' finito si chiude come puo'
+            pass
+        finally:
+            self.pipe.sblocca()
+            # La pipe la chiude chi arriva per ultimo, una volta sola.
+            with self._blocco:
+                chiudere = not self._in_lettura and not self._pipe_chiusa
+                self._pipe_chiusa = self._pipe_chiusa or chiudere
+            if chiudere:
+                self.pipe.chiudi()
+
+    def cancel(self):
+        self.close()

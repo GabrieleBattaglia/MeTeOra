@@ -1,6 +1,6 @@
 # MeTeOra, le prove delle dirette lette da MeTeOra: un server ICY finto in locale, niente rete.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 12/11/2026: nasce con la 3.11.0, issue 46. Nella 3.11.6 il filtro dei fotogrammi.
+# 12/11/2026: nasce con la 3.11.0, issue 46. Nella 3.11.6 il filtro dei fotogrammi. Nella 3.12.0 le liste con il video.
 
 import socket
 import threading
@@ -299,3 +299,17 @@ def test_cio_che_non_e_mp3_passa_com_e():
     filtro = diretta.Fotogrammi()
     assert filtro.passa(b"a" * 10) == b"" and filtro.fine() == b"a" * 10
     assert diretta.da_filtrare("audio/mpeg") and diretta.da_filtrare("audio/aacp; charset=x") and not diretta.da_filtrare("audio/ogg")
+
+
+def test_le_liste_con_il_video_si_riconoscono():
+    # Le TV che radio-browser mette fra le radio, come quelle coreane della
+    # ricerca buddhi (3.12.0).
+    lista = b"HTTP/1.0 200 OK\r\nContent-Type: application/vnd.apple.mpegurl\r\n\r\n#EXTM3U\n#EXT-X-VERSION:3\n"
+    tv = lista + b'#EXT-X-STREAM-INF:BANDWIDTH=1258191,CODECS="avc1.42001e,mp4a.40.2",RESOLUTION=1280x720\nchunklist.m3u8\n'
+    radio = lista + b'#EXT-X-STREAM-INF:BANDWIDTH=96000,CODECS="mp4a.40.2"\naudio.m3u8\n'
+    pezzi = lista + b"#EXTINF:6.0,\nseg1.ts\n"
+    porta, _richieste = _server([tv, radio, pezzi])
+    base = f"http://127.0.0.1:{porta}"
+    assert diretta.lista_con_video(f"{base}/tv.m3u8")
+    assert not diretta.lista_con_video(f"{base}/radio.m3u8") and not diretta.lista_con_video(f"{base}/pezzi.m3u8")
+    assert not diretta.lista_con_video("file:///C:/x.m3u8") and not diretta.lista_con_video("")

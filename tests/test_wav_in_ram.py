@@ -1,6 +1,6 @@
 # MeTeOra, le prove del WAV in RAM per gli speaker Cast (2.7.0).
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 05/11/2026: nasce con wav_in_ram.py, nella 2.7.0.
+# 05/11/2026: nasce con wav_in_ram.py, nella 2.7.0. Nella 3.12.0 il WAV senza fine delle dirette.
 
 """Le prove di wav_in_ram.py con un convertitore finto, che scrive nella pipe
 con nome vera dei byte che si riconoscono: il byte n del PCM vale n % 251.
@@ -228,3 +228,79 @@ def _nessuna_pipe_appesa():
             return
         time.sleep(0.05)
     raise AssertionError(f"fili della pipe rimasti: {len(rimasti)}")
+
+
+# La diretta convertita dal vivo per lo speaker (3.12.0).
+
+class _DalVivo:
+    """avvia(uscita, alla_fine) come il convertitore dal vivo della finestra:
+    scrive nella pipe quanti byte riconoscibili, poi, se aspetta, resta
+    aperto finche' terminate() non lo ferma, come una TV che va avanti."""
+
+    def __init__(self, quanti, aspetta=False):
+        self.quanti, self.aspetta = quanti, aspetta
+        self.fermo = threading.Event()
+        self.finito = threading.Event()
+
+    def __call__(self, uscita, alla_fine):
+        def scrivi():
+            try:
+                with open(uscita, "wb", buffering=0) as pipe:
+                    pipe.writelines(_atteso(inizio, min(4096, self.quanti - inizio)) for inizio in range(0, self.quanti, 4096))
+                    if self.aspetta:
+                        self.fermo.wait(10)
+            except OSError:
+                pass
+            finally:
+                self.finito.set()
+                alla_fine()
+
+        threading.Thread(target=scrivi, daemon=True).start()
+        return type("Lettore", (), {"terminate": lambda _self: self.fermo.set()})()
+
+
+def _letto(flusso):
+    letti = bytearray()
+    while True:
+        pezzo = flusso.read(5000)
+        if not pezzo:
+            return bytes(letti)
+        letti += pezzo
+
+
+def test_la_diretta_dal_vivo_e_un_wav_senza_fine():
+    flusso = wav_in_ram.FlussoPcm(_DalVivo(20000))
+    dati = _letto(flusso)
+    flusso.close()
+    testa, pcm = dati[:INTESTAZIONE], dati[INTESTAZIONE:]
+    # Un WAV lungo quanto il WAV sa dire, a 48 kHz, 16 bit e stereo.
+    assert testa[:4] == b"RIFF" and testa[8:16] == b"WAVEfmt " and testa[36:40] == b"data"
+    totale = struct.unpack("<I", testa[40:44])[0]
+    assert totale % 4 == 0 and totale > 6 * 3600 * 48000 * 4 and struct.unpack("<I", testa[24:28])[0] == 48000
+    assert pcm == _atteso(0, 20000) and flusso.scritti == 20000 and flusso.tipo == "audio/wav"
+
+
+def test_close_ferma_la_diretta_dal_vivo_che_aspetta():
+    convertitore = _DalVivo(4096, aspetta=True)
+    flusso = wav_in_ram.FlussoPcm(convertitore)
+    assert flusso.read(100).startswith(b"RIFF") and flusso.read(4096) == _atteso(0, 4096)
+    letti = []
+    filo = threading.Thread(target=lambda: letti.append(flusso.read(4096)))
+    filo.start()
+    time.sleep(0.2)
+    inizio = time.monotonic()
+    flusso.close()
+    filo.join(5)
+    assert not filo.is_alive() and letti == [b""] and time.monotonic() - inizio < 2
+    assert convertitore.finito.wait(5) and flusso.read(10) == b""
+
+
+def test_la_diretta_gia_scritta_e_chiusa_si_legge_lo_stesso():
+    # Il convertitore ha scritto tutto e chiuso prima della prima lettura:
+    # ConnectNamedPipe da' ERROR_NO_DATA, e i byte ci sono ancora (3.12.0).
+    convertitore = _DalVivo(10000)
+    flusso = wav_in_ram.FlussoPcm(convertitore)
+    assert convertitore.finito.wait(5)
+    time.sleep(0.1)
+    assert _letto(flusso)[INTESTAZIONE:] == _atteso(0, 10000)
+    flusso.close()

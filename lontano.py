@@ -1,6 +1,6 @@
 # MeTeOra, il lettore lontano: uno speaker Cast al posto della scheda audio, con la strada A e il WAV in RAM.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/11/2026: nasce con la 1.117.0, tappa 15 b del piano. Nella 2.6.4 il sottobrano resta a fine brano, come nel motore. Nella 3.11.1 le radio, con MeTeOra che fa da ripetitore senza conversione. Nella 3.11.3 le letture chiuse allo stop e all'errore, i titoli vecchi scartati e le liste dirette allo speaker. Nella 3.11.6 allo speaker solo fotogrammi interi, e i conti per le statistiche.
+# 03/11/2026: nasce con la 1.117.0, tappa 15 b del piano. Nella 2.6.4 il sottobrano resta a fine brano, come nel motore. Nella 3.11.1 le radio, con MeTeOra che fa da ripetitore senza conversione. Nella 3.11.3 le letture chiuse allo stop e all'errore, i titoli vecchi scartati e le liste dirette allo speaker. Nella 3.11.6 allo speaker solo fotogrammi interi, e i conti per le statistiche. Nella 3.12.0 le TV con l'audio convertito dal vivo, e le liste rifiutate ricordate.
 # Nella 2.6.5 la fine che lo speaker non dice, fermo in caricamento all'ultimo campione. Nella 2.7.0 il WAV in RAM al posto del FLAC su disco.
 
 """Il lettore che suona su un apparecchio Cast, per il motore.
@@ -33,6 +33,7 @@ import diretta
 import formati
 import indirizzi
 import trasmissione
+import wav_in_ram
 
 # Per quanti secondi il volume chiesto vale piu' di quello che l'apparecchio
 # dice: tanto basta perche' arrivi il suo stato nuovo.
@@ -50,6 +51,9 @@ _SUONA_O_ASPETTA = (trasmissione.IN_RIPRODUZIONE, trasmissione.IN_PAUSA, trasmis
 # caricamento entro MARGINE_DELLA_FINE secondi dalla durata.
 ATTESA_DELLA_FINE = 1.0
 MARGINE_DELLA_FINE = 0.25
+# Le liste che uno speaker ha rifiutato, mandate com'erano: da li' in poi
+# vanno con l'audio convertito dal vivo (3.12.0).
+_liste_da_convertire = set()
 
 
 def da_convertire(percorso, sottobrano=None, midi_reso=False):
@@ -67,14 +71,21 @@ class LettoreLontano:
     da' la sorgente del WAV in RAM, con chiudi(), o solleva se il brano non si
     legge. I comandi non sollevano mai: un errore va ad al_guasto.
     al_conto(nome, quanto) riceve i conti per le statistiche, come i punti
-    rotti tolti alle radio."""
+    rotti tolti alle radio. converti_dal_vivo(percorso, uscita, alla_fine)
+    fa partire il convertitore dell'audio di una TV, che scrive il PCM in
+    uscita, e torna un oggetto con terminate()."""
 
     def __init__(self, connetti, server, converti, alla_fine=None, all_errore=None, al_caricamento=None, all_interruzione=None, al_guasto=None,
-            al_titolo=None, al_conto=None):
+            al_titolo=None, al_conto=None, converti_dal_vivo=None):
         self._blocco = threading.RLock()
         # Chi tiene i conti delle statistiche, al_conto(nome, quanto), dai
         # fili del lettore (3.11.6).
         self._al_conto = al_conto
+        # Chi converte dal vivo l'audio di una TV per lo speaker,
+        # converti_dal_vivo(percorso, uscita, alla_fine), e la lista mandata
+        # allo speaker com'era, per ricordarla se la rifiuta (3.12.0).
+        self._converti_dal_vivo = converti_dal_vivo
+        self._lista_diretta = None
         # La radio ripetuta allo speaker (3.11.1): il titolo in onda, chi lo
         # vuole sapere, e la lettura aperta che aspetta la prima richiesta.
         self.titolo_in_onda = None
@@ -176,6 +187,7 @@ class LettoreLontano:
             self._durata = None
             vecchia, self._sorgente = self._sorgente, None
             self.titolo_in_onda = None
+            self._lista_diretta = None
         if vecchia is not None:
             self._lascia(vecchia)
         self._lascia_la_lettura()
@@ -211,12 +223,12 @@ class LettoreLontano:
         diretta.py, che toglie i metadati e da' il titolo in onda, e ne passa
         i byte cosi' come sono dal suo server, da ripetitore, senza
         convertirla: lo speaker la decodifica. Va anche con i server ICY 200
-        OK e i certificati scaduti, che lo speaker potrebbe non aprire. Le
-        dirette a pezzi, come le m3u8, lo speaker le apre da se'. Alle MP3 e
-        alle AAC si tolgono i byte rotti fra i fotogrammi, che fermano
-        GabryBar (3.11.6, diretta.Fotogrammi)."""
+        OK e i certificati scaduti, che lo speaker potrebbe non aprire. Alle
+        MP3 e alle AAC si tolgono i byte rotti fra i fotogrammi, che fermano
+        GabryBar (3.11.6, diretta.Fotogrammi). Le dirette a pezzi, come le
+        m3u8, vanno a _manda_la_lista."""
         if not diretta.da_leggere(percorso):
-            self._manda(generazione, None, None, diretto=(percorso, "application/x-mpegURL"))
+            self._manda_la_lista(generazione, percorso)
             return
         def al_titolo(titolo):
             self._titolo(generazione, titolo)
@@ -224,9 +236,9 @@ class LettoreLontano:
         try:
             lettura = diretta.Lettura(percorso, al_titolo=al_titolo)
         except diretta.NonDiretta:
-            # Porta a una lista, come una HLS senza .m3u8: lo speaker la apre da se'.
+            # Porta a una lista, come una HLS senza .m3u8.
             diretta.a_libmpv(percorso)
-            self._manda(generazione, None, None, diretto=(percorso, "application/x-mpegURL"))
+            self._manda_la_lista(generazione, percorso)
             return
         except Exception:  # noqa: BLE001 - la rete fallisce in molti modi: per il lettore la radio non si suona
             self._errore(generazione)
@@ -239,43 +251,79 @@ class LettoreLontano:
         tipo = lettura.tipo if lettura.tipo.startswith("audio/") else "audio/mpeg"
         filtrare = diretta.da_filtrare(lettura.tipo)
 
-        def scrivi(uscita):
+        def apri():
             with self._blocco:
-                if generazione != self._generazione:
-                    return
                 prima, self._lettura_in_attesa = self._lettura_in_attesa, None
-            corrente = prima or diretta.Lettura(percorso, al_titolo=al_titolo)
-            # Allo speaker solo fotogrammi interi (3.11.6): un filtro per
-            # richiesta, perche' una richiesta nuova riparte da un punto nuovo.
-            filtro = diretta.Fotogrammi() if filtrare else None
-            with self._blocco:
-                self._letture.add(corrente)
-                viva = generazione == self._generazione
-            try:
-                while viva and generazione == self._generazione:
-                    dati = corrente.read(16384)
-                    if not dati:
-                        resto = filtro.fine() if filtro is not None else b""
-                        if resto:
-                            uscita.write(resto)
-                        return
-                    if filtro is not None:
-                        rotture, scartati = filtro.rotture, filtro.scartati
-                        dati = filtro.passa(dati)
-                        self._conta("rotture_tolte_allo_speaker", filtro.rotture - rotture)
-                        self._conta("byte_rotti_tolti_allo_speaker", filtro.scartati - scartati)
-                        if not dati:
-                            continue
-                    uscita.write(dati)
-            finally:
-                with self._blocco:
-                    self._letture.discard(corrente)
-                corrente.close()
+            return prima or diretta.Lettura(percorso, al_titolo=al_titolo)
+
+        def scrivi(uscita):
+            self._passa(generazione, apri, uscita, filtrare)
 
         # L'estensione del tipo, che il Chromecast guarda.
         estensione = next((e for e, t in trasmissione.TIPI.items() if t == tipo), ".mp3")
         indirizzo = self._server.pubblica_flusso(f"radio{generazione}{estensione}", scrivi, tipo)
         self._manda(generazione, None, None, diretto=(indirizzo, tipo))
+
+    def _manda_la_lista(self, generazione, percorso):
+        """Una diretta a pezzi, come le m3u8, o un indirizzo che porta a una
+        lista: lo speaker la apre da se'. Le TV, che radio-browser mette fra
+        le radio, sono flussi video, e lo speaker, solo audio, le rifiuta
+        senza mai partire (prova su GabryBar del 12 novembre 2026): una lista
+        con varianti video, o che lo speaker ha gia' rifiutato, va con
+        l'audio convertito dal vivo da libmpv, come WAV senza fine
+        (Gabriele, 3.12.0). Un convertitore per richiesta."""
+        if self._converti_dal_vivo is None or not (percorso in _liste_da_convertire or diretta.lista_con_video(percorso)):
+            with self._blocco:
+                if generazione == self._generazione:
+                    self._lista_diretta = percorso
+            self._manda(generazione, None, None, diretto=(percorso, "application/x-mpegURL"))
+            return
+
+        def avvia(uscita, alla_fine):
+            return self._converti_dal_vivo(percorso, uscita, alla_fine)
+
+        def scrivi(uscita):
+            self._passa(generazione, lambda: wav_in_ram.FlussoPcm(avvia), uscita, False)
+
+        self._conta("dirette_convertite_per_lo_speaker", 1)
+        indirizzo = self._server.pubblica_flusso(f"radio{generazione}.wav", scrivi, wav_in_ram.TIPO)
+        self._manda(generazione, None, None, diretto=(indirizzo, wav_in_ram.TIPO))
+
+    def _passa(self, generazione, apri, uscita, filtrare):
+        """Passa allo speaker, in uscita, quello che legge il lettore che apri()
+        da', una diretta.Lettura o un wav_in_ram.FlussoPcm, finche' la radio
+        e' la stessa e il lettore ha dati; a una radio nuova, o allo stop, lo
+        chiude _lascia_la_lettura, che sveglia anche una lettura che aspetta.
+        Con filtrare, solo fotogrammi interi (3.11.6): un filtro per
+        richiesta, perche' una richiesta nuova riparte da un punto nuovo."""
+        with self._blocco:
+            if generazione != self._generazione:
+                return
+        corrente = apri()
+        filtro = diretta.Fotogrammi() if filtrare else None
+        with self._blocco:
+            self._letture.add(corrente)
+            viva = generazione == self._generazione
+        try:
+            while viva and generazione == self._generazione:
+                dati = corrente.read(16384)
+                if not dati:
+                    resto = filtro.fine() if filtro is not None else b""
+                    if resto:
+                        uscita.write(resto)
+                    return
+                if filtro is not None:
+                    rotture, scartati = filtro.rotture, filtro.scartati
+                    dati = filtro.passa(dati)
+                    self._conta("rotture_tolte_allo_speaker", filtro.rotture - rotture)
+                    self._conta("byte_rotti_tolti_allo_speaker", filtro.scartati - scartati)
+                    if not dati:
+                        continue
+                uscita.write(dati)
+        finally:
+            with self._blocco:
+                self._letture.discard(corrente)
+            corrente.close()
 
     def _titolo(self, generazione, titolo):
         """Il titolo in onda della radio ripetuta, dal filo che la legge; quello
@@ -353,6 +401,7 @@ class LettoreLontano:
             self._fine_attesa = None
             self._pausa = False
             self.titolo_in_onda = None
+            self._lista_diretta = None
         self._lascia_se_finito()
         self._lascia_la_lettura()
         if c_era:
@@ -498,6 +547,13 @@ class LettoreLontano:
         self.percorso = None
         self._indirizzo = None
         self._pronto = False
+        if motivo == "ERROR" and self._lista_diretta is not None and self._lista_diretta == percorso:
+            # La lista mandata com'era e' rifiutata: la riprova della finestra
+            # la manda con l'audio convertito dal vivo (3.12.0).
+            _liste_da_convertire.add(percorso)
+            self._lista_diretta = None
+            if self._al_conto is not None:
+                self._al_conto("liste_rifiutate_dallo_speaker", 1)
         if motivo == "ERROR":
             return (lambda: self._all_errore(percorso)) if self._all_errore is not None else None
         if motivo in ("INTERRUPTED", "CANCELLED"):
