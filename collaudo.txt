@@ -31,3 +31,5 @@ Collaudo di MeTeOra 3.11.1: le radio sugli speaker Cast.
 Con lo speaker scelto, una radio, come Rai Radio 3, suona sullo speaker, e il titolo in onda arriva nella console; Dove sono lo dice.
 Una radio su un gruppo di altoparlanti suona in tutti, insieme.
 Cambiando radio, o con stop, lo speaker passa alla nuova o si ferma subito.
+Collaudo di MeTeOra 3.11.2.
+Il primo indirizzo o la prima ricerca dei contenuti del giorno: la console dice che yt-dlp è già all'ultima versione, con il numero, o che si è aggiornato; il secondo dello stesso giorno non dice niente.

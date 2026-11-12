@@ -562,6 +562,12 @@ def test_il_controllo_di_yt_dlp_una_volta_al_giorno(finestra, con_ytdlp, monkeyp
     monkeypatch.setattr(indirizzi, "aggiorna_ytdlp", lambda avanza=None: (_ for _ in ()).throw(OSError("rete assente")))
     finestra._controlla_ytdlp()
     assert finestra._righe[-1].startswith("yt-dlp non si aggiorna: rete assente")
+    # Senza novita' lo dice lo stesso, con la versione che c'e' (3.11.2).
+    finestra.impostazioni["ytdlp_controllato"] = ""
+    monkeypatch.setattr(indirizzi, "aggiorna_ytdlp", lambda avanza=None: None)
+    monkeypatch.setattr(indirizzi, "versione_di_ytdlp", lambda: "2026.10.26")
+    finestra._controlla_ytdlp()
+    assert finestra._righe[-1].startswith("yt-dlp è già all'ultima versione, 2026.10.26: lo ricontrollo domani")
 
 
 def test_i_menu_e_le_copie_degli_indirizzi(finestra, con_ytdlp, monkeypatch):

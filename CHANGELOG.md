@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.11.2] - 2026-11-12
+
+- yt-dlp si controlla una volta al giorno, al primo indirizzo aperto o alla prima ricerca dei contenuti, e la console lo diceva solo quando arrivava una versione nuova: da novembre non ne sono uscite, così il controllo sembrava non esserci. Ora la console lo dice anche quando yt-dlp è già all'ultima versione, con il numero, come yt-dlp è già all'ultima versione, 2026.10.26. Chiesto da Gabriele.
+
 ## [3.11.1] - 2026-11-12
 
 Le radio sugli speaker Cast, che non suonavano: MeTeOra trattava l'indirizzo di una radio come un file del disco, o provava a convertirla in WAV, che vuole una durata.
