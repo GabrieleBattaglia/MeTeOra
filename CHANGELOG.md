@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.11.5] - 2026-11-12
+
+- Nelle statistiche, alla riga Da dove, le radio hanno la loro sorgente, Radio, dalle Recenti, dai gruppi e dalle ricerche del ramo Radio, e i risultati di Cerca contenuti la loro, Ricerca dei contenuti. Prima contavano come file aperti da soli, perché le loro liste non hanno una cartella. Il tempo già contato resta dov'era. Scelta di Gabriele.
+- La prova nuova è in tests/test_verifica_3113.py.
+
 ## [3.11.4] - 2026-11-12
 
 La prova fallita del collaudo dalla 3.8.2 alla 3.11.3: Radio Armisa, ascoltata dal fondo delle Recenti, restava al suo posto.

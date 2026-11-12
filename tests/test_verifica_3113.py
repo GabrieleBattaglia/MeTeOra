@@ -1,6 +1,6 @@
 # MeTeOra, le prove dei difetti trovati dalle due verifiche del 12 novembre 2026.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 12/11/2026: nasce con la 3.11.3. Nella 3.11.4 il brano sale subito in cima, e la coda ricorda l'ordine di prima.
+# 12/11/2026: nasce con la 3.11.3. Nella 3.11.4 il brano sale subito in cima, e la coda ricorda l'ordine di prima. Nella 3.11.5 le sorgenti Radio e Ricerca dei contenuti.
 
 import types
 
@@ -155,3 +155,20 @@ def test_con_gli_effetti_a_parte_la_scheda_della_musica_resta_la_sua(finestra):
     assert finestra._scheda_della_musica_in_uso() is not musica or musica is None
     finestra.impostazioni["scheda_effetti"] = {"dispositivo": "Cuffie", "interfaccia": "Windows WASAPI"}
     assert finestra._scheda_della_musica_in_uso() is musica
+
+
+def test_le_radio_e_i_contenuti_hanno_la_loro_sorgente(finestra):
+    # Nella 3.11.5: prima contavano come file aperti da soli.
+    radio = Brano("http://x/r.mp3", titolo="R", radio={"uuid": "r", "paese": "IT"})
+    finestra.coda.imposta(finestra.archivio.radio, radio)
+    assert finestra._sorgente_per_le_statistiche() == "Radio"
+    gruppo = modulo.Playlist("Radio, Italia", [radio], cartella="")
+    finestra.coda.imposta(gruppo, radio)
+    assert finestra._sorgente_per_le_statistiche() == "Radio"
+    pl = modulo.Playlist("Ricerca di x", [Brano("https://x.it/a", titolo="A")], cartella="")
+    pl.contenuti = True
+    finestra.coda.imposta(pl, pl.brani[0])
+    assert finestra._sorgente_per_le_statistiche() == "Ricerca dei contenuti"
+    solo = modulo.Playlist("file aperto", [Brano(r"C:\m\a.mp3")], cartella="")
+    finestra.coda.imposta(solo, solo.brani[0])
+    assert finestra._sorgente_per_le_statistiche() == "file aperti da soli"

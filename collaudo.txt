@@ -2,3 +2,5 @@ Collaudo di MeTeOra 3.11.4: la prova fallita della 3.8.2.
 Ascolta per più di un minuto di fila una radio che sta in fondo a Recenti, poi, mentre suona ancora, chiudi e riapri il ramo Radio: la radio è in cima a Recenti.
 Fai lo stesso con un brano in fondo agli Indirizzi: dopo un minuto, richiudendo e riaprendo gli Indirizzi, il brano è in cima.
 Suona gli Indirizzi o le Recenti uno dopo l'altro, ascoltandone qualcuno per più di un minuto: la fila va avanti in ordine, senza tornare indietro fra due brani.
+Collaudo di MeTeOra 3.11.5: le sorgenti delle statistiche.
+Ascolta una radio e un risultato di Cerca contenuti, poi apri le statistiche con Maiuscolo e F7: la riga Da dove ha Radio e Ricerca dei contenuti.
