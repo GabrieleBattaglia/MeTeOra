@@ -5,7 +5,6 @@
 import ctypes
 import json
 import os
-import re
 
 import pytest
 
@@ -126,12 +125,12 @@ def test_suona_fissa_l_attesa_sulla_durata_del_preset(monkeypatch):
 def test_ogni_preset_porta_la_firma_di_meteora():
     from GBUtils import Acusticator
 
-    # Chi crea un suono lo firma nel nome, chi lo usa e basta nella descrizione:
-    # cosi' Gabriele lo ritrova in Acu_Maker cercando meteora.
-    firma = re.compile(r"Usato da: [^.]*\bmeteora\b")
+    # Ogni suono che MeTeOra usa porta la sua firma, cosi' Gabriele lo ritrova
+    # in Acu_Maker cercando @meteora. Da GBUtils V265 la firma e' il campo
+    # usato_da del preset, e il prefisso del nome non conta piu': con la
+    # migrazione i preset meteora_ hanno ricevuto la firma (issue 60 di GBUtils).
     # I segnaposto non si firmano: non sono di MeTeOra, e se ne vanno all'ascolto.
-    senza = [p for e, p in suoni.EVENTI.items() if e not in suoni.SEGNAPOSTO and not p.startswith("meteora_")
-        and not firma.search(Acusticator.descrizione(p))]
+    senza = [p for e, p in suoni.EVENTI.items() if e not in suoni.SEGNAPOSTO and "meteora" not in Acusticator.usato_da(p)]
     assert not senza, f"preset senza la firma di MeTeOra: {senza}"
 
 

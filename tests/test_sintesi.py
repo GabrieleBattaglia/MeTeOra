@@ -74,7 +74,10 @@ def test_dici_puo_interrompere_la_voce(sintesi_finta):
 def test_la_voce_di_windows_si_apre_anche_senza_l_elenco_delle_voci(monkeypatch):
     # 1.83.3: accessible_output2 legge l'elenco delle voci all'apertura, e sul
     # PC di Gabriele l'elenco fallisce: la voce di Windows la apre MeTeOra.
-    import win32com.client
+    # Da GBsintesi 1.0.1, GBUtils V258, la apre sempre _VoceDiWindows, con il
+    # collegamento dinamico di win32com, che non passa dalla cache gen_py: la
+    # finta va su win32com.client.dynamic.Dispatch (issue 61 di GBUtils).
+    import win32com.client.dynamic
 
     detti = []
 
@@ -86,7 +89,7 @@ def test_la_voce_di_windows_si_apre_anche_senza_l_elenco_delle_voci(monkeypatch)
         raise RuntimeError("elenco delle voci non letto")
 
     monkeypatch.setattr(GBsintesi.importlib, "import_module", rotto)
-    monkeypatch.setattr(win32com.client, "Dispatch", lambda nome: Voce() if nome == "SAPI.SpVoice" else None)
+    monkeypatch.setattr(win32com.client.dynamic, "Dispatch", lambda nome: Voce() if nome == "SAPI.SpVoice" else None)
     voce = _CREA_VERA("sapi5")
     assert type(voce).__name__ == "_VoceDiWindows" and voce.is_active() and voce.braille("x") is False
     voce.speak("ciao")
@@ -94,5 +97,5 @@ def test_la_voce_di_windows_si_apre_anche_senza_l_elenco_delle_voci(monkeypatch)
     assert detti == [("ciao", 1), ("basta", 3)]
     # Le altre uscite, se non si aprono, restano chiuse.
     assert _CREA_VERA("nvda") is None
-    monkeypatch.setattr(win32com.client, "Dispatch", lambda nome: (_ for _ in ()).throw(OSError("niente SAPI")))
+    monkeypatch.setattr(win32com.client.dynamic, "Dispatch", lambda nome: (_ for _ in ()).throw(OSError("niente SAPI")))
     assert _CREA_VERA("sapi5") is None
