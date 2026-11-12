@@ -1,6 +1,6 @@
 # MeTeOra, le prove delle dirette lette da MeTeOra: un server ICY finto in locale, niente rete.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 12/11/2026: nasce con la 3.11.0, issue 46.
+# 12/11/2026: nasce con la 3.11.0, issue 46. Nella 3.11.6 il filtro dei fotogrammi.
 
 import socket
 import threading
@@ -238,3 +238,64 @@ def test_il_motore_ripiega_su_libmpv_se_l_indirizzo_porta_a_una_lista(finestra):
         time.sleep(0.05)
     assert len(richieste) >= 2
     finestra.motore.stop()
+
+
+# Il filtro dei fotogrammi per lo speaker (3.11.6).
+
+def _mp3(n, frequenza=24000):
+    """n fotogrammi MP3 layer III senza CRC, mono: MPEG-2 a 56 kbps e 24 kHz,
+    168 byte come quelli della BBC, o MPEG-1 a 192 kbps e 48 kHz, 576 byte.
+    Il contenuto non ha 0xFF, che sembrerebbe un'intestazione."""
+    if frequenza == 24000:
+        testa, lunghezza = b"\xff\xf3\x74\xc0", 168
+    else:
+        testa, lunghezza = b"\xff\xfb\xb4\xc0", 576
+    return [testa + bytes([0x11 + (k % 100)]) * (lunghezza - 4) for k in range(n)]
+
+
+def _adts(n, contenuto=200):
+    """n fotogrammi AAC LC in ADTS, 44,1 kHz, stereo, senza CRC."""
+    lunghezza = 7 + contenuto
+    testa = bytes([0xFF, 0xF1, 0x50, 0x80 | (lunghezza >> 11), (lunghezza >> 3) & 0xFF, ((lunghezza & 7) << 5) | 0x1F, 0xFC])
+    return [testa + bytes([0x22 + (k % 100)]) * contenuto for k in range(n)]
+
+
+def _a_pezzi(filtro, dati, passo=7):
+    uscita = b""
+    for i in range(0, len(dati), passo):
+        uscita += filtro.passa(dati[i:i + passo])
+    return uscita
+
+
+def test_il_filtro_toglie_i_byte_rotti_e_i_fotogrammi_troncati():
+    fotogrammi = _mp3(20)
+    rotti = b"\x8d\x01\x02\x7f" * 8
+    troncato = fotogrammi[0][:50]
+    flusso = b"".join(fotogrammi[:6]) + rotti + b"".join(fotogrammi[6:12]) + troncato + b"".join(fotogrammi[12:])
+    for passo in (1, 7, 100, 4096):
+        filtro = diretta.Fotogrammi()
+        uscita = _a_pezzi(filtro, flusso, passo)
+        # L'ultimo aspetta il seguente, e a flusso finito passa se e' intero.
+        assert uscita == b"".join(fotogrammi[:19]) and filtro.fine() == fotogrammi[19]
+        assert filtro.rotture == 2 and filtro.scartati == len(rotti) + len(troncato) and not filtro.arreso
+
+
+def test_il_filtro_tiene_l_aac_e_i_cambi_di_formato_confermati():
+    fotogrammi = _adts(10)
+    filtro = diretta.Fotogrammi()
+    assert _a_pezzi(filtro, b"\x00\x01" + b"".join(fotogrammi[:5]) + b"\x13" * 40 + b"".join(fotogrammi[5:])) == b"".join(fotogrammi[:9])
+    assert filtro.rotture == 1 and filtro.scartati == 42
+    # Da 24 a 48 kHz, come la BBC il 12 novembre 2026: il formato nuovo passa.
+    prima, dopo = _mp3(5), _mp3(5, frequenza=48000)
+    filtro = diretta.Fotogrammi()
+    assert _a_pezzi(filtro, b"".join(prima + dopo)) == b"".join(prima + dopo[:4]) and filtro.rotture == 0
+
+
+def test_cio_che_non_e_mp3_passa_com_e():
+    # Un flusso che si dice MP3 ma non lo e', o pochi byte: passa tutto.
+    filtro = diretta.Fotogrammi()
+    altro = bytes(range(100)) * 200
+    assert _a_pezzi(filtro, altro, 1000) == altro and filtro.arreso
+    filtro = diretta.Fotogrammi()
+    assert filtro.passa(b"a" * 10) == b"" and filtro.fine() == b"a" * 10
+    assert diretta.da_filtrare("audio/mpeg") and diretta.da_filtrare("audio/aacp; charset=x") and not diretta.da_filtrare("audio/ogg")

@@ -1,6 +1,6 @@
 # MeTeOra, le dirette lette da MeTeOra: le radio HTTP passate a libmpv senza la sua lettura di rete.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 12/11/2026: nasce con la 3.11.0, issue 46, con le correzioni della rilettura di un sottoagente. Nella 3.11.1 il tipo, per lo speaker Cast.
+# 12/11/2026: nasce con la 3.11.0, issue 46, con le correzioni della rilettura di un sottoagente. Nella 3.11.1 il tipo, per lo speaker Cast. Nella 3.11.6 il filtro dei fotogrammi MP3 e AAC per lo speaker.
 
 """Le dirette HTTP lette da MeTeOra (issue 46, 3.11.0).
 
@@ -97,6 +97,187 @@ def titolo_dei_metadati(blocco):
     if trovato is None:
         return None
     return " ".join(trovato.group(1).split()) or None
+
+
+# Il filtro dei fotogrammi per lo speaker (3.11.6). I tipi delle dirette MP3
+# e AAC, a cui si tolgono i byte rotti fra un fotogramma e l'altro.
+TIPI_DA_FILTRARE = ("audio/mpeg", "audio/mp3", "audio/mpeg3", "audio/x-mpeg", "audio/aac", "audio/aacp", "audio/x-aac", "audio/x-aacp")
+# Senza un aggancio entro tanti byte dall'inizio, o dopo una rottura, il
+# flusso non e' quello che il tipo dice, e il filtro lo lascia passare com'e'.
+AGGANCIO_ALL_INIZIO = 16384
+AGGANCIO_DOPO_UNA_ROTTURA = 65536
+# I byte che servono per leggere un'intestazione: 4 per l'MP3, 6 per l'AAC.
+_TESTA = 6
+_POCO = object()
+# Le frequenze dell'MP3 per versione, 3 MPEG-1, 2 MPEG-2, 0 MPEG-2.5, e i
+# kbps per versione e strato, 3 il primo, 2 il secondo, 1 il terzo.
+_FREQUENZE_MP3 = {3: (44100, 48000, 32000), 2: (22050, 24000, 16000), 0: (11025, 12000, 8000)}
+_KBPS_MPEG1 = {3: (0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448),
+    2: (0, 32, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384),
+    1: (0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320)}
+_KBPS_MPEG2 = {3: (0, 32, 48, 56, 64, 80, 96, 112, 128, 144, 160, 176, 192, 224, 256),
+    2: (0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160),
+    1: (0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160)}
+
+
+def da_filtrare(tipo):
+    """Vero per il tipo di una diretta MP3 o AAC, come audio/mpeg."""
+    return str(tipo or "").split(";", 1)[0].strip().lower() in TIPI_DA_FILTRARE
+
+
+def _testa(dati, i):
+    """L'intestazione di un fotogramma MP3, di qualunque versione e strato,
+    o AAC ADTS, a dati[i]: (lunghezza del fotogramma, chiave), dove la
+    chiave dice il formato, che i fotogrammi di fila hanno uguale; None se li'
+    non c'e' un'intestazione; _POCO se i byte non bastano per dirlo. Le due
+    intestazioni non si confondono: l'ADTS ha lo strato 0, che l'MP3 non ha."""
+    if i + _TESTA > len(dati):
+        return _POCO
+    b0, b1, b2, b3 = dati[i], dati[i + 1], dati[i + 2], dati[i + 3]
+    if b0 != 0xFF:
+        return None
+    if b1 & 0xF6 == 0xF0:
+        frequenza = (b2 >> 2) & 0x0F
+        lunghezza = ((b3 & 3) << 11) | (dati[i + 4] << 3) | (dati[i + 5] >> 5)
+        if frequenza > 12 or lunghezza < (7 if b1 & 1 else 9):
+            return None
+        return lunghezza, ("aac", b1 & 0x08, b2 >> 6, frequenza, ((b2 & 1) << 2) | (b3 >> 6))
+    if b1 & 0xE0 != 0xE0:
+        return None
+    versione, strato = (b1 >> 3) & 3, (b1 >> 1) & 3
+    indice, frequenza, riempimento = b2 >> 4, (b2 >> 2) & 3, (b2 >> 1) & 1
+    # Il formato libero, indice 0, non dice la lunghezza: non si filtra.
+    if versione == 1 or strato == 0 or indice in (0, 15) or frequenza == 3:
+        return None
+    hz = _FREQUENZE_MP3[versione][frequenza]
+    kbps = (_KBPS_MPEG1 if versione == 3 else _KBPS_MPEG2)[strato][indice]
+    if strato == 3:
+        lunghezza = (12 * kbps * 1000 // hz + riempimento) * 4
+    elif strato == 1 and versione != 3:
+        lunghezza = 72 * kbps * 1000 // hz + riempimento
+    else:
+        lunghezza = 144 * kbps * 1000 // hz + riempimento
+    return lunghezza, ("mp3", versione, strato, frequenza)
+
+
+class Fotogrammi:
+    """Il filtro dei fotogrammi di una diretta MP3 o AAC per lo speaker
+    (3.11.6). BBC World Service manda, circa ogni 15 secondi, da 3 a 166 byte
+    rotti fra un fotogramma e l'altro, gia' dal server (misura del 12
+    novembre 2026): libmpv li salta, GabryBar si ferma con un errore.
+    passa(dati) torna i fotogrammi interi arrivati, senza niente in mezzo, e
+    tiene da parte quelli che non si possono ancora giudicare. Ci si aggancia
+    a un fotogramma quando il seguente, dove deve stare, ha lo stesso
+    formato. Agganciati, un fotogramma passa quando il seguente comincia
+    dove deve; un cambio di formato vale se lo conferma il fotogramma dopo.
+    Altrimenti c'e' una rottura, e si cerca l'aggancio dopo l'inizio del
+    fotogramma: se e' oltre la sua fine il fotogramma era intero e passa, se
+    e' prima era troncato e si scarta. Se l'aggancio non arriva entro
+    AGGANCIO_ALL_INIZIO byte all'inizio, o AGGANCIO_DOPO_UNA_ROTTURA dopo una
+    rottura, il flusso non e' MP3 ne' AAC, e da li' passa tutto com'e'.
+    rotture conta i punti rotti, scartati i byte tolti."""
+
+    def __init__(self):
+        self._dati = bytearray()
+        self._chiave = None
+        self._in_rottura = False
+        self.rotture = 0
+        self.scartati = 0
+        self.arreso = False
+
+    def passa(self, dati):
+        if self.arreso:
+            return bytes(dati)
+        self._dati += dati
+        pezzi, i = [], 0
+        while True:
+            if self._chiave is None:
+                k = self._aggancio(i, None, AGGANCIO_ALL_INIZIO)
+                if k is _POCO:
+                    break
+                if k is None:
+                    self.arreso = True
+                    pezzi.append(self._dati[i:])
+                    i = len(self._dati)
+                    break
+                self.scartati += k - i
+                i, self._chiave = k, _testa(self._dati, k)[1]
+                continue
+            testa = _testa(self._dati, i)
+            if testa is _POCO:
+                break
+            buono = False
+            if testa is not None:
+                lunghezza, chiave = testa
+                seguente = _testa(self._dati, i + lunghezza)
+                if seguente is _POCO:
+                    break
+                if seguente is not None and seguente[1][0] == chiave[0]:
+                    buono = seguente[1] == chiave
+                    if not buono:
+                        # Un formato nuovo vale se lo conferma il fotogramma dopo.
+                        terzo = _testa(self._dati, i + lunghezza + seguente[0])
+                        if terzo is _POCO:
+                            break
+                        buono = terzo is not None and terzo[1] == seguente[1]
+            if buono:
+                pezzi.append(self._dati[i:i + lunghezza])
+                i += lunghezza
+                self._chiave, self._in_rottura = chiave, False
+                continue
+            if not self._in_rottura:
+                self._in_rottura = True
+                self.rotture += 1
+            k = self._aggancio(i + 1, self._chiave[0], AGGANCIO_DOPO_UNA_ROTTURA)
+            if k is _POCO:
+                break
+            if k is None:
+                self.arreso = True
+                pezzi.append(self._dati[i:])
+                i = len(self._dati)
+                break
+            if testa is not None and k >= i + lunghezza:
+                # Il fotogramma era intero: i byte rotti sono dopo.
+                pezzi.append(self._dati[i:i + lunghezza])
+                self.scartati += k - i - lunghezza
+            else:
+                self.scartati += k - i
+            i, self._in_rottura = k, False
+            self._chiave = _testa(self._dati, k)[1]
+        del self._dati[:i]
+        return b"".join(pezzi)
+
+    def fine(self):
+        """A flusso finito, cio' che resta da parte: tutto, se non ci si e'
+        mai agganciati, perche' non era MP3 ne' AAC; altrimenti il
+        fotogramma che aspettava il seguente, se e' intero."""
+        if self._chiave is None:
+            resto = bytes(self._dati)
+        else:
+            testa = _testa(self._dati, 0)
+            intero = testa is not None and testa is not _POCO and testa[0] <= len(self._dati)
+            resto = bytes(self._dati[:testa[0]]) if intero else b""
+        self._dati.clear()
+        return resto
+
+    def _aggancio(self, da, genere, limite):
+        """Il primo punto da da in poi dove comincia un fotogramma, del genere
+        dato, mp3 o aac, o di uno qualunque con None, seguito da uno dello
+        stesso formato; _POCO se i byte non bastano ancora per dirlo; None se
+        non c'e' entro limite byte."""
+        j = da
+        while j - da <= limite:
+            testa = _testa(self._dati, j)
+            if testa is _POCO:
+                return _POCO
+            if testa is not None and (genere is None or testa[1][0] == genere):
+                seguente = _testa(self._dati, j + testa[0])
+                if seguente is _POCO:
+                    return _POCO
+                if seguente is not None and seguente[1] == testa[1]:
+                    return j
+            j += 1
+        return None
 
 
 def _contesto_tls():

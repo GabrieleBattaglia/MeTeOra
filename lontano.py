@@ -1,6 +1,6 @@
 # MeTeOra, il lettore lontano: uno speaker Cast al posto della scheda audio, con la strada A e il WAV in RAM.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/11/2026: nasce con la 1.117.0, tappa 15 b del piano. Nella 2.6.4 il sottobrano resta a fine brano, come nel motore. Nella 3.11.1 le radio, con MeTeOra che fa da ripetitore senza conversione. Nella 3.11.3 le letture chiuse allo stop e all'errore, i titoli vecchi scartati e le liste dirette allo speaker.
+# 03/11/2026: nasce con la 1.117.0, tappa 15 b del piano. Nella 2.6.4 il sottobrano resta a fine brano, come nel motore. Nella 3.11.1 le radio, con MeTeOra che fa da ripetitore senza conversione. Nella 3.11.3 le letture chiuse allo stop e all'errore, i titoli vecchi scartati e le liste dirette allo speaker. Nella 3.11.6 allo speaker solo fotogrammi interi, e i conti per le statistiche.
 # Nella 2.6.5 la fine che lo speaker non dice, fermo in caricamento all'ultimo campione. Nella 2.7.0 il WAV in RAM al posto del FLAC su disco.
 
 """Il lettore che suona su un apparecchio Cast, per il motore.
@@ -65,11 +65,16 @@ class LettoreLontano:
     al_guasto, come un comando che non arriva; server e' il server da cui
     l'apparecchio prende i file e le sorgenti; converti(percorso, sottobrano)
     da' la sorgente del WAV in RAM, con chiudi(), o solleva se il brano non si
-    legge. I comandi non sollevano mai: un errore va ad al_guasto."""
+    legge. I comandi non sollevano mai: un errore va ad al_guasto.
+    al_conto(nome, quanto) riceve i conti per le statistiche, come i punti
+    rotti tolti alle radio."""
 
     def __init__(self, connetti, server, converti, alla_fine=None, all_errore=None, al_caricamento=None, all_interruzione=None, al_guasto=None,
-            al_titolo=None):
+            al_titolo=None, al_conto=None):
         self._blocco = threading.RLock()
+        # Chi tiene i conti delle statistiche, al_conto(nome, quanto), dai
+        # fili del lettore (3.11.6).
+        self._al_conto = al_conto
         # La radio ripetuta allo speaker (3.11.1): il titolo in onda, chi lo
         # vuole sapere, e la lettura aperta che aspetta la prima richiesta.
         self.titolo_in_onda = None
@@ -207,7 +212,9 @@ class LettoreLontano:
         i byte cosi' come sono dal suo server, da ripetitore, senza
         convertirla: lo speaker la decodifica. Va anche con i server ICY 200
         OK e i certificati scaduti, che lo speaker potrebbe non aprire. Le
-        dirette a pezzi, come le m3u8, lo speaker le apre da se'."""
+        dirette a pezzi, come le m3u8, lo speaker le apre da se'. Alle MP3 e
+        alle AAC si tolgono i byte rotti fra i fotogrammi, che fermano
+        GabryBar (3.11.6, diretta.Fotogrammi)."""
         if not diretta.da_leggere(percorso):
             self._manda(generazione, None, None, diretto=(percorso, "application/x-mpegURL"))
             return
@@ -230,6 +237,7 @@ class LettoreLontano:
                 return
             self._lettura_in_attesa = lettura
         tipo = lettura.tipo if lettura.tipo.startswith("audio/") else "audio/mpeg"
+        filtrare = diretta.da_filtrare(lettura.tipo)
 
         def scrivi(uscita):
             with self._blocco:
@@ -237,6 +245,9 @@ class LettoreLontano:
                     return
                 prima, self._lettura_in_attesa = self._lettura_in_attesa, None
             corrente = prima or diretta.Lettura(percorso, al_titolo=al_titolo)
+            # Allo speaker solo fotogrammi interi (3.11.6): un filtro per
+            # richiesta, perche' una richiesta nuova riparte da un punto nuovo.
+            filtro = diretta.Fotogrammi() if filtrare else None
             with self._blocco:
                 self._letture.add(corrente)
                 viva = generazione == self._generazione
@@ -244,7 +255,17 @@ class LettoreLontano:
                 while viva and generazione == self._generazione:
                     dati = corrente.read(16384)
                     if not dati:
+                        resto = filtro.fine() if filtro is not None else b""
+                        if resto:
+                            uscita.write(resto)
                         return
+                    if filtro is not None:
+                        rotture, scartati = filtro.rotture, filtro.scartati
+                        dati = filtro.passa(dati)
+                        self._conta("rotture_tolte_allo_speaker", filtro.rotture - rotture)
+                        self._conta("byte_rotti_tolti_allo_speaker", filtro.scartati - scartati)
+                        if not dati:
+                            continue
                     uscita.write(dati)
             finally:
                 with self._blocco:
@@ -366,6 +387,11 @@ class LettoreLontano:
             self._server.ferma()
 
     # Dietro le quinte.
+
+    def _conta(self, nome, quanto):
+        """Un conto delle statistiche, dal filo che lo vede, se e' piu' di zero."""
+        if quanto > 0 and self._al_conto is not None:
+            self._al_conto(nome, quanto)
 
     def _comanda(self, comando):
         try:

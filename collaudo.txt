@@ -1,12 +1,3 @@
-Collaudo di MeTeOra 3.11.4: la prova fallita della 3.8.2.
-Ascolta per più di un minuto di fila una radio che sta in fondo a Recenti, poi, mentre suona ancora, chiudi e riapri il ramo Radio: la radio è in cima a Recenti.
-* Durante la riproduzione di BBC ottengo questo errore: Non riesco a suonare BBC World Service. 20:17
-
-Collaudo di MeTeOra 3.11.5: le sorgenti delle statistiche.
-Ascolta una radio e un risultato di Cerca contenuti, poi apri le statistiche con Maiuscolo e F7: la riga Da dove ha Radio e Ricerca dei contenuti.
-* Anche qui ottengo:  Trovate 3 radio con buddhi nel nome. 20:25
-In riproduzione: Buddhist Broadcasting System TV, Corea, AAC a 2254 kbps, 1 di 3, Radio, ricerca di buddhi. 20:25
-In riproduzione: Buddhist Broadcasting System TV, Corea, AAC a 2254 kbps, 1 di 3, Radio, ricerca di buddhi. 20:26
-Non riesco a suonare Buddhist Broadcasting System TV. 20:26
-In riproduzione: Buddhist True Network TV, Corea, AAC,H.264 a 1260 kbps, 2 di 3, Radio, ricerca di buddhi. 20:26
-Per il resto la prova passa.
+Collaudo di MeTeOra 3.11.6: le radio con i byte rotti su GabryBar.
+Con GabryBar scelto, ascolta BBC World Service per almeno tre minuti: suona senza fermarsi, e non dice più Non riesco a suonare.
+Poi apri le statistiche con Maiuscolo e F7: la riga Radio MP3 e AAC ripetute a uno speaker conta i punti rotti tolti, più di zero.

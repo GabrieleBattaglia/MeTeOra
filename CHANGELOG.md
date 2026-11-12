@@ -2,6 +2,16 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.11.6] - 2026-11-13
+
+Il collaudo della 3.11.4 e della 3.11.5, con le radio su GabryBar: BBC World Service si fermava con Non riesco a suonare, e le due TV coreane della ricerca buddhi non partivano.
+
+- Le prove sul PC, con l'uscita nulla: le tre suonano due minuti e mezzo senza errori. BBC World Service ha, circa ogni 15 secondi, da 3 a 166 byte rotti fra un fotogramma MP3 e l'altro, uguali byte per byte con e senza MeTeOra: arrivano dal server. libmpv li salta.
+- La prova su GabryBar, al 10% del volume, con il via di Gabriele: la BBC si ferma con un errore dello speaker dopo 27 secondi; Radio Armisa, per controllo, suona tutti i novanta secondi.
+- Il ripetitore passa allo speaker solo fotogrammi interi, per le radio MP3 e AAC: toglie i byte rotti fra l'uno e l'altro, e i fotogrammi troncati, senza convertire niente. Un cambio di formato vale se lo conferma il fotogramma dopo; un flusso che si dice MP3 o AAC ma non lo è passa com'è. Sui tre minuti della BBC catturati il 12 novembre il filtro toglie 15 punti rotti, 1389 byte, e l'uscita è una catena di 10090 fotogrammi senza buchi. Scelta di Gabriele, per l'MP3 e per l'AAC.
+- Nelle statistiche, fra le raccolte, la riga nuova Radio MP3 e AAC ripetute a uno speaker, con i punti rotti tolti e il loro peso.
+- Le prove nuove sono in tests/test_diretta.py e in tests/test_lontano.py.
+
 ## [3.11.5] - 2026-11-12
 
 - Nelle statistiche, alla riga Da dove, le radio hanno la loro sorgente, Radio, dalle Recenti, dai gruppi e dalle ricerche del ramo Radio, e i risultati di Cerca contenuti la loro, Ricerca dei contenuti. Prima contavano come file aperti da soli, perché le loro liste non hanno una cartella. Il tempo già contato resta dov'era. Scelta di Gabriele.

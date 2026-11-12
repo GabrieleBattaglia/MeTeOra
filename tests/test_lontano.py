@@ -1,6 +1,6 @@
 # MeTeOra, le prove del lettore lontano: uno speaker Cast al posto della scheda audio.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/11/2026: nasce con lontano.py, nella 1.117.0. Nella 3.11.1 la radio allo speaker dal ripetitore.
+# 03/11/2026: nasce con lontano.py, nella 1.117.0. Nella 3.11.1 la radio allo speaker dal ripetitore. Nella 3.11.6 i fotogrammi interi allo speaker.
 
 """Le prove di lontano.py, con un apparecchio, un server e una sorgente del
 WAV in RAM finti: niente rete e niente libmpv. Gli stati dell'apparecchio si mandano
@@ -366,6 +366,33 @@ def test_una_radio_va_allo_speaker_dal_ripetitore(banco, monkeypatch):
     assert uscita.getvalue() == audio and titoli == ["Lucio Dalla - Caruso"] and banco.lettore.titolo_in_onda == "Lucio Dalla - Caruso"
     banco.lettore.stop()
     assert banco.lettore.titolo_in_onda is None
+
+
+def test_allo_speaker_arrivano_solo_fotogrammi_interi(banco, monkeypatch):
+    # Come la BBC: byte rotti fra i fotogrammi, che fermavano GabryBar (3.11.6).
+    import io
+
+    from test_diretta import _icy, _mp3, _server
+
+    import diretta
+    import indirizzi
+
+    monkeypatch.setattr(diretta, "RIPROVE", 0)
+    fotogrammi = _mp3(30)
+    rotti = b"\x8d\x01\x02" * 11
+    audio = b"".join(fotogrammi[:10]) + rotti + b"".join(fotogrammi[10:])
+    porta, _richieste = _server([_icy(audio, 1000, [])])
+    url = f"http://127.0.0.1:{porta}/bbc"
+    indirizzi.metti_il_diretto(url, dal_vivo=True)
+    conti = []
+    banco.lettore._al_conto = lambda nome, quanto: conti.append((nome, quanto))
+    banco.lettore.suona(url)
+    assert banco.aspetta_suona()
+    uscita = io.BytesIO()
+    banco.server.flussi[-1][1](uscita)
+    assert uscita.getvalue() == b"".join(fotogrammi)
+    assert conti == [("rotture_tolte_allo_speaker", 1), ("byte_rotti_tolti_allo_speaker", len(rotti))]
+    banco.lettore.stop()
 
 
 def test_lo_stop_chiude_la_radio_che_tace(banco):
