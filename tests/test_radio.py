@@ -367,7 +367,7 @@ def test_mostra_altre_radio_in_fondo_alla_ricerca(finestra, con_le_radio, monkey
     assert finestra._statistiche.dati["conti"]["radio_altre"] == 2
 
 
-def test_una_radio_entra_fra_le_recenti_dopo_un_minuto(finestra, con_le_radio, monkeypatch):
+def test_una_radio_entra_fra_le_recenti_dopo_un_minuto(finestra, con_le_radio, monkeypatch, suoni_annotati):
     # Il minuto di ascolto di fila anche per le radio (3.10.2).
     import types
 
@@ -378,9 +378,11 @@ def test_una_radio_entra_fra_le_recenti_dopo_un_minuto(finestra, con_le_radio, m
     gruppo.radio_gruppo = True
     finestra._suona(gruppo, brano)
     assert not finestra.archivio.radio.brani
-    finto = types.SimpleNamespace(in_corso=brano.percorso, posizione=0.0, in_pausa=False)
+    finto = types.SimpleNamespace(in_corso=brano.percorso, posizione=0.0, in_pausa=False, volume=100)
     orologio = [100.0]
     monkeypatch.setattr(finestra, "motore", finto)
+    # Lo scatto delle statistiche leggerebbe il motore vero.
+    monkeypatch.setattr(finestra, "_scatto_delle_statistiche", lambda: None)
     monkeypatch.setattr(finestra, "coda", types.SimpleNamespace(playlist=gruppo, corrente=brano))
     monkeypatch.setattr(modulo.time, "monotonic", lambda: orologio[0])
     for _n in range(60):
@@ -392,6 +394,6 @@ def test_una_radio_entra_fra_le_recenti_dopo_un_minuto(finestra, con_le_radio, m
     finto.posizione += 1.0
     finestra._guarda_l_indirizzo()
     assert [b.radio["uuid"] for b in finestra.archivio.radio.brani] == ["uuid-rai3"]
-    assert finestra._righe[-1].startswith("Rai Radio 3: un minuto di ascolto di fila, ora è fra le Recenti.")
+    assert finestra._righe[-1].startswith("Rai Radio 3: un minuto di ascolto di fila, ora è fra le Recenti.") and suoni_annotati[-1] == "sorgente_tenuta"
     assert finestra._statistiche.dati["conti"]["radio_tenute"] == 1 and not finestra.archivio.indirizzi.brani
     monkeypatch.undo()

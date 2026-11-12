@@ -2,6 +2,10 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.10.3] - 2026-11-12
+
+- Un indirizzo o una radio che, dopo un minuto di ascolto di fila, entra negli Indirizzi o fra le Recenti, o ci torna in cima, ora ha il suo suono, oltre alla riga della console: spia_che_si_accende, due lampi e una nota che sale e resta, votato 4 da Gabriele all'ascolto alla cieca dell'11 novembre 2026 e libero. Firmato da MeTeOra in GBUtils V252.
+
 ## [3.10.2] - 2026-11-11
 
 - Anche le radio entrano fra le Recenti solo dopo un minuto di ascolto di fila, come gli indirizzi: le radio provate per pochi secondi non entrano più. Una pausa o uno stop fanno ricominciare il conto, e la console dice quando una radio entra, o torna in cima. Chiesto da Gabriele.

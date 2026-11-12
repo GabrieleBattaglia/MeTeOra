@@ -200,6 +200,7 @@ NOMI_DEGLI_EVENTI = {
     "alle_registrazioni": _("al ramo Registrazioni"), "cartella_delle_registrazioni": _("cartella delle registrazioni aperta"),
     "scheda_degli_effetti": _("scheda degli effetti cambiata"), "console_letta": _("lettura della console cambiata, con F10"),
     "console_letta_al_limite": _("lettura della console già al limite"),
+    "sorgente_tenuta": _("indirizzo o radio tenuti dopo un minuto di ascolto"),
     "scaricamento_avviato": _("scaricamento avviato"), "scaricamento_finito": _("scaricamento finito"),
     "brano_seguente_da_solo": _("brano seguente partito da solo"), "fine_playlist": _("fine della lista"),
     "avanti": _("salto avanti"), "indietro": _("salto indietro"), "vai_a_tempo": _("vai a un tempo"),

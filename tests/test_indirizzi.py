@@ -763,9 +763,11 @@ def test_cerca_contenuti_negli_indirizzi_e_i_dieci_secondi(finestra, con_ytdlp, 
     # Suonato per un minuto di fila (3.10.1) entra negli Indirizzi; una pausa fa ricominciare il conto.
     pl = finestra._contenuti_trovati["playlist"]
     brano = pl.brani[0]
-    finto = types.SimpleNamespace(in_corso=brano.percorso, posizione=0.0, in_pausa=False)
+    finto = types.SimpleNamespace(in_corso=brano.percorso, posizione=0.0, in_pausa=False, volume=100)
     orologio = [100.0]
     monkeypatch.setattr(finestra, "motore", finto)
+    # Lo scatto delle statistiche leggerebbe il motore vero.
+    monkeypatch.setattr(finestra, "_scatto_delle_statistiche", lambda: None)
     monkeypatch.setattr(finestra, "coda", types.SimpleNamespace(playlist=pl, corrente=brano))
     monkeypatch.setattr(modulo.time, "monotonic", lambda: orologio[0])
 

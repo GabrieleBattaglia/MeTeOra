@@ -94,6 +94,10 @@ EVENTI = {
     "scheda_degli_effetti": "folata_verso_destra",
     "console_letta": "sonar_con_due_echi",
     "console_letta_al_limite": "soffio_che_si_ferma",
+    # Un indirizzo o una radio che dopo un minuto di ascolto di fila entra
+    # negli Indirizzi o fra le Recenti (3.10.3): votato 4 da Gabriele
+    # all'ascolto dell'11 novembre 2026, scelto da lui fra i liberi.
+    "sorgente_tenuta": "spia_che_si_accende",
     "scaricamento_avviato": "meteora_scaricamento_avviato",
     "scaricamento_finito": "meteora_scaricamento_finito",
     "brano_seguente_da_solo": "carta_giocata",
