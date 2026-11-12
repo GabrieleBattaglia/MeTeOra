@@ -2,6 +2,24 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.11.3] - 2026-11-12
+
+Le correzioni della verifica delle novità dalla 3.6.0 alla 3.11.1, chiesta da Gabriele e fatta da due sottoagenti, ognuno su metà delle versioni, che hanno riprodotto i difetti con prove loro.
+
+- Indirizzi e Recenti suonati in fila non rimbalzano più all'infinito fra due brani: un brano ascoltato un minuto dalla sua lista sale in cima quando parte il brano dopo, o alla chiusura, e non mentre suona, quando il seguente sarebbe diventato il primo.
+- Con la scheda degli effetti a parte, le righe della scheda audio, la lista di Ctrl e Maiuscolo con X, le statistiche e gli avvisi delle uscite dicevano la scheda degli effetti al posto di quella della musica. Ora dicono quella giusta, e la prova che la scheda della musica si apre si fa sulla sua uscita. Una scheda degli effetti che all'avvio non si apre rimanda gli effetti sulla musica, e la console lo dice.
+- Ogni salto nel brano, anche con i comandi dei capitoli, fa ricominciare il conto del minuto e il capitolo visto: un capitolo non si dice più due volte dopo Ctrl e Maiuscolo con la virgola.
+- Con D spento, i titoli in onda e i capitoli non li legge nemmeno la console letta: vince D, come ha deciso Gabriele.
+- Con la console letta, di F12, F2 e F3 si legge solo la prima riga; il resto si legge nella console, dove va il fuoco.
+- Un contenuto più corto di un minuto entra negli Indirizzi se lo ascolti fino in fondo, sempre di fila. Decisione di Gabriele.
+- Canc o Togli dalle ascoltate su una radio delle Recenti, e Canc su un risultato della ricerca, aggiornano il ramo e lasciano il fuoco sulla voce vicina; Recenti richiuso e riaperto si ricarica.
+- F4, Aggiungi ai preferiti e Aggiungi alla playlist su un risultato della ricerca dei contenuti non richiudono più i risultati, e il fuoco resta sul risultato.
+- Mostra altri risultati conta solo i risultati davvero nuovi, senza i doppioni, e una pagina che non arriva per un errore si può richiedere.
+- Mostra altre radio non resta più bloccata dopo un errore di rete di un certo tipo, e un Aggiorna del gruppo mentre arrivano altre radio non dà più errori.
+- Sullo speaker Cast: lo stop e il cambio di radio chiudono subito la lettura della radio anche se la radio tace, e il titolo di una radio di prima non arriva più su quella nuova; una radio che porta a una lista va allo speaker con il suo indirizzo, che lo speaker apre da sé.
+- Una registrazione fermata senza niente da scrivere non conta più come file prodotto nelle statistiche.
+- Le prove nuove sono in tests/test_verifica_3113.py e in tests/test_lontano.py.
+
 ## [3.11.2] - 2026-11-12
 
 - yt-dlp si controlla una volta al giorno, al primo indirizzo aperto o alla prima ricerca dei contenuti, e la console lo diceva solo quando arrivava una versione nuova: da novembre non ne sono uscite, così il controllo sembrava non esserci. Ora la console lo dice anche quando yt-dlp è già all'ultima versione, con il numero, come yt-dlp è già all'ultima versione, 2026.10.26. Chiesto da Gabriele.

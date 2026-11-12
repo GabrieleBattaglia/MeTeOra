@@ -1,6 +1,6 @@
 # MeTeOra, le radio in rete: le stazioni di radio-browser.info.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 06/11/2026: nasce con la 3.3.0, tappa 19 c del piano, issue 40. Nella 3.10.0 le pagine, per Mostra altre radio.
+# 06/11/2026: nasce con la 3.3.0, tappa 19 c del piano, issue 40. Nella 3.10.0 le pagine, per Mostra altre radio. Nella 3.11.3 gli errori di http.client come ErroreRadio.
 
 """Le radio in rete (3.3.0, issue 40).
 
@@ -22,6 +22,7 @@ sua lingua, come Italia, Germania, Inglese.
 
 import contextlib
 import ctypes
+import http.client
 import json
 import threading
 import urllib.parse
@@ -84,7 +85,7 @@ def _chiedi(percorso, **parametri):
     for nome in server():
         try:
             return _leggi(f"https://{nome}{percorso}{coda}")
-        except (OSError, ValueError) as e:
+        except (OSError, ValueError, http.client.HTTPException) as e:
             errori.append(str(getattr(e, "reason", None) or e))
     raise ErroreRadio(_("radio-browser non risponde: {errore}").format(errore=errori[-1] if errori else _("nessun server")))
 

@@ -1,6 +1,6 @@
 # MeTeOra, il lettore lontano: uno speaker Cast al posto della scheda audio, con la strada A e il WAV in RAM.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/11/2026: nasce con la 1.117.0, tappa 15 b del piano. Nella 2.6.4 il sottobrano resta a fine brano, come nel motore. Nella 3.11.1 le radio, con MeTeOra che fa da ripetitore senza conversione.
+# 03/11/2026: nasce con la 1.117.0, tappa 15 b del piano. Nella 2.6.4 il sottobrano resta a fine brano, come nel motore. Nella 3.11.1 le radio, con MeTeOra che fa da ripetitore senza conversione. Nella 3.11.3 le letture chiuse allo stop e all'errore, i titoli vecchi scartati e le liste dirette allo speaker.
 # Nella 2.6.5 la fine che lo speaker non dice, fermo in caricamento all'ultimo campione. Nella 2.7.0 il WAV in RAM al posto del FLAC su disco.
 
 """Il lettore che suona su un apparecchio Cast, per il motore.
@@ -75,6 +75,8 @@ class LettoreLontano:
         self.titolo_in_onda = None
         self._al_titolo = al_titolo
         self._lettura_in_attesa = None
+        # Le letture che stanno passando una radio allo speaker (3.11.3).
+        self._letture = set()
         self._server = server
         self._converti = converti
         self._alla_fine = alla_fine
@@ -209,8 +211,16 @@ class LettoreLontano:
         if not diretta.da_leggere(percorso):
             self._manda(generazione, None, None, diretto=(percorso, "application/x-mpegURL"))
             return
+        def al_titolo(titolo):
+            self._titolo(generazione, titolo)
+
         try:
-            lettura = diretta.Lettura(percorso, al_titolo=self._titolo)
+            lettura = diretta.Lettura(percorso, al_titolo=al_titolo)
+        except diretta.NonDiretta:
+            # Porta a una lista, come una HLS senza .m3u8: lo speaker la apre da se'.
+            diretta.a_libmpv(percorso)
+            self._manda(generazione, None, None, diretto=(percorso, "application/x-mpegURL"))
+            return
         except Exception:  # noqa: BLE001 - la rete fallisce in molti modi: per il lettore la radio non si suona
             self._errore(generazione)
             return
@@ -223,15 +233,22 @@ class LettoreLontano:
 
         def scrivi(uscita):
             with self._blocco:
+                if generazione != self._generazione:
+                    return
                 prima, self._lettura_in_attesa = self._lettura_in_attesa, None
-            corrente = prima or diretta.Lettura(percorso, al_titolo=self._titolo)
+            corrente = prima or diretta.Lettura(percorso, al_titolo=al_titolo)
+            with self._blocco:
+                self._letture.add(corrente)
+                viva = generazione == self._generazione
             try:
-                while generazione == self._generazione:
+                while viva and generazione == self._generazione:
                     dati = corrente.read(16384)
                     if not dati:
                         return
                     uscita.write(dati)
             finally:
+                with self._blocco:
+                    self._letture.discard(corrente)
                 corrente.close()
 
         # L'estensione del tipo, che il Chromecast guarda.
@@ -239,18 +256,26 @@ class LettoreLontano:
         indirizzo = self._server.pubblica_flusso(f"radio{generazione}{estensione}", scrivi, tipo)
         self._manda(generazione, None, None, diretto=(indirizzo, tipo))
 
-    def _titolo(self, titolo):
-        """Il titolo in onda della radio ripetuta, dal filo che la legge."""
+    def _titolo(self, generazione, titolo):
+        """Il titolo in onda della radio ripetuta, dal filo che la legge; quello
+        di una radio di prima si scarta."""
+        if generazione != self._generazione:
+            return
         self.titolo_in_onda = titolo
         if self._al_titolo is not None:
             self._al_titolo(titolo)
 
     def _lascia_la_lettura(self):
-        """La lettura della radio di prima, se lo speaker non l'ha mai chiesta."""
+        """Le letture della radio di prima: quella che lo speaker non ha mai
+        chiesto e quelle che gli passano la radio, che close sveglia anche se
+        aspettano la rete (verifica della 3.11.3)."""
         with self._blocco:
-            lettura, self._lettura_in_attesa = self._lettura_in_attesa, None
-        if lettura is not None:
-            lettura.close()
+            letture = [self._lettura_in_attesa, *self._letture]
+            self._lettura_in_attesa = None
+            self._letture.clear()
+        for lettura in letture:
+            if lettura is not None:
+                lettura.close()
 
     def _manda(self, generazione, file, inizio, sorgente=None, diretto=None):
         with self._blocco:
@@ -355,6 +380,11 @@ class LettoreLontano:
             self._al_guasto(ConnectionError(f"connessione {stato}"))
 
     def _errore(self, generazione):
+        with self._blocco:
+            if generazione != self._generazione or self.percorso is None:
+                return
+        # Le letture della radio in errore si chiudono (verifica della 3.11.3).
+        self._lascia_la_lettura()
         with self._blocco:
             if generazione != self._generazione or self.percorso is None:
                 return

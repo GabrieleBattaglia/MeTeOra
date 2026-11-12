@@ -33,3 +33,10 @@ Una radio su un gruppo di altoparlanti suona in tutti, insieme.
 Cambiando radio, o con stop, lo speaker passa alla nuova o si ferma subito.
 Collaudo di MeTeOra 3.11.2.
 Il primo indirizzo o la prima ricerca dei contenuti del giorno: la console dice che yt-dlp è già all'ultima versione, con il numero, o che si è aggiornato; il secondo dello stesso giorno non dice niente.
+Collaudo di MeTeOra 3.11.3, le correzioni delle verifiche.
+Suona gli Indirizzi o le Recenti uno dopo l'altro, ascoltandone qualcuno per più di un minuto: la fila va avanti in ordine, senza tornare indietro fra due brani.
+Con la scheda degli effetti sulle cuffie, la voce Scheda audio dice la scheda della musica, non le cuffie.
+Con D spento e la console letta accesa, il titolo in onda di una radio non si sente.
+Con la console letta accesa, F12 legge solo la prima riga della guida.
+Canc su una radio delle Recenti la toglie dal ramo, e il fuoco va su quella vicina.
+F4 su un risultato della ricerca dei contenuti lascia aperti i risultati, con il fuoco sul risultato.

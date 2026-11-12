@@ -366,3 +366,55 @@ def test_una_radio_va_allo_speaker_dal_ripetitore(banco, monkeypatch):
     assert uscita.getvalue() == audio and titoli == ["Lucio Dalla - Caruso"] and banco.lettore.titolo_in_onda == "Lucio Dalla - Caruso"
     banco.lettore.stop()
     assert banco.lettore.titolo_in_onda is None
+
+
+def test_lo_stop_chiude_la_radio_che_tace(banco):
+    # Una radio che manda le intestazioni e poi tace: lo stop chiude la sua
+    # lettura subito, senza aspettare la rete (verifica della 3.11.3).
+    import io
+    import socket
+    import time
+
+    import indirizzi
+
+    presa = socket.socket()
+    presa.bind(("127.0.0.1", 0))
+    presa.listen(2)
+    fine = threading.Event()
+
+    def servi():
+        conn, _da = presa.accept()
+        conn.recv(4096)
+        conn.sendall(b"HTTP/1.0 200 OK\r\nContent-Type: audio/mpeg\r\n\r\n" + b"a" * 10)
+        fine.wait(30)
+        conn.close()
+        presa.close()
+
+    threading.Thread(target=servi, daemon=True).start()
+    url = f"http://127.0.0.1:{presa.getsockname()[1]}/stream"
+    indirizzi.metti_il_diretto(url, dal_vivo=True)
+    banco.lettore.suona(url)
+    assert banco.aspetta_suona()
+    uscita = io.BytesIO()
+    filo = threading.Thread(target=banco.server.flussi[-1][1], args=(uscita,))
+    filo.start()
+    time.sleep(0.3)
+    inizio = time.monotonic()
+    banco.lettore.stop()
+    filo.join(5)
+    fine.set()
+    assert not filo.is_alive() and time.monotonic() - inizio < 2 and uscita.getvalue() == b"a" * 10
+
+
+def test_una_radio_che_porta_a_una_lista_va_diretta_allo_speaker(banco):
+    from test_diretta import _server
+
+    import indirizzi
+
+    porta, _richieste = _server([b"HTTP/1.0 200 OK\r\nContent-Type: application/vnd.apple.mpegurl\r\n\r\n#EXTM3U\n"])
+    url = f"http://127.0.0.1:{porta}/live"
+    indirizzi.metti_il_diretto(url, dal_vivo=True)
+    banco.lettore.suona(url)
+    assert banco.aspetta_suona()
+    chiamata = next(c for c in banco.apparecchio.chiamate if c[0] == "suona")
+    assert chiamata[1] == url and chiamata[2] == "application/x-mpegURL" and not banco.server.flussi
