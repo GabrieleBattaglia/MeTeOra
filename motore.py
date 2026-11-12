@@ -1656,9 +1656,10 @@ class Motore:
 
     @property
     def titolo_in_onda(self):
-        """Il titolo che la radio in corso manda, o None (3.3.0)."""
+        """Il titolo che la radio in corso manda, o None (3.3.0); con lo
+        speaker, quello della radio ripetuta (3.11.1)."""
         if self._lontano is not None:
-            return None
+            return getattr(self._lontano, "titolo_in_onda", None)
         return self._attivo.titolo_in_onda if self._attivo.percorso else None
 
     def capitoli(self):

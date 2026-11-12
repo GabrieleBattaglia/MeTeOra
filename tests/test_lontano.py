@@ -1,6 +1,6 @@
 # MeTeOra, le prove del lettore lontano: uno speaker Cast al posto della scheda audio.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/11/2026: nasce con lontano.py, nella 1.117.0.
+# 03/11/2026: nasce con lontano.py, nella 1.117.0. Nella 3.11.1 la radio allo speaker dal ripetitore.
 
 """Le prove di lontano.py, con un apparecchio, un server e una sorgente del
 WAV in RAM finti: niente rete e niente libmpv. Gli stati dell'apparecchio si mandano
@@ -30,7 +30,8 @@ class _ApparecchioFinto:
             raise self.guasto
         self.chiamate.append(voce)
 
-    def suona(self, indirizzo, tipo, titolo=None, inizio=None, in_pausa=False):
+    def suona(self, indirizzo, tipo, titolo=None, inizio=None, in_pausa=False, in_diretta=False):
+        self.in_diretta = in_diretta
         self._annota("suona", indirizzo, tipo, titolo, inizio, in_pausa)
 
     def pausa(self):
@@ -65,6 +66,7 @@ class _ServerFinto:
         self.pubblicati = []
         self.sorgenti = []
         self.ritirate = []
+        self.flussi = []
         self.fermato = False
 
     def pubblica_file(self, percorso):
@@ -77,6 +79,10 @@ class _ServerFinto:
 
     def ritira_sorgente(self, sorgente):
         self.ritirate.append(sorgente)
+
+    def pubblica_flusso(self, nome, scrivi, tipo):
+        self.flussi.append((nome, scrivi, tipo))
+        return f"http://pc/flusso/{nome}"
 
     def ferma(self):
         self.fermato = True
@@ -331,3 +337,32 @@ def test_gli_errori(tmp_path):
     banco.apparecchio.guasto = OSError("speaker spento")
     banco.lettore.pausa()
     assert banco.avvisi[-1] == ("guasto", "speaker spento")
+
+
+def test_una_radio_va_allo_speaker_dal_ripetitore(banco, monkeypatch):
+    # La radio la legge MeTeOra e la passa cosi' com'e', senza metadati e
+    # senza conversione, come flusso senza fine (3.11.1).
+    import io
+
+    from test_diretta import _icy, _server
+
+    import diretta
+    import indirizzi
+
+    monkeypatch.setattr(diretta, "RIPROVE", 0)
+    audio = bytes(range(200)) + b"y" * 100
+    porta, _richieste = _server([_icy(audio, 100, [None, "Lucio Dalla - Caruso"])])
+    url = f"http://127.0.0.1:{porta}/stream"
+    indirizzi.metti_il_diretto(url, dal_vivo=True)
+    titoli = []
+    banco.lettore._al_titolo = titoli.append
+    banco.lettore.suona(url)
+    assert banco.aspetta_suona()
+    chiamata = next(c for c in banco.apparecchio.chiamate if c[0] == "suona")
+    assert chiamata[1].startswith("http://pc/flusso/radio") and chiamata[1].endswith(".mp3") and chiamata[2] == "audio/mpeg"
+    assert banco.apparecchio.in_diretta and not banco.conversioni and not banco.server.pubblicati
+    uscita = io.BytesIO()
+    banco.server.flussi[-1][1](uscita)
+    assert uscita.getvalue() == audio and titoli == ["Lucio Dalla - Caruso"] and banco.lettore.titolo_in_onda == "Lucio Dalla - Caruso"
+    banco.lettore.stop()
+    assert banco.lettore.titolo_in_onda is None

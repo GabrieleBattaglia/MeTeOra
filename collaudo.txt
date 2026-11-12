@@ -27,3 +27,7 @@ Il titolo in onda arriva ancora, nella console e, con D acceso, alla sintesi.
 Una radio che cade si riprende da sola, o la console dice che si è interrotta.
 Una registrazione di una radio, riascoltata, è pulita anche lei.
 Le radio m3u8, come BBC News o RNE, suonano come prima.
+Collaudo di MeTeOra 3.11.1: le radio sugli speaker Cast.
+Con lo speaker scelto, una radio, come Rai Radio 3, suona sullo speaker, e il titolo in onda arriva nella console; Dove sono lo dice.
+Una radio su un gruppo di altoparlanti suona in tutti, insieme.
+Cambiando radio, o con stop, lo speaker passa alla nuova o si ferma subito.

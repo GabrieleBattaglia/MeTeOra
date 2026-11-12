@@ -11257,6 +11257,8 @@ class Finestra(wx.Frame):
             "al_caricamento": lambda: wx.CallAfter(self._aggiorna_il_video),
             "all_interruzione": lambda: wx.CallAfter(self._speaker_interrotto),
             "al_guasto": lambda errore: wx.CallAfter(self._speaker_perso, errore),
+            # Il titolo in onda della radio che MeTeOra ripete allo speaker (3.11.1).
+            "al_titolo": lambda titolo: wx.CallAfter(self._titolo_in_onda, titolo),
         }
 
         def collega():

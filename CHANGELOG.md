@@ -2,6 +2,15 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.11.1] - 2026-11-12
+
+Le radio sugli speaker Cast, che non suonavano: MeTeOra trattava l'indirizzo di una radio come un file del disco, o provava a convertirla in WAV, che vuole una durata.
+
+- Ora MeTeOra fa da ripetitore, senza conversione, come ha scelto Gabriele: legge la radio con la lettura nuova della 3.11.0, toglie i metadati e tiene il titolo in onda, e passa i byte così come sono allo speaker, dal suo server, come diretta senza fine. Lo speaker decodifica, e il PC quasi non lavora.
+- Un solo collegamento verso la radio, anche per un gruppo di altoparlanti, dove lo speaker capogruppo prende il flusso e lo distribuisce agli altri.
+- Va anche con le radio dei server vecchi, che rispondono ICY 200 OK, e con i certificati scaduti, che lo speaker da solo potrebbe non aprire. Le dirette a pezzi, come le m3u8, lo speaker le apre da sé.
+- Il titolo in onda arriva nella console, e Dove sono lo dice, anche con lo speaker.
+
 ## [3.11.0] - 2026-11-12
 
 Le radio senza distorsioni, issue 46: Gabriele sentiva in molte radio piccoli guasti nel suono, a intervalli più o meno regolari.

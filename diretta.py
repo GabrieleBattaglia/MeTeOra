@@ -1,6 +1,6 @@
 # MeTeOra, le dirette lette da MeTeOra: le radio HTTP passate a libmpv senza la sua lettura di rete.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 12/11/2026: nasce con la 3.11.0, issue 46, con le correzioni della rilettura di un sottoagente.
+# 12/11/2026: nasce con la 3.11.0, issue 46, con le correzioni della rilettura di un sottoagente. Nella 3.11.1 il tipo, per lo speaker Cast.
 
 """Le dirette HTTP lette da MeTeOra (issue 46, 3.11.0).
 
@@ -152,6 +152,8 @@ class Lettura:
         self._metaint = self._al_blocco = 0
         self._con_la_lunghezza = False
         self._finita = False
+        # Il tipo che il server dice, come audio/mpeg, per lo speaker (3.11.1).
+        self.tipo = ""
         self._riprove, self._prima_riprova = 0, 0.0
         self._apri()
 
@@ -197,6 +199,7 @@ class Lettura:
                 self._chiudi_la_connessione()
                 raise OSError(f"il server risponde {risposta.status} {risposta.reason}".strip())
             tipo = (risposta.getheader("Content-Type") or "").lower()
+            self.tipo = tipo.split(";", 1)[0].strip()
             if any(lista in tipo for lista in TIPI_DELLE_LISTE) or urllib.parse.urlsplit(indirizzo).path.lower().endswith(DA_LIBMPV):
                 self._chiudi_la_connessione()
                 raise NonDiretta(f"{indirizzo} porta a una lista, {tipo or 'senza tipo'}")

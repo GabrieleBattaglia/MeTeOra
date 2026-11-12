@@ -1,6 +1,6 @@
 # MeTeOra, il lettore lontano: uno speaker Cast al posto della scheda audio, con la strada A e il WAV in RAM.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/11/2026: nasce con la 1.117.0, tappa 15 b del piano. Nella 2.6.4 il sottobrano resta a fine brano, come nel motore.
+# 03/11/2026: nasce con la 1.117.0, tappa 15 b del piano. Nella 2.6.4 il sottobrano resta a fine brano, come nel motore. Nella 3.11.1 le radio, con MeTeOra che fa da ripetitore senza conversione.
 # Nella 2.6.5 la fine che lo speaker non dice, fermo in caricamento all'ultimo campione. Nella 2.7.0 il WAV in RAM al posto del FLAC su disco.
 
 """Il lettore che suona su un apparecchio Cast, per il motore.
@@ -29,7 +29,9 @@ import os
 import threading
 import time
 
+import diretta
 import formati
+import indirizzi
 import trasmissione
 
 # Per quanti secondi il volume chiesto vale piu' di quello che l'apparecchio
@@ -65,8 +67,14 @@ class LettoreLontano:
     da' la sorgente del WAV in RAM, con chiudi(), o solleva se il brano non si
     legge. I comandi non sollevano mai: un errore va ad al_guasto."""
 
-    def __init__(self, connetti, server, converti, alla_fine=None, all_errore=None, al_caricamento=None, all_interruzione=None, al_guasto=None):
+    def __init__(self, connetti, server, converti, alla_fine=None, all_errore=None, al_caricamento=None, all_interruzione=None, al_guasto=None,
+            al_titolo=None):
         self._blocco = threading.RLock()
+        # La radio ripetuta allo speaker (3.11.1): il titolo in onda, chi lo
+        # vuole sapere, e la lettura aperta che aspetta la prima richiesta.
+        self.titolo_in_onda = None
+        self._al_titolo = al_titolo
+        self._lettura_in_attesa = None
         self._server = server
         self._converti = converti
         self._alla_fine = alla_fine
@@ -160,8 +168,13 @@ class LettoreLontano:
             self._pausa = bool(in_pausa)
             self._durata = None
             vecchia, self._sorgente = self._sorgente, None
+            self.titolo_in_onda = None
         if vecchia is not None:
             self._lascia(vecchia)
+        self._lascia_la_lettura()
+        if formati.e_indirizzo(percorso) and indirizzi.e_una_radio(percorso):
+            threading.Thread(target=self._ripeti_la_radio, args=(generazione, percorso), name="MeTeOra, radio per lo speaker", daemon=True).start()
+            return
         if not da_convertire(percorso, sottobrano, midi_reso):
             self._manda(generazione, percorso, inizio)
         else:
@@ -186,11 +199,68 @@ class LettoreLontano:
             return
         self._manda(generazione, None, inizio, sorgente)
 
-    def _manda(self, generazione, file, inizio, sorgente=None):
+    def _ripeti_la_radio(self, generazione, percorso):
+        """Una radio per lo speaker (Gabriele, 3.11.1): MeTeOra la legge con
+        diretta.py, che toglie i metadati e da' il titolo in onda, e ne passa
+        i byte cosi' come sono dal suo server, da ripetitore, senza
+        convertirla: lo speaker la decodifica. Va anche con i server ICY 200
+        OK e i certificati scaduti, che lo speaker potrebbe non aprire. Le
+        dirette a pezzi, come le m3u8, lo speaker le apre da se'."""
+        if not diretta.da_leggere(percorso):
+            self._manda(generazione, None, None, diretto=(percorso, "application/x-mpegURL"))
+            return
+        try:
+            lettura = diretta.Lettura(percorso, al_titolo=self._titolo)
+        except Exception:  # noqa: BLE001 - la rete fallisce in molti modi: per il lettore la radio non si suona
+            self._errore(generazione)
+            return
+        with self._blocco:
+            if generazione != self._generazione:
+                lettura.close()
+                return
+            self._lettura_in_attesa = lettura
+        tipo = lettura.tipo if lettura.tipo.startswith("audio/") else "audio/mpeg"
+
+        def scrivi(uscita):
+            with self._blocco:
+                prima, self._lettura_in_attesa = self._lettura_in_attesa, None
+            corrente = prima or diretta.Lettura(percorso, al_titolo=self._titolo)
+            try:
+                while generazione == self._generazione:
+                    dati = corrente.read(16384)
+                    if not dati:
+                        return
+                    uscita.write(dati)
+            finally:
+                corrente.close()
+
+        # L'estensione del tipo, che il Chromecast guarda.
+        estensione = next((e for e, t in trasmissione.TIPI.items() if t == tipo), ".mp3")
+        indirizzo = self._server.pubblica_flusso(f"radio{generazione}{estensione}", scrivi, tipo)
+        self._manda(generazione, None, None, diretto=(indirizzo, tipo))
+
+    def _titolo(self, titolo):
+        """Il titolo in onda della radio ripetuta, dal filo che la legge."""
+        self.titolo_in_onda = titolo
+        if self._al_titolo is not None:
+            self._al_titolo(titolo)
+
+    def _lascia_la_lettura(self):
+        """La lettura della radio di prima, se lo speaker non l'ha mai chiesta."""
+        with self._blocco:
+            lettura, self._lettura_in_attesa = self._lettura_in_attesa, None
+        if lettura is not None:
+            lettura.close()
+
+    def _manda(self, generazione, file, inizio, sorgente=None, diretto=None):
         with self._blocco:
             if generazione != self._generazione:
                 return
-            if sorgente is not None:
+            if diretto is not None:
+                # Una radio: il suo flusso ripetuto, o una m3u8, senza fine (3.11.1).
+                indirizzo, tipo = diretto
+                self._indirizzo = indirizzo
+            elif sorgente is not None:
                 indirizzo = self._indirizzo = self._server.pubblica_sorgente(sorgente)
                 tipo = sorgente.tipo
             else:
@@ -198,6 +268,9 @@ class LettoreLontano:
                 tipo = trasmissione.tipo_di(file)
             in_pausa = self._pausa
             titolo = os.path.basename(self.percorso or file)
+        if diretto is not None:
+            self._comanda(lambda: self.apparecchio.suona(indirizzo, tipo, titolo=titolo, in_diretta=True, in_pausa=in_pausa))
+            return
         self._comanda(lambda: self.apparecchio.suona(indirizzo, tipo, titolo=titolo, inizio=inizio or None, in_pausa=in_pausa))
 
     def _lascia(self, sorgente):
@@ -233,7 +306,9 @@ class LettoreLontano:
             self._pronto = False
             self._fine_attesa = None
             self._pausa = False
+            self.titolo_in_onda = None
         self._lascia_se_finito()
+        self._lascia_la_lettura()
         if c_era:
             self._comanda(self.apparecchio.ferma)
 
