@@ -1,7 +1,0 @@
-Collaudo di MeTeOra 3.11.6: le radio con i byte rotti su GabryBar.
-Con GabryBar scelto, ascolta BBC World Service per almeno tre minuti: suona senza fermarsi, e non dice più Non riesco a suonare.
-Poi apri le statistiche con Maiuscolo e F7: la riga Radio ripetute a uno speaker conta i punti rotti tolti alle MP3 e alle AAC, più di zero.
-Collaudo di MeTeOra 3.12.0: le TV su GabryBar, con l'audio convertito.
-Con GabryBar scelto, cerca buddhi fra le radio e suona Buddhist Broadcasting System TV: dopo qualche secondo si sente l'audio della TV, e va avanti senza fermarsi.
-Fai lo stesso con Buddhist True Network TV.
-Nelle statistiche, Maiuscolo con F7, la riga delle radio ripetute a uno speaker conta le TV con l'audio convertito dal vivo.
