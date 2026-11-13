@@ -4,6 +4,8 @@ Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
 ## [3.12.0] - 2026-11-13
 
+Pubblicata il 13 novembre 2026, con l'installatore e lo zip: la sesta release, che porta agli utenti tutto quello che è venuto dopo la 3.8.1, dalle radio Recenti della 3.8.2 alla ricerca dei contenuti della 3.9.0, le radio senza distorsioni della 3.11.0 e le radio e le TV sugli speaker Cast. Prima, il 13 novembre, la tappa 19 d del piano, Voce chiara e Cuffia: con l'ascolto alla cieca Gabriele non ha sentito miglioramenti, e non sono entrate; la issue 40 si è chiusa con il resoconto.
+
 Le TV sugli speaker Cast. Le due TV coreane della ricerca buddhi, Buddhist Broadcasting System TV e Buddhist True Network TV, sono flussi video HLS, a 1080p e 720p, che radio-browser mette fra le radio: MeTeOra le mandava a GabryBar com'erano, e lo speaker, solo audio, le rifiutava dopo 7 e 13 secondi senza mai partire. Sul PC suonano.
 
 - Una lista HLS con varianti video, che lo dicono con RESOLUTION o con un codec video, va allo speaker con l'audio convertito dal vivo: la legge libmpv, in modo codifica, come per i video, e lo speaker riceve un WAV senza fine, a 48 kHz, 16 bit e stereo, senza perdita. Lo speaker la tiene come una diretta. Il WAV dice di durare più di sei ore, quanto la sua intestazione sa dire. Scelta di Gabriele.
