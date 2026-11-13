@@ -1,0 +1,53 @@
+MeTeOra: ascolto alla cieca dei filtri per la cuffia e per la voce, issue 40.
+
+Prova di la cuffia, sessione del 2026-11-13 12:14
+
+Prova di la cuffia, sessione del 2026-11-13 12:20
+
+Prova di la cuffia, sessione del 2026-11-13 12:25
+
+GRUPPO: 1 di 3, California Girls, dei Beach Boys, gruppo california
+Data: 2026-11-13 12:30
+Misura: A spenta, voto 3; B sofalizer, voto 2; C spenta, voto 2; D bs2b, voto 3; E bs2b_cmoy, voto 3; F bs2b_jmeier, voto 3
+Commento di Gabriele: test superato, nessun commento
+
+GRUPPO: 2 di 3, Mrs. Robinson, di Simon & Garfunkel, gruppo robinson
+Data: 2026-11-13 12:35
+Misura: A bs2b, voto 3; B spenta, voto 4; C sofalizer, voto 2; D bs2b_jmeier, voto 3; E bs2b_cmoy, voto 3; F sofalizer, voto 2
+Commento di Gabriele: test superato, nessun commento
+
+GRUPPO: 3 di 3, Money, dei Pink Floyd, gruppo money
+Data: 2026-11-13 12:40
+Misura: A spenta, voto 4; B bs2b_jmeier, voto 3; C sofalizer, voto 2; D sofalizer, voto 2; E bs2b, voto 3; F bs2b_cmoy, voto 3
+Commento di Gabriele: test superato, nessun commento
+
+RIEPILOGO DEI VOTI, prova di la cuffia, sessione del 2026-11-13 12:25
+california: spenta (A) 3, bs2b (D) 3, bs2b_cmoy (E) 3, bs2b_jmeier (F) 3, sofalizer (B) 2, spenta (C) 2.
+robinson: spenta (B) 4, bs2b (A) 3, bs2b_jmeier (D) 3, bs2b_cmoy (E) 3, sofalizer (C) 2, sofalizer (F) 2.
+money: spenta (A) 4, bs2b_jmeier (B) 3, bs2b (E) 3, bs2b_cmoy (F) 3, sofalizer (C) 2, sofalizer (D) 2.
+Somme: spenta 11, media 3.7, bs2b 9, media 3.0, bs2b_cmoy 9, media 3.0, bs2b_jmeier 9, media 3.0, sofalizer 6, media 2.0.
+Il candidato ripetuto, per gruppo: california, spenta: A 3 e C 2; robinson, sofalizer: C 2 e F 2; money, sofalizer: C 2 e D 2.
+
+Prova di la voce, sessione del 2026-11-13 12:40
+
+GRUPPO: 1 di 3, un parlato alla radio, Story Time di CanaleItalia, gruppo story_time
+Data: 2026-11-13 12:45
+Misura: A arnndn, voto 3; B speechnorm, voto 3; C spenta, voto 3; D arnndn_speechnorm, voto 3; E arnndn, voto 3
+Commento di Gabriele: test superato, nessun commento
+
+GRUPPO: 2 di 3, una presentazione registrata, quella di Chess-CLI, gruppo chess_cli
+Data: 2026-11-13 12:49
+Misura: A speechnorm, voto 3; B arnndn, voto 3; C arnndn_speechnorm, voto 3; D spenta, voto 3; E arnndn, voto 3
+Commento di Gabriele: test superato, nessun commento
+
+GRUPPO: 3 di 3, un film audiodescritto, Alla ricerca di Nemo, gruppo nemo
+Data: 2026-11-13 12:53
+Misura: A spenta, voto 3; B arnndn_speechnorm, voto 1; C arnndn, voto 1; D spenta, voto 3; E speechnorm, voto 3
+Commento di Gabriele: test superato, nessun commento
+
+RIEPILOGO DEI VOTI, prova di la voce, sessione del 2026-11-13 12:40
+story_time: arnndn (A) 3, speechnorm (B) 3, spenta (C) 3, arnndn_speechnorm (D) 3, arnndn (E) 3.
+chess_cli: speechnorm (A) 3, arnndn (B) 3, arnndn_speechnorm (C) 3, spenta (D) 3, arnndn (E) 3.
+nemo: spenta (A) 3, spenta (D) 3, speechnorm (E) 3, arnndn_speechnorm (B) 1, arnndn (C) 1.
+Somme: spenta 9, media 3.0, speechnorm 9, media 3.0, arnndn 7, media 2.3, arnndn_speechnorm 7, media 2.3.
+Il candidato ripetuto, per gruppo: story_time, arnndn: A 3 e E 3; chess_cli, arnndn: B 3 e E 3; nemo, spenta: A 3 e D 3.
