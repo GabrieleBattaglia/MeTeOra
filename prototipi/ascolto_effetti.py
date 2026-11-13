@@ -7,7 +7,9 @@
 Uso, dalla cartella di MeTeOra, con il via di Gabriele:
   python prototipi\\ascolto_effetti.py cuffia [PAROLA]
   python prototipi\\ascolto_effetti.py voce [PAROLA]
-La prova della cuffia si ascolta in cuffia. Con una parola fa sentire
+La prova della cuffia suona sulla cuffia G325, quella della voce sugli
+altoparlanti Realtek, con WASAPI, senza toccare l'uscita predefinita di
+Windows; se l'uscita non c'e', su quella predefinita. Con una parola fa sentire
 soltanto i gruppi il cui titolo la contiene.
 
 Tre gruppi per prova, uno per brano. In ogni gruppo i candidati, piu' uno di
@@ -19,7 +21,7 @@ ascolti, e il voto da 1 a 5: r lo riascolta, Escape lo lascia senza voto. Il
 gruppo si chiude con il menu comune dei collaudi: r riascolta la rassegna, c
 commenta, Invio lo da' per superato.
 I campioni li prepara prepara_ascolto_effetti.py, tutti alla stessa
-sonorita' dentro il gruppo; il volume e' quello di Windows. Gli esiti, con le
+sonorita' dentro il gruppo; il volume e' quello dell'uscita. Gli esiti, con le
 lettere sciolte, vanno in prototipi\\ascolto_effetti_esiti.txt, con in fondo
 il riepilogo dei voti per candidato e per gruppo, e i due voti del candidato
 ripetuto; a schermo, durante l'ascolto, niente nomi ne' numeri.
@@ -44,6 +46,23 @@ PROVE = {
     "cuffia": ("la cuffia", ("spenta", "bs2b", "bs2b_cmoy", "bs2b_jmeier", "sofalizer"), ("california", "robinson", "money")),
     "voce": ("la voce", ("spenta", "arnndn", "speechnorm", "arnndn_speechnorm"), ("story_time", "chess_cli", "nemo")),
 }
+# L'uscita di ogni prova, scelta da Gabriele il 13 novembre 2026 per non
+# passare dal mixer: la cuffia G325 e gli altoparlanti Realtek, con WASAPI.
+USCITE = {"cuffia": "G325", "voce": "Altoparlanti (Realtek"}
+INTERFACCIA = "Windows WASAPI"
+# L'uscita scelta, come numero di sounddevice, o None per la predefinita.
+_uscita = None
+
+
+def trova_l_uscita(nome):
+    """Il numero e il nome dell'uscita WASAPI il cui nome contiene nome, o
+    (None, None) se non c'e'."""
+    import sounddevice
+
+    for numero, info in enumerate(sounddevice.query_devices()):
+        if info["max_output_channels"] >= 2 and nome in info["name"] and sounddevice.query_hostapis(info["hostapi"])["name"] == INTERFACCIA:
+            return numero, info["name"]
+    return None, None
 LETTERE = "ABCDEFGH"
 ASCOLTI = 2
 VOTI = "12345"
@@ -63,7 +82,10 @@ def suona(file):
     with wave.open(file, "rb") as w:
         frequenza = w.getframerate()
         dati = np.frombuffer(w.readframes(w.getnframes()), dtype="<i2").reshape(-1, w.getnchannels())
-    sounddevice.play(dati.astype(np.float32) / 32768, frequenza)
+    # Con WASAPI condiviso la frequenza e' quella della scheda: se e' un'altra,
+    # come i 44.1 kHz degli altoparlanti Realtek, la converte Windows.
+    extra = sounddevice.WasapiSettings(auto_convert=True) if _uscita is not None else None
+    sounddevice.play(dati.astype(np.float32) / 32768, frequenza, device=_uscita, extra_settings=extra)
     sounddevice.wait()
 
 
@@ -202,13 +224,17 @@ def main(argomenti=None):
     if mancanti:
         print(f"Mancano {len(mancanti)} campioni, come {mancanti[0]}.")
         return 1
+    global _uscita
+    _uscita, nome_dell_uscita = trova_l_uscita(USCITE[prova])
+    if _uscita is None:
+        print(f"Non trovo l'uscita {USCITE[prova]}: suono su quella predefinita di Windows.")
     quante = len(candidati) + 1
     print(f"Ascolto alla cieca dei filtri per {nome}: {len(gruppi)} gruppi, uno per brano, con {quante} lettere ciascuno, di dodici secondi.")
-    if prova == "cuffia":
-        print("Questa prova va ascoltata in cuffia.")
+    if _uscita is not None:
+        print(f"Suona su {nome_dell_uscita}.")
     print("Le lettere cambiano a caso a ogni gruppo. Ogni gruppo si annuncia, e Escape lo salta.")
     print(f"Prima la rassegna: le {quante} lettere di fila, ognuna dopo {SILENZIO_LETTERA:g} secondi di silenzio, con {SILENZIO_RASSEGNA:g} secondi dopo ogni suono. "
-          "Durante la prima rassegna puoi regolare il volume di Windows.")
+          "Durante la prima rassegna puoi regolare il volume.")
     print(f"Poi una lettera alla volta: la lettera, {SILENZIO_CANDIDATO:g} secondi, e {ASCOLTI} ascolti con {SILENZIO_FRA_ASCOLTI:g} secondi fra l'uno e l'altro; "
           "poi il voto da 1 a 5, dove 3 vuol dire che va bene ma non ti colpisce.")
     print("Al voto r riascolta la lettera, Escape la lascia senza voto. A fine gruppo r riascolta la rassegna, c commenta, Invio lo da' per superato.")
