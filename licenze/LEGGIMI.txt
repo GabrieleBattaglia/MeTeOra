@@ -1,8 +1,8 @@
-Le licenze dei componenti di MeTeOra 3.8.1.
+Le licenze dei componenti di MeTeOra 3.12.0.
 MeTeOra è copyright 2026 di Gabriele Battaglia (IZ4APU), software libero sotto la GNU General Public License, versione 3 o, a tua scelta, qualunque versione successiva (GPL-3.0-or-later), senza alcuna garanzia. Il testo è nel file LICENSE accanto al programma, e una copia in testi\GPL-3.0.txt.
 Qui sotto, un componente per riga: a che cosa serve, la versione, la licenza e dove sono i suoi testi in questa cartella. Il file SORGENTI.txt dice dove trovare il codice sorgente esatto di ognuno.
-MeTeOra 3.8.1, con sidshim.dll, il suo ponte verso libsidplayfp: GPL-3.0-or-later, testi\GPL-3.0.txt.
-GBUtils V251, la libreria di Gabriele, con gli effetti sonori di Acusticator: GPL-3.0, testi\GPL-3.0.txt.
+MeTeOra 3.12.0, con sidshim.dll, il suo ponte verso libsidplayfp: GPL-3.0-or-later, testi\GPL-3.0.txt.
+GBUtils V265, la libreria di Gabriele, con gli effetti sonori di Acusticator: GPL-3.0, testi\GPL-3.0.txt.
 libmpv-2.dll, la riproduzione: mpv e470f8986e con FFmpeg 939c2c733, libopenmpt e le altre librerie della build 20260928 di shinchiro/mpv-winbuild-cmake: GPL-3.0-or-later nel suo insieme, testi\GPL-3.0.txt; mpv è GPL-2.0-or-later con parti LGPL-2.1-or-later, testi\GPL-2.0.txt e testi\LGPL-2.1.txt. Le librerie che contiene sono nelle righe seguenti, ciascuna con i file di licenza del suo progetto, nella cartella libmpv.
 amf-headers, dentro libmpv-2.dll: libmpv\amf-headers\LICENSE.txt.
 angle-headers, dentro libmpv-2.dll: libmpv\angle-headers\LICENSE.
@@ -117,16 +117,16 @@ winrt-runtime 3.2.1, con winrt-Windows.Foundation 3.2.1, winrt-Windows.Foundatio
 sounddevice 0.5.6, il suono degli effetti, con PortAudio: MIT, python\sounddevice-0.5.6.
 PortAudio, la libreria del suono degli effetti, dentro sounddevice 0.5.6: MIT, portaudio\LICENSE.txt.
 cffi 2.1.1, il collegamento di sounddevice con PortAudio: MIT-0, python\cffi-2.1.1.
-pycparser 3.11, per cffi: BSD-3-Clause, python\pycparser-3.11.
+pycparser 3.12, per cffi: BSD-3-Clause, python\pycparser-3.12.
 requests 2.34.2, gli scaricamenti e l'aggiornamento automatico: Apache-2.0, python\requests-2.34.2.
 urllib3 2.8.0, per requests: MIT, python\urllib3-2.8.0.
 idna 3.20, per requests: BSD-3-Clause, python\idna-3.20.
 charset_normalizer 3.5.2, per requests: MIT, python\charset_normalizer-3.5.2.
-certifi 2026.10.19, i certificati per requests: MPL-2.0, python\certifi-2026.10.19.
-platformdirs 4.13.5, le cartelle di sistema: MIT, python\platformdirs-4.13.5.
+certifi 2026.10.23, i certificati per requests: MPL-2.0, python\certifi-2026.10.23.
+platformdirs 4.14.5, le cartelle di sistema: MIT, python\platformdirs-4.14.5.
 typing_extensions 4.16.0, per i pacchetti qui sopra: PSF-2.0, python\typing_extensions-4.16.0.
-pychromecast 14.0.10, gli speaker Cast: la ricerca, la connessione e i comandi: MIT, python\pychromecast-14.0.10.
-zeroconf 0.151.5, la ricerca degli speaker Cast sulla rete, per pychromecast: LGPL-2.1-or-later, python\zeroconf-0.151.5.
+pychromecast 14.1.1, gli speaker Cast: la ricerca, la connessione e i comandi: MIT, python\pychromecast-14.1.1.
+zeroconf 0.154.0, la ricerca degli speaker Cast sulla rete, per pychromecast: LGPL-2.1-or-later, python\zeroconf-0.154.0.
 protobuf 7.36.2, i messaggi degli speaker Cast, per pychromecast: BSD-3-Clause, python\protobuf-7.36.2.
 casttube 0.2.1, per pychromecast: MIT, python\casttube-0.2.1.
 ifaddr 0.2.0, le schede di rete, per zeroconf: MIT, python\ifaddr-0.2.0.

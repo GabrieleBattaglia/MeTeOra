@@ -1,7 +1,7 @@
-Il codice sorgente dei componenti di MeTeOra 3.8.1.
+Il codice sorgente dei componenti di MeTeOra 3.12.0.
 Il codice sorgente corrispondente di ogni componente incluso nel pacchetto si trova agli indirizzi qui sotto, alla versione esatta. Se uno non fosse più raggiungibile, chiedilo con una segnalazione su https://github.com/GabrieleBattaglia/MeTeOra/issues e lo riceverai.
-MeTeOra 3.8.1, con sidshim.dll e lo script che prepara le librerie (strumenti\prepara_ambiente.py): https://github.com/GabrieleBattaglia/MeTeOra, alla release della versione 3.8.1.
-GBUtils V251: https://github.com/GabrieleBattaglia/GBUtils/tree/ca41c8d069b7185ffae1d2189900bdbfbcc9a98e.
+MeTeOra 3.12.0, con sidshim.dll e lo script che prepara le librerie (strumenti\prepara_ambiente.py): https://github.com/GabrieleBattaglia/MeTeOra, alla release della versione 3.12.0.
+GBUtils V265: https://github.com/GabrieleBattaglia/GBUtils/tree/081e3d0b4d3787dcdf1f7c44eea9c48a9bb27084.
 libmpv-2.dll, build 20260928 di shinchiro, impronta SHA-256 0d5b9dbecb73e179ef39dc94314ff8905fab926a80f8d60a2367d824b7254e2e:
 mpv: https://github.com/mpv-player/mpv/tree/e470f8986e
 FFmpeg: https://github.com/FFmpeg/FFmpeg/tree/939c2c733
@@ -120,16 +120,16 @@ I moduli winrt: https://github.com/pywinrt/pywinrt
 sounddevice 0.5.6: https://pypi.org/project/sounddevice/0.5.6/#files
 PortAudio, la DLL che sounddevice porta con se': https://github.com/spatialaudio/portaudio-binaries, compilata dal codice di https://github.com/PortAudio/portaudio
 cffi 2.1.1: https://pypi.org/project/cffi/2.1.1/#files
-pycparser 3.11: https://pypi.org/project/pycparser/3.11/#files
+pycparser 3.12: https://pypi.org/project/pycparser/3.12/#files
 requests 2.34.2: https://pypi.org/project/requests/2.34.2/#files
 urllib3 2.8.0: https://pypi.org/project/urllib3/2.8.0/#files
 idna 3.20: https://pypi.org/project/idna/3.20/#files
 charset_normalizer 3.5.2: https://pypi.org/project/charset_normalizer/3.5.2/#files
-certifi 2026.10.19: https://pypi.org/project/certifi/2026.10.19/#files
-platformdirs 4.13.5: https://pypi.org/project/platformdirs/4.13.5/#files
+certifi 2026.10.23: https://pypi.org/project/certifi/2026.10.23/#files
+platformdirs 4.14.5: https://pypi.org/project/platformdirs/4.14.5/#files
 typing_extensions 4.16.0: https://pypi.org/project/typing_extensions/4.16.0/#files
-pychromecast 14.0.10: https://pypi.org/project/pychromecast/14.0.10/#files
-zeroconf 0.151.5: https://pypi.org/project/zeroconf/0.151.5/#files
+pychromecast 14.1.1: https://pypi.org/project/pychromecast/14.1.1/#files
+zeroconf 0.154.0: https://pypi.org/project/zeroconf/0.154.0/#files
 protobuf 7.36.2: https://pypi.org/project/protobuf/7.36.2/#files
 casttube 0.2.1: https://pypi.org/project/casttube/0.2.1/#files
 ifaddr 0.2.0: https://pypi.org/project/ifaddr/0.2.0/#files
