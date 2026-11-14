@@ -319,3 +319,78 @@ def test_il_karaoke_nella_finestra_con_lo_speaker(finestra, tmp_path, sintesi_fi
         assert conti["righe_dei_sottotitoli"] == 2 and conti["righe_del_karaoke_allo_speaker"] == 2
     finally:
         finestra.motore.usa_il_lontano(None)
+
+
+def test_le_righe_e_i_colori_della_vista():
+    # La vista del karaoke a tutto schermo (Gabriele, 3.18.0).
+    import vista_karaoke
+
+    blocchi = karaoke.blocchi(karaoke.dal_lrc(LRC))
+    # Prima del canto sono tutte prossime; poi in alto quella cominciata, anche fra due righe.
+    # Le prossime sono al piu' tre (Gabriele).
+    assert vista_karaoke.righe_da_mostrare(blocchi, 0.1) == (None, ["Prima riga", "Ritornello", "Parole"])
+    assert vista_karaoke.righe_da_mostrare(blocchi, 3.2) == ("Ritornello", ["Parole", "Seconda strofa", "Ritornello"])
+    assert vista_karaoke.righe_da_mostrare(blocchi, 1.0) == ("Prima riga", ["Ritornello", "Parole", "Seconda strofa"])
+    assert vista_karaoke.righe_da_mostrare(blocchi, 7.0) == ("Parole", ["Seconda strofa", "Ritornello"])
+    assert vista_karaoke.righe_da_mostrare(blocchi, 30.0) == ("Ritornello", [])
+    assert vista_karaoke.righe_da_mostrare([], 3.0) == (None, []) and vista_karaoke.righe_da_mostrare(blocchi, None)[0] is None
+    # Il colore della riga da cantare risalta piu' del testo: sul nero il
+    # giallo, o il bianco se il testo e' gia' giallo; sul bianco il blu scuro.
+    ciano, nero, bianco = (0, 204, 214), (0, 0, 0), (255, 255, 255)
+    assert vista_karaoke.colore_in_evidenza(ciano, nero) == (255, 255, 0)
+    assert vista_karaoke.colore_in_evidenza((255, 255, 0), nero) == bianco
+    assert vista_karaoke.colore_in_evidenza((60, 60, 60), bianco) == (0, 0, 140)
+    assert vista_karaoke.contrasto(bianco, nero) == pytest.approx(21.0)
+    assert vista_karaoke.contrasto((255, 255, 0), nero) > vista_karaoke.contrasto(ciano, nero)
+    # A capo fra le parole, con gli a capo delle strofe; una parola troppo larga resta intera.
+    assert vista_karaoke.a_capo("uno due tre quattro", 9, len) == ["uno due", "tre", "quattro"]
+    assert vista_karaoke.a_capo("prima\nseconda riga", 20, len) == ["prima", "seconda riga"]
+    assert vista_karaoke.a_capo("lunghissimaparola", 5, len) == ["lunghissimaparola"]
+
+
+def test_la_vista_del_karaoke_nella_finestra(finestra, tmp_path, suoni_annotati):
+    # Gabriele, 3.18.0: con il video acceso, un brano da cantare senza video
+    # apre la vista a tutto schermo; Esc la nasconde per il brano, Ctrl con F1 la spegne.
+    import time
+    import wave
+
+    import wx
+
+    def aspetta(condizione, secondi=8):
+        fine = time.time() + secondi
+        while time.time() < fine and not condizione():
+            wx.Yield()
+            time.sleep(0.02)
+        return condizione()
+
+    brano = tmp_path / "canzone.wav"
+    with wave.open(str(brano), "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(8000)
+        w.writeframes(b"\0\0" * 8000 * 20)
+    (tmp_path / "canzone.lrc").write_text("[00:00.50]Prima riga\n[00:03.00]Seconda riga\n[00:06.00]Terza riga\n", encoding="utf-8")
+    finestra.impostazioni["video"] = True
+    finestra.impostazioni["colori_testo"] = {"c": [0, 80, 84]}
+    finestra.impostazioni["colori_sfondo"] = {"c": [0, 0, 0]}
+    finestra._suona_file(str(brano), str(tmp_path))
+    assert aspetta(lambda: finestra._vista_del_karaoke is not None and finestra._vista_del_karaoke.IsShown())
+    vista = finestra._vista_del_karaoke
+    assert vista.IsFullScreen() and vista.GetTitle().endswith(", karaoke, MeTeOra")
+    assert vista._colori == ((0, 204, 214), (0, 0, 0), (255, 255, 0))
+    assert aspetta(lambda: vista.mostrate()[0] == "Prima riga")
+    assert vista.mostrate()[1] == ["Seconda riga", "Terza riga"]
+    assert finestra._statistiche.dati["conti"]["viste_del_karaoke"] == 1
+    # Esc la nasconde per questo brano, e la console lo dice; Maiuscolo con F1 la riapre.
+    evento = wx.KeyEvent(wx.wxEVT_CHAR_HOOK)
+    evento.SetKeyCode(wx.WXK_ESCAPE)
+    vista._tasto(evento)
+    assert not vista.IsShown() and "Karaoke nascosto per questo brano" in finestra._righe[-1]
+    finestra._aggiorna_il_video()
+    assert not vista.IsShown()
+    finestra._metti_il_video(True)
+    assert vista.IsShown()
+    # Ctrl con F1 spegne il video e la vista.
+    finestra._metti_il_video(False)
+    assert not vista.IsShown() and "il karaoke non si vede" in finestra._righe[-1]
+    finestra.motore.stop()

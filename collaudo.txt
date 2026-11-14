@@ -29,3 +29,9 @@ Collaudo di MeTeOra 3.17.1 e 3.17.2: la console per chi guarda.
 Chi vede lo schermo suona un KAR e guarda la console: le righe nuove restano sempre in vista, anche se il tuo cursore è più su.
 Se sale con la rotellina a rileggere la vista resta ferma, e quando riscende in fondo torna a seguire le righe nuove.
 Le righe del karaoke e dei sottotitoli nella console non hanno l'ora in fondo; gli altri messaggi sì.
+Collaudo di MeTeOra 3.18.0: la vista del karaoke a tutto schermo.
+Premi Maiuscolo con F1 e suona un KAR: si apre a tutto schermo la vista, con la riga da cantare in alto, grande e gialla, e sotto le prossime in ciano.
+Chi guarda conferma che il testo scorre da solo, che le righe cantate spariscono e che si legge bene da lontano.
+Con la vista davanti C mette in pausa e X riprende; Esc la nasconde e la console lo dice; Maiuscolo con F1 la riapre.
+Ctrl con F1 la chiude, e il brano dopo non la apre più finché non riaccendi con Maiuscolo con F1.
+Prova anche con lo speaker GabryBar: la vista segue lo speaker.

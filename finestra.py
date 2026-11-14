@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17). Nella 2.7.1 la precedenza ai tasti sul lavoro in disparte. Nella 2.7.2 i lettori di rete chiusi all'uscita. Nella 2.7.3 i tasti funzione nelle tabelle COMANDI_DEI_TASTI_FUNZIONE e INTERRUTTORI, lette dalla prova della guida rapida, e le righe del cruscotto nell'ordine della regola. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.1.0 la voce Componenti aggiuntivi delle impostazioni, e gli altri banchi liberi da scaricare. Nella 3.2.0 gli indirizzi in rete: Ctrl con V, Apri un indirizzo, il ramo Indirizzi, il flusso chiesto prima di suonare e in anticipo per il seguente, e yt-dlp aggiornato ogni giorno. Nella 3.3.0 il ramo Radio, con la ricerca delle radio, il titolo in onda, le dirette che non si saltano e i contatori di radio, componenti e lingua. Nella 3.3.1 la voce Lingua con la sua lista anche con una lingua sola. Nella 3.4.0 i Preferiti in rete, un ramo in cima ai Preferiti, con F4 che sceglie la categoria (issue 41). Nella 3.5.0 le registrazioni, con la famiglia di R e il ramo Registrazioni, e i comandi dei marker su T (issue 42). Nella 3.6.0 la scheda degli effetti, con Ctrl e Maiuscolo con Z (issue 43). Nella 3.7.0 la console letta da sola, con la famiglia di F10 (issue 44). Nella 3.8.0 D per i titoli in onda e i capitoli, e il capitolo nuovo detto suonando (issue 45). Nella 3.8.1 anche i caratteri di console e cruscotto hanno lo sfondo scelto, che NVDA legge. Nella 3.8.2 le radio ascoltate di recente nel sottoramo Recenti. Nella 3.9.0 Cerca contenuti negli Indirizzi, i risultati man mano e i dieci secondi per entrare negli Indirizzi (issue 47). Nella 3.9.1 l'avviso dei dieci secondi. Nella 3.9.2 formato, sorgente e primati delle registrazioni per le statistiche. Nella 3.10.0 Mostra altri risultati dei contenuti e Mostra altre radio. Nella 3.10.1 un minuto per entrare negli Indirizzi. Nella 3.10.2 un minuto anche per le radio Recenti. Nella 3.10.3 il suono della sorgente tenuta. Nella 3.11.2 il controllo di yt-dlp detto anche senza novità. Nella 3.11.3 le correzioni delle due verifiche delle novita' dalla 3.6.0 alla 3.11.1. Nella 3.11.4 la radio delle Recenti e il brano degli Indirizzi salgono subito in cima, con la coda che ricorda l'ordine di prima. Nella 3.11.5 le sorgenti Radio e Ricerca dei contenuti nelle statistiche. Nella 3.11.6 i conti del ripetitore dello speaker. Nella 3.12.0 il convertitore dal vivo per lo speaker. Nella 3.13.0 la voce Cartella delle registrazioni. Nella 3.13.2 l'attesa di Alt con R anche al passaggio, e le parti non unite dette. Nella 3.14.0 la voce Vai alla cartella delle registrazioni. Nella 3.15.0 la voce Formato e qualità delle registrazioni, a due passi. Nella 3.16.0 YouTube Music di riserva nella ricerca dei contenuti. Nella 3.16.1 le anteprime di SoundCloud tolte dai risultati. Nella 3.16.2 l'etichetta degli Indirizzi segue i brani entrati dopo il minuto di ascolto. Nella 3.17.0 le righe del karaoke dette con lo speaker, contate. Nella 3.17.1 la console che segue il fondo senza spostare il cursore. Nella 3.17.2 i sottotitoli e il karaoke nella console senza l'ora.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17). Nella 2.7.1 la precedenza ai tasti sul lavoro in disparte. Nella 2.7.2 i lettori di rete chiusi all'uscita. Nella 2.7.3 i tasti funzione nelle tabelle COMANDI_DEI_TASTI_FUNZIONE e INTERRUTTORI, lette dalla prova della guida rapida, e le righe del cruscotto nell'ordine della regola. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.1.0 la voce Componenti aggiuntivi delle impostazioni, e gli altri banchi liberi da scaricare. Nella 3.2.0 gli indirizzi in rete: Ctrl con V, Apri un indirizzo, il ramo Indirizzi, il flusso chiesto prima di suonare e in anticipo per il seguente, e yt-dlp aggiornato ogni giorno. Nella 3.3.0 il ramo Radio, con la ricerca delle radio, il titolo in onda, le dirette che non si saltano e i contatori di radio, componenti e lingua. Nella 3.3.1 la voce Lingua con la sua lista anche con una lingua sola. Nella 3.4.0 i Preferiti in rete, un ramo in cima ai Preferiti, con F4 che sceglie la categoria (issue 41). Nella 3.5.0 le registrazioni, con la famiglia di R e il ramo Registrazioni, e i comandi dei marker su T (issue 42). Nella 3.6.0 la scheda degli effetti, con Ctrl e Maiuscolo con Z (issue 43). Nella 3.7.0 la console letta da sola, con la famiglia di F10 (issue 44). Nella 3.8.0 D per i titoli in onda e i capitoli, e il capitolo nuovo detto suonando (issue 45). Nella 3.8.1 anche i caratteri di console e cruscotto hanno lo sfondo scelto, che NVDA legge. Nella 3.8.2 le radio ascoltate di recente nel sottoramo Recenti. Nella 3.9.0 Cerca contenuti negli Indirizzi, i risultati man mano e i dieci secondi per entrare negli Indirizzi (issue 47). Nella 3.9.1 l'avviso dei dieci secondi. Nella 3.9.2 formato, sorgente e primati delle registrazioni per le statistiche. Nella 3.10.0 Mostra altri risultati dei contenuti e Mostra altre radio. Nella 3.10.1 un minuto per entrare negli Indirizzi. Nella 3.10.2 un minuto anche per le radio Recenti. Nella 3.10.3 il suono della sorgente tenuta. Nella 3.11.2 il controllo di yt-dlp detto anche senza novità. Nella 3.11.3 le correzioni delle due verifiche delle novita' dalla 3.6.0 alla 3.11.1. Nella 3.11.4 la radio delle Recenti e il brano degli Indirizzi salgono subito in cima, con la coda che ricorda l'ordine di prima. Nella 3.11.5 le sorgenti Radio e Ricerca dei contenuti nelle statistiche. Nella 3.11.6 i conti del ripetitore dello speaker. Nella 3.12.0 il convertitore dal vivo per lo speaker. Nella 3.13.0 la voce Cartella delle registrazioni. Nella 3.13.2 l'attesa di Alt con R anche al passaggio, e le parti non unite dette. Nella 3.14.0 la voce Vai alla cartella delle registrazioni. Nella 3.15.0 la voce Formato e qualità delle registrazioni, a due passi. Nella 3.16.0 YouTube Music di riserva nella ricerca dei contenuti. Nella 3.16.1 le anteprime di SoundCloud tolte dai risultati. Nella 3.16.2 l'etichetta degli Indirizzi segue i brani entrati dopo il minuto di ascolto. Nella 3.17.0 le righe del karaoke dette con lo speaker, contate. Nella 3.17.1 la console che segue il fondo senza spostare il cursore. Nella 3.17.2 i sottotitoli e il karaoke nella console senza l'ora. Nella 3.18.0 la vista del karaoke a tutto schermo, con il video acceso.
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -121,6 +121,7 @@ from ricerca import (
 from schedario import Schedario, credibile
 from valori import AREE, ErroreValore, leggi_tempo, leggi_tempo_nel_brano, secondi_da_leggere, tempo
 from video import FinestraVideo
+from vista_karaoke import FinestraKaraoke
 
 FILE_PLAYLIST = "MeTeOra - Playlist.json"
 FILE_IMPOSTAZIONI = "MeTeOra - Impostazioni.json"
@@ -515,7 +516,7 @@ TASTI_COMUNI = [
     "O il suo guadagno, di un dB, e Ctrl e Maiuscolo insieme la azzerano; P tutte le bande, e Ctrl e Maiuscolo insieme le azzerano."),
     _("L la dissolvenza incrociata, con cui sfumano i cambi di brano, lo stop, la pausa, X da capo e i marker: Ctrl la spegne, Maiuscolo la accende. "
     "K la sua durata, di mezzo secondo alla volta."),
-    _("Il video: Ctrl con F1 lo spegne, Maiuscolo con F1 lo accende; Ctrl con F5 lo rimette in finestra, Maiuscolo con F5 a schermo intero. D i sottotitoli letti, G la traccia audio, I il rapporto dell'immagine: "
+    _("Il video: Ctrl con F1 lo spegne, Maiuscolo con F1 lo accende, con la vista del karaoke a tutto schermo per i brani da cantare; Ctrl con F5 lo rimette in finestra, Maiuscolo con F5 a schermo intero. D i sottotitoli letti, G la traccia audio, I il rapporto dell'immagine: "
     "Ctrl e Maiuscolo il precedente e il seguente, Alt l'ultimo, Ctrl e Alt il primo, che per i sottotitoli è spenti."),
     _("J la playlist: Ctrl e Maiuscolo aprono e suonano la precedente e la successiva, Alt l'ultima, Ctrl e Alt la prima; le cifre da 1 a 0 le prime dieci playlist."),
     _("Nella plancia Backspace chiude il ramo in cui sei e risale di un livello, Maiuscolo con Backspace risale di colpo all'unità o alla playlist, Preferiti compresi, e chiude i rami al suo interno."),
@@ -776,9 +777,10 @@ def indirizzi_in_disparte(lavoro, al_termine):
 
 
 def _frase_del_video(acceso):
+    # Con il video anche la vista del karaoke (Gabriele, 3.18.0).
     if acceso:
-        return _("Video acceso: i video si vedono in una finestra sopra MeTeOra.")
-    return _("Video spento: dei video si sente solo l'audio.")
+        return _("Video acceso: i video si vedono in una finestra sopra MeTeOra, e i brani da cantare a tutto schermo.")
+    return _("Video spento: dei video si sente solo l'audio, e il karaoke non si vede.")
 
 
 # Le voci della finestra delle impostazioni, in ordine: chiave -> (etichetta,
@@ -1482,6 +1484,10 @@ class Finestra(wx.Frame):
         # brano ripreso all'avvio in pausa, che la apre con X (tappa 9).
         self._video_rimandato = False
         self._video_in_attesa = None
+        # La vista del karaoke a tutto schermo, e il brano su cui e' stata
+        # nascosta con Esc: per lui non si riapre (Gabriele, 3.18.0).
+        self._vista_del_karaoke = None
+        self._karaoke_nascosto_per = None
         self._rapporto = 0
         # La domanda il cui suono aspetta la fine dell'effetto prima, e il
         # brano seguente che aspetta la fine del suono di un errore.
@@ -6280,6 +6286,7 @@ class Finestra(wx.Frame):
         self._aggiorna_etichette(solo=solo)
         self._insegui()
         self._video_nascosto_per = self._video_in_attesa = None
+        self._karaoke_nascosto_per = None
         self._aggiorna_il_video()
         self._anticipa_il_seguente_in_rete(pl, brano)
 
@@ -9125,6 +9132,7 @@ class Finestra(wx.Frame):
             return
         if not self.motore.in_corso:
             self._nascondi_il_video()
+            self._nascondi_il_karaoke()
             self._aggiorna_la_lettura(None)
             return
         tracce = self.motore.tracce()
@@ -9138,6 +9146,13 @@ class Finestra(wx.Frame):
             self._mostra_il_video()
         else:
             self._nascondi_il_video()
+        # Un brano da cantare senza un video suo, con il video acceso: la
+        # vista del karaoke a tutto schermo (Gabriele, 3.18.0).
+        if (self.impostazioni["video"] and not tracce["video"] and not formati.e_video(self.motore.in_corso) and not in_attesa
+                and self.motore.in_corso != self._karaoke_nascosto_per and self.motore.blocchi_del_karaoke()):
+            self._mostra_il_karaoke()
+        else:
+            self._nascondi_il_karaoke()
 
     def _sottotitoli_del_brano(self, tracce):
         """Accesi, se il brano non ne ha gia' scelti si prende la prima traccia,
@@ -9206,6 +9221,55 @@ class Finestra(wx.Frame):
         fuoco = wx.Window.FindFocus()
         if fuoco is None or fuoco.GetTopLevelParent() is not self:
             self.albero.SetFocus()
+
+    def _colori_della_console(self):
+        """(testo, sfondo) della console in [r, g, b] da 0 a 255: quelli
+        scelti nelle impostazioni, o quelli di Windows."""
+        scelti = []
+        for chiave, di_windows in (("colori_testo", self.console.GetForegroundColour()), ("colori_sfondo", self.console.GetBackgroundColour())):
+            percentuali = self.impostazioni[chiave].get("c")
+            if percentuali:
+                scelti.append(tuple(round(p * 255 / 100) for p in percentuali))
+            else:
+                scelti.append((di_windows.Red(), di_windows.Green(), di_windows.Blue()))
+        return tuple(scelti)
+
+    def _mostra_il_karaoke(self):
+        """La vista del karaoke a tutto schermo, sullo schermo di MeTeOra, con i
+        colori della console e i suoi caratteri (3.18.0)."""
+        if self._vista_del_karaoke is None:
+            self._vista_del_karaoke = FinestraKaraoke(self, self.motore.blocchi_del_karaoke, lambda: self.motore.posizione, self._nascondi_il_karaoke_a_mano)
+        # Traduttori: il titolo della vista del karaoke; nome e' quello del brano.
+        titolo = _("{nome}, karaoke, MeTeOra").format(nome=self._nome_in_corso())
+        if self._vista_del_karaoke.IsShown():
+            self._vista_del_karaoke.SetTitle(titolo)
+            return
+        if not ctypes.windll.user32.IsWindowEnabled(self.GetHandle()):
+            # Come il video: con un dialogo aperto si apre quando MeTeOra torna attiva.
+            self._video_rimandato = True
+            return
+        testo, sfondo = self._colori_della_console()
+        self._vista_del_karaoke.apri(titolo, testo, sfondo, self.GetScreenRect())
+        self._statistiche.conta("viste_del_karaoke")
+
+    def _nascondi_il_karaoke(self):
+        """La vista del karaoke sparisce, e il fuoco torna come dopo il video."""
+        vista = self._vista_del_karaoke
+        if vista is None or not vista.IsShown():
+            return
+        attiva = vista.IsActive()
+        vista.chiudi()
+        if attiva:
+            self.Raise()
+            wx.CallAfter(self._fuoco_dopo_il_video)
+
+    def _nascondi_il_karaoke_a_mano(self):
+        """Esc nella vista del karaoke, o la sua chiusura: sparisce per il
+        brano in corso, e resta accesa per i brani da cantare dopo."""
+        self._karaoke_nascosto_per = self.motore.in_corso
+        self._nascondi_il_karaoke()
+        self._statistiche.conta("viste_del_karaoke_nascoste")
+        self._riscontro("video_nascosto", _("Karaoke nascosto per questo brano: il prossimo brano da cantare lo apre da sé."))
 
     def _nascondi_a_mano(self):
         """Esc nella finestra del video, o la sua chiusura: la finestra
@@ -9306,12 +9370,13 @@ class Finestra(wx.Frame):
         prima a giro); a video acceso, Maiuscolo con F1 riapre la finestra
         nascosta con Esc per il brano in corso."""
         evento = "video_acceso" if acceso else "video_spento"
-        nascosto = acceso and self._video_nascosto_per is not None and self._video_nascosto_per == self.motore.in_corso
+        nascosti = (self._video_nascosto_per, self._karaoke_nascosto_per)
+        nascosto = acceso and self.motore.in_corso is not None and self.motore.in_corso in nascosti
         if self.impostazioni["video"] == acceso and not nascosto:
             self._riscontro(evento, _("Già così. {frase}").format(frase=_frase_del_video(acceso)))
             return
         self.impostazioni["video"] = acceso
-        self._video_nascosto_per = None
+        self._video_nascosto_per = self._karaoke_nascosto_per = None
         self._salva_impostazioni()
         if not acceso:
             self._spegni_il_video()
@@ -14611,6 +14676,9 @@ class Finestra(wx.Frame):
             self._video.barra.ferma()
             self._video.Destroy()
             self._video = None
+        if self._vista_del_karaoke is not None:
+            self._vista_del_karaoke.Destroy()
+            self._vista_del_karaoke = None
         self._salva_all_uscita(self.schedario.salva, _("lo schedario delle durate e dei tag"), non_salvati)
         self._salva_all_uscita(self.impostazioni.salva, _("le impostazioni"), non_salvati)
         # Le statistiche per ultime: contano anche i salvataggi non riusciti.

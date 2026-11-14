@@ -4817,14 +4817,14 @@ def test_maiuscolo_f1_accende_il_video_e_ctrl_f1_lo_spegne(finestra, monkeypatch
     _tasto(finestra, codice=wx.WXK_F1, maiuscolo=True)
     assert finestra.impostazioni["video"] is True and _salvate(finestra)["video"] is True
     assert "video_acceso" in suoni_annotati
-    assert any(_senza_ora(r) == "Video acceso: i video si vedono in una finestra sopra MeTeOra." for r in finestra._righe)
+    assert any(_senza_ora(r) == "Video acceso: i video si vedono in una finestra sopra MeTeOra, e i brani da cantare a tutto schermo." for r in finestra._righe)
     video = finestra._video
     assert video is not None and video.IsShown() and video.GetTitle() == "film.mkv, video, MeTeOra"
     assert chiamate[0] == ("video", video.finestre())
     # Maiuscolo accende soltanto, Ctrl spegne (collaudo della 2.0.0).
     _tasto(finestra, codice=wx.WXK_F1, maiuscolo=True)
     assert finestra.impostazioni["video"] is True and video.IsShown()
-    assert _ultima(finestra) == "Già così. Video acceso: i video si vedono in una finestra sopra MeTeOra."
+    assert _ultima(finestra) == "Già così. Video acceso: i video si vedono in una finestra sopra MeTeOra, e i brani da cantare a tutto schermo."
     # Un brano senza video la chiude; uno con il video la riapre, senza ridare
     # al motore le finestre.
     stato["tracce"] = _tracce(video=False)
@@ -4846,7 +4846,7 @@ def test_maiuscolo_f1_accende_il_video_e_ctrl_f1_lo_spegne(finestra, monkeypatch
     _tasto(finestra, codice=wx.WXK_F1, ctrl=True)
     assert finestra.impostazioni["video"] is False and chiamate[-1] == ("video", None)
     assert suoni_annotati[-1] == "video_spento" and not video.IsShown()
-    assert _ultima(finestra) == "Video spento: dei video si sente solo l'audio."
+    assert _ultima(finestra) == "Video spento: dei video si sente solo l'audio, e il karaoke non si vede."
 
 
 def test_esc_nella_finestra_del_video_la_nasconde_per_quel_brano(finestra, monkeypatch, suoni_annotati):
@@ -4863,7 +4863,7 @@ def test_esc_nella_finestra_del_video_la_nasconde_per_quel_brano(finestra, monke
     assert not video.IsShown()
     # Maiuscolo con F1, a video acceso, la riapre (2.0.2); e di nuovo Esc.
     _tasto(finestra, codice=wx.WXK_F1, maiuscolo=True)
-    assert video.IsShown() and _ultima(finestra) == "Video acceso: i video si vedono in una finestra sopra MeTeOra."
+    assert video.IsShown() and _ultima(finestra) == "Video acceso: i video si vedono in una finestra sopra MeTeOra, e i brani da cantare a tutto schermo."
     video._tasto(evento)
     assert not video.IsShown()
     stato["in_corso"] = r"C:\m\altro.mkv"

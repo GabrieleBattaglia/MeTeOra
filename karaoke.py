@@ -1,6 +1,6 @@
 # MeTeOra, i testi del karaoke: MIDI e .kar, .lrc accanto al brano, SYLT dei tag ID3, fatti traccia di sottotitoli.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.82.0, per la tappa 10, punto e. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.17.0 Seguito, il testo detto seguendo la posizione dello speaker Cast.
+# 04/10/2026: nasce con la 1.82.0, per la tappa 10, punto e. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.17.0 Seguito, il testo detto seguendo la posizione dello speaker Cast. Nella 3.18.0 i blocchi del Seguito, per la vista del karaoke.
 
 """I testi a tempo del karaoke (tappa 10, punto e).
 
@@ -531,6 +531,11 @@ class Seguito:
         self._blocchi = blocchi(self.righe, modo, anticipo)
         self._inizi = [blocco[0] for blocco in self._blocchi]
         self._ultimo = self._in_corso(self._posizione) if self._posizione is not None else None
+
+    @property
+    def blocchi(self):
+        """I blocchi di adesso, [(inizio, fine, testo)], per la vista del karaoke (3.18.0)."""
+        return list(self._blocchi)
 
     def scegli(self, scelto):
         """Scelto, ridice subito il blocco in corso, come libmpv quando si

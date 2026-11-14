@@ -2,6 +2,13 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.18.0] - 2026-11-14
+
+- La vista del karaoke a tutto schermo, chiesta da Gabriele per chi canta guardando lo schermo. Si accende e si spegne con il video, Maiuscolo e Ctrl con F1: con il video acceso, un brano da cantare senza un video suo, come un MIDI, un KAR o un audio con il suo LRC, la apre da sé, anche con lo speaker Cast. In alto la riga da cantare, in grassetto, alta circa un decimo dello schermo e in un colore che risalta di più sullo sfondo: il giallo sugli sfondi scuri, o il bianco se il testo è già giallo, il blu scuro o il nero su quelli chiari, scelto con il contrasto del WCAG. Sotto arrivano le tre prossime, alte due terzi di lei, nei colori della console; quelle già cantate spariscono, e il testo scorre da solo. Le misure seguono lo schermo e non i caratteri della console: con quelli, il doppio a 8 punti, su uno schermo da 1920 per 1080 la riga era alta il 3% e non si leggeva da lontano. Gabriele ha scelto le misure e le tre righe. Le righe lunghe vanno a capo fra le parole.
+- I tasti di MeTeOra funzionano anche con la vista davanti; Esc la nasconde per il brano in corso, e Maiuscolo con F1 la riapre. Con un dialogo aperto aspetta che si chiuda, come il video. Le frasi di Maiuscolo e Ctrl con F1 e la guida rapida lo dicono.
+- Nelle statistiche, la sezione del video conta le volte che la vista del karaoke si apre e si nasconde.
+- Le prove sono in tests/test_karaoke.py.
+
 ## [3.17.2] - 2026-11-14
 
 - Le righe dei sottotitoli e del karaoke arrivano nella console senza l'ora in fondo, chiesto da Gabriele: l'ora è dei messaggi di MeTeOra, non dei testi da leggere o da cantare. La sintesi e il braille le avevano già senza.
