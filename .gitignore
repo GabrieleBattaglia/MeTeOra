@@ -20,6 +20,16 @@ banchi/
 /quickjs/
 # Le registrazioni delle radio e degli indirizzi (issue 42, 3.5.0), che nascono accanto ai dati provando MeTeOra dai sorgenti.
 /Registrazioni/
+# E, dalla 3.13.0, ovunque nel repository, se la cartella delle registrazioni scelta nelle impostazioni ci sta dentro: i
+# formati in cui MeTeOra registra e i pezzi della registrazione in corso, .parziale1 e i seguenti. Nessun file audio e' tracciato:
+# uno di prova che servisse davvero si aggiunge con git add -f.
+*.mp3
+*.opus
+*.aac
+*.m4a
+*.flac
+*.wav
+*.parziale*
 # Il registro degli errori e dei crash (1.89.0), che nasce accanto ai dati provando MeTeOra dai sorgenti.
 MeTeOra - *.log
 MeTeOra - *.log.*
