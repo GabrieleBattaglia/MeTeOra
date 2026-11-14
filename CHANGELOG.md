@@ -2,6 +2,16 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.17.2] - 2026-11-14
+
+- Le righe dei sottotitoli e del karaoke arrivano nella console senza l'ora in fondo, chiesto da Gabriele: l'ora è dei messaggi di MeTeOra, non dei testi da leggere o da cantare. La sintesi e il braille le avevano già senza.
+- Le prove sono in tests/test_karaoke.py.
+
+## [3.17.1] - 2026-11-14
+
+- La console segue le righe nuove anche per chi guarda lo schermo. Una persona che cantava il karaoke, trovato da Gabriele, la vedeva tornare in cima a ogni riga: ogni riga nuova va in fondo e il cursore torna dove era, perché NVDA e la barra braille non si spostino, e la vista seguiva il cursore. Ora la vista torna in fondo senza toccare il cursore; se chi guarda è salito con la rotellina a rileggere, resta lì, e segue di nuovo le righe quando riscende in fondo, come nelle chat e nei terminali.
+- Le prove sono in tests/test_finestra.py.
+
 ## [3.17.0] - 2026-11-14
 
 - Il testo del karaoke anche con lo speaker Cast. Gabriele suonava i MID e i KAR su GabryBar e il testo non arrivava più: con lo speaker il brano non suona in libmpv, e la traccia del karaoke, che è una traccia di sottotitoli di libmpv, non c'era. Era così dalla 1.117.0, quando sono arrivati gli speaker: non un difetto nuovo, ma un pezzo che mancava. Ora MeTeOra legge il testo del brano come sempre, dai MIDI e dai KAR, dai file LRC e dai tag, e con lo speaker lo dice seguendo la posizione che lo speaker riferisce, dieci volte al secondo: ogni riga quando comincia, con il modo e l'anticipo del karaoke, alla sintesi, al braille e nella console. Dopo un salto ridice la riga in corso, come sul PC.

@@ -275,6 +275,42 @@ def test_console_riscrive_la_riga_della_stessa_categoria(finestra):
     assert [_senza_ora(r) for r in finestra._righe[-2:]] == ["altro", "Volume 60."]
 
 
+def test_la_console_segue_il_fondo_senza_spostare_il_cursore(finestra):
+    # Gabriele, 3.17.1: chi guarda il karaoke vedeva la console tornare in
+    # cima a ogni riga, perche' la vista seguiva il cursore rimesso dov'era.
+    import ctypes
+
+    import finestra as modulo
+
+    def scorrimento():
+        info = modulo._Scorrimento(ctypes.sizeof(modulo._Scorrimento), modulo._SIF_ALL)
+        assert modulo._leggi_lo_scorrimento(finestra.console.GetHandle(), modulo._SB_VERT, ctypes.byref(info))
+        return info.nPos, info.nMax - int(info.nPage)
+
+    def scorri(verso):
+        modulo._manda_messaggio(finestra.console.GetHandle(), modulo._WM_VSCROLL, verso, 0)
+
+    finestra.SetSize((900, 700))
+    finestra.Layout()
+    finestra.console.SetInsertionPoint(0)
+    for i in range(80):
+        finestra.scrivi(f"Riga {i}", ora=False)
+    # La vista e' in fondo, il cursore e' rimasto in cima.
+    posizione, fondo = scorrimento()
+    assert fondo > 0 and posizione >= fondo - modulo.TOLLERANZA_DEL_FONDO and finestra.console.GetInsertionPoint() == 0
+    # Chi guarda sale a rileggere: la riga nuova non lo sposta.
+    scorri(6)
+    finestra.scrivi("Mentre rileggo", ora=False)
+    assert scorrimento()[0] == 0 and not finestra._console_in_fondo()
+    # Riscende in fondo: le righe nuove, anche quelle riscritte, si seguono di nuovo.
+    scorri(modulo._SB_BOTTOM)
+    finestra.scrivi("Volume 50.", "volume")
+    finestra.scrivi("Volume 55.", "volume")
+    finestra.scrivi("Dopo", ora=False)
+    posizione, fondo = scorrimento()
+    assert posizione >= fondo - modulo.TOLLERANZA_DEL_FONDO and finestra._console_in_fondo() and finestra.console.GetInsertionPoint() == 0
+
+
 def _aspetta_l_apertura(finestra):
     """Aspetta l'esploratore e fa le fette rimaste dell'apertura, come il filo
     della finestra quando arrivano i suoi avvisi."""

@@ -313,7 +313,8 @@ def test_il_karaoke_nella_finestra_con_lo_speaker(finestra, tmp_path, sintesi_fi
         assert aspetta(lambda: [n for n, t in sintesi_finta.detti if t == "Prima riga"])
         speaker.posizione = 3.1
         assert aspetta(lambda: [n for n, t in sintesi_finta.detti if t == "Seconda riga"])
-        assert [r.rsplit(" ", 1)[0] for r in finestra._righe[-2:]] == ["Prima riga", "Seconda riga"]
+        # Nella console senza l'ora, che e' dei messaggi di MeTeOra (3.17.2).
+        assert finestra._righe[-2:] == ["Prima riga", "Seconda riga"]
         conti = finestra._statistiche.dati["conti"]
         assert conti["righe_dei_sottotitoli"] == 2 and conti["righe_del_karaoke_allo_speaker"] == 2
     finally:

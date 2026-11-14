@@ -25,3 +25,7 @@ Con lo speaker GabryBar suona un KAR, come ComeMai-883.kar: le righe del testo a
 Salta indietro o avanti di qualche secondo: arriva subito la riga in corso, e poi le seguenti.
 Ctrl e Alt con D spegne il testo, Maiuscolo con D lo riaccende e dice Testo del karaoke letto, dal MIDI, e la riga in corso arriva subito.
 Prova anche un MID con il testo e una canzone con il suo file LRC accanto.
+Collaudo di MeTeOra 3.17.1 e 3.17.2: la console per chi guarda.
+Chi vede lo schermo suona un KAR e guarda la console: le righe nuove restano sempre in vista, anche se il tuo cursore è più su.
+Se sale con la rotellina a rileggere la vista resta ferma, e quando riscende in fondo torna a seguire le righe nuove.
+Le righe del karaoke e dei sottotitoli nella console non hanno l'ora in fondo; gli altri messaggi sì.
