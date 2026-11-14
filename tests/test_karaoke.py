@@ -316,7 +316,7 @@ def test_il_karaoke_nella_finestra_con_lo_speaker(finestra, tmp_path, sintesi_fi
         # Nella console senza l'ora, che e' dei messaggi di MeTeOra (3.17.2).
         assert finestra._righe[-2:] == ["Prima riga", "Seconda riga"]
         conti = finestra._statistiche.dati["conti"]
-        assert conti["righe_dei_sottotitoli"] == 2 and conti["righe_del_karaoke_allo_speaker"] == 2
+        assert conti["righe_dei_sottotitoli"] == 2 and conti["righe_allo_speaker"] == 2
     finally:
         finestra.motore.usa_il_lontano(None)
 

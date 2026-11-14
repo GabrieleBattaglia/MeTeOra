@@ -1,6 +1,6 @@
 # MeTeOra, il motore di riproduzione: libmpv, e i SID in tempo reale.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7). Nella 1.65.0 i MIDI resi da FluidSynth (tappa 8). Nella 1.66.0 la musica delle console con libgme. Nella 1.67.0 il file lasciato o rinominato per Rinomina file. Nella 1.82.0 il testo del karaoke come traccia in memoria, senza i .lrc caricati da mpv, e due sottotitoli uguali di fila detti tutti e due. Nella 1.83.0 il tempo che resta al sottotitolo, per la barra braille a blocchi. Nella 1.83.3 la durata vera di Musepack e DSF, da mutagen. Nella 1.93.0 i capitoli che libmpv vede. Nella 1.95.0 l'attenuazione, per la sfumatura del timer di spegnimento. Nella 1.96.0 il volume uniforme con ReplayGain. Nella 1.96.11 suona con a_volume_pieno. Nella 1.102.2 (issue 22) il ricampionamento con soxr, le bande compensate, il preamplificatore nella catena e il volume oltre 100 con il limitatore. Nella 1.102.3 rubberband quando velocita' o tono sono cambiati, con il tono fatto da lui (issue 20). Nella 1.116.0 alle_uscite, quando cambiano le uscite audio di mpv, e all_uscita_persa, quando il brano si ferma perche' l'uscita non si apre piu'. Nella 1.117.0 il lettore lontano, uno speaker Cast al posto delle schede, e converti_in_flac. Nella 2.7.0 sorgente_wav e passaggio_in_pcm, il WAV in RAM al posto del FLAC su disco. Nella 2.7.4 il WAV in RAM sempre a 16 bit, che lo speaker suona bene anche a 96 kHz. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 gli indirizzi in rete: il flusso di yt-dlp, con le intestazioni e l'audio a parte, anche per lo speaker. Nella 3.3.0 le dirette senza durata, riconosciute anche da sole, e il titolo in onda dai metadati ICY. Nella 3.5.0 caratteristiche(), per le registrazioni che si adattano alla sorgente. Nella 3.8.0 i sottotitoli dei siti, con sub-files. Nella 3.11.0 le dirette HTTP lette da diretta.py, con il protocollo diretta://, il titolo in onda da li' e il ripiego su libmpv. Nella 3.17.0 il testo del karaoke anche con lo speaker Cast, seguito dalla sua posizione. Nella 3.18.0 i blocchi del karaoke per la vista a tutto schermo.
+# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7). Nella 1.65.0 i MIDI resi da FluidSynth (tappa 8). Nella 1.66.0 la musica delle console con libgme. Nella 1.67.0 il file lasciato o rinominato per Rinomina file. Nella 1.82.0 il testo del karaoke come traccia in memoria, senza i .lrc caricati da mpv, e due sottotitoli uguali di fila detti tutti e due. Nella 1.83.0 il tempo che resta al sottotitolo, per la barra braille a blocchi. Nella 1.83.3 la durata vera di Musepack e DSF, da mutagen. Nella 1.93.0 i capitoli che libmpv vede. Nella 1.95.0 l'attenuazione, per la sfumatura del timer di spegnimento. Nella 1.96.0 il volume uniforme con ReplayGain. Nella 1.96.11 suona con a_volume_pieno. Nella 1.102.2 (issue 22) il ricampionamento con soxr, le bande compensate, il preamplificatore nella catena e il volume oltre 100 con il limitatore. Nella 1.102.3 rubberband quando velocita' o tono sono cambiati, con il tono fatto da lui (issue 20). Nella 1.116.0 alle_uscite, quando cambiano le uscite audio di mpv, e all_uscita_persa, quando il brano si ferma perche' l'uscita non si apre piu'. Nella 1.117.0 il lettore lontano, uno speaker Cast al posto delle schede, e converti_in_flac. Nella 2.7.0 sorgente_wav e passaggio_in_pcm, il WAV in RAM al posto del FLAC su disco. Nella 2.7.4 il WAV in RAM sempre a 16 bit, che lo speaker suona bene anche a 96 kHz. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 gli indirizzi in rete: il flusso di yt-dlp, con le intestazioni e l'audio a parte, anche per lo speaker. Nella 3.3.0 le dirette senza durata, riconosciute anche da sole, e il titolo in onda dai metadati ICY. Nella 3.5.0 caratteristiche(), per le registrazioni che si adattano alla sorgente. Nella 3.8.0 i sottotitoli dei siti, con sub-files. Nella 3.11.0 le dirette HTTP lette da diretta.py, con il protocollo diretta://, il titolo in onda da li' e il ripiego su libmpv. Nella 3.17.0 il testo del karaoke anche con lo speaker Cast, seguito dalla sua posizione. Nella 3.18.0 i blocchi del karaoke per la vista a tutto schermo. Nella 3.19.0 il lettore ombra dello speaker, per i sottotitoli dei video.
 
 """Due lettori libmpv per tutti i formati.
 
@@ -175,6 +175,11 @@ RIPETIZIONE_MINIMA = 0.5
 # Il karaoke dello speaker (3.17.0): ogni quanti secondi si guarda la
 # posizione che lo speaker dice, per le righe del testo.
 PASSO_DEL_KARAOKE_LONTANO = 0.1
+# Il lettore ombra dello speaker (3.19.0): ogni quanti secondi segue la
+# posizione dello speaker, e di quanti secondi puo' scostarsene prima di
+# saltare al suo punto.
+PASSO_DELL_OMBRA = 0.25
+SCARTO_DELL_OMBRA = 0.4
 # Il volume uniforme (1.96.0): la scelta delle impostazioni e l'opzione di
 # mpv, che legge i tag ReplayGain dei file e vale subito, anche per il brano
 # in corso.
@@ -586,6 +591,124 @@ class _Lettore:
         self.mpv.terminate()
 
 
+class _Ombra:
+    """Il lettore ombra dello speaker Cast (Gabriele, 3.19.0). Con lo speaker
+    il video suona solo lassu', e libmpv non legge i suoi sottotitoli: questa
+    libmpv muta, sull'uscita nulla e senza immagine, apre lo stesso brano e lo
+    tiene al punto dello speaker, e i suoi sottotitoli, dentro il file,
+    accanto o del sito, arrivano come sul PC. numero e' il brano dello
+    speaker che ha aperto, pronto vale dal FILE_LOADED. al_testo(numero,
+    testo) riceve ogni sottotitolo, al_caricamento() avvisa che le tracce ci
+    sono. Le tracce a immagini non si danno: senza il video non si leggono."""
+
+    def __init__(self, al_testo, al_caricamento):
+        self.numero = None
+        self.pronto = False
+        self._al_testo, self._al_caricamento = al_testo, al_caricamento
+        self._testo = self._inizio = self._karaoke = None
+        self._nuovo = False
+        self.mpv = mpv.MPV(**{**OPZIONI_DI_BASE, "ao": "null", "keep_open": "yes", "mute": True})
+        # I .lrc li legge karaoke.py, come per i lettori.
+        with contextlib.suppress(Exception):
+            self.mpv["sub-auto-exts"] = [estensione for estensione in self.mpv["sub-auto-exts"] if estensione != "lrc"]
+        self.mpv.observe_property("sub-text", self._sottotitolo)
+        self.mpv.observe_property("sub-start", self._inizio_del_sottotitolo)
+        self.mpv.register_event_callback(self._evento)
+
+    def carica(self, numero, brano, posizione, karaoke_del_brano=None):
+        """Apre brano, un _Brano, dai secondi posizione, per il brano numero
+        dello speaker; karaoke_del_brano, (testo SubRip, titolo), diventa la
+        sua traccia del karaoke, come per i lettori."""
+        self.numero, self.pronto = numero, False
+        self._testo = self._inizio = None
+        self._nuovo = False
+        self._karaoke = karaoke_del_brano
+        for nome, voci in (("http-header-fields", brano.intestazioni), ("audio-files", brano.audio), ("sub-files", brano.sottotitoli)):
+            self.mpv.command("change-list", nome, "clr", "")
+            for voce in voci:
+                self.mpv.command("change-list", nome, "append", voce)
+        opzioni = dict(brano.opzioni)
+        if posizione:
+            opzioni["start"] = f"{posizione:.3f}"
+        self.mpv.command("loadfile", brano.indirizzo, "replace", "-1", ",".join(f"{chiave}={valore}" for chiave, valore in opzioni.items()))
+
+    def _evento(self, evento):
+        if evento.event_id.value != mpv.MpvEventID.FILE_LOADED or self.numero is None:
+            return
+        self.pronto = True
+        if self._karaoke is not None:
+            srt, titolo = self._karaoke
+            with contextlib.suppress(Exception):
+                self.mpv.command_async("sub-add", "memory://" + srt, "auto", titolo)
+        self._al_caricamento()
+
+    def segui(self, posizione, in_pausa):
+        """Allo stesso punto dello speaker, in pausa con lui; un salto solo se
+        si scosta piu' di SCARTO_DELL_OMBRA, e non mentre ne fa gia' uno."""
+        if not self.pronto or posizione is None:
+            return
+        try:
+            if bool(self.mpv.pause) != bool(in_pausa):
+                self.mpv.pause = bool(in_pausa)
+            if self.mpv.seeking:
+                return
+            mia = self.mpv.time_pos
+            if mia is None or abs(mia - posizione) > SCARTO_DELL_OMBRA:
+                self.mpv.command_async("seek", f"{posizione:.3f}", "absolute+exact")
+        except Exception:  # noqa: BLE001 - una libmpv che cambia brano intanto
+            return
+
+    def _sottotitolo(self, _nome, testo):
+        self._testo, self._nuovo = testo, True
+        if testo and self.numero is not None:
+            self._al_testo(self.numero, testo)
+
+    def _inizio_del_sottotitolo(self, _nome, inizio):
+        """Un sottotitolo uguale al precedente si ridice, come nei lettori."""
+        ripeti = None
+        if inizio is not None:
+            if not self._nuovo and self._inizio is not None and inizio - self._inizio >= RIPETIZIONE_MINIMA:
+                ripeti = self._testo
+            self._inizio = inizio
+        self._nuovo = False
+        if ripeti and self.numero is not None:
+            self._al_testo(self.numero, ripeti)
+
+    def tracce(self):
+        """Le tracce dei sottotitoli di testo, come le da' track-list."""
+        from sottotitoli_ocr import CODEC_A_IMMAGINI
+
+        try:
+            elenco = self.mpv.track_list or []
+        except Exception:  # noqa: BLE001 - una libmpv che cambia brano intanto
+            return []
+        return [traccia for traccia in elenco if traccia.get("type") == "sub" and traccia.get("codec") not in CODEC_A_IMMAGINI]
+
+    def scegli(self, numero):
+        with contextlib.suppress(Exception):
+            self.mpv["sid"] = str(numero)
+
+    def resto(self):
+        """I secondi che restano al sottotitolo di adesso, o None."""
+        try:
+            fine, ora = self.mpv.sub_end, self.mpv.time_pos
+        except Exception:  # noqa: BLE001 - niente sottotitolo
+            return None
+        return fine - ora if fine is not None and ora is not None and fine > ora else None
+
+    def ferma(self, numero):
+        """Ferma il brano numero, se e' ancora il suo."""
+        if self.numero != numero:
+            return
+        self.numero, self.pronto = None, False
+        with contextlib.suppress(Exception):
+            self.mpv.command("stop")
+
+    def chiudi(self):
+        self.numero = None
+        self.mpv.terminate()
+
+
 class _Sfumatura:
     """Una dissolvenza in corso fra chi esce e chi entra. L'avanzamento si
     misura sulla posizione di chi entra, divisa per la velocita': la pausa
@@ -728,6 +851,9 @@ class Motore:
         # ogni brano nuovo e allo stop e ferma il filo che lo segue.
         self._karaoke_lontano = None
         self._brano_lontano = 0
+        # Il lettore ombra dello speaker, per i sottotitoli dei video (3.19.0):
+        # nasce al primo video che suona allo speaker.
+        self._ombra = None
         self._uscente = None
         self._preparato = None
         self._sfumatura = None
@@ -873,15 +999,84 @@ class Motore:
         quando si suona sulle schede del PC."""
         return self._lontano
 
-    def _segui_il_karaoke_lontano(self, percorso):
+    def _segui_il_karaoke_lontano(self, percorso, brano=None, inizio=None):
         """Un brano nuovo allo speaker (3.17.0): il suo testo del karaoke si
         cerca in disparte, come per i lettori, perche' la ricerca puo'
-        aspettare una cartella di rete, e poi un filo lo segue."""
+        aspettare una cartella di rete, e poi un filo lo segue. Un video, o un
+        brano di un sito con i sottotitoli, va invece al lettore ombra, che
+        legge anche il testo del karaoke accanto (3.19.0)."""
         with self._blocco:
             self._brano_lontano += 1
             numero, self._karaoke_lontano = self._brano_lontano, None
-        if percorso and not formati.e_indirizzo(percorso):
+        if not percorso:
+            return
+        if brano is not None and (formati.e_video(percorso) or (formati.e_indirizzo(percorso) and brano.sottotitoli)):
+            threading.Thread(target=self._ombra_allo_speaker, args=(numero, brano, inizio), name="MeTeOra, ombra dello speaker", daemon=True).start()
+        elif not formati.e_indirizzo(percorso):
             threading.Thread(target=self._karaoke_allo_speaker, args=(numero, percorso), name="MeTeOra, karaoke dello speaker", daemon=True).start()
+
+    def _ombra_allo_speaker(self, numero, brano, inizio):
+        """Nel suo filo: il lettore ombra apre il brano numero dello speaker e,
+        finche' quel brano suona, ne segue il punto ogni PASSO_DELL_OMBRA; poi
+        si ferma (Gabriele, 3.19.0)."""
+        with self._blocco:
+            if self._chiuso or numero != self._brano_lontano or self._lontano is None:
+                return
+            ombra = self._ombra
+            modo, anticipo = self._karaoke
+        if ombra is None:
+            try:
+                ombra = _Ombra(self._testo_dell_ombra, self._ombra_caricata)
+            except Exception:  # noqa: BLE001 - senza l'ombra niente sottotitoli, il brano suona lo stesso
+                return
+            with self._blocco:
+                if self._ombra is None and not self._chiuso:
+                    self._ombra = ombra
+                else:
+                    ombra.chiudi()
+                    ombra = self._ombra
+            if ombra is None:
+                return
+        fonte, righe = karaoke.cerca(brano.percorso) if not formati.e_indirizzo(brano.percorso) else (None, [])
+        testo = (karaoke.traccia(righe, modo, anticipo), karaoke.titolo(fonte)) if fonte is not None else None
+        try:
+            ombra.carica(numero, brano, inizio, testo)
+        except Exception:  # noqa: BLE001 - un brano che l'ombra non apre resta senza sottotitoli
+            return
+        try:
+            while True:
+                time.sleep(PASSO_DELL_OMBRA)
+                with self._blocco:
+                    lontano = self._lontano
+                    if self._chiuso or numero != self._brano_lontano or lontano is None:
+                        return
+                try:
+                    posizione = lontano.posizione if lontano.percorso == brano.percorso else None
+                    in_pausa = lontano.in_pausa
+                except Exception:  # noqa: BLE001 - uno speaker che sparisce non sa la posizione
+                    posizione, in_pausa = None, True
+                ombra.segui(posizione, in_pausa)
+        finally:
+            if not self._chiuso:
+                ombra.ferma(numero)
+
+    def _testo_dell_ombra(self, numero, testo):
+        """Un sottotitolo del lettore ombra, nel suo filo: va ai sottotitoli
+        se e' del brano che suona allo speaker."""
+        with self._blocco:
+            vivo = not self._chiuso and numero == self._brano_lontano and self._lontano is not None
+        if vivo and self._ai_sottotitoli is not None:
+            self._ai_sottotitoli(testo)
+
+    def _ombra_caricata(self):
+        """Il lettore ombra ha aperto il brano: la finestra rilegge le tracce."""
+        if self._al_caricamento is not None:
+            self._al_caricamento()
+
+    def _ombra_attiva(self):
+        """Il lettore ombra, se ha aperto il brano che suona allo speaker; con il lucchetto."""
+        ombra = self._ombra
+        return ombra if ombra is not None and ombra.pronto and ombra.numero == self._brano_lontano and self._lontano is not None else None
 
     def _lascia_il_karaoke_lontano(self):
         with self._blocco:
@@ -1085,7 +1280,7 @@ class Motore:
         brano = _Brano(percorso, sottobrano, inizio, self._banco_midi)
         if self._lontano is not None:
             self._lontano.suona(percorso, brano.sottobrano, brano.sottobrani, inizio, in_pausa, midi_reso=brano.indirizzo.startswith("midi://"))
-            self._segui_il_karaoke_lontano(percorso)
+            self._segui_il_karaoke_lontano(percorso, brano, inizio)
             return
         with self._blocco:
             if self._chiuso:
@@ -1401,7 +1596,9 @@ class Motore:
         alla barra braille a blocchi, per dividerli fra i blocchi (1.83.0).
         Con uno speaker Cast, quelli del blocco del karaoke (3.17.0)."""
         with self._blocco:
-            lontano, seguito = self._lontano, self._karaoke_lontano
+            lontano, seguito, ombra = self._lontano, self._karaoke_lontano, self._ombra_attiva()
+        if ombra is not None:
+            return ombra.resto()
         if lontano is not None:
             return seguito.resto(lontano.posizione) if seguito is not None and seguito.scelto else None
         with self._blocco:
@@ -1614,13 +1811,17 @@ class Motore:
         """Le tracce del brano in corso: {"video": vero se ne ha una,
         "audio": [...], "sub": [...]}, ciascuna come la da' track-list di
         mpv (id, selected, title, lang, codec...). None se non c'e' un brano
-        aperto. Con uno speaker Cast va solo l'audio: c'e' soltanto il testo
-        del karaoke, se il brano ne ha uno, come una traccia (3.17.0)."""
+        aperto. Con uno speaker Cast va solo l'audio: ci sono i sottotitoli
+        del video dal lettore ombra (3.19.0), o il testo del karaoke, se il
+        brano ne ha uno, come una traccia (3.17.0)."""
         if self._lontano is not None:
             if not self._lontano.percorso:
                 return None
             with self._blocco:
-                seguito = self._karaoke_lontano
+                seguito, ombra = self._karaoke_lontano, self._ombra_attiva()
+            if ombra is not None:
+                # I sottotitoli del video, dal lettore ombra (3.19.0).
+                return {"video": False, "audio": [], "sub": ombra.tracce()}
             sub = [] if seguito is None else [{"id": 1, "type": "sub", "title": karaoke.titolo(seguito.fonte), "selected": seguito.scelto, "external": True,
                 "image": False, "codec": "subrip"}]
             return {"video": False, "audio": [], "sub": sub}
@@ -1663,7 +1864,10 @@ class Motore:
         del karaoke del brano, scelto o no (3.17.0)."""
         if self._lontano is not None:
             with self._blocco:
-                if tipo == "sid" and self._karaoke_lontano is not None:
+                ombra = self._ombra_attiva()
+                if tipo == "sid" and ombra is not None:
+                    ombra.scegli(numero)
+                elif tipo == "sid" and self._karaoke_lontano is not None:
                     self._karaoke_lontano.scegli(str(numero) != "no")
             return
         with self._blocco:
@@ -1999,9 +2203,13 @@ class Motore:
                 return
             self._chiuso = True
             lontano, self._lontano = self._lontano, None
+            ombra, self._ombra = self._ombra, None
         if lontano is not None:
             with contextlib.suppress(Exception):
                 lontano.chiudi(attendi=False)
+        if ombra is not None:
+            with contextlib.suppress(Exception):
+                ombra.chiudi()
         with self._blocco:
             self._riposo.set()
             self._sveglia.notify_all()

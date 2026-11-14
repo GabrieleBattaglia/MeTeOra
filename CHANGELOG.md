@@ -2,6 +2,20 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.19.1] - 2026-11-14
+
+- I sottotitoli che scorrono, come quelli automatici di YouTube, non ripetono più ogni riga. Nella verifica chiesta da Gabriele, con un video di Superquark, ogni sottotitolo ha due righe e quella di sotto sale sopra nel sottotitolo dopo: MeTeOra diceva ogni riga due volte, e a volte una terza, sola, nel passaggio. Ora, se un sottotitolo comincia con l'ultima riga di quello di prima, si dice solo il resto, e niente se non c'è altro. Un sottotitolo uguale a quello di prima, come un ritornello, si dice ancora intero, e dopo un salto il primo si dice intero.
+- Nelle statistiche, la sezione dei sottotitoli conta le righe che scorrono non ridette.
+- Le prove sono in tests/test_finestra.py.
+
+## [3.19.0] - 2026-11-14
+
+- I sottotitoli dei video anche con lo speaker Cast, chiesto da Gabriele: con lo speaker il video suona solo lassù, e libmpv non leggeva i suoi sottotitoli. Ora un lettore ombra, una libmpv muta, sull'uscita nulla e senza immagine, apre lo stesso video sul PC e lo tiene al punto dello speaker: ogni quarto di secondo guarda dove è lo speaker, salta lì se se ne scosta più di quattro decimi, e si mette in pausa con lui. I suoi sottotitoli arrivano come sul PC: quelli dentro il file, quelli accanto, quelli dei siti come YouTube, e il testo del karaoke di un LRC accanto al video. D li sceglie e li spegne come sempre, e con i sottotitoli accesi la prima traccia si sceglie da sola.
+- Per i brani dei siti l'ombra parte solo se il sito ha i sottotitoli, e scarica l'audio una seconda volta; per i video sul disco parte sempre, e non costa quasi niente. I sottotitoli fatti di immagini non si danno: senza l'immagine non si leggono.
+- La verifica chiesta da Gabriele, con un video vero di YouTube con i sottotitoli automatici: arrivano sul PC, e quindi anche con le cuffie Bluetooth, che sono un'uscita del PC come le altre, e con lo speaker, dal lettore ombra.
+- Nelle statistiche, la riga delle righe con lo speaker conta anche i sottotitoli dei video.
+- Le prove sono in tests/test_motore.py.
+
 ## [3.18.0] - 2026-11-14
 
 - La vista del karaoke a tutto schermo, chiesta da Gabriele per chi canta guardando lo schermo. Si accende e si spegne con il video, Maiuscolo e Ctrl con F1: con il video acceso, un brano da cantare senza un video suo, come un MIDI, un KAR o un audio con il suo LRC, la apre da sé, anche con lo speaker Cast. In alto la riga da cantare, in grassetto, alta circa un decimo dello schermo e in un colore che risalta di più sullo sfondo: il giallo sugli sfondi scuri, o il bianco se il testo è già giallo, il blu scuro o il nero su quelli chiari, scelto con il contrasto del WCAG. Sotto arrivano le tre prossime, alte due terzi di lei, nei colori della console; quelle già cantate spariscono, e il testo scorre da solo. Le misure seguono lo schermo e non i caratteri della console: con quelli, il doppio a 8 punti, su uno schermo da 1920 per 1080 la riga era alta il 3% e non si leggeva da lontano. Gabriele ha scelto le misure e le tre righe. Le righe lunghe vanno a capo fra le parole.

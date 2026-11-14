@@ -1636,6 +1636,42 @@ def test_il_karaoke_con_lo_speaker(crea, avvisi, tmp_path):
     m.usa_il_lontano(None)
 
 
+def test_i_sottotitoli_dei_video_con_lo_speaker(crea, avvisi, tmp_path):
+    # Gabriele, 3.19.0: con lo speaker il video suona solo lassu'; il lettore
+    # ombra, muto, apre lo stesso video, ne segue il punto e legge i sottotitoli.
+    # Il video e' un WAV con il nome di un MKV: libmpv lo apre dal contenuto.
+    film = _silenzio(tmp_path / "film.mkv", 12)
+    (tmp_path / "film.srt").write_text("1\n00:00:01,000 --> 00:00:02,500\nPrima\n\n2\n00:00:05,000 --> 00:00:06,500\nSeconda\n", encoding="utf-8")
+    detti = []
+    m = crea(ai_sottotitoli=detti.append, al_caricamento=avvisi("al_caricamento"))
+    lontano = _LontanoFinto()
+    lontano.posizione = 0.0
+    m.usa_il_lontano(lontano)
+    m.suona(film)
+    # Le tracce sono quelle dell'ombra, e la finestra rilegge le tracce quando l'ombra ha aperto il video.
+    assert _aspetta(lambda: (m.tracce() or {}).get("sub"))
+    assert _aspetta(lambda: "al_caricamento" in avvisi.nomi())
+    sub = m.tracce()["sub"]
+    assert len(sub) == 1 and sub[0].get("external")
+    m.scegli_traccia("sid", str(sub[0]["id"]))
+    # Lo speaker al secondo 1.2: l'ombra salta li', e il sottotitolo arriva.
+    lontano.posizione = 1.2
+    assert _aspetta(lambda: "Prima" in detti)
+    lontano.posizione = 5.2
+    assert _aspetta(lambda: "Seconda" in detti)
+    assert m.resto_del_sottotitolo() is not None
+    # Spenti, tacciono anche tornando al primo.
+    m.scegli_traccia("sid", "no")
+    quanti = len(detti)
+    lontano.posizione = 1.2
+    time.sleep(1.0)
+    assert len(detti) == quanti
+    # Lo stop ferma l'ombra; un brano che non e' un video non la usa.
+    m.stop()
+    assert m.tracce() is None and _aspetta(lambda: m._ombra.numero is None)
+    m.usa_il_lontano(None)
+
+
 def test_la_sorgente_wav(crea, tmp_path):
     # 2.7.0: il WAV in RAM per gli speaker, al posto del FLAC su disco, con
     # libmpv vero che scrive nella pipe con nome: tre secondi di seno a 16 bit

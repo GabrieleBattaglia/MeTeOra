@@ -4988,6 +4988,27 @@ def test_f5_schermo_intero_e_i_il_rapporto(finestra, monkeypatch, suoni_annotati
     assert chiamate[-1] == ("rapporto", "-1")
 
 
+def test_i_sottotitoli_che_scorrono_non_si_ridicono(finestra, sintesi_finta):
+    # Gabriele, 3.19.1: i sottotitoli automatici di YouTube scorrono su due
+    # righe, e la riga di sotto sale sopra nel sottotitolo dopo: si dice solo
+    # la riga nuova. Sono quelli veri di un video di Superquark.
+    finestra.impostazioni["sottotitoli"] = True
+    for testo in ("Caruso morì In pratica stette male fu\nportato a Napoli e da viveva in questa", "portato a Napoli e da viveva in questa\n",
+            "portato a Napoli e da viveva in questa\nsuite dove gli amici mi Ospitarono a", "suite dove gli amici mi Ospitarono a\nSorrento e allora"):
+        finestra._sottotitolo(testo)
+    assert [testo for _chiave, testo in sintesi_finta.detti] == ["Caruso morì In pratica stette male fu portato a Napoli e da viveva in questa",
+        "suite dove gli amici mi Ospitarono a", "Sorrento e allora"]
+    assert finestra._righe[-3:] == [testo for _chiave, testo in sintesi_finta.detti]
+    assert finestra._statistiche.dati["conti"]["righe_scorrevoli_saltate"] == 1
+    # Uguale a quello di prima, come un ritornello, si dice intero; dopo un
+    # salto il sottotitolo si dice intero, anche se comincia con l'ultima riga.
+    finestra._sottotitolo("suite dove gli amici mi Ospitarono a\nSorrento e allora")
+    assert sintesi_finta.detti[-1][1] == "suite dove gli amici mi Ospitarono a Sorrento e allora"
+    finestra._testo_superato()
+    finestra._sottotitolo("Sorrento e allora\nmi fecero vedere")
+    assert sintesi_finta.detti[-1][1] == "Sorrento e allora mi fecero vedere"
+
+
 def test_impostazioni_video_sottotitoli_e_sintesi(finestra, monkeypatch, suoni_annotati, sintesi_finta):
     _stato, chiamate = _video_finto(finestra, monkeypatch, _tracce())
     _campo, lista = _cambia(finestra, monkeypatch, "video", "sì")
