@@ -1,6 +1,6 @@
 # MeTeOra, i valori scritti nei campi delle impostazioni: dal testo al valore, con le correzioni dette a chi scrive.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); leggi_tempo e secondi_da_leggere arrivano da finestra.py. Nella 1.51.2 leggi_tempo accetta solo le cifre: prima passavano inf e 1e5. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza, con i loro limiti e le loro forme da leggere (tappa 4, issue 15). Nella 1.59.2 velocita' e dissolvenza si scrivono con il punto, come il resto di MeTeOra. Nella 1.60.0 leggi_tempo_nel_brano, per W, anche dalla fine. Nella 1.61.0 i modelli della riproduzione casuale. Nella 1.82.0 l'anticipo del karaoke. Nella 1.83.0 le celle della barra braille e il tempo minimo di lettura. Nella 1.88.0 tempo() arriva da finestra.py, per la linea del tempo della barra. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.5.0 i formati e i kbps delle registrazioni. Nella 3.7.0 le scelte della console letta. Nella 3.15.0 bit, frequenze e canali delle registrazioni.
+# 01/10/2026: nasce con la 1.51.0, per la finestra delle impostazioni (tappa 3, issue 14, piano 5.8); leggi_tempo e secondi_da_leggere arrivano da finestra.py. Nella 1.51.2 leggi_tempo accetta solo le cifre: prima passavano inf e 1e5. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza, con i loro limiti e le loro forme da leggere (tappa 4, issue 15). Nella 1.59.2 velocita' e dissolvenza si scrivono con il punto, come il resto di MeTeOra. Nella 1.60.0 leggi_tempo_nel_brano, per W, anche dalla fine. Nella 1.61.0 i modelli della riproduzione casuale. Nella 1.82.0 l'anticipo del karaoke. Nella 1.83.0 le celle della barra braille e il tempo minimo di lettura. Nella 1.88.0 tempo() arriva da finestra.py, per la linea del tempo della barra. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.5.0 i formati e i kbps delle registrazioni. Nella 3.7.0 le scelte della console letta. Nella 3.15.0 bit, frequenze e canali delle registrazioni. Nella 3.20.0 la dimensione e il colore della vista del karaoke.
 
 """I valori delle impostazioni, letti dal testo scritto nei campi.
 
@@ -41,6 +41,11 @@ SECONDI_MINIMI = 0.1
 RIGHE_MINIME = 100
 # L'anticipo del testo del karaoke, in millesimi di secondo (1.82.0).
 ANTICIPO_MASSIMO_DEL_KARAOKE = 10000
+# La vista del karaoke a tutto schermo (Gabriele, 3.20.0): l'altezza della
+# riga da cantare, in percentuale dell'altezza dello schermo.
+ALTEZZA_DEL_KARAOKE_MINIMA = 3
+ALTEZZA_DEL_KARAOKE_MASSIMA = 30
+ALTEZZA_DEL_KARAOKE = 10
 # La barra braille a blocchi (1.83.0): le celle della barra, 0 per il testo
 # intero, e il tempo minimo di lettura di un blocco, in millesimi.
 CELLE_MASSIME = 160
@@ -340,6 +345,36 @@ def leggi_si_no(testo, nome=None):
 def leggi_anticipo_del_karaoke(testo):
     """Quanti millesimi prima del canto arriva il testo del karaoke."""
     return leggi_intero(testo, 0, ANTICIPO_MASSIMO_DEL_KARAOKE, _("Anticipo del karaoke"))
+
+
+def leggi_altezza_del_karaoke(testo):
+    """L'altezza della riga da cantare nella vista del karaoke, in
+    percentuale dell'altezza dello schermo; il segno di percentuale si puo'
+    scrivere (3.20.0)."""
+    return leggi_intero(_pulito(testo).removesuffix("%").strip(), ALTEZZA_DEL_KARAOKE_MINIMA, ALTEZZA_DEL_KARAOKE_MASSIMA,
+        _("Dimensione del karaoke a tutto schermo"))
+
+
+def leggi_colore_del_karaoke(testo):
+    """Il colore della riga da cantare nella vista del karaoke (3.20.0):
+    ([r, g, b] in percentuali intere, correzioni), con tre percentuali
+    separate dal punto, come 100.100.0; oltre 100 si porta a 100. Il campo
+    vuoto da' la lista vuota, il colore automatico."""
+    testo = _pulito(testo)
+    if not testo:
+        return [], []
+    nome = _("Colore della riga da cantare")
+    parti = testo.split(".")
+    if len(parti) != len(COMPONENTI) or not all(_CIFRE.fullmatch(p) for p in parti):
+        # Traduttori: l'esempio 100.100.0 resta com'e': e' quello che si scrive nel campo.
+        raise ErroreValore(_("{nome}: {testo} non è un colore; scrivi tre percentuali intere da 0 a {massimo}, per rosso, verde e blu, separate dal punto, "
+            "per esempio 100.100.0, il giallo. Il campo vuoto torna al colore automatico.").format(nome=nome, testo=testo, massimo=PERCENTUALE_MASSIMA))
+    percentuali, correzioni = [], []
+    for parte, componente in zip(parti, COMPONENTI, strict=True):
+        valore, corrette = _nei_limiti(int(parte), 0, PERCENTUALE_MASSIMA, f"{nome}, {componente}")
+        percentuali.append(valore)
+        correzioni += corrette
+    return percentuali, correzioni
 
 
 def leggi_ripresa_oltre(testo):

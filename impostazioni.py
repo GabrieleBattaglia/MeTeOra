@@ -1,6 +1,6 @@
 # MeTeOra, le impostazioni: i valori che il programma ricorda fra un avvio e l'altro.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 le righe della console. Nella 1.51.0 caratteri, colori e scheda audio, e i limiti controllati alla lettura del file. Nella 1.51.2 un file con un JSON che non e' un dizionario non ferma l'avvio. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza (tappa 4, issue 15). Nella 1.59.0 la riproduzione casuale (issue 17). Nella 1.61.0 il modello della riproduzione casuale. Nella 1.63.0 video, sottotitoli letti e sintesi (tappa 7). Nella 1.64.0 i percorsi di rete scritti a mano. Nella 1.65.0 il banco dei suoni MIDI. Nella 1.66.36 un file illeggibile non si sovrascrive: si salva accanto, con .nuovo. Nella 1.82.0 destinazione, karaoke e anticipo del karaoke. Nella 1.83.0 celle della barra braille e tempo minimo di lettura. Nella 1.84.0 la versione dell'ultimo avvio. Nella 1.102.2 il volume di partenza e' 100, il livello originale dei file (issue 22). Nella 1.111.0 lo stato della selezione per lo screen reader, acceso di partenza (issue 21). Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 il segnalibro sugli Indirizzi e il giorno del controllo di yt-dlp. Nella 3.4.0 il segnalibro sui Preferiti in rete. Nella 3.5.0 il formato e la qualita' delle registrazioni. Nella 3.6.0 la scheda degli effetti. Nella 3.7.0 la console letta. Nella 3.13.0 la cartella delle registrazioni. Nella 3.15.0 bit, frequenza e canali delle registrazioni.
+# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 le righe della console. Nella 1.51.0 caratteri, colori e scheda audio, e i limiti controllati alla lettura del file. Nella 1.51.2 un file con un JSON che non e' un dizionario non ferma l'avvio. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza (tappa 4, issue 15). Nella 1.59.0 la riproduzione casuale (issue 17). Nella 1.61.0 il modello della riproduzione casuale. Nella 1.63.0 video, sottotitoli letti e sintesi (tappa 7). Nella 1.64.0 i percorsi di rete scritti a mano. Nella 1.65.0 il banco dei suoni MIDI. Nella 1.66.36 un file illeggibile non si sovrascrive: si salva accanto, con .nuovo. Nella 1.82.0 destinazione, karaoke e anticipo del karaoke. Nella 1.83.0 celle della barra braille e tempo minimo di lettura. Nella 1.84.0 la versione dell'ultimo avvio. Nella 1.102.2 il volume di partenza e' 100, il livello originale dei file (issue 22). Nella 1.111.0 lo stato della selezione per lo screen reader, acceso di partenza (issue 21). Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 il segnalibro sugli Indirizzi e il giorno del controllo di yt-dlp. Nella 3.4.0 il segnalibro sui Preferiti in rete. Nella 3.5.0 il formato e la qualita' delle registrazioni. Nella 3.6.0 la scheda degli effetti. Nella 3.7.0 la console letta. Nella 3.13.0 la cartella delle registrazioni. Nella 3.15.0 bit, frequenza e canali delle registrazioni. Nella 3.20.0 la dimensione e il colore della vista del karaoke.
 
 """Le impostazioni, in un file JSON accanto al programma.
 
@@ -26,6 +26,9 @@ from GBsintesi import USCITE as USCITE_DELLA_SINTESI
 from karaoke import MODI as MODI_DEL_KARAOKE
 from lingua import _
 from valori import (
+    ALTEZZA_DEL_KARAOKE,
+    ALTEZZA_DEL_KARAOKE_MASSIMA,
+    ALTEZZA_DEL_KARAOKE_MINIMA,
     ANTICIPO_MASSIMO_DEL_KARAOKE,
     AREE,
     BIT_DI_REGISTRAZIONE,
@@ -109,6 +112,11 @@ PREDEFINITE = {
     "console_letta": "spenta",
     "karaoke": "riga",
     "anticipo_karaoke": 0,
+    # La vista del karaoke a tutto schermo (3.20.0): l'altezza della riga da
+    # cantare, in percentuale dello schermo, e il suo colore come [r, g, b] in
+    # percentuali, o la lista vuota per quello automatico.
+    "altezza_karaoke": ALTEZZA_DEL_KARAOKE,
+    "colore_karaoke": [],
     # La barra braille a blocchi (1.83.0): quante celle ha, 0 per il testo
     # intero, e quanti millesimi resta almeno ogni blocco.
     "celle_braille": 0,
@@ -286,6 +294,9 @@ CONTROLLI = {
     "console_letta": lambda valore: valore in LETTURE_DELLA_CONSOLE,
     "karaoke": lambda valore: valore in MODI_DEL_KARAOKE,
     "anticipo_karaoke": _intero_fra(0, ANTICIPO_MASSIMO_DEL_KARAOKE),
+    "altezza_karaoke": _intero_fra(ALTEZZA_DEL_KARAOKE_MINIMA, ALTEZZA_DEL_KARAOKE_MASSIMA),
+    "colore_karaoke": lambda valore: isinstance(valore, list) and (not valore or (len(valore) == len(COMPONENTI)
+        and all(_intero_fra(0, PERCENTUALE_MASSIMA)(p) for p in valore))),
     "celle_braille": _intero_fra(0, CELLE_MASSIME),
     "ripresa_oltre": _intero_fra(0, RIPRESA_MASSIMA),
     "lettura_minima": _intero_fra(LETTURA_MINIMA, LETTURA_MASSIMA),

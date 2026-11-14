@@ -390,6 +390,11 @@ def test_la_vista_del_karaoke_nella_finestra(finestra, tmp_path, suoni_annotati)
     assert not vista.IsShown()
     finestra._metti_il_video(True)
     assert vista.IsShown()
+    # La dimensione e il colore scelti valgono subito, anche a vista aperta (3.20.0).
+    finestra.impostazioni["altezza_karaoke"] = 20
+    finestra.impostazioni["colore_karaoke"] = [100, 0, 0]
+    finestra._aspetto_del_karaoke()
+    assert vista._altezza == 0.2 and vista._colori[2] == (255, 0, 0)
     # Ctrl con F1 spegne il video e la vista.
     finestra._metti_il_video(False)
     assert not vista.IsShown() and "il karaoke non si vede" in finestra._righe[-1]

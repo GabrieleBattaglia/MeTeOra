@@ -642,6 +642,25 @@ def test_predefinite_della_tappa_4():
     assert PREDEFINITE["dissolvenza"] == {"accesa": False, "secondi": 4.0}
 
 
+def test_la_dimensione_e_il_colore_del_karaoke(tmp_path):
+    # La vista del karaoke a tutto schermo (Gabriele, 3.20.0).
+    assert valori.leggi_altezza_del_karaoke("15") == (15, []) and valori.leggi_altezza_del_karaoke(" 12 % ") == (12, [])
+    assert valori.leggi_altezza_del_karaoke("50") == (30, ["Dimensione del karaoke a tutto schermo: 50 è oltre il massimo, ho messo 30."])
+    assert valori.leggi_altezza_del_karaoke("1")[0] == 3
+    with pytest.raises(valori.ErroreValore):
+        valori.leggi_altezza_del_karaoke("dieci")
+    assert valori.leggi_colore_del_karaoke("100.100.0") == ([100, 100, 0], []) and valori.leggi_colore_del_karaoke("  ") == ([], [])
+    colore, correzioni = valori.leggi_colore_del_karaoke("120.0.5")
+    assert colore == [100, 0, 5] and correzioni == ["Colore della riga da cantare, rosso: 120 è oltre il massimo, ho messo 100."]
+    for sbagliato in ("100.100", "giallo", "100,100,0", "1.2.3.4"):
+        with pytest.raises(valori.ErroreValore):
+            valori.leggi_colore_del_karaoke(sbagliato)
+    # Le impostazioni scartano i valori fuori posto e tengono quelli di partenza.
+    assert PREDEFINITE["altezza_karaoke"] == 10 and PREDEFINITE["colore_karaoke"] == []
+    caricate = _caricate(tmp_path, {"altezza_karaoke": 31, "colore_karaoke": [100, 100]})
+    assert caricate["altezza_karaoke"] == 10 and caricate["colore_karaoke"] == []
+
+
 def test_carica_i_valori_buoni(tmp_path):
     buoni = {"volume": 300, "volume_di_prima": 80, "passo_volume": 50, "passo_indietro": 0.1, "passo_avanti": 0.23, "volume_effetti": 1, "insegui": True, "casuale": True, "modello_casuale": "totale", "ripetizione": "lista", "replaygain": "album", "video": True, "sottotitoli": True, "sintesi": "nvda", "impressi": "passata", "impressi_scelti": True, "destinazione": "braille", "karaoke": "strofa", "anticipo_karaoke": 10000, "celle_braille": 160, "lettura_minima": 100, "versione": "1.83.3", "barra_dei_comandi": False, "stato_della_selezione": False, "ripresa_oltre": 30, "banco_midi": "C:\\banchi\\FluidR3_GM.sf2", "percorsi_di_rete": ["\\\\server\\musica"],
         "ripresa": {"percorso": "x"}, "righe_della_console": 100, "caratteri": {"p": 6, "t": 72}, "colori_testo": {"c": [0, 100, 50]},
@@ -652,6 +671,7 @@ def test_carica_i_valori_buoni(tmp_path):
         "velocita": 1.05, "tono": -3, "bande": [0, 2, -12, 12, 0, 0, 1], "dissolvenza": {"accesa": True, "secondi": 2.5},
         "ytdlp_controllato": "2026-11-05", "formato_registrazioni": "flac", "qualita_registrazioni": 320,
         "cartella_registrazioni": r"D:\Registrazioni", "bit_registrazioni": 24, "frequenza_registrazioni": 96000, "canali_registrazioni": "stereo",
+        "altezza_karaoke": 30, "colore_karaoke": [100, 100, 0],
             "console_letta": "braille", "scheda_effetti": {}}
     imp = _caricate(tmp_path, buoni)
     assert dict(imp) == buoni

@@ -1,6 +1,6 @@
 # MeTeOra, la vista del karaoke: il testo da cantare a tutto schermo, per chi canta guardando lo schermo.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 14/11/2026: nasce con la 3.18.0, chiesta da Gabriele per una persona vedente che cantava il karaoke.
+# 14/11/2026: nasce con la 3.18.0, chiesta da Gabriele per una persona vedente che cantava il karaoke. Nella 3.20.0 la dimensione e il colore scelti nelle impostazioni.
 
 """La vista del karaoke (Gabriele, 3.18.0).
 
@@ -30,7 +30,9 @@ from lingua import _
 # Ogni quanti millisecondi si guarda la posizione del brano.
 PASSO = 100
 # L'altezza dei caratteri della riga da cantare, in parti dell'altezza dello
-# schermo, e quella delle prossime rispetto a lei; quante prossime (Gabriele).
+# schermo, quella di partenza: dalla 3.20.0 la sceglie la voce Dimensione del
+# karaoke a tutto schermo; quella delle prossime rispetto a lei; quante
+# prossime (Gabriele).
 ALTEZZA_DELLA_RIGA = 0.1
 ALTEZZA_DELLE_PROSSIME = 2 / 3
 PROSSIME = 3
@@ -120,6 +122,7 @@ class FinestraKaraoke(wx.Frame):
         sizer.Add(self.pannello, 1, wx.EXPAND)
         self.SetSizer(sizer)
         self._colori = ((0, 200, 200), (0, 0, 0), (255, 255, 0))
+        self._altezza = ALTEZZA_DELLA_RIGA
         self._mostrate = None
         self._orologio = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self._passo, self._orologio)
@@ -128,11 +131,20 @@ class FinestraKaraoke(wx.Frame):
         self.pannello.Bind(wx.EVT_PAINT, self._disegna)
         self.pannello.Bind(wx.EVT_SIZE, lambda evento: (self.pannello.Refresh(), evento.Skip()))
 
-    def apri(self, titolo, testo, sfondo, rettangolo):
-        """Mostra la vista a tutto schermo sullo schermo di rettangolo, con i
-        colori della console in [r, g, b] da 0 a 255, e le da' il fuoco."""
+    def aspetto(self, testo, sfondo, altezza=None, evidenza=None):
+        """I colori della console in [r, g, b] da 0 a 255, l'altezza della riga
+        da cantare in parti dello schermo, e il suo colore, o None per quello
+        che risalta di piu' (3.20.0). La vista si ridisegna, senza prendere il
+        fuoco: le impostazioni la cambiano anche aperta."""
+        self._colori = (tuple(testo), tuple(sfondo), tuple(evidenza) if evidenza else colore_in_evidenza(testo, sfondo))
+        self._altezza = altezza or ALTEZZA_DELLA_RIGA
+        self.pannello.Refresh()
+
+    def apri(self, titolo, testo, sfondo, rettangolo, altezza=None, evidenza=None):
+        """Mostra la vista a tutto schermo sullo schermo di rettangolo, con
+        l'aspetto dato, e le da' il fuoco."""
         self.SetTitle(titolo)
-        self._colori = (tuple(testo), tuple(sfondo), colore_in_evidenza(testo, sfondo))
+        self.aspetto(testo, sfondo, altezza, evidenza)
         self._mostrate = None
         if not self.IsShown():
             self.SetRect(rettangolo)
@@ -183,7 +195,7 @@ class FinestraKaraoke(wx.Frame):
         utile = max(1, larghezza - 2 * margine)
         corrente, prossime = self._mostrate if self._mostrate is not None else self.mostrate()
         y = margine
-        alta = altezza * ALTEZZA_DELLA_RIGA
+        alta = altezza * self._altezza
         if corrente:
             dc.SetFont(self._carattere(alta, grassetto=True))
             dc.SetTextForeground(evidenza)

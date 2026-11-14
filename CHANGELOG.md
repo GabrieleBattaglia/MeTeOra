@@ -2,6 +2,12 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.20.0] - 2026-11-14
+
+- Due voci nuove nelle impostazioni, dopo Anticipo del karaoke, chieste da Gabriele perché ognuno regoli la vista del karaoke a tutto schermo per i suoi occhi e il suo schermo. Dimensione del karaoke a tutto schermo: quanto è alta la riga da cantare, in percentuale dell'altezza dello schermo, da 3 a 30, di partenza 10, quella della 3.18.0; le prossime restano due terzi di lei. Colore della riga da cantare: tre percentuali di rosso, verde e blu, come negli altri colori, per esempio 100.100.0; il campo vuoto, di partenza, tiene il colore automatico della 3.18.0, quello che risalta più del testo della console.
+- Le due voci valgono subito, anche con la vista aperta, che si ridisegna senza prendere il fuoco alle impostazioni.
+- Le prove sono in tests/test_valori.py, tests/test_finestra.py e tests/test_karaoke.py.
+
 ## [3.19.1] - 2026-11-14
 
 - I sottotitoli che scorrono, come quelli automatici di YouTube, non ripetono più ogni riga. Nella verifica chiesta da Gabriele, con un video di Superquark, ogni sottotitolo ha due righe e quella di sotto sale sopra nel sottotitolo dopo: MeTeOra diceva ogni riga due volte, e a volte una terza, sola, nel passaggio. Ora, se un sottotitolo comincia con l'ultima riga di quello di prima, si dice solo il resto, e niente se non c'è altro. Un sottotitolo uguale a quello di prima, come un ritornello, si dice ancora intero, e dopo un salto il primo si dice intero.

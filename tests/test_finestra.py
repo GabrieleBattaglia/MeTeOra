@@ -3162,6 +3162,8 @@ def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_an
         ("console_letta", "Lettura della console: spenta"),
         ("karaoke", "Testo del karaoke: per riga"),
         ("anticipo_karaoke", "Anticipo del karaoke: 0 ms"),
+        ("altezza_karaoke", "Dimensione del karaoke a tutto schermo: la riga da cantare alta il 10% dello schermo"),
+        ("colore_karaoke", "Colore della riga da cantare: automatico, quello che risalta di più sullo sfondo della console"),
         ("celle_braille", "Celle della barra braille: 0, il testo intero"),
         ("lettura_minima", "Tempo minimo di lettura in braille: 2000 ms"),
         ("banco_midi", "Banco dei suoni MIDI: nessuno, si sceglie al primo MIDI"),
@@ -6247,6 +6249,17 @@ def test_le_impostazioni_del_karaoke(finestra, monkeypatch, suoni_annotati, sint
     assert finestra.impostazioni["anticipo_karaoke"] == 10000
     _cambia(finestra, monkeypatch, "anticipo_karaoke", "0")
     assert _ultima(finestra) == "Il testo del karaoke ora arriva quando comincia il canto."
+    # La dimensione e il colore della vista del karaoke (Gabriele, 3.20.0).
+    _campo, lista = _cambia(finestra, monkeypatch, "altezza_karaoke", "15%")
+    assert finestra.impostazioni["altezza_karaoke"] == 15 and _ultima(finestra) == "La riga da cantare ora è alta il 15% dello schermo."
+    assert lista.righe["altezza_karaoke"] == "Dimensione del karaoke a tutto schermo: la riga da cantare alta il 15% dello schermo"
+    _campo, lista = _cambia(finestra, monkeypatch, "colore_karaoke", "100.50.0")
+    assert finestra.impostazioni["colore_karaoke"] == [100, 50, 0] and _ultima(finestra) == "La riga da cantare ora ha il colore 100.50.0."
+    assert lista.righe["colore_karaoke"] == "Colore della riga da cantare: 100.50.0"
+    assert finestra._misure_del_karaoke() == (0.15, (255, 128, 0))
+    _cambia(finestra, monkeypatch, "colore_karaoke", "")
+    assert finestra.impostazioni["colore_karaoke"] == [] and finestra._misure_del_karaoke() == (0.15, None)
+    assert _ultima(finestra) == "La riga da cantare ora ha il colore automatico, quello che risalta di più sullo sfondo della console."
 
 
 def test_maiuscolo_f2_sul_testo_del_karaoke(finestra, monkeypatch, suoni_annotati):

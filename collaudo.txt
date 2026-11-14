@@ -39,3 +39,7 @@ Collaudo di MeTeOra 3.19.0 e 3.19.1: i sottotitoli dei video, anche con lo speak
 Con le cuffie Bluetooth suona un video di YouTube con i sottotitoli e premi Maiuscolo con D: i sottotitoli arrivano, e ogni riga una volta sola.
 Con lo speaker GabryBar suona lo stesso video: i sottotitoli arrivano anche qui, a tempo con lo speaker; prova una pausa e un salto.
 Con lo speaker suona un film dal disco con i sottotitoli dentro, o un file SRT accanto: D li sceglie, Ctrl e Alt con D li spegne.
+Collaudo di MeTeOra 3.20.0: dimensione e colore della vista del karaoke.
+Nelle impostazioni, dopo Anticipo del karaoke, le voci Dimensione del karaoke a tutto schermo, di partenza 10%, e Colore della riga da cantare, automatico.
+Con la vista aperta, scrivi 15 nella dimensione e 100.100.100 nel colore: chi guarda vede subito la riga più grande e bianca.
+Svuota il campo del colore: la riga torna gialla.
