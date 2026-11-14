@@ -1,6 +1,6 @@
 # MeTeOra, i testi del karaoke: MIDI e .kar, .lrc accanto al brano, SYLT dei tag ID3, fatti traccia di sottotitoli.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.82.0, per la tappa 10, punto e. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni.
+# 04/10/2026: nasce con la 1.82.0, per la tappa 10, punto e. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.17.0 Seguito, il testo detto seguendo la posizione dello speaker Cast.
 
 """I testi a tempo del karaoke (tappa 10, punto e).
 
@@ -500,3 +500,68 @@ def titolo(fonte):
 def traccia(righe, modo="riga", anticipo=0.0):
     """Il testo SubRip della traccia del karaoke."""
     return formati.testo_srt(blocchi(righe, modo, anticipo))
+
+# Il karaoke dello speaker Cast (Gabriele, 3.17.0). Con lo speaker il brano
+# non suona in libmpv, e la traccia del karaoke non c'e': le righe si dicono
+# seguendo la posizione che lo speaker riferisce. Un passo in avanti piu'
+# lungo di SALTO_IN_AVANTI, o uno indietro piu' lungo di SALTO_INDIETRO, e' un
+# salto, e si ridice il blocco in corso, come fa libmpv; i piccoli
+# aggiustamenti della posizione dello speaker no.
+SALTO_IN_AVANTI = 2.0
+SALTO_INDIETRO = 1.0
+
+
+class Seguito:
+    """Il testo del karaoke di un brano che suona fuori da libmpv, detto
+    seguendo la sua posizione: avanza(posizione) da' i testi dei blocchi che
+    cominciano, in ordine, anche uno piu' corto di un passo, e dopo un salto
+    quello in corso. scelto dice se il testo si legge, come una traccia di
+    sottotitoli scelta: non scelto, avanza segue la posizione in silenzio."""
+
+    def __init__(self, fonte, righe, modo="riga", anticipo=0.0):
+        self.fonte, self.righe = fonte, righe
+        self.scelto = False
+        self._posizione = None
+        self._ultimo = None
+        self.imposta(modo, anticipo)
+
+    def imposta(self, modo, anticipo):
+        """Il modo e l'anticipo, in secondi, come per la traccia. Il blocco
+        in corso non si ridice: il seguente arriva gia' con quelli nuovi."""
+        self._blocchi = blocchi(self.righe, modo, anticipo)
+        self._inizi = [blocco[0] for blocco in self._blocchi]
+        self._ultimo = self._in_corso(self._posizione) if self._posizione is not None else None
+
+    def scegli(self, scelto):
+        """Scelto, ridice subito il blocco in corso, come libmpv quando si
+        sceglie una traccia a meta' di un sottotitolo."""
+        if scelto and not self.scelto:
+            self._posizione = None
+        self.scelto = bool(scelto)
+
+    def _in_corso(self, posizione):
+        i = bisect.bisect_right(self._inizi, posizione) - 1
+        return i if i >= 0 and posizione < self._blocchi[i][1] else None
+
+    def avanza(self, posizione):
+        """I testi da dire arrivando ai secondi posizione; None non sposta niente."""
+        if posizione is None:
+            return []
+        prima, self._posizione = self._posizione, posizione
+        if prima is None or posizione < prima - SALTO_INDIETRO or posizione > prima + SALTO_IN_AVANTI:
+            corrente = self._in_corso(posizione)
+            self._ultimo = corrente
+            return [self._blocchi[corrente][2]] if corrente is not None and self.scelto else []
+        testi = []
+        for i in range(bisect.bisect_right(self._inizi, prima), bisect.bisect_right(self._inizi, posizione)):
+            if i != self._ultimo:
+                self._ultimo = i
+                testi.append(self._blocchi[i][2])
+        return testi if self.scelto else []
+
+    def resto(self, posizione):
+        """I secondi che restano al blocco in corso, o None fuori dai blocchi."""
+        if posizione is None:
+            return None
+        corrente = self._in_corso(posizione)
+        return self._blocchi[corrente][1] - posizione if corrente is not None else None

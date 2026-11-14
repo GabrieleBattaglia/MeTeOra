@@ -20,3 +20,8 @@ Cerca lucio dalla caruso: i risultati di YouTube hanno ancora autore e durata, c
 Collaudo di MeTeOra 3.16.2: il conto degli Indirizzi.
 Chiudi gli Indirizzi, suona un risultato nuovo per un minuto di fila: l'etichetta degli Indirizzi dice subito un brano in più, e riaprendo il ramo lo trovi in cima ai brani.
 Con gli Indirizzi aperti fai lo stesso con un altro risultato: chiudendo e riaprendo il ramo, l'etichetta e i brani cambiano insieme.
+Collaudo di MeTeOra 3.17.0: il karaoke con lo speaker.
+Con lo speaker GabryBar suona un KAR, come ComeMai-883.kar: le righe del testo arrivano mentre la canzone le canta, alla sintesi, al braille e nella console.
+Salta indietro o avanti di qualche secondo: arriva subito la riga in corso, e poi le seguenti.
+Ctrl e Alt con D spegne il testo, Maiuscolo con D lo riaccende e dice Testo del karaoke letto, dal MIDI, e la riga in corso arriva subito.
+Prova anche un MID con il testo e una canzone con il suo file LRC accanto.

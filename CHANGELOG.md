@@ -2,6 +2,14 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.17.0] - 2026-11-14
+
+- Il testo del karaoke anche con lo speaker Cast. Gabriele suonava i MID e i KAR su GabryBar e il testo non arrivava più: con lo speaker il brano non suona in libmpv, e la traccia del karaoke, che è una traccia di sottotitoli di libmpv, non c'era. Era così dalla 1.117.0, quando sono arrivati gli speaker: non un difetto nuovo, ma un pezzo che mancava. Ora MeTeOra legge il testo del brano come sempre, dai MIDI e dai KAR, dai file LRC e dai tag, e con lo speaker lo dice seguendo la posizione che lo speaker riferisce, dieci volte al secondo: ogni riga quando comincia, con il modo e l'anticipo del karaoke, alla sintesi, al braille e nella console. Dopo un salto ridice la riga in corso, come sul PC.
+- Il testo è una traccia come le altre: si sceglie da solo con i sottotitoli accesi, e i tasti dei sottotitoli lo accendono e lo spengono. La barra braille a blocchi ha il tempo che resta alla riga.
+- Lo speaker dice la sua posizione con un piccolo ritardo: la riga può arrivare qualche decimo di secondo prima o dopo il canto. I sottotitoli dei video, con lo speaker, restano fuori.
+- Nelle statistiche, la sezione del video e dei sottotitoli conta le righe del karaoke dette con lo speaker.
+- Le prove sono in tests/test_karaoke.py e in tests/test_motore.py.
+
 ## [3.16.2] - 2026-11-14
 
 - L'etichetta degli Indirizzi diceva meno brani di quelli che c'erano, trovato da Gabriele: 8 detti e 10 dentro. Un brano che entrava dopo un minuto di ascolto, come un risultato della ricerca, andava negli Indirizzi, ma l'etichetta restava al conto di prima, anche riaprendo il ramo, fino al riavvio o a un altro cambiamento delle playlist. Ora un ramo chiuso dice subito il conto nuovo, e uno aperto lo dice quando si riapre, insieme al brano nuovo. Ogni playlist che si riapre rifà la sua etichetta.

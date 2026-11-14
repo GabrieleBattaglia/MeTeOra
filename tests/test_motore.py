@@ -1589,6 +1589,53 @@ def test_il_lettore_lontano(crea, avvisi, tmp_path):
     assert lontano.chiamate[-1] == ("chiudi", False) and m.lontano is None
 
 
+def test_il_karaoke_con_lo_speaker(crea, avvisi, tmp_path):
+    # Gabriele, 3.17.0: con lo speaker il brano non suona in libmpv, e il
+    # testo del karaoke si dice seguendo la posizione che lo speaker riferisce.
+    brano = _silenzio(tmp_path / "canzone.wav", 1)
+    (tmp_path / "canzone.lrc").write_text("[00:01.00]Prima riga\n[00:03.00]Seconda riga\n[00:05.00]Terza riga\n", encoding="utf-8")
+    detti = []
+    m = crea(ai_sottotitoli=detti.append, al_caricamento=avvisi("al_caricamento"))
+    lontano = _LontanoFinto()
+    lontano.posizione = 0.0
+    m.usa_il_lontano(lontano)
+    m.imposta_il_karaoke("riga", 0)
+    m.suona(brano)
+    # Il testo arriva in disparte come una traccia da scegliere, e la finestra rilegge le tracce.
+    assert _aspetta(lambda: m.tracce()["sub"])
+    assert m.tracce()["sub"] == [{"id": 1, "type": "sub", "title": "Testo del karaoke, dal file LRC", "selected": False, "external": True, "image": False,
+        "codec": "subrip"}]
+    assert _aspetta(lambda: "al_caricamento" in avvisi.nomi())
+    # Non scelto tace.
+    lontano.posizione = 1.5
+    time.sleep(0.3)
+    assert detti == [] and m.resto_del_sottotitolo() is None
+    # Scelto, dice subito la riga in corso, poi le seguenti quando cominciano.
+    m.scegli_traccia("sid", "1")
+    assert _aspetta(lambda: detti == ["Prima riga"]) and m.tracce()["sub"][0]["selected"]
+    assert m.resto_del_sottotitolo() == pytest.approx(1.5)
+    lontano.posizione = 3.2
+    assert _aspetta(lambda: detti == ["Prima riga", "Seconda riga"])
+    # Un salto indietro ridice la riga in corso.
+    lontano.posizione = 1.2
+    assert _aspetta(lambda: detti == ["Prima riga", "Seconda riga", "Prima riga"])
+    # Spento tace; l'anticipo nuovo vale subito.
+    m.scegli_traccia("sid", "no")
+    lontano.posizione = 5.5
+    time.sleep(0.3)
+    assert len(detti) == 3
+    m.scegli_traccia("sid", "1")
+    m.imposta_il_karaoke("riga", 1000)
+    assert _aspetta(lambda: detti[-1] == "Terza riga") and m.resto_del_sottotitolo() == pytest.approx(8.5)
+    # Lo stop ferma il filo, e un brano senza testo non ha tracce.
+    m.stop()
+    assert m.tracce() is None
+    m.suona(_silenzio(tmp_path / "senza.wav", 1))
+    time.sleep(0.3)
+    assert m.tracce() == {"video": False, "audio": [], "sub": []}
+    m.usa_il_lontano(None)
+
+
 def test_la_sorgente_wav(crea, tmp_path):
     # 2.7.0: il WAV in RAM per gli speaker, al posto del FLAC su disco, con
     # libmpv vero che scrive nella pipe con nome: tre secondi di seno a 16 bit

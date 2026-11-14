@@ -182,6 +182,35 @@ def test_i_blocchi_per_riga_e_per_strofa():
     assert srt.startswith("1\n00:00:00,000 --> 00:00:02,500\nPrima riga\n\n2\n00:00:02,500 --> 00:00:04,000\nRitornello\n")
 
 
+def test_il_seguito_dello_speaker():
+    # Il karaoke con lo speaker Cast (Gabriele, 3.17.0): i blocchi detti
+    # seguendo la posizione che lo speaker riferisce.
+    s = karaoke.Seguito("lrc", karaoke.dal_lrc(LRC))
+    s.scegli(True)
+    assert s.avanza(None) == [] and s.avanza(0.0) == []
+    assert s.avanza(0.4) == [] and s.avanza(0.6) == ["Prima riga"] and s.avanza(1.5) == []
+    # Due blocchi cominciati in un passo arrivano tutti e due, in ordine.
+    assert s.avanza(2.9) == [] and s.avanza(4.6) == ["Ritornello", "Parole"]
+    # Fra due blocchi niente; il blocco dopo quando comincia, con il tempo che gli resta.
+    assert s.avanza(7.0) == [] and s.avanza(7.6) == ["Seconda strofa"]
+    assert s.resto(7.6) == pytest.approx(1.9) and s.resto(7.0) is None and s.resto(None) is None
+    # Un piccolo passo indietro dello speaker non ridice niente; un salto
+    # indietro, o in avanti, ridice il blocco in corso.
+    assert s.avanza(7.0) == [] and s.avanza(7.7) == []
+    assert s.avanza(3.5) == ["Ritornello"] and s.avanza(4.0) == []
+    assert s.avanza(10.0) == ["Ritornello"]
+    # Non scelto tace, e scelto di nuovo ridice subito il blocco in corso.
+    s.scegli(False)
+    assert s.avanza(10.5) == []
+    s.scegli(True)
+    assert s.avanza(10.6) == ["Ritornello"]
+    # Il modo e l'anticipo nuovi non ridicono il blocco in corso; dopo
+    # l'ultimo non c'e' piu' niente.
+    s.imposta("strofa", 0.0)
+    assert s.avanza(10.8) == [] and s.avanza(20.0) == []
+    assert s.avanza(7.6) == ["Seconda strofa\nRitornello"]
+
+
 def _sylt(*voci, tipo=1):
     from mutagen.id3 import ID3, SYLT
 
@@ -224,3 +253,68 @@ def test_cerca_non_solleva_mai(tmp_path, monkeypatch):
     fonte, righe = karaoke.cerca(str(buono))
     assert fonte == "midi" and [r.testo for r in righe] == ["Uno", "Due", "Tre"]
     assert karaoke.titolo(fonte) == "Testo del karaoke, dal MIDI"
+
+
+class _SpeakerFinto:
+    """Lo speaker come lo vede la finestra: la posizione la sceglie la prova."""
+
+    def __init__(self):
+        self.percorso = self.sottobrano = self.sottobrani = None
+        self.in_pausa, self.posizione, self.durata, self.volume, self.titolo_in_onda = False, 0.0, 60.0, 50, None
+
+    def suona(self, percorso, sottobrano=None, sottobrani=None, inizio=None, in_pausa=False, midi_reso=False):
+        self.percorso = percorso
+
+    def stop(self):
+        self.percorso = None
+
+    def pausa(self, valore=None):
+        return False
+
+    def salta(self, secondi):
+        pass
+
+    def vai_a(self, secondi):
+        pass
+
+    def chiudi(self, attendi=True):
+        pass
+
+
+def test_il_karaoke_nella_finestra_con_lo_speaker(finestra, tmp_path, sintesi_finta):
+    # Gabriele, 3.17.0: con lo speaker il testo si sceglie da solo, con i
+    # sottotitoli accesi, e le righe vanno alla sintesi e nella console.
+    import time
+    import wave
+
+    import wx
+
+    def aspetta(condizione):
+        fine = time.time() + 5
+        while time.time() < fine and not condizione():
+            wx.Yield()
+            time.sleep(0.02)
+        return condizione()
+
+    brano = tmp_path / "canzone.wav"
+    with wave.open(str(brano), "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(8000)
+        w.writeframes(b"\0\0" * 8000)
+    (tmp_path / "canzone.lrc").write_text("[00:01.00]Prima riga\n[00:03.00]Seconda riga\n", encoding="utf-8")
+    speaker = _SpeakerFinto()
+    finestra.motore.usa_il_lontano(speaker)
+    finestra.impostazioni["sottotitoli"] = True
+    try:
+        finestra._suona_file(str(brano), str(tmp_path))
+        assert aspetta(lambda: [t["selected"] for t in (finestra.motore.tracce() or {}).get("sub", [])] == [True])
+        speaker.posizione = 1.2
+        assert aspetta(lambda: [n for n, t in sintesi_finta.detti if t == "Prima riga"])
+        speaker.posizione = 3.1
+        assert aspetta(lambda: [n for n, t in sintesi_finta.detti if t == "Seconda riga"])
+        assert [r.rsplit(" ", 1)[0] for r in finestra._righe[-2:]] == ["Prima riga", "Seconda riga"]
+        conti = finestra._statistiche.dati["conti"]
+        assert conti["righe_dei_sottotitoli"] == 2 and conti["righe_del_karaoke_allo_speaker"] == 2
+    finally:
+        finestra.motore.usa_il_lontano(None)
