@@ -3132,6 +3132,7 @@ def test_impostazioni_si_aprono_con_le_loro_voci(finestra, monkeypatch, suoni_an
         ("componenti", "Componenti aggiuntivi: nessuno installato, 6 disponibili"),
         ("formato_registrazioni", "Formato delle registrazioni: MP3, il più diffuso"),
         ("qualita_registrazioni", "Qualità delle registrazioni: 128 kbps"),
+        ("cartella_registrazioni", f"Cartella delle registrazioni: Registrazioni, accanto ai dati di MeTeOra: {modulo.registrazioni.cartella()}"),
         ("insegui", "Inseguimento della plancia (Ctrl+F8, Maiuscolo+F8): no"),
         ("ripresa_oltre", "Punto lasciato dei file lunghi: oltre 10 minuti"),
         ("lingua", "Lingua: italiano"),

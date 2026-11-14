@@ -2,6 +2,23 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.13.2] - 2026-11-14
+
+La verifica delle registrazioni chiesta da Gabriele: l'attesa di Alt con R, lo stop, la pausa, la radio che cade, la chiusura e le registrazioni di ore. Le prove vere, con libmpv e una radio finta in locale che manda un MP3 al passo dell'orologio con quattro secondi di riserva: lo stop chiude il file in 0.12 secondi; una radio che cade chiude la registrazione come interrotta, con il file e quello che è arrivato; la pausa e la ripresa tolgono la riserva, e l'unione di dieci secondi ci mette 0.2 secondi. Due correzioni.
+
+- Con l'attesa di Alt con R, un indirizzo che entrava con il passaggio preparato, come il brano seguente di una playlist di YouTube con la dissolvenza, non si registrava: la registrazione partiva solo per un brano suonato da capo. Ora parte anche per lui.
+- Le registrazioni lunghe riprese dopo una pausa: l'unione che le riscrive in un file solo ci mette minuti, 51 secondi per due ore di MP3 su questo PC, circa tre minuti e mezzo per otto ore, e dopo dieci minuti si fermava, lasciando un file troncato e cancellando le parti. Ora si aspetta finché il file cresce, a qualunque lunghezza; se l'unione si blocca o fallisce, le parti restano file da ascoltare, come Rai Radio 3 2026-11-14 10.00.00 parte 1.mp3 e parte 2, e la console lo dice. Anche le parti che si accodano senza riscriverle non passano più tutte in memoria.
+- Nelle statistiche, la sezione Le registrazioni conta le registrazioni rimaste a parti separate.
+- Le prove nuove sono in tests/test_registrazioni.py.
+
+## [3.13.0] - 2026-11-14
+
+- La voce nuova Cartella delle registrazioni, nelle impostazioni dopo Qualità delle registrazioni, chiesta da Gabriele: Invio apre la finestra delle cartelle di Windows, sulla cartella di adesso, e quella scelta riceve le registrazioni nuove. Di partenza è quella di sempre, Registrazioni accanto ai dati, e sceglierla di nuovo la rimette così. Una cartella dove non si può scrivere si rifiuta, con il motivo; una che non si trova più, per esempio su un disco staccato, la voce lo dice. Le registrazioni di prima restano dove sono, e una in corso finisce dov'è.
+- Il ramo Registrazioni e Ctrl e Alt con R mostrano la cartella scelta.
+- Nelle statistiche, la sezione Le registrazioni conta le volte che la cartella cambia.
+- Nel repository, il .gitignore tiene fuori i file delle registrazioni ovunque, anche se la cartella scelta ci sta dentro.
+- Le prove nuove sono in tests/test_registrazioni.py.
+
 ## [3.12.0] - 2026-11-13
 
 Pubblicata il 13 novembre 2026, con l'installatore e lo zip: la sesta release, che porta agli utenti tutto quello che è venuto dopo la 3.8.1, dalle radio Recenti della 3.8.2 alla ricerca dei contenuti della 3.9.0, le radio senza distorsioni della 3.11.0 e le radio e le TV sugli speaker Cast. Prima, il 13 novembre, la tappa 19 d del piano, Voce chiara e Cuffia: con l'ascolto alla cieca Gabriele non ha sentito miglioramenti, e non sono entrate; la issue 40 si è chiusa con il resoconto.

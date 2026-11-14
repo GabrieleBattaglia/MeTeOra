@@ -1,6 +1,6 @@
 # MeTeOra, le prove delle registrazioni: libmpv vero su file locali, niente rete.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 10/11/2026: nasce con la 3.5.0, issue 42.
+# 10/11/2026: nasce con la 3.5.0, issue 42. Nella 3.13.0 la cartella delle registrazioni; nella 3.13.2 l'attesa al passaggio e le parti non unite.
 
 import datetime
 import os
@@ -153,12 +153,13 @@ class _Finta:
 
     create: typing.ClassVar[list] = []
 
-    def __init__(self, sorgente, titolo, flusso, formato, kbps, canali, frequenza, al_termine=None):
+    def __init__(self, sorgente, titolo, flusso, formato, kbps, canali, frequenza, al_termine=None, dove=None):
         self.sorgente, self.titolo, self.flusso = sorgente, titolo, flusso
         self.formato, self.kbps, self.canali, self.frequenza, self.al_termine = formato, kbps, canali, frequenza, al_termine
         self.dal_vivo = getattr(flusso, "dal_vivo", True)
         self.stato, self.secondi, self.byte, self.comandi = "pronta", 754.0, 11_534_336, []
-        self.percorso = os.path.join(registrazioni.cartella(), f"{titolo}.mp3")
+        self.dove = dove
+        self.percorso = os.path.join(dove or registrazioni.cartella(), f"{titolo}.mp3")
         _Finta.create.append(self)
 
     @property
@@ -300,3 +301,134 @@ def test_le_registrazioni_si_chiudono_con_meteora(finestra, con_registrazioni):
     finestra.Close(force=True)
     assert reg.comandi[-1] == "ferma"
     time.sleep(0)
+
+
+class _DialogoDiCartella:
+    """La finestra delle cartelle di Windows, finta: risponde con la cartella data, o annulla."""
+
+    risposte: typing.ClassVar[list] = []
+    aperti: typing.ClassVar[list] = []
+
+    def __init__(self, _genitore, titolo, defaultPath="", style=0):
+        _DialogoDiCartella.aperti.append((titolo, defaultPath))
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_a):
+        return False
+
+    def ShowModal(self):
+        import wx
+
+        self.scelta = _DialogoDiCartella.risposte.pop(0)
+        return wx.ID_CANCEL if self.scelta is None else wx.ID_OK
+
+    def GetPath(self):
+        return self.scelta
+
+
+def test_la_cartella_delle_registrazioni(finestra, con_registrazioni, monkeypatch, tmp_path):
+    # La voce delle impostazioni (Gabriele, 3.13.0): la finestra delle
+    # cartelle di Windows, e le registrazioni nuove nella cartella scelta.
+    import finestra as modulo
+
+    monkeypatch.setattr(modulo, "DialogoDiCartella", _DialogoDiCartella)
+    _DialogoDiCartella.aperti.clear()
+    di_sempre = registrazioni.cartella()
+    assert finestra._riga_dell_impostazione("cartella_registrazioni") == f"Cartella delle registrazioni: Registrazioni, accanto ai dati di MeTeOra: {di_sempre}"
+    scelta = tmp_path / "Le mie registrazioni"
+    _DialogoDiCartella.risposte[:] = [None, str(scelta)]
+    finestra._cambia_impostazione("cartella_registrazioni", None)
+
+    def riga():
+        # L'ultima riga della console, senza l'ora in fondo.
+        return finestra._righe[-1].rsplit(" ", 1)[0]
+
+    assert finestra.impostazioni["cartella_registrazioni"] == "" and riga() == "Cartella delle registrazioni non cambiata."
+    finestra._cambia_impostazione("cartella_registrazioni", None)
+    assert finestra.impostazioni["cartella_registrazioni"] == str(scelta) and scelta.is_dir()
+    assert riga() == f"Le registrazioni nuove vanno in {scelta}; quelle di prima restano dove sono."
+    assert finestra._riga_dell_impostazione("cartella_registrazioni") == f"Cartella delle registrazioni: {scelta}"
+    assert _DialogoDiCartella.aperti[0][0] == "Cartella delle registrazioni"
+    # La registrazione nuova va li', e Ctrl e Alt con R aprono quella.
+    _suona_la_radio(finestra, con_registrazioni)
+    finestra._comando_registra()
+    reg = _Finta.create[-1]
+    assert reg.dove == str(scelta) and os.path.dirname(reg.percorso) == str(scelta)
+    aperte = []
+    monkeypatch.setattr(modulo.os, "startfile", aperte.append, raising=False)
+    finestra._comando_apri_la_cartella_delle_registrazioni()
+    assert aperte == [str(scelta)]
+    # Con la registrazione in corso, la scelta lo dice; e scegliere quella di
+    # sempre la rimette come predefinita.
+    _DialogoDiCartella.risposte[:] = [di_sempre]
+    finestra._cambia_impostazione("cartella_registrazioni", None)
+    assert finestra.impostazioni["cartella_registrazioni"] == "" and riga().endswith("La registrazione in corso finisce dov'è.")
+    assert _DialogoDiCartella.aperti[-1][1] == str(scelta)
+    finestra._comando_ferma_la_registrazione()
+    assert os.path.exists(reg.percorso)
+    # Una cartella che non c'e' piu' si dice.
+    finestra.impostazioni["cartella_registrazioni"] = str(tmp_path / "staccata")
+    assert finestra._riga_dell_impostazione("cartella_registrazioni").endswith("staccata, che non si trova")
+    assert finestra._statistiche.dati["conti"]["cartelle_delle_registrazioni_cambiate"] == 2
+    righe = statistiche.Pagina(finestra._statistiche, "", None, None, {}, {}, {}).le_registrazioni()
+    assert "La cartella delle registrazioni cambiata nelle impostazioni: 2 volte." in righe
+
+
+def test_l_attesa_di_alt_con_r_e_il_brano_che_entra_con_il_passaggio(finestra, con_registrazioni):
+    # Il seguente di una playlist di indirizzi, preparato, entra con il
+    # passaggio senza essere suonato da capo: con l'attesa di Alt con R si
+    # registra anche lui (3.13.2; prima no).
+    import finestra as modulo
+
+    file = Brano(r"C:\m\a.mp3")
+    video = Brano("https://www.youtube.com/watch?v=prova", titolo="Il video di prova")
+    indirizzi.metti_il_diretto(video.percorso)
+    pl = modulo.Playlist("Video", [file, video], cartella="")
+    finestra.coda.imposta(pl, file)
+    finestra._in_ascolto = True
+    finestra._uscente, finestra._preparato = (pl, file, None), (pl, video, None)
+    con_registrazioni.stato["in_corso"] = video.percorso
+    finestra._passaggio(video.percorso, None)
+    assert finestra.coda.corrente is video and finestra._registrazione is _Finta.create[-1]
+    assert _Finta.create[-1].sorgente == video.percorso and not finestra._in_ascolto
+
+
+def test_le_parti_che_non_si_uniscono_restano_file(tmp_path, monkeypatch):
+    # Un'unione che fallisce non perde niente: le parti diventano file da
+    # ascoltare (3.13.2; prima restavano .parziale, nascoste).
+    vera = registrazioni._riscrivi
+    uno = _registrata(tmp_path, "uno", 2.0)
+    due = _registrata(tmp_path, "due", 3.0)
+    reg = registrazioni.Registrazione(RADIO, "radio lunga", indirizzi.Flusso(RADIO, dal_vivo=True), "mp3", 64, 1, 44100, dove=str(tmp_path / "Registrazioni"))
+    parti = []
+    for origine, secondi, taglio in ((uno, 2.0, 0.0), (due, 3.0, 1.0)):
+        parte = registrazioni.Parte(origine.percorso)
+        parte.secondi, parte.taglio = secondi, taglio
+        parti.append(parte)
+    reg._parti = parti
+    base = os.path.splitext(reg.percorso)[0]
+
+    def rotta(*_argomenti):
+        raise OSError("le parti della registrazione non si uniscono")
+
+    monkeypatch.setattr(registrazioni, "_riscrivi", rotta)
+    percorso = reg.ferma()
+    assert reg.parti_separate == [f"{base} parte 1.mp3", f"{base} parte 2.mp3"] and percorso == reg.parti_separate[0]
+    assert all(os.path.exists(f) for f in reg.parti_separate) and not os.path.exists(uno.percorso) and not os.path.exists(due.percorso)
+    # La riscrittura vera, con una parte che non c'e', fallisce e non lascia
+    # un file a meta'.
+    with pytest.raises(OSError):
+        vera([registrazioni.Parte(str(tmp_path / "manca.mp3"))], str(tmp_path / "unione.mp3"), "mp3", 64, 1, 44100)
+    assert not os.path.exists(tmp_path / "unione.mp3")
+
+
+def test_la_console_dice_le_parti_che_non_si_sono_unite(finestra, con_registrazioni, suoni_annotati):
+    _suona_la_radio(finestra, con_registrazioni)
+    finestra._comando_registra()
+    reg = _Finta.create[-1]
+    reg.parti_separate = [os.path.join(registrazioni.cartella(), "Rai Radio 3 parte 1.mp3"), os.path.join(registrazioni.cartella(), "Rai Radio 3 parte 2.mp3")]
+    finestra._registrazione_fermata(reg, reg.parti_separate[0])
+    assert finestra._righe[-1].startswith("Le parti della registrazione di Rai Radio 3 non si sono unite: sono 2 file, nel ramo Registrazioni, come Rai Radio 3 parte 1.mp3.")
+    assert suoni_annotati[-1] == "errore" and finestra._statistiche.dati["conti"]["registrazioni_a_parti_separate"] == 1

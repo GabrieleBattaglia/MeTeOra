@@ -1,6 +1,6 @@
 # MeTeOra, le registrazioni: le radio e gli indirizzi in rete scritti su file.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 10/11/2026: nasce con la 3.5.0, issue 42. Nella 3.11.0 le dirette HTTP lette da diretta.py, senza riconnessioni.
+# 10/11/2026: nasce con la 3.5.0, issue 42. Nella 3.11.0 le dirette HTTP lette da diretta.py, senza riconnessioni. Nella 3.13.2 le unioni lunghe senza troncare, e le parti salvate a file se l'unione fallisce.
 
 """Le registrazioni (3.5.0, issue 42).
 
@@ -26,6 +26,7 @@ import contextlib
 import datetime
 import os
 import re
+import shutil
 import threading
 import time
 
@@ -55,10 +56,14 @@ QUALITA = valori.QUALITA_DI_REGISTRAZIONE
 QUALITA_PREDEFINITA = 128
 FREQUENZA = 44100
 FREQUENZA_SENZA_PERDITA = 48000
-# Quanto si aspetta, al piu', che libmpv chiuda il file, e che unisca le
-# parti di una registrazione senza perdita.
+# Quanto si aspetta, al piu', che libmpv chiuda il file. L'unione che
+# riscrive le parti si aspetta finche' il file cresce, perche' su otto ore
+# ci mette minuti (141 volte il tempo reale, misura del 14 novembre 2026), e
+# si da' per bloccata se non cresce per ATTESA_DELL_UNIONE_FERMA secondi; la
+# si guarda ogni PASSO_DELL_UNIONE (3.13.2: prima si troncava dopo dieci minuti).
 ATTESA_DELLA_CHIUSURA = 10.0
-ATTESA_DELLA_UNIONE = 600.0
+ATTESA_DELL_UNIONE_FERMA = 60.0
+PASSO_DELL_UNIONE = 2.0
 _NON_VALIDI = re.compile(r'[<>:"/\\|?*\x00-\x1f]+')
 
 
@@ -153,6 +158,8 @@ class Registrazione:
         self.percorso = nome_del_file(titolo, quando or datetime.datetime.now(), FORMATI[formato][3], dove)
         self.stato = "pronta"
         self.dal_vivo = getattr(flusso, "dal_vivo", False)
+        # I file delle parti che non si sono unite, se e' successo (3.13.2).
+        self.parti_separate = []
         self._al_termine = al_termine
         self._blocco = threading.RLock()
         # Le parti chiuse, e quella in corso con il suo libmpv, l'evento della
@@ -316,10 +323,11 @@ class Registrazione:
         if len(parti) == 1 and not tagli:
             os.replace(parti[0].file, self.percorso)
         elif not tagli and self.formato in ("mp3", "aac", "opus"):
+            # A pezzi, perche' una parte di ore pesa centinaia di MB (3.13.2).
             with open(self.percorso + ".unione", "wb") as uscita:
                 for parte in parti:
                     with open(parte.file, "rb") as f:
-                        uscita.write(f.read())
+                        shutil.copyfileobj(f, uscita, 1 << 20)
             os.replace(self.percorso + ".unione", self.percorso)
         else:
             _riscrivi(parti, self.percorso + ".unione", self.formato, self.kbps, self.canali, self.frequenza)
@@ -335,8 +343,27 @@ class Registrazione:
     def _finisci(self):
         with self._blocco:
             self._chiudi_la_parte()
-            with contextlib.suppress(OSError):
+            try:
                 self._unisci()
+            except OSError:
+                self._salva_le_parti()
+
+    def _salva_le_parti(self):
+        """Le parti che non si sono unite diventano file da ascoltare, uno per
+        parte, come Rai Radio 3 2026-11-14 10.00.00 parte 1.mp3: niente di
+        registrato si perde (3.13.2). Il percorso della registrazione e'
+        quello della prima; parti_separate dice tutti i file."""
+        base, estensione = os.path.splitext(self.percorso)
+        salvate = []
+        for numero, parte in enumerate(self._parti, 1):
+            arrivo = f"{base} parte {numero}{estensione}"
+            with contextlib.suppress(OSError):
+                os.replace(parte.file, arrivo)
+                salvate.append(arrivo)
+        self._parti = []
+        if salvate:
+            self.parti_separate = salvate
+            self.percorso = salvate[0]
 
     def ferma(self):
         """Ferma la registrazione e chiude il file. Torna il percorso del
@@ -398,16 +425,33 @@ def _riscrivi(parti, uscita, formato, kbps, canali, frequenza):
             voce += f",start={parte.taglio:.3f}"
         voci.append(voce)
     finita = threading.Event()
+    motivi = []
     opzioni = {**motore.OPZIONI_DI_BASE, "o": uscita, "of": contenitore, "oac": codificatore, "audio_channels": "mono" if canali == 1 else "stereo",
         "audio_samplerate": frequenza}
     if kbps:
         opzioni["oacopts"] = f"b={kbps}k"
     lettore = mpv.MPV(**opzioni)
+
+    def evento(e):
+        if e.event_id.value == mpv.MpvEventID.END_FILE:
+            motivi.append(e.data.reason)
+            finita.set()
+
     try:
-        lettore.register_event_callback(lambda evento: finita.set() if evento.event_id.value == mpv.MpvEventID.END_FILE else None)
+        lettore.register_event_callback(evento)
         lettore.command("loadfile", "edl://" + ";".join(voci))
-        finita.wait(ATTESA_DELLA_UNIONE)
+        # Si aspetta finche' il file cresce: un'unione lunga non si tronca.
+        peso, fermo_da = -1, time.monotonic()
+        while not finita.wait(PASSO_DELL_UNIONE):
+            with contextlib.suppress(OSError):
+                adesso = os.path.getsize(uscita)
+                if adesso != peso:
+                    peso, fermo_da = adesso, time.monotonic()
+            if time.monotonic() - fermo_da > ATTESA_DELL_UNIONE_FERMA:
+                break
     finally:
         lettore.terminate()
-    if not os.path.exists(uscita):
+    if not finita.is_set() or motivi[:1] != [mpv.MpvEventEndFile.EOF] or not os.path.exists(uscita):
+        with contextlib.suppress(OSError):
+            os.remove(uscita)
         raise OSError(_("le parti della registrazione non si uniscono"))
