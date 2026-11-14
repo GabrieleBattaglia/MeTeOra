@@ -1,6 +1,6 @@
 # MeTeOra, le prove delle registrazioni: libmpv vero su file locali, niente rete.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 10/11/2026: nasce con la 3.5.0, issue 42. Nella 3.13.0 la cartella delle registrazioni; nella 3.13.2 l'attesa al passaggio e le parti non unite.
+# 10/11/2026: nasce con la 3.5.0, issue 42. Nella 3.13.0 la cartella delle registrazioni; nella 3.13.2 l'attesa al passaggio e le parti non unite. Nella 3.14.0 la voce che apre la cartella.
 
 import datetime
 import os
@@ -373,7 +373,12 @@ def test_la_cartella_delle_registrazioni(finestra, con_registrazioni, monkeypatc
     assert finestra._riga_dell_impostazione("cartella_registrazioni").endswith("staccata, che non si trova")
     assert finestra._statistiche.dati["conti"]["cartelle_delle_registrazioni_cambiate"] == 2
     righe = statistiche.Pagina(finestra._statistiche, "", None, None, {}, {}, {}).le_registrazioni()
-    assert "La cartella delle registrazioni cambiata nelle impostazioni: 2 volte." in righe
+    assert "La cartella delle registrazioni aperta in Esplora risorse: 1 volta; cambiata nelle impostazioni: 2 volte." in righe
+    # Vai alla cartella delle registrazioni, nelle impostazioni (3.14.0): come Ctrl e Alt con R.
+    assert finestra._riga_dell_impostazione("apri_cartella_registrazioni") == "Vai alla cartella delle registrazioni: la apre in Esplora risorse, come Ctrl e Alt con R"
+    finestra.impostazioni["cartella_registrazioni"] = str(scelta)
+    finestra._cambia_impostazione("apri_cartella_registrazioni", None)
+    assert aperte == [str(scelta), str(scelta)] and finestra._statistiche.dati["conti"]["cartelle_delle_registrazioni_aperte"] == 2
 
 
 def test_l_attesa_di_alt_con_r_e_il_brano_che_entra_con_il_passaggio(finestra, con_registrazioni):

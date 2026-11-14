@@ -5,3 +5,5 @@ Registra una radio per qualche secondo e fermala con Ctrl con R: il file è nell
 Riapri la voce e scegli di nuovo la cartella Registrazioni accanto a MeTeOra: la voce torna a dire quella di partenza.
 Collaudo di MeTeOra 3.13.2: l'attesa di Alt con R al passaggio.
 Con la dissolvenza accesa suona due risultati di Cerca contenuti di fila e premi Alt con R mentre suona il primo: quando entra il secondo, sfumando, la registrazione parte da sola.
+Collaudo di MeTeOra 3.14.0: la cartella delle registrazioni in Esplora risorse.
+Nelle impostazioni, la voce Vai alla cartella delle registrazioni, dopo Cartella delle registrazioni: Invio apre la cartella in Esplora risorse, quella scelta o quella di partenza.

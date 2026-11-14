@@ -2,6 +2,12 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.14.0] - 2026-11-14
+
+- La voce nuova Vai alla cartella delle registrazioni, nelle impostazioni dopo Cartella delle registrazioni, chiesta da Gabriele: apre in Esplora risorse la cartella delle registrazioni, quella scelta o quella di sempre, come Ctrl e Alt con R.
+- Nelle statistiche, la sezione Le registrazioni conta anche le volte che la cartella si apre, con il tasto o con la voce, insieme a quelle che cambia.
+- Le prove sono in tests/test_registrazioni.py.
+
 ## [3.13.2] - 2026-11-14
 
 La verifica delle registrazioni chiesta da Gabriele: l'attesa di Alt con R, lo stop, la pausa, la radio che cade, la chiusura e le registrazioni di ore. Le prove vere, con libmpv e una radio finta in locale che manda un MP3 al passo dell'orologio con quattro secondi di riserva: lo stop chiude il file in 0.12 secondi; una radio che cade chiude la registrazione come interrotta, con il file e quello che è arrivato; la pausa e la ripresa tolgono la riserva, e l'unione di dieci secondi ci mette 0.2 secondi. Due correzioni.
