@@ -1,6 +1,6 @@
 # MeTeOra, le impostazioni: i valori che il programma ricorda fra un avvio e l'altro.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 le righe della console. Nella 1.51.0 caratteri, colori e scheda audio, e i limiti controllati alla lettura del file. Nella 1.51.2 un file con un JSON che non e' un dizionario non ferma l'avvio. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza (tappa 4, issue 15). Nella 1.59.0 la riproduzione casuale (issue 17). Nella 1.61.0 il modello della riproduzione casuale. Nella 1.63.0 video, sottotitoli letti e sintesi (tappa 7). Nella 1.64.0 i percorsi di rete scritti a mano. Nella 1.65.0 il banco dei suoni MIDI. Nella 1.66.36 un file illeggibile non si sovrascrive: si salva accanto, con .nuovo. Nella 1.82.0 destinazione, karaoke e anticipo del karaoke. Nella 1.83.0 celle della barra braille e tempo minimo di lettura. Nella 1.84.0 la versione dell'ultimo avvio. Nella 1.102.2 il volume di partenza e' 100, il livello originale dei file (issue 22). Nella 1.111.0 lo stato della selezione per lo screen reader, acceso di partenza (issue 21). Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 il segnalibro sugli Indirizzi e il giorno del controllo di yt-dlp. Nella 3.4.0 il segnalibro sui Preferiti in rete. Nella 3.5.0 il formato e la qualita' delle registrazioni. Nella 3.6.0 la scheda degli effetti. Nella 3.7.0 la console letta. Nella 3.13.0 la cartella delle registrazioni.
+# 30/09/2026: nasce con la tappa 1. Nella 1.34.0 le righe della console. Nella 1.51.0 caratteri, colori e scheda audio, e i limiti controllati alla lettura del file. Nella 1.51.2 un file con un JSON che non e' un dizionario non ferma l'avvio. Nella 1.55.0 velocita', tono, bande dell'equalizzatore e dissolvenza (tappa 4, issue 15). Nella 1.59.0 la riproduzione casuale (issue 17). Nella 1.61.0 il modello della riproduzione casuale. Nella 1.63.0 video, sottotitoli letti e sintesi (tappa 7). Nella 1.64.0 i percorsi di rete scritti a mano. Nella 1.65.0 il banco dei suoni MIDI. Nella 1.66.36 un file illeggibile non si sovrascrive: si salva accanto, con .nuovo. Nella 1.82.0 destinazione, karaoke e anticipo del karaoke. Nella 1.83.0 celle della barra braille e tempo minimo di lettura. Nella 1.84.0 la versione dell'ultimo avvio. Nella 1.102.2 il volume di partenza e' 100, il livello originale dei file (issue 22). Nella 1.111.0 lo stato della selezione per lo screen reader, acceso di partenza (issue 21). Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 il segnalibro sugli Indirizzi e il giorno del controllo di yt-dlp. Nella 3.4.0 il segnalibro sui Preferiti in rete. Nella 3.5.0 il formato e la qualita' delle registrazioni. Nella 3.6.0 la scheda degli effetti. Nella 3.7.0 la console letta. Nella 3.13.0 la cartella delle registrazioni. Nella 3.15.0 bit, frequenza e canali delle registrazioni.
 
 """Le impostazioni, in un file JSON accanto al programma.
 
@@ -28,6 +28,8 @@ from lingua import _
 from valori import (
     ANTICIPO_MASSIMO_DEL_KARAOKE,
     AREE,
+    BIT_DI_REGISTRAZIONE,
+    CANALI_DI_REGISTRAZIONE,
     CARATTERI_MASSIMI,
     CARATTERI_MINIMI,
     CELLE_MASSIME,
@@ -36,6 +38,7 @@ from valori import (
     DISSOLVENZA_MINIMA,
     FORMATI_DI_REGISTRAZIONE,
     FREQUENZE_DELLE_BANDE,
+    FREQUENZE_DI_REGISTRAZIONE,
     GUADAGNO_MASSIMO,
     LETTURA_MASSIMA,
     LETTURA_MINIMA,
@@ -125,6 +128,11 @@ PREDEFINITE = {
     # kbps di partenza, come ha chiesto Gabriele.
     "formato_registrazioni": "mp3",
     "qualita_registrazioni": 128,
+    # I parametri delle registrazioni (Gabriele, 3.15.0): i bit di FLAC e
+    # WAV, la loro frequenza, 0 quella della sorgente, e i canali di tutti.
+    "bit_registrazioni": 16,
+    "frequenza_registrazioni": 0,
+    "canali_registrazioni": "sorgente",
     # La cartella delle registrazioni scelta (Gabriele, 3.13.0); vuota, quella
     # di sempre, Registrazioni accanto ai dati.
     "cartella_registrazioni": "",
@@ -285,6 +293,9 @@ CONTROLLI = {
     "percorsi_di_rete": lambda valore: all(isinstance(p, str) and p.startswith("\\\\") and len(p) > 2 for p in valore),
     "formato_registrazioni": lambda valore: valore in FORMATI_DI_REGISTRAZIONE,
     "qualita_registrazioni": lambda valore: valore in QUALITA_DI_REGISTRAZIONE,
+    "bit_registrazioni": lambda valore: valore in BIT_DI_REGISTRAZIONE,
+    "frequenza_registrazioni": lambda valore: valore in FREQUENZE_DI_REGISTRAZIONE,
+    "canali_registrazioni": lambda valore: valore in CANALI_DI_REGISTRAZIONE,
     "cartella_registrazioni": lambda valore: isinstance(valore, str),
     "ytdlp_controllato": lambda valore: not valore or (len(valore) == 10 and valore[4] == valore[7] == "-" and valore.replace("-", "").isdigit()),
 }

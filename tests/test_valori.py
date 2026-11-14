@@ -651,7 +651,7 @@ def test_carica_i_valori_buoni(tmp_path):
             "nome": r"E:\libri", "indice": -1},
         "velocita": 1.05, "tono": -3, "bande": [0, 2, -12, 12, 0, 0, 1], "dissolvenza": {"accesa": True, "secondi": 2.5},
         "ytdlp_controllato": "2026-11-05", "formato_registrazioni": "flac", "qualita_registrazioni": 320,
-        "cartella_registrazioni": r"D:\Registrazioni",
+        "cartella_registrazioni": r"D:\Registrazioni", "bit_registrazioni": 24, "frequenza_registrazioni": 96000, "canali_registrazioni": "stereo",
             "console_letta": "braille", "scheda_effetti": {}}
     imp = _caricate(tmp_path, buoni)
     assert dict(imp) == buoni

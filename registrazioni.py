@@ -1,6 +1,6 @@
 # MeTeOra, le registrazioni: le radio e gli indirizzi in rete scritti su file.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 10/11/2026: nasce con la 3.5.0, issue 42. Nella 3.11.0 le dirette HTTP lette da diretta.py, senza riconnessioni. Nella 3.13.2 le unioni lunghe senza troncare, e le parti salvate a file se l'unione fallisce.
+# 10/11/2026: nasce con la 3.5.0, issue 42. Nella 3.11.0 le dirette HTTP lette da diretta.py, senza riconnessioni. Nella 3.13.2 le unioni lunghe senza troncare, e le parti salvate a file se l'unione fallisce. Nella 3.15.0 bit, frequenza e canali scelti, e il WAV con RF64.
 
 """Le registrazioni (3.5.0, issue 42).
 
@@ -19,7 +19,11 @@ come ha chiesto Gabriele. La qualita' di partenza e' MP3 a 128 kbps, 44,1
 kHz, stereo, e si adatta alla sorgente per risparmiare spazio: mono se la
 sorgente e' mono, con meta' dei kbps, mai piu' kbps della sorgente, mai piu'
 campioni al secondo della sorgente. Opus vuole i 48 kHz, e i formati senza
-perdita tengono la frequenza della sorgente, fino a 48 kHz.
+perdita tengono la frequenza della sorgente, fino a 96 kHz.
+Dalla 3.15.0, per la post-produzione (Gabriele), si scelgono anche i canali,
+della sorgente, mono o stereo, per tutti i formati; e per FLAC e WAV i bit,
+16, 24 o, solo per il WAV, 32 in virgola mobile, e la frequenza, della
+sorgente o fissa a 44.1, 48 o 96 kHz. Il WAV passa a RF64 oltre i 4 GB.
 """
 
 import contextlib
@@ -55,7 +59,16 @@ FORMATO_PREDEFINITO = "mp3"
 QUALITA = valori.QUALITA_DI_REGISTRAZIONE
 QUALITA_PREDEFINITA = 128
 FREQUENZA = 44100
-FREQUENZA_SENZA_PERDITA = 48000
+# Senza perdita, con la frequenza della sorgente, al piu' questa (3.15.0: prima 48).
+FREQUENZA_SENZA_PERDITA = 96000
+# I parametri scelti nelle impostazioni (Gabriele, 3.15.0): i bit di FLAC e
+# WAV, 32 in virgola mobile solo per il WAV; la frequenza senza perdita, 0
+# quella della sorgente; i canali, della sorgente, mono o stereo.
+BIT = valori.BIT_DI_REGISTRAZIONE
+BIT_PREDEFINITI = 16
+FREQUENZE = valori.FREQUENZE_DI_REGISTRAZIONE
+CANALI = valori.CANALI_DI_REGISTRAZIONE
+CANALI_DELLA_SORGENTE = "sorgente"
 # Quanto si aspetta, al piu', che libmpv chiuda il file. L'unione che
 # riscrive le parti si aspetta finche' il file cresce, perche' su otto ore
 # ci mette minuti (141 volte il tempo reale, misura del 14 novembre 2026), e
@@ -88,13 +101,17 @@ def nome_del_file(titolo, quando, estensione, dove=None):
     return percorso
 
 
-def parametri(formato, kbps, sorgente_kbps=None, canali=None, frequenza=None):
+def parametri(formato, kbps, sorgente_kbps=None, canali=None, frequenza=None, scelta_canali=CANALI_DELLA_SORGENTE, scelta_frequenza=0):
     """(kbps o None per i formati senza perdita, canali, frequenza) di una
     registrazione: la qualita' scelta, adattata alla sorgente, quando se ne
-    sanno i kbps, i canali e la frequenza."""
+    sanno i kbps, i canali e la frequenza. scelta_canali, mono o stereo,
+    vince sui canali della sorgente; scelta_frequenza, se non e' 0, e' la
+    frequenza dei formati senza perdita (3.15.0)."""
+    if scelta_canali in ("mono", "stereo"):
+        canali = 1 if scelta_canali == "mono" else 2
     canali = 1 if canali == 1 else 2
     if not FORMATI[formato][4]:
-        return None, canali, min(frequenza or FREQUENZA, FREQUENZA_SENZA_PERDITA)
+        return None, canali, scelta_frequenza or min(frequenza or FREQUENZA, FREQUENZA_SENZA_PERDITA)
     if canali == 1:
         kbps = kbps // 2
     if sorgente_kbps and sorgente_kbps > 0:
@@ -104,8 +121,49 @@ def parametri(formato, kbps, sorgente_kbps=None, canali=None, frequenza=None):
     return kbps, canali, frequenza
 
 
-def descrizione(formato, kbps, canali, frequenza):
-    """Il formato come si dice: MP3 a 128 kbps, stereo, 44.1 kHz."""
+def bit_per(formato, bit):
+    """I bit di una registrazione nel formato dato: None per quelli con
+    perdita; il FLAC arriva a 24, il WAV anche a 32 in virgola mobile."""
+    if FORMATI[formato][4]:
+        return None
+    if formato == "flac":
+        return 24 if bit in (24, 32) else 16
+    return bit if bit in BIT else BIT_PREDEFINITI
+
+
+def nome_dei_bit(bit):
+    """I bit come si dicono: 24 bit, o 32 bit in virgola mobile."""
+    if bit == 32:
+        # Traduttori: la profondita' di una registrazione WAV a 32 bit in virgola mobile.
+        return _("32 bit in virgola mobile")
+    # Traduttori: la profondita' di una registrazione senza perdita, come 24 bit.
+    return _("{n} bit").format(n=bit)
+
+
+def _codifica(formato, kbps, bit):
+    """Le opzioni di libmpv in modo codifica per il formato: il codificatore,
+    il formato dei campioni, le opzioni del codificatore e del contenitore.
+    Il WAV a 24 bit vuole campioni a 32, di cui tiene i 24 piu' alti, come il
+    FLAC a 24 con bits_per_raw_sample; il WAV ha rf64=auto, che resta un WAV
+    normale fino ai 4 GB e passa a RF64 oltre, dove la sua intestazione non
+    basta piu' (prove del 14 novembre 2026)."""
+    _nome, codificatore, contenitore, _estensione, _perdita = FORMATI[formato]
+    opzioni = {"of": contenitore, "oac": codificatore}
+    if formato == "wav":
+        opzioni["oac"], opzioni["audio_format"] = {16: ("pcm_s16le", "s16"), 24: ("pcm_s24le", "s32"), 32: ("pcm_f32le", "float")}[bit or BIT_PREDEFINITI]
+        opzioni["ofopts"] = "rf64=auto"
+    elif formato == "flac":
+        opzioni["audio_format"] = "s32" if bit == 24 else "s16"
+        if bit == 24:
+            opzioni["oacopts"] = "bits_per_raw_sample=24"
+    elif kbps:
+        opzioni["oacopts"] = f"b={kbps}k"
+    return opzioni
+
+
+def descrizione(formato, kbps, canali, frequenza, bit=None):
+    """Il formato come si dice: MP3 a 128 kbps, stereo, 44.1 kHz, o WAV a 24
+    bit, stereo, 48 kHz."""
     nome = FORMATI[formato][0]
     # Traduttori: i canali di una registrazione.
     voci = _("mono") if canali == 1 else _("stereo")
@@ -113,8 +171,8 @@ def descrizione(formato, kbps, canali, frequenza):
     if kbps:
         # Traduttori: il formato di una registrazione, come MP3 a 128 kbps, stereo, 44.1 kHz; i decimali col punto.
         return _("{nome} a {kbps} kbps, {canali}, {khz} kHz").format(nome=nome, kbps=kbps, canali=voci, khz=khz)
-    # Traduttori: il formato di una registrazione senza perdita, come FLAC, stereo, 48 kHz.
-    return _("{nome}, {canali}, {khz} kHz").format(nome=nome, canali=voci, khz=khz)
+    # Traduttori: il formato di una registrazione senza perdita, come FLAC a 24 bit, stereo, 48 kHz.
+    return _("{nome} a {bit}, {canali}, {khz} kHz").format(nome=nome, bit=nome_dei_bit(bit or BIT_PREDEFINITI), canali=voci, khz=khz)
 
 
 class Parte:
@@ -152,9 +210,13 @@ class Registrazione:
     in disparte."""
 
     def __init__(self, sorgente, titolo, flusso, formato=FORMATO_PREDEFINITO, kbps=QUALITA_PREDEFINITA, canali=2, frequenza=FREQUENZA, al_termine=None,
-            quando=None, dove=None):
+            quando=None, dove=None, bit=BIT_PREDEFINITI):
         self.sorgente, self.titolo, self.flusso = sorgente, titolo, flusso
-        self.formato, self.kbps, self.canali, self.frequenza = formato, kbps, canali, frequenza
+        self.formato, self.canali, self.frequenza = formato, canali, frequenza
+        # I kbps valgono solo per i formati con perdita.
+        self.kbps = kbps if FORMATI[formato][4] else None
+        # I bit di FLAC e WAV (3.15.0), None per i formati con perdita.
+        self.bit = bit_per(formato, bit)
         self.percorso = nome_del_file(titolo, quando or datetime.datetime.now(), FORMATI[formato][3], dove)
         self.stato = "pronta"
         self.dal_vivo = getattr(flusso, "dal_vivo", False)
@@ -175,7 +237,7 @@ class Registrazione:
 
     @property
     def descrizione(self):
-        return descrizione(self.formato, self.kbps, self.canali, self.frequenza)
+        return descrizione(self.formato, self.kbps, self.canali, self.frequenza, self.bit)
 
     def _registrati(self, parte, lettore):
         """(secondi registrati, taglio) della parte in corso, letti da libmpv."""
@@ -191,14 +253,11 @@ class Registrazione:
 
     def _apri_la_parte(self):
         os.makedirs(os.path.dirname(self.percorso), exist_ok=True)
-        _nome, codificatore, contenitore, _estensione, _perdita = FORMATI[self.formato]
         # Una puntata riprende dal punto a cui era arrivata.
         inizio = 0.0 if self.dal_vivo else sum(parte.secondi for parte in self._parti)
         parte = Parte(f"{self.percorso}.parziale{len(self._parti) + 1}", inizio)
-        opzioni = {**motore.OPZIONI_DI_BASE, "o": parte.file, "of": contenitore, "oac": codificatore, "audio_channels": "mono" if self.canali == 1 else "stereo",
-            "audio_samplerate": self.frequenza}
-        if self.kbps:
-            opzioni["oacopts"] = f"b={self.kbps}k"
+        opzioni = {**motore.OPZIONI_DI_BASE, "o": parte.file, **_codifica(self.formato, self.kbps, self.bit),
+            "audio_channels": "mono" if self.canali == 1 else "stereo", "audio_samplerate": self.frequenza}
         try:
             lettore = mpv.MPV(**opzioni)
         except Exception as e:
@@ -330,7 +389,7 @@ class Registrazione:
                         shutil.copyfileobj(f, uscita, 1 << 20)
             os.replace(self.percorso + ".unione", self.percorso)
         else:
-            _riscrivi(parti, self.percorso + ".unione", self.formato, self.kbps, self.canali, self.frequenza)
+            _riscrivi(parti, self.percorso + ".unione", self.formato, self.kbps, self.canali, self.frequenza, self.bit)
             os.replace(self.percorso + ".unione", self.percorso)
         secondi = sum(parte.secondi - parte.taglio for parte in parti)
         for parte in parti:
@@ -413,11 +472,10 @@ def _durata_del_file(percorso):
         lettore.terminate()
 
 
-def _riscrivi(parti, uscita, formato, kbps, canali, frequenza):
+def _riscrivi(parti, uscita, formato, kbps, canali, frequenza, bit=BIT_PREDEFINITI):
     """Le parti di una registrazione in un file solo, ognuna senza i secondi
     da togliere in testa, con un libmpv in modo codifica che le legge di
     seguito, come una lista EDL."""
-    _nome, codificatore, contenitore, _estensione, _perdita = FORMATI[formato]
     voci = []
     for parte in parti:
         voce = f"%{len(parte.file.encode('utf-8'))}%{parte.file}"
@@ -426,10 +484,8 @@ def _riscrivi(parti, uscita, formato, kbps, canali, frequenza):
         voci.append(voce)
     finita = threading.Event()
     motivi = []
-    opzioni = {**motore.OPZIONI_DI_BASE, "o": uscita, "of": contenitore, "oac": codificatore, "audio_channels": "mono" if canali == 1 else "stereo",
+    opzioni = {**motore.OPZIONI_DI_BASE, "o": uscita, **_codifica(formato, kbps, bit_per(formato, bit)), "audio_channels": "mono" if canali == 1 else "stereo",
         "audio_samplerate": frequenza}
-    if kbps:
-        opzioni["oacopts"] = f"b={kbps}k"
     lettore = mpv.MPV(**opzioni)
 
     def evento(e):

@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17). Nella 2.7.1 la precedenza ai tasti sul lavoro in disparte. Nella 2.7.2 i lettori di rete chiusi all'uscita. Nella 2.7.3 i tasti funzione nelle tabelle COMANDI_DEI_TASTI_FUNZIONE e INTERRUTTORI, lette dalla prova della guida rapida, e le righe del cruscotto nell'ordine della regola. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.1.0 la voce Componenti aggiuntivi delle impostazioni, e gli altri banchi liberi da scaricare. Nella 3.2.0 gli indirizzi in rete: Ctrl con V, Apri un indirizzo, il ramo Indirizzi, il flusso chiesto prima di suonare e in anticipo per il seguente, e yt-dlp aggiornato ogni giorno. Nella 3.3.0 il ramo Radio, con la ricerca delle radio, il titolo in onda, le dirette che non si saltano e i contatori di radio, componenti e lingua. Nella 3.3.1 la voce Lingua con la sua lista anche con una lingua sola. Nella 3.4.0 i Preferiti in rete, un ramo in cima ai Preferiti, con F4 che sceglie la categoria (issue 41). Nella 3.5.0 le registrazioni, con la famiglia di R e il ramo Registrazioni, e i comandi dei marker su T (issue 42). Nella 3.6.0 la scheda degli effetti, con Ctrl e Maiuscolo con Z (issue 43). Nella 3.7.0 la console letta da sola, con la famiglia di F10 (issue 44). Nella 3.8.0 D per i titoli in onda e i capitoli, e il capitolo nuovo detto suonando (issue 45). Nella 3.8.1 anche i caratteri di console e cruscotto hanno lo sfondo scelto, che NVDA legge. Nella 3.8.2 le radio ascoltate di recente nel sottoramo Recenti. Nella 3.9.0 Cerca contenuti negli Indirizzi, i risultati man mano e i dieci secondi per entrare negli Indirizzi (issue 47). Nella 3.9.1 l'avviso dei dieci secondi. Nella 3.9.2 formato, sorgente e primati delle registrazioni per le statistiche. Nella 3.10.0 Mostra altri risultati dei contenuti e Mostra altre radio. Nella 3.10.1 un minuto per entrare negli Indirizzi. Nella 3.10.2 un minuto anche per le radio Recenti. Nella 3.10.3 il suono della sorgente tenuta. Nella 3.11.2 il controllo di yt-dlp detto anche senza novità. Nella 3.11.3 le correzioni delle due verifiche delle novita' dalla 3.6.0 alla 3.11.1. Nella 3.11.4 la radio delle Recenti e il brano degli Indirizzi salgono subito in cima, con la coda che ricorda l'ordine di prima. Nella 3.11.5 le sorgenti Radio e Ricerca dei contenuti nelle statistiche. Nella 3.11.6 i conti del ripetitore dello speaker. Nella 3.12.0 il convertitore dal vivo per lo speaker. Nella 3.13.0 la voce Cartella delle registrazioni. Nella 3.13.2 l'attesa di Alt con R anche al passaggio, e le parti non unite dette. Nella 3.14.0 la voce Vai alla cartella delle registrazioni.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17). Nella 2.7.1 la precedenza ai tasti sul lavoro in disparte. Nella 2.7.2 i lettori di rete chiusi all'uscita. Nella 2.7.3 i tasti funzione nelle tabelle COMANDI_DEI_TASTI_FUNZIONE e INTERRUTTORI, lette dalla prova della guida rapida, e le righe del cruscotto nell'ordine della regola. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.1.0 la voce Componenti aggiuntivi delle impostazioni, e gli altri banchi liberi da scaricare. Nella 3.2.0 gli indirizzi in rete: Ctrl con V, Apri un indirizzo, il ramo Indirizzi, il flusso chiesto prima di suonare e in anticipo per il seguente, e yt-dlp aggiornato ogni giorno. Nella 3.3.0 il ramo Radio, con la ricerca delle radio, il titolo in onda, le dirette che non si saltano e i contatori di radio, componenti e lingua. Nella 3.3.1 la voce Lingua con la sua lista anche con una lingua sola. Nella 3.4.0 i Preferiti in rete, un ramo in cima ai Preferiti, con F4 che sceglie la categoria (issue 41). Nella 3.5.0 le registrazioni, con la famiglia di R e il ramo Registrazioni, e i comandi dei marker su T (issue 42). Nella 3.6.0 la scheda degli effetti, con Ctrl e Maiuscolo con Z (issue 43). Nella 3.7.0 la console letta da sola, con la famiglia di F10 (issue 44). Nella 3.8.0 D per i titoli in onda e i capitoli, e il capitolo nuovo detto suonando (issue 45). Nella 3.8.1 anche i caratteri di console e cruscotto hanno lo sfondo scelto, che NVDA legge. Nella 3.8.2 le radio ascoltate di recente nel sottoramo Recenti. Nella 3.9.0 Cerca contenuti negli Indirizzi, i risultati man mano e i dieci secondi per entrare negli Indirizzi (issue 47). Nella 3.9.1 l'avviso dei dieci secondi. Nella 3.9.2 formato, sorgente e primati delle registrazioni per le statistiche. Nella 3.10.0 Mostra altri risultati dei contenuti e Mostra altre radio. Nella 3.10.1 un minuto per entrare negli Indirizzi. Nella 3.10.2 un minuto anche per le radio Recenti. Nella 3.10.3 il suono della sorgente tenuta. Nella 3.11.2 il controllo di yt-dlp detto anche senza novità. Nella 3.11.3 le correzioni delle due verifiche delle novita' dalla 3.6.0 alla 3.11.1. Nella 3.11.4 la radio delle Recenti e il brano degli Indirizzi salgono subito in cima, con la coda che ricorda l'ordine di prima. Nella 3.11.5 le sorgenti Radio e Ricerca dei contenuti nelle statistiche. Nella 3.11.6 i conti del ripetitore dello speaker. Nella 3.12.0 il convertitore dal vivo per lo speaker. Nella 3.13.0 la voce Cartella delle registrazioni. Nella 3.13.2 l'attesa di Alt con R anche al passaggio, e le parti non unite dette. Nella 3.14.0 la voce Vai alla cartella delle registrazioni. Nella 3.15.0 la voce Formato e qualità delle registrazioni, a due passi.
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -697,6 +697,30 @@ FORMATI_DELLE_REGISTRAZIONI = {
     "wav": _("WAV, senza perdita e senza compressione"),
 }
 QUALITA_DELLE_REGISTRAZIONI = {kbps: f"{kbps} kbps" for kbps in registrazioni.QUALITA}
+# I parametri delle registrazioni (Gabriele, 3.15.0): le righe delle liste, e
+# come li dice la riga della voce.
+BIT_DELLE_REGISTRAZIONI = {
+    # Traduttori: i bit delle registrazioni senza perdita, nella loro lista.
+    16: _("16 bit, come i CD"),
+    24: _("24 bit, per la post-produzione"),
+    32: _("32 bit in virgola mobile, che non satura mai: solo WAV"),
+}
+FREQUENZE_DELLE_REGISTRAZIONI = {
+    # Traduttori: la frequenza delle registrazioni senza perdita, nella sua lista.
+    0: _("come la sorgente, fino a 96 kHz"),
+    44100: "44.1 kHz",
+    48000: "48 kHz",
+    96000: "96 kHz",
+}
+CANALI_DELLE_REGISTRAZIONI = {
+    # Traduttori: i canali delle registrazioni, nella loro lista.
+    "sorgente": _("come la sorgente: mono se è mono, altrimenti stereo"),
+    "mono": _("sempre mono"),
+    "stereo": _("sempre stereo"),
+}
+# Traduttori: la frequenza e i canali come li dice la voce Formato e qualità delle registrazioni.
+FREQUENZE_DA_LEGGERE = {0: _("frequenza della sorgente"), 44100: "44.1 kHz", 48000: "48 kHz", 96000: "96 kHz"}
+CANALI_DA_LEGGERE = {"sorgente": _("canali della sorgente"), "mono": _("mono"), "stereo": _("stereo")}
 ATTESA_DELLA_SORGENTE = 2500
 # La console letta da sola (issue 44, 3.7.0): le scelte, dalla piu' bassa,
 # come le dice la riga della voce.
@@ -772,8 +796,8 @@ VOCI_DELLE_IMPOSTAZIONI = {
     # I componenti aggiuntivi da scaricare, tappa 19 a (3.1.0, issue 40).
     "componenti": (_("Componenti aggiuntivi"), None),
     # Le registrazioni (issue 42, 3.5.0).
-    "formato_registrazioni": (_("Formato delle registrazioni"), _("Formato delle registrazioni non cambiato.")),
-    "qualita_registrazioni": (_("Qualità delle registrazioni"), _("Qualità delle registrazioni non cambiata.")),
+    # Dalla 3.15.0 una voce sola, a due passi: il formato, poi i suoi parametri (Gabriele).
+    "formato_registrazioni": (_("Formato e qualità delle registrazioni"), _("Formato e qualità delle registrazioni non cambiati.")),
     # Dove vanno le registrazioni (Gabriele, 3.13.0).
     "cartella_registrazioni": (_("Cartella delle registrazioni"), _("Cartella delle registrazioni non cambiata.")),
     # La cartella delle registrazioni in Esplora risorse, come Ctrl e Alt con R (Gabriele, 3.14.0).
@@ -8327,8 +8351,7 @@ class Finestra(wx.Frame):
             "lettura_minima": lambda: f"{imp['lettura_minima']} ms",
             "banco_midi": self._banco_da_leggere,
             "componenti": self._componenti_da_leggere,
-            "formato_registrazioni": lambda: FORMATI_DELLE_REGISTRAZIONI[imp["formato_registrazioni"]],
-            "qualita_registrazioni": self._qualita_da_leggere,
+            "formato_registrazioni": self._formato_da_leggere,
             "cartella_registrazioni": self._cartella_da_leggere,
             "apri_cartella_registrazioni": lambda: _("la apre in Esplora risorse, come Ctrl e Alt con R"),
             "insegui": lambda: _("sì") if imp["insegui"] else _("no"),
@@ -8429,10 +8452,7 @@ class Finestra(wx.Frame):
             "sintesi": self._scegli_la_sintesi,
             "banco_midi": self._scegli_il_banco,
             "componenti": self._scegli_un_componente,
-            "formato_registrazioni": lambda genitore: self._scegli_da_una_lista(genitore, "formato_registrazioni", FORMATI_DELLE_REGISTRAZIONI,
-                lambda chiave: _("Le registrazioni ora sono in {formato}.").format(formato=FORMATI_DELLE_REGISTRAZIONI[chiave])),
-            "qualita_registrazioni": lambda genitore: self._scegli_da_una_lista(genitore, "qualita_registrazioni", QUALITA_DELLE_REGISTRAZIONI,
-                lambda chiave: _("Le registrazioni con perdita ora sono a {qualita} al massimo.").format(qualita=QUALITA_DELLE_REGISTRAZIONI[chiave])),
+            "formato_registrazioni": self._scegli_il_formato_delle_registrazioni,
             "cartella_registrazioni": self._scegli_la_cartella_delle_registrazioni,
             "apri_cartella_registrazioni": lambda _genitore: self._comando_apri_la_cartella_delle_registrazioni(),
             "salva_console": lambda _genitore: self._salva_console(),
@@ -9755,13 +9775,65 @@ class Finestra(wx.Frame):
 
     # Le registrazioni, issue 42 (3.5.0).
 
-    def _qualita_da_leggere(self):
+    def _formato_da_leggere(self):
+        """Il formato e i suoi parametri, come MP3 a 128 kbps, canali della
+        sorgente, o WAV a 24 bit, 48 kHz, stereo (3.15.0)."""
         imp = self.impostazioni
-        if not registrazioni.FORMATI[imp["formato_registrazioni"]][4]:
-            # Traduttori: la riga della qualita' delle registrazioni quando il formato e' senza perdita.
-            return _("{qualita}, che non conta per {formato}").format(qualita=QUALITA_DELLE_REGISTRAZIONI[imp["qualita_registrazioni"]],
-                formato=registrazioni.FORMATI[imp["formato_registrazioni"]][0])
-        return QUALITA_DELLE_REGISTRAZIONI[imp["qualita_registrazioni"]]
+        formato = imp["formato_registrazioni"]
+        nome, canali = registrazioni.FORMATI[formato][0], CANALI_DA_LEGGERE[imp["canali_registrazioni"]]
+        if registrazioni.FORMATI[formato][4]:
+            # Traduttori: la voce Formato e qualità delle registrazioni con un formato con perdita, come MP3 a 128 kbps, canali della sorgente.
+            return _("{formato} a {qualita}, {canali}").format(formato=nome, qualita=QUALITA_DELLE_REGISTRAZIONI[imp["qualita_registrazioni"]], canali=canali)
+        bit = registrazioni.nome_dei_bit(registrazioni.bit_per(formato, imp["bit_registrazioni"]))
+        # Traduttori: la voce Formato e qualità delle registrazioni senza perdita, come WAV a 24 bit, 48 kHz, stereo.
+        return _("{formato} a {bit}, {frequenza}, {canali}").format(formato=nome, bit=bit, frequenza=FREQUENZE_DA_LEGGERE[imp["frequenza_registrazioni"]],
+            canali=canali)
+
+    def _scegli_in_lista(self, genitore, titolo, scelte, attuale):
+        """Una lista di scelte, sulla riga di attuale: la chiave scelta, o None con Escape."""
+        chiavi = list(scelte)
+        righe = [f"{scelte[c][0].upper()}{scelte[c][1:]}" for c in chiavi]
+        self._domanda()
+        with FinestraScelta(genitore, titolo, righe, chiavi.index(attuale) if attuale in chiavi else 0) as dialogo:
+            if dialogo.ShowModal() != wx.ID_OK:
+                return None
+            return chiavi[dialogo.GetSelection()]
+
+    def _scegli_il_formato_delle_registrazioni(self, genitore):
+        """Formato e qualita' delle registrazioni (Gabriele, 3.15.0): prima il
+        formato, poi i suoi parametri, una lista dopo l'altra, ognuna sulla
+        scelta di adesso: per MP3, Opus e AAC i kbps e i canali; per FLAC e
+        WAV i bit, 32 in virgola mobile solo per il WAV, la frequenza e i
+        canali. Escape in una qualunque lascia tutto com'era; alla fine si
+        salva tutto insieme."""
+        imp = self.impostazioni
+        nome, annullato = VOCI_DELLE_IMPOSTAZIONI["formato_registrazioni"]
+        formato = self._scegli_in_lista(genitore, nome, FORMATI_DELLE_REGISTRAZIONI, imp["formato_registrazioni"])
+        if formato is None:
+            self._annullato(annullato)
+            return
+        nome_del_formato = registrazioni.FORMATI[formato][0]
+        if registrazioni.FORMATI[formato][4]:
+            # Traduttori: i titoli delle liste dei parametri delle registrazioni, come Kbps delle registrazioni in MP3.
+            passi = [("qualita_registrazioni", _("Kbps delle registrazioni in {formato}").format(formato=nome_del_formato), QUALITA_DELLE_REGISTRAZIONI, imp["qualita_registrazioni"])]
+        else:
+            bit = {b: riga for b, riga in BIT_DELLE_REGISTRAZIONI.items() if formato == "wav" or b != 32}
+            passi = [("bit_registrazioni", _("Bit delle registrazioni in {formato}").format(formato=nome_del_formato), bit, registrazioni.bit_per(formato, imp["bit_registrazioni"])),
+                ("frequenza_registrazioni", _("Frequenza delle registrazioni in {formato}").format(formato=nome_del_formato), FREQUENZE_DELLE_REGISTRAZIONI, imp["frequenza_registrazioni"])]
+        passi.append(("canali_registrazioni", _("Canali delle registrazioni in {formato}").format(formato=nome_del_formato), CANALI_DELLE_REGISTRAZIONI, imp["canali_registrazioni"]))
+        nuove = {"formato_registrazioni": formato}
+        for chiave, titolo, scelte, attuale in passi:
+            scelta = self._scegli_in_lista(genitore, titolo, scelte, attuale)
+            if scelta is None:
+                self._annullato(annullato)
+                return
+            nuove[chiave] = scelta
+        imp.update(nuove)
+        self._salva_impostazioni()
+        self._statistiche.conta("formati_delle_registrazioni_scelti")
+        if genitore and genitore.IsShown() and hasattr(genitore, "aggiorna"):
+            genitore.aggiorna("formato_registrazioni", self._riga_dell_impostazione("formato_registrazioni"))
+        self._riscontro("impostazione_cambiata", _("Le registrazioni ora sono in {formato}.").format(formato=self._formato_da_leggere()))
 
     def _cartella_delle_registrazioni(self):
         """La cartella delle registrazioni: quella scelta nelle impostazioni,
@@ -9870,9 +9942,10 @@ class Finestra(wx.Frame):
         sorgente_kbps, canali, frequenza = self.motore.caratteristiche()
         if brano.radio and brano.radio.get("bitrate"):
             sorgente_kbps = brano.radio["bitrate"]
-        kbps, canali, frequenza = registrazioni.parametri(imp["formato_registrazioni"], imp["qualita_registrazioni"], sorgente_kbps, canali, frequenza)
+        kbps, canali, frequenza = registrazioni.parametri(imp["formato_registrazioni"], imp["qualita_registrazioni"], sorgente_kbps, canali, frequenza,
+            scelta_canali=imp["canali_registrazioni"], scelta_frequenza=imp["frequenza_registrazioni"])
         registrazione = registrazioni.Registrazione(brano.percorso, brano.nome_del_file, flusso, imp["formato_registrazioni"], kbps, canali, frequenza,
-            al_termine=lambda r: wx.CallAfter(self._registrazione_finita_da_se, r), dove=self._cartella_delle_registrazioni())
+            al_termine=lambda r: wx.CallAfter(self._registrazione_finita_da_se, r), dove=self._cartella_delle_registrazioni(), bit=imp["bit_registrazioni"])
         try:
             registrazione.avvia()
         except OSError as e:
@@ -10027,6 +10100,9 @@ class Finestra(wx.Frame):
         self._statistiche.conta("byte_registrati", reg.byte)
         # Per la sezione Le registrazioni (3.9.2): il formato, la sorgente e i primati.
         self._statistiche.conta(f"registrazioni_in_{reg.formato}")
+        if getattr(reg, "bit", None):
+            # I bit delle registrazioni senza perdita (3.15.0).
+            self._statistiche.conta(f"registrazioni_a_{reg.bit}_bit")
         self._statistiche.conta("registrazioni_di_dirette" if reg.dal_vivo else "registrazioni_di_puntate")
         self._statistiche.massimo("registrazione_piu_lunga", round(reg.secondi), reg.titolo)
         self._statistiche.massimo("registrazione_piu_pesante", reg.byte, reg.titolo)

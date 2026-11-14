@@ -2,6 +2,19 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.15.0] - 2026-11-14
+
+Le registrazioni per la post-produzione, chieste da Gabriele: oltre ai kbps, i parametri dei formati senza perdita.
+
+- Le voci Formato delle registrazioni e Qualità delle registrazioni diventano una sola, Formato e qualità delle registrazioni, a due passi: prima la lista dei formati, poi i parametri di quello scelto, una lista dopo l'altra, ognuna sulla scelta di adesso. Per MP3, Opus e AAC i kbps e i canali; per WAV i bit, 16, 24 o 32 in virgola mobile, la frequenza e i canali; per FLAC lo stesso, con i bit fino a 24. Escape in una qualunque lascia tutto com'era. La riga della voce dice tutto, come WAV a 24 bit, 48 kHz, stereo.
+- La frequenza dei formati senza perdita è quella della sorgente, ora fino a 96 kHz invece di 48, oppure una fissa, 44.1, 48 o 96 kHz, per stare nella frequenza del progetto.
+- I canali, per tutti i formati: come la sorgente, il comportamento di prima, oppure sempre mono o sempre stereo. In mono i formati con perdita usano metà dei kbps, come prima con le sorgenti mono.
+- Il WAV ha l'opzione RF64 di FFmpeg: resta un WAV normale fino ai 4 GB e passa a RF64 oltre, dove l'intestazione del WAV non basta più. A 32 bit in virgola mobile, 48 kHz e stereo, i 4 GB arrivano dopo poco più di tre ore.
+- Provato con la libmpv di MeTeOra, leggendo le intestazioni vere dei file: WAV a 16, 24 e 32 bit in virgola mobile, FLAC a 16 e 24, a 44.1, 48 e 96 kHz, mono e stereo.
+- La descrizione delle registrazioni senza perdita dice i bit, come FLAC a 24 bit, stereo, 48 kHz, nella console e con R.
+- Nelle statistiche, la sezione Le registrazioni conta quelle senza perdita per profondità.
+- Le prove sono in tests/test_registrazioni.py.
+
 ## [3.14.0] - 2026-11-14
 
 - La voce nuova Vai alla cartella delle registrazioni, nelle impostazioni dopo Cartella delle registrazioni, chiesta da Gabriele: apre in Esplora risorse la cartella delle registrazioni, quella scelta o quella di sempre, come Ctrl e Alt con R.

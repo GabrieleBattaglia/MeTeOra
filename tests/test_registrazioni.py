@@ -1,6 +1,6 @@
 # MeTeOra, le prove delle registrazioni: libmpv vero su file locali, niente rete.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 10/11/2026: nasce con la 3.5.0, issue 42. Nella 3.13.0 la cartella delle registrazioni; nella 3.13.2 l'attesa al passaggio e le parti non unite. Nella 3.14.0 la voce che apre la cartella.
+# 10/11/2026: nasce con la 3.5.0, issue 42. Nella 3.13.0 la cartella delle registrazioni; nella 3.13.2 l'attesa al passaggio e le parti non unite. Nella 3.14.0 la voce che apre la cartella. Nella 3.15.0 i bit veri nei file e la voce a due passi.
 
 import datetime
 import os
@@ -53,12 +53,12 @@ def _durata(percorso):
     return durata, traccia.get("demux-channel-count"), traccia.get("demux-samplerate")
 
 
-def _registrata(tmp_path, nome, secondi, formato="mp3", kbps=64, canali=1, frequenza=44100):
+def _registrata(tmp_path, nome, secondi, formato="mp3", kbps=64, canali=1, frequenza=44100, bit=16):
     """Una registrazione di un file locale, che finisce da se', completa."""
     sorgente = _seno(tmp_path / f"{nome}.wav", secondi)
     finita = threading.Event()
     reg = registrazioni.Registrazione(sorgente, nome, indirizzi.Flusso(sorgente), formato, kbps, canali, frequenza, dove=str(tmp_path / "Registrazioni"),
-        al_termine=lambda _r: finita.set())
+        al_termine=lambda _r: finita.set(), bit=bit)
     reg.avvia()
     assert finita.wait(30)
     return reg
@@ -84,10 +84,18 @@ def test_la_qualita_si_adatta_alla_sorgente():
     assert registrazioni.parametri("mp3", 128, sorgente_kbps=56, canali=2, frequenza=22050) == (48, 2, 22050)
     assert registrazioni.parametri("mp3", 32, sorgente_kbps=20, canali=1) == (32, 1, 44100)
     assert registrazioni.parametri("opus", 96, canali=2, frequenza=22050) == (96, 2, 48000)
-    assert registrazioni.parametri("flac", 128, sorgente_kbps=64, canali=1, frequenza=96000) == (None, 1, 48000)
+    # Senza perdita, dalla 3.15.0, la frequenza della sorgente fino a 96 kHz.
+    assert registrazioni.parametri("flac", 128, sorgente_kbps=64, canali=1, frequenza=192000) == (None, 1, 96000)
     assert registrazioni.parametri("wav", 320, frequenza=22050) == (None, 2, 22050)
     assert registrazioni.descrizione("mp3", 128, 2, 44100) == "MP3 a 128 kbps, stereo, 44.1 kHz"
-    assert registrazioni.descrizione("flac", None, 1, 48000) == "FLAC, mono, 48 kHz"
+    assert registrazioni.descrizione("flac", None, 1, 48000) == "FLAC a 16 bit, mono, 48 kHz"
+    # I parametri scelti (3.15.0): i canali vincono sulla sorgente, la frequenza fissa vale senza perdita.
+    assert registrazioni.parametri("mp3", 128, canali=2, scelta_canali="mono") == (64, 1, 44100)
+    assert registrazioni.parametri("mp3", 128, canali=1, scelta_canali="stereo") == (128, 2, 44100)
+    assert registrazioni.parametri("wav", 128, canali=1, frequenza=22050, scelta_canali="stereo", scelta_frequenza=96000) == (None, 2, 96000)
+    assert registrazioni.parametri("mp3", 128, frequenza=22050, scelta_frequenza=96000) == (128, 2, 22050)
+    assert [registrazioni.bit_per(f, b) for f, b in (("mp3", 24), ("flac", 32), ("flac", 16), ("wav", 32), ("wav", 8))] == [None, 24, 16, 32, 16]
+    assert registrazioni.descrizione("wav", None, 2, 96000, 32) == "WAV a 32 bit in virgola mobile, stereo, 96 kHz"
 
 
 @pytest.mark.parametrize("formato", ["mp3", "opus", "aac", "flac", "wav"])
@@ -153,18 +161,18 @@ class _Finta:
 
     create: typing.ClassVar[list] = []
 
-    def __init__(self, sorgente, titolo, flusso, formato, kbps, canali, frequenza, al_termine=None, dove=None):
+    def __init__(self, sorgente, titolo, flusso, formato, kbps, canali, frequenza, al_termine=None, dove=None, bit=None):
         self.sorgente, self.titolo, self.flusso = sorgente, titolo, flusso
         self.formato, self.kbps, self.canali, self.frequenza, self.al_termine = formato, kbps, canali, frequenza, al_termine
         self.dal_vivo = getattr(flusso, "dal_vivo", True)
         self.stato, self.secondi, self.byte, self.comandi = "pronta", 754.0, 11_534_336, []
-        self.dove = dove
+        self.dove, self.bit = dove, registrazioni.bit_per(formato, bit or 16)
         self.percorso = os.path.join(dove or registrazioni.cartella(), f"{titolo}.mp3")
         _Finta.create.append(self)
 
     @property
     def descrizione(self):
-        return registrazioni.descrizione(self.formato, self.kbps, self.canali, self.frequenza)
+        return registrazioni.descrizione(self.formato, self.kbps, self.canali, self.frequenza, self.bit)
 
     def avvia(self):
         self.comandi.append("avvia")
@@ -281,10 +289,9 @@ def test_una_radio_caduta_e_le_impostazioni_delle_registrazioni(finestra, con_re
     reg.al_termine(reg)
     assert finestra._righe[-1].startswith("La registrazione di Rai Radio 3 si è interrotta") and suoni_annotati[-1] == "errore"
     assert finestra._registrazione is None and finestra._statistiche.dati["conti"]["registrazioni_interrotte"] == 1
-    assert finestra._riga_dell_impostazione("formato_registrazioni") == "Formato delle registrazioni: MP3, il più diffuso"
-    assert finestra._riga_dell_impostazione("qualita_registrazioni") == "Qualità delle registrazioni: 128 kbps"
+    assert finestra._riga_dell_impostazione("formato_registrazioni") == "Formato e qualità delle registrazioni: MP3 a 128 kbps, canali della sorgente"
     finestra.impostazioni["formato_registrazioni"] = "flac"
-    assert finestra._riga_dell_impostazione("qualita_registrazioni") == "Qualità delle registrazioni: 128 kbps, che non conta per FLAC"
+    assert finestra._riga_dell_impostazione("formato_registrazioni") == "Formato e qualità delle registrazioni: FLAC a 16 bit, frequenza della sorgente, canali della sorgente"
     # Una puntata che finisce da se' e' completa.
     finestra.impostazioni["formato_registrazioni"] = "mp3"
     finestra._comando_registra()
@@ -437,3 +444,94 @@ def test_la_console_dice_le_parti_che_non_si_sono_unite(finestra, con_registrazi
     finestra._registrazione_fermata(reg, reg.parti_separate[0])
     assert finestra._righe[-1].startswith("Le parti della registrazione di Rai Radio 3 non si sono unite: sono 2 file, nel ramo Registrazioni, come Rai Radio 3 parte 1.mp3.")
     assert suoni_annotati[-1] == "errore" and finestra._statistiche.dati["conti"]["registrazioni_a_parti_separate"] == 1
+
+
+def _intestazione_del_wav(percorso):
+    """(formato, bit, frequenza, canali) dall'intestazione di un WAV: 1 PCM, 3 virgola mobile."""
+    import struct
+
+    with open(percorso, "rb") as f:
+        dati = f.read(200)
+    i = dati.find(b"fmt ")
+    tag, canali, frequenza, _byte, _blocco, bit = struct.unpack("<HHIIHH", dati[i + 8:i + 24])
+    if tag == 0xFFFE:
+        tag = struct.unpack("<H", dati[i + 32:i + 34])[0]
+    return tag, bit, frequenza, canali
+
+
+def test_le_registrazioni_senza_perdita_hanno_i_loro_bit(tmp_path):
+    # I bit scelti finiscono davvero nei file (3.15.0): WAV a 24 e a 32 in
+    # virgola mobile, FLAC a 24, anche a 96 kHz e in stereo da una sorgente mono.
+    import mutagen.flac
+
+    reg = _registrata(tmp_path, "wav 24", 2.0, "wav", canali=2, frequenza=96000, bit=24)
+    assert _intestazione_del_wav(reg.percorso) == (1, 24, 96000, 2) and reg.descrizione == "WAV a 24 bit, stereo, 96 kHz"
+    reg = _registrata(tmp_path, "wav 32", 2.0, "wav", canali=1, frequenza=48000, bit=32)
+    assert _intestazione_del_wav(reg.percorso) == (3, 32, 48000, 1)
+    reg = _registrata(tmp_path, "flac 24", 2.0, "flac", canali=2, frequenza=48000, bit=24)
+    info = mutagen.flac.FLAC(reg.percorso).info
+    assert (info.bits_per_sample, info.sample_rate, info.channels) == (24, 48000, 2) and abs(info.length - 2.0) < 0.2
+    # Il FLAC non ha i 32 bit: diventano 24.
+    assert registrazioni.Registrazione("x", "y", indirizzi.Flusso("x"), "flac", None, 2, 48000, bit=32).bit == 24
+
+
+class _ListeInFila:
+    """Le liste delle impostazioni, finte: rispondono una dopo l'altra con le
+    righe date, None per Escape, e annotano titolo, righe e riga di partenza."""
+
+    def __init__(self, *risposte):
+        self.risposte, self.aperte = list(risposte), []
+
+    def __call__(self, _genitore, titolo, righe, scelta, con_filtro=False):
+        self.aperte.append((titolo, list(righe), scelta))
+        self._risposta = self.risposte.pop(0)
+        return self
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_a):
+        return False
+
+    def ShowModal(self):
+        import wx
+
+        return wx.ID_CANCEL if self._risposta is None else wx.ID_OK
+
+    def GetSelection(self):
+        return self.aperte[-1][1].index(self._risposta)
+
+
+def test_formato_e_qualita_a_due_passi(finestra, con_registrazioni, monkeypatch):
+    # La voce unica (Gabriele, 3.15.0): il formato, poi i suoi parametri.
+    import finestra as modulo
+
+    imp = finestra.impostazioni
+    # WAV: bit, frequenza e canali, ognuno sulla scelta di adesso.
+    liste = _ListeInFila("WAV, senza perdita e senza compressione", "32 bit in virgola mobile, che non satura mai: solo WAV", "48 kHz", "Sempre stereo")
+    monkeypatch.setattr(modulo, "FinestraScelta", liste)
+    finestra._cambia_impostazione("formato_registrazioni", None)
+    assert [a[0] for a in liste.aperte] == ["Formato e qualità delle registrazioni", "Bit delle registrazioni in WAV", "Frequenza delle registrazioni in WAV",
+        "Canali delle registrazioni in WAV"]
+    assert [a[2] for a in liste.aperte] == [0, 0, 0, 0] and len(liste.aperte[1][1]) == 3
+    assert (imp["formato_registrazioni"], imp["bit_registrazioni"], imp["frequenza_registrazioni"], imp["canali_registrazioni"]) == ("wav", 32, 48000, "stereo")
+    assert finestra._righe[-1].startswith("Le registrazioni ora sono in WAV a 32 bit in virgola mobile, 48 kHz, stereo.")
+    # FLAC non ha i 32 bit, e parte dai 24; Escape a meta' lascia tutto com'era.
+    liste = _ListeInFila("FLAC, senza perdita e compresso", "24 bit, per la post-produzione", None)
+    monkeypatch.setattr(modulo, "FinestraScelta", liste)
+    finestra._cambia_impostazione("formato_registrazioni", None)
+    assert len(liste.aperte[1][1]) == 2 and liste.aperte[1][2] == 1 and liste.aperte[2][2] == 2
+    assert imp["formato_registrazioni"] == "wav" and finestra._righe[-1].startswith("Formato e qualità delle registrazioni non cambiati.")
+    # MP3: kbps e canali.
+    liste = _ListeInFila("MP3, il più diffuso", "192 kbps", "Sempre mono")
+    monkeypatch.setattr(modulo, "FinestraScelta", liste)
+    finestra._cambia_impostazione("formato_registrazioni", None)
+    assert [a[0] for a in liste.aperte][1:] == ["Kbps delle registrazioni in MP3", "Canali delle registrazioni in MP3"]
+    assert (imp["formato_registrazioni"], imp["qualita_registrazioni"], imp["canali_registrazioni"]) == ("mp3", 192, "mono")
+    assert finestra._riga_dell_impostazione("formato_registrazioni") == "Formato e qualità delle registrazioni: MP3 a 192 kbps, mono"
+    assert finestra._statistiche.dati["conti"]["formati_delle_registrazioni_scelti"] == 2
+    # La registrazione riceve i parametri: mono da una sorgente stereo, con meta' dei kbps.
+    _suona_la_radio(finestra, con_registrazioni)
+    finestra._comando_registra()
+    reg = _Finta.create[-1]
+    assert (reg.formato, reg.kbps, reg.canali) == ("mp3", 96, 1)

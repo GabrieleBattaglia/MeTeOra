@@ -7,3 +7,8 @@ Collaudo di MeTeOra 3.13.2: l'attesa di Alt con R al passaggio.
 Con la dissolvenza accesa suona due risultati di Cerca contenuti di fila e premi Alt con R mentre suona il primo: quando entra il secondo, sfumando, la registrazione parte da sola.
 Collaudo di MeTeOra 3.14.0: la cartella delle registrazioni in Esplora risorse.
 Nelle impostazioni, la voce Vai alla cartella delle registrazioni, dopo Cartella delle registrazioni: Invio apre la cartella in Esplora risorse, quella scelta o quella di partenza.
+Collaudo di MeTeOra 3.15.0: formato e qualità delle registrazioni.
+Nelle impostazioni c'è una voce sola, Formato e qualità delle registrazioni, al posto di Formato e Qualità: Invio apre i formati, poi i parametri di quello scelto.
+Scegli WAV, poi 24 bit, 48 kHz e sempre stereo: la riga della voce dice WAV a 24 bit, 48 kHz, stereo.
+Registra una radio per qualche secondo: R e la riga d'avvio dicono WAV a 24 bit, stereo, 48 kHz, e il file si apre nel tuo programma di montaggio a 24 bit e 48 kHz.
+Riapri la voce, scegli FLAC e premi Escape alla lista dei bit: la voce resta WAV come prima. Poi rimetti il formato che usi di solito.
