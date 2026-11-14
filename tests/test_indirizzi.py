@@ -704,6 +704,92 @@ def test_la_ricerca_legge_yt_dlp_una_riga_alla_volta(tmp_path, monkeypatch):
     assert lanciati[0][-3:] == ["--playlist-items", "21:40", "ytsearch40:caruso"] and lanciati[1][-3:] == ["--playlist-items", "11:20", "scsearch20:caruso"]
 
 
+def _ricerca_finta(monkeypatch, risposte):
+    """Popen finto per la ricerca: risposte da' le voci per l'ultimo argomento
+    di yt-dlp, la ricerca; quelle che mancano non trovano niente."""
+    lanciati = []
+
+    class Processo:
+        def __init__(self, comando, **_chiavi):
+            lanciati.append(comando)
+            voci = next((v for chiave, v in risposte.items() if comando[-1].startswith(chiave)), [])
+            self.stdout, self.returncode = iter(json.dumps(v).encode() + b"\n" for v in voci), 0
+            self.stderr = io.BytesIO(b"")
+
+        def wait(self):
+            return 0
+
+        def kill(self):
+            pass
+
+    monkeypatch.setattr(indirizzi, "ytdlp_presente", lambda: True)
+    monkeypatch.setattr(indirizzi.subprocess, "Popen", Processo)
+    return lanciati
+
+
+def test_youtube_music_di_riserva_e_anteprime_tolte(monkeypatch):
+    # Rocco Hunt (Gabriele, 3.16.0 e 3.16.1): YouTube chiede l'eta' e non da'
+    # niente, YouTube Music si', e SoundCloud ha l'anteprima da 30 secondi.
+    musica = "https://music.youtube.com/search?q=Rocco+Hunt+-+Nu+juorno+buono#"
+    lanciati = _ricerca_finta(monkeypatch, {
+        musica + "songs": [{"url": "https://music.youtube.com/watch?v=_2WK_z8QMnA", "title": "Nu juorno buono"}],
+        musica + "videos": [{"url": "https://music.youtube.com/watch?v=mt2QuQcb2oU", "title": "Nu juorno buono"}],
+        "scsearch": [{"url": "https://api.soundcloud.com/tracks/254230696", "title": "Nu juorno buono", "duration": 30.0, "uploader": "Rocco Hunt"},
+            {"url": "https://api.soundcloud.com/tracks/136205738", "title": "Nu juorno buono (Cover)", "duration": 173.086, "uploader": "Salvo G36"},
+            {"url": "https://soundcloud.com/qualcuno/breve", "title": "Breve", "duration": 30.5}]})
+    trovati, conti = [], []
+    assert indirizzi.cerca("Rocco Hunt - Nu juorno buono", trovati.append, conta=lambda nome, quanto: conti.append((nome, quanto))) == 4
+    assert [c[-1] for c in lanciati] == ["ytsearch20:Rocco Hunt - Nu juorno buono", musica + "songs", musica + "videos", "scsearch10:Rocco Hunt - Nu juorno buono"]
+    assert [c[-3:-1] for c in lanciati[1:3]] == [["--playlist-items", "1:10"]] * 2
+    # Gli indirizzi di YouTube Music diventano quelli di YouTube.
+    assert trovati == [("https://www.youtube.com/watch?v=_2WK_z8QMnA", "Nu juorno buono", None, None),
+        ("https://www.youtube.com/watch?v=mt2QuQcb2oU", "Nu juorno buono", None, None),
+        ("https://api.soundcloud.com/tracks/136205738", "Nu juorno buono (Cover)", 173.086, "Salvo G36"),
+        ("https://soundcloud.com/qualcuno/breve", "Breve", 30.5, None)]
+    assert sorted(conti) == [("anteprime_tolte", 1), ("ricerche_di_riserva", 1), ("risultati_di_riserva", 2)]
+    # La pagina seguente chiede a YouTube Music le voci seguenti.
+    lanciati.clear()
+    indirizzi.cerca("Rocco Hunt - Nu juorno buono", lambda _r: None, pagina=1)
+    assert [c[-3:-1] for c in lanciati[1:3]] == [["--playlist-items", "11:20"]] * 2
+
+
+def test_youtube_music_solo_quando_youtube_non_da_niente(monkeypatch):
+    lanciati = _ricerca_finta(monkeypatch, {"ytsearch": [{"url": "https://www.youtube.com/watch?v=a", "title": "Caruso", "duration": 30.0}]})
+    conti = []
+    # Un video di YouTube di 30 secondi resta: le anteprime sono solo di SoundCloud.
+    assert indirizzi.cerca("caruso", lambda _r: None, conta=lambda nome, quanto: conti.append(nome)) == 1
+    assert [c[-1] for c in lanciati] == ["ytsearch20:caruso", "scsearch10:caruso"] and conti == []
+    # Fermata dopo YouTube, YouTube Music non parte.
+    lanciati_prima = _ricerca_finta(monkeypatch, {})
+    assert indirizzi.cerca("caruso", lambda _r: None, fermo=lambda: bool(lanciati_prima)) == 0
+    assert [c[-1] for c in lanciati_prima] == ["ytsearch20:caruso"]
+
+
+def test_youtube_music_quando_youtube_sbaglia(monkeypatch):
+    # YouTube dice di no, YouTube Music trova: nessun errore.
+    lanciati = []
+
+    class Processo:
+        def __init__(self, comando, **_chiavi):
+            lanciati.append(comando)
+            sbaglia = comando[-1].startswith("ytsearch")
+            voci = [{"url": "https://music.youtube.com/watch?v=x", "title": "X"}] if "#songs" in comando[-1] else []
+            self.stdout = iter(json.dumps(v).encode() + b"\n" for v in voci)
+            self.returncode = 1 if sbaglia else 0
+            self.stderr = io.BytesIO(b"ERROR: [youtube:search] HTTP Error 429: Too Many Requests" if sbaglia else b"")
+
+        def wait(self):
+            return self.returncode
+
+        def kill(self):
+            pass
+
+    monkeypatch.setattr(indirizzi, "ytdlp_presente", lambda: True)
+    monkeypatch.setattr(indirizzi.subprocess, "Popen", Processo)
+    assert indirizzi.cerca("x", lambda _r: None) == 1
+    assert len(lanciati) == 4
+
+
 def test_cerca_contenuti_negli_indirizzi_e_i_dieci_secondi(finestra, con_ytdlp, monkeypatch):
     import types
 
@@ -729,9 +815,11 @@ def test_cerca_contenuti_negli_indirizzi_e_i_dieci_secondi(finestra, con_ytdlp, 
         def GetValue(self):
             return "  lucio   dalla "
 
-    def cerca(testo, trovato, fermo=None, pagina=0):
+    def cerca(testo, trovato, fermo=None, pagina=0, conta=None):
         assert testo == "lucio dalla" and not fermo()
         if pagina == 0:
+            # I conti per le statistiche (3.16.0 e 3.16.1).
+            conta("anteprime_tolte", 2)
             trovato(("https://www.youtube.com/watch?v=a", "Caruso", 340.0, "Lucio Dalla"))
             trovato(("https://www.youtube.com/watch?v=b", "Attenti al lupo", None, None))
             return 2
@@ -762,6 +850,7 @@ def test_cerca_contenuti_negli_indirizzi_e_i_dieci_secondi(finestra, con_ytdlp, 
     figli = list(finestra._figli(voce))[:2]
     assert [e for e, _a in finestra._voci_del_menu(finestra._dati(figli[0]))] == ["Riproduci", "Aggiungi alla playlist", "Aggiungi ai preferiti", "Copia l'indirizzo", "Cerca contenuti"]
     assert finestra._statistiche.dati["conti"]["contenuti_trovati"] == 3 and finestra._statistiche.dati["conti"]["contenuti_altri"] == 2
+    assert finestra._statistiche.dati["conti"]["anteprime_tolte"] == 2
     # Il ramo si rifa' con gli Indirizzi: Cerca contenuti e i risultati restano in cima.
     finestra._popola_playlist()
     finestra.albero.Expand(finestra.nodo_indirizzi)

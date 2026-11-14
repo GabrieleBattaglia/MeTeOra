@@ -1,6 +1,6 @@
 # MeTeOra, gli indirizzi in rete: le pagine dei siti, aperte con yt-dlp.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 05/11/2026: nasce con la 3.2.0, tappa 19 b del piano, issue 40. Nella 3.3.0 le dirette, senza durata, e gli indirizzi diretti, che libmpv apre senza yt-dlp. Nella 3.3.1 la pagina che non c'e', il 404, e il 403 detti per chi ascolta. Nella 3.5.1 gli appunti con un indirizzo senza https://. Nella 3.8.0 i sottotitoli dei siti. Nella 3.9.0 la ricerca dei contenuti, issue 47.
+# 05/11/2026: nasce con la 3.2.0, tappa 19 b del piano, issue 40. Nella 3.3.0 le dirette, senza durata, e gli indirizzi diretti, che libmpv apre senza yt-dlp. Nella 3.3.1 la pagina che non c'e', il 404, e il 403 detti per chi ascolta. Nella 3.5.1 gli appunti con un indirizzo senza https://. Nella 3.8.0 i sottotitoli dei siti. Nella 3.9.0 la ricerca dei contenuti, issue 47. Nella 3.16.0 YouTube Music di riserva, quando YouTube chiede l'eta' e non da' risultati. Nella 3.16.1 le anteprime di SoundCloud tolte.
 
 """Gli indirizzi in rete (3.2.0, issue 40).
 
@@ -251,35 +251,93 @@ def _esegui(argomenti, attesa=ATTESA):
 # La ricerca dei contenuti (Gabriele, issue 47, 3.9.0): i motori di yt-dlp,
 # nell'ordine in cui si cercano, con quanti risultati chiedere a ognuno.
 MOTORI_DELLA_RICERCA = (("ytsearch", 20), ("scsearch", 10))
+# YouTube Music di riserva (Gabriele, 3.16.0). Per certe ricerche, come
+# Rocco Hunt Nu juorno buono, YouTube chiede a chi non ha fatto l'accesso di
+# confermare l'eta', e al posto dei risultati manda solo quell'invito: yt-dlp
+# trova zero voci e non dice niente, mentre i video si aprono liberi. YouTube
+# Music non lo chiede: quando YouTube non da' niente si cercano li' i brani e
+# i video, dieci e dieci, al posto dei venti di YouTube. Le sue voci non
+# hanno ne' durata ne' autore.
+YOUTUBE_MUSIC = "https://music.youtube.com/search?q={testo}#{sezione}"
+SEZIONI_DI_YOUTUBE_MUSIC = (("songs", 10), ("videos", 10))
+# Le anteprime di SoundCloud (Gabriele, 3.16.1): i brani che il sito fa
+# sentire interi solo agli abbonati arrivano lunghi esattamente 30 secondi,
+# e non entrano nei risultati.
+DURATA_DELLE_ANTEPRIME = 30.0
 
 
-def cerca(testo, trovato, fermo=None, attesa=ATTESA, pagina=0):
+def _fermata(fermo):
+    return fermo is not None and fermo()
+
+
+def cerca(testo, trovato, fermo=None, attesa=ATTESA, pagina=0, conta=None):
     """Cerca testo su YouTube e poi su SoundCloud con yt-dlp, e da' a trovato
     ogni risultato appena arriva, come (indirizzo, titolo, durata, autore):
     yt-dlp con -j ne scrive uno per riga. pagina 0 sono i primi di ogni
     motore, quanti ne dice MOTORI_DELLA_RICERCA, la 1 i seguenti, per Mostra
-    altri risultati (3.10.0). fermo(), vero, la interrompe. Torna quanti ne
-    ha trovati. SenzaYtDlp se yt-dlp non c'e', ErroreIndirizzo se non parte,
-    o se dice di no senza trovare niente."""
+    altri risultati (3.10.0). Se YouTube non da' niente si cerca su YouTube
+    Music (3.16.0). fermo(), vero, la interrompe. conta(nome, quanto), se
+    c'e', riceve i conti per le statistiche: ricerche_di_riserva e
+    risultati_di_riserva per YouTube Music, anteprime_tolte per SoundCloud.
+    Torna quanti ne ha trovati. SenzaYtDlp se yt-dlp non c'e', ErroreIndirizzo
+    se non parte, o se dice di no senza trovare niente."""
     if not ytdlp_presente():
         raise SenzaYtDlp(_("yt-dlp non è installato"))
     quanti, errori = 0, []
     for motore, per_pagina in MOTORI_DELLA_RICERCA:
-        if fermo is not None and fermo():
+        if _fermata(fermo):
             break
         primo, ultimo = per_pagina * pagina + 1, per_pagina * (pagina + 1)
-        trovati, errore = _cerca_con(f"{motore}{ultimo}:{testo}", f"{primo}:{ultimo}", trovato, fermo, attesa)
-        quanti += trovati
+        trovati, errore = _cerca_con(f"{motore}{ultimo}:{testo}", f"{primo}:{ultimo}", trovato, fermo, attesa, conta)
         if errore:
             errori.append(errore)
-    if errori and not quanti and not (fermo is not None and fermo()):
+        if motore == "ytsearch" and not trovati and not _fermata(fermo):
+            trovati = _cerca_su_youtube_music(testo, pagina, trovato, fermo, attesa, conta, errori)
+        quanti += trovati
+    if errori and not quanti and not _fermata(fermo):
         raise ErroreIndirizzo(_motivo(errori[0]))
     return quanti
 
 
-def _cerca_con(ricerca, voci, trovato, fermo, attesa):
+def _cerca_su_youtube_music(testo, pagina, trovato, fermo, attesa, conta, errori):
+    """La riserva di YouTube (3.16.0): i brani e poi i video di YouTube Music,
+    della stessa pagina. Torna quanti ne ha trovati; gli errori vanno in errori."""
+    quanti = 0
+    for sezione, per_pagina in SEZIONI_DI_YOUTUBE_MUSIC:
+        if _fermata(fermo):
+            break
+        ricerca = YOUTUBE_MUSIC.format(testo=urllib.parse.quote_plus(testo), sezione=sezione)
+        trovati, errore = _cerca_con(ricerca, f"{per_pagina * pagina + 1}:{per_pagina * (pagina + 1)}", trovato, fermo, attesa, conta)
+        quanti += trovati
+        if errore:
+            errori.append(errore)
+    if conta is not None:
+        conta("ricerche_di_riserva", 1)
+        if quanti:
+            conta("risultati_di_riserva", quanti)
+    return quanti
+
+
+def anteprima(voce):
+    """Vero per un'anteprima di SoundCloud, lunga esattamente 30 secondi
+    (3.16.1): il brano intero lo sentono solo gli abbonati."""
+    return sito(voce.get("url") or "").endswith("soundcloud.com") and voce.get("duration") == DURATA_DELLE_ANTEPRIME
+
+
+def indirizzo_della_voce(voce):
+    """L'indirizzo di un risultato. Quelli di YouTube Music diventano come
+    quelli di YouTube, www.youtube.com/watch, che si aprono uguali e contano
+    per lo stesso sito (3.16.0)."""
+    parti = urllib.parse.urlsplit(voce["url"])
+    if parti.hostname == "music.youtube.com" and parti.path == "/watch":
+        return urllib.parse.urlunsplit(("https", "www.youtube.com", "/watch", parti.query, ""))
+    return voce["url"]
+
+
+def _cerca_con(ricerca, voci, trovato, fermo, attesa, conta=None):
     """Una ricerca di yt-dlp, come ytsearch40:caruso, con le sole voci date,
-    come 21:40: (quanti risultati, il testo dell'errore se yt-dlp dice di no)."""
+    come 21:40: (quanti risultati, il testo dell'errore se yt-dlp dice di no).
+    Le anteprime di SoundCloud restano fuori, contate in conta (3.16.1)."""
     comando = _comando(["--flat-playlist", "--ignore-errors", "--playlist-items", voci, ricerca])
     comando[comando.index("-J")] = "-j"
     with _stato:
@@ -293,10 +351,10 @@ def _cerca_con(ricerca, voci, trovato, fermo, attesa):
         _processi.add(processo)
     sveglia = threading.Timer(attesa, processo.kill)
     sveglia.start()
-    quanti = 0
+    quanti = tolte = 0
     try:
         for riga in processo.stdout:
-            if fermo is not None and fermo():
+            if _fermata(fermo):
                 processo.kill()
                 break
             try:
@@ -305,8 +363,12 @@ def _cerca_con(ricerca, voci, trovato, fermo, attesa):
                 continue
             if not isinstance(voce, dict) or not voce.get("url"):
                 continue
+            if anteprima(voce):
+                tolte += 1
+                continue
             quanti += 1
-            trovato((voce["url"], str(voce.get("title") or voce["url"]), _durata(voce.get("duration")), voce.get("uploader") or voce.get("channel")))
+            indirizzo = indirizzo_della_voce(voce)
+            trovato((indirizzo, str(voce.get("title") or indirizzo), _durata(voce.get("duration")), voce.get("uploader") or voce.get("channel")))
         errore = processo.stderr.read().decode("utf-8", "replace")
         processo.wait()
     finally:
@@ -314,6 +376,8 @@ def _cerca_con(ricerca, voci, trovato, fermo, attesa):
         with _stato:
             _processi.discard(processo)
             _stato.notify_all()
+    if tolte and conta is not None:
+        conta("anteprime_tolte", tolte)
     return quanti, (errore if processo.returncode else "")
 
 

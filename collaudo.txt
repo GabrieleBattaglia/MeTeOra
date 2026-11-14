@@ -12,3 +12,8 @@ Nelle impostazioni c'è una voce sola, Formato e qualità delle registrazioni, a
 Scegli WAV, poi 24 bit, 48 kHz e sempre stereo: la riga della voce dice WAV a 24 bit, 48 kHz, stereo.
 Registra una radio per qualche secondo: R e la riga d'avvio dicono WAV a 24 bit, stereo, 48 kHz, e il file si apre nel tuo programma di montaggio a 24 bit e 48 kHz.
 Riapri la voce, scegli FLAC e premi Escape alla lista dei bit: la voce resta WAV come prima. Poi rimetti il formato che usi di solito.
+Collaudo di MeTeOra 3.16.0 e 3.16.1: la ricerca dei contenuti.
+Cerca contenuti con Rocco Hunt - Nu juorno buono: arrivano più di venti risultati, il brano e il videoclip in cima, senza autore né durata, e suonano interi.
+Nei risultati di SoundCloud non c'è più Nu juorno buono di Rocco Hunt da 30 secondi.
+Mostra altri risultati in fondo porta altri venti risultati di YouTube Music.
+Cerca lucio dalla caruso: i risultati di YouTube hanno ancora autore e durata, come prima.

@@ -2,6 +2,18 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.16.1] - 2026-11-14
+
+- Le anteprime di SoundCloud non entrano più nei risultati della ricerca dei contenuti, chiesto da Gabriele: i brani che il sito fa sentire interi solo agli abbonati, come quelli ufficiali di Rocco Hunt, arrivano lunghi esattamente 30 secondi, e suonavano solo quelli.
+- Nelle statistiche, la riga nuova della ricerca conta le anteprime tolte.
+- Le prove sono in tests/test_indirizzi.py.
+
+## [3.16.0] - 2026-11-14
+
+- YouTube Music di riserva nella ricerca dei contenuti. Gabriele cercava Rocco Hunt - Nu juorno buono e trovava pochi risultati, tutti di SoundCloud: per certe ricerche, qui bastava la parola juorno, YouTube chiede a chi non ha fatto l'accesso di confermare l'età e al posto dei risultati manda solo quell'invito, anche se i video sono per tutti, e yt-dlp trovava zero voci senza dire niente. YouTube Music non lo chiede: quando YouTube non dà niente, MeTeOra cerca lì dieci brani e dieci video, anche con Mostra altri risultati. Questi risultati hanno solo il titolo, senza autore e durata, che arriva quando il brano si apre, e il loro indirizzo è quello di YouTube.
+- Nelle statistiche, una riga nuova nella sezione degli indirizzi conta le ricerche passate a YouTube Music e i loro risultati.
+- Le prove sono in tests/test_indirizzi.py.
+
 ## [3.15.0] - 2026-11-14
 
 Le registrazioni per la post-produzione, chieste da Gabriele: oltre ai kbps, i parametri dei formati senza perdita.

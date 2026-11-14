@@ -6,10 +6,10 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: MeTeOra 3.15.0\n"
+"Project-Id-Version: MeTeOra 3.16.1\n"
 "Report-Msgid-Bugs-To: https://github.com/GabrieleBattaglia/MeTeOra/issues"
 "\n"
-"POT-Creation-Date: 2026-11-14 13:19+0100\n"
+"POT-Creation-Date: 2026-11-14 15:30+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -554,7 +554,7 @@ msgstr ""
 msgid "&Chiudi"
 msgstr ""
 
-#: dialoghi.py:167 dialoghi.py:179 finestra.py:11700
+#: dialoghi.py:167 dialoghi.py:179 finestra.py:11701
 msgid "Aggiornamento di MeTeOra"
 msgstr ""
 
@@ -702,7 +702,7 @@ msgid ""
 "selezionate, Esc chiude."
 msgstr ""
 
-#: dialoghi.py:591 finestra.py:11862
+#: dialoghi.py:591 finestra.py:11863
 msgid "Cancella tutto"
 msgstr ""
 
@@ -787,7 +787,7 @@ msgstr ""
 #. Traduttori: nell'etichetta di un brano segnato come saltato, che
 #. l'avanzamento non suona.
 #. Traduttori: il brano di Dove sono, che l'avanzamento salta.
-#: filtro.py:69 finestra.py:3052 finestra.py:12620
+#: filtro.py:69 finestra.py:3052 finestra.py:12621
 msgid "saltato"
 msgstr ""
 
@@ -1292,8 +1292,9 @@ msgstr ""
 
 #: finestra.py:555
 msgid ""
-"Invio cerca i risultati seguenti, venti di YouTube e dieci di SoundCloud,"
-" che arrivano in fondo al ramo."
+"Invio cerca i risultati seguenti, venti di YouTube, o di YouTube Music "
+"quando YouTube non ne dà, e dieci di SoundCloud, che arrivano in fondo al"
+" ramo."
 msgstr ""
 
 #: finestra.py:556
@@ -1312,10 +1313,11 @@ msgstr ""
 
 #: finestra.py:557
 msgid ""
-"Freccia destra mostra i risultati, prima quelli di YouTube e poi quelli "
-"di SoundCloud, man mano che arrivano. X ne suona uno; suonato per un "
-"minuto di fila entra negli Indirizzi. Invio, Applicazioni o Spazio: menu "
-"con Riproduci e Cerca contenuti."
+"Freccia destra mostra i risultati, prima quelli di YouTube, o di YouTube "
+"Music quando YouTube non ne dà, e poi quelli di SoundCloud, man mano che "
+"arrivano. X ne suona uno; suonato per un minuto di fila entra negli "
+"Indirizzi. Invio, Applicazioni o Spazio: menu con Riproduci e Cerca "
+"contenuti."
 msgstr ""
 
 #: finestra.py:559
@@ -1691,19 +1693,19 @@ msgstr ""
 msgid "Volume uniforme (ReplayGain) non cambiato."
 msgstr ""
 
-#: finestra.py:775 finestra.py:11402
+#: finestra.py:775 finestra.py:11403
 msgid "Scheda audio"
 msgstr ""
 
-#: finestra.py:775 finestra.py:11404
+#: finestra.py:775 finestra.py:11405
 msgid "Scheda audio non cambiata."
 msgstr ""
 
-#: finestra.py:776 finestra.py:11328
+#: finestra.py:776 finestra.py:11329
 msgid "Scheda degli effetti"
 msgstr ""
 
-#: finestra.py:776 finestra.py:11330
+#: finestra.py:776 finestra.py:11331
 msgid "Scheda degli effetti non cambiata."
 msgstr ""
 
@@ -1757,11 +1759,11 @@ msgstr ""
 msgid "Riproduzione casuale (Ctrl+N, Maiuscolo+N) non cambiata."
 msgstr ""
 
-#: finestra.py:784 finestra.py:11281
+#: finestra.py:784 finestra.py:11282
 msgid "Modello della riproduzione casuale"
 msgstr ""
 
-#: finestra.py:784 finestra.py:11283
+#: finestra.py:784 finestra.py:11284
 msgid "Modello della riproduzione casuale non cambiato."
 msgstr ""
 
@@ -1847,15 +1849,15 @@ msgstr ""
 msgid "Tempo minimo di lettura in braille non cambiato."
 msgstr ""
 
-#: finestra.py:795 finestra.py:9718 finestra.py:9764 finestra.py:11196
+#: finestra.py:795 finestra.py:9718 finestra.py:9764 finestra.py:11197
 msgid "Banco dei suoni MIDI"
 msgstr ""
 
-#: finestra.py:795 finestra.py:9720 finestra.py:9766 finestra.py:11198
+#: finestra.py:795 finestra.py:9720 finestra.py:9766 finestra.py:11199
 msgid "Banco dei suoni MIDI non cambiato."
 msgstr ""
 
-#: finestra.py:797 finestra.py:11095 finestra.py:11172
+#: finestra.py:797 finestra.py:11096 finestra.py:11173
 msgid "Componenti aggiuntivi"
 msgstr ""
 
@@ -1954,22 +1956,22 @@ msgstr ""
 msgid "Salva console"
 msgstr ""
 
-#: finestra.py:817 finestra.py:11910
+#: finestra.py:817 finestra.py:11911
 msgid "Importa marcatori"
 msgstr ""
 
-#: finestra.py:818 finestra.py:11735
+#: finestra.py:818 finestra.py:11736
 msgid "Associazioni dei formati"
 msgstr ""
 
 #. Traduttori: il titolo della traccia di sottotitoli scritta dalla passata dei
 #. sottotitoli impressi nel video.
-#: finestra.py:819 finestra.py:838 finestra.py:9306 finestra.py:11214
+#: finestra.py:819 finestra.py:838 finestra.py:9306 finestra.py:11215
 #: motore.py:1374
 msgid "Sottotitoli impressi"
 msgstr ""
 
-#: finestra.py:819 finestra.py:11216
+#: finestra.py:819 finestra.py:11217
 msgid "Sottotitoli impressi non cambiati."
 msgstr ""
 
@@ -2349,7 +2351,7 @@ msgstr ""
 
 #. Traduttori: il nome della playlist speciale dei brani preferiti.
 #: finestra.py:1836 finestra.py:4595 finestra.py:5559 finestra.py:5624
-#: finestra.py:12687 finestra.py:12712 playlist.py:33
+#: finestra.py:12688 finestra.py:12713 playlist.py:33
 msgid "Preferiti"
 msgstr ""
 
@@ -2390,7 +2392,7 @@ msgstr ""
 #. Traduttori: il nome della lista di un file aperto da solo, come in In
 #. riproduzione: C:\musica\a.mp3, file aperto.
 #. Traduttori: il nome della lista di un file aperto da solo.
-#: finestra.py:2071 finestra.py:8036 finestra.py:14056 statistiche.py:223
+#: finestra.py:2071 finestra.py:8036 finestra.py:14057 statistiche.py:223
 msgid "file aperto"
 msgstr ""
 
@@ -2540,7 +2542,7 @@ msgstr ""
 #. Traduttori: frase dice la riproduzione casuale di adesso, come Riproduzione
 #. casuale spenta.
 #: finestra.py:2437 finestra.py:7949 finestra.py:9261 finestra.py:9565
-#: finestra.py:13130
+#: finestra.py:13131
 #, python-brace-format
 msgid "Già così. {frase}"
 msgstr ""
@@ -2628,8 +2630,8 @@ msgstr ""
 msgid "Sottobrano {numero} di {totale}, {durata}"
 msgstr ""
 
-#: finestra.py:3036 finestra.py:3049 finestra.py:11862 finestra.py:11872
-#: finestra.py:14315
+#: finestra.py:3036 finestra.py:3049 finestra.py:11863 finestra.py:11873
+#: finestra.py:14316
 #, python-brace-format
 msgid "{n} marker"
 msgid_plural "{n} marker"
@@ -2856,7 +2858,7 @@ msgstr ""
 msgid "Mostra altri risultati"
 msgstr ""
 
-#: finestra.py:3832 finestra.py:10502 finestra.py:10707
+#: finestra.py:3832 finestra.py:10502 finestra.py:10708
 msgid "Cerca contenuti"
 msgstr ""
 
@@ -2988,8 +2990,8 @@ msgstr ""
 
 #: finestra.py:4173 finestra.py:4186 finestra.py:4208 finestra.py:4217
 #: finestra.py:4225 finestra.py:4241 finestra.py:4252 finestra.py:4262
-#: finestra.py:10259 finestra.py:10264 finestra.py:10269 finestra.py:10709
-#: finestra.py:10711
+#: finestra.py:10259 finestra.py:10264 finestra.py:10269 finestra.py:10710
+#: finestra.py:10712
 msgid "Riproduci"
 msgstr ""
 
@@ -3005,11 +3007,11 @@ msgstr ""
 msgid "Ferma la ricerca"
 msgstr ""
 
-#: finestra.py:4180 finestra.py:10362 finestra.py:10696
+#: finestra.py:4180 finestra.py:10362 finestra.py:10697
 msgid "Mostra altre radio"
 msgstr ""
 
-#: finestra.py:4190 finestra.py:4222 finestra.py:10775
+#: finestra.py:4190 finestra.py:4222 finestra.py:10776
 msgid "Apri un indirizzo"
 msgstr ""
 
@@ -3017,7 +3019,7 @@ msgstr ""
 msgid "Rileggi dal sito"
 msgstr ""
 
-#: finestra.py:4193 finestra.py:4222 finestra.py:10270 finestra.py:10712
+#: finestra.py:4193 finestra.py:4222 finestra.py:10270 finestra.py:10713
 msgid "Copia l'indirizzo"
 msgstr ""
 
@@ -3079,12 +3081,12 @@ msgid "Togli dalla playlist"
 msgstr ""
 
 #: finestra.py:4221 finestra.py:4242 finestra.py:4252 finestra.py:4263
-#: finestra.py:4964 finestra.py:10269 finestra.py:10711
+#: finestra.py:4964 finestra.py:10269 finestra.py:10712
 msgid "Aggiungi alla playlist"
 msgstr ""
 
 #: finestra.py:4221 finestra.py:4229 finestra.py:4253 finestra.py:4264
-#: finestra.py:4964 finestra.py:10270 finestra.py:10712
+#: finestra.py:4964 finestra.py:10270 finestra.py:10713
 msgid "Aggiungi ai preferiti"
 msgstr ""
 
@@ -3109,7 +3111,7 @@ msgstr ""
 msgid "Togli il percorso"
 msgstr ""
 
-#: finestra.py:4248 finestra.py:14440
+#: finestra.py:4248 finestra.py:14441
 msgid "Riconosci questo disco"
 msgstr ""
 
@@ -3174,9 +3176,9 @@ msgstr ""
 msgid "Non ho potuto rinominare {file}."
 msgstr ""
 
-#: finestra.py:4444 finestra.py:11862 finestra.py:11872 finestra.py:11899
-#: statistiche.py:1515 statistiche.py:1830 statistiche.py:1834
-#: statistiche.py:2181 statistiche.py:2187 statistiche.py:2220
+#: finestra.py:4444 finestra.py:11863 finestra.py:11873 finestra.py:11900
+#: statistiche.py:1515 statistiche.py:1834 statistiche.py:1838
+#: statistiche.py:2185 statistiche.py:2191 statistiche.py:2224
 #, python-brace-format
 msgid "{n} file"
 msgid_plural "{n} file"
@@ -3255,7 +3257,7 @@ msgstr ""
 
 #. Traduttori: il nome del ramo della plancia con gli indirizzi in rete aperti,
 #. le pagine dei siti.
-#: finestra.py:4592 finestra.py:10463 finestra.py:10959 finestra.py:12716
+#: finestra.py:4592 finestra.py:10463 finestra.py:10960 finestra.py:12717
 #: playlist.py:39
 msgid "Indirizzi"
 msgstr ""
@@ -3358,9 +3360,9 @@ msgstr[1] ""
 msgid "Playlist: {quante}, con {brani} in tutto."
 msgstr ""
 
-#: finestra.py:4682 finestra.py:5457 finestra.py:8263 finestra.py:14314
-#: finestra.py:14317 statistiche.py:1317 statistiche.py:1638
-#: statistiche.py:1731 statistiche.py:1738
+#: finestra.py:4682 finestra.py:5457 finestra.py:8263 finestra.py:14315
+#: finestra.py:14318 statistiche.py:1317 statistiche.py:1638
+#: statistiche.py:1731 statistiche.py:1742
 #, python-brace-format
 msgid "{n} brano"
 msgid_plural "{n} brani"
@@ -3509,7 +3511,7 @@ msgstr ""
 msgid "{nome} è un percorso di rete, non una cartella da cestinare."
 msgstr ""
 
-#: finestra.py:4852 finestra.py:13847
+#: finestra.py:4852 finestra.py:13848
 #, python-brace-format
 msgid "Non riesco a leggere {nome}: {errore}."
 msgstr ""
@@ -3644,7 +3646,7 @@ msgstr[1] ""
 msgid "Elimina playlist"
 msgstr ""
 
-#: finestra.py:5020 finestra.py:5879 finestra.py:10960 finestra.py:11845
+#: finestra.py:5020 finestra.py:5879 finestra.py:10961 finestra.py:11846
 msgid "Eliminazione annullata."
 msgstr ""
 
@@ -3933,23 +3935,23 @@ msgid "in Questa rete"
 msgstr ""
 
 #. Traduttori: dove si cerca, come in Ricerca nei Preferiti.
-#: finestra.py:5559 finestra.py:12433 statistiche.py:163
+#: finestra.py:5559 finestra.py:12434 statistiche.py:163
 msgid "nei Preferiti"
 msgstr ""
 
 #. Traduttori: dove si cerca, come in Ricerca nei Preferiti in rete.
-#: finestra.py:5563 finestra.py:12439
+#: finestra.py:5563 finestra.py:12440
 msgid "nei Preferiti in rete"
 msgstr ""
 
 #. Traduttori: dove si cerca, come in Ricerca negli Indirizzi, il ramo degli
 #. indirizzi in rete.
-#: finestra.py:5566 finestra.py:12437
+#: finestra.py:5566 finestra.py:12438
 msgid "negli Indirizzi"
 msgstr ""
 
 #. Traduttori: dove si cerca, come in Ricerca nella playlist Rock.
-#: finestra.py:5569 finestra.py:12435 finestra.py:12441
+#: finestra.py:5569 finestra.py:12436 finestra.py:12442
 #, python-brace-format
 msgid "nella playlist {nome}"
 msgstr ""
@@ -3976,13 +3978,13 @@ msgstr ""
 msgid "Ricerca annullata."
 msgstr ""
 
-#: finestra.py:5607 finestra.py:8307 finestra.py:13869
+#: finestra.py:5607 finestra.py:8307 finestra.py:13870
 #, python-brace-format
 msgid "Nella ricerca non capisco: {errore}"
 msgstr ""
 
 #. Traduttori: la radice dell'albero dei risultati di una ricerca.
-#: finestra.py:5631 finestra.py:5646 finestra.py:12689 finestra.py:12721
+#: finestra.py:5631 finestra.py:5646 finestra.py:12690 finestra.py:12722
 #: ricerca.py:355
 msgid "Risultati"
 msgstr ""
@@ -4490,7 +4492,7 @@ msgstr ""
 msgid "Fine: nessun brano si riesce a suonare."
 msgstr ""
 
-#: finestra.py:6817 finestra.py:12406 finestra.py:12614 finestra.py:12813
+#: finestra.py:6817 finestra.py:12407 finestra.py:12615 finestra.py:12814
 msgid "Non sta suonando niente."
 msgstr ""
 
@@ -4803,7 +4805,7 @@ msgstr ""
 msgid "{tempo} di {durata}"
 msgstr ""
 
-#: finestra.py:7394 finestra.py:12658
+#: finestra.py:7394 finestra.py:12659
 msgid "il tempo non si sa ancora"
 msgstr ""
 
@@ -5990,11 +5992,11 @@ msgid ""
 "NVDA come un albero di Windows."
 msgstr ""
 
-#: finestra.py:8760 finestra.py:13128
+#: finestra.py:8760 finestra.py:13129
 msgid "Inseguimento sganciato: la selezione resta dove la lasci."
 msgstr ""
 
-#: finestra.py:8763 finestra.py:13126
+#: finestra.py:8763 finestra.py:13127
 msgid ""
 "Inseguimento agganciato: la selezione della plancia segue il brano che "
 "suona."
@@ -6075,7 +6077,7 @@ msgstr ""
 msgid "Automatica ({scheda})"
 msgstr ""
 
-#: finestra.py:8900 finestra.py:8922 finestra.py:11394
+#: finestra.py:8900 finestra.py:8922 finestra.py:11395
 msgid "Automatica"
 msgstr ""
 
@@ -6909,7 +6911,7 @@ msgstr ""
 msgid "Cerco {testo} fra le radio di radio-browser."
 msgstr ""
 
-#: finestra.py:10412 finestra.py:10681
+#: finestra.py:10412 finestra.py:10682
 #, python-brace-format
 msgid "{errore}."
 msgstr ""
@@ -7005,175 +7007,175 @@ msgstr[1] ""
 msgid "Nessun contenuto trovato per {testo}."
 msgstr ""
 
-#: finestra.py:10622
+#: finestra.py:10623
 msgid "Non ci sono altri risultati da cercare."
 msgstr ""
 
-#: finestra.py:10625
+#: finestra.py:10626
 #, python-brace-format
 msgid "La ricerca di {testo} va ancora avanti: un momento."
 msgstr ""
 
-#: finestra.py:10636
+#: finestra.py:10637
 #, python-brace-format
 msgid "Cerco altri risultati per {testo}: arrivano in fondo al ramo."
 msgstr ""
 
-#: finestra.py:10657
+#: finestra.py:10658
 msgid "Mostra altre radio si usa sulla sua voce, in fondo a un ramo di radio."
 msgstr ""
 
-#: finestra.py:10660
+#: finestra.py:10661
 msgid "Sto già chiedendo altre radio a radio-browser: un momento."
 msgstr ""
 
-#: finestra.py:10664
+#: finestra.py:10665
 #, python-brace-format
 msgid "Chiedo altre radio di {nome} a radio-browser."
 msgstr ""
 
-#: finestra.py:10701
+#: finestra.py:10702
 #, python-brace-format
 msgid "Un'altra radio in {nome}: ora sono {totale}."
 msgid_plural "Altre {n} radio in {nome}: ora sono {totale}."
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:10704
+#: finestra.py:10705
 #, python-brace-format
 msgid "Non ci sono altre radio in {nome}."
 msgstr ""
 
-#: finestra.py:10757
+#: finestra.py:10758
 #, python-brace-format
 msgid "{titolo}: un minuto di ascolto di fila, torna in cima agli Indirizzi."
 msgstr ""
 
-#: finestra.py:10759
+#: finestra.py:10760
 #, python-brace-format
 msgid "{titolo}: un minuto di ascolto di fila, ora è negli Indirizzi."
 msgstr ""
 
-#: finestra.py:10775
+#: finestra.py:10776
 msgid ""
 "L'indirizzo della pagina da aprire, per esempio di RaiPlay Sound, "
 "YouTube, SoundCloud o Bandcamp."
 msgstr ""
 
-#: finestra.py:10778 finestra.py:10782
+#: finestra.py:10779 finestra.py:10783
 msgid "Nessun indirizzo aperto."
 msgstr ""
 
-#: finestra.py:10786
+#: finestra.py:10787
 #, python-brace-format
 msgid "{testo} non è un indirizzo: si scrive come https://www.raiplaysound.it/..."
 msgstr ""
 
-#: finestra.py:10798
+#: finestra.py:10799
 #, python-brace-format
 msgid ""
 "Per aprire gli indirizzi dei siti serve yt-dlp, e per YouTube anche "
 "QuickJS: in tutto circa {peso}. Li scarico?"
 msgstr ""
 
-#: finestra.py:10800
+#: finestra.py:10801
 #, python-brace-format
 msgid "Per aprire gli indirizzi dei siti serve yt-dlp, circa {peso}. Lo scarico?"
 msgstr ""
 
-#: finestra.py:10801
+#: finestra.py:10802
 msgid "Indirizzi in rete"
 msgstr ""
 
-#: finestra.py:10802
+#: finestra.py:10803
 msgid ""
 "Senza yt-dlp gli indirizzi dei siti non si aprono: si installa anche da "
 "Componenti aggiuntivi, nelle impostazioni."
 msgstr ""
 
-#: finestra.py:10836
+#: finestra.py:10837
 #, python-brace-format
 msgid "yt-dlp non si aggiorna: {errore}"
 msgstr ""
 
-#: finestra.py:10839
+#: finestra.py:10840
 #, python-brace-format
 msgid "yt-dlp aggiornato alla versione {versione}."
 msgstr ""
 
-#: finestra.py:10845
+#: finestra.py:10846
 #, python-brace-format
 msgid ""
 "yt-dlp è già all'ultima versione, {versione}: lo ricontrollo domani, al "
 "primo indirizzo o alla prima ricerca."
 msgstr ""
 
-#: finestra.py:10848
+#: finestra.py:10849
 msgid ""
 "yt-dlp è già all'ultima versione: lo ricontrollo domani, al primo "
 "indirizzo o alla prima ricerca."
 msgstr ""
 
-#: finestra.py:10854 finestra.py:11115
+#: finestra.py:10855 finestra.py:11116
 #, python-brace-format
 msgid "Sto già scaricando {nome}: un momento."
 msgstr ""
 
-#: finestra.py:10857
+#: finestra.py:10858
 #, python-brace-format
 msgid "Cerco una versione nuova di {nome}."
 msgstr ""
 
-#: finestra.py:10863
+#: finestra.py:10864
 #, python-brace-format
 msgid "{nome} non si aggiorna: {errore}"
 msgstr ""
 
-#: finestra.py:10876
+#: finestra.py:10877
 #, python-brace-format
 msgid "{nome} è già all'ultima versione, {versione}."
 msgstr ""
 
-#: finestra.py:10879
+#: finestra.py:10880
 #, python-brace-format
 msgid "{nome} aggiornato alla versione {versione}."
 msgstr ""
 
-#: finestra.py:10889
+#: finestra.py:10890
 #, python-brace-format
 msgid "Sto già aprendo un indirizzo di {sito}: un momento."
 msgstr ""
 
-#: finestra.py:10896
+#: finestra.py:10897
 #, python-brace-format
 msgid "Apro un indirizzo di {sito}: ci vuole qualche secondo."
 msgstr ""
 
-#: finestra.py:10912
+#: finestra.py:10913
 #, python-brace-format
 msgid "L'indirizzo di {sito} non si apre: {motivo}."
 msgstr ""
 
-#: finestra.py:10930
+#: finestra.py:10931
 #, python-brace-format
 msgid "La playlist {nome} di {sito} è vuota."
 msgstr ""
 
-#: finestra.py:10947
+#: finestra.py:10948
 #, python-brace-format
 msgid "Riletta dal sito la playlist {nome}: {n} brano."
 msgid_plural "Riletta dal sito la playlist {nome}: {n} brani."
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:10950
+#: finestra.py:10951
 #, python-brace-format
 msgid "Negli Indirizzi la playlist {nome}, da {sito}: {n} brano."
 msgid_plural "Negli Indirizzi la playlist {nome}, da {sito}: {n} brani."
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:10957
+#: finestra.py:10958
 #, python-brace-format
 msgid ""
 "Tolgo dagli Indirizzi la playlist {nome}, con {n} brano? Si può riaprire "
@@ -7184,29 +7186,29 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:10965
+#: finestra.py:10966
 #, python-brace-format
 msgid "Tolta dagli Indirizzi la playlist {nome}."
 msgstr ""
 
-#: finestra.py:10976 finestra.py:14095
+#: finestra.py:10977 finestra.py:14096
 #, python-brace-format
 msgid "Apro {nome}, da {sito}."
 msgstr ""
 
-#: finestra.py:11010 finestra.py:14107
+#: finestra.py:11011 finestra.py:14108
 #, python-brace-format
 msgid "{nome} non si apre: {motivo}."
 msgstr ""
 
-#: finestra.py:11056
+#: finestra.py:11057
 #, python-brace-format
 msgid "nessuno installato, {totale} disponibile"
 msgid_plural "nessuno installato, {totale} disponibili"
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:11057
+#: finestra.py:11058
 #, python-brace-format
 msgid "{n} installato su {totale}"
 msgid_plural "{n} installati su {totale}"
@@ -7215,126 +7217,126 @@ msgstr[1] ""
 
 #. Traduttori: il nome di un componente con la sua versione, come yt-dlp
 #. 2026.10.26.
-#: finestra.py:11065
+#: finestra.py:11066
 #, python-brace-format
 msgid "{nome} {versione}"
 msgstr ""
 
 #. Traduttori: uso e' una frase che comincia in minuscolo, come il
 #. sintetizzatore che suona i MIDI con un banco di suoni.
-#: finestra.py:11068
+#: finestra.py:11069
 #, python-brace-format
 msgid "{nome}, da installare: {uso} Licenza {licenza}, circa {peso}."
 msgstr ""
 
-#: finestra.py:11070
+#: finestra.py:11071
 #, python-brace-format
 msgid "{nome}, da aggiornare: {uso} Licenza {licenza}, circa {peso}."
 msgstr ""
 
-#: finestra.py:11072
+#: finestra.py:11073
 #, python-brace-format
 msgid "{nome}, installato e in uso per i MIDI: {uso} Licenza {licenza}, {peso}."
 msgstr ""
 
-#: finestra.py:11073
+#: finestra.py:11074
 #, python-brace-format
 msgid "{nome}, installato: {uso} Licenza {licenza}, {peso}."
 msgstr ""
 
-#: finestra.py:11079
+#: finestra.py:11080
 #, python-brace-format
 msgid "Installa, circa {peso}"
 msgstr ""
 
-#: finestra.py:11082
+#: finestra.py:11083
 #, python-brace-format
 msgid "Aggiorna, circa {peso}"
 msgstr ""
 
-#: finestra.py:11084
+#: finestra.py:11085
 msgid "Cerca un aggiornamento"
 msgstr ""
 
-#: finestra.py:11086
+#: finestra.py:11087
 msgid "Usa per i MIDI"
 msgstr ""
 
-#: finestra.py:11087
+#: finestra.py:11088
 msgid "Togli"
 msgstr ""
 
-#: finestra.py:11097
+#: finestra.py:11098
 msgid "Componenti aggiuntivi: niente di cambiato."
 msgstr ""
 
-#: finestra.py:11104 finestra.py:11173
+#: finestra.py:11105 finestra.py:11174
 #, python-brace-format
 msgid "{nome}: niente di cambiato."
 msgstr ""
 
-#: finestra.py:11120
+#: finestra.py:11121
 #, python-brace-format
 msgid "Scarico {nome}, circa {peso}."
 msgstr ""
 
 #. Traduttori: l'avanzamento dello scaricamento, come FluidR3 GM: 50%.
-#: finestra.py:11127
+#: finestra.py:11128
 #, python-brace-format
 msgid "{nome}: {percentuale}%."
 msgstr ""
 
-#: finestra.py:11133
+#: finestra.py:11134
 #, python-brace-format
 msgid "{nome} non si scarica: {errore}"
 msgstr ""
 
-#: finestra.py:11148
+#: finestra.py:11149
 #, python-brace-format
 msgid "{nome} scaricato."
 msgstr ""
 
-#: finestra.py:11161
+#: finestra.py:11162
 #, python-brace-format
 msgid "Uso {nome} per i MIDI, al posto di {banco}?"
 msgstr ""
 
-#: finestra.py:11165
+#: finestra.py:11166
 msgid ""
 "Per suonare i MIDI serve anche FluidSynth, che si scarica al primo MIDI o"
 " da Componenti aggiuntivi."
 msgstr ""
 
-#: finestra.py:11170
+#: finestra.py:11171
 #, python-brace-format
 msgid "Tolgo {nome}? Si libera circa {peso}, e si può installare di nuovo da qui."
 msgstr ""
 
-#: finestra.py:11179
+#: finestra.py:11180
 #, python-brace-format
 msgid "{nome} non si toglie: {errore}"
 msgstr ""
 
-#: finestra.py:11190
+#: finestra.py:11191
 #, python-brace-format
 msgid "{nome} tolto. I MIDI non hanno più un banco: si sceglie al prossimo MIDI."
 msgstr ""
 
-#: finestra.py:11192
+#: finestra.py:11193
 #, python-brace-format
 msgid "{nome} tolto."
 msgstr ""
 
-#: finestra.py:11196
+#: finestra.py:11197
 msgid "Il percorso del banco di suoni, un file sf2 o sf3."
 msgstr ""
 
-#: finestra.py:11202
+#: finestra.py:11203
 #, python-brace-format
 msgid "{percorso} non è un banco di suoni: serve un file sf2 o sf3."
 msgstr ""
 
-#: finestra.py:11206
+#: finestra.py:11207
 msgid ""
 "Non è un banco General MIDI completo: alcuni strumenti dei MIDI "
 "potrebbero mancare o suonare con un altro timbro."
@@ -7342,165 +7344,165 @@ msgstr ""
 
 #. Traduttori: modo e' come si leggono, come letti al volo, mentre il video
 #. suona.
-#: finestra.py:11223
+#: finestra.py:11224
 #, python-brace-format
 msgid "I sottotitoli impressi ora sono {modo}."
 msgstr ""
 
 #. Traduttori: voce e' il nome dell'impostazione, come Ripetizione o Volume
 #. uniforme.
-#: finestra.py:11236
+#: finestra.py:11237
 #, python-brace-format
 msgid "{voce}: non cambiato."
 msgstr ""
 
 #. Traduttori: destinazione e' dove vanno, come alla sintesi e al braille.
-#: finestra.py:11255
+#: finestra.py:11256
 #, python-brace-format
 msgid "Sottotitoli e karaoke ora vanno {destinazione}."
 msgstr ""
 
-#: finestra.py:11258 finestra.py:13328
+#: finestra.py:11259 finestra.py:13329
 #, python-brace-format
 msgid "Con {sintesi}, il braille non arriva: ce l'hanno NVDA e JAWS."
 msgstr ""
 
 #. Traduttori: modo e' come arriva il testo, come per riga.
-#: finestra.py:11272
+#: finestra.py:11273
 #, python-brace-format
 msgid "Il testo del karaoke ora arriva {modo}."
 msgstr ""
 
-#: finestra.py:11290
+#: finestra.py:11291
 #, python-brace-format
 msgid "La riproduzione casuale ora va con il modello {modello}."
 msgstr ""
 
 #. Traduttori: la scheda degli effetti di partenza, nella riga della voce.
-#: finestra.py:11309
+#: finestra.py:11310
 msgid "la stessa della musica"
 msgstr ""
 
-#: finestra.py:11321 finestra.py:11390
+#: finestra.py:11322 finestra.py:11391
 #, python-brace-format
 msgid "Non riesco a leggere le schede audio: {errore}."
 msgstr ""
 
-#: finestra.py:11325
+#: finestra.py:11326
 msgid "La stessa della musica"
 msgstr ""
 
-#: finestra.py:11338
+#: finestra.py:11339
 #, python-brace-format
 msgid "Gli effetti suonano sulla scheda {scheda}."
 msgstr ""
 
-#: finestra.py:11339
+#: finestra.py:11340
 msgid "Gli effetti suonano sulla stessa scheda della musica."
 msgstr ""
 
-#: finestra.py:11343
+#: finestra.py:11344
 #, python-brace-format
 msgid ""
 "La scheda {scheda} non si apre per gli effetti: tornano sulla scheda "
 "della musica."
 msgstr ""
 
-#: finestra.py:11348
+#: finestra.py:11349
 msgid "Gli effetti non riescono ad aprire la scheda della musica."
 msgstr ""
 
 #. Traduttori: la scheda audio scelta da sola, nella lista delle schede; dopo i
 #. due punti quella che sarebbe adesso.
-#: finestra.py:11394
+#: finestra.py:11395
 #, python-brace-format
 msgid "Automatica: {scheda}"
 msgstr ""
 
-#: finestra.py:11426
+#: finestra.py:11427
 #, python-brace-format
 msgid "Scheda audio: {scheda}."
 msgstr ""
 
-#: finestra.py:11428
+#: finestra.py:11429
 msgid "La musica non la ritrova, e suona sulla scheda di Windows."
 msgstr ""
 
-#: finestra.py:11434
+#: finestra.py:11435
 #, python-brace-format
 msgid "La scheda audio {scheda} non si apre: {errore}."
 msgstr ""
 
-#: finestra.py:11436
+#: finestra.py:11437
 #, python-brace-format
 msgid "La scheda audio {scheda} non si apre."
 msgstr ""
 
-#: finestra.py:11440
+#: finestra.py:11441
 #, python-brace-format
 msgid "Torno alla scelta automatica, ma neanche lei va: {errore}."
 msgstr ""
 
-#: finestra.py:11442
+#: finestra.py:11443
 #, python-brace-format
 msgid "Torno alla scelta automatica, {scheda}."
 msgstr ""
 
-#: finestra.py:11444
+#: finestra.py:11445
 msgid "Torno alla scelta automatica."
 msgstr ""
 
-#: finestra.py:11446
+#: finestra.py:11447
 #, python-brace-format
 msgid "La scheda audio automatica non si apre: {errore}."
 msgstr ""
 
-#: finestra.py:11448
+#: finestra.py:11449
 msgid "La scheda audio automatica non si apre."
 msgstr ""
 
-#: finestra.py:11484
+#: finestra.py:11485
 #, python-brace-format
 msgid ""
 "Lo speaker scelto, {nome}, non si può usare: manca pychromecast. Suono "
 "sul PC."
 msgstr ""
 
-#: finestra.py:11496
+#: finestra.py:11497
 #, python-brace-format
 msgid "Lo speaker scelto, {nome}, non c'è: suono sul PC finché non compare."
 msgstr ""
 
-#: finestra.py:11514
+#: finestra.py:11515
 #, python-brace-format
 msgid "Mi collego a {nome}."
 msgstr ""
 
-#: finestra.py:11569
+#: finestra.py:11570
 #, python-brace-format
 msgid "Lo speaker {nome} è tornato: la musica suona di nuovo lì."
 msgstr ""
 
 #. Traduttori: tipo e' la riga dello speaker senza il nome, come speaker Cast,
 #. Google Home Speaker.
-#: finestra.py:11572
+#: finestra.py:11573
 #, python-brace-format
 msgid ""
 "Suono su {nome}, {tipo}. Gli effetti restano sul PC; dissolvenza, "
 "equalizzatore, velocità e tono sullo speaker non valgono."
 msgstr ""
 
-#: finestra.py:11585
+#: finestra.py:11586
 #, python-brace-format
 msgid "Non riesco a collegarmi a {nome}: {errore}."
 msgstr ""
 
-#: finestra.py:11616
+#: finestra.py:11617
 #, python-brace-format
 msgid "Lo speaker {nome} non risponde più: suono sul PC, da dove eri."
 msgstr ""
 
-#: finestra.py:11627
+#: finestra.py:11628
 #, python-brace-format
 msgid ""
 "Su {nome} suona altro, mandato da fuori: MeTeOra si ferma. X riparte da "
@@ -7509,80 +7511,80 @@ msgstr ""
 
 #. Traduttori: cosa e' quello che sullo speaker non vale, come La velocità o
 #. L'equalizzatore; nome quello dello speaker.
-#: finestra.py:11641
+#: finestra.py:11642
 #, python-brace-format
 msgid "{cosa} su {nome} non vale: vale sulle schede del PC."
 msgstr ""
 
-#: finestra.py:11661
+#: finestra.py:11662
 #, python-brace-format
 msgid "Non riesco a salvare la console: {errore}."
 msgstr ""
 
-#: finestra.py:11664
+#: finestra.py:11665
 #, python-brace-format
 msgid "Console salvata in {nome}, nella cartella del programma: {n} riga."
 msgid_plural "Console salvata in {nome}, nella cartella del programma: {n} righe."
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:11677
+#: finestra.py:11678
 #, python-brace-format
 msgid ""
 "È disponibile MeTeOra {versione}: la finestra dell'aggiornamento dice le "
 "novità."
 msgstr ""
 
-#: finestra.py:11681
+#: finestra.py:11682
 #, python-brace-format
 msgid "Scarico MeTeOra {versione}: la console dice a che punto sono."
 msgstr ""
 
-#: finestra.py:11683
+#: finestra.py:11684
 msgid "Aggiornamento rimandato: te lo ripropongo al prossimo avvio."
 msgstr ""
 
-#: finestra.py:11691
+#: finestra.py:11692
 #, python-brace-format
 msgid "Aggiornamento: {percentuale}%."
 msgstr ""
 
-#: finestra.py:11693
+#: finestra.py:11694
 #, python-brace-format
 msgid "Aggiornamento: {mega} MB."
 msgstr ""
 
-#: finestra.py:11730
+#: finestra.py:11731
 msgid ""
 "Le associazioni dei formati si fanno solo dal programma compilato: da "
 "sorgente, Windows aprirebbe Python."
 msgstr ""
 
-#: finestra.py:11732
+#: finestra.py:11733
 msgid ""
 "Associa: MeTeOra in Apri con per tutti i suoi formati, poi la pagina "
 "delle app predefinite di Windows"
 msgstr ""
 
-#: finestra.py:11733
+#: finestra.py:11734
 msgid "Togli MeTeOra dalle associazioni"
 msgstr ""
 
-#: finestra.py:11737
+#: finestra.py:11738
 msgid "Associazioni dei formati: niente di cambiato."
 msgstr ""
 
-#: finestra.py:11746
+#: finestra.py:11747
 #, python-brace-format
 msgid "Non riesco a cambiare le associazioni dei formati: {errore}."
 msgstr ""
 
-#: finestra.py:11749
+#: finestra.py:11750
 msgid "MeTeOra non è più nelle associazioni dei formati."
 msgstr ""
 
 #. Traduttori: Apri con e' il menu di Esplora file.
-#: finestra.py:11752
+#: finestra.py:11753
 #, python-brace-format
 msgid ""
 "MeTeOra ora compare in Apri con per {n} formato. Si apre la pagina delle "
@@ -7593,123 +7595,123 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:11762
+#: finestra.py:11763
 msgid "PayPal si apre nel browser: grazie di cuore!"
 msgstr ""
 
-#: finestra.py:11772
+#: finestra.py:11773
 msgid "La mail d'iscrizione al PUB è pronta: spediscila tu."
 msgstr ""
 
-#: finestra.py:11773
+#: finestra.py:11774
 msgid "Entra al PUB: niente di preparato."
 msgstr ""
 
-#: finestra.py:11802
+#: finestra.py:11803
 #, python-brace-format
 msgid "Non riesco a scrivere il file dei registri: {errore}."
 msgstr ""
 
-#: finestra.py:11806
+#: finestra.py:11807
 msgid "La mail d'aiuto al PUB è pronta: scrivi la domanda e spediscila tu."
 msgstr ""
 
-#: finestra.py:11807
+#: finestra.py:11808
 msgid "Chiedi aiuto al PUB: niente di preparato."
 msgstr ""
 
-#: finestra.py:11844
+#: finestra.py:11845
 #, python-brace-format
 msgid "Eliminare {n} marker?"
 msgid_plural "Eliminare {n} marker?"
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:11844
+#: finestra.py:11845
 msgid "Elimina marcatori"
 msgstr ""
 
-#: finestra.py:11850
+#: finestra.py:11851
 #, python-brace-format
 msgid "Eliminato {n} marker."
 msgid_plural "Eliminati {n} marker."
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:11858
+#: finestra.py:11859
 msgid "Non ci sono marcatori da cancellare."
 msgstr ""
 
 #. Traduttori: marker e' come 3 marker, file come 2 file.
-#: finestra.py:11861
+#: finestra.py:11862
 #, python-brace-format
 msgid ""
 "Cancellare tutti i marcatori, {marker} in {file}? Non si possono "
 "recuperare."
 msgstr ""
 
-#: finestra.py:11863
+#: finestra.py:11864
 msgid "I marcatori restano dove sono."
 msgstr ""
 
 #. Traduttori: marker e' come 3 marker, file come 2 file.
-#: finestra.py:11871
+#: finestra.py:11872
 #, python-brace-format
 msgid "Cancellati tutti i marcatori: {marker} in {file}."
 msgstr ""
 
-#: finestra.py:11880
+#: finestra.py:11881
 msgid ""
 "I marker scelti non si esportano: MeTeOra non conosce una durata valida "
 "dei loro file, e senza la durata un altro computer non li ritroverebbe."
 msgstr ""
 
-#: finestra.py:11883
+#: finestra.py:11884
 msgid "Esporta marcatori"
 msgstr ""
 
-#: finestra.py:11886
+#: finestra.py:11887
 msgid "Esportazione annullata."
 msgstr ""
 
-#: finestra.py:11894
+#: finestra.py:11895
 #, python-brace-format
 msgid "Non riesco a esportare i marcatori: {errore}."
 msgstr ""
 
 #. Traduttori: file e' come 2 file, nome quello del file scritto.
-#: finestra.py:11898
+#: finestra.py:11899
 #, python-brace-format
 msgid "Esportato {n} marker di {file} in {nome}."
 msgid_plural "Esportati {n} marker di {file} in {nome}."
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:11901
+#: finestra.py:11902
 #, python-brace-format
 msgid "{n} non esportato: MeTeOra non conosce una durata valida dei loro file."
 msgid_plural "{n} non esportati: MeTeOra non conosce una durata valida dei loro file."
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:11913
+#: finestra.py:11914
 msgid "Importazione annullata."
 msgstr ""
 
-#: finestra.py:11924
+#: finestra.py:11925
 #, python-brace-format
 msgid "{n} c'era già"
 msgid_plural "{n} c'erano già"
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:11924
+#: finestra.py:11925
 msgid "nessuno c'era già"
 msgstr ""
 
 #. Traduttori: presenti e' quanti marcatori c'erano già, come nessuno c'era già
 #. o 2 c'erano già.
-#: finestra.py:11926
+#: finestra.py:11927
 #, python-brace-format
 msgid "Importato {n} marcatore, {presenti}."
 msgid_plural "Importati {n} marcatori, {presenti}."
@@ -7718,54 +7720,54 @@ msgstr[1] ""
 
 #. Traduttori: spiegazione e' una frase su cosa fa il comando, come i marker si
 #. mettono nel brano che suona.
-#: finestra.py:11987
+#: finestra.py:11988
 #, python-brace-format
 msgid "Non sta suonando niente: {spiegazione}"
 msgstr ""
 
-#: finestra.py:12001
+#: finestra.py:12002
 #, python-brace-format
 msgid "Non riesco a salvare i marker, riprovo all'uscita: {errore}"
 msgstr ""
 
-#: finestra.py:12007
+#: finestra.py:12008
 msgid "i marker si mettono nel brano che suona."
 msgstr ""
 
-#: finestra.py:12019
+#: finestra.py:12020
 #, python-brace-format
 msgid "Marker {nome} a {tempo}."
 msgstr ""
 
-#: finestra.py:12022
+#: finestra.py:12023
 msgid "Ctrl e Maiuscolo con Y saltano fra i marker del brano che suona."
 msgstr ""
 
-#: finestra.py:12027 finestra.py:12075 finestra.py:12108 finestra.py:12119
+#: finestra.py:12028 finestra.py:12076 finestra.py:12109 finestra.py:12120
 msgid "Questo brano non ha marker: T ne mette uno dove sei."
 msgstr ""
 
-#: finestra.py:12038
+#: finestra.py:12039
 msgid "È l'ultimo marker."
 msgstr ""
 
-#: finestra.py:12038
+#: finestra.py:12039
 msgid "Dopo di qui non ci sono marker."
 msgstr ""
 
-#: finestra.py:12040
+#: finestra.py:12041
 msgid "È il primo marker."
 msgstr ""
 
-#: finestra.py:12040
+#: finestra.py:12041
 msgid "Prima di qui non ci sono marker."
 msgstr ""
 
-#: finestra.py:12070
+#: finestra.py:12071
 msgid "Y dice i marker del brano che suona."
 msgstr ""
 
-#: finestra.py:12081
+#: finestra.py:12082
 #, python-brace-format
 msgid ""
 "Prima di qui non ci sono marker; il brano ne ha {n}, il primo è {nome}, "
@@ -7776,52 +7778,52 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:12088
+#: finestra.py:12089
 #, python-brace-format
 msgid "Marker {numero} di {quanti}, {nome}, {tempo}: ci sei sopra."
 msgstr ""
 
-#: finestra.py:12090
+#: finestra.py:12091
 #, python-brace-format
 msgid "Marker {numero} di {quanti}, {nome}, {tempo}: il più vicino prima di qui."
 msgstr ""
 
-#: finestra.py:12102
+#: finestra.py:12103
 msgid ""
 "Alt con Y e Ctrl e Alt con Y vanno all'ultimo e al primo marker del brano"
 " che suona."
 msgstr ""
 
-#: finestra.py:12114
+#: finestra.py:12115
 msgid "Alt con T conta i marker del brano che suona."
 msgstr ""
 
-#: finestra.py:12126
+#: finestra.py:12127
 #, python-brace-format
 msgid "Il brano ha {n} marker: {prima} prima di qui e {dopo} dopo, e sei su uno."
 msgid_plural "Il brano ha {n} marker: {prima} prima di qui e {dopo} dopo, e sei su uno."
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:12129
+#: finestra.py:12130
 #, python-brace-format
 msgid "Il brano ha {n} marker: {prima} prima di qui e {dopo} dopo."
 msgid_plural "Il brano ha {n} marker: {prima} prima di qui e {dopo} dopo."
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:12143
+#: finestra.py:12144
 msgid ""
 "Maiuscolo con le cifre va ai marker del brano su cui sta la plancia: "
 "porta il fuoco su un brano."
 msgstr ""
 
-#: finestra.py:12162
+#: finestra.py:12163
 #, python-brace-format
 msgid "Il sottobrano {sottobrano} di {file} non ha marker."
 msgstr ""
 
-#: finestra.py:12164
+#: finestra.py:12165
 #, python-brace-format
 msgid ""
 "Non c'è il marker {numero}: il sottobrano {sottobrano} di {file} ne ha "
@@ -7833,538 +7835,538 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. Traduttori: file e' il nome del file, con l'iniziale maiuscola.
-#: finestra.py:12169
+#: finestra.py:12170
 #, python-brace-format
 msgid "{file} non ha marker."
 msgstr ""
 
-#: finestra.py:12171
+#: finestra.py:12172
 #, python-brace-format
 msgid "Non c'è il marker {numero}: {file} ne ha {n}."
 msgid_plural "Non c'è il marker {numero}: {file} ne ha {n}."
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:12179
+#: finestra.py:12180
 msgid ""
 "Ctrl con T, Maiuscolo con T e Ctrl e Maiuscolo con T tolgono i marker del"
 " brano che suona; quelli di un altro brano si tolgono con Canc sulla loro"
 " voce nella plancia."
 msgstr ""
 
-#: finestra.py:12193
+#: finestra.py:12194
 #, python-brace-format
 msgid "Non ci sono marker da togliere prima di {tempo}."
 msgstr ""
 
-#: finestra.py:12195
+#: finestra.py:12196
 #, python-brace-format
 msgid "Non ci sono marker da togliere dopo {tempo}."
 msgstr ""
 
-#: finestra.py:12197
+#: finestra.py:12198
 msgid "Non ci sono marker da togliere in tutto il brano."
 msgstr ""
 
-#: finestra.py:12203
+#: finestra.py:12204
 #, python-brace-format
 msgid "Tolto {n} marker prima di {tempo}."
 msgid_plural "Tolti {n} marker prima di {tempo}."
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:12205
+#: finestra.py:12206
 #, python-brace-format
 msgid "Tolto {n} marker dopo {tempo}."
 msgid_plural "Tolti {n} marker dopo {tempo}."
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:12207
+#: finestra.py:12208
 #, python-brace-format
 msgid "Tolto {n} marker in tutto il brano."
 msgid_plural "Tolti {n} marker in tutto il brano."
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:12220
+#: finestra.py:12221
 #, python-brace-format
 msgid "Nome del marker a {tempo}:"
 msgstr ""
 
-#: finestra.py:12220
+#: finestra.py:12221
 msgid "Rinomina il marker"
 msgstr ""
 
-#: finestra.py:12223 finestra.py:12227
+#: finestra.py:12224 finestra.py:12228
 msgid "Nome del marker non cambiato."
 msgstr ""
 
-#: finestra.py:12232
+#: finestra.py:12233
 #, python-brace-format
 msgid "Il marker {vecchio}, a {tempo}, ora si chiama {nome}."
 msgstr ""
 
-#: finestra.py:12247
+#: finestra.py:12248
 #, python-brace-format
 msgid "Eliminato il marker {nome}, a {tempo}."
 msgstr ""
 
-#: finestra.py:12271 finestra.py:12537
+#: finestra.py:12272 finestra.py:12538
 #, python-brace-format
 msgid "{file} è fuori dal loop: si suona solo fra il punto A e il punto B."
 msgstr ""
 
-#: finestra.py:12274
+#: finestra.py:12275
 #, python-brace-format
 msgid "Dal marker {nome}, {tempo}."
 msgstr ""
 
-#: finestra.py:12410
+#: finestra.py:12411
 #, python-brace-format
 msgid "{file} non è nella plancia: è stato aperto con Apri file."
 msgstr ""
 
-#: finestra.py:12414
+#: finestra.py:12415
 #, python-brace-format
 msgid "Selezione su {voce}."
 msgstr ""
 
 #. Traduttori: i pezzi della frase del segnalibro, come Canzone.mp3, a 12:34 di
 #. 45:00, nella playlist Libri.
-#: finestra.py:12427
+#: finestra.py:12428
 #, python-brace-format
 msgid "a {tempo} di {durata}"
 msgstr ""
 
-#: finestra.py:12427
+#: finestra.py:12428
 #, python-brace-format
 msgid "a {tempo}"
 msgstr ""
 
-#: finestra.py:12431
+#: finestra.py:12432
 #, python-brace-format
 msgid "sottobrano {numero}"
 msgstr ""
 
-#: finestra.py:12443
+#: finestra.py:12444
 #, python-brace-format
 msgid "nella cartella {nome} con le sottocartelle"
 msgstr ""
 
-#: finestra.py:12446
+#: finestra.py:12447
 #, python-brace-format
 msgid "nella cartella {nome}"
 msgstr ""
 
-#: finestra.py:12454 finestra.py:12522
+#: finestra.py:12455 finestra.py:12523
 msgid "Nessun segnalibro: Ctrl e Maiuscolo con H lo mettono sul brano che suona."
 msgstr ""
 
-#: finestra.py:12456 finestra.py:12502
+#: finestra.py:12457 finestra.py:12503
 #, python-brace-format
 msgid "Segnalibro su {segnalibro}. Maiuscolo con H ci torna."
 msgstr ""
 
-#: finestra.py:12464
+#: finestra.py:12465
 msgid "Niente da segnare: il segnalibro si mette sul brano che suona."
 msgstr ""
 
-#: finestra.py:12500
+#: finestra.py:12501
 #, python-brace-format
 msgid "Segnalibro riscritto su {segnalibro}."
 msgstr ""
 
-#: finestra.py:12508
+#: finestra.py:12509
 msgid "Nessun segnalibro da togliere."
 msgstr ""
 
-#: finestra.py:12512
+#: finestra.py:12513
 #, python-brace-format
 msgid "Segnalibro tolto: era su {segnalibro}."
 msgstr ""
 
-#: finestra.py:12525
+#: finestra.py:12526
 #, python-brace-format
 msgid "Il file del segnalibro non c'è più: {percorso}."
 msgstr ""
 
-#: finestra.py:12529
+#: finestra.py:12530
 #, python-brace-format
 msgid "Non ritrovo {file} nella sua cartella."
 msgstr ""
 
-#: finestra.py:12541
+#: finestra.py:12542
 #, python-brace-format
 msgid "Dal segnalibro, a {tempo}."
 msgstr ""
 
-#: finestra.py:12645
+#: finestra.py:12646
 #, python-brace-format
 msgid "Su {nome} non vale: vale sulle schede del PC."
 msgstr ""
 
-#: finestra.py:12658
+#: finestra.py:12659
 #, python-brace-format
 msgid "il tempo non si sa ancora, dura {durata}"
 msgstr ""
 
 #. Traduttori: il tempo di una diretta, come una radio, in Dove sono: 12:34, in
 #. diretta.
-#: finestra.py:12661
+#: finestra.py:12662
 #, python-brace-format
 msgid "{posizione}, in diretta"
 msgstr ""
 
-#: finestra.py:12663
+#: finestra.py:12664
 #, python-brace-format
 msgid "{posizione}, la durata non si sa"
 msgstr ""
 
-#: finestra.py:12664
+#: finestra.py:12665
 #, python-brace-format
 msgid "{posizione} di {durata}, mancano {mancano}"
 msgstr ""
 
-#: finestra.py:12688
+#: finestra.py:12689
 msgid "non è più nei Preferiti"
 msgstr ""
 
-#: finestra.py:12690
+#: finestra.py:12691
 msgid "non è più nei Risultati"
 msgstr ""
 
 #. Traduttori: lista e' come playlist Libri, selezione o cartella Musica.
-#: finestra.py:12692
+#: finestra.py:12693
 #, python-brace-format
 msgid "non è più nella {lista}"
 msgstr ""
 
-#: finestra.py:12694
+#: finestra.py:12695
 #, python-brace-format
 msgid "{numero} di {quanti} della selezione"
 msgstr ""
 
-#: finestra.py:12700
+#: finestra.py:12701
 #, python-brace-format
 msgid "fuori dal filtro, {numero} di {quanti} in tutto"
 msgstr ""
 
-#: finestra.py:12701
+#: finestra.py:12702
 #, python-brace-format
 msgid "{numero} di {quanti} col filtro"
 msgstr ""
 
 #. Traduttori: il posto del brano nella lista, come 3 di 12.
-#: finestra.py:12703
+#: finestra.py:12704
 #, python-brace-format
 msgid "{numero} di {quanti}"
 msgstr ""
 
-#: finestra.py:12719
+#: finestra.py:12720
 #, python-brace-format
 msgid "playlist {nome}"
 msgstr ""
 
 #. Traduttori: la lista dei brani scelti nella plancia e suonati con X.
-#: finestra.py:12724
+#: finestra.py:12725
 msgid "selezione"
 msgstr ""
 
-#: finestra.py:12730
+#: finestra.py:12731
 #, python-brace-format
 msgid "unità {unita} con le sottocartelle"
 msgstr ""
 
-#: finestra.py:12730
+#: finestra.py:12731
 #, python-brace-format
 msgid "unità {unita}"
 msgstr ""
 
-#: finestra.py:12731
+#: finestra.py:12732
 #, python-brace-format
 msgid "cartella {nome} con le sottocartelle"
 msgstr ""
 
-#: finestra.py:12731
+#: finestra.py:12732
 #, python-brace-format
 msgid "cartella {nome}"
 msgstr ""
 
-#: finestra.py:12739 finestra.py:13075
+#: finestra.py:12740 finestra.py:13076
 msgid "in pausa"
 msgstr ""
 
 #. Traduttori: il titolo che la radio manda, come in onda Lucio Dalla - Caruso.
-#: finestra.py:12742
+#: finestra.py:12743
 #, python-brace-format
 msgid "in onda {titolo}"
 msgstr ""
 
-#: finestra.py:12744
+#: finestra.py:12745
 #, python-brace-format
 msgid "sottobrano {numero} di {quanti}"
 msgstr ""
 
 #. Traduttori: ripetizione e' quale, come del brano o della lista.
-#: finestra.py:12749
+#: finestra.py:12750
 #, python-brace-format
 msgid "ripetizione {ripetizione}"
 msgstr ""
 
-#: finestra.py:12751 statistiche.py:123
+#: finestra.py:12752 statistiche.py:123
 msgid "riproduzione casuale"
 msgstr ""
 
-#: finestra.py:12755 statistiche.py:122
+#: finestra.py:12756 statistiche.py:122
 msgid "loop A-B"
 msgstr ""
 
 #. Traduttori: il volume tolto, in fondo alla riga di Dove sono.
-#: finestra.py:12758 statistiche.py:123
+#: finestra.py:12759 statistiche.py:123
 msgid "muto"
 msgstr ""
 
-#: finestra.py:12760
+#: finestra.py:12761
 #, python-brace-format
 msgid "velocità {velocita}"
 msgstr ""
 
-#: finestra.py:12765
+#: finestra.py:12766
 #, python-brace-format
 msgid "tono più {n} semitono"
 msgid_plural "tono più {n} semitoni"
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:12767
+#: finestra.py:12768
 #, python-brace-format
 msgid "tono meno {n} semitono"
 msgid_plural "tono meno {n} semitoni"
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:12780
+#: finestra.py:12781
 #, python-brace-format
 msgid "capitolo {numero} di {quanti}: {titolo}"
 msgstr ""
 
-#: finestra.py:12781
+#: finestra.py:12782
 #, python-brace-format
 msgid "capitolo {numero} di {quanti}"
 msgstr ""
 
-#: finestra.py:12787
+#: finestra.py:12788
 msgid "timer scaduto, la musica sfuma"
 msgstr ""
 
-#: finestra.py:12789
+#: finestra.py:12790
 msgid "timer alla fine del brano"
 msgstr ""
 
 #. Traduttori: minuti e' come 5 minuti.
-#: finestra.py:12792
+#: finestra.py:12793
 #, python-brace-format
 msgid "timer fra {minuti}"
 msgstr ""
 
-#: finestra.py:12947
+#: finestra.py:12948
 #, python-brace-format
 msgid "{ora} di domani"
 msgstr ""
 
-#: finestra.py:12947
+#: finestra.py:12948
 #, python-brace-format
 msgid "{ora} di {data}"
 msgstr ""
 
-#: finestra.py:13006
+#: finestra.py:13007
 #, python-brace-format
 msgid "alla velocità {velocita} sono {tempo}"
 msgstr ""
 
 #. Traduttori: quanto manca, di quanto dura tutto: come 3:00 di 10:00.
-#: finestra.py:13013
+#: finestra.py:13014
 #, python-brace-format
 msgid "{mancano} di {totale}"
 msgstr ""
 
 #. Traduttori: alla_velocita e' come alla velocità 1.5 sono 2:00.
-#: finestra.py:13016
+#: finestra.py:13017
 #, python-brace-format
 msgid "{mancano}, {alla_velocita}, in tutto {totale}"
 msgstr ""
 
 #. Traduttori: percentuale e' come 70%.
-#: finestra.py:13018
+#: finestra.py:13019
 #, python-brace-format
 msgid "trascorsi {trascorso}, {percentuale} ascoltato"
 msgstr ""
 
-#: finestra.py:13020
+#: finestra.py:13021
 msgid "Suona un brano solo, e la sua durata non si sa"
 msgstr ""
 
-#: finestra.py:13020
+#: finestra.py:13021
 msgid "Nessuna durata è nota"
 msgstr ""
 
-#: finestra.py:13023
+#: finestra.py:13024
 #, python-brace-format
 msgid "Suona un brano solo: mancano {mancano}"
 msgstr ""
 
-#: finestra.py:13025
+#: finestra.py:13026
 #, python-brace-format
 msgid "Suona un brano solo: mancano {mancano}, {alla_velocita}"
 msgstr ""
 
-#: finestra.py:13028
+#: finestra.py:13029
 msgid "Del brano la durata non si sa"
 msgstr ""
 
-#: finestra.py:13030
+#: finestra.py:13031
 #, python-brace-format
 msgid "Del brano mancano {resto}"
 msgstr ""
 
-#: finestra.py:13032
+#: finestra.py:13033
 #, python-brace-format
 msgid "Del brano mancano {resto}, {alla_velocita}"
 msgstr ""
 
 #. Traduttori: del_brano e' come Del brano mancano 2:00.
-#: finestra.py:13034
+#: finestra.py:13035
 #, python-brace-format
 msgid "{del_brano}, in tutto {totale}, ordine casuale senza fine"
 msgstr ""
 
 #. Traduttori: numeri e' come 3:00 di 10:00, trascorsi 7:00, 70% ascoltato.
-#: finestra.py:13037
+#: finestra.py:13038
 #, python-brace-format
 msgid "Casuale: suonati {suonati} di {quanti}, nel mazzo restano {numeri}"
 msgstr ""
 
 #. Traduttori: numeri e' come 3:00 di 10:00, trascorsi 7:00, 70% ascoltato.
-#: finestra.py:13040
+#: finestra.py:13041
 #, python-brace-format
 msgid "Mancano {numeri}"
 msgstr ""
 
-#: finestra.py:13049 finestra.py:13061
+#: finestra.py:13050 finestra.py:13062
 msgid "il brano si ripete"
 msgstr ""
 
-#: finestra.py:13049
+#: finestra.py:13050
 msgid ""
 "il brano si ripete: la lista non va avanti finché la ripetizione resta "
 "accesa"
 msgstr ""
 
-#: finestra.py:13054
+#: finestra.py:13055
 msgid "poi il mazzo si rimescola"
 msgstr ""
 
-#: finestra.py:13056
+#: finestra.py:13057
 msgid "il brano è fuori dal loop: poi si va al punto A"
 msgstr ""
 
-#: finestra.py:13056
+#: finestra.py:13057
 msgid "poi si torna al punto A"
 msgstr ""
 
-#: finestra.py:13058
+#: finestra.py:13059
 msgid "poi si riparte dalla prima voce della plancia"
 msgstr ""
 
-#: finestra.py:13058
+#: finestra.py:13059
 msgid "poi la lista ricomincia"
 msgstr ""
 
-#: finestra.py:13065
+#: finestra.py:13066
 msgid "il timer è scaduto, e la musica sta sfumando"
 msgstr ""
 
-#: finestra.py:13068
+#: finestra.py:13069
 msgid "il timer ferma la musica alla fine di questo brano"
 msgstr ""
 
 #. Traduttori: ora e' come 14:30, o 14:30 di domani.
-#: finestra.py:13071
+#: finestra.py:13072
 #, python-brace-format
 msgid "il timer ferma la musica alla fine di questo brano, verso le {ora}"
 msgstr ""
 
 #. Traduttori: ora e' come 14:30, o 14:30 di domani.
-#: finestra.py:13079
+#: finestra.py:13080
 #, python-brace-format
 msgid "il giro finisce verso le {ora}"
 msgstr ""
 
 #. Traduttori: ora e' come 14:30, o 14:30 di domani.
-#: finestra.py:13082
+#: finestra.py:13083
 #, python-brace-format
 msgid "finisce verso le {ora}"
 msgstr ""
 
 #. Traduttori: posto e' il posto del brano nella lista, come 3 di 12.
-#: finestra.py:13086
+#: finestra.py:13087
 #, python-brace-format
 msgid "brano {posto}"
 msgstr ""
 
-#: finestra.py:13089
+#: finestra.py:13090
 #, python-brace-format
 msgid "con i rami aperti della plancia, {n} brano in tutto"
 msgid_plural "con i rami aperti della plancia, {n} brani in tutto"
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:13091
+#: finestra.py:13092
 msgid "dopo si riparte dal primo brano"
 msgstr ""
 
-#: finestra.py:13093
+#: finestra.py:13094
 #, python-brace-format
 msgid "{n} saltato escluso"
 msgid_plural "{n} saltati esclusi"
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:13095
+#: finestra.py:13096
 #, python-brace-format
 msgid "{n} brano senza durata"
 msgid_plural "{n} brani senza durata"
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:13105
+#: finestra.py:13106
 #, python-brace-format
 msgid "ma il timer ferma la musica alle {ora}"
 msgstr ""
 
-#: finestra.py:13107
+#: finestra.py:13108
 #, python-brace-format
 msgid "il timer ferma la musica alle {ora}"
 msgstr ""
 
-#: finestra.py:13158
+#: finestra.py:13159
 msgid "Qui non c'è un ramo."
 msgstr ""
 
 #. Traduttori: il ramo della plancia, che non e' aperto.
-#: finestra.py:13163
+#: finestra.py:13164
 #, python-brace-format
 msgid "{nome}: chiuso."
 msgstr ""
 
 #. Traduttori: voci e' come 12 voci, rami come 2 rami aperti.
-#: finestra.py:13167
+#: finestra.py:13168
 #, python-brace-format
 msgid "{nome}: aperto, con {voci} e {rami} dentro."
 msgstr ""
 
-#: finestra.py:13167 finestra.py:13198 finestra.py:13706 finestra.py:14315
+#: finestra.py:13168 finestra.py:13199 finestra.py:13707 finestra.py:14316
 #: statistiche.py:1661
 #, python-brace-format
 msgid "{n} voce"
@@ -8372,7 +8374,7 @@ msgid_plural "{n} voci"
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:13168 finestra.py:13707
+#: finestra.py:13169 finestra.py:13708
 #, python-brace-format
 msgid "{n} ramo aperto"
 msgid_plural "{n} rami aperti"
@@ -8381,136 +8383,136 @@ msgstr[1] ""
 
 #. Traduttori: titolo e' come Apertura di tutta la plancia; rami come 3 rami,
 #. voci come 120 voci.
-#: finestra.py:13197
+#: finestra.py:13198
 #, python-brace-format
 msgid "{titolo} in corso: finora {rami} e {voci}"
 msgstr ""
 
-#: finestra.py:13197
+#: finestra.py:13198
 #, python-brace-format
 msgid "{n} ramo"
 msgid_plural "{n} rami"
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:13201
+#: finestra.py:13202
 #, python-brace-format
 msgid "{n} cartella letta"
 msgid_plural "{n} cartelle lette"
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:13203
+#: finestra.py:13204
 #, python-brace-format
 msgid "sto leggendo {cartella}"
 msgstr ""
 
-#: finestra.py:13212
+#: finestra.py:13213
 msgid "Qui non c'è niente da chiudere."
 msgstr ""
 
-#: finestra.py:13219
+#: finestra.py:13220
 #, python-brace-format
 msgid "Chiuso tutto dentro {nome}."
 msgstr ""
 
-#: finestra.py:13219 finestra.py:13257
+#: finestra.py:13220 finestra.py:13258
 msgid "Apertura fermata."
 msgstr ""
 
-#: finestra.py:13257
+#: finestra.py:13258
 msgid "Chiusa tutta la plancia."
 msgstr ""
 
-#: finestra.py:13267
+#: finestra.py:13268
 msgid "Apertura di tutta la plancia"
 msgstr ""
 
-#: finestra.py:13267
+#: finestra.py:13268
 msgid ""
 "Apro tutta la plancia, tranne i CD, Computer della rete e le condivisioni"
 " salvate in Windows"
 msgstr ""
 
-#: finestra.py:13268
+#: finestra.py:13269
 msgid "Aperta tutta la plancia"
 msgstr ""
 
-#: finestra.py:13275
+#: finestra.py:13276
 msgid "Qui non c'è niente da aprire."
-msgstr ""
-
-#: finestra.py:13278
-#, python-brace-format
-msgid "Apertura dentro {nome}"
-msgstr ""
-
-#: finestra.py:13278
-#, python-brace-format
-msgid "Apro tutto dentro {nome}"
 msgstr ""
 
 #: finestra.py:13279
 #, python-brace-format
+msgid "Apertura dentro {nome}"
+msgstr ""
+
+#: finestra.py:13279
+#, python-brace-format
+msgid "Apro tutto dentro {nome}"
+msgstr ""
+
+#: finestra.py:13280
+#, python-brace-format
 msgid "Aperto tutto dentro {nome}"
 msgstr ""
 
-#: finestra.py:13324
+#: finestra.py:13325
 msgid "La console non si legge da sola."
 msgstr ""
 
-#: finestra.py:13325
+#: finestra.py:13326
 #, python-brace-format
 msgid "La console si legge da sola, {dove}."
 msgstr ""
 
-#: finestra.py:13338
+#: finestra.py:13339
 msgid "La console si legge già al braille e alla sintesi."
 msgstr ""
 
-#: finestra.py:13339
+#: finestra.py:13340
 msgid "La lettura della console è già spenta."
 msgstr ""
 
-#: finestra.py:13417
+#: finestra.py:13418
 msgid "Non c'è un'apertura in corso."
 msgstr ""
 
 #. Traduttori: titolo e' come Apertura di tutta la plancia, o Apertura dentro
 #. Musica.
-#: finestra.py:13420
+#: finestra.py:13421
 #, python-brace-format
 msgid "{titolo} fermata: i rami aperti fin qui restano aperti."
 msgstr ""
 
 #. Traduttori: inizio e' come Apro tutto dentro Musica.
-#: finestra.py:13437
+#: finestra.py:13438
 #, python-brace-format
 msgid ""
 "{inizio}: ci vuole un po', e intanto puoi navigare. Ctrl e Maiuscolo con "
 "F9 mi fermano."
 msgstr ""
 
-#: finestra.py:13702
+#: finestra.py:13703
 #, python-brace-format
 msgid "Niente da suonare dentro {nome}."
 msgstr ""
 
 #. Traduttori: fine e' come Aperta tutta la plancia; voci come 120 voci, rami
 #. come 3 rami aperti.
-#: finestra.py:13706
+#: finestra.py:13707
 #, python-brace-format
 msgid "{fine}: {voci} e {rami}"
 msgstr ""
 
-#: finestra.py:13709
+#: finestra.py:13710
 #, python-brace-format
 msgid "da {n} cartella letta"
 msgid_plural "da {n} cartelle lette"
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:13724
+#: finestra.py:13725
 #, python-brace-format
 msgid "{n} cartella non si legge."
 msgid_plural "{n} cartelle non si leggono."
@@ -8518,14 +8520,14 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. Traduttori: elenco e' quello dei percorsi di rete, divisi dalle virgole.
-#: finestra.py:13729
+#: finestra.py:13730
 #, python-brace-format
 msgid "In rete non ha risposto: {elenco}."
 msgid_plural "In rete non hanno risposto: {elenco}."
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:13733
+#: finestra.py:13734
 #, python-brace-format
 msgid "In rete una cartella non ha risposto, e l'apertura è andata avanti senza."
 msgid_plural ""
@@ -8534,83 +8536,83 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:13856
+#: finestra.py:13857
 msgid "Cerca nella console"
 msgstr ""
 
-#: finestra.py:13858
+#: finestra.py:13859
 msgid "Ricerca nella console annullata."
 msgstr ""
 
-#: finestra.py:13864
+#: finestra.py:13865
 msgid "Ricerca nella console annullata: il testo è vuoto."
 msgstr ""
 
-#: finestra.py:13889
+#: finestra.py:13890
 #, python-brace-format
 msgid "Nella console non c'è {testo}."
 msgstr ""
 
-#: finestra.py:13906
+#: finestra.py:13907
 msgid "Nella console non c'è una ricerca: la barra rovesciata ne apre una."
 msgstr ""
 
-#: finestra.py:13920
+#: finestra.py:13921
 msgid "Nel manuale non trovo la guida rapida."
 msgstr ""
 
-#: finestra.py:13931
+#: finestra.py:13932
 #, python-brace-format
 msgid "Non riesco ad aprire {nome}: il file non c'è."
 msgstr ""
 
-#: finestra.py:13936
+#: finestra.py:13937
 #, python-brace-format
 msgid "Non riesco ad aprire {nome}: {errore}."
 msgstr ""
 
-#: finestra.py:13938
+#: finestra.py:13939
 msgid "Il manuale si apre nel browser."
 msgstr ""
 
-#: finestra.py:13950
+#: finestra.py:13951
 #, python-brace-format
 msgid ""
 "Le versioni precedenti sono nel changelog intero: il file CHANGELOG.md, "
 "nella cartella {cartella}, e su GitHub, all'indirizzo {indirizzo}"
 msgstr ""
 
-#: finestra.py:13952
+#: finestra.py:13953
 msgid "Novità di MeTeOra"
 msgstr ""
 
-#: finestra.py:13956
-msgid "Crediti di MeTeOra"
-msgstr ""
-
 #: finestra.py:13957
-#, python-brace-format
-msgid "MeTeOra {versione} del {data}."
+msgid "Crediti di MeTeOra"
 msgstr ""
 
 #: finestra.py:13958
 #, python-brace-format
+msgid "MeTeOra {versione} del {data}."
+msgstr ""
+
+#: finestra.py:13959
+#, python-brace-format
 msgid "Autori: {autori}."
 msgstr ""
 
-#: finestra.py:13960
+#: finestra.py:13961
 #, python-brace-format
 msgid "Grazie a chi sostiene MeTeOra con una donazione: {sostenitori}."
 msgstr ""
 
-#: finestra.py:13964
+#: finestra.py:13965
 msgid ""
 "MeTeOra è software libero: puoi ridistribuirlo e modificarlo secondo la "
 "GNU General Public License, versione 3 o, a tua scelta, qualunque "
 "versione successiva. È distribuito senza alcuna garanzia."
 msgstr ""
 
-#: finestra.py:13966
+#: finestra.py:13967
 msgid ""
 "Il testo della licenza è nel file LICENSE accanto al programma; le "
 "licenze dei componenti sono nella cartella licenze, e il file "
@@ -8618,120 +8620,120 @@ msgid ""
 "MeTeOra è su https://github.com/GabrieleBattaglia/MeTeOra."
 msgstr ""
 
-#: finestra.py:13968
+#: finestra.py:13969
 msgid ""
 "MeTeOra è formato da tre parole italiane, una dedica di Gabriele alla sua"
 " ragazza Ginevra."
 msgstr ""
 
-#: finestra.py:13969
+#: finestra.py:13970
 msgid ""
 "Riproduzione: libmpv, del progetto mpv, con FFmpeg, libopenmpt, "
 "rubberband e le altre librerie della build di shinchiro, GPL 3 o "
 "successiva."
 msgstr ""
 
-#: finestra.py:13970
+#: finestra.py:13971
 msgid ""
 "SID del Commodore 64: libsidplayfp, con l'emulazione reSIDfp, GPL 2 o "
 "successiva."
 msgstr ""
 
-#: finestra.py:13971
+#: finestra.py:13972
 msgid "Durate dei SID: il database Songlengths della High Voltage SID Collection."
 msgstr ""
 
-#: finestra.py:13972
+#: finestra.py:13973
 msgid ""
 "MIDI: FluidSynth e libsndfile, LGPL 2.1 o successiva, scaricati al primo "
 "MIDI; il banco di suoni FluidR3 GM di Frank Wen, licenza MIT, quando lo "
 "scarichi."
 msgstr ""
 
-#: finestra.py:13974
+#: finestra.py:13975
 msgid "Musica delle console: libgme, Game Music Emu, LGPL 2.1 o successiva."
 msgstr ""
 
-#: finestra.py:13975
+#: finestra.py:13976
 msgid "Interfaccia: wxPython e wxWidgets, wxWindows Library Licence."
 msgstr ""
 
-#: finestra.py:13976
+#: finestra.py:13977
 msgid ""
 "Sintesi e braille: accessible_output2, licenza MIT, con il client di "
 "controllo di NVDA, LGPL 2.1."
 msgstr ""
 
-#: finestra.py:13977
+#: finestra.py:13978
 msgid ""
 "Riconoscimento dei caratteri: il motore di Windows con i pacchetti winrt,"
 " licenza MIT, e Pillow."
 msgstr ""
 
-#: finestra.py:13978
+#: finestra.py:13979
 msgid ""
 "Durate, lettura e scrittura dei tag dei file audio: mutagen, GPL 2 o "
 "successiva. Collegamento con libmpv: python-mpv, GPL 2 o successiva."
 msgstr ""
 
-#: finestra.py:13980
+#: finestra.py:13981
 msgid ""
 "Effetti sonori: Acusticator, della libreria GBUtils di Gabriele, GPL 3, "
 "con numpy, scipy e sounddevice su PortAudio."
 msgstr ""
 
-#: finestra.py:13981
+#: finestra.py:13982
 msgid ""
 "Il caricatore di Vulkan, di Khronos Group, LunarG e Valve: la copia di "
 "scorta di vulkan-1.dll. Apache 2.0, con parti MIT."
 msgstr ""
 
-#: finestra.py:13982
+#: finestra.py:13983
 msgid ""
 "Python, della Python Software Foundation; pacchetto creato con "
 "PyInstaller, programma di installazione con Inno Setup."
 msgstr ""
 
-#: finestra.py:13983
+#: finestra.py:13984
 msgid "Questo software si basa in parte sul lavoro dell'Independent JPEG Group."
 msgstr ""
 
-#: finestra.py:13984
+#: finestra.py:13985
 msgid ""
 "Parti di questo software sono copyright The FreeType Project "
 "(www.freetype.org). Tutti i diritti riservati."
 msgstr ""
 
-#: finestra.py:14044
+#: finestra.py:14045
 #, python-brace-format
 msgid "Non trovo più {percorso}, che suonava l'ultima volta."
 msgstr ""
 
-#: finestra.py:14083 finestra.py:14114
+#: finestra.py:14084 finestra.py:14115
 #, python-brace-format
 msgid "Riprendo da dove eri: {percorso}, in pausa a {tempo}. X riparte."
 msgstr ""
 
-#: finestra.py:14091
+#: finestra.py:14092
 #, python-brace-format
 msgid ""
 "{nome}, che suonava l'ultima volta, è un indirizzo in rete, e senza yt-"
 "dlp non si apre."
 msgstr ""
 
-#: finestra.py:14155
+#: finestra.py:14156
 #, python-brace-format
 msgid "Pulizia all'avvio: controllo {n} voce."
 msgid_plural "Pulizia all'avvio: controllo {n} voci."
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:14203
+#: finestra.py:14204
 #, python-brace-format
 msgid "La pulizia all'avvio non è riuscita: {errore}"
 msgstr ""
 
-#: finestra.py:14311
+#: finestra.py:14312
 #, python-brace-format
 msgid "Pulizia finita, {n} file sparito."
 msgid_plural "Pulizia finita, {n} file spariti."
@@ -8740,46 +8742,46 @@ msgstr[1] ""
 
 #. Traduttori: i pezzi di Tolti, divisi dai punti e virgola: dove e quanti,
 #. come da playlist e Preferiti 3 brani.
-#: finestra.py:14313
+#: finestra.py:14314
 #, python-brace-format
 msgid "dallo schedario {n}"
 msgid_plural "dallo schedario {n}"
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:14314
+#: finestra.py:14315
 #, python-brace-format
 msgid "da playlist e Preferiti {brani}"
 msgstr ""
 
-#: finestra.py:14315
+#: finestra.py:14316
 #, python-brace-format
 msgid "dai marker {voci} con {marker}"
 msgstr ""
 
-#: finestra.py:14316
+#: finestra.py:14317
 #, python-brace-format
 msgid "punti da riprendere {n}"
 msgid_plural "punti da riprendere {n}"
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:14317
+#: finestra.py:14318
 #, python-brace-format
 msgid "dallo storico delle statistiche {brani}"
 msgstr ""
 
 #. Traduttori: tolti e' l'elenco di dove e quanti, diviso dai punti e virgola.
-#: finestra.py:14321
+#: finestra.py:14322
 #, python-brace-format
 msgid "Tolti {tolti}."
 msgstr ""
 
-#: finestra.py:14323
+#: finestra.py:14324
 msgid "Pulizia finita: c'è ancora tutto."
 msgstr ""
 
-#: finestra.py:14325
+#: finestra.py:14326
 #, python-brace-format
 msgid ""
 "Tolta dallo schedario {n} scheda doppia, scritta con le maiuscole diverse"
@@ -8790,7 +8792,7 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:14329
+#: finestra.py:14330
 #, python-brace-format
 msgid "{n} voce resta"
 msgid_plural "{n} voci restano"
@@ -8799,7 +8801,7 @@ msgstr[1] ""
 
 #. Traduttori: radici e' l'elenco delle unità, come E:\, F:\; restano come 3
 #. voci restano.
-#: finestra.py:14331
+#: finestra.py:14332
 #, python-brace-format
 msgid "Non risponde {radici}, e {restano} per il prossimo avvio."
 msgid_plural "Non rispondono {radici}, e {restano} per il prossimo avvio."
@@ -8807,7 +8809,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. Traduttori: radici e' l'elenco delle unità, come E:\, F:\.
-#: finestra.py:14337
+#: finestra.py:14338
 #, python-brace-format
 msgid "Saltate {radici}, usate da dischi diversi: le loro {n} voci restano."
 msgid_plural "Saltate {radici}, usate da dischi diversi: le loro {n} voci restano."
@@ -8815,7 +8817,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. Traduttori: radice e' un'unità, come E:\.
-#: finestra.py:14341
+#: finestra.py:14342
 #, python-brace-format
 msgid "Saltata {radice}, usata da dischi diversi: la sua voce resta."
 msgid_plural "Saltata {radice}, usata da dischi diversi: le sue {n} voci restano."
@@ -8823,7 +8825,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. Traduttori: radici e' l'elenco delle unità, come E:\, F:\.
-#: finestra.py:14347
+#: finestra.py:14348
 #, python-brace-format
 msgid ""
 "Saltate {radici}, non riconosco i dischi che rispondono: le loro {n} voci"
@@ -8835,7 +8837,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. Traduttori: radice e' un'unità, come E:\.
-#: finestra.py:14351
+#: finestra.py:14352
 #, python-brace-format
 msgid "Saltata {radice}, non riconosco il disco che risponde: la sua voce resta."
 msgid_plural ""
@@ -8846,7 +8848,7 @@ msgstr[1] ""
 
 #. Traduttori: Riconosci questo disco e Questo PC sono una voce di menu e un
 #. ramo della plancia; radice un'unità, come E:\.
-#: finestra.py:14357
+#: finestra.py:14358
 #, python-brace-format
 msgid ""
 "Per riconoscere il disco di adesso, Riconosci questo disco nel menu di "
@@ -8854,19 +8856,19 @@ msgid ""
 msgstr ""
 
 #. Traduttori: menu e' l'elenco delle unità, come di E:\, di F:\ e di G:\.
-#: finestra.py:14360
+#: finestra.py:14361
 #, python-brace-format
 msgid "{elenco} e di {ultima}"
 msgstr ""
 
-#: finestra.py:14360
+#: finestra.py:14361
 #, python-brace-format
 msgid "di {radice}"
 msgstr ""
 
 #. Traduttori: Riconosci questo disco e Questo PC sono una voce di menu e un
 #. ramo della plancia; menu come di E:\ e di F:\.
-#: finestra.py:14362
+#: finestra.py:14363
 #, python-brace-format
 msgid ""
 "Per riconoscere i dischi di adesso, Riconosci questo disco nel menu "
@@ -8875,7 +8877,7 @@ msgstr ""
 
 #. Traduttori: lettera e' un'unità, come E:\; Riconosci questo disco e Questo
 #. PC sono una voce di menu e un ramo della plancia.
-#: finestra.py:14390
+#: finestra.py:14391
 #, python-brace-format
 msgid ""
 "{lettera} ha un disco diverso da quello che conosco: le sue voci restano,"
@@ -8883,42 +8885,42 @@ msgid ""
 "{lettera} in Questo PC."
 msgstr ""
 
-#: finestra.py:14404
+#: finestra.py:14405
 #, python-brace-format
 msgid ""
 "Il file dei dischi della pulizia non si legge: {errore}. Finché non si "
 "legge, {lettera} non si può riconoscere."
 msgstr ""
 
-#: finestra.py:14408
+#: finestra.py:14409
 #, python-brace-format
 msgid ""
 "Sto ancora contando le voci di {lettera}, e la domanda arriva appena ho "
 "finito."
 msgstr ""
 
-#: finestra.py:14433
+#: finestra.py:14434
 #, python-brace-format
 msgid ""
 "{lettera} non risponde, o non dice quale disco c'è: il disco resta da "
 "riconoscere."
 msgstr ""
 
-#: finestra.py:14435
+#: finestra.py:14436
 #, python-brace-format
 msgid ""
 "Il disco di {lettera} è già quello riconosciuto: la pulizia all'avvio la "
 "controlla."
 msgstr ""
 
-#: finestra.py:14441
+#: finestra.py:14442
 #, python-brace-format
 msgid ""
 "Il disco di {lettera} resta da riconoscere: la pulizia all'avvio continua"
 " a saltarla."
 msgstr ""
 
-#: finestra.py:14444
+#: finestra.py:14445
 #, python-brace-format
 msgid ""
 "Intanto a {lettera} ha risposto un altro disco: il disco resta da "
@@ -8926,7 +8928,7 @@ msgid ""
 "questo disco."
 msgstr ""
 
-#: finestra.py:14455
+#: finestra.py:14456
 #, python-brace-format
 msgid ""
 "Disco di {lettera} riconosciuto: è quello che risponde adesso. Dal "
@@ -8934,34 +8936,34 @@ msgid ""
 "che su questo disco non ci sono."
 msgstr ""
 
-#: finestra.py:14465
+#: finestra.py:14466
 msgid ""
 "le sue voci non si sono potute contare, e la prossima pulizia toglierà "
 "quelle dei file che qui non ci sono."
 msgstr ""
 
-#: finestra.py:14469
+#: finestra.py:14470
 #, python-brace-format
 msgid ""
 "di {lettera} non conosco nessuna voce, e la prossima pulizia non avrà "
 "niente da togliere."
 msgstr ""
 
-#: finestra.py:14471
+#: finestra.py:14472
 #, python-brace-format
 msgid ""
 "l'unica voce di {lettera} è di un file che qui non c'è, e la prossima "
 "pulizia la toglierà."
 msgstr ""
 
-#: finestra.py:14472
+#: finestra.py:14473
 #, python-brace-format
 msgid ""
 "l'unica voce di {lettera} è di un file che c'è, e la prossima pulizia non"
 " toglierà niente."
 msgstr ""
 
-#: finestra.py:14475
+#: finestra.py:14476
 #, python-brace-format
 msgid ""
 "le {n} voci di {lettera} sono tutte di file che ci sono, e la prossima "
@@ -8972,7 +8974,7 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: finestra.py:14478
+#: finestra.py:14479
 #, python-brace-format
 msgid ""
 "le {n} voci di {lettera} sono tutte di file che qui non ci sono, e la "
@@ -8985,7 +8987,7 @@ msgstr[1] ""
 
 #. Traduttori: voci e' quante voci ha l'unità, n quante di loro sono di file
 #. che non ci sono.
-#: finestra.py:14482
+#: finestra.py:14483
 #, python-brace-format
 msgid ""
 "delle {voci} voci di {lettera}, {n} è di un file che qui non c'è e la "
@@ -8998,47 +9000,47 @@ msgstr[1] ""
 
 #. Traduttori: lettera e' un'unità, come E:\; quante e' una frase su quante
 #. voci la pulizia toglierà.
-#: finestra.py:14486
+#: finestra.py:14487
 #, python-brace-format
 msgid "{lettera} diventa del disco che risponde adesso; {quante} Riconosco?"
 msgstr ""
 
-#: finestra.py:14533
+#: finestra.py:14534
 msgid "le playlist"
 msgstr ""
 
-#: finestra.py:14535
+#: finestra.py:14536
 msgid "le posizioni dei file lunghi"
 msgstr ""
 
-#: finestra.py:14537 statistiche.py:1176
+#: finestra.py:14538 statistiche.py:1176
 msgid "i marker"
 msgstr ""
 
-#: finestra.py:14539
+#: finestra.py:14540
 msgid "i dischi della pulizia all'avvio"
 msgstr ""
 
-#: finestra.py:14556
+#: finestra.py:14557
 msgid "lo schedario delle durate e dei tag"
 msgstr ""
 
-#: finestra.py:14557 statistiche.py:138
+#: finestra.py:14558 statistiche.py:138
 msgid "le impostazioni"
 msgstr ""
 
-#: finestra.py:14563 statistiche.py:167
+#: finestra.py:14564 statistiche.py:167
 msgid "le statistiche"
 msgstr ""
 
 #. Traduttori: cosa e' l'elenco di cosa non si e' salvato, con il perche',
 #. diviso dai punti e virgola.
-#: finestra.py:14570
+#: finestra.py:14571
 #, python-brace-format
 msgid "MeTeOra non è riuscito a salvare {cosa}."
 msgstr ""
 
-#: finestra.py:14570
+#: finestra.py:14571
 msgid "MeTeOra, uscita"
 msgstr ""
 
@@ -9103,7 +9105,7 @@ msgstr[1] ""
 
 #. Traduttori: la voce saltata e' una cartella, come in Saltata E:\Musica\Rock:
 #. cartella.
-#: importazione.py:96 statistiche.py:1831
+#: importazione.py:96 statistiche.py:1835
 #, python-brace-format
 msgid "{n} cartella"
 msgid_plural "{n} cartelle"
@@ -9173,11 +9175,11 @@ msgstr ""
 msgid "yt-dlp non ha detto perché"
 msgstr ""
 
-#: indirizzi.py:223 indirizzi.py:265
+#: indirizzi.py:223 indirizzi.py:285
 msgid "yt-dlp non è installato"
 msgstr ""
 
-#: indirizzi.py:231 indirizzi.py:292
+#: indirizzi.py:231 indirizzi.py:350
 #, python-brace-format
 msgid "yt-dlp non parte: {errore}"
 msgstr ""
@@ -9191,40 +9193,40 @@ msgstr ""
 msgid "yt-dlp ha risposto in un modo che non capisco"
 msgstr ""
 
-#: indirizzi.py:379
+#: indirizzi.py:443
 msgid "il sito non dà un flusso da suonare"
 msgstr ""
 
-#: indirizzi.py:534
+#: indirizzi.py:598
 msgid "è una playlist, non un brano"
 msgstr ""
 
-#: indirizzi.py:555
+#: indirizzi.py:619
 msgid "GitHub non dice l'ultima versione di yt-dlp"
 msgstr ""
 
-#: indirizzi.py:579
+#: indirizzi.py:643
 #, python-brace-format
 msgid "la release {versione} di yt-dlp non ha l'impronta di {nome}"
 msgstr ""
 
-#: indirizzi.py:582
+#: indirizzi.py:646
 msgid "lo zip di yt-dlp scaricato non è quello atteso"
 msgstr ""
 
-#: indirizzi.py:590
+#: indirizzi.py:654
 msgid "nello zip di yt-dlp manca yt-dlp.exe"
 msgstr ""
 
-#: indirizzi.py:613
+#: indirizzi.py:677
 msgid "yt-dlp è al lavoro: si toglie fra poco"
 msgstr ""
 
-#: indirizzi.py:629
+#: indirizzi.py:693
 msgid "QuickJS scaricato non è quello atteso"
 msgstr ""
 
-#: indirizzi.py:640
+#: indirizzi.py:704
 msgid "yt-dlp lo sta usando: si toglie fra poco"
 msgstr ""
 
@@ -12274,7 +12276,7 @@ msgstr ""
 msgid "Le {posti} cartelle più ascoltate"
 msgstr ""
 
-#: statistiche.py:1545 statistiche.py:2189
+#: statistiche.py:1545 statistiche.py:2193
 #, python-brace-format
 msgid "Per unità: {unita}."
 msgstr ""
@@ -12576,7 +12578,15 @@ msgid ""
 "ascolto: {tenuti}."
 msgstr ""
 
-#: statistiche.py:1736
+#: statistiche.py:1737
+#, python-brace-format
+msgid ""
+"Ricerche passate a YouTube Music, perché YouTube non dava risultati: "
+"{riserva}, con {risultati} risultati; anteprime di SoundCloud da 30 "
+"secondi tolte: {anteprime}."
+msgstr ""
+
+#: statistiche.py:1740
 #, python-brace-format
 msgid ""
 "Indirizzi in rete aperti: {aperti}; playlist dei siti: {playlist}, con "
@@ -12584,7 +12594,7 @@ msgid ""
 " yt-dlp aggiornato {aggiornato}."
 msgstr ""
 
-#: statistiche.py:1740
+#: statistiche.py:1744
 #, python-brace-format
 msgid ""
 "Radio ascoltate: {ascoltate}, entrate fra le Recenti dopo un minuto di "
@@ -12592,7 +12602,7 @@ msgid ""
 "{altre}; titoli in onda arrivati: {titoli}."
 msgstr ""
 
-#: statistiche.py:1745
+#: statistiche.py:1749
 #, python-brace-format
 msgid ""
 "Radio ripetute a uno speaker: punti rotti tolti alle MP3 e alle AAC "
@@ -12600,7 +12610,7 @@ msgid ""
 "liste rifiutate dallo speaker, e poi convertite, {rifiutate}."
 msgstr ""
 
-#: statistiche.py:1749
+#: statistiche.py:1753
 #, python-brace-format
 msgid ""
 "Playlist rinominate: {rinominate}; eliminate: {eliminate}; ordinate: "
@@ -12608,41 +12618,41 @@ msgid ""
 "nell'ordine di prima: {rimesse}."
 msgstr ""
 
-#: statistiche.py:1753
+#: statistiche.py:1757
 #, python-brace-format
 msgid "Brani aggiunti alle playlist: {n}, in {volte}."
 msgstr ""
 
-#: statistiche.py:1754
+#: statistiche.py:1758
 #, python-brace-format
 msgid ""
 "Brani tolti: {tolti}; spostati: {spostati}; segnati come saltati: "
 "{saltati}, e tornati: {tornati}."
 msgstr ""
 
-#: statistiche.py:1756
+#: statistiche.py:1760
 #, python-brace-format
 msgid "Brani messi nei Preferiti: {messi}; c'erano già: {gia}."
 msgstr ""
 
-#: statistiche.py:1757
+#: statistiche.py:1761
 #, python-brace-format
 msgid "Filtri messi: {messi}; tolti: {tolti}."
 msgstr ""
 
-#: statistiche.py:1768
+#: statistiche.py:1772
 #, python-brace-format
 msgid ""
 "Registrazioni avviate: {avviate}, di cui con l'attesa di Alt con R "
 "{attese}; file prodotti: {finite}, con {durata} e {peso}."
 msgstr ""
 
-#: statistiche.py:1771
+#: statistiche.py:1775
 #, python-brace-format
 msgid "In media una registrazione dura {durata} e pesa {peso}."
 msgstr ""
 
-#: statistiche.py:1774
+#: statistiche.py:1778
 #, python-brace-format
 msgid ""
 "Dalle dirette, come le radio: {dirette}; dalle puntate e dai video, che "
@@ -12650,81 +12660,81 @@ msgid ""
 msgstr ""
 
 #. Traduttori: formati e' un elenco come MP3 12, Opus 3.
-#: statistiche.py:1779
+#: statistiche.py:1783
 #, python-brace-format
 msgid "Per formato: {formati}."
 msgstr ""
 
-#: statistiche.py:1781
+#: statistiche.py:1785
 msgid "a 16 bit"
 msgstr ""
 
-#: statistiche.py:1781
+#: statistiche.py:1785
 msgid "a 24 bit"
 msgstr ""
 
-#: statistiche.py:1781
+#: statistiche.py:1785
 msgid "a 32 bit in virgola mobile"
 msgstr ""
 
 #. Traduttori: bit e' un elenco come a 16 bit 3, a 24 bit 1.
-#: statistiche.py:1784
+#: statistiche.py:1788
 #, python-brace-format
 msgid "Senza perdita, per profondità: {bit}."
 msgstr ""
 
-#: statistiche.py:1786
+#: statistiche.py:1790
 #, python-brace-format
 msgid "La registrazione più lunga: {durata}, di {cosa}, {quando}."
 msgstr ""
 
-#: statistiche.py:1789
+#: statistiche.py:1793
 #, python-brace-format
 msgid "La registrazione più pesante: {peso}, di {cosa}, {quando}."
 msgstr ""
 
-#: statistiche.py:1791
+#: statistiche.py:1795
 #, python-brace-format
 msgid ""
 "In pausa: {pause}; interrotte dal flusso: {interrotte}; eliminate: "
 "{eliminate}."
 msgstr ""
 
-#: statistiche.py:1795
+#: statistiche.py:1799
 #, python-brace-format
 msgid ""
 "Registrazioni rimaste a parti separate, perché l'unione non è riuscita: "
 "{n}."
 msgstr ""
 
-#: statistiche.py:1800
+#: statistiche.py:1804
 #, python-brace-format
 msgid ""
 "La cartella delle registrazioni aperta in Esplora risorse: {aperta}; "
 "cambiata nelle impostazioni: {cambiata}."
 msgstr ""
 
-#: statistiche.py:1808
+#: statistiche.py:1812
 #, python-brace-format
 msgid "Ricerche: {n}; nel ramo {nel_ramo}, in tutto MeTeOra {ovunque}."
 msgstr ""
 
-#: statistiche.py:1810
+#: statistiche.py:1814
 #, python-brace-format
 msgid "Risultati trovati dalle ricerche finite: {n}"
 msgstr ""
 
-#: statistiche.py:1812
+#: statistiche.py:1816
 #, python-brace-format
 msgid ", in media {n} per ricerca"
 msgstr ""
 
-#: statistiche.py:1814
+#: statistiche.py:1818
 #, python-brace-format
 msgid "Ricerche senza risultati: {senza}; fermate prima della fine: {fermate}."
 msgstr ""
 
-#: statistiche.py:1816
+#: statistiche.py:1820
 #, python-brace-format
 msgid ""
 "Altri risultati mostrati: {altri}; risultati salvati come playlist: "
@@ -12733,158 +12743,158 @@ msgstr ""
 
 #. Traduttori: dove si cerca, nella riga «Ricerche nella console, contando
 #. anche Invio: ...».
-#: statistiche.py:1819
+#: statistiche.py:1823
 msgid "nella console"
 msgstr ""
 
-#: statistiche.py:1819
+#: statistiche.py:1823
 msgid "nella finestra dei marcatori"
 msgstr ""
 
-#: statistiche.py:1819
+#: statistiche.py:1823
 msgid "nelle statistiche"
 msgstr ""
 
 #. Traduttori: dove è «nella console», «nella finestra dei marcatori» o «nelle
 #. statistiche»; gli altri sono numeri di ricerche.
-#: statistiche.py:1821
+#: statistiche.py:1825
 #, python-brace-format
 msgid ""
 "Ricerche {dove}, contando anche Invio: trovate {trovate}, ripartite "
 "dall'inizio {ripartite}, non trovate {non_trovate}."
 msgstr ""
 
-#: statistiche.py:1829
+#: statistiche.py:1833
 #, python-brace-format
 msgid "File rinominati: {n}."
 msgstr ""
 
-#: statistiche.py:1830
+#: statistiche.py:1834
 #, python-brace-format
 msgid "Mandati nel cestino: {file} e {cartelle}."
 msgstr ""
 
-#: statistiche.py:1832
+#: statistiche.py:1836
 #, python-brace-format
 msgid ""
 "Tag letti con F11: {letti}; dettagli di cartelle, unità e playlist: "
 "{dettagli}."
 msgstr ""
 
-#: statistiche.py:1833
+#: statistiche.py:1837
 #, python-brace-format
 msgid "Tag cambiati: {volte}, su {file}; tag cancellati: {cancellati}."
 msgstr ""
 
-#: statistiche.py:1842
+#: statistiche.py:1846
 #, python-brace-format
 msgid "Video avviati: {n}."
 msgstr ""
 
-#: statistiche.py:1843
+#: statistiche.py:1847
 #, python-brace-format
 msgid ""
 "Immagine accesa con Maiuscolo e F1 e spenta con Ctrl e F1: accesa "
 "{accesa}, spenta {spenta}."
 msgstr ""
 
-#: statistiche.py:1845
+#: statistiche.py:1849
 #, python-brace-format
 msgid "Schermo intero: {volte}, per {durata}."
 msgstr ""
 
-#: statistiche.py:1846
+#: statistiche.py:1850
 #, python-brace-format
 msgid "Finestra del video nascosta: {n}."
 msgstr ""
 
-#: statistiche.py:1847
+#: statistiche.py:1851
 #, python-brace-format
 msgid ""
 "Tracce audio cambiate: {tracce}; rapporto dell'immagine cambiato: "
 "{rapporto}."
 msgstr ""
 
-#: statistiche.py:1848
+#: statistiche.py:1852
 #, python-brace-format
 msgid "Sottotitoli accesi: {accesi}; spenti: {spenti}."
 msgstr ""
 
-#: statistiche.py:1849
+#: statistiche.py:1853
 #, python-brace-format
 msgid "Righe di sottotitoli e karaoke lette: {n}."
 msgstr ""
 
-#: statistiche.py:1851
+#: statistiche.py:1855
 #, python-brace-format
 msgid ""
 "Righe della console lette da sole: {righe}; capitoli nuovi detti "
 "suonando: {capitoli}."
 msgstr ""
 
-#: statistiche.py:1853
+#: statistiche.py:1857
 #, python-brace-format
 msgid "Di queste, lette dalle immagini con il riconoscimento dei caratteri: {n}."
 msgstr ""
 
-#: statistiche.py:1854
+#: statistiche.py:1858
 #, python-brace-format
 msgid "Di queste, del karaoke: {n}."
 msgstr ""
 
-#: statistiche.py:1855
+#: statistiche.py:1859
 #, python-brace-format
 msgid "Passate in anticipo degli impressi: avviate {avviate}, finite {finite}."
 msgstr ""
 
-#: statistiche.py:1867
+#: statistiche.py:1871
 msgid "una delle prime dieci playlist"
 msgstr ""
 
-#: statistiche.py:1870
+#: statistiche.py:1874
 msgid "uno dei primi dieci marker"
 msgstr ""
 
-#: statistiche.py:1877
+#: statistiche.py:1881
 #, python-brace-format
 msgid "Tasti premuti: {n}"
 msgstr ""
 
-#: statistiche.py:1880
+#: statistiche.py:1884
 #, python-brace-format
 msgid ", cioè {n} per ogni ora di MeTeOra aperto"
 msgstr ""
 
 #. Traduttori: n è quante frecce in tutto; frecce le frecce una per una, come
 #. «freccia giù 3; freccia su 1».
-#: statistiche.py:1886
+#: statistiche.py:1890
 #, python-brace-format
 msgid "Frecce: {n}; {frecce}."
 msgstr ""
 
-#: statistiche.py:1895
+#: statistiche.py:1899
 #, python-brace-format
 msgid "I {posti} tasti più premuti"
 msgstr ""
 
-#: statistiche.py:1897
+#: statistiche.py:1901
 #, python-brace-format
 msgid "Tasti senza comando: {n}"
 msgstr ""
 
 #. Traduttori: nome è il nome di un tasto, come «U accentata»; volte come «3
 #. volte».
-#: statistiche.py:1901
+#: statistiche.py:1905
 #, python-brace-format
 msgid "; il più frequente: {nome}, {volte}"
 msgstr ""
 
-#: statistiche.py:1904
+#: statistiche.py:1908
 #, python-brace-format
 msgid "Rami aperti: {aperti}; chiusi: {chiusi}."
 msgstr ""
 
-#: statistiche.py:1905
+#: statistiche.py:1909
 #, python-brace-format
 msgid ""
 "F8, al brano che suona: {f8}; inseguimento acceso con Maiuscolo e F8: "
@@ -12893,7 +12903,7 @@ msgstr ""
 
 #. Traduttori: ramo_aperto e ramo_chiuso vanno con Maiuscolo e Ctrl,
 #. plancia_aperta e plancia_chiusa con Alt e Ctrl e Alt.
-#: statistiche.py:1908
+#: statistiche.py:1912
 #, python-brace-format
 msgid ""
 "Maiuscolo e Ctrl con F9 sul ramo, aperto e chiuso: {ramo_aperto} e "
@@ -12901,118 +12911,118 @@ msgid ""
 "{plancia_aperta} e {plancia_chiusa}."
 msgstr ""
 
-#: statistiche.py:1911
+#: statistiche.py:1915
 #, python-brace-format
 msgid ""
 "Backspace, risali: {risali}; Maiuscolo con Backspace, all'antenato: "
 "{antenato}."
 msgstr ""
 
-#: statistiche.py:1912
+#: statistiche.py:1916
 #, python-brace-format
 msgid "Menu aperti: {n}."
 msgstr ""
 
-#: statistiche.py:1913
+#: statistiche.py:1917
 #, python-brace-format
 msgid "Tasti rapidi spenti con Ctrl e F12: {n}."
 msgstr ""
 
-#: statistiche.py:1914
+#: statistiche.py:1918
 #, python-brace-format
 msgid "Clic sulla barra dei comandi: {n}."
 msgstr ""
 
-#: statistiche.py:1922
+#: statistiche.py:1926
 #, python-brace-format
 msgid ""
 "Righe scritte nella console: {scritte}; riscritte al loro posto, come "
 "quelle del volume: {riscritte}."
 msgstr ""
 
-#: statistiche.py:1924
+#: statistiche.py:1928
 #, python-brace-format
 msgid ""
 "Alla plancia con F5: {plancia}; alla console con F6: {console}; al "
 "cruscotto con F7: {cruscotto}."
 msgstr ""
 
-#: statistiche.py:1926
+#: statistiche.py:1930
 #, python-brace-format
 msgid ""
 "Manuale con F1: {manuale}; novità con F2: {novita}; crediti con F3: "
 "{crediti}; guida rapida con F12: {guida}."
 msgstr ""
 
-#: statistiche.py:1928
+#: statistiche.py:1932
 #, python-brace-format
 msgid "Console salvata: {n}."
 msgstr ""
 
-#: statistiche.py:1929
+#: statistiche.py:1933
 #, python-brace-format
 msgid "Statistiche aperte: {n}."
 msgstr ""
 
-#: statistiche.py:1932
+#: statistiche.py:1936
 #, python-brace-format
 msgid "Effetti sonori, contati anche con il volume degli effetti a zero: {n}"
 msgstr ""
 
-#: statistiche.py:1937
+#: statistiche.py:1941
 #, python-brace-format
 msgid "; il più suonato: {evento}, {volte}"
 msgstr ""
 
-#: statistiche.py:1939
+#: statistiche.py:1943
 #, python-brace-format
 msgid "Domande, con il loro suono: {domande}; annullate: {annullate}."
 msgstr ""
 
-#: statistiche.py:1947
+#: statistiche.py:1951
 #, python-brace-format
 msgid "Voci delle impostazioni aperte con Invio: {n}"
 msgstr ""
 
 #. Traduttori: voce è il nome di una voce delle impostazioni, come «Volume
 #. degli effetti»; volte come «3 volte».
-#: statistiche.py:1951
+#: statistiche.py:1955
 #, python-brace-format
 msgid "; la più usata: {voce}, {volte}"
 msgstr ""
 
-#: statistiche.py:1953
+#: statistiche.py:1957
 #, python-brace-format
 msgid ""
 "Finestra delle impostazioni aperta: {volte}; impostazioni cambiate: "
 "{cambiate}."
 msgstr ""
 
-#: statistiche.py:1956
+#: statistiche.py:1960
 #, python-brace-format
 msgid "Scheda audio cambiata: {volte}."
 msgstr ""
 
-#: statistiche.py:1958
+#: statistiche.py:1962
 #, python-brace-format
 msgid ""
 "Percorsi di rete aggiunti: {aggiunti}; tolti: {tolti}; ricerche dei "
 "computer della rete: {ricerche}."
 msgstr ""
 
-#: statistiche.py:1960
+#: statistiche.py:1964
 #, python-brace-format
 msgid ""
 "Banco dei suoni MIDI scelto: {volte}; scaricamenti avviati: {avviati}, "
 "finiti: {finiti}."
 msgstr ""
 
-#: statistiche.py:1962
+#: statistiche.py:1966
 #, python-brace-format
 msgid "Aggiornamenti proposti: {n}."
 msgstr ""
 
-#: statistiche.py:1964
+#: statistiche.py:1968
 #, python-brace-format
 msgid ""
 "Componenti aggiuntivi installati: {installati}; tolti: {tolti}. Lingua "
@@ -13021,100 +13031,100 @@ msgstr ""
 
 #. Traduttori: Dona per questo progetto è il nome di una voce del menu; volte
 #. come «2 volte».
-#: statistiche.py:1967
+#: statistiche.py:1971
 #, python-brace-format
 msgid "Dona per questo progetto aperto: {volte}."
 msgstr ""
 
 #. Traduttori: Entra al PUB e Chiedi aiuto al PUB sono voci del menu; entra e
 #. aiuto come «2 volte»; pronte e registri sono numeri.
-#: statistiche.py:1969
+#: statistiche.py:1973
 #, python-brace-format
 msgid ""
 "Entra al PUB aperto: {entra}; Chiedi aiuto al PUB: {aiuto}; mail pronte: "
 "{pronte}, con i registri allegati: {registri}."
 msgstr ""
 
-#: statistiche.py:1977
+#: statistiche.py:1981
 #, python-brace-format
 msgid "Brani non suonati per un errore: {n}"
 msgstr ""
 
-#: statistiche.py:1979
+#: statistiche.py:1983
 #, python-brace-format
 msgid "; per formato: {formati}"
 msgstr ""
 
-#: statistiche.py:1982
+#: statistiche.py:1986
 #, python-brace-format
 msgid "Messaggi d'errore nella console: {n}."
 msgstr ""
 
-#: statistiche.py:1983
+#: statistiche.py:1987
 #, python-brace-format
 msgid "Problemi interni scritti nella console: {n}."
 msgstr ""
 
-#: statistiche.py:1984
+#: statistiche.py:1988
 #, python-brace-format
 msgid "Avvii dopo un errore grave, con il resoconto da mandare: {n}."
 msgstr ""
 
-#: statistiche.py:1985
+#: statistiche.py:1989
 #, python-brace-format
 msgid "Chiusure non regolari: {n}."
 msgstr ""
 
-#: statistiche.py:1986
+#: statistiche.py:1990
 #, python-brace-format
 msgid "Salvataggi non riusciti: {n}."
 msgstr ""
 
-#: statistiche.py:1987
+#: statistiche.py:1991
 #, python-brace-format
 msgid "Cartelle di rete che non hanno risposto nella plancia: {n}."
 msgstr ""
 
-#: statistiche.py:1990
+#: statistiche.py:1994
 #, python-brace-format
 msgid ""
 "Dischi riconosciuti a mano: {riconosciuti}; lettere rese contese dalla "
 "Sentinella, a MeTeOra aperto: {contese}."
 msgstr ""
 
-#: statistiche.py:1992
+#: statistiche.py:1996
 #, python-brace-format
 msgid ""
 "Attese dei SID, dei MIDI e delle console oltre un secondo e mezzo, dopo "
 "un salto: {n}."
 msgstr ""
 
-#: statistiche.py:1993
+#: statistiche.py:1997
 #, python-brace-format
 msgid "Comandi che lì non valgono: {non_validi}; niente da suonare: {niente}."
 msgstr ""
 
-#: statistiche.py:2007
+#: statistiche.py:2011
 msgid "Pulizie all'avvio: nessuna."
 msgstr ""
 
-#: statistiche.py:2008
+#: statistiche.py:2012
 #, python-brace-format
 msgid "Pulizie all'avvio: {n}"
 msgstr ""
 
 #. Traduttori: dopo «Pulizie all'avvio: 1», la sola pulizia che c'è stata.
-#: statistiche.py:2011
+#: statistiche.py:2015
 msgid ", non riuscita per un errore"
 msgstr ""
 
-#: statistiche.py:2011
+#: statistiche.py:2015
 msgid ", tutte non riuscite per un errore"
 msgstr ""
 
 #. Traduttori: dopo «Pulizie all'avvio: 4», quante di quelle pulizie non sono
 #. riuscite.
-#: statistiche.py:2014
+#: statistiche.py:2018
 #, python-brace-format
 msgid ", di cui {n} non riuscita per un errore"
 msgid_plural ", di cui {n} non riuscite per un errore"
@@ -13123,63 +13133,63 @@ msgstr[1] ""
 
 #. Traduttori: voci sono due o più voci femminili, come «3 schede doppie dello
 #. schedario, 2 voci dei marker».
-#: statistiche.py:2024
+#: statistiche.py:2028
 #, python-brace-format
 msgid "; tolte {voci}"
 msgstr ""
 
 #. Traduttori: voci sono due o più voci, come «4 file dallo schedario, 2 voci
 #. dei marker».
-#: statistiche.py:2027
+#: statistiche.py:2031
 #, python-brace-format
 msgid "; tolti {voci}"
 msgstr ""
 
-#: statistiche.py:2029
+#: statistiche.py:2033
 msgid "; niente da togliere"
 msgstr ""
 
 #. Traduttori: da qui, i motivi per cui la pulizia ha saltato delle unità, con
 #. quante: «unità saltate perché non rispondevano: 2».
-#: statistiche.py:2033
+#: statistiche.py:2037
 #, python-brace-format
 msgid "non rispondevano: {n}"
 msgstr ""
 
-#: statistiche.py:2035
+#: statistiche.py:2039
 #, python-brace-format
 msgid "usate da dischi diversi: {n}"
 msgstr ""
 
-#: statistiche.py:2037
+#: statistiche.py:2041
 #, python-brace-format
 msgid "il disco che rispondeva non si riconosceva: {n}"
 msgstr ""
 
 #. Traduttori: motivo è come «non rispondevano: 2»; gli altri motivi seguono
 #. con «; perché».
-#: statistiche.py:2040
+#: statistiche.py:2044
 #, python-brace-format
 msgid "; unità saltate perché {motivo}"
 msgstr ""
 
-#: statistiche.py:2040
+#: statistiche.py:2044
 #, python-brace-format
 msgid "; perché {motivo}"
 msgstr ""
 
-#: statistiche.py:2046
+#: statistiche.py:2050
 msgid "La libreria di adesso non si è potuta contare."
 msgstr ""
 
-#: statistiche.py:2059
+#: statistiche.py:2063
 #, python-brace-format
 msgid "Al ritmo di oggi, per ascoltare tutta la libreria servirebbero {tempo}."
 msgstr ""
 
 #. Traduttori: giorni è sempre almeno 2, perché con un giorno solo la frase è
 #. quella di oggi; tempo è come «9 anni e 7 mesi».
-#: statistiche.py:2062
+#: statistiche.py:2066
 #, python-brace-format
 msgid ""
 "Al ritmo di questi {giorni} giorni, per ascoltare tutta la libreria "
@@ -13192,7 +13202,7 @@ msgstr[1] ""
 
 #. Traduttori: cd e cassette sono numeri interi; la forma la sceglie il numero
 #. delle cassette.
-#: statistiche.py:2067
+#: statistiche.py:2071
 #, python-brace-format
 msgid ""
 "La riproduzione equivale a {cd} CD da 74 minuti, o {cassette} cassetta da"
@@ -13204,142 +13214,142 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. Traduttori: ore è un numero con i decimali, come 1.5.
-#: statistiche.py:2071
+#: statistiche.py:2075
 #, python-brace-format
 msgid "Per ogni ora in pausa, {ore} ore in riproduzione."
 msgstr ""
 
-#: statistiche.py:2074
+#: statistiche.py:2078
 #, python-brace-format
 msgid ""
 "Ogni 100 brani avviati, {lasciati} lasciati prima della fine, {subito} "
 "nei primi {secondi} secondi."
 msgstr ""
 
-#: statistiche.py:2077
+#: statistiche.py:2081
 #, python-brace-format
 msgid "Se i salti in avanti con E fossero un brano, durerebbe {durata}."
 msgstr ""
 
-#: statistiche.py:2081
+#: statistiche.py:2085
 #, python-brace-format
 msgid "I SID ascoltati sono {percentuale} dei {durata} di SID della libreria."
 msgstr ""
 
-#: statistiche.py:2090
+#: statistiche.py:2094
 #, python-brace-format
 msgid "Eventi diversi accaduti: {n} su {totale} che MeTeOra conosce."
 msgstr ""
 
-#: statistiche.py:2162
+#: statistiche.py:2166
 msgid "Schedario: ancora vuoto."
 msgstr ""
 
-#: statistiche.py:2164
+#: statistiche.py:2168
 #, python-brace-format
 msgid "Schedario: {file}, {dimensione}."
 msgstr ""
 
-#: statistiche.py:2164
+#: statistiche.py:2168
 #, python-brace-format
 msgid "{n} file conosciuto"
 msgid_plural "{n} file conosciuti"
 msgstr[0] ""
 msgstr[1] ""
 
-#: statistiche.py:2165
+#: statistiche.py:2169
 #, python-brace-format
 msgid "Durata di tutta la libreria: {durata}."
 msgstr ""
 
-#: statistiche.py:2171
+#: statistiche.py:2175
 #, python-brace-format
 msgid "Per numero di file: {famiglie}."
 msgstr ""
 
-#: statistiche.py:2175
+#: statistiche.py:2179
 #, python-brace-format
 msgid "Per durata: {famiglie}."
 msgstr ""
 
-#: statistiche.py:2179
+#: statistiche.py:2183
 #, python-brace-format
 msgid "Per spazio: {famiglie}."
 msgstr ""
 
-#: statistiche.py:2181
+#: statistiche.py:2185
 #, python-brace-format
 msgid "Sottobrani dei SID: {n}, in {file}."
 msgstr ""
 
-#: statistiche.py:2184
+#: statistiche.py:2188
 #, python-brace-format
 msgid "Formati presenti: {n} dei {totale}; i più numerosi: {numerosi}."
 msgstr ""
 
-#: statistiche.py:2191
+#: statistiche.py:2195
 #, python-brace-format
 msgid "Il file più lungo: {nome}, {durata}."
 msgstr ""
 
-#: statistiche.py:2193
+#: statistiche.py:2197
 #, python-brace-format
 msgid "Il file più corto: {nome}, {durata}."
 msgstr ""
 
-#: statistiche.py:2197
+#: statistiche.py:2201
 #, python-brace-format
 msgid "{n} autore"
 msgid_plural "{n} autori"
 msgstr[0] ""
 msgstr[1] ""
 
-#: statistiche.py:2199
+#: statistiche.py:2203
 #, python-brace-format
 msgid "{n} album"
 msgid_plural "{n} album"
 msgstr[0] ""
 msgstr[1] ""
 
-#: statistiche.py:2201
+#: statistiche.py:2205
 #, python-brace-format
 msgid "{n} genere"
 msgid_plural "{n} generi"
 msgstr[0] ""
 msgstr[1] ""
 
-#: statistiche.py:2204
+#: statistiche.py:2208
 #, python-brace-format
 msgid "anni dal {primo} al {ultimo}"
 msgstr ""
 
 #. Traduttori: tag è come «1 autore, 1 album, 1 genere; anni dal 1985 al 1991».
-#: statistiche.py:2208
+#: statistiche.py:2212
 #, python-brace-format
 msgid "Dai tag: {tag}."
 msgstr ""
 
-#: statistiche.py:2210
+#: statistiche.py:2214
 msgid "Dai tag: nessun autore, album, genere o anno."
 msgstr ""
 
-#: statistiche.py:2213
+#: statistiche.py:2217
 #, python-brace-format
 msgid "L'autore con più file: {autore}, {n}."
 msgstr ""
 
 #. Traduttori: decennio è come «anni '80» o «anni 2020»; n è quanti file.
-#: statistiche.py:2217
+#: statistiche.py:2221
 #, python-brace-format
 msgid "Il decennio con più file: gli {decennio}, {n}."
 msgstr ""
 
-#: statistiche.py:2218
+#: statistiche.py:2222
 #, python-brace-format
 msgid "File di cui la durata non si sa: {n}."
 msgstr ""
 
-#: statistiche.py:2220
+#: statistiche.py:2224
 #, python-brace-format
 msgid ""
 "Durate non credibili, oltre una settimana, lasciate fuori dai conti: "
