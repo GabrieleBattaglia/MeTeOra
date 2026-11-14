@@ -886,6 +886,25 @@ def test_cerca_contenuti_negli_indirizzi_e_i_dieci_secondi(finestra, con_ytdlp, 
     assert finestra._righe[-1].startswith("Caruso, Lucio Dalla: un minuto di ascolto di fila, ora è negli Indirizzi.")
     secondi(20)
     assert len(finestra.archivio.indirizzi.brani) == 1
+    # L'etichetta degli Indirizzi (Gabriele, 3.16.2): con il ramo aperto
+    # cambia quando si riapre, insieme ai brani; prima restava al conto vecchio.
+    nodo = finestra.nodo_indirizzi
+    # Le etichette dei brani chiedono alla coda il loop A-B.
+    monkeypatch.setattr(finestra, "coda", types.SimpleNamespace(playlist=pl, corrente=brano, loop_playlist=None, punto_a=None, punto_b=None))
+    assert finestra.albero.IsExpanded(nodo) and "brani: 0" in finestra.albero.GetItemText(nodo)
+    finestra.albero.Collapse(nodo)
+    finestra.albero.Expand(nodo)
+    assert "brani: 1 " in finestra.albero.GetItemText(nodo)
+    assert [finestra.albero.GetItemText(v).split(",")[0] for v in finestra._figli(nodo)][2:] == ["Caruso"]
+    # Con il ramo chiuso il conto nuovo arriva subito.
+    finestra.albero.Collapse(nodo)
+    secondo = pl.brani[1]
+    finto.in_corso, finto.posizione = secondo.percorso, 0.0
+    monkeypatch.setattr(finestra, "coda", types.SimpleNamespace(playlist=pl, corrente=secondo, loop_playlist=None, punto_a=None, punto_b=None))
+    secondi(62)
+    assert len(finestra.archivio.indirizzi.brani) == 2 and "brani: 2 " in finestra.albero.GetItemText(nodo)
+    finestra.albero.Expand(nodo)
+    assert [finestra.albero.GetItemText(v).split(",")[0] for v in finestra._figli(nodo)][2:] == ["Attenti al lupo", "Caruso"]
     monkeypatch.undo()
 
 

@@ -2,6 +2,12 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.16.2] - 2026-11-14
+
+- L'etichetta degli Indirizzi diceva meno brani di quelli che c'erano, trovato da Gabriele: 8 detti e 10 dentro. Un brano che entrava dopo un minuto di ascolto, come un risultato della ricerca, andava negli Indirizzi, ma l'etichetta restava al conto di prima, anche riaprendo il ramo, fino al riavvio o a un altro cambiamento delle playlist. Ora un ramo chiuso dice subito il conto nuovo, e uno aperto lo dice quando si riapre, insieme al brano nuovo. Ogni playlist che si riapre rifà la sua etichetta.
+- Cerca contenuti e il ramo dei risultati non entrano nel conto, come prima: l'etichetta conta i brani, e le playlist dei siti a parte.
+- Le prove sono in tests/test_indirizzi.py.
+
 ## [3.16.1] - 2026-11-14
 
 - Le anteprime di SoundCloud non entrano più nei risultati della ricerca dei contenuti, chiesto da Gabriele: i brani che il sito fa sentire interi solo agli abbonati, come quelli ufficiali di Rocco Hunt, arrivano lunghi esattamente 30 secondi, e suonavano solo quelli.

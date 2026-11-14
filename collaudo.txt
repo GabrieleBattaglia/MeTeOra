@@ -17,3 +17,6 @@ Cerca contenuti con Rocco Hunt - Nu juorno buono: arrivano più di venti risulta
 Nei risultati di SoundCloud non c'è più Nu juorno buono di Rocco Hunt da 30 secondi.
 Mostra altri risultati in fondo porta altri venti risultati di YouTube Music.
 Cerca lucio dalla caruso: i risultati di YouTube hanno ancora autore e durata, come prima.
+Collaudo di MeTeOra 3.16.2: il conto degli Indirizzi.
+Chiudi gli Indirizzi, suona un risultato nuovo per un minuto di fila: l'etichetta degli Indirizzi dice subito un brano in più, e riaprendo il ramo lo trovi in cima ai brani.
+Con gli Indirizzi aperti fai lo stesso con un altro risultato: chiudendo e riaprendo il ramo, l'etichetta e i brani cambiano insieme.
