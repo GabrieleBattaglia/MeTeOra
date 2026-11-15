@@ -1721,7 +1721,7 @@ def test_i_sottotitoli_dei_siti_con_lo_speaker(crea, avvisi, monkeypatch):
 
     scaricati = []
 
-    def scarica(traccia, intestazioni=(), attesa=None):
+    def scarica(traccia, intestazioni=(), attesa=None, serve=None):
         scaricati.append((traccia.lingua, tuple(intestazioni)))
         if traccia.lingua == "de":
             raise OSError("HTTP Error 403")
@@ -1738,7 +1738,8 @@ def test_i_sottotitoli_dei_siti_con_lo_speaker(crea, avvisi, monkeypatch):
     lontano.posizione = 0.0
     m.usa_il_lontano(lontano)
     m.suona(pagina)
-    assert _aspetta(lambda: (m.tracce() or {}).get("sub"))
+    # Le tracce arrivano una alla volta: si aspetta l'ultima.
+    assert _aspetta(lambda: len((m.tracce() or {}).get("sub") or ()) == 2)
     # Una traccia che non si scarica resta fuori; le altre hanno la lingua e il titolo.
     assert m.tracce()["sub"] == [
         {"id": 1, "type": "sub", "title": "automatici", "lang": "it", "selected": False, "external": True, "image": False, "codec": "webvtt"},
@@ -1773,11 +1774,159 @@ def test_i_sottotitoli_dei_siti_con_lo_speaker(crea, avvisi, monkeypatch):
     m.usa_il_lontano(None)
 
 
+def test_i_sottotitoli_dei_siti_con_lo_speaker_arrivano_una_traccia_alla_volta(crea, avvisi, monkeypatch):
+    # Revisione del 15 novembre 2026: la prima traccia, nella lingua di
+    # MeTeOra, quella che la finestra sceglie, non aspetta le altre, che
+    # possono metterci fino a 15 secondi l'una; la finestra lo sa dopo la
+    # prima e di nuovo dopo l'ultima, come sul PC.
+    import indirizzi
+
+    sblocca = threading.Event()
+    servono = []
+
+    def scarica(traccia, intestazioni=(), attesa=None, serve=None):
+        servono.append(serve)
+        if traccia.lingua == "de":
+            assert sblocca.wait(10)
+        return f"WEBVTT\n\n00:00:00.500 --> 00:00:09.000\nRiga {traccia.lingua}\n"
+
+    monkeypatch.setattr(indirizzi, "scarica_i_sottotitoli", scarica)
+    pagina = "https://www.youtube.com/watch?v=lenta"
+    indirizzi._tieni(pagina, False, indirizzi.Flusso("https://a/audio.webm", sottotitoli=[indirizzi.Sottotitoli("https://a/it.vtt", "it", "Italiano"),
+        indirizzi.Sottotitoli("https://a/de.vtt", "de", "Deutsch")]))
+    detti = []
+    m = crea(ai_sottotitoli=detti.append, al_caricamento=avvisi("al_caricamento"))
+    lontano = _LontanoFinto()
+    lontano.posizione = 1.0
+    m.usa_il_lontano(lontano)
+    m.suona(pagina)
+    # La prima c'e', la finestra lo sa e si legge gia', mentre la seconda si scarica ancora.
+    assert _aspetta(lambda: [t["lang"] for t in (m.tracce() or {}).get("sub", [])] == ["it"])
+    assert _aspetta(lambda: avvisi.nomi().count("al_caricamento") == 1)
+    m.scegli_traccia("sid", "1")
+    assert _aspetta(lambda: detti == ["Riga it"])
+    # La seconda arriva in coda, la finestra lo risa, e la scelta resta.
+    sblocca.set()
+    assert _aspetta(lambda: [t["lang"] for t in m.tracce()["sub"]] == ["it", "de"])
+    assert _aspetta(lambda: avvisi.nomi().count("al_caricamento") == 2)
+    assert [t["selected"] for t in m.tracce()["sub"]] == [True, False] and detti == ["Riga it"]
+    # serve dice se le tracce servono ancora: dopo lo stop no.
+    assert len(servono) == 2 and servono[0]()
+    m.stop()
+    assert not servono[0]()
+    # Una traccia che arriva a brano cambiato resta fuori.
+    sblocca.clear()
+    m.suona(pagina)
+    assert _aspetta(lambda: [t["lang"] for t in (m.tracce() or {}).get("sub", [])] == ["it"])
+    m.stop()
+    sblocca.set()
+    time.sleep(0.3)
+    assert m._sottotitoli_lontani is None
+    m.usa_il_lontano(None)
+
+
+def test_i_sottotitoli_a_pezzi_dei_siti_con_lo_speaker(crea, avvisi, monkeypatch):
+    # Revisione del 15 novembre 2026: una traccia che il sito da' come
+    # playlist HLS di pezzi WebVTT, come quelle che yt-dlp chiama
+    # m3u8_native, con lo speaker spariva senza avviso; ora si scarica a
+    # pezzi, come fa libmpv sul PC, e si legge seguendo lo speaker.
+    import io
+
+    import indirizzi
+
+    pagine = {"https://s.example/it/prog.m3u8": "#EXTM3U\n#EXT-X-TARGETDURATION:6\n#EXTINF:6.0,\nseg0.webvtt\n#EXTINF:6.0,\nseg1.webvtt\n#EXT-X-ENDLIST\n",
+        "https://s.example/it/seg0.webvtt": ("WEBVTT\nX-TIMESTAMP-MAP=MPEGTS:900000,LOCAL:00:00:00.000\n\n00:00:01.000 --> 00:00:02.500\nBip!\n\n"
+            "00:00:05.000 --> 00:00:07.000\nA cavallo\n"),
+        "https://s.example/it/seg1.webvtt": ("WEBVTT\nX-TIMESTAMP-MAP=MPEGTS:900000,LOCAL:00:00:00.000\n\n00:00:05.000 --> 00:00:07.000\nA cavallo\n\n"
+            "00:00:08.000 --> 00:00:09.000\nBop!\n")}
+
+    class Risposta(io.BytesIO):
+        def __init__(self, indirizzo):
+            super().__init__(pagine[indirizzo].encode("utf-8"))
+            self.indirizzo = indirizzo
+
+        def geturl(self):
+            return self.indirizzo
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_eccezione):
+            self.close()
+
+    monkeypatch.setattr(indirizzi.urllib.request, "urlopen", lambda richiesta, timeout=None: Risposta(richiesta.full_url))
+    pagina = "https://www.example.com/video/a-pezzi"
+    indirizzi._tieni(pagina, False, indirizzi.Flusso("https://s.example/audio.m4a", sottotitoli=[indirizzi.Sottotitoli("https://s.example/it/prog.m3u8", "it", "Italiano")]))
+    detti = []
+    m = crea(ai_sottotitoli=detti.append, al_caricamento=avvisi("al_caricamento"))
+    lontano = _LontanoFinto()
+    lontano.posizione = 0.0
+    m.usa_il_lontano(lontano)
+    m.suona(pagina)
+    assert _aspetta(lambda: [(t["title"], t["lang"]) for t in (m.tracce() or {}).get("sub", [])] == [("Italiano", "it")])
+    m.scegli_traccia("sid", "1")
+    for posizione, testo in ((1.5, "Bip!"), (5.5, "A cavallo"), (8.5, "Bop!")):
+        lontano.posizione = posizione
+        assert _aspetta(lambda testo=testo: detti[-1:] == [testo])
+    # Il cue a cavallo dei due pezzi si dice una volta, come sul PC.
+    assert detti == ["Bip!", "A cavallo", "Bop!"]
+    m.stop()
+    m.usa_il_lontano(None)
+
+
+def test_le_tracce_dei_siti_sul_pc_si_aggiungono_una_alla_volta():
+    # Revisione del 15 novembre 2026: sub-add apre ogni traccia in disparte,
+    # e le aggiunte vanno una alla volta, dalla risposta di quella prima,
+    # perche' insieme finirebbero in un ordine qualunque. La prima, nella
+    # lingua di MeTeOra, si aggiunge scelta, come la sceglieva sub-files
+    # (3.8.0): con i sottotitoli spenti la toglie la finestra.
+    import indirizzi
+
+    class LettoreFinto:
+        """Il lettore come lo vede il motore: annota i comandi, e risponde solo quando la prova lo chiede."""
+
+        def __init__(self):
+            self._richieste = 1
+            self.sottotitoli_del_sito = (indirizzi.Sottotitoli("https://a/it.vtt", "it", "Italian (Original)", True), indirizzi.Sottotitoli("https://a/de.vtt", "de", "Deutsch"),
+                indirizzi.Sottotitoli("https://a/en.vtt", "en", "English"))
+            self.comandi, self.risposte = [], []
+
+        def comando(self, *argomenti, risposta=None):
+            self.comandi.append(argomenti)
+            self.risposte.append(risposta)
+
+    m = Motore(ao="null")
+    try:
+        finto = LettoreFinto()
+        avvisati = []
+        m._aggiungi_i_sottotitoli_del_sito(finto, 1, lambda: avvisati.append(len(finto.comandi)))
+        assert finto.comandi == [("sub-add", "https://a/it.vtt", "select", "automatici", "it")] and avvisati == []
+        # La seconda parte solo dalla risposta della prima, e la finestra rilegge le tracce.
+        finto.risposte[0](None, None)
+        assert finto.comandi[1:] == [("sub-add", "https://a/de.vtt", "auto", "Deutsch", "de")] and avvisati == [2]
+        # Una traccia che il sito non da' non ferma le altre.
+        finto.risposte[1](RuntimeError("HTTP Error 404"), None)
+        assert finto.comandi[2:] == [("sub-add", "https://a/en.vtt", "auto", "English", "en")] and avvisati == [2]
+        # Dopo l'ultima, la finestra le rilegge tutte.
+        finto.risposte[2](None, None)
+        assert len(finto.comandi) == 3 and avvisati == [2, 3]
+        # La risposta di un caricamento vecchio non aggiunge niente.
+        finto.comandi.clear()
+        finto.risposte.clear()
+        m._aggiungi_i_sottotitoli_del_sito(finto, 1)
+        finto._richieste = 2
+        finto.risposte[0](None, None)
+        assert len(finto.comandi) == 1
+    finally:
+        m.chiudi()
+
+
 def test_i_sottotitoli_dei_siti_sul_pc_hanno_titolo_e_lingua(avvisi, tmp_path):
     # Gabriele, 15 novembre 2026: con sub-files libmpv chiamava la traccia
     # con la coda del suo indirizzo firmato, e D la leggeva tutta; sub-add le
-    # da' il titolo e la lingua, nell'ordine dato, senza sceglierle. I
-    # sottotitoli sono file sul disco, che sub-add apre come gli indirizzi.
+    # da' il titolo e la lingua, nell'ordine dato, e sceglie la prima, come
+    # sub-files (revisione del 15 novembre 2026). I sottotitoli sono file sul
+    # disco, che sub-add apre come gli indirizzi.
     import indirizzi
 
     brano = _silenzio(tmp_path / "audio.wav", 6)
@@ -1793,15 +1942,83 @@ def test_i_sottotitoli_dei_siti_sul_pc_hanno_titolo_e_lingua(avvisi, tmp_path):
         # L'avviso arriva dopo la prima traccia, e di nuovo dopo l'ultima.
         assert _aspetta(lambda: len((m.tracce() or {"sub": []})["sub"]) == 2 and len(caricati) == 2, 10)
         sub = m.tracce()["sub"]
-        assert [(t.get("title"), t.get("lang"), t.get("selected"), t.get("codec")) for t in sub] == [("automatici", "it", False, "webvtt"), ("Deutsch", "de", False, "webvtt")]
-        m.scegli_traccia("sid", str(sub[0]["id"]))
+        assert [(t.get("title"), t.get("lang"), t.get("selected"), t.get("codec")) for t in sub] == [("automatici", "it", True, "webvtt"), ("Deutsch", "de", False, "webvtt")]
+        # La prima, scelta da libmpv, si legge senza che la finestra la scelga.
         assert _aspetta(lambda: detti == ["Ciao a tutti"], 5)
+        m.scegli_traccia("sid", str(sub[1]["id"]))
+        assert _aspetta(lambda: detti == ["Ciao a tutti", "Hallo"], 5)
         # Il brano dopo, un file, non ha le tracce del sito.
         m.suona(_silenzio(tmp_path / "file.wav", 2))
         assert _aspetta(lambda: m.tracce() is not None and m._attivo.percorso.endswith("file.wav"), 5)
         assert _aspetta(lambda: m.tracce()["sub"] == [], 2)
     finally:
         m.chiudi()
+
+
+def _sul_pc(blocchi):
+    """Che cosa dice il motore sul PC di una fila di sottotitoli di testo,
+    [(inizio, fine, testo)]: sub-text quando il testo cambia, anche vuoto fra
+    due staccati, e sub-start a ogni cue, come li manda libmpv."""
+    detti = []
+    m = Motore(ao="null", ai_sottotitoli=detti.append)
+    try:
+        lettore, fine_di_prima, testo_di_prima = m._attivo, None, None
+        for inizio, fine, testo in blocchi:
+            if fine_di_prima is not None and inizio > fine_di_prima + 0.001:
+                m._sottotitolo(lettore, "sub-text", "")
+                m._sottotitolo_a_immagini(lettore, "sub-start", None)
+                testo_di_prima = ""
+            if testo != testo_di_prima:
+                m._sottotitolo(lettore, "sub-text", testo)
+            m._sottotitolo_a_immagini(lettore, "sub-start", inizio)
+            fine_di_prima, testo_di_prima = fine, testo
+    finally:
+        m.chiudi()
+    return detti
+
+
+def test_i_blocchi_uguali_e_attaccati_dei_siti_si_dicono_come_sul_pc():
+    # Revisione del 15 novembre 2026: con lo speaker un cartello animato, lo
+    # stesso testo cue dopo cue, come quello della 1.82.0, si ridiceva ogni
+    # mezzo secondo, perche' il cue si confrontava con l'inizio del blocco
+    # gia' unito; sul PC si dice una volta. Il confronto e' con il cue prima.
+    import karaoke
+
+    cartello = [(20 + i / 24, 20 + (i + 1) / 24, "Stazione di Tokyo") for i in range(72)]
+    uniti = modulo._senza_ripetizioni(cartello)
+    assert len(uniti) == 1 and uniti[0][0] == 20 and uniti[0][1] == pytest.approx(23.0) and uniti[0][2] == "Stazione di Tokyo"
+    # Due uguali e attaccati restano due se il secondo comincia mezzo secondo
+    # o piu' dopo il primo, come un ritornello; prima diventano uno. Due
+    # staccati restano due.
+    no, si, ah = [(1.0, 1.6, "No"), (1.6, 2.2, "No")], [(1.0, 1.4, "Sì"), (1.4, 1.8, "Sì")], [(1.0, 1.2, "Ah"), (1.3, 1.5, "Ah")]
+    assert modulo._senza_ripetizioni(no) == no and modulo._senza_ripetizioni(si) == [(1.0, 1.8, "Sì")] and modulo._senza_ripetizioni(ah) == ah
+    # Con lo speaker si dicono come sul PC.
+    attesi = {"Stazione di Tokyo": ["Stazione di Tokyo"], "No": ["No", "No"], "Sì": ["Sì"], "Ah": ["Ah", "Ah"]}
+    for blocchi in (cartello, no, si, ah):
+        seguito = karaoke.Seguito("sito", [], pronti=modulo._senza_ripetizioni(blocchi))
+        seguito.scegli(True)
+        detti = [testo for passo in range(300) for testo in seguito.avanza(round(blocchi[0][0] - 1.0 + passo * 0.1, 3))]
+        assert detti == _sul_pc(blocchi) == attesi[blocchi[0][2]]
+
+
+def test_dopo_un_salto_l_ombra_ridice_il_sottotitolo():
+    # Revisione del 15 novembre 2026: quando l'ombra salta al punto dello
+    # speaker, il sottotitolo di adesso si dice anche se ha le righe di
+    # quello visto prima, con la sola riga vuota spostata, come nei lettori.
+    detti = []
+    comandi = []
+    mpv_finto = types.SimpleNamespace(pause=False, seeking=False, time_pos=12.1, command_async=lambda *argomenti: comandi.append(argomenti))
+    ombra = types.SimpleNamespace(pronto=True, mpv=mpv_finto, _testo="Caruso\n", _nuovo=False, numero=1, _al_testo=lambda _numero, testo: detti.append(testo))
+    # Vicina allo speaker non salta, e la riga spostata non si ridice.
+    modulo._Ombra.segui(ombra, 12.0, False)
+    modulo._Ombra._sottotitolo(ombra, "sub-text", " \nCaruso")
+    assert comandi == [] and detti == []
+    # Scostata piu' di SCARTO_DELL_OMBRA salta, e la riga si dice.
+    mpv_finto.time_pos = 12.0 + modulo.SCARTO_DELL_OMBRA + 1.0
+    modulo._Ombra.segui(ombra, 12.0, False)
+    assert comandi == [("seek", "12.000", "absolute+exact")] and ombra._testo is None
+    modulo._Ombra._sottotitolo(ombra, "sub-text", "Caruso\n")
+    assert detti == ["Caruso\n"]
 
 
 def test_la_sorgente_wav(crea, tmp_path):

@@ -135,7 +135,7 @@ def test_i_sottotitoli_dei_siti_nella_finestra_con_lo_speaker(finestra, monkeypa
             time.sleep(0.02)
         return condizione()
 
-    monkeypatch.setattr(indirizzi, "scarica_i_sottotitoli", lambda _traccia, _intestazioni=(), _attesa=None: WEBVTT_DI_SUPERQUARK)
+    monkeypatch.setattr(indirizzi, "scarica_i_sottotitoli", lambda _traccia, _intestazioni=(), _attesa=None, serve=None: WEBVTT_DI_SUPERQUARK)
     pagina = "https://www.youtube.com/watch?v=yXWQ_voCgwU"
     indirizzi._tieni(pagina, False, indirizzi.Flusso("https://a/audio.webm", sottotitoli=[indirizzi.Sottotitoli("https://a/it.vtt", "it", "Italian (Original)", True)]))
     speaker = _SpeakerFinto()

@@ -368,14 +368,20 @@ def _senza_ripetizioni(blocchi):
     """I blocchi dei sottotitoli di un sito seguiti allo speaker senza le
     ripetizioni che libmpv sul PC non direbbe (Gabriele, 15 novembre 2026):
     un blocco uguale a quello di prima, attaccato a lui e cominciato meno di
-    RIPETIZIONE_MINIMA secondi dopo, diventa uno con lui, come i cartelli ASS
-    animati della 1.82.0; uno cominciato dopo, come un ritornello, resta."""
+    RIPETIZIONE_MINIMA secondi dopo il cue di prima, diventa uno con lui,
+    come i cartelli ASS animati della 1.82.0; uno cominciato dopo, come un
+    ritornello, resta. Il confronto e' con l'inizio del cue di prima, come
+    sul PC, dove sub-start cambia a ogni cue: con quello del blocco gia'
+    unito un cartello di tre secondi si ridiceva ogni mezzo secondo
+    (revisione del 15 novembre 2026)."""
     uniti = []
+    inizio_di_prima = None
     for inizio, fine, testo in blocchi:
-        if uniti and testo == uniti[-1][2] and inizio <= uniti[-1][1] + 0.001 and inizio - uniti[-1][0] < RIPETIZIONE_MINIMA:
+        if uniti and testo == uniti[-1][2] and inizio <= uniti[-1][1] + 0.001 and inizio - inizio_di_prima < RIPETIZIONE_MINIMA:
             uniti[-1] = (uniti[-1][0], max(uniti[-1][1], fine), testo)
         else:
             uniti.append((inizio, fine, testo))
+        inizio_di_prima = inizio
     return uniti
 
 
@@ -1160,7 +1166,7 @@ class Motore:
             self._karaoke_lontano = seguito
         if self._al_caricamento is not None:
             self._al_caricamento()
-        self._segui_lo_speaker(numero, percorso, [seguito])
+        self._segui_lo_speaker(numero, percorso, lambda: (seguito,))
 
     def _sottotitoli_allo_speaker(self, numero, percorso, sottotitoli, intestazioni=()):
         """Nel suo filo: le tracce dei sottotitoli del brano numero, di un
@@ -1169,35 +1175,57 @@ class Motore:
         traccia del karaoke; la finestra le rilegge, e con i sottotitoli
         accesi sceglie la prima. Poi, finche' quel brano suona allo speaker,
         i blocchi della traccia scelta vanno ai sottotitoli, dalla posizione
-        che lo speaker dice (Gabriele, 15 novembre 2026). Una traccia che non
-        si scarica, o non ha testo, resta fuori; senza tracce il filo finisce."""
-        tracce = []
-        for traccia in sottotitoli:
+        che lo speaker dice (Gabriele, 15 novembre 2026). Le tracce si danno
+        una alla volta, appena scaricate, e un filo a parte segue lo speaker
+        dalla prima: la prima, nella lingua di MeTeOra, quella che la finestra
+        sceglie, non aspetta le altre, che possono metterci fino a
+        indirizzi.ATTESA_DEI_SOTTOTITOLI l'una. La finestra le rilegge dopo la
+        prima e di nuovo dopo l'ultima, come sul PC (revisione del 15
+        novembre 2026). Una traccia che non si scarica, o non ha testo, resta
+        fuori; senza tracce non si segue niente."""
+
+        def serve():
             with self._blocco:
-                if self._chiuso or numero != self._brano_lontano or self._lontano is None:
-                    return
+                return not self._chiuso and numero == self._brano_lontano and self._lontano is not None
+
+        date = 0
+        for traccia in sottotitoli:
+            if not serve():
+                return
             try:
-                blocchi = _senza_ripetizioni(indirizzi.blocchi_del_webvtt(indirizzi.scarica_i_sottotitoli(traccia, intestazioni)))
+                blocchi = _senza_ripetizioni(indirizzi.blocchi_del_webvtt(indirizzi.scarica_i_sottotitoli(traccia, intestazioni, serve=serve)))
             except Exception:  # noqa: BLE001 - la rete fallisce in molti modi: la traccia resta fuori, il brano suona lo stesso
                 blocchi = []
-            if blocchi:
-                tracce.append((traccia, karaoke.Seguito(traccia, [], pronti=blocchi)))
-        if not tracce:
-            return
-        with self._blocco:
-            if self._chiuso or numero != self._brano_lontano or self._lontano is None:
-                return
-            self._sottotitoli_lontani = tracce
-        if self._al_caricamento is not None:
+            if not blocchi:
+                continue
+            with self._blocco:
+                if not serve():
+                    return
+                # Una lista nuova a ogni traccia: chi ha letto quella di
+                # prima, come tracce(), la scorre fuori dal lucchetto.
+                self._sottotitoli_lontani = [*(self._sottotitoli_lontani or ()), (traccia, karaoke.Seguito(traccia, [], pronti=blocchi))]
+            date += 1
+            if date == 1:
+                threading.Thread(target=self._segui_lo_speaker, args=(numero, percorso, self._seguiti_dei_sottotitoli),
+                    name="MeTeOra, sottotitoli seguiti allo speaker", daemon=True).start()
+                if self._al_caricamento is not None:
+                    self._al_caricamento()
+        if date > 1 and self._al_caricamento is not None and serve():
             self._al_caricamento()
-        self._segui_lo_speaker(numero, percorso, [seguito for _traccia, seguito in tracce])
+
+    def _seguiti_dei_sottotitoli(self):
+        """Con il lucchetto: i karaoke.Seguito delle tracce dei sottotitoli
+        del sito arrivate fin qui."""
+        return [seguito for _traccia, seguito in self._sottotitoli_lontani or ()]
 
     def _segui_lo_speaker(self, numero, percorso, seguiti):
         """Nel filo di chi segue lo speaker: finche' il brano numero suona
         allo speaker, ogni PASSO_DEL_KARAOKE_LONTANO i testi dei seguiti,
         karaoke.Seguito, vanno ai sottotitoli, dalla posizione che lo speaker
         dice; ne parla solo quello scelto. Per il karaoke (3.17.0) e per i
-        sottotitoli dei siti (Gabriele, 15 novembre 2026)."""
+        sottotitoli dei siti (Gabriele, 15 novembre 2026). seguiti(), con il
+        lucchetto, da' quelli di adesso: le tracce dei siti arrivano una
+        alla volta (revisione del 15 novembre 2026)."""
         while True:
             time.sleep(PASSO_DEL_KARAOKE_LONTANO)
             with self._blocco:
@@ -1211,7 +1239,7 @@ class Motore:
             with self._blocco:
                 if numero != self._brano_lontano:
                     return
-                testi = [testo for seguito in seguiti for testo in seguito.avanza(posizione)]
+                testi = [testo for seguito in seguiti() for testo in seguito.avanza(posizione)]
             if self._ai_sottotitoli is not None:
                 for testo in testi:
                     self._ai_sottotitoli(testo)
@@ -1776,20 +1804,24 @@ class Motore:
         """Un brano di un sito appena aperto, il caricamento numero del
         lettore: le sue tracce di sottotitoli, come quelle di YouTube,
         diventano tracce di libmpv con sub-add, che da' il titolo e la lingua
-        di indirizzi.Sottotitoli, senza sceglierle. Con sub-files (3.8.0)
-        libmpv chiamava ogni traccia con la coda del suo indirizzo firmato,
-        timedtext?v=...&fmt=vtt, e D la leggeva tutta (Gabriele, 15 novembre
-        2026). sub-add scarica la traccia in disparte, e le aggiunte vanno una
-        alla volta, dalla risposta di quella prima: insieme finirebbero in un
-        ordine qualunque, e la prima, nella lingua di MeTeOra, non sarebbe piu'
-        quella che la finestra sceglie. poi(), se c'e', arriva quando la prima
-        e' aggiunta, e di nuovo dopo l'ultima, cosi' chi legge le tracce le
-        trova. Nel filo degli eventi del lettore, fuori dal blocco."""
+        di indirizzi.Sottotitoli. Con sub-files (3.8.0) libmpv chiamava ogni
+        traccia con la coda del suo indirizzo firmato, timedtext?v=...&fmt=vtt,
+        e D la leggeva tutta (Gabriele, 15 novembre 2026). sub-add scarica la
+        traccia in disparte, e le aggiunte vanno una alla volta, dalla
+        risposta di quella prima: insieme finirebbero in un ordine qualunque.
+        La prima, nella lingua di MeTeOra, si aggiunge scelta, con select,
+        come la sceglieva libmpv da se' con sub-files: con i sottotitoli
+        spenti la toglie la finestra, come prima, e con gli impressi scelti su
+        un film resta questa, e non parte la lettura degli impressi sui
+        fotogrammi del video del sito (revisione del 15 novembre 2026). Le
+        altre si aggiungono senza sceglierle. poi(), se c'e', arriva quando la
+        prima e' aggiunta, e di nuovo dopo l'ultima, cosi' chi legge le
+        tracce le trova. Nel filo degli eventi del lettore, fuori dal blocco."""
         with self._blocco:
             tracce = lettore.sottotitoli_del_sito if lettore._richieste == numero and not self._chiuso else ()
             traccia = tracce[posto] if posto < len(tracce) else None
             if traccia is not None:
-                lettore.comando("sub-add", traccia.indirizzo, "auto", traccia.titolo, traccia.lingua,
+                lettore.comando("sub-add", traccia.indirizzo, "select" if posto == 0 else "auto", traccia.titolo, traccia.lingua,
                     risposta=lambda _errore, _esito: self._aggiungi_i_sottotitoli_del_sito(lettore, numero, poi, posto + 1))
         if poi is not None and (posto == 1 or traccia is None):
             poi()
