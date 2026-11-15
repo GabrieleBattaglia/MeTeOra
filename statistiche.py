@@ -196,7 +196,8 @@ NOMI_DEGLI_EVENTI = {
     "percorso_aggiunto": _("percorso di rete aggiunto"), "percorso_tolto": _("percorso di rete tolto"),
     "registrazione_avviata": _("registrazione avviata"), "registrazione_in_pausa": _("registrazione in pausa"),
     "registrazione_ripresa": _("registrazione ripresa"), "registrazione_fermata": _("registrazione fermata"),
-    "registrazione_in_ascolto": _("in ascolto per registrare, con Alt e R"), "registrazione_eliminata": _("registrazione eliminata"),
+    "registrazione_in_ascolto": _("attesa di Alt con R accesa"), "registrazione_attesa_spenta": _("attesa di Alt con R spenta"),
+    "chiusura_in_attesa": _("chiusura rimandata per salvare le registrazioni"), "registrazione_eliminata": _("registrazione eliminata"),
     "alle_registrazioni": _("al ramo Registrazioni"), "cartella_delle_registrazioni": _("cartella delle registrazioni aperta"),
     "scheda_degli_effetti": _("scheda degli effetti cambiata"), "console_letta": _("lettura della console cambiata, con F10"),
     "console_letta_al_limite": _("lettura della console già al limite"),
@@ -1769,8 +1770,10 @@ class Pagina:
         media, le dirette e le puntate, i formati e i primati."""
         r = self.d["record"]
         finite, secondi, byte = self.c("registrazioni_finite"), self.c("secondi_registrati"), self.c("byte_registrati")
-        righe = [_("Registrazioni avviate: {avviate}, di cui con l'attesa di Alt con R {attese}; file prodotti: {finite}, con {durata} e {peso}.").format(
-            avviate=self.c("registrazioni_avviate"), attese=self.c("registrazioni_in_ascolto"), finite=finite, durata=durata(secondi), peso=_peso(byte))]
+        # Dal 15 novembre 2026 le partite dall'attesa: prima si contavano le
+        # pressioni di Alt con R, che ora sono le accensioni dell'attesa.
+        righe = [_("Registrazioni avviate: {avviate}, di cui partite dall'attesa di Alt con R {attese}; file prodotti: {finite}, con {durata} e {peso}.").format(
+            avviate=self.c("registrazioni_avviate"), attese=self.c("registrazioni_dall_attesa"), finite=finite, durata=durata(secondi), peso=_peso(byte))]
         if finite:
             righe.append(_("In media una registrazione dura {durata} e pesa {peso}.").format(durata=durata(secondi / finite), peso=_peso(byte / finite)))
         dirette, puntate = self.c("registrazioni_di_dirette"), self.c("registrazioni_di_puntate")
@@ -1797,12 +1800,57 @@ class Pagina:
         if self.c("registrazioni_a_parti_separate"):
             # Le unioni non riuscite, con le parti salvate a file (3.13.2).
             righe.append(_("Registrazioni rimaste a parti separate, perché l'unione non è riuscita: {n}.").format(n=self.c("registrazioni_a_parti_separate")))
+        righe += self._le_registrazioni_che_seguono(r)
         aperta, cambiata = self.c("cartelle_delle_registrazioni_aperte"), self.c("cartelle_delle_registrazioni_cambiate")
         if aperta or cambiata:
             # La voce Cartella delle registrazioni (3.13.0), e la cartella
             # aperta con Ctrl e Alt con R o con Vai alla cartella delle registrazioni (3.14.0).
             righe.append(_("La cartella delle registrazioni aperta in Esplora risorse: {aperta}; cambiata nelle impostazioni: {cambiata}.").format(
                 aperta=_volte(aperta), cambiata=_volte(cambiata)))
+        return righe
+
+    def _le_registrazioni_che_seguono(self, r):
+        """Le righe dell'attesa che segue la sorgente, dei marker, degli
+        avvisi, dei salvataggi, della chiusura rimandata e dei recuperi
+        all'avvio (Gabriele, 15 novembre 2026), solo quando ci sono."""
+        righe = []
+        accese, spente = self.c("registrazioni_in_ascolto"), self.c("attese_spente")
+        if accese or spente:
+            righe.append(_("L'attesa di Alt con R: accesa {accese}, spenta {spente}.").format(accese=_volte(accese), spente=_volte(spente)))
+        pause, riprese, ricollegamenti = self.c("pause_automatiche"), self.c("riprese_automatiche"), self.c("ricollegamenti_delle_registrazioni")
+        if pause or riprese or ricollegamenti:
+            righe.append(_("Pause automatiche, con la sorgente che taceva: {pause}; riprese automatiche: {riprese}; ricollegamenti dopo una caduta della rete: "
+                "{ricollegamenti}.").format(pause=pause, riprese=riprese, ricollegamenti=ricollegamenti))
+        if self.c("riprove_dell_attesa"):
+            # Le registrazioni non riuscite che l'attesa riprova ogni minuto (revisione del 15 novembre 2026).
+            righe.append(_("Registrazioni riprovate dall'attesa, dopo una che non era riuscita: {n}.").format(n=self.c("riprove_dell_attesa")))
+        marker, avvisi = self.c("marker_delle_registrazioni"), self.c("avvisi_delle_registrazioni")
+        if marker or avvisi:
+            righe.append(_("Marker messi dalle registrazioni, dai titoli in onda, dai capitoli e dalle riprese: {marker}; avvisi nella console, senza suono: {avvisi}.").format(
+                marker=marker, avvisi=avvisi))
+        millisecondi = self.c("millisecondi_di_salvataggio")
+        if millisecondi:
+            riga = _("Tempo passato a salvare le registrazioni: {durata}").format(durata=durata(millisecondi / 1000))
+            if "salvataggio_piu_lungo" in r:
+                riga += _("; il salvataggio più lungo: {durata}, di {cosa}, {quando}").format(durata=durata(r["salvataggio_piu_lungo"]["valore"]),
+                    cosa=r["salvataggio_piu_lungo"].get("cosa", ""), quando=data_e_ora(r["salvataggio_piu_lungo"]["quando"]))
+            righe.append(riga + ".")
+        chiusure, salvate = self.c("chiusure_rimandate"), self.c("registrazioni_salvate_alla_chiusura")
+        if chiusure or salvate:
+            righe.append(_("Chiusure di MeTeOra rimandate per salvare le registrazioni: {chiusure}; registrazioni salvate alla chiusura: {salvate}.").format(
+                chiusure=chiusure, salvate=salvate))
+        if self.c("aggiornamenti_rimandati_per_le_registrazioni"):
+            # Gli aggiornamenti rimandati al prossimo avvio, per non interrompere un salvataggio (revisione del 15 novembre 2026).
+            righe.append(_("Aggiornamenti di MeTeOra rimandati al prossimo avvio per non interrompere le registrazioni: {n}.").format(
+                n=self.c("aggiornamenti_rimandati_per_le_registrazioni")))
+        recuperate = self.c("registrazioni_recuperate_all_avvio")
+        if recuperate:
+            # Il plurale delle parti e' il loro (revisione del 15 novembre 2026): prima si diceva con 1 parti.
+            parti = self.c("parti_recuperate_all_avvio")
+            # Traduttori: le parti delle registrazioni recuperate all'avvio, in coda alla riga che le conta.
+            con_le_parti = ngettext("con {n} parte", "con {n} parti", parti).format(n=parti)
+            # Traduttori: parti e' con 1 parte o con 3 parti.
+            righe.append(_("Registrazioni recuperate all'avvio, rimaste a metà da una chiusura improvvisa: {n}, {parti}.").format(n=recuperate, parti=con_le_parti))
         return righe
 
     def la_ricerca(self):
