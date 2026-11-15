@@ -4126,7 +4126,7 @@ class _SpeakerFinto:
         return self.posizione
 
 
-_CUCINA ={"uuid": "6d9b1c3e", "nome": "Cucina", "modello": "Google Home Speaker", "produttore": "Google Inc.", "tipo": "audio",
+_CUCINA = {"uuid": "6d9b1c3e", "nome": "Cucina", "modello": "Google Home Speaker", "produttore": "Google Inc.", "tipo": "audio",
            "indirizzo": "192.168.1.72", "porta": 8009}
 _OVUNQUE = {"uuid": "a1b2", "nome": "ovunque", "modello": "Google Cast Group", "produttore": "Google Inc.", "tipo": "group",
             "indirizzo": "192.168.1.33", "porta": 32230}
