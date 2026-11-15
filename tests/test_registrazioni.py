@@ -2,9 +2,12 @@
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 # 10/11/2026: nasce con la 3.5.0, issue 42. Nella 3.13.0 la cartella delle registrazioni; nella 3.13.2 l'attesa al passaggio e le parti non unite. Nella 3.14.0 la voce che apre la cartella. Nella 3.15.0 i bit veri nei file e la voce a due passi.
 
+import contextlib
 import datetime
+import itertools
 import json
 import os
+import shutil
 import socket
 import struct
 import threading
@@ -202,9 +205,11 @@ def test_l_mp3_si_taglia_a_fotogrammi_e_tiene_un_info_solo(tmp_path):
     assert dati.count(b"Info") == 1 and dati[:3] == b"ID3"
     info = mutagen.mp3.MP3(reg.percorso).info
     assert abs(info.length - reg.secondi) < 0.06 and abs(info.length - 7.0) < 0.2
-    # Il taglio cade a fotogrammi, uno in piu' del secondo chiesto.
+    # Il taglio cade a fotogrammi: il primo tenuto e' quello che comincia dal
+    # secondo chiesto, senza il fotogramma in piu' di prima della revisione.
     fotogramma = 1152 / 44100
-    assert abs(reg.secondi - (2.0376 + 3.0 + 0.03 + 3.0 + 0.03 - 1.0 - fotogramma)) < 0.1
+    tolti = -(-round(1.0 * 44100) // 1152) * fotogramma
+    assert abs(reg.secondi - (2.0376 + 3.0 + 0.03 + 3.0 + 0.03 - tolti)) < 0.06
     # Si salta dove si vuole, anche nell'ultima parte.
     assert abs(_salto(reg.percorso, 6.5) - 6.5) < 0.05
 
@@ -289,36 +294,68 @@ def test_la_riserva_di_una_ripresa_si_misura_con_l_orologio(monkeypatch):
 
 def test_i_titoli_diventano_marker_con_la_distanza_minima(monkeypatch):
     """Il primo titolo va all'inizio; un titolo che arriva entro la distanza
-    minima rinomina il marker di prima; su una ripresa si aggiunge; i
-    doppioni delle connessioni nuove non contano; il richiamo dice numero,
-    nome e secondi, senza il lucchetto."""
+    minima rinomina il marker di prima; i doppioni delle connessioni nuove non
+    contano; il richiamo dice numero, nome e secondi del marker sul file,
+    senza il lucchetto. Dalla revisione del 15 novembre 2026 il marker si
+    dice una volta sola, quando il suo nome e' fermo, con il titolo vero e
+    non con il segnaposto; un titolo gia' andato in onda da poco non fa un
+    marker nuovo, contro l'alternanza del nome della radio e del brano; e il
+    titolo arrivato prima dell'audio di una ripresa va nel suo marker."""
     orologio = [1000.0]
     monkeypatch.setattr(registrazioni.time, "monotonic", lambda: orologio[0])
-    detti = []
+    detti, riprese = [], []
     reg = registrazioni.Registrazione(RADIO, "Rai Radio 3", indirizzi.Flusso(RADIO, dal_vivo=True), dove="non usata",
-        al_marker=lambda r, numero, nome, secondi: detti.append((numero, nome)))
+        al_marker=lambda r, numero, nome, secondi: detti.append((numero, nome, secondi)), alla_ripresa=lambda r, motivo: riprese.append(motivo))
     monkeypatch.setattr(reg, "_annota", lambda: None)
     parte = registrazioni.Parte("x.parziale1")
     parte.partita = orologio[0]
     reg._parte = parte
-    parte.posizione = 1.5
+    reg._posizione(parte, 1.5)
     reg._titolo_nella_parte(parte, "Radio 3 Suite")
     orologio[0] += 5
-    parte.posizione = 6.0
+    reg._posizione(parte, 6.0)
     reg._titolo_nella_parte(parte, "Lucio  Dalla - Caruso")
+    # Il nome non e' ancora fermo: niente da dire. La prima parte ha l'audio.
+    assert detti == [] and riprese == [None]
     orologio[0] += 60
-    parte.posizione = 66.0
+    reg._posizione(parte, 66.0)
+    assert detti == [(1, "Lucio Dalla - Caruso", 0.0)]
     reg._titolo_nella_parte(parte, "Lucio Dalla - Caruso")
     reg._titolo_nella_parte(parte, "Mina - Azzurro")
     reg._titolo_nella_parte(registrazioni.Parte("vecchia"), "Da una parte chiusa")
     assert parte.marker == [[0.0, "Lucio Dalla - Caruso", False, "Lucio Dalla - Caruso"], [66.0, "Mina - Azzurro", False, "Mina - Azzurro"]]
-    assert detti == [(1, "Radio 3 Suite"), (1, "Lucio Dalla - Caruso"), (2, "Mina - Azzurro")] and reg.numero_dei_marker == 2
-    # La ripresa ha il suo marker, e un titolo subito dopo le si aggiunge.
+    # L'alternanza: il nome della radio e il brano di prima, gia' andati in
+    # onda, non fanno marker, ne' righe; un brano nuovo si'.
+    for passo, titolo in enumerate(["Radio 3 Suite", "Mina - Azzurro", "Radio 3 Suite", "Mina - Azzurro", "Radio 3 Suite", "Battiato - La cura"]):
+        orologio[0] += 30
+        reg._posizione(parte, 96.0 + 30 * passo)
+        reg._titolo_nella_parte(parte, titolo)
+    assert [voce[1] for voce in parte.marker] == ["Lucio Dalla - Caruso", "Mina - Azzurro", "Battiato - La cura"] and reg.numero_dei_marker == 3
+    assert detti == [(1, "Lucio Dalla - Caruso", 0.0), (2, "Mina - Azzurro", 66.0)]
+    orologio[0] += 20
+    reg._posizione(parte, 266.0)
+    assert detti[-1] == (3, "Battiato - La cura", 246.0)
+    # La ripresa: un titolo arrivato con la riserva, prima dell'audio, va nel
+    # suo marker, che si dice subito, sul tempo del file dopo la prima parte.
+    parte.secondi, parte.finita = 266.0, orologio[0]
+    reg._parti = [parte]
     nuova = registrazioni.Parte("x.parziale2")
+    nuova.ripresa, nuova.partita = "sorgente", orologio[0]
     reg._parte = nuova
-    reg._marker_di_ripresa()
-    reg._titolo_nella_parte(nuova, "Battiato - La cura")
-    assert nuova.marker[0][1].startswith("Ripresa alle ") and nuova.marker[0][1].endswith(": Battiato - La cura") and reg.numero_dei_marker == 3
+    reg._titolo_nella_parte(nuova, "Franco Battiato - Centro di gravità")
+    assert nuova.marker == [] and reg.numero_dei_marker == 3
+    reg._posizione(nuova, 0.5)
+    assert nuova.marker[0][1].startswith("Ripresa alle ") and nuova.marker[0][1].endswith(": Franco Battiato - Centro di gravità") and reg.numero_dei_marker == 4
+    assert detti[-1][0] == 4 and detti[-1][2] == 266.0 and riprese == [None, "sorgente"]
+    # Un titolo subito dopo si aggiunge alla ripresa, senza un marker nuovo ne' una riga.
+    reg._titolo_nella_parte(nuova, "Lucio Dalla - Futura")
+    assert nuova.marker[0][1].endswith(": Lucio Dalla - Futura") and len(detti) == 4
+    # Un ricollegamento non ha marker: dice solo che l'audio e' arrivato.
+    rete = registrazioni.Parte("x.parziale3")
+    rete.ripresa = "rete"
+    reg._parte = rete
+    reg._posizione(rete, 0.3)
+    assert rete.marker == [] and riprese == [None, "sorgente", "rete"] and rete.viva and rete.ultimo_dato == orologio[0]
 
 
 def test_la_caduta_di_una_diretta_e_una_pausa_per_la_rete(tmp_path, monkeypatch):
@@ -363,11 +400,13 @@ def test_una_connessione_rifiutata_si_dice_anche_subito(tmp_path):
     assert reg.ferma() is None and not os.path.exists(reg.percorso + registrazioni.FILE_DELLE_PARTI)
 
 
-def _server_icy(audio, metaint, titoli, pausa=0.15):
+def _server_icy(audio, metaint, titoli, pausa=0.5, riserva=2):
     """Un server ICY in locale: a ogni connessione manda l'audio diviso in
-    blocchi da metaint, con un titolo dopo ognuno, un blocco ogni pausa
-    secondi come una radio vera, che va al passo dell'orologio, poi chiude.
-    Torna la porta."""
+    blocchi da metaint, con un titolo dopo ognuno; i primi riserva blocchi
+    subito, come la riserva di una radio vera, poi uno ogni pausa secondi,
+    al passo dell'orologio: 4000 byte ogni mezzo secondo sono 64 kbps
+    (revisione del 15 novembre 2026: prima un blocco ogni 0.15 secondi, tre
+    volte piu' veloce dell'orologio, e senza riserva). Poi chiude. Torna la porta."""
     presa = socket.socket()
     presa.bind(("127.0.0.1", 0))
     presa.listen(4)
@@ -382,7 +421,7 @@ def _server_icy(audio, metaint, titoli, pausa=0.15):
                 conn.recv(4096)
                 conn.sendall(b"HTTP/1.0 200 OK\r\nContent-Type: audio/mpeg\r\nicy-metaint: " + str(metaint).encode() + b"\r\n\r\n")
                 rimasti = list(elenco)
-                for i in range(0, len(audio), metaint):
+                for numero, i in enumerate(range(0, len(audio), metaint)):
                     blocco = audio[i:i + metaint]
                     if len(blocco) == metaint:
                         titolo = rimasti.pop(0) if rimasti else None
@@ -393,7 +432,8 @@ def _server_icy(audio, metaint, titoli, pausa=0.15):
                         conn.sendall(blocco)
                     except OSError:
                         break
-                    time.sleep(pausa)
+                    if numero >= riserva - 1:
+                        time.sleep(pausa)
         presa.close()
 
     threading.Thread(target=servi, daemon=True).start()
@@ -408,7 +448,7 @@ def test_una_diretta_vera_con_i_titoli_e_il_ricollegamento(tmp_path, monkeypatch
     import mutagen
 
     monkeypatch.setattr(registrazioni, "DISTANZA_DEI_MARKER", 0.0)
-    sorgente = _registrata(tmp_path, "da servire", 6.0)
+    sorgente = _registrata(tmp_path, "da servire", 4.0)
     with open(sorgente.percorso, "rb") as f:
         audio = f.read()
     # libmpv comincia a decodificare dopo un secondo e mezzo di flusso, che
@@ -563,20 +603,24 @@ def test_due_wav_a_24_bit_si_uniscono_con_la_loro_intestazione(tmp_path):
 
 
 class _Finta:
-    """Una registrazione finta: annota i comandi, e ferma dice il suo file."""
+    """Una registrazione finta: annota i comandi, e ferma dice il suo file.
+    Come la vera, la ripresa e il ricollegamento si dicono quando la parte
+    nuova riceve l'audio: lo fa arriva(), con alla_ripresa e, per una
+    diretta, il marker della ripresa (revisione del 15 novembre 2026)."""
 
     create: typing.ClassVar[list] = []
 
     def __init__(self, sorgente, titolo, flusso, formato, kbps, canali, frequenza, al_termine=None, dove=None, bit=None, dal_vivo=None, al_marker=None,
-            alla_caduta=None, capitoli=()):
+            alla_caduta=None, capitoli=(), alla_ripresa=None, da_riconoscere=False):
         self.sorgente, self.titolo, self.flusso = sorgente, titolo, flusso
         self.formato, self.kbps, self.canali, self.frequenza, self.al_termine = formato, kbps, canali, frequenza, al_termine
         self.dal_vivo = getattr(flusso, "dal_vivo", True) if dal_vivo is None else dal_vivo
-        self.al_marker, self.alla_caduta, self.capitoli = al_marker, alla_caduta, list(capitoli)
+        self.al_marker, self.alla_caduta, self.alla_ripresa, self.capitoli = al_marker, alla_caduta, alla_ripresa, list(capitoli)
+        self.da_riconoscere = da_riconoscere
         self.stato, self.secondi, self.byte, self.comandi = "pronta", 754.0, 11_534_336, []
         self.dove, self.bit = dove, registrazioni.bit_per(formato, bit or 16)
         self.percorso = os.path.join(dove or registrazioni.cartella(), f"{titolo}.mp3")
-        self.motivo = self.avanzamento = self.ultimo_marker = self.salvataggio = None
+        self.motivo = self.avanzamento = self.salvataggio = self.ripresa = None
         self.marker_finali, self.parti_separate = [], []
         _Finta.create.append(self)
 
@@ -584,15 +628,29 @@ class _Finta:
     def descrizione(self):
         return registrazioni.descrizione(self.formato, self.kbps, self.canali, self.frequenza, self.bit)
 
+    @property
+    def file_finali(self):
+        return [self.percorso] if os.path.exists(self.percorso) else []
+
     def avvia(self):
         self.comandi.append("avvia")
         self.stato = "in_corso"
 
     def pausa(self, valore, motivo="mano", flusso=None):
         self.comandi.append(("pausa", valore))
+        prima = self.motivo
         self.stato, self.motivo = ("in_pausa", motivo) if valore else ("in_corso", None)
-        if not valore and self.dal_vivo:
-            self.ultimo_marker = (3, "Ripresa alle 16.05")
+        if not valore:
+            self.ripresa = prima or "mano"
+
+    def arriva(self):
+        """La parte nuova della ripresa riceve l'audio."""
+        motivo, self.ripresa = self.ripresa, None
+        if motivo is None:
+            return
+        if self.dal_vivo and motivo != "rete":
+            self.al_marker(self, 3, "Ripresa alle 16.05", 754.0)
+        self.alla_ripresa(self, motivo)
 
     def metti_il_motivo(self, motivo):
         self.motivo = motivo
@@ -616,10 +674,11 @@ class _Finta:
         self.comandi.append("elimina")
         self.stato = "eliminata"
 
-    def cade(self):
-        """La connessione della diretta cade, come fa Registrazione con alla_caduta."""
-        self.stato, self.motivo = "in_pausa", "rete"
-        self.alla_caduta(self, 5.0)
+    def cade(self, secondi=5.0):
+        """La connessione della diretta cade, come fa Registrazione con
+        alla_caduta: secondi zero per un tentativo che non ha ricevuto niente."""
+        self.stato, self.motivo, self.ripresa = "in_pausa", "rete", None
+        self.alla_caduta(self, secondi)
 
 
 @pytest.fixture
@@ -791,7 +850,10 @@ def test_l_attesa_segue_la_sorgente_senza_i_silenzi(finestra, con_registrazioni,
     stato["in_pausa"] = False
     finestra._guarda_le_registrazioni()
     assert reg.comandi[-1] == ("pausa", False) and reg.motivo is None and len(suoni_annotati) == suonati
-    assert finestra._righe[-1].startswith("Registro Rai Radio 3, marker 3: Ripresa alle 16.05, a 12:34.")
+    # La ripresa si conta, e il suo marker si dice, quando la parte nuova riceve l'audio.
+    assert finestra._statistiche.dati["conti"].get("riprese_automatiche", 0) == 0
+    reg.arriva()
+    assert finestra._righe[-1].startswith("Registro Rai Radio 3, marker 3: Ripresa alle 16.05, a 12:34.") and len(suoni_annotati) == suonati
     # Fermo e poi su un file: sempre in pausa, mai un file nuovo.
     stato["in_corso"] = None
     finestra._guarda_le_registrazioni()
@@ -812,35 +874,43 @@ def test_l_attesa_segue_la_sorgente_senza_i_silenzi(finestra, con_registrazioni,
     assert conti["pause_automatiche"] == 2 and conti["riprese_automatiche"] == 1 and conti["registrazioni_dall_attesa"] == 2
 
 
-def test_una_puntata_scarica_intera_in_disparte(finestra, con_registrazioni, suoni_annotati):
-    # Le puntate le scarica il registratore: la pausa dell'ascolto non le
-    # tocca, e un'altra sorgente le lascia finire di scaricare in disparte.
+def test_una_puntata_scarica_intera_e_un_altra_sorgente_la_chiude(finestra, con_registrazioni, suoni_annotati):
+    """Le puntate le scarica il registratore: la pausa dell'ascolto non le
+    tocca. Un'altra sorgente invece chiude il file, anche della puntata, con
+    quello che ha scaricato, come chiede il compito (revisione del 15 novembre
+    2026: prima la lasciava finire in disparte, e tornandoci se ne scaricava
+    un'altra copia, in parallelo). Una puntata finita mentre suona ancora non
+    si riscarica. La scheda con la durata dice che non e' una diretta."""
     from test_finestra import _premi
 
     video = Brano("https://www.youtube.com/watch?v=prova", titolo="Il video di prova")
     indirizzi.metti_il_diretto(video.percorso)
+    finestra.schedario.metti_la_scheda(video.percorso, {"durata": 600.0})
     _premi(finestra, "r", alt=True)
     con_registrazioni.stato["in_corso"] = video.percorso
     finestra.coda.imposta(None, video)
     finestra._guarda_le_registrazioni()
     puntata = _Finta.create[-1]
-    assert not puntata.dal_vivo
+    assert not puntata.dal_vivo and not puntata.da_riconoscere
     con_registrazioni.stato["in_pausa"] = True
     finestra._guarda_le_registrazioni()
     assert puntata.comandi == ["avvia"]
+    # A, poi la radio B, poi di nuovo A: la prima copia di A e' chiusa, mai due in corso.
     _suona_la_radio(finestra, con_registrazioni)
-    assert puntata in finestra._in_chiusura and puntata.comandi == ["avvia"] and _Finta.create[-1].titolo == "Rai Radio 3"
-    assert "Salvo in disparte: Il video di prova, che scarica ancora." in _premi(finestra, "r")
-    puntata.stato = "completa"
-    puntata.al_termine(puntata)
-    assert puntata not in finestra._in_chiusura and "è arrivata alla fine" in finestra._righe[-1]
-    # Finita la puntata mentre suona ancora, l'attesa non la riscarica.
-    finestra.coda.imposta(None, video)
+    assert puntata.comandi == ["avvia", "ferma"] and puntata not in finestra._in_chiusura and _Finta.create[-1].titolo == "Rai Radio 3"
     con_registrazioni.stato.update(in_corso=video.percorso, in_pausa=False)
-    finestra._registrazione = None
-    finestra._da_non_registrare = video.percorso
+    finestra.coda.imposta(None, video)
     finestra._guarda_le_registrazioni()
-    assert finestra._registrazione is None
+    vive = [r for r in _Finta.create if r.sorgente == video.percorso and r.stato == "in_corso"]
+    assert vive == [finestra._registrazione] and not finestra._in_chiusura
+    seconda = finestra._registrazione
+    seconda.stato = "completa"
+    seconda.al_termine(seconda)
+    assert "è arrivata alla fine" in finestra._righe[-1] and finestra._registrazione is None
+    # Finita la puntata mentre suona ancora, l'attesa non la riscarica, e R lo dice.
+    finestra._guarda_le_registrazioni()
+    assert finestra._registrazione is None and len(_Finta.create) == 3
+    assert _premi(finestra, "r") == "Attesa accesa: non registro di nuovo Il video di prova, finché non suona un'altra sorgente. Alt con R spegne l'attesa."
 
 
 def test_la_ripresa_a_mano_con_la_sorgente_che_tace(finestra, con_registrazioni, suoni_annotati):
@@ -910,8 +980,10 @@ def test_la_chiusura_aspetta_il_comando_in_volo(finestra, con_registrazioni, mon
 
 def test_la_rete_che_cade_si_ricollega(finestra, con_registrazioni, monkeypatch, suoni_annotati):
     """La connessione del registratore cade mentre il lettore suona: si
-    ricollega da se', nello stesso file. Con il lettore fermo e' una pausa
-    automatica. Dopo cinque tentativi falliti la registrazione finisce."""
+    ricollega da se', nello stesso file, e lo dice quando la parte nuova
+    riceve l'audio. Con il lettore fermo e' una pausa automatica. Dopo cinque
+    tentativi falliti la registrazione finisce, e l'attesa la riprova un
+    minuto dopo, mentre la sorgente suona."""
     from test_finestra import _premi
 
     _premi(finestra, "r", alt=True)
@@ -919,6 +991,9 @@ def test_la_rete_che_cade_si_ricollega(finestra, con_registrazioni, monkeypatch,
     reg = _Finta.create[-1]
     reg.cade()
     assert reg.comandi[-1] == ("pausa", False) and reg.stato == "in_corso" and reg.riprove == 1
+    assert finestra._righe[-1].startswith("La registrazione di Rai Radio 3 ha perso la connessione: mi ricollego.")
+    assert finestra._statistiche.dati["conti"].get("ricollegamenti_delle_registrazioni", 0) == 0
+    reg.arriva()
     assert finestra._righe[-1].startswith("La registrazione di Rai Radio 3 si è ricollegata")
     assert finestra._statistiche.dati["conti"]["ricollegamenti_delle_registrazioni"] == 1
     con_registrazioni.stato["in_pausa"] = True
@@ -942,9 +1017,33 @@ def test_la_rete_che_cade_si_ricollega(finestra, con_registrazioni, monkeypatch,
     reg.cade()
     assert attese == [1000, 2000, 5000, 10000, 30000] and reg.comandi[-1] == "ferma" and finestra._registrazione is None
     assert finestra._righe[-1].startswith("La registrazione di Rai Radio 3 si è interrotta: il flusso non risponde più") and suoni_annotati[-1] == "errore"
-    # La sorgente che non risponde non si riprova finche' non ne suona un'altra.
+    assert finestra._righe[-1].rsplit(" ", 1)[0].endswith("L'attesa ci riprova ogni minuto mentre suona, o appena la fai ripartire.")
+    assert finestra._statistiche.dati["conti"]["ricollegamenti_delle_registrazioni"] == 1
+    # La sorgente che non risponde si riprova un minuto dopo, se suona ancora, con un file nuovo.
     finestra._guarda_le_registrazioni()
-    assert finestra._registrazione is None
+    assert finestra._registrazione is None and len(_Finta.create) == 1
+    assert _premi(finestra, "r").startswith("Attesa accesa, ma la registrazione di Rai Radio 3 non è riuscita: ci riprovo ogni minuto mentre suona")
+    con_registrazioni.orologio[0] += 60
+    finestra._guarda_le_registrazioni()
+    seconda = _Finta.create[-1]
+    assert len(_Finta.create) == 2 and finestra._registrazione is seconda and finestra._statistiche.dati["conti"]["riprove_dell_attesa"] == 1
+
+    def non_risponde(valore, motivo="mano", flusso=None):
+        raise OSError("il server non risponde")
+
+    # Il tentativo nuovo non riceve niente: fallisce in silenzio, senza file, e l'attesa riprova ancora.
+    monkeypatch.setattr(seconda, "pausa", non_risponde)
+    monkeypatch.setattr(seconda, "ferma", lambda: seconda.comandi.append("ferma"))
+    righe = len(finestra._righe)
+    seconda.cade(0.0)
+    assert finestra._registrazione is None and len(finestra._righe) == righe and finestra._non_riuscita[2] == 2 and seconda.comandi[-1] == "ferma"
+    # Quando l'audio arriva, la sorgente si registra di nuovo davvero.
+    con_registrazioni.orologio[0] += 60
+    finestra._guarda_le_registrazioni()
+    terza = _Finta.create[-1]
+    assert terza is not seconda and finestra._non_riuscita is not None
+    terza.alla_ripresa(terza, None)
+    assert finestra._non_riuscita is None
 
 
 def test_i_marker_e_gli_avvisi_senza_suono(finestra, con_registrazioni, suoni_annotati):
@@ -1279,3 +1378,809 @@ def test_formato_e_qualita_a_due_passi(finestra, con_registrazioni, monkeypatch)
     finestra._comando_registra()
     reg = _Finta.create[-1]
     assert (reg.formato, reg.kbps, reg.canali) == ("mp3", 96, 1)
+
+
+# La revisione del 15 novembre 2026: le prove dei due revisori, portate nel ramo.
+
+
+def _linea_del_tempo(percorso, secondi, frequenza=44100):
+    """Un WAV in cui il secondo k e' un tono di 400 + 50 k Hz: nel file
+    registrato si riconosce ogni secondo, e un buco o un doppione si vede."""
+    t = np.arange(frequenza) / frequenza
+    campioni = (np.concatenate([0.25 * np.sin(2 * np.pi * (400 + 50 * k) * t) for k in range(secondi)]) * 32767).astype("<i2")
+    with wave.open(str(percorso), "wb") as f:
+        f.setnchannels(1)
+        f.setsampwidth(2)
+        f.setframerate(frequenza)
+        f.writeframes(campioni.tobytes())
+    return str(percorso)
+
+
+def _secondi_presenti(percorso, frequenza=44100):
+    """Per ogni mezzo secondo di un WAV registrato, il secondo della linea del tempo che vi suona."""
+    with wave.open(percorso, "rb") as f:
+        dati = np.frombuffer(f.readframes(f.getnframes()), dtype="<i2").astype(float) / 32768
+    finestra = frequenza // 2
+    trovati = []
+    for inizio in range(0, len(dati) - finestra, finestra):
+        spettro = np.abs(np.fft.rfft(dati[inizio:inizio + finestra] * np.hanning(finestra)))
+        trovati.append(round((np.argmax(spettro) * frequenza / finestra - 400) / 50))
+    return trovati
+
+
+def _glissando(percorso, secondi, hz, frequenza=44100):
+    """Un glissando da hz a quattro volte hz: nessun pezzo somiglia a un altro, e l'allineamento e' uno solo."""
+    t = np.arange(int(frequenza * secondi)) / frequenza
+    campioni = (0.25 * np.sin(2 * np.pi * (hz * t + 3 * hz * t * t / (2 * secondi))) * 32767).astype("<i2")
+    with wave.open(str(percorso), "wb") as f:
+        f.setnchannels(1)
+        f.setsampwidth(2)
+        f.setframerate(frequenza)
+        f.writeframes(campioni.tobytes())
+    return str(percorso)
+
+
+def _decodificato(percorso):
+    """I campioni di un file decodificato da libmpv, da -1 a 1."""
+    uscita = percorso + ".pcm.wav"
+    finita = threading.Event()
+    lettore = mpv.MPV(**{**motore.OPZIONI_DI_BASE, "o": uscita, "of": "wav", "oac": "pcm_s16le"})
+    lettore.register_event_callback(lambda e: finita.set() if e.event_id.value == mpv.MpvEventID.END_FILE else None)
+    lettore.command("loadfile", percorso)
+    assert finita.wait(30)
+    lettore.terminate()
+    with wave.open(uscita, "rb") as f:
+        return np.frombuffer(f.readframes(f.getnframes()), dtype="<i2").astype(float) / 32768
+
+
+class _LibmpvFinto:
+    """Il libmpv di una parte, finto: annota i comandi, e non apre niente."""
+
+    def __init__(self, **opzioni):
+        self.opzioni, self.comandi, self.time_pos = opzioni, [], None
+
+    def __setitem__(self, chiave, valore):
+        pass
+
+    def register_event_callback(self, funzione):
+        self.evento = funzione
+
+    def observe_property(self, nome, funzione):
+        pass
+
+    def register_stream_protocol(self, schema, funzione):
+        pass
+
+    def command(self, *argomenti):
+        self.comandi.append(argomenti)
+
+    def terminate(self):
+        pass
+
+
+class _Rimando:
+    """Un wx.CallLater finto, che parte quando la coda della prova lo raggiunge, se non e' fermato."""
+
+    def __init__(self, funzione, argomenti):
+        self.funzione, self.argomenti, self.fermo = funzione, argomenti, False
+
+    def Stop(self):
+        self.fermo = True
+
+    def __call__(self):
+        if not self.fermo:
+            self.funzione(*self.argomenti)
+
+
+def _come_il_vero(lavoro, al_termine):
+    """registrazioni_in_disparte come la vera, ma nel filo della prova: l'errore del lavoro e' l'esito."""
+    try:
+        esito = lavoro()
+    except Exception as e:  # noqa: BLE001 - come registrazioni_in_disparte
+        esito = e
+    al_termine(esito)
+
+
+def test_le_opzioni_della_codifica_scrivono_ogni_pacchetto():
+    # flush_packets: la parte in corso cresce sul disco a ogni pacchetto, e
+    # dopo un crollo c'e' tutta; la riscrittura dell'unione non ne ha bisogno.
+    assert registrazioni._codifica("mp3", 128, None)["ofopts"] == "flush_packets=1"
+    assert registrazioni._codifica("wav", None, 24)["ofopts"] == "rf64=auto,flush_packets=1"
+    assert registrazioni._codifica("opus", 96, None)["ofopts"] == "flush_packets=1,page_duration=200000"
+    assert "ofopts" not in registrazioni._codifica("flac", None, 16, svuota=False)
+    assert registrazioni._codifica("wav", None, 16, svuota=False)["ofopts"] == "rf64=auto"
+
+
+def test_registrazioni_in_disparte_porta_anche_gli_errori():
+    # Un'eccezione del lavoro arriva ad al_termine come esito: prima chiudeva
+    # il filo senza dirlo, e la chiusura di MeTeOra aspettava per sempre.
+    import finestra as modulo
+
+    esiti, fatto = [], threading.Event()
+
+    def rotto():
+        raise RuntimeError("libmpv non riparte")
+
+    modulo.registrazioni_in_disparte(rotto, lambda esito: esiti.append(esito) or fatto.set())
+    assert fatto.wait(5) and isinstance(esiti[0], RuntimeError)
+
+
+def test_il_buco_di_un_ricollegamento_parte_dall_ultimo_dato(tmp_path, monkeypatch):
+    """La rete si pianta senza chiudere: libmpv dice la fine solo dopo
+    l'attesa della lettura, quindici secondi dopo l'ultimo dato. Il buco si
+    conta dall'ultimo dato, e della riserva della connessione nuova, che
+    riporta quei secondi, si toglie solo il doppione; anche il taglio si
+    ferma all'ultimo dato mentre non arriva niente (prima si perdevano fino a
+    quindici secondi a ogni stallo)."""
+    orologio = [100.0]
+    monkeypatch.setattr(registrazioni.time, "monotonic", lambda: orologio[0])
+    monkeypatch.setattr(registrazioni.mpv, "MPV", _LibmpvFinto)
+    reg = registrazioni.Registrazione(RADIO, "x", indirizzi.Flusso(RADIO, dal_vivo=True), dove=str(tmp_path))
+    caduta = registrazioni.Parte(str(tmp_path / "x.parziale1"))
+    caduta.secondi, caduta.partita, caduta.ultimo_dato, caduta.finita = 6.0, 100.0, 106.0, 121.0
+    reg._parti, reg.stato, reg.motivo = [caduta], "in_pausa", "rete"
+    orologio[0] = 122.0
+    reg.pausa(False)
+    nuova = reg._parte
+    assert nuova.buco == 16.0 and nuova.ripresa == "rete" and nuova.dati_contati and reg._lettore.comandi[-1][0] == "loadfile"
+    # La riserva di 22 secondi, poi 8 al passo dell'orologio: se ne tolgono i
+    # 6 doppi. L'ultimo dato lo annota la lettura della rete, non time-pos,
+    # che cresce anche quando libmpv decodifica alla fine quello che teneva.
+    orologio[0] = 130.0
+    reg._posizione(nuova, 29.0)
+    assert nuova.ultimo_dato == 0.0 and nuova.viva
+    nuova.ultimo_dato = 130.0
+    reg._posizione(nuova, 30.0)
+    assert reg._taglio(nuova, 30.0) == 6.0 and reg.secondi == 30.0
+    # La rete si pianta di nuovo: mentre non arriva niente il taglio resta.
+    orologio[0] = 145.0
+    assert reg._taglio(nuova, 30.0) == 6.0 and reg.secondi == 30.0
+    # La lettura della parte annota l'orologio di ogni dato arrivato.
+    lettura = registrazioni._LetturaDellaParte(types.SimpleNamespace(read=lambda quanti: b"x" * quanti, close=lambda: None, cancel=lambda: None), nuova)
+    assert lettura.read(4) == b"xxxx" and nuova.ultimo_dato == 145.0 and not hasattr(lettura, "seek") and not hasattr(lettura, "size")
+
+
+def test_la_rete_che_si_pianta_non_perde_i_secondi(tmp_path, monkeypatch):
+    """Con libmpv vero e una radio in locale che si pianta senza chiudere,
+    poi alla connessione nuova manda otto secondi di riserva: nel file
+    registrato ci sono tutti i secondi della linea del tempo, senza buchi e
+    senza doppioni (la prova dello stallo del revisore, accorciata: prima
+    mancavano i secondi della caduta)."""
+    monkeypatch.setattr(registrazioni.diretta, "ATTESA", 1.5)
+    origine = _linea_del_tempo(tmp_path / "linea.wav", 16)
+    finita = threading.Event()
+    mp3 = registrazioni.Registrazione(origine, "linea", indirizzi.Flusso(origine), "mp3", 64, 1, 44100, dove=str(tmp_path / "L"), al_termine=lambda _r: finita.set())
+    mp3.avvia()
+    assert finita.wait(30)
+    with open(mp3.percorso, "rb") as f:
+        dati = f.read()
+    i = registrazioni._lunghezza_id3(dati)
+    # Solo i fotogrammi audio, senza ID3 ne' Info, come una radio: 8000 byte al secondo.
+    audio = dati[i + registrazioni.diretta._testa(dati, i)[0]:]
+    presa = socket.socket()
+    presa.bind(("127.0.0.1", 0))
+    presa.listen(4)
+    stato = {}
+
+    def una(conn, numero):
+        with conn, contextlib.suppress(OSError):
+            conn.recv(4096)
+            conn.sendall(b"HTTP/1.0 200 OK\r\nContent-Type: audio/mpeg\r\n\r\n")
+            if numero == 1:
+                stato["partenza"] = time.monotonic()
+                for passo in range(12):
+                    conn.sendall(audio[passo * 2000:(passo + 1) * 2000])
+                    time.sleep(0.25)
+                time.sleep(5.0)
+                return
+            adesso = time.monotonic() - stato["partenza"]
+            conn.sendall(audio[max(0, int((adesso - 8.0) * 8000)):int(adesso * 8000)])
+            fatto = adesso
+            while fatto < adesso + 6.0:
+                time.sleep(0.25)
+                conn.sendall(audio[int(fatto * 8000):int((fatto + 0.25) * 8000)])
+                fatto += 0.25
+
+    def servi():
+        for numero in (1, 2):
+            try:
+                conn, _da = presa.accept()
+            except OSError:
+                return
+            threading.Thread(target=una, args=(conn, numero), daemon=True).start()
+        presa.close()
+
+    threading.Thread(target=servi, daemon=True).start()
+    indirizzo = f"http://127.0.0.1:{presa.getsockname()[1]}/radio"
+    caduta = threading.Event()
+    reg = registrazioni.Registrazione(indirizzo, "Piantata", indirizzi.Flusso(indirizzo, dal_vivo=True), "wav", None, 1, 44100, dove=str(tmp_path / "R"),
+        alla_caduta=lambda r, s: caduta.set())
+    reg.avvia()
+    assert caduta.wait(20)
+    reg.pausa(False)
+    time.sleep(3.0)
+    percorso = reg.ferma()
+    presenti = _secondi_presenti(percorso)
+    assert presenti and presenti[0] == 0 and max(presenti) >= 6 and all(0 <= b - a <= 1 for a, b in itertools.pairwise(presenti)), " ".join(map(str, presenti))
+
+
+def test_la_registrazione_riconosce_da_se_una_diretta(tmp_path):
+    """Una radio aperta con Ctrl con V, che il motore non ha ancora
+    riconosciuto: la registrazione la riconosce dal suo libmpv, di rete, che
+    non si salta e senza durata, e la sua fine e' una caduta della rete, non
+    quella di una puntata. Un file del disco resta quello che e'."""
+    sorgente = _registrata(tmp_path, "da riconoscere", 4.0)
+    with open(sorgente.percorso, "rb") as f:
+        dati = f.read()
+    # Solo i fotogrammi audio, come una radio: con l'intestazione Info libmpv sa la durata.
+    i = registrazioni._lunghezza_id3(dati)
+    audio = dati[i + registrazioni.diretta._testa(dati, i)[0]:]
+    porta = _server_icy(audio, 4000, [["Primo"]], riserva=4)
+    indirizzo = f"http://127.0.0.1:{porta}/stream"
+    cadute = threading.Event()
+    reg = registrazioni.Registrazione(indirizzo, "Da riconoscere", indirizzi.Flusso(indirizzo), "mp3", 64, 1, 44100, dove=str(tmp_path / "Registrazioni"),
+        alla_caduta=lambda r, s: cadute.set(), da_riconoscere=True)
+    assert not reg.dal_vivo
+    reg.avvia()
+    fine = time.monotonic() + 10
+    while not reg.dal_vivo and time.monotonic() < fine:
+        time.sleep(0.05)
+    assert reg.dal_vivo and reg.capitoli == []
+    assert cadute.wait(20) and (reg.stato, reg.motivo) == ("in_pausa", "rete")
+    reg.ferma()
+    finita = threading.Event()
+    locale = registrazioni.Registrazione(sorgente.percorso, "locale", indirizzi.Flusso(sorgente.percorso), "mp3", 64, 1, 44100, dove=str(tmp_path / "Locale"),
+        al_termine=lambda _r: finita.set(), da_riconoscere=True)
+    locale.avvia()
+    assert finita.wait(30) and locale.stato == "completa" and not locale.dal_vivo
+
+
+def test_la_finestra_chiede_di_riconoscere_solo_le_sorgenti_senza_durata(finestra, con_registrazioni):
+    # Un indirizzo aperto con Ctrl con V, che il flusso non dice diretta e la
+    # scheda non sa lungo: la registrazione deve riconoscerlo da se'.
+    indirizzo = "http://127.0.0.1:9/stream"
+    indirizzi.metti_il_diretto(indirizzo)
+    con_registrazioni.stato["in_corso"] = indirizzo
+    finestra.coda.imposta(None, Brano(indirizzo))
+    finestra._comando_registra()
+    assert _Finta.create[-1].da_riconoscere and not _Finta.create[-1].dal_vivo
+    # La radio, che si sa diretta, no.
+    finestra._comando_ferma_la_registrazione()
+    _suona_la_radio(finestra, con_registrazioni)
+    finestra._comando_registra()
+    assert not _Finta.create[-1].da_riconoscere and _Finta.create[-1].dal_vivo
+
+
+def test_il_recupero_toglie_la_parte_vuota_del_crollo(tmp_path):
+    """Al crollo la parte appena aperta e' ancora vuota: si toglie, i suoi
+    marker vanno in fondo alla parte prima, e il resto si unisce in un file
+    solo, con l'intestazione rifatta; prima tutto diventava file separati,
+    con un file vuoto. Una registrazione della sola parte vuota non lascia niente."""
+    import mutagen
+
+    reg = _a_parti(tmp_path, "mp3", [(2.0, 0.0, [(0.5, "Caruso")])], nome="vuota")
+    base = reg.percorso
+    os.replace(reg._parti[0].file, base + ".parziale1")
+    reg._parti[0].file = base + ".parziale1"
+    open(base + ".parziale2", "wb").close()
+    in_corso = registrazioni.Parte(base + ".parziale2")
+    in_corso.marker = [[1.0, "Azzurro", False, "Azzurro"]]
+    reg._parte = in_corso
+    reg._annota()
+    reg._parte = None
+    recuperata = registrazioni.Registrazione.da_recuperare(base)
+    assert recuperata.recuperate == 1 and not os.path.exists(base + ".parziale2")
+    percorso = recuperata.ferma()
+    assert percorso == base and not recuperata.parti_separate and abs(mutagen.File(percorso).info.length - 2.0) < 0.1
+    assert [n for _f, _t, n in recuperata.marker_finali] == ["Caruso", "Azzurro"] and abs(recuperata.marker_finali[1][1] - recuperata.secondi) < 0.1
+    sola = str(tmp_path / "Registrazioni" / "Sola 2026-11-15 10.00.00.mp3")
+    open(sola + ".parziale1", "wb").close()
+    assert registrazioni.Registrazione.da_recuperare(sola) is None and not os.path.exists(sola + ".parziale1")
+    # Un file delle parti rotto non ferma il recupero.
+    rotta = _a_parti(tmp_path, "mp3", [(2.0, 0.0, [])], nome="rotta")
+    os.replace(rotta._parti[0].file, rotta.percorso + ".parziale1")
+    with open(rotta.percorso + registrazioni.FILE_DELLE_PARTI, "w", encoding="utf-8") as f:
+        json.dump({"formato": "mp3", "kbps": "tanti", "frequenza": None, "parti": [{"file": os.path.basename(rotta.percorso) + ".parziale1", "inizio": "x",
+            "secondi": [], "taglio": "?", "marker": [["a", "b"]]}], "capitoli": [["mai", "Sigla"]]}, f)
+    recuperata = registrazioni.Registrazione.da_recuperare(rotta.percorso)
+    assert recuperata.ferma() == rotta.percorso and abs(recuperata.secondi - 2.0) < 0.1
+
+
+@pytest.mark.parametrize("formato", ["wav", "mp3"])
+def test_il_recupero_di_una_parte_ancora_aperta(tmp_path, formato):
+    """Un crollo vero, fatto copiando a meta' i file di una registrazione in
+    corso da una radio in locale: con flush_packets la parte aperta cresce a
+    ogni pacchetto, e il recupero le rifa' l'intestazione, anche da sola.
+    Prima il WAV recuperato diceva 48695 secondi, l'MP3 zero, e una parte MP3
+    piu' giovane di sedici secondi era vuota."""
+    import mutagen
+
+    sorgente = _registrata(tmp_path, f"servita {formato}", 8.0)
+    with open(sorgente.percorso, "rb") as f:
+        audio = f.read()
+    porta = _server_icy(audio, 4000, [["Primo"]])
+    indirizzo = f"http://127.0.0.1:{porta}/stream"
+    reg = registrazioni.Registrazione(indirizzo, f"Crollo {formato}", indirizzi.Flusso(indirizzo, dal_vivo=True), formato, 64, 1, 44100,
+        dove=str(tmp_path / "Registrazioni"), alla_caduta=lambda r, s: None)
+    reg.avvia()
+    time.sleep(3.0)
+    copia = tmp_path / "copia"
+    copia.mkdir()
+    cartella = os.path.dirname(reg.percorso)
+    for nome in os.listdir(cartella):
+        if nome.startswith(os.path.basename(reg.percorso)):
+            shutil.copy(os.path.join(cartella, nome), copia / nome)
+    al_crollo = reg.secondi
+    assert os.path.getsize(copia / (os.path.basename(reg.percorso) + ".parziale1")) > 0
+    reg.ferma()
+    recuperata = registrazioni.Registrazione.da_recuperare(str(copia / os.path.basename(reg.percorso)))
+    percorso = recuperata.ferma()
+    assert percorso is not None and not recuperata.parti_separate
+    durata = mutagen.File(percorso).info.length
+    assert abs(durata - recuperata.secondi) < 0.1 and abs(durata - al_crollo) < 1.0, (durata, recuperata.secondi, al_crollo)
+    assert abs(_durata(percorso)[0] - durata) < 0.1 and [n for _f, _t, n in recuperata.marker_finali] == ["Primo"]
+
+
+def test_il_taglio_della_parte_in_corso_si_stima_al_recupero(tmp_path):
+    """La parte in corso al crollo non ha il suo taglio nel file delle parti:
+    si stima dall'ora vera della partenza e da quella dell'ultima scrittura
+    (prima teneva tutta la riserva, venti e piu' secondi doppi alla giunzione)."""
+    reg = _a_parti(tmp_path, "wav", [(2.0, 0.0, []), (3.0, 0.0, [])], nome="stima")
+    base = reg.percorso
+    for numero, parte in enumerate(reg._parti, 1):
+        os.replace(parte.file, f"{base}.parziale{numero}")
+        parte.file = f"{base}.parziale{numero}"
+    prima, seconda = reg._parti
+    reg._parti = [prima]
+    # La seconda era aperta: tre secondi di file, scritti un secondo dopo la sua partenza.
+    seconda.secondi, seconda.partita_ora = 0.0, time.time() - 100.0
+    os.utime(seconda.file, (seconda.partita_ora + 1.0, seconda.partita_ora + 1.0))
+    reg._parte = seconda
+    reg._annota()
+    reg._parte = None
+    recuperata = registrazioni.Registrazione.da_recuperare(base)
+    presenti = registrazioni._audio_della_parte(seconda.file, "wav")
+    assert presenti >= 3.0 and recuperata._parti[1].taglio == pytest.approx(presenti - 1.0, abs=0.01)
+    recuperata.ferma()
+    with wave.open(recuperata.percorso, "rb") as f:
+        assert f.getnframes() / f.getframerate() == pytest.approx(3.0, abs=0.05)
+
+
+def test_la_giunzione_dell_mp3_tagliato(tmp_path):
+    """La giunzione dell'MP3 tagliato a fotogrammi, decodificata e confrontata
+    con la parte decodificata da sola: sbaglia solo il primo granulo, per il
+    serbatoio di bit, senza picchi sopra l'ampiezza. Il fotogramma in piu'
+    saltato prima della revisione ne sbagliava tre, con un picco a 0.273."""
+
+    def mp3(nome, origine):
+        finita = threading.Event()
+        reg = registrazioni.Registrazione(origine, nome, indirizzi.Flusso(origine), "mp3", 64, 1, 44100, dove=str(tmp_path / "R"), al_termine=lambda _r: finita.set())
+        reg.avvia()
+        assert finita.wait(30)
+        return reg.percorso
+
+    uno = mp3("silenzio", _seno(tmp_path / "silenzio.wav", 2.0, hz=0))
+    due = mp3("glissando", _glissando(tmp_path / "glissando.wav", 3.0, 660))
+    (tmp_path / "U").mkdir()
+    unita = registrazioni.Registrazione(RADIO, "giunzione", indirizzi.Flusso(RADIO, dal_vivo=True), "mp3", 64, 1, 44100, dove=str(tmp_path / "U"))
+    for file, secondi, taglio in ((uno, 2.0, 0.0), (due, 3.0, 1.0)):
+        copia = str(tmp_path / f"parte {len(unita._parti)}.mp3")
+        shutil.copy(file, copia)
+        parte = registrazioni.Parte(copia)
+        parte.secondi, parte.taglio = secondi, taglio
+        unita._parti.append(parte)
+    unita._unisci()
+    onda, sola = _decodificato(unita.percorso), _decodificato(due)
+    # La parte da sola allineata sul file unito, lontano dalla giunzione.
+    m0, lunghezza = int(2.6 * 44100), 4096
+    pezzo = onda[m0:m0 + lunghezza]
+    candidati = np.argsort(np.correlate(sola, pezzo, mode="valid"))[-20:]
+    migliore = int(min(candidati, key=lambda s: float(np.sum(np.abs(sola[s:s + lunghezza] - pezzo)))))
+    scarto = migliore - m0
+    assert float(np.sqrt(np.mean((sola[migliore:migliore + lunghezza] - pezzo) ** 2))) < 1e-4
+    inizio = int(np.argmax(np.abs(onda[int(1.5 * 44100):]) > 0.02)) + int(1.5 * 44100)
+    errori = [float(np.sqrt(np.mean((onda[a:a + 576] - sola[a + scarto:a + 576 + scarto]) ** 2))) for a in range(inizio, inizio + 8 * 576, 576)]
+    picco = float(np.max(np.abs(onda[inizio:inizio + 3 * 576])))
+    assert max(errori[1:]) < 0.02 and picco <= 0.26, (errori, picco)
+
+
+def test_la_ripresa_vera_mette_il_marker_sulla_giunzione(tmp_path):
+    """Pausa e ripresa di una Registrazione vera, da una radio in locale al
+    passo dell'orologio: alla_ripresa arriva quando la parte nuova ha
+    l'audio, e il marker della ripresa nasce allora, detto e messo dove
+    comincia la seconda parte nel file finale."""
+    import mutagen
+
+    sorgente = _registrata(tmp_path, "ripresa vera", 12.0)
+    with open(sorgente.percorso, "rb") as f:
+        audio = f.read()
+    porta = _server_icy(audio, 4000, [["Primo"], ["Primo"]])
+    indirizzo = f"http://127.0.0.1:{porta}/stream"
+    riprese, detti = [], []
+    reg = registrazioni.Registrazione(indirizzo, "Ripresa", indirizzi.Flusso(indirizzo, dal_vivo=True), "mp3", 64, 1, 44100, dove=str(tmp_path / "Registrazioni"),
+        alla_caduta=lambda r, s: None, alla_ripresa=lambda r, motivo: riprese.append(motivo), al_marker=lambda r, numero, nome, secondi: detti.append((nome, secondi)))
+    reg.avvia()
+    time.sleep(3.0)
+    reg.pausa(True, motivo="sorgente")
+    giunzione = reg.secondi
+    reg.pausa(False)
+    assert riprese == [None]
+    fine = time.monotonic() + 10
+    while len(riprese) < 2 and time.monotonic() < fine:
+        time.sleep(0.05)
+    time.sleep(1.0)
+    percorso = reg.ferma()
+    assert riprese == [None, "sorgente"]
+    nomi = [n for _f, _t, n in reg.marker_finali]
+    ripresa = [t for _f, t, n in reg.marker_finali if n.startswith("Ripresa alle ")]
+    assert nomi[0] == "Primo" and len(ripresa) == 1 and abs(ripresa[0] - giunzione) < 0.3, (reg.marker_finali, giunzione)
+    assert any(n.startswith("Ripresa alle ") and abs(s - giunzione) < 0.3 for n, s in detti)
+    assert abs(mutagen.File(percorso).info.length - reg.secondi) < 0.1
+
+
+def test_il_margine_contro_i_cambi_rapidi(finestra, con_registrazioni, monkeypatch):
+    """Il margine di ATTESA_DELLA_SORGENTE, che il fixture mette a zero: una
+    pausa di un secondo, e un'altra radio per un secondo, non toccano il file;
+    la pausa vera arriva dopo il margine (prova del revisore)."""
+    from test_finestra import _premi
+
+    import finestra as modulo
+
+    monkeypatch.setattr(modulo, "ATTESA_DELLA_SORGENTE", 2500)
+    in_attesa = []
+    monkeypatch.setattr(modulo.wx, "CallLater", lambda ms, funzione, *a: in_attesa.append((con_registrazioni.orologio[0] + ms / 1000, funzione, a)))
+
+    def avanza(secondi, passo=0.5):
+        orologio = con_registrazioni.orologio
+        fine = orologio[0] + secondi
+        while orologio[0] < fine - 1e-9:
+            orologio[0] = min(fine, orologio[0] + passo)
+            for voce in [v for v in in_attesa if v[0] <= orologio[0] + 1e-9]:
+                in_attesa.remove(voce)
+                voce[1](*voce[2])
+            finestra._guarda_le_registrazioni()
+
+    _premi(finestra, "r", alt=True)
+    _suona_la_radio(finestra, con_registrazioni)
+    avanza(1.0)
+    assert not _Finta.create
+    avanza(2.0)
+    assert len(_Finta.create) == 1
+    reg = _Finta.create[-1]
+    con_registrazioni.stato["in_pausa"] = True
+    finestra._segui_la_sorgente()
+    avanza(1.0)
+    con_registrazioni.stato["in_pausa"] = False
+    finestra._segui_la_sorgente()
+    avanza(5.0)
+    assert reg.comandi == ["avvia"]
+    _suona_la_radio(finestra, con_registrazioni, Brano(RADIO_2, titolo="Rai Radio 2", radio={"uuid": "v"}))
+    avanza(1.0)
+    _suona_la_radio(finestra, con_registrazioni)
+    avanza(5.0)
+    assert reg.comandi == ["avvia"] and len(_Finta.create) == 1
+    con_registrazioni.stato["in_pausa"] = True
+    finestra._segui_la_sorgente()
+    avanza(2.0)
+    assert reg.comandi == ["avvia"]
+    avanza(1.0)
+    assert reg.comandi[-1] == ("pausa", True)
+
+
+def test_i_ricollegamenti_falliti_non_si_dicono_riusciti(finestra, con_registrazioni, monkeypatch):
+    """Come la Registrazione vera, pausa(False) da' solo il loadfile, e la
+    connessione rifiutata arriva dopo, come una caduta di zero secondi: prima
+    ogni tentativo si diceva ricollegato e si contava (prova D del revisore)."""
+    import finestra as modulo
+
+    _suona_la_radio(finestra, con_registrazioni)
+    finestra._comando_registra()
+    reg = _Finta.create[-1]
+
+    def in_disparte(lavoro, al_termine):
+        al_termine(lavoro())
+        if reg.stato == "in_corso" and reg.ripresa == "rete":
+            reg.cade(0.0)
+
+    monkeypatch.setattr(modulo, "registrazioni_in_disparte", in_disparte)
+    reg.cade()
+    righe = [r for r in finestra._righe if "Rai Radio 3" in r]
+    assert not any("ricollegata" in r for r in righe) and sum("ha perso la connessione" in r for r in righe) == 1
+    assert finestra._statistiche.dati["conti"].get("ricollegamenti_delle_registrazioni", 0) == 0 and finestra._registrazione is None
+    assert reg.comandi.count(("pausa", False)) == 5 and reg.comandi[-1] == "ferma"
+
+
+def test_un_ricollegamento_vero_che_non_riceve_niente_non_si_dice_riuscito(finestra, monkeypatch, suoni_annotati):
+    """Con la Registrazione vera e libmpv vero, nella finestra, una radio che
+    accetta la connessione e la chiude senza mandare niente: i cinque
+    tentativi falliscono, nessuno si dice riuscito, e la registrazione
+    finisce senza file (prova E del revisore, con una porta chiusa, che su
+    Windows rifiuta dopo due secondi: prima la console diceva cinque volte
+    che si era ricollegata)."""
+    import finestra as modulo
+
+    servitore = socket.socket()
+    servitore.bind(("127.0.0.1", 0))
+    servitore.listen(8)
+
+    def chiudi_subito():
+        while True:
+            try:
+                conn, _da = servitore.accept()
+            except OSError:
+                return
+            conn.close()
+
+    threading.Thread(target=chiudi_subito, daemon=True).start()
+    coda = []
+    monkeypatch.setattr(modulo.wx, "CallAfter", lambda funzione, *argomenti, **chiavi: coda.append(lambda: funzione(*argomenti, **chiavi)))
+
+    def piu_tardi(_ms, funzione, *argomenti):
+        rimando = _Rimando(funzione, argomenti)
+        coda.append(rimando)
+        return rimando
+
+    monkeypatch.setattr(modulo.wx, "CallLater", piu_tardi)
+    monkeypatch.setattr(modulo, "_blocca_lo_spegnimento", lambda *_a: True)
+    monkeypatch.setattr(modulo, "_sblocca_lo_spegnimento", lambda *_a: True)
+    indirizzo = f"http://127.0.0.1:{servitore.getsockname()[1]}/stream"
+    indirizzi.metti_il_diretto(indirizzo, dal_vivo=True)
+    stato = {"in_corso": indirizzo, "in_pausa": False}
+    monkeypatch.setattr(finestra.motore, "suona", lambda *a, **k: None)
+    monkeypatch.setattr(type(finestra.motore), "in_corso", property(lambda self: stato["in_corso"]))
+    monkeypatch.setattr(type(finestra.motore), "in_pausa", property(lambda self: stato["in_pausa"]))
+    monkeypatch.setattr(type(finestra.motore), "caratteristiche", lambda self: (128, 2, 44100))
+    finestra.coda.imposta(None, Brano(indirizzo, titolo="Radio muta"))
+    finestra._comando_registra()
+    assert isinstance(finestra._registrazione, registrazioni.Registrazione)
+    fine = time.monotonic() + 60
+    while time.monotonic() < fine and (finestra._registrazione is not None or finestra._in_chiusura):
+        while coda:
+            coda.pop(0)()
+        time.sleep(0.05)
+    servitore.close()
+    righe = [r for r in finestra._righe if "Radio muta" in r]
+    assert finestra._registrazione is None and not finestra._in_chiusura
+    assert not any("ricollegata" in r for r in righe) and finestra._statistiche.dati["conti"].get("ricollegamenti_delle_registrazioni", 0) == 0
+    assert sum("ha perso la connessione" in r for r in righe) == 1
+    assert any(r.startswith("La registrazione di Radio muta si è interrotta: il flusso non risponde, e non era arrivato niente da scrivere.") for r in righe), righe
+
+
+def test_dopo_una_caduta_l_attesa_registra_di_nuovo_la_stessa_radio(finestra, con_registrazioni, monkeypatch):
+    """Attesa accesa, la rete cade e i cinque tentativi falliscono; l'avviso
+    dei dieci minuti dice perche' non registra. Il lettore si ferma, e la
+    stessa radio riparte con X: l'attesa la registra di nuovo, in un file
+    nuovo (prova F del revisore: prima restava esclusa finche' non suonava
+    un'altra sorgente, mentre R e l'avviso dicevano che si registrava)."""
+    from test_finestra import _premi
+
+    _premi(finestra, "r", alt=True)
+    _suona_la_radio(finestra, con_registrazioni)
+    reg = _Finta.create[-1]
+
+    def non_riapre(valore, motivo="mano", flusso=None):
+        raise OSError("la rete non c'e'")
+
+    monkeypatch.setattr(reg, "pausa", non_riapre)
+    reg.cade()
+    assert finestra._registrazione is None and finestra._non_riuscita[0] == RADIO
+    finestra._ultimo_avviso -= 600
+    finestra._guarda_le_registrazioni()
+    assert finestra._righe[-1].startswith("Attesa accesa, ma la registrazione di Rai Radio 3 non è riuscita: ci riprovo ogni minuto mentre suona")
+    con_registrazioni.stato["in_corso"] = None
+    finestra._guarda_le_registrazioni()
+    assert finestra._non_riuscita is None and len(_Finta.create) == 1
+    _suona_la_radio(finestra, con_registrazioni)
+    assert len(_Finta.create) == 2 and finestra._registrazione is _Finta.create[-1] and finestra._in_ascolto
+
+
+def test_una_puntata_in_pausa_a_mano_riprende_subito(finestra, con_registrazioni, suoni_annotati):
+    """Una puntata in pausa a mano, con l'attesa accesa e il lettore in
+    pausa: Maiuscolo con R la riprende subito, perche' il suo scaricamento non
+    segue l'ascolto; prima si metteva ad aspettare la sorgente, e la ripresa
+    diceva una riga rotta, marker 0 (prova B del revisore)."""
+    from test_finestra import _premi
+
+    video = Brano("https://www.youtube.com/watch?v=prova", titolo="Il video di prova")
+    indirizzi.metti_il_diretto(video.percorso)
+    finestra.schedario.metti_la_scheda(video.percorso, {"durata": 600.0})
+    _premi(finestra, "r", alt=True)
+    con_registrazioni.stato["in_corso"] = video.percorso
+    finestra.coda.imposta(None, video)
+    finestra._guarda_le_registrazioni()
+    puntata = _Finta.create[-1]
+    _premi(finestra, "r", maiuscolo=True)
+    con_registrazioni.stato["in_pausa"] = True
+    finestra._guarda_le_registrazioni()
+    assert _premi(finestra, "r", maiuscolo=True).startswith("Registrazione ripresa: Il video di prova, 12:34")
+    assert (puntata.stato, puntata.motivo) == ("in_corso", None)
+    con_registrazioni.stato["in_pausa"] = False
+    finestra._guarda_le_registrazioni()
+    assert puntata.comandi == ["avvia", ("pausa", True), ("pausa", False)] and not any("marker 0" in r for r in finestra._righe)
+
+
+def test_un_errore_nel_salvataggio_non_blocca_la_chiusura(finestra, con_registrazioni, monkeypatch):
+    """ferma che solleva qualcosa che non e' OSError: le parti si salvano in
+    fretta, e MeTeOra si chiude lo stesso (prova A del revisore: prima la
+    registrazione restava fra quelle in chiusura, e Esc ridiceva per sempre il
+    suono della chiusura che aspetta)."""
+    import finestra as modulo
+
+    lavori = []
+    monkeypatch.setattr(modulo, "registrazioni_in_disparte", lambda lavoro, al_termine: lavori.append((lavoro, al_termine)))
+    _suona_la_radio(finestra, con_registrazioni)
+    finestra._comando_registra()
+    reg = _Finta.create[-1]
+
+    def rotta():
+        raise RuntimeError("un errore che non e' OSError")
+
+    reg.ferma = rotta
+    monkeypatch.setattr(finestra, "_ferma", lambda sfumando: con_registrazioni.stato.update(in_corso=None))
+    finestra.Close()
+    assert not finestra._chiusa and len(lavori) == 1
+    _come_il_vero(*lavori.pop())
+    assert finestra._chiusa and reg.comandi[-1] == "in fretta" and not finestra._in_chiusura
+
+
+def test_un_errore_nel_recupero_non_blocca_la_chiusura(finestra, monkeypatch):
+    # da_recuperare che solleva: il recupero si scala comunque, e la console lo dice.
+    import finestra as modulo
+
+    monkeypatch.setattr(modulo, "registrazioni_in_disparte", _come_il_vero)
+    monkeypatch.setattr(modulo.wx, "CallAfter", lambda funzione, *argomenti, **chiavi: funzione(*argomenti, **chiavi))
+    cartella = registrazioni.cartella()
+    os.makedirs(cartella, exist_ok=True)
+    with open(os.path.join(cartella, "Rai Radio 3 2026-11-15 10.00.00.mp3.parziale1"), "wb") as f:
+        f.write(b"\xff\xfb" + b"\0" * 400)
+
+    def rotta(percorso):
+        raise RuntimeError("libmpv non parte")
+
+    monkeypatch.setattr(registrazioni.Registrazione, "da_recuperare", staticmethod(rotta))
+    finestra._recupera_le_registrazioni()
+    assert finestra._recuperi_in_corso == 0 and not finestra._da_salvare()
+    assert finestra._righe[-1].startswith("La registrazione rimasta a metà Rai Radio 3 2026-11-15 10.00.00.mp3 non si recupera: libmpv non parte.")
+
+
+def test_la_ricerca_delle_registrazioni_rimaste_e_in_disparte(finestra, monkeypatch):
+    """All'avvio la ricerca nelle cartelle non gira nel filo della finestra:
+    una cartella su un disco di rete che non risponde la fermava. Mentre
+    cerca conta fra i recuperi in corso, e la chiusura la aspetta."""
+    import finestra as modulo
+
+    lavori, guardate = [], []
+    monkeypatch.setattr(modulo, "registrazioni_in_disparte", lambda lavoro, al_termine: lavori.append((lavoro, al_termine)))
+    monkeypatch.setattr(modulo.wx, "CallAfter", lambda funzione, *argomenti, **chiavi: funzione(*argomenti, **chiavi))
+    monkeypatch.setattr(modulo.registrazioni, "rimaste", lambda cartella: guardate.append(cartella) or [])
+    os.makedirs(registrazioni.cartella(), exist_ok=True)
+    finestra._recupera_le_registrazioni()
+    assert guardate == [] and finestra._recuperi_in_corso == 1 and finestra._da_salvare() and len(lavori) == 1
+    lavoro, al_termine = lavori.pop()
+    al_termine(lavoro())
+    assert guardate == [registrazioni.cartella()] and finestra._recuperi_in_corso == 0 and not finestra._da_salvare()
+
+
+def test_la_chiusura_rimandata_ricorda_il_punto_da_riprendere(finestra, con_registrazioni, monkeypatch):
+    # Il punto da riprendere all'avvio si prende prima di fermare il lettore:
+    # prima un file del disco ripartiva da zero.
+    import finestra as modulo
+
+    lavori = []
+    monkeypatch.setattr(modulo, "registrazioni_in_disparte", lambda lavoro, al_termine: lavori.append((lavoro, al_termine)))
+    _suona_la_radio(finestra, con_registrazioni)
+    finestra._comando_registra()
+    stati = iter([{"percorso": r"C:\musica\a.mp3", "posizione": 150.0, "tipo": "file"}, {"percorso": r"C:\musica\a.mp3", "posizione": 0, "tipo": "file"}])
+    monkeypatch.setattr(finestra, "_stato_da_riprendere", lambda: next(stati))
+    monkeypatch.setattr(finestra, "_ferma", lambda sfumando: con_registrazioni.stato.update(in_corso=None))
+    finestra.Close()
+    lavoro, al_termine = lavori.pop()
+    al_termine(lavoro())
+    assert finestra._chiusa and finestra.impostazioni["ripresa"]["posizione"] == 150.0
+
+
+def test_un_altra_sorgente_chiude_il_file_senza_il_suono_della_fermata(finestra, con_registrazioni, monkeypatch, suoni_annotati):
+    """Quando l'attesa passa a un'altra sorgente, la registrazione nuova
+    parte, con il suo suono, prima che quella di prima sia salvata: la riga
+    di quella finita arriva dopo, senza il suono della fermata, che prima era
+    l'ultimo suono mentre si registrava."""
+    from test_finestra import _premi
+
+    import finestra as modulo
+
+    lavori = []
+    monkeypatch.setattr(modulo, "registrazioni_in_disparte", lambda lavoro, al_termine: lavori.append((lavoro, al_termine)))
+    _premi(finestra, "r", alt=True)
+    _suona_la_radio(finestra, con_registrazioni)
+    _suona_la_radio(finestra, con_registrazioni, Brano(RADIO_2, titolo="Rai Radio 2", radio={"uuid": "v"}))
+    assert suoni_annotati[-1] == "registrazione_avviata" and finestra._registrazione.titolo == "Rai Radio 2"
+    lavoro, al_termine = lavori.pop(0)
+    al_termine(lavoro())
+    assert suoni_annotati[-1] == "registrazione_avviata" and "registrazione_fermata" not in suoni_annotati
+    assert finestra._righe[-1].startswith("Registrazione finita: Rai Radio 3")
+
+
+def test_r_e_gli_avvisi_dicono_il_ricollegamento_e_la_pausa_a_mano(finestra, con_registrazioni, monkeypatch):
+    """Durante un ricollegamento R e l'avviso dei dieci minuti dicono che si
+    ricollega, non che aspetta la sorgente; con l'attesa accesa e la pausa a
+    mano l'avviso dice la pausa, non che registra la prossima radio."""
+    from test_finestra import _premi
+
+    import finestra as modulo
+
+    _premi(finestra, "r", alt=True)
+    _suona_la_radio(finestra, con_registrazioni)
+    reg = _Finta.create[-1]
+    monkeypatch.setattr(modulo.wx, "CallLater", lambda _ms, funzione, *argomenti: None)
+    reg.cade()
+    assert _premi(finestra, "r").startswith("La registrazione di Rai Radio 3, 12:34, 12 MB si sta ricollegando alla sorgente.")
+    con_registrazioni.orologio[0] += 600
+    finestra._guarda_le_registrazioni()
+    assert finestra._righe[-1].startswith("La registrazione di Rai Radio 3, 12:34, 12 MB si sta ricollegando alla sorgente.")
+    assert _premi(finestra, "r", maiuscolo=True).startswith("Registrazione in pausa: Rai Radio 3") and reg.motivo == "mano"
+    con_registrazioni.orologio[0] += 600
+    finestra._guarda_le_registrazioni()
+    assert finestra._righe[-1].startswith("Registrazione in pausa: Rai Radio 3, 12:34, 12 MB. Maiuscolo con R riprende.")
+
+
+def test_l_aggiornamento_aspetta_le_registrazioni(finestra, con_registrazioni, monkeypatch, suoni_annotati):
+    """Con una registrazione aperta l'aggiornamento non si propone, e si
+    ripropone al prossimo avvio; e una chiusura per l'aggiornamento che
+    aspetta piu' dello script di GBUtils lascia MeTeOra aperto, perche'
+    chiudersi lo lascerebbe chiuso senza aggiornarlo."""
+    from test_finestra import _premi
+
+    import finestra as modulo
+
+    _suona_la_radio(finestra, con_registrazioni)
+    finestra._comando_registra()
+    assert finestra.proponi_l_aggiornamento("3.20.0", "3.21.0", "novità", 120) is False and "domanda" not in suoni_annotati
+    assert finestra._righe[-1].startswith("È disponibile MeTeOra 3.21.0: te lo propongo al prossimo avvio, perché ci sono registrazioni da salvare.")
+    lavori, chiuse = [], []
+    monkeypatch.setattr(modulo, "registrazioni_in_disparte", lambda lavoro, al_termine: lavori.append((lavoro, al_termine)))
+    monkeypatch.setattr(finestra, "_ferma", lambda sfumando: con_registrazioni.stato.update(in_corso=None))
+    finestra.chiudi_per_aggiornare()
+    assert finestra._chiusura_chiesta == "forzata"
+    con_registrazioni.orologio[0] += modulo.ATTESA_DELL_AGGIORNAMENTO + 1
+    monkeypatch.setattr(finestra, "Close", lambda force=False: chiuse.append(force))
+    lavoro, al_termine = lavori.pop()
+    al_termine(lavoro())
+    assert chiuse == [] and finestra._chiusura_chiesta is None and not finestra._chiusa
+    assert finestra._righe[-1].startswith("Registrazioni salvate. L'aggiornamento non ha potuto aspettare tanto: MeTeOra resta aperto")
+    assert finestra._statistiche.dati["conti"]["aggiornamenti_rimandati_per_le_registrazioni"] == 2
+    righe = statistiche.Pagina(finestra._statistiche, "", None, None, {}, {}, {}).le_registrazioni()
+    assert "Aggiornamenti di MeTeOra rimandati al prossimo avvio per non interrompere le registrazioni: 2." in righe
+    # MeTeOra resta usabile: si registra di nuovo.
+    _suona_la_radio(finestra, con_registrazioni)
+    monkeypatch.setattr(modulo, "registrazioni_in_disparte", lambda lavoro, al_termine: al_termine(lavoro()))
+    assert _premi(finestra, "r", maiuscolo=True).startswith("Registro Rai Radio 3")
+
+
+def test_lo_spegnimento_arriva_dall_applicazione(finestra, con_registrazioni, monkeypatch):
+    """EVT_QUERY_END_SESSION mandato all'applicazione arriva alla finestra, e
+    si rifiuta; EVT_END_SESSION salva subito le parti (prova del revisore)."""
+    import wx
+
+    import finestra as modulo
+
+    lavori = []
+    monkeypatch.setattr(modulo, "registrazioni_in_disparte", lambda lavoro, al_termine: lavori.append((lavoro, al_termine)))
+    _suona_la_radio(finestra, con_registrazioni)
+    finestra._comando_registra()
+    reg = _Finta.create[-1]
+    evento = wx.CloseEvent(wx.wxEVT_QUERY_END_SESSION)
+    evento.SetCanVeto(True)
+    wx.GetApp().ProcessEvent(evento)
+    assert evento.GetVeto() and finestra._chiusura_chiesta == "normale" and not finestra._chiusa
+    fine = wx.CloseEvent(wx.wxEVT_END_SESSION)
+    fine.SetCanVeto(False)
+    finestra._spegnimento(fine)
+    assert reg.comandi[-1] == "in fretta" and not finestra._da_salvare()
+
+
+def test_le_parti_recuperate_al_singolare(finestra):
+    # Il plurale e' quello delle parti: prima si diceva con 1 parti.
+    finestra._statistiche.conta("registrazioni_recuperate_all_avvio")
+    finestra._statistiche.conta("parti_recuperate_all_avvio")
+    righe = statistiche.Pagina(finestra._statistiche, "", None, None, {}, {}, {}).le_registrazioni()
+    assert "Registrazioni recuperate all'avvio, rimaste a metà da una chiusura improvvisa: 1, con 1 parte." in righe

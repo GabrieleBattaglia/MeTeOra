@@ -1821,6 +1821,9 @@ class Pagina:
         if pause or riprese or ricollegamenti:
             righe.append(_("Pause automatiche, con la sorgente che taceva: {pause}; riprese automatiche: {riprese}; ricollegamenti dopo una caduta della rete: "
                 "{ricollegamenti}.").format(pause=pause, riprese=riprese, ricollegamenti=ricollegamenti))
+        if self.c("riprove_dell_attesa"):
+            # Le registrazioni non riuscite che l'attesa riprova ogni minuto (revisione del 15 novembre 2026).
+            righe.append(_("Registrazioni riprovate dall'attesa, dopo una che non era riuscita: {n}.").format(n=self.c("riprove_dell_attesa")))
         marker, avvisi = self.c("marker_delle_registrazioni"), self.c("avvisi_delle_registrazioni")
         if marker or avvisi:
             righe.append(_("Marker messi dalle registrazioni, dai titoli in onda, dai capitoli e dalle riprese: {marker}; avvisi nella console, senza suono: {avvisi}.").format(
@@ -1836,11 +1839,18 @@ class Pagina:
         if chiusure or salvate:
             righe.append(_("Chiusure di MeTeOra rimandate per salvare le registrazioni: {chiusure}; registrazioni salvate alla chiusura: {salvate}.").format(
                 chiusure=chiusure, salvate=salvate))
+        if self.c("aggiornamenti_rimandati_per_le_registrazioni"):
+            # Gli aggiornamenti rimandati al prossimo avvio, per non interrompere un salvataggio (revisione del 15 novembre 2026).
+            righe.append(_("Aggiornamenti di MeTeOra rimandati al prossimo avvio per non interrompere le registrazioni: {n}.").format(
+                n=self.c("aggiornamenti_rimandati_per_le_registrazioni")))
         recuperate = self.c("registrazioni_recuperate_all_avvio")
         if recuperate:
-            righe.append(ngettext("Registrazioni recuperate all'avvio, rimaste a metà da una chiusura improvvisa: {n}, con {parti} parti.",
-                "Registrazioni recuperate all'avvio, rimaste a metà da una chiusura improvvisa: {n}, con {parti} parti.", recuperate).format(
-                n=recuperate, parti=self.c("parti_recuperate_all_avvio")))
+            # Il plurale delle parti e' il loro (revisione del 15 novembre 2026): prima si diceva con 1 parti.
+            parti = self.c("parti_recuperate_all_avvio")
+            # Traduttori: le parti delle registrazioni recuperate all'avvio, in coda alla riga che le conta.
+            con_le_parti = ngettext("con {n} parte", "con {n} parti", parti).format(n=parti)
+            # Traduttori: parti e' con 1 parte o con 3 parti.
+            righe.append(_("Registrazioni recuperate all'avvio, rimaste a metà da una chiusura improvvisa: {n}, {parti}.").format(n=recuperate, parti=con_le_parti))
         return righe
 
     def la_ricerca(self):

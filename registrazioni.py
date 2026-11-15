@@ -38,12 +38,21 @@ perdere niente. Un'ora si salva in pochi secondi, e secondi, byte e
 avanzamento si leggono senza il lucchetto, che l'unione tiene. Accanto alle
 parti il file .parti.json le descrive: le parti rimaste da un crollo si
 recuperano all'avvio, con i loro tagli e i loro marker.
+Dopo la revisione del 15 novembre 2026 una ripresa, e un ricollegamento, si
+dicono quando la parte nuova riceve l'audio, con alla_ripresa, e non quando
+libmpv comincia ad aprire la rete; il marker della ripresa nasce allora. Il
+buco di un ricollegamento si conta dall'ultimo dato arrivato, non dalla
+caduta detta da libmpv. Una diretta che il chiamante non sa riconoscere la
+riconosce la registrazione, dal suo libmpv. libmpv scrive ogni pacchetto sul
+disco appena fatto, flush_packets: dopo un crollo la parte in corso c'e'
+tutta, e il recupero le rifa' l'intestazione.
 """
 
 import contextlib
 import datetime
 import functools
 import json
+import math
 import mmap
 import os
 import re
@@ -111,6 +120,13 @@ DISTANZA_DEI_MARKER = 20.0
 # Il primo titolo, se arriva entro tanti secondi di registrazione, va
 # all'inizio del file: e' il titolo di partenza.
 PRIMO_MARKER = 20.0
+# Un titolo gia' andato in onda negli ultimi tanti secondi non fa un marker
+# nuovo (revisione del 15 novembre 2026): e' il nome della radio fra un brano
+# e l'altro, o l'alternanza del nome e del brano, che faceva un marker ogni
+# venti secondi e una riga ogni dieci. Il marker si dice quando il suo nome
+# e' fermo, a DISTANZA_DEI_MARKER secondi dalla nascita: con il titolo vero,
+# e non con il segnaposto che lo precede.
+RIPETIZIONE_DEI_TITOLI = 600.0
 # I blocchi della copia dell'unione, e il file che descrive le parti.
 BLOCCO_DELLA_COPIA = 1 << 20
 FILE_DELLE_PARTI = ".parti.json"
@@ -196,18 +212,26 @@ def nome_dei_bit(bit):
     return _("{n} bit").format(n=bit)
 
 
-def _codifica(formato, kbps, bit):
+def _codifica(formato, kbps, bit, svuota=True):
     """Le opzioni di libmpv in modo codifica per il formato: il codificatore,
     il formato dei campioni, le opzioni del codificatore e del contenitore.
     Il WAV a 24 bit vuole campioni a 32, di cui tiene i 24 piu' alti, come il
     FLAC a 24 con bits_per_raw_sample; il WAV ha rf64=auto, che resta un WAV
     normale fino ai 4 GB e passa a RF64 oltre, dove la sua intestazione non
-    basta piu' (prove del 14 novembre 2026)."""
+    basta piu' (prove del 14 novembre 2026). Con svuota ogni pacchetto va sul
+    disco appena fatto, flush_packets: senza, libmpv scriveva a blocchi di
+    256 KB, e dopo un crollo una parte MP3 a 128 kbps piu' giovane di sedici
+    secondi era vuota (revisione del 15 novembre 2026). L'Ogg dell'Opus tiene
+    i pacchetti fino a riempire una pagina, un secondo: con svuota le pagine
+    sono di un quinto di secondo, e l'unione le rifa' di un secondo. La
+    riscrittura dell'unione non ne ha bisogno."""
     _nome, codificatore, contenitore, _estensione, _perdita = FORMATI[formato]
     opzioni = {"of": contenitore, "oac": codificatore}
+    if svuota:
+        opzioni["ofopts"] = "flush_packets=1,page_duration=200000" if formato == "opus" else "flush_packets=1"
     if formato == "wav":
         opzioni["oac"], opzioni["audio_format"] = {16: ("pcm_s16le", "s16"), 24: ("pcm_s24le", "s32"), 32: ("pcm_f32le", "float")}[bit or BIT_PREDEFINITI]
-        opzioni["ofopts"] = "rf64=auto"
+        opzioni["ofopts"] = "rf64=auto,flush_packets=1" if svuota else "rf64=auto"
     elif formato == "flac":
         opzioni["audio_format"] = "s32" if bit == 24 else "s16"
         if bit == 24:
@@ -237,7 +261,11 @@ class Parte:
     all'unione. Dal 15 novembre 2026 anche i suoi marker, come liste [secondi
     dal suo inizio, nome, di ripresa, nome di base]; quando e' partita e
     finita, sull'orologio; e per una parte nata da un ricollegamento il buco
-    d'orologio fra la caduta e lei, che della riserva non si toglie."""
+    d'orologio fra la caduta e lei, che della riserva non si toglie. Dalla
+    revisione dello stesso giorno anche l'orologio dell'ultimo dato arrivato,
+    che dopo una rete piantata viene prima della fine detta da libmpv; l'ora
+    vera della partenza, per il recupero; se ha gia' ricevuto l'audio; e il
+    motivo della pausa da cui riprende, o None per la prima."""
 
     def __init__(self, file, inizio=0.0):
         self.file, self.inizio = file, inizio
@@ -247,6 +275,19 @@ class Parte:
         self.marker = []
         self.partita = self.finita = 0.0
         self.buco = 0.0
+        self.ultimo_dato = 0.0
+        self.partita_ora = 0.0
+        self.viva = False
+        self.ripresa = None
+        # Vero se l'ultimo dato lo annota la lettura della rete di MeTeOra:
+        # time-pos cresce anche quando libmpv, alla fine, decodifica i
+        # pacchetti che teneva da parte, e dopo una rete piantata sembrava che
+        # i dati fossero arrivati fino alla caduta.
+        self.dati_contati = False
+        # Il marker della ripresa, quando c'e', e il titolo arrivato prima di
+        # lui, dalla riserva della connessione nuova, che gli va nel nome.
+        self.marker_della_ripresa = None
+        self.titolo_della_ripresa = None
 
 
 class Registrazione:
@@ -270,14 +311,25 @@ class Registrazione:
     flusso finisce da se': una puntata registrata tutta, con lo stato
     completa, o una radio che cade, con lo stato interrotta. Con
     alla_caduta(registrazione, secondi della parte) una diretta che cade va
-    invece in pausa per la rete, e chi la riceve decide se ricollegarla.
-    al_marker(registrazione, numero, nome, secondi) dice ogni titolo nuovo
-    diventato marker, dal filo che legge la rete: non deve aspettare niente.
+    invece in pausa per la rete, e chi la riceve decide se ricollegarla; i
+    secondi sono zero se la parte non aveva ricevuto niente, come un
+    tentativo di ricollegarsi che non riesce.
+    al_marker(registrazione, numero, nome, secondi) dice ogni marker
+    automatico, con i secondi del suo punto sul file finale: quello di un
+    titolo quando il suo nome e' fermo, quello di una ripresa subito.
+    alla_ripresa(registrazione, motivo) dice che una parte ha ricevuto
+    l'audio, con il motivo della pausa che finisce, o None per la prima: per
+    la rete e' il ricollegamento riuscito. Arrivano tutti dai fili di libmpv e
+    della rete: non devono aspettare niente.
+    Con da_riconoscere la registrazione guarda da se', a file aperto, se il
+    flusso e' una diretta, come fa il motore: di rete, che non si salta e
+    senza una lunghezza in byte (revisione del 15 novembre 2026).
     I comandi che chiudono una parte aspettano libmpv: chi li chiama da una
     finestra li fa in disparte."""
 
     def __init__(self, sorgente, titolo, flusso, formato=FORMATO_PREDEFINITO, kbps=QUALITA_PREDEFINITA, canali=2, frequenza=FREQUENZA, al_termine=None,
-            quando=None, dove=None, bit=BIT_PREDEFINITI, dal_vivo=None, al_marker=None, alla_caduta=None, capitoli=(), percorso=None):
+            quando=None, dove=None, bit=BIT_PREDEFINITI, dal_vivo=None, al_marker=None, alla_caduta=None, capitoli=(), percorso=None, alla_ripresa=None,
+            da_riconoscere=False):
         self.sorgente, self.titolo, self.flusso = sorgente, titolo, flusso
         self.formato, self.canali, self.frequenza = formato, canali, frequenza
         # I kbps valgono solo per i formati con perdita.
@@ -291,7 +343,7 @@ class Registrazione:
         self.dal_vivo = bool(getattr(flusso, "dal_vivo", False) if dal_vivo is None else dal_vivo)
         # I capitoli di una puntata, [(secondi, titolo)], dalla sua scheda:
         # il file ha il tempo della sorgente, e diventano marker all'unione.
-        self.capitoli = [(float(c[0]), str(c[1] or "")) for c in capitoli or () if isinstance(c, (list, tuple)) and len(c) >= 2]
+        self.capitoli = [(_numero(c[0]), str(c[1] or "")) for c in capitoli or () if isinstance(c, (list, tuple)) and len(c) >= 2]
         # Il motivo della pausa: mano, sorgente o rete; None fuori dalla pausa.
         self.motivo = None
         # Durante l'unione, da 0 a 1, e se si sta salvando; quanti secondi ha
@@ -302,15 +354,15 @@ class Registrazione:
         # I file delle parti che non si sono unite, se e' successo (3.13.2).
         self.parti_separate = []
         # I marker per il file finale, (file, secondi, nome), pronti dopo
-        # l'unione; quanti ne sono nati, e l'ultimo, come (numero, nome).
+        # l'unione, e quanti ne sono nati.
         self.marker_finali = []
         self.numero_dei_marker = 0
-        self.ultimo_marker = None
         # Le parti trovate all'avvio, per una registrazione recuperata; i
         # secondi delle parti rimaste file separati, che non sono piu' parti.
         self.recuperate = 0
         self._secondi_separati = None
-        self._al_termine, self._al_marker, self._alla_caduta = al_termine, al_marker, alla_caduta
+        self._al_termine, self._al_marker, self._alla_caduta, self._alla_ripresa = al_termine, al_marker, alla_caduta, alla_ripresa
+        self._da_riconoscere = bool(da_riconoscere) and not self.dal_vivo
         self._blocco = threading.RLock()
         # Il lucchetto dei marker, che il filo della rete prende e il blocco
         # no: non aspetta mai niente. Quello del file delle parti, ancora piu' sotto.
@@ -323,10 +375,15 @@ class Registrazione:
         self._parti = []
         self._parte = self._lettore = self._finita = None
         self._chiudendo = None
-        # L'ultimo titolo visto, contro i doppioni delle connessioni nuove, e
-        # l'ultimo marker automatico, (orologio, voce), per la distanza minima.
+        # L'ultimo titolo visto, contro i doppioni delle connessioni nuove;
+        # l'ultimo marker automatico, (orologio, voce), per la distanza minima;
+        # i titoli visti, con l'orologio dell'ultima volta, contro le
+        # ripetizioni; e il marker da dire quando il suo nome e' fermo,
+        # (orologio, parte, voce, numero).
         self._ultimo_titolo = None
         self._ultimo_marker = None
+        self._titoli_visti = {}
+        self._da_avvisare = None
         # In fretta, allo spegnimento di Windows: l'unione si ferma.
         self._in_fretta = False
         # Per una registrazione recuperata senza il file delle parti, o con il
@@ -354,8 +411,10 @@ class Registrazione:
         """(secondi registrati, taglio) della parte in corso, letti da libmpv."""
         with contextlib.suppress(Exception):
             adesso = lettore.time_pos
-            if adesso is not None:
-                parte.posizione = max(parte.posizione, float(adesso))
+            if adesso is not None and float(adesso) > parte.posizione:
+                parte.posizione = float(adesso)
+                if not parte.dati_contati:
+                    parte.ultimo_dato = time.monotonic()
         secondi = max(0.0, parte.posizione - parte.inizio)
         return secondi, self._taglio(parte, secondi)
 
@@ -363,17 +422,21 @@ class Registrazione:
         """I secondi da togliere in testa a una parte di una diretta che non
         e' la prima: la riserva, i secondi registrati in piu' dell'orologio,
         senza il buco d'orologio di un ricollegamento, che la riserva
-        riporta e non e' un doppione."""
+        riporta e non e' un doppione. L'orologio si ferma all'ultimo dato
+        arrivato (revisione del 15 novembre 2026): con la rete piantata libmpv
+        dice la fine solo dopo l'attesa della lettura, quindici secondi, che
+        non sono stati registrati."""
         if not self.dal_vivo or not self._parti:
             return 0.0
-        riserva = secondi - (time.monotonic() - parte.partita)
+        riserva = secondi - ((parte.ultimo_dato or time.monotonic()) - parte.partita)
         return min(secondi, max(0.0, riserva - parte.buco))
 
-    def _apri_la_parte(self, ricollegamento=False):
+    def _apri_la_parte(self, ricollegamento=False, ripresa=None):
         os.makedirs(os.path.dirname(self.percorso), exist_ok=True)
         # Una puntata riprende dal punto a cui era arrivata.
         inizio = 0.0 if self.dal_vivo else sum(parte.secondi for parte in self._parti)
         parte = Parte(f"{self.percorso}.parziale{len(self._parti) + 1}", inizio)
+        parte.ripresa = ripresa
         opzioni = {**motore.OPZIONI_DI_BASE, "o": parte.file, **_codifica(self.formato, self.kbps, self.bit),
             "audio_channels": "mono" if self.canali == 1 else "stereo", "audio_samplerate": self.frequenza}
         try:
@@ -382,9 +445,11 @@ class Registrazione:
             # libmpv che non parte e' un errore da dire.
             raise OSError(str(e)) from e
         finita = threading.Event()
-        parte.partita = time.monotonic()
+        parte.partita, parte.partita_ora = time.monotonic(), time.time()
         if ricollegamento and self._parti:
-            parte.buco = max(0.0, parte.partita - self._parti[-1].finita)
+            # Il buco va dall'ultimo dato della parte caduta, non dalla sua fine.
+            caduta = self._parti[-1]
+            parte.buco = max(0.0, parte.partita - (caduta.ultimo_dato or caduta.finita))
         # La parte e' in corso prima che libmpv apra la rete: il primo titolo
         # puo' arrivare subito.
         self._parte, self._lettore, self._finita = parte, lettore, finita
@@ -393,18 +458,19 @@ class Registrazione:
             if self.flusso.intestazioni:
                 lettore["http-header-fields"] = list(self.flusso.intestazioni)
             lettore.register_event_callback(lambda evento: self._evento(lettore, finita, evento))
-            lettore.observe_property("time-pos", lambda _nome, valore: setattr(parte, "posizione", max(parte.posizione, float(valore)))
-                if valore is not None else None)
+            lettore.observe_property("time-pos", lambda _nome, valore: self._posizione(parte, valore))
             # Di un video con l'audio a parte si registra l'audio.
             indirizzo = self.flusso.audio[0] if self.flusso.audio else self.flusso.indirizzo
             # Una diretta HTTP la legge MeTeOra, come nel motore (issue 46,
             # 3.11.0), e i titoli in onda arrivano dai suoi metadati ICY; di
-            # una che legge libmpv da' l'icy-title dei metadati (15 novembre 2026).
+            # una che legge libmpv da' l'icy-title dei metadati (15 novembre
+            # 2026), anche di una che si riconosce solo a file aperto.
             if self.dal_vivo and not self.flusso.intestazioni and not self.flusso.audio and diretta.da_leggere(indirizzo):
                 al_titolo = functools.partial(self._titolo_nella_parte, parte)
-                lettore.register_stream_protocol(diretta.SCHEMA, lambda uri: _lettura_della_diretta(uri, al_titolo))
+                lettore.register_stream_protocol(diretta.SCHEMA, lambda uri: _lettura_della_diretta(uri, al_titolo, parte))
                 indirizzo = diretta.indirizzo_per_mpv(indirizzo)
-            elif self.dal_vivo:
+                parte.dati_contati = True
+            elif self.dal_vivo or self._da_riconoscere:
                 lettore.observe_property("metadata", lambda _nome, metadati: self._metadati(parte, metadati))
             self._annota()
             # In corso prima di aprire: una connessione rifiutata arriva alla
@@ -433,6 +499,11 @@ class Registrazione:
         # Mentre si chiude conta ancora nei secondi, letti senza il lucchetto.
         self._chiudendo = parte
         self._parte = self._lettore = self._finita = None
+        # Il marker che aspettava il suo nome fermo si dice adesso: la parte
+        # non riceve piu' titoli. Di una registrazione eliminata, no.
+        detto = self._marker_da_dire(forza=True)
+        if self.stato != "eliminata":
+            self._di_il_marker(detto)
         with contextlib.suppress(Exception):
             lettore.command("stop")
         finita.wait(attesa)
@@ -461,7 +532,12 @@ class Registrazione:
     def _evento(self, lettore, finita, evento):
         """Il filo degli eventi di libmpv: non prende il lucchetto, perche' chi
         chiude una parte lo tiene mentre terminate aspetta questo filo."""
-        if evento.event_id.value != mpv.MpvEventID.END_FILE:
+        identita = evento.event_id.value
+        if identita == mpv.MpvEventID.FILE_LOADED:
+            if lettore is self._lettore and self._da_riconoscere and not self.dal_vivo:
+                self._riconosci_la_diretta(lettore)
+            return
+        if identita != mpv.MpvEventID.END_FILE:
             return
         finita.set()
         if lettore is self._lettore and self.stato == "in_corso":
@@ -470,26 +546,52 @@ class Registrazione:
             completa = evento.data.reason == mpv.MpvEventEndFile.EOF and not self.dal_vivo
             threading.Thread(target=self._finito_da_se, args=(lettore, completa), name="MeTeOra, registrazione finita da se'", daemon=True).start()
 
+    def _riconosci_la_diretta(self, lettore):
+        """A file aperto, dal filo degli eventi: un flusso di rete che non si
+        salta e non ha una lunghezza in byte e' una diretta, come per il
+        motore (3.3.0). Il motore lo sa solo dopo aver aperto il suo, e mai con
+        lo speaker: una radio Icecast aperta con Ctrl con V e registrata subito
+        era una puntata, senza pause automatiche, senza taglio della riserva e
+        senza ricollegamenti (revisione del 15 novembre 2026). La lunghezza
+        tiene fuori una puntata da un server che non si lascia saltare; la
+        durata no, perche' libmpv la stima anche di una radio, da quello che ha
+        letto."""
+        with contextlib.suppress(Exception):
+            if lettore.demuxer_via_network and not lettore.seekable and not lettore.file_size:
+                self.dal_vivo, self.capitoli = True, []
+                self._annota()
+                # Il titolo in onda arrivato prima di saperlo vale adesso.
+                parte = self._parte
+                if parte is not None:
+                    self._metadati(parte, lettore.metadata)
+
     def _finito_da_se(self, lettore, completa):
         """Il flusso e' finito da se'. Una diretta con alla_caduta va in pausa
         per la rete, con la parte chiusa, e chi la riceve decide; le altre
-        finiscono, complete o interrotte, come prima."""
-        caduta = None
-        with self._blocco:
-            if lettore is not self._lettore or self.stato != "in_corso":
-                return
-            if self.dal_vivo and self._alla_caduta is not None:
-                parte = self._parte
-                self._chiudi_la_parte()
-                self.stato, self.motivo = "in_pausa", "rete"
-                caduta = max(0.0, parte.finita - parte.partita)
-            else:
-                self.stato = "completa" if completa else "interrotta"
-                self._finisci()
-        if caduta is not None:
-            self._alla_caduta(self, caduta)
-        elif self._al_termine is not None:
-            self._al_termine(self)
+        finiscono, complete o interrotte, come prima. Il richiamo arriva anche
+        se la chiusura solleva qualcosa: senza, la registrazione restava aperta
+        per sempre, e MeTeOra non si chiudeva piu' (revisione del 15 novembre 2026)."""
+        caduta = richiamo = None
+        try:
+            with self._blocco:
+                if lettore is not self._lettore or self.stato != "in_corso":
+                    return
+                if self.dal_vivo and self._alla_caduta is not None:
+                    parte = self._parte
+                    richiamo = "caduta"
+                    self.stato, self.motivo = "in_pausa", "rete"
+                    self._chiudi_la_parte()
+                    # Un tentativo che non ha ricevuto niente dura zero.
+                    caduta = max(0.0, parte.finita - parte.partita) if parte.viva else 0.0
+                else:
+                    richiamo = "termine"
+                    self.stato = "completa" if completa else "interrotta"
+                    self._finisci()
+        finally:
+            if richiamo == "caduta":
+                self._alla_caduta(self, caduta or 0.0)
+            elif richiamo == "termine" and self._al_termine is not None:
+                self._al_termine(self)
 
     def avvia(self):
         """Comincia a scrivere. OSError se la cartella non si crea, o libmpv
@@ -542,8 +644,11 @@ class Registrazione:
         La pausa ha un motivo, mano, sorgente o rete; una pausa che c'e' gia'
         prende quello nuovo. La ripresa di una diretta dopo la rete e' un
         ricollegamento; dopo le altre pause ha un marker, come Ripresa alle
-        16.05 (Gabriele, 15 novembre 2026). flusso, se c'e', e' quello fresco
-        della sorgente, da riaprire. OSError se la ripresa non riesce."""
+        16.05 (Gabriele, 15 novembre 2026), che nasce quando la parte nuova
+        riceve l'audio: prima stava in una parte che, senza rete, restava vuota
+        e si cancellava con lui. flusso, se c'e', e' quello fresco della
+        sorgente, da riaprire. OSError se la ripresa non riesce ad aprire
+        libmpv; una rete che non risponde arriva dopo, come una caduta."""
         with self._blocco:
             if valore and self.stato == "in_corso":
                 self.stato, self.motivo = "in_pausa", motivo
@@ -554,18 +659,51 @@ class Registrazione:
                 prima = self.motivo
                 if flusso is not None:
                     self.flusso = flusso
-                self._apri_la_parte(ricollegamento=prima == "rete")
+                self._apri_la_parte(ricollegamento=prima == "rete", ripresa=prima or "mano")
                 self.stato, self.motivo = "in_corso", None
-                if self.dal_vivo and prima != "rete":
-                    self._marker_di_ripresa()
 
     def metti_il_motivo(self, motivo):
         """Il motivo nuovo di una pausa che c'e' gia', senza toccare le parti."""
         if self.stato == "in_pausa":
             self.motivo = motivo
 
+    def _posizione(self, parte, valore):
+        """time-pos della libmpv della parte, nel filo dei suoi eventi: la
+        posizione, e l'orologio dell'ultimo dato, quando cresce. La prima volta
+        che cresce la parte ha l'audio: una ripresa lo dice, e mette il suo
+        marker. Poi il marker che aspettava il suo nome fermo, se e' ora."""
+        if valore is None:
+            return
+        try:
+            valore = float(valore)
+        except (TypeError, ValueError):
+            return
+        if valore > parte.posizione:
+            parte.posizione = valore
+            if not parte.dati_contati:
+                parte.ultimo_dato = time.monotonic()
+            if not parte.viva:
+                parte.viva = True
+                self._parte_viva(parte)
+        if self._da_avvisare is not None:
+            self._di_il_marker(self._marker_da_dire())
+
+    def _parte_viva(self, parte):
+        """La parte ha ricevuto l'audio: se e' nata da una ripresa, il marker
+        della ripresa di una diretta; poi alla_ripresa, con il motivo della
+        pausa da cui riprende, o None per la prima parte."""
+        if parte is not self._parte:
+            return
+        if parte.ripresa is not None and self.dal_vivo and parte.ripresa != "rete":
+            self._marker_di_ripresa(parte)
+        if self._alla_ripresa is not None:
+            self._alla_ripresa(self, parte.ripresa)
+
     def _metadati(self, parte, metadati):
-        """metadata della libmpv della parte, nel suo filo: l'icy-title."""
+        """metadata della libmpv della parte, nel suo filo: l'icy-title, solo
+        di una diretta."""
+        if not self.dal_vivo:
+            return
         titolo = next((str(v) for k, v in (metadati or {}).items() if str(k).lower() == "icy-title"), "")
         if titolo:
             self._titolo_nella_parte(parte, titolo)
@@ -575,15 +713,27 @@ class Registrazione:
         che legge la rete o da quello degli eventi di libmpv: un marker nuovo,
         o il nome nuovo dell'ultimo se e' piu' vicino di DISTANZA_DEI_MARKER
         secondi d'orologio. Il primo titolo, nei primi secondi, va
-        all'inizio del file. Non prende il lucchetto della registrazione."""
+        all'inizio del file. Un titolo gia' andato in onda negli ultimi
+        RIPETIZIONE_DEI_TITOLI secondi non conta. Il marker nuovo si dice
+        quando il suo nome e' fermo. Non prende il lucchetto della registrazione."""
         nome = nome_del_marker(titolo)
         if not nome:
             return
+        detto = None
         with self._blocco_dei_marker:
             if parte is not self._parte or nome == self._ultimo_titolo:
                 return
             self._ultimo_titolo = nome
             adesso = time.monotonic()
+            visto = self._titoli_visti.get(nome)
+            self._titoli_visti = {t: quando for t, quando in self._titoli_visti.items() if adesso - quando < RIPETIZIONE_DEI_TITOLI}
+            self._titoli_visti[nome] = adesso
+            if visto is not None and adesso - visto < RIPETIZIONE_DEI_TITOLI:
+                return
+            if self.dal_vivo and parte.ripresa not in (None, "rete") and parte.marker_della_ripresa is None:
+                # La ripresa non ha ancora l'audio, e il suo marker: il titolo va nel suo nome.
+                parte.titolo_della_ripresa = nome
+                return
             if self._ultimo_marker is not None and adesso - self._ultimo_marker[0] < DISTANZA_DEI_MARKER:
                 voce = self._ultimo_marker[1]
                 if voce[2]:
@@ -592,6 +742,8 @@ class Registrazione:
                 else:
                     voce[1] = voce[3] = nome
             else:
+                # Il marker di prima, se aspetta ancora, si dice adesso.
+                detto = self._togli_il_sospeso()
                 secondi = max(0.0, parte.posizione - parte.inizio)
                 if not self.numero_dei_marker and not self._parti and secondi < PRIMO_MARKER:
                     secondi = 0.0
@@ -599,26 +751,61 @@ class Registrazione:
                 parte.marker.append(voce)
                 self.numero_dei_marker += 1
                 self._ultimo_marker = (adesso, voce)
-            self.ultimo_marker = (self.numero_dei_marker, voce[1])
-            numero = self.numero_dei_marker
+                self._da_avvisare = (adesso, parte, voce, self.numero_dei_marker)
         self._annota()
-        if self._al_marker is not None:
-            self._al_marker(self, numero, voce[1], self.secondi)
+        self._di_il_marker(detto)
 
-    def _marker_di_ripresa(self):
-        """Il marker all'inizio della parte appena aperta da una ripresa."""
+    def _marker_di_ripresa(self, parte):
+        """Il marker all'inizio della parte di una ripresa, che ha appena
+        ricevuto l'audio: si dice subito."""
         # Traduttori: il nome del marker messo dove una registrazione riprende dopo una pausa, come Ripresa alle 16.05.
-        nome = _("Ripresa alle {ora}").format(ora=f"{datetime.datetime.now():%H.%M}")
+        base = _("Ripresa alle {ora}").format(ora=f"{datetime.datetime.now():%H.%M}")
         with self._blocco_dei_marker:
-            parte = self._parte
-            if parte is None:
+            if parte is not self._parte or parte.marker_della_ripresa is not None:
                 return
-            voce = [0.0, nome, True, nome]
+            prima = self._togli_il_sospeso()
+            nome = f"{base}: {parte.titolo_della_ripresa}" if parte.titolo_della_ripresa else base
+            voce = parte.marker_della_ripresa = [0.0, nome, True, base]
             parte.marker.append(voce)
             self.numero_dei_marker += 1
             self._ultimo_marker = (time.monotonic(), voce)
-            self.ultimo_marker = (self.numero_dei_marker, nome)
+            numero = self.numero_dei_marker
         self._annota()
+        self._di_il_marker(prima)
+        self._di_il_marker((numero, nome, self._tempo_sul_file(parte, 0.0)))
+
+    def _togli_il_sospeso(self):
+        """Col lucchetto dei marker: il marker che aspettava di essere detto,
+        tolto, come (numero, nome, secondi sul file); o None."""
+        sospeso, self._da_avvisare = self._da_avvisare, None
+        if sospeso is None:
+            return None
+        _creato, parte, voce, numero = sospeso
+        return numero, voce[1], self._tempo_sul_file(parte, voce[0])
+
+    def _marker_da_dire(self, forza=False):
+        """Il marker che aspettava il suo nome fermo, se e' ora, o se forza."""
+        with self._blocco_dei_marker:
+            sospeso = self._da_avvisare
+            if sospeso is None or (not forza and time.monotonic() - sospeso[0] < DISTANZA_DEI_MARKER):
+                return None
+            return self._togli_il_sospeso()
+
+    def _di_il_marker(self, detto):
+        if detto is not None and self._al_marker is not None:
+            self._al_marker(self, *detto)
+
+    def _tempo_sul_file(self, parte, secondi):
+        """Dove cade sul file finale il punto a secondi dall'inizio della
+        parte: dopo le parti chiuse prima di lei, senza i secondi tolti in
+        testa. Una stima, finche' la registrazione e' aperta."""
+        prima = 0.0
+        for altra in list(self._parti):
+            if altra is parte:
+                break
+            prima += max(0.0, altra.secondi - altra.taglio)
+        taglio = parte.taglio if parte.finita else self._taglio(parte, max(0.0, parte.posizione - parte.inizio))
+        return prima + max(0.0, secondi - taglio)
 
     def _avanza(self, frazione):
         self.avanzamento = frazione
@@ -634,7 +821,10 @@ class Registrazione:
             return
         tagli = any(parte.taglio > 0 for parte in parti)
         provvisorio = self.percorso + ".unione"
-        if len(parti) == 1 and not tagli:
+        # Una parte recuperata da un crollo ha l'intestazione di un file non
+        # chiuso, come il WAV di 48695 secondi o l'MP3 di zero: si rifa'
+        # sempre, anche da sola (revisione del 15 novembre 2026).
+        if len(parti) == 1 and not tagli and not self.recuperate:
             os.replace(parti[0].file, self.percorso)
             tratti = [(0.0, 0.0, parti[0].secondi)]
         else:
@@ -683,7 +873,11 @@ class Registrazione:
 
     def _finisci(self):
         """Chiude la parte in corso e unisce le parti; se l'unione non
-        riesce, o si ferma per la fretta, le parti diventano file."""
+        riesce, per qualunque motivo, o si ferma per la fretta, le parti
+        diventano file. Prima solo OSError: un'altra eccezione usciva da
+        ferma, e la finestra non sapeva mai che il salvataggio era finito
+        (revisione del 15 novembre 2026). Se anche questo non riesce, le parti
+        restano con il file delle parti, al recupero dell'avvio."""
         with self._blocco:
             self._chiudi_la_parte()
             if not self._parti:
@@ -699,8 +893,9 @@ class Registrazione:
                     self._salva_le_parti()
                 else:
                     self._unisci()
-            except OSError:
-                self._salva_le_parti()
+            except Exception:  # noqa: BLE001 - un'unione che non riesce non perde niente
+                with contextlib.suppress(Exception):
+                    self._salva_le_parti()
             finally:
                 self.salvataggio = time.monotonic() - inizio
                 self.in_salvataggio, self.avanzamento = False, None
@@ -717,7 +912,8 @@ class Registrazione:
         for numero, parte in enumerate(self._parti, 1):
             arrivo = _libero(f"{base} parte {numero}", estensione)
             try:
-                os.replace(parte.file, arrivo)
+                if not (self.recuperate and not self._in_fretta and _ripara(parte, arrivo, self.formato)):
+                    os.replace(parte.file, arrivo)
             except OSError:
                 tutte = False
                 continue
@@ -811,7 +1007,16 @@ class Registrazione:
         .parzialeN che ha accanto, ferma e pronta per ferma, che la unisce:
         con il file delle parti tornano i parametri, i tagli e i marker; senza,
         o con il file finale gia' scritto, le parti diventano file separati.
-        None se non ha parti, o il formato non si riconosce."""
+        None se non ha parti, o il formato non si riconosce.
+        Dalla revisione del 15 novembre 2026 conta la parte che era in corso al
+        crollo, che la prova di prima non vedeva: le parti senza audio, come
+        quella appena aperta, si tolgono, e i loro marker vanno in fondo alla
+        parte prima (prima una parte vuota mandava tutto a file separati, con
+        un file vuoto); i secondi della parte in corso sono quelli che il file
+        ha davvero, e il suo taglio si stima dall'ora della partenza e da
+        quella dell'ultima scrittura. Un file delle parti rotto non ferma
+        niente: valgono i numeri che si leggono. None anche se nessuna parte ha
+        l'audio, e allora non resta niente."""
         cartella_della_registrazione = os.path.dirname(percorso)
         file = sorted((int(trovato["numero"]), os.path.join(cartella_della_registrazione, nome)) for nome in _elenco(cartella_della_registrazione)
             if (trovato := _PARTE_RIMASTA.match(nome)) and os.path.join(cartella_della_registrazione, trovato["base"]) == percorso)
@@ -826,18 +1031,38 @@ class Registrazione:
         if formato is None:
             return None
         titolo = str(dati.get("titolo") or os.path.splitext(os.path.basename(percorso))[0])
-        reg = cls(str(dati.get("sorgente") or percorso), titolo, None, formato, dati.get("kbps") or QUALITA_PREDEFINITA, dati.get("canali") or 2,
-            dati.get("frequenza") or FREQUENZA, dove=cartella_della_registrazione, bit=dati.get("bit") or BIT_PREDEFINITI, dal_vivo=bool(dati.get("dal_vivo")),
-            capitoli=dati.get("capitoli") or (), percorso=percorso)
-        descritte = {str(voce.get("file")): voce for voce in [*(dati.get("parti") or []), dati.get("in_corso") or {}] if isinstance(voce, dict)}
+        capitoli = dati.get("capitoli") if isinstance(dati.get("capitoli"), list) else ()
+        reg = cls(str(dati.get("sorgente") or percorso), titolo, None, formato, int(_numero(dati.get("kbps"), QUALITA_PREDEFINITA)) or QUALITA_PREDEFINITA,
+            1 if _numero(dati.get("canali"), 2) == 1 else 2, int(_numero(dati.get("frequenza"), FREQUENZA)) or FREQUENZA, dove=cartella_della_registrazione,
+            bit=int(_numero(dati.get("bit"), BIT_PREDEFINITI)) or BIT_PREDEFINITI, dal_vivo=bool(dati.get("dal_vivo")), capitoli=capitoli, percorso=percorso)
+        in_corso = dati.get("in_corso") if isinstance(dati.get("in_corso"), dict) else {}
+        chiuse = [voce for voce in dati.get("parti") or [] if isinstance(voce, dict)] if isinstance(dati.get("parti"), list) else []
+        descritte = {str(voce.get("file")): voce for voce in [*chiuse, in_corso] if voce}
         parti = []
-        for _numero, nome in file:
+        for _numero_della_parte, nome in file:
             voce = descritte.get(os.path.basename(nome)) or {}
-            parte = Parte(nome, float(voce.get("inizio") or 0.0))
-            parte.secondi = float(voce.get("secondi") or 0.0) or _durata_del_file(nome)
-            parte.taglio = min(parte.secondi, float(voce.get("taglio") or 0.0))
-            parte.marker = [[float(m[0]), str(m[1]), False, str(m[1])] for m in voce.get("marker") or [] if isinstance(m, list) and len(m) >= 2]
+            marker = [[_numero(m[0]), str(m[1]), False, str(m[1])] for m in voce.get("marker") or [] if isinstance(m, list) and len(m) >= 2] if isinstance(
+                voce.get("marker"), list) else []
+            presenti = _audio_della_parte(nome, formato)
+            if presenti <= 0:
+                if parti:
+                    parti[-1].marker.extend([[parti[-1].secondi, m[1], False, m[3]] for m in marker])
+                with contextlib.suppress(OSError):
+                    os.remove(nome)
+                continue
+            parte = Parte(nome, max(0.0, _numero(voce.get("inizio"))))
+            # I secondi detti alla chiusura, senza il riempimento in coda di
+            # libmpv; della parte in corso, che non li ha, quelli del file.
+            detti = _numero(voce.get("secondi"))
+            parte.secondi = detti if detti > 0 else presenti
+            parte.taglio = min(parte.secondi, max(0.0, _numero(voce.get("taglio"))))
+            if voce and voce is in_corso and reg.dal_vivo and parti:
+                parte.taglio = _taglio_stimato(nome, parte.secondi, voce)
+            parte.marker = marker
             parti.append(parte)
+        if not parti:
+            reg._togli_l_annotazione()
+            return None
         reg._parti = parti
         reg.stato = "finita"
         reg.recuperate = len(parti)
@@ -846,8 +1071,86 @@ class Registrazione:
 
 
 def _descrizione_della_parte(parte):
+    """Una parte nel file delle parti; anche l'ora vera della partenza e il
+    buco, per stimare al recupero il taglio della parte in corso."""
     return {"file": os.path.basename(parte.file), "inizio": parte.inizio, "secondi": parte.secondi, "taglio": parte.taglio,
-        "marker": [[voce[0], voce[1]] for voce in list(parte.marker)]}
+        "marker": [[voce[0], voce[1]] for voce in list(parte.marker)], "partita_ora": parte.partita_ora, "buco": parte.buco}
+
+
+def _numero(valore, predefinito=0.0):
+    """Un numero dal file delle parti, che dopo un crollo puo' essere rotto:
+    predefinito se non lo e'."""
+    try:
+        numero = float(valore)
+    except (TypeError, ValueError):
+        return predefinito
+    return numero if math.isfinite(numero) else predefinito
+
+
+def _taglio_stimato(percorso, secondi, voce):
+    """Il taglio della parte che era in corso al crollo, che il file delle
+    parti non sa: la riserva, i secondi del file in piu' di quelli d'orologio
+    fra la partenza e l'ultima scrittura, senza il buco di un
+    ricollegamento. Senza l'ora della partenza, zero, come prima."""
+    partita = _numero(voce.get("partita_ora"))
+    if partita <= 0:
+        return 0.0
+    try:
+        ultima = os.path.getmtime(percorso)
+    except OSError:
+        return 0.0
+    riserva = secondi - max(0.0, ultima - partita)
+    return min(secondi, max(0.0, riserva - max(0.0, _numero(voce.get("buco")))))
+
+
+def _audio_della_parte(percorso, formato):
+    """I secondi d'audio che il file di una parte ha davvero, dai suoi
+    fotogrammi, dai campioni o dai pacchetti, anche se libmpv non l'ha chiuso;
+    zero se non ne ha, come la parte appena aperta al crollo. Il FLAC, e un
+    file che non si legge, li chiedono a libmpv."""
+    with contextlib.suppress(Exception):
+        if not os.path.getsize(percorso):
+            return 0.0
+        with _mappa(percorso) as dati:
+            if formato in ("mp3", "aac"):
+                i = _lunghezza_id3(dati)
+                if formato == "mp3" and i + 7 <= len(dati) and dati[i] == 0xFF:
+                    testa = diretta._testa(dati, i)
+                    if testa is not None and testa is not diretta._POCO and testa[1][0] == "mp3" and _xing(dati, i) is not None:
+                        i += testa[0]
+                _primo, _fine, _fotogrammi, _tolti, tenuti, hz = _scorri(dati, i)
+                return tenuti / hz
+            if formato == "wav":
+                _fmt, _inizio, lunghezza, frequenza, blocco = _wav(dati)
+                return lunghezza / blocco / frequenza
+            if formato == "opus":
+                pacchetti, _stato = _pacchetti_ogg(dati)
+                testa = next(pacchetti, b"")
+                next(pacchetti, b"")
+                if testa[:8] != b"OpusHead" or len(testa) < 19:
+                    return 0.0
+                campioni = sum(_campioni_opus(pacchetto) for pacchetto in pacchetti if pacchetto)
+                return max(0, campioni - struct.unpack("<H", testa[10:12])[0]) / OPUS_HZ
+    # Il FLAC, e una parte che cosi' non si legge, li chiede a libmpv.
+    return _durata_del_file(percorso)
+
+
+def _ripara(parte, arrivo, formato):
+    """Una parte recuperata in un file suo, arrivo, con l'intestazione rifatta
+    dall'accodamento di lei sola, senza tagli: un WAV o un MP3 non chiusi
+    dicevano 48695 secondi o zero. Vero se e' riuscito, e allora la parte non
+    c'e' piu'; il FLAC, che si riscriverebbe, resta com'e'."""
+    sola = Parte(parte.file)
+    sola.secondi = parte.secondi
+    try:
+        _accoda([sola], arrivo, formato, lambda _frazione: None, lambda: False)
+    except Exception:  # noqa: BLE001 - una parte che non si ripara si salva com'e'
+        with contextlib.suppress(OSError):
+            os.remove(arrivo)
+        return False
+    with contextlib.suppress(OSError):
+        os.remove(parte.file)
+    return True
 
 
 def _elenco(cartella_da_guardare):
@@ -882,25 +1185,50 @@ def rimaste(cartella_da_guardare):
     return sorted(basi)
 
 
-def _lettura_della_diretta(uri, al_titolo=None):
+def _lettura_della_diretta(uri, al_titolo=None, parte=None):
     """La diretta letta da MeTeOra, per il protocollo del lettore della
-    registrazione, con i titoli in onda ad al_titolo; ValueError, per libmpv,
-    se non si apre."""
+    registrazione, con i titoli in onda ad al_titolo, e con parte l'orologio
+    dell'ultimo dato arrivato; ValueError, per libmpv, se non si apre."""
     try:
         # Senza riconnessioni: una ricollegata infilerebbe nel file la riserva
         # dei secondi gia' mandati. Dal 15 novembre 2026 la ricollega la
         # finestra, con una parte nuova, e la riserva doppia si toglie.
-        return diretta.Lettura(diretta.indirizzo_vero(uri), al_titolo=al_titolo, riconnetti=False)
+        lettura = diretta.Lettura(diretta.indirizzo_vero(uri), al_titolo=al_titolo, riconnetti=False)
     except Exception as e:
         # La rete fallisce in molti modi.
         raise ValueError(str(e)) from e
+    return lettura if parte is None else _LetturaDellaParte(lettura, parte)
+
+
+class _LetturaDellaParte:
+    """La lettura della diretta di una parte, che annota l'orologio di ogni
+    dato arrivato dalla rete (revisione del 15 novembre 2026). Per python-mpv
+    ha solo read, close e cancel, come Lettura: niente seek ne' size."""
+
+    def __init__(self, lettura, parte):
+        self._lettura, self._parte = lettura, parte
+
+    def read(self, quanti):
+        dati = self._lettura.read(quanti)
+        if dati:
+            self._parte.ultimo_dato = time.monotonic()
+        return dati
+
+    def close(self):
+        self._lettura.close()
+
+    def cancel(self):
+        self._lettura.cancel()
 
 
 def _durata_del_file(percorso):
-    """I secondi di un file scritto, letti da libmpv; zero se non si sa."""
-    pronto = threading.Event()
-    lettore = mpv.MPV(**{**motore.OPZIONI_DI_BASE, "ao": "null", "pause": True})
+    """I secondi di un file scritto, letti da libmpv; zero se non si sa,
+    anche se libmpv non parte (revisione del 15 novembre 2026: prima la sua
+    creazione stava fuori dal try, e l'errore usciva da chi chiudeva)."""
+    lettore = None
     try:
+        pronto = threading.Event()
+        lettore = mpv.MPV(**{**motore.OPZIONI_DI_BASE, "ao": "null", "pause": True})
         lettore.register_event_callback(lambda evento: pronto.set() if evento.event_id.value in (mpv.MpvEventID.FILE_LOADED, mpv.MpvEventID.END_FILE)
             else None)
         lettore.command("loadfile", percorso)
@@ -909,21 +1237,28 @@ def _durata_del_file(percorso):
     except Exception:  # noqa: BLE001 - un file che non si legge non ha durata
         return 0.0
     finally:
-        lettore.terminate()
+        if lettore is not None:
+            with contextlib.suppress(Exception):
+                lettore.terminate()
 
 
 def _durata_vera(parte, formato):
     """La durata di una parte da riscrivere, dal suo file: mutagen la sa
-    giusta per FLAC e Opus; per gli altri valgono i secondi registrati."""
+    giusta per FLAC e Opus, se il file e' chiuso; per gli altri, e per una
+    parte rimasta aperta da un crollo, che mutagen dice di zero secondi,
+    valgono i secondi registrati."""
     with contextlib.suppress(Exception):
+        durata = 0.0
         if formato == "flac":
             import mutagen.flac
 
-            return float(mutagen.flac.FLAC(parte.file).info.length)
-        if formato == "opus":
+            durata = float(mutagen.flac.FLAC(parte.file).info.length)
+        elif formato == "opus":
             import mutagen.oggopus
 
-            return float(mutagen.oggopus.OggOpus(parte.file).info.length)
+            durata = float(mutagen.oggopus.OggOpus(parte.file).info.length)
+        if durata > 0:
+            return durata
     return parte.secondi
 
 
@@ -947,9 +1282,13 @@ def _riscrivi(parti, uscita, formato, kbps, canali, frequenza, bit=BIT_PREDEFINI
     totale = max(inizio, 0.001)
     finita = threading.Event()
     motivi = []
-    opzioni = {**motore.OPZIONI_DI_BASE, "o": uscita, **_codifica(formato, kbps, bit_per(formato, bit)), "audio_channels": "mono" if canali == 1 else "stereo",
-        "audio_samplerate": frequenza}
-    lettore = mpv.MPV(**opzioni)
+    opzioni = {**motore.OPZIONI_DI_BASE, "o": uscita, **_codifica(formato, kbps, bit_per(formato, bit), svuota=False),
+        "audio_channels": "mono" if canali == 1 else "stereo", "audio_samplerate": frequenza}
+    try:
+        lettore = mpv.MPV(**opzioni)
+    except Exception as e:
+        # libmpv che non parte e' un'unione che non riesce: le parti restano file.
+        raise OSError(str(e)) from e
 
     def evento(e):
         if e.event_id.value == mpv.MpvEventID.END_FILE:
@@ -1040,7 +1379,7 @@ def _accoda(parti, uscita, formato, avanza, fermata):
         with open(uscita, "wb") as f, contextlib.ExitStack() as pila:
             mappe = [pila.enter_context(_mappa(parte.file)) for parte in parti]
             return accoda(parti, mappe, _Scrittore(f, totale, avanza, fermata))
-    except (ValueError, IndexError, KeyError, struct.error) as e:
+    except (ValueError, IndexError, KeyError, ArithmeticError, struct.error) as e:
         with contextlib.suppress(OSError):
             os.remove(uscita)
         raise _DaRiscrivere(str(e)) from e
@@ -1068,13 +1407,17 @@ def _xing(dati, i):
     return j if bytes(dati[j:j + 4]) in (b"Xing", b"Info") else None
 
 
-def _scorri(dati, i, taglio=0.0, uno_in_piu=False):
+def _scorri(dati, i, taglio=0.0):
     """I fotogrammi MP3 o AAC ADTS di dati da i, fino al primo che non lo e'
     o non e' intero. Con il taglio si saltano quelli dei primi taglio
-    secondi e, con uno_in_piu, uno ancora: nell'MP3 il primo dopo il taglio
-    prende bit dai fotogrammi saltati, il serbatoio di bit, e suonerebbe
-    rotto. Torna (primo byte tenuto, fine, fotogrammi tenuti, campioni
-    tolti, campioni tenuti, frequenza)."""
+    secondi. Nell'MP3 il primo fotogramma tenuto prende parte dei suoi bit da
+    quelli prima, il serbatoio di bit, che nel file unito sono la coda della
+    parte di prima: alla giunzione si sbagliano un paio di granuli, circa 26
+    millisecondi. Il fotogramma in piu' saltato fino alla revisione del 15
+    novembre 2026 non serviva: anche il seguente prende dal serbatoio, e
+    decodificato sbagliava tre granuli, con un picco sopra l'ampiezza. Torna
+    (primo byte tenuto, fine, fotogrammi tenuti, campioni tolti, campioni
+    tenuti, frequenza)."""
     n = len(dati)
     misure = {}
     primo, fotogrammi, tolti, tenuti, frequenza, da_togliere = None, 0, 0, 0, None, 0
@@ -1104,11 +1447,6 @@ def _scorri(dati, i, taglio=0.0, uno_in_piu=False):
             da_togliere = round(taglio * hz) if taglio > 0 else 0
         if primo is None:
             if tolti < da_togliere:
-                tolti += campioni
-                i += lunghezza
-                continue
-            if uno_in_piu and tolti:
-                uno_in_piu = False
                 tolti += campioni
                 i += lunghezza
                 continue
@@ -1188,7 +1526,7 @@ def _accoda_mp3(parti, mappe, scrittore):
             i += primo[0]
         elif numero == 0:
             testa = bytes(dati[:i])
-        misure.append(_scorri(dati, i, parte.taglio, uno_in_piu=True))
+        misure.append(_scorri(dati, i, parte.taglio))
     fotogrammi = sum(misura[2] for misura in misure)
     audio = sum(misura[1] - misura[0] for misura in misure)
     scrittore.scrivi(testa)
@@ -1238,7 +1576,10 @@ def _wav(dati):
             if not lunghezza or inizio + lunghezza > len(dati):
                 lunghezza = len(dati) - inizio
             blocco = struct.unpack("<H", fmt[12:14])[0] or 1
-            return fmt, inizio, lunghezza - lunghezza % blocco, struct.unpack("<I", fmt[4:8])[0], blocco
+            frequenza = struct.unpack("<I", fmt[4:8])[0]
+            if not frequenza:
+                raise ValueError("un WAV senza frequenza")
+            return fmt, inizio, lunghezza - lunghezza % blocco, frequenza, blocco
         i += 8 + lunghezza + (lunghezza & 1)
     raise ValueError("un WAV senza campioni")
 
