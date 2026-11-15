@@ -306,8 +306,10 @@ class Registrazione:
         self.marker_finali = []
         self.numero_dei_marker = 0
         self.ultimo_marker = None
-        # Le parti trovate all'avvio, per una registrazione recuperata.
+        # Le parti trovate all'avvio, per una registrazione recuperata; i
+        # secondi delle parti rimaste file separati, che non sono piu' parti.
         self.recuperate = 0
+        self._secondi_separati = None
         self._al_termine, self._al_marker, self._alla_caduta = al_termine, al_marker, alla_caduta
         self._blocco = threading.RLock()
         # Il lucchetto dei marker, che il filo della rete prende e il blocco
@@ -386,6 +388,7 @@ class Registrazione:
         # La parte e' in corso prima che libmpv apra la rete: il primo titolo
         # puo' arrivare subito.
         self._parte, self._lettore, self._finita = parte, lettore, finita
+        prima = self.stato
         try:
             if self.flusso.intestazioni:
                 lettore["http-header-fields"] = list(self.flusso.intestazioni)
@@ -404,12 +407,17 @@ class Registrazione:
             elif self.dal_vivo:
                 lettore.observe_property("metadata", lambda _nome, metadati: self._metadati(parte, metadati))
             self._annota()
+            # In corso prima di aprire: una connessione rifiutata arriva alla
+            # fine in un attimo, e una fine prima di in_corso non contava, e
+            # la registrazione restava viva senza flusso (15 novembre 2026).
+            self.stato = "in_corso"
             if inizio:
                 lettore.command("loadfile", indirizzo, "replace", "-1", f"start={inizio:.3f}")
             else:
                 lettore.command("loadfile", indirizzo)
         except Exception as e:
             self._parte = self._lettore = self._finita = None
+            self.stato = prima
             lettore.terminate()
             self._annota()
             raise OSError(str(e)) from e
@@ -496,6 +504,9 @@ class Registrazione:
         ore tiene il lucchetto, e prima R fermava la finestra finche' l'unione
         non finiva."""
         chiudendo, parti, parte = self._chiudendo, self._parti, self._parte
+        if not parti and parte is None and chiudendo is None and self._secondi_separati is not None:
+            # Le parti diventate file separati, con la loro riserva.
+            return self._secondi_separati
         secondi = sum(p.secondi - p.taglio for p in parti)
         if chiudendo is not None and chiudendo not in parti:
             secondi += chiudendo.secondi - chiudendo.taglio
@@ -508,7 +519,7 @@ class Registrazione:
     def byte(self):
         """I byte scritti, anche questi senza il lucchetto."""
         parte = self._parte
-        file = [p.file for p in self._parti] + ([parte.file] if parte is not None else [])
+        file = [p.file for p in self._parti] + ([parte.file] if parte is not None else []) + list(self.parti_separate)
         if self.stato in ("finita", "completa", "interrotta"):
             file.append(self.percorso)
         totale = 0
@@ -696,6 +707,7 @@ class Registrazione:
         sulla loro parte, con la riserva, che qui non si taglia."""
         base, estensione = os.path.splitext(self.percorso)
         salvate, voci, tutte = [], [], True
+        self._secondi_separati = sum(parte.secondi for parte in self._parti)
         for numero, parte in enumerate(self._parti, 1):
             arrivo = _libero(f"{base} parte {numero}", estensione)
             try:

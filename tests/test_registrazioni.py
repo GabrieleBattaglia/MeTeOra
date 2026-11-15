@@ -339,6 +339,30 @@ def test_la_caduta_di_una_diretta_e_una_pausa_per_la_rete(tmp_path, monkeypatch)
     assert (reg.stato, reg.motivo) == ("in_pausa", "rete") and len(cadute) == 1 and reg._parti == [parte]
 
 
+def test_una_connessione_rifiutata_si_dice_anche_subito(tmp_path):
+    # Un server che rifiuta subito la connessione: la fine arrivava prima che
+    # la registrazione fosse in corso, non contava, e la registrazione restava
+    # viva senza flusso. Ora la caduta si dice, all'avvio e al ricollegamento.
+    presa = socket.socket()
+    presa.bind(("127.0.0.1", 0))
+    porta = presa.getsockname()[1]
+    presa.close()
+    indirizzo = f"http://127.0.0.1:{porta}/stream"
+    cadute = []
+    caduta = threading.Event()
+    reg = registrazioni.Registrazione(indirizzo, "Muta", indirizzi.Flusso(indirizzo, dal_vivo=True), "mp3", 64, 1, 44100, dove=str(tmp_path / "Registrazioni"),
+        alla_caduta=lambda r, secondi: cadute.append(secondi) or caduta.set())
+    for _volta in range(3):
+        caduta.clear()
+        if reg.stato == "pronta":
+            reg.avvia()
+        else:
+            reg.pausa(False)
+        assert caduta.wait(15) and (reg.stato, reg.motivo) == ("in_pausa", "rete")
+    assert len(cadute) == 3 and not reg._parti
+    assert reg.ferma() is None
+
+
 def _server_icy(audio, metaint, titoli, pausa=0.15):
     """Un server ICY in locale: a ogni connessione manda l'audio diviso in
     blocchi da metaint, con un titolo dopo ognuno, un blocco ogni pausa
@@ -445,6 +469,8 @@ def test_in_fretta_le_parti_diventano_file(tmp_path):
     base = os.path.splitext(reg.parti_separate[0])[0][:-len(" parte 1")]
     assert file == [f"{base} parte 1.mp3", f"{base} parte 2.mp3"] and all(os.path.exists(f) for f in file) and reg.stato == "finita"
     assert reg.marker_finali == [(file[0], 1.0, "Caruso")]
+    # Secondi e byte sono quelli di tutte le parti, con la loro riserva: prima i secondi erano zero.
+    assert reg.secondi == pytest.approx(4.0) and reg.byte == sum(os.path.getsize(f) for f in file)
 
 
 def test_le_parti_rimaste_si_recuperano(tmp_path):
@@ -486,7 +512,7 @@ def test_le_parti_che_non_si_uniscono_restano_file(tmp_path, monkeypatch):
     monkeypatch.setattr(registrazioni, "_accoda", rotta)
     percorso = reg.ferma()
     assert reg.parti_separate == [f"{base} parte 1.mp3", f"{base} parte 2.mp3"] and percorso == reg.parti_separate[0]
-    assert all(os.path.exists(f) for f in reg.parti_separate) and not os.path.exists(uno) and not os.path.exists(due)
+    assert all(os.path.exists(f) for f in reg.parti_separate) and not os.path.exists(uno) and not os.path.exists(due) and reg.secondi == pytest.approx(5.0)
     # La riscrittura vera, con una parte che non c'e', fallisce e non lascia
     # un file a meta'.
     with pytest.raises(OSError):
@@ -572,7 +598,7 @@ class _Finta:
         self.motivo = motivo
 
     def capitoli_passati(self):
-        return 0
+        return getattr(self, "passati", 0)
 
     def ferma(self):
         self.comandi.append("ferma")
@@ -815,6 +841,71 @@ def test_una_puntata_scarica_intera_in_disparte(finestra, con_registrazioni, suo
     finestra._da_non_registrare = video.percorso
     finestra._guarda_le_registrazioni()
     assert finestra._registrazione is None
+
+
+def test_la_ripresa_a_mano_con_la_sorgente_che_tace(finestra, con_registrazioni, suoni_annotati):
+    # Con l'attesa accesa e la sorgente in pausa, Maiuscolo con R toglie la
+    # pausa a mano e la rimette ad aspettare la sorgente, senza aprire niente.
+    from test_finestra import _premi
+
+    _premi(finestra, "r", alt=True)
+    _suona_la_radio(finestra, con_registrazioni)
+    reg = _Finta.create[-1]
+    _premi(finestra, "r", maiuscolo=True)
+    con_registrazioni.stato["in_pausa"] = True
+    finestra._guarda_le_registrazioni()
+    assert reg.motivo == "mano"
+    assert _premi(finestra, "r", maiuscolo=True) == "Registrazione ripresa: Rai Radio 3 riparte appena la sorgente torna a suonare."
+    assert suoni_annotati[-1] == "registrazione_ripresa" and reg.motivo == "sorgente" and reg.comandi[-1] == ("pausa", True)
+    con_registrazioni.stato["in_pausa"] = False
+    finestra._guarda_le_registrazioni()
+    assert reg.comandi[-1] == ("pausa", False) and reg.stato == "in_corso"
+
+
+def test_i_capitoli_di_una_puntata_si_dicono_senza_inondare(finestra, con_registrazioni, suoni_annotati):
+    # Una puntata scarica piu' veloce dell'ascolto: una riga dice l'ultimo
+    # capitolo passato, al piu' ogni dieci secondi, e il primo non si dice.
+    video = Brano("https://www.youtube.com/watch?v=capitoli", titolo="Puntata")
+    indirizzi.metti_il_diretto(video.percorso)
+    finestra.schedario.metti_la_scheda(video.percorso, {"durata": 600.0, "capitoli": [[0.0, "Sigla"], [60.0, "Intervista"], [120.0, ""], [300.0, "Saluti"]]})
+    con_registrazioni.stato["in_corso"] = video.percorso
+    finestra.coda.imposta(None, video)
+    finestra._comando_registra()
+    puntata = _Finta.create[-1]
+    assert not puntata.dal_vivo and [c[1] for c in puntata.capitoli] == ["Sigla", "Intervista", "", "Saluti"]
+    righe = len(finestra._righe)
+    puntata.passati = 3
+    finestra._guarda_le_registrazioni()
+    assert finestra._righe[-1].startswith("Registro Puntata, marker 3: capitolo 3, a 2:00.") and len(finestra._righe) == righe + 1
+    puntata.passati = 4
+    con_registrazioni.orologio[0] += 5
+    finestra._guarda_le_registrazioni()
+    assert len(finestra._righe) == righe + 1
+    con_registrazioni.orologio[0] += 5
+    finestra._guarda_le_registrazioni()
+    assert finestra._righe[-1].startswith("Registro Puntata, marker 4: Saluti, a 5:00.") and suoni_annotati[-1] == "registrazione_avviata"
+
+
+def test_la_chiusura_aspetta_il_comando_in_volo(finestra, con_registrazioni, monkeypatch, suoni_annotati):
+    # Esc mentre la pausa chiude un pezzo: la registrazione si chiude quando
+    # il comando ha finito, e poi MeTeOra.
+    import finestra as modulo
+
+    lavori = []
+    _suona_la_radio(finestra, con_registrazioni)
+    finestra._comando_registra()
+    reg = _Finta.create[-1]
+    monkeypatch.setattr(modulo, "registrazioni_in_disparte", lambda lavoro, al_termine: lavori.append((lavoro, al_termine)))
+    finestra._comando_registra()
+    assert finestra._registrazione_occupata and len(lavori) == 1
+    finestra.Close()
+    assert not finestra._chiusa and finestra._registrazione is reg and finestra._da_chiudere == "chiusura"
+    lavoro, al_termine = lavori.pop()
+    al_termine(lavoro())
+    assert finestra._registrazione is None and finestra._in_chiusura == [reg] and len(lavori) == 1
+    lavoro, al_termine = lavori.pop()
+    al_termine(lavoro())
+    assert finestra._chiusa and reg.comandi[-2:] == [("pausa", True), "ferma"]
 
 
 def test_la_rete_che_cade_si_ricollega(finestra, con_registrazioni, monkeypatch, suoni_annotati):
