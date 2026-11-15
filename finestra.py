@@ -413,7 +413,8 @@ TASTI = {
     ("m", CTRL_MAIUSCOLO): "volume_di_prima",
     ("m", ALT): "volume_massimo",
     ("m", CTRL_ALT): "volume_minimo",
-    # La virgola, accanto a M: i capitoli degli audiolibri e dei film (1.93.0).
+    # La virgola, accanto a M: i capitoli degli audiolibri e dei film (1.93.0),
+    # e dei video dei siti, come YouTube, che li dice yt-dlp (3.2.0).
     (",", SOLO): "capitolo",
     (",", CTRL): "capitolo_precedente",
     (",", MAIUSCOLO): "capitolo_successivo",
@@ -509,7 +510,7 @@ TASTI_COMUNI = [
     "E i passi dei salti: Ctrl e Maiuscolo chiedono quello indietro e quello avanti, Ctrl e Maiuscolo insieme li riportano ai predefiniti. W va a un tempo."),
     _("M il volume: Ctrl e Maiuscolo lo abbassano e lo alzano di un passo, Ctrl e Maiuscolo insieme lo riportano a quello di prima del massimo o dello zero, "
     "Alt lo porta al massimo, Ctrl e Alt a zero, che fa da muto. Il punto: il passo del volume."),
-    _("La virgola, i capitoli degli audiolibri e dei film: Ctrl e Maiuscolo il precedente e il successivo, Alt l'ultimo, Ctrl e Alt il primo; "
+    _("La virgola, i capitoli degli audiolibri, dei film e dei video dei siti, come YouTube: Ctrl e Maiuscolo il precedente e il successivo, Alt l'ultimo, Ctrl e Alt il primo; "
     "Ctrl con la virgola, oltre i primi secondi di un capitolo, torna al suo inizio."),
     _("A la velocità, F il tono, di un semitono: Ctrl abbassa, Maiuscolo alza, Ctrl e Maiuscolo insieme tornano al normale, Alt al massimo, Ctrl e Alt al minimo."),
     _("U la banda dell'equalizzatore: Ctrl e Maiuscolo la precedente e la seguente, Alt l'ultima, Ctrl e Alt la prima. "
@@ -2243,11 +2244,15 @@ class Finestra(wx.Frame):
 
     def _suona_il_capitolo(self, dati):
         """X, Invio o il menu su un capitolo della plancia: il file da li'; se
-        suona gia', un salto."""
+        suona gia', un salto, con il suono dei capitoli della virgola: quello
+        del precedente se il capitolo comincia prima del punto in cui si e',
+        anche se e' quello in cui si e', altrimenti quello del successivo
+        (Gabriele, 15 novembre 2026)."""
         frase = f"{frase_del_capitolo(dati['numero'], dati['totale'], dati['titolo'], dati['secondi'])}."
         if self.motore.in_corso and dati["brano"] is self.coda.corrente:
+            indietro = dati["secondi"] < (self.motore.posizione or 0.0)
             self._vai_a(dati["secondi"])
-            self._riscontro("capitolo_successivo", frase)
+            self._riscontro("capitolo_precedente" if indietro else "capitolo_successivo", frase)
             return
         self._suona(dati["playlist"], dati["brano"], inizio=dati["secondi"])
         self.scrivi(f"{frase_del_capitolo(dati['numero'], dati['totale'], dati['titolo'], dati['secondi'], dal=True)}.")

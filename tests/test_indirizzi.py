@@ -427,6 +427,15 @@ def test_i_sottotitoli_si_scaricano_una_volta_con_le_intestazioni(monkeypatch):
         indirizzi.scarica_i_sottotitoli(traccia)
 
 
+def test_i_capitoli_dei_siti_senza_segnaposto_e_da_due_in_su():
+    # Gabriele, 15 novembre 2026: il titolo che yt-dlp inventa per i capitoli
+    # senza nome non si dice, e un capitolo solo non e' una divisione.
+    capitoli = [{"start_time": 5.0, "title": "<Untitled Chapter 2>"}, {"start_time": 0, "title": "<Untitled Chapter 1>"}, {"start_time": 61.5, "title": " Il resto "}]
+    assert indirizzi.scheda_dell_info({"title": "Corso", "chapters": capitoli})["capitoli"] == [[0.0, ""], [5.0, ""], [61.5, "Il resto"]]
+    assert "capitoli" not in indirizzi.scheda_dell_info({"title": "Corso", "chapters": [{"start_time": 0, "title": "Tutto"}]})
+    assert "capitoli" not in indirizzi.scheda_dell_info({"title": "Corso", "chapters": None})
+
+
 # Gli indirizzi nella finestra.
 
 

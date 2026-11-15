@@ -602,16 +602,32 @@ def _titolo(info):
     return info.get("title")
 
 
+# Il titolo che yt-dlp da' ai capitoli che il sito non chiama, come <Untitled
+# Chapter 1>: non e' del sito, e il capitolo si dice con il solo numero e il
+# tempo (Gabriele, 15 novembre 2026).
+_CAPITOLO_SENZA_TITOLO = re.compile(r"<Untitled Chapter \d+>")
+
+
+def _titolo_del_capitolo(titolo):
+    titolo = str(titolo or "").strip()
+    return "" if _CAPITOLO_SENZA_TITOLO.fullmatch(titolo) else titolo
+
+
 def scheda_dell_info(info):
     """La scheda di un brano di un sito per lo schedario, come quelle dei
-    file: durata, tag e capitoli, senza dimensione e data."""
+    file: durata, tag e capitoli, senza dimensione e data. I capitoli sono
+    quelli che yt-dlp legge dal sito (3.2.0), come quelli dei video di
+    YouTube: si tengono da due in su, come quelli dei tag, perche' un capitolo
+    solo non e' una divisione, e senza il titolo segnaposto di yt-dlp
+    (Gabriele, 15 novembre 2026)."""
     anno = info.get("release_year") or str(info.get("upload_date") or "")[:4]
     tag = {"titolo": info.get("track") or _titolo(info), "autore": info.get("artist") or info.get("creator") or info.get("uploader") or info.get("channel"),
         "album": info.get("album"), "genere": info.get("genre"), "anno": int(anno) if str(anno).isdigit() else None}
     scheda = {"dim": None, "mod": None, "durata": _durata(info.get("duration")), "tag": {k: str(v) if k != "anno" else v for k, v in tag.items() if v},
         "sottobrani": None, "durate_sid": None, "indirizzo": True}
-    capitoli = [[float(c["start_time"]), str(c.get("title") or "")] for c in info.get("chapters") or [] if isinstance(c.get("start_time"), (int, float))]
-    if capitoli:
+    capitoli = sorted([float(c["start_time"]), _titolo_del_capitolo(c.get("title"))] for c in info.get("chapters") or []
+        if isinstance(c, dict) and isinstance(c.get("start_time"), (int, float)))
+    if len(capitoli) > 1:
         scheda["capitoli"] = capitoli
     return scheda
 
