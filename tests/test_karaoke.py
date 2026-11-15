@@ -1,6 +1,6 @@
 # MeTeOra, le prove dei testi del karaoke: MIDI e .kar costruiti qui, .lrc, SYLT, blocchi e traccia.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.82.0.
+# 04/10/2026: nasce con la 1.82.0. Nella 3.26.9 la posizione attesa negli speaker finti. Nella 3.26.14 il Seguito con i blocchi pronti.
 
 """I MIDI si costruiscono byte per byte, i .lrc si scrivono in tmp_path, i
 SYLT arrivano da tag ID3 veri di mutagen dentro un file finto."""

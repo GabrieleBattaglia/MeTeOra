@@ -1,6 +1,6 @@
 # MeTeOra, le registrazioni: le radio e gli indirizzi in rete scritti su file.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 10/11/2026: nasce con la 3.5.0, issue 42. Nella 3.11.0 le dirette HTTP lette da diretta.py, senza riconnessioni. Nella 3.13.2 le unioni lunghe senza troncare, e le parti salvate a file se l'unione fallisce. Nella 3.15.0 bit, frequenza e canali scelti, e il WAV con RF64.
+# 10/11/2026: nasce con la 3.5.0, issue 42. Nella 3.11.0 le dirette HTTP lette da diretta.py, senza riconnessioni. Nella 3.13.2 le unioni lunghe senza troncare, e le parti salvate a file se l'unione fallisce. Nella 3.15.0 bit, frequenza e canali scelti, e il WAV con RF64. Nella 3.26.0 l'attesa che segue la sorgente, con la pausa per motivo, i ricollegamenti detti quando arriva l'audio, con il buco dall'ultimo dato, i marker dei titoli e delle riprese, il salvataggio in fretta, ogni pacchetto sul disco e il recupero delle parti, anche di quella aperta al crollo; la diretta riconosciuta da se'. Nella 3.26.4 l'unione senza ricodificare, e secondi e byte senza lucchetto. Nella 3.26.9 i flussi dei siti chiesti a pezzi.
 
 """Le registrazioni (3.5.0, issue 42).
 
@@ -477,8 +477,15 @@ class Registrazione:
             # fine in un attimo, e una fine prima di in_corso non contava, e
             # la registrazione restava viva senza flusso (15 novembre 2026).
             self.stato = "in_corso"
-            if inizio:
-                lettore.command("loadfile", indirizzo, "replace", "-1", f"start={inizio:.3f}")
+            opzioni = [f"start={inizio:.3f}"] if inizio else []
+            # Il flusso a pezzi, come lo vuole YouTube, che a una richiesta
+            # aperta risponde a circa 26 KB/s: nel motore dal 15 novembre 2026,
+            # e anche qui, o un video di un'ora si scaricava in mezz'ora.
+            pezzo = getattr(self.flusso, "pezzo", None)
+            if pezzo:
+                opzioni.append(f"{motore.OPZIONE_DEL_PEZZO}={int(pezzo)}")
+            if opzioni:
+                lettore.command("loadfile", indirizzo, "replace", "-1", ",".join(opzioni))
             else:
                 lettore.command("loadfile", indirizzo)
         except Exception as e:

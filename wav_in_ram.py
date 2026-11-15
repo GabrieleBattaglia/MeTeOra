@@ -1,6 +1,6 @@
 # MeTeOra, il WAV in RAM: la conversione per gli speaker Cast senza disco, servita a intervalli da una finestra di memoria.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 05/11/2026: nasce con la 2.7.0, tappa 17 del piano, dal prototipo prototipi/wav_a_finestra.py provato su GabryBar. Nella 3.12.0 il WAV senza fine delle dirette, FlussoPcm.
+# 05/11/2026: nasce con la 2.7.0, tappa 17 del piano, dal prototipo prototipi/wav_a_finestra.py provato su GabryBar. Nella 3.12.0 il WAV senza fine delle dirette, FlussoPcm. Nella 3.26.9 l'anello di memoria, le ripartenze senza convertitori appesi, la ripartenza vuota che conta come guasto, e FlussoPcm che si chiude senza libmpv appese.
 
 """Il WAV in RAM, per i brani che lo speaker Cast non legge da se'.
 

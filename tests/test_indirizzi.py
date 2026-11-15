@@ -1,6 +1,6 @@
 # MeTeOra, le prove degli indirizzi in rete: yt-dlp finto, niente rete.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 10/11/2026, 3.5.1: gli appunti con un indirizzo senza https://. Nella 3.9.0 la ricerca dei contenuti, i dieci secondi e i cento Indirizzi. Nella 3.10.0 la ricerca a pagine e Mostra altri risultati.
+# 10/11/2026, 3.5.1: gli appunti con un indirizzo senza https://. Nella 3.9.0 la ricerca dei contenuti, i dieci secondi e i cento Indirizzi. Nella 3.10.0 la ricerca a pagine e Mostra altri risultati. Nella 3.26.9 il pezzo dei formati. Nella 3.26.14 i blocchi del WebVTT, lo scaricamento dei sottotitoli, anche a pezzi, e i capitoli senza segnaposto.
 # 05/11/2026: nasce con la 3.2.0, tappa 19 b del piano, issue 40. Nella 3.4.0 le prove dei Preferiti in rete (issue 41).
 
 import datetime

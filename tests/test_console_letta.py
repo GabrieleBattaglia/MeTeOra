@@ -1,6 +1,6 @@
 # MeTeOra, le prove della console letta da sola, dei capitoli detti suonando e dei sottotitoli dei siti.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 11/11/2026: nasce con la 3.8.0, issue 44 e 45.
+# 11/11/2026: nasce con la 3.8.0, issue 44 e 45. Nella 3.26.14 i sottotitoli dei siti con lo speaker, scelti da soli, e i loro contatori.
 
 import types
 

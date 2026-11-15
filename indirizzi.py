@@ -1,6 +1,6 @@
 # MeTeOra, gli indirizzi in rete: le pagine dei siti, aperte con yt-dlp.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 05/11/2026: nasce con la 3.2.0, tappa 19 b del piano, issue 40. Nella 3.3.0 le dirette, senza durata, e gli indirizzi diretti, che libmpv apre senza yt-dlp. Nella 3.3.1 la pagina che non c'e', il 404, e il 403 detti per chi ascolta. Nella 3.5.1 gli appunti con un indirizzo senza https://. Nella 3.8.0 i sottotitoli dei siti. Nella 3.9.0 la ricerca dei contenuti, issue 47. Nella 3.16.0 YouTube Music di riserva, quando YouTube chiede l'eta' e non da' risultati. Nella 3.16.1 le anteprime di SoundCloud tolte.
+# 05/11/2026: nasce con la 3.2.0, tappa 19 b del piano, issue 40. Nella 3.3.0 le dirette, senza durata, e gli indirizzi diretti, che libmpv apre senza yt-dlp. Nella 3.3.1 la pagina che non c'e', il 404, e il 403 detti per chi ascolta. Nella 3.5.1 gli appunti con un indirizzo senza https://. Nella 3.8.0 i sottotitoli dei siti. Nella 3.9.0 la ricerca dei contenuti, issue 47. Nella 3.16.0 YouTube Music di riserva, quando YouTube chiede l'eta' e non da' risultati. Nella 3.16.1 le anteprime di SoundCloud tolte. Nella 3.26.9 il pezzo dei flussi, per chiederli a pezzi come vuole YouTube. Nella 3.26.14 i sottotitoli dei siti con il titolo e la lingua, il loro file WebVTT scaricato, anche a pezzi HLS, e i capitoli senza il segnaposto, da due in su.
 
 """Gli indirizzi in rete (3.2.0, issue 40).
 

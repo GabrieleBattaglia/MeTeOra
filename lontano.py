@@ -1,6 +1,6 @@
 # MeTeOra, il lettore lontano: uno speaker Cast al posto della scheda audio, con la strada A e il WAV in RAM.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/11/2026: nasce con la 1.117.0, tappa 15 b del piano. Nella 2.6.4 il sottobrano resta a fine brano, come nel motore. Nella 3.11.1 le radio, con MeTeOra che fa da ripetitore senza conversione. Nella 3.11.3 le letture chiuse allo stop e all'errore, i titoli vecchi scartati e le liste dirette allo speaker. Nella 3.11.6 allo speaker solo fotogrammi interi, e i conti per le statistiche. Nella 3.12.0 le TV con l'audio convertito dal vivo, e le liste rifiutate ricordate.
+# 03/11/2026: nasce con la 1.117.0, tappa 15 b del piano. Nella 2.6.4 il sottobrano resta a fine brano, come nel motore. Nella 3.11.1 le radio, con MeTeOra che fa da ripetitore senza conversione. Nella 3.11.3 le letture chiuse allo stop e all'errore, i titoli vecchi scartati e le liste dirette allo speaker. Nella 3.11.6 allo speaker solo fotogrammi interi, e i conti per le statistiche. Nella 3.12.0 le TV con l'audio convertito dal vivo, e le liste rifiutate ricordate. Nella 3.26.9 i comandi allo speaker in fila in un filo loro, dal punto chiesto, con i rinvii prima del brano, e i salti senza risposta che non perdono lo speaker.
 # Nella 2.6.5 la fine che lo speaker non dice, fermo in caricamento all'ultimo campione. Nella 2.7.0 il WAV in RAM al posto del FLAC su disco.
 
 """Il lettore che suona su un apparecchio Cast, per il motore.

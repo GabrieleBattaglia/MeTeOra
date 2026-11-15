@@ -1,6 +1,6 @@
 # MeTeOra, le prove del WAV in RAM per gli speaker Cast (2.7.0).
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 05/11/2026: nasce con wav_in_ram.py, nella 2.7.0. Nella 3.12.0 il WAV senza fine delle dirette.
+# 05/11/2026: nasce con wav_in_ram.py, nella 2.7.0. Nella 3.12.0 il WAV senza fine delle dirette. Nella 3.26.9 l'anello a cavallo della fine, la ripartenza vuota guasta, le ripartenze e le TV senza convertitori appesi.
 
 """Le prove di wav_in_ram.py con un convertitore finto, che scrive nella pipe
 con nome vera dei byte che si riconoscono: il byte n del PCM vale n % 251.

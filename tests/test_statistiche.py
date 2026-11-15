@@ -1,6 +1,6 @@
 # MeTeOra, le prove delle statistiche: l'orologio, la vita dei brani, il file, l'azzeramento e la pagina.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (UltraCode).
-# 17/10/2026: nasce con la 1.103.0. Nella 1.104.0 le prove delle righe-elenco senza le voci a zero, delle percentuali, degli anni futuri, delle date con il giorno della settimana, della pulizia all'avvio e dei brani rinominati. Nella 1.105.0 quella dei nomi di tutti gli eventi, con Dove sono. Nella 1.109.0 la riga delle playlist con Ordina e Mescola. Nella 1.110.0 la durata residua in fondo agli eventi. Nella 1.112.0 la riga delle pulizie con le unita' usate da dischi diversi o con un disco che non si riconosceva, e la riga dei dischi riconosciuti a mano e delle lettere rese contese dalla Sentinella. Nella 1.113.0 la prova che ogni evento dei suoni ha il suo nome. Nella 1.113.5 quelle delle statistiche scritte solo se cambiate, al piu' ogni mezz'ora. Nella 1.119.0 quella della riga delle uscite (issue 31). Nella 3.5.0 i nomi degli eventi delle registrazioni.
+# 17/10/2026: nasce con la 1.103.0. Nella 1.104.0 le prove delle righe-elenco senza le voci a zero, delle percentuali, degli anni futuri, delle date con il giorno della settimana, della pulizia all'avvio e dei brani rinominati. Nella 1.105.0 quella dei nomi di tutti gli eventi, con Dove sono. Nella 1.109.0 la riga delle playlist con Ordina e Mescola. Nella 1.110.0 la durata residua in fondo agli eventi. Nella 1.112.0 la riga delle pulizie con le unita' usate da dischi diversi o con un disco che non si riconosceva, e la riga dei dischi riconosciuti a mano e delle lettere rese contese dalla Sentinella. Nella 1.113.0 la prova che ogni evento dei suoni ha il suo nome. Nella 1.113.5 quelle delle statistiche scritte solo se cambiate, al piu' ogni mezz'ora. Nella 1.119.0 quella della riga delle uscite (issue 31). Nella 3.5.0 i nomi degli eventi delle registrazioni. Nella 3.26.9 la riga dei salti allo speaker. Nella 3.26.15 i tasti veri dei marker tolti.
 
 import datetime
 import json
@@ -233,7 +233,8 @@ def test_la_pagina_ha_tutte_le_sezioni_e_i_tag(tmp_path):
     assert "Per ora: ore 10: 100.0%." in testo and "Per giorno della settimana: domenica 100.0%." in testo
     assert "Per fascia: mattina, dalle 6: 100.0%." in testo and "Per mese: novembre 2026, 2 minuti." in testo
     assert not any(r.startswith(("Video:", "MIDI:", "Audio, MP3")) for r in righe)
-    assert "Marker eliminati: 3." in testo and "Prima del punto, con Ctrl e R: 3, in 0 volte." in testo
+    # I tasti veri dei marker, dalla 3.5.0: prima la riga diceva Ctrl e R.
+    assert "Marker eliminati: 3." in testo and "Prima del punto, con Ctrl e T: 3, in 0 volte." in testo
     assert "1. Freccia giù: 1.\n2. X, suona: 1." in testo and "Frecce: 1; freccia giù 1." in testo
     assert "Tasti senza comando: 1; il più frequente: U accentata, 1 volta." in testo
     assert "la più usata: Volume degli effetti, 1 volta" in testo

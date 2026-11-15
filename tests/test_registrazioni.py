@@ -1,6 +1,6 @@
 # MeTeOra, le prove delle registrazioni: libmpv vero su file locali, niente rete.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 10/11/2026: nasce con la 3.5.0, issue 42. Nella 3.13.0 la cartella delle registrazioni; nella 3.13.2 l'attesa al passaggio e le parti non unite. Nella 3.14.0 la voce che apre la cartella. Nella 3.15.0 i bit veri nei file e la voce a due passi.
+# 10/11/2026: nasce con la 3.5.0, issue 42. Nella 3.13.0 la cartella delle registrazioni; nella 3.13.2 l'attesa al passaggio e le parti non unite. Nella 3.14.0 la voce che apre la cartella. Nella 3.15.0 i bit veri nei file e la voce a due passi. Nella 3.26.0 l'attesa che segue la sorgente, i ricollegamenti, i marker, gli avvisi, la chiusura che aspetta, una diretta vera da un server ICY in locale al passo dell'orologio, lo stallo della rete, il crollo a meta' e il recupero all'avvio. Nella 3.26.4 le unioni senza ricodificare lette da mutagen e la giunzione decodificata. Nella 3.26.9 la registrazione di un flusso a pezzi.
 
 import contextlib
 import datetime
@@ -2184,3 +2184,68 @@ def test_le_parti_recuperate_al_singolare(finestra):
     finestra._statistiche.conta("parti_recuperate_all_avvio")
     righe = statistiche.Pagina(finestra._statistiche, "", None, None, {}, {}, {}).le_registrazioni()
     assert "Registrazioni recuperate all'avvio, rimaste a metà da una chiusura improvvisa: 1, con 1 parte." in righe
+
+
+def _server_a_intervalli(dati):
+    """Un server HTTP come quello dei flussi di YouTube, che serve a
+    intervalli di byte e annota l'intestazione Range di ogni richiesta, come
+    quello delle prove del motore."""
+    import http.server
+
+    chiesti = []
+
+    class Gestore(http.server.BaseHTTPRequestHandler):
+        def log_message(self, *_argomenti):
+            pass
+
+        def do_GET(self):
+            intervallo = self.headers.get("Range")
+            chiesti.append(intervallo)
+            inizio, fine = 0, len(dati) - 1
+            if intervallo and intervallo.startswith("bytes="):
+                da, _trattino, a = intervallo[len("bytes="):].partition("-")
+                inizio, fine = int(da or 0), min(int(a), len(dati) - 1) if a else len(dati) - 1
+                self.send_response(206)
+                self.send_header("Content-Range", f"bytes {inizio}-{fine}/{len(dati)}")
+            else:
+                self.send_response(200)
+            self.send_header("Content-Type", "audio/wav")
+            self.send_header("Accept-Ranges", "bytes")
+            self.send_header("Content-Length", str(fine - inizio + 1))
+            self.end_headers()
+            with contextlib.suppress(OSError):
+                self.wfile.write(dati[inizio:fine + 1])
+
+    server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Gestore)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    return server, chiesti
+
+
+def test_la_registrazione_di_un_flusso_a_pezzi_lo_chiede_a_pezzi(tmp_path):
+    """YouTube a una richiesta aperta risponde a circa 26 KB/s: dal 15 novembre
+    2026 il motore chiede i suoi flussi a pezzi, e cosi' la registrazione,
+    che ha una libmpv sua. Con libmpv vero e un server in locale: con il
+    pezzo le richieste sono tutte chiuse, e il file registrato e' intero;
+    senza, come per gli altri siti, la richiesta resta aperta."""
+    sorgente = _seno(tmp_path / "video.wav", 12)
+    with open(sorgente, "rb") as f:
+        dati = f.read()
+    server, chiesti = _server_a_intervalli(dati)
+    try:
+        vero = f"http://127.0.0.1:{server.server_address[1]}/video.wav"
+        for nome, flusso in (("A pezzi", indirizzi.Flusso(vero, pezzo=65536)), ("Intero", indirizzi.Flusso(vero))):
+            chiesti.clear()
+            finita = threading.Event()
+            reg = registrazioni.Registrazione("https://www.youtube.com/watch?v=a_pezzi", nome, flusso, "mp3", 64, 1, 44100,
+                dove=str(tmp_path / "Registrazioni"), al_termine=lambda _r, finita=finita: finita.set())
+            reg.avvia()
+            assert finita.wait(30)
+            assert _durata(reg.percorso)[0] == pytest.approx(12.0, abs=0.15)
+            if flusso.pezzo:
+                # Piu' di un mega in pezzi da 64 KB: almeno sedici richieste, tutte chiuse.
+                assert len(chiesti) >= len(dati) // 65536 and all(r and r.startswith("bytes=") and not r.endswith("-") for r in chiesti), chiesti
+            else:
+                assert any(r is None or r.endswith("-") for r in chiesti), chiesti
+    finally:
+        server.shutdown()
+        server.server_close()

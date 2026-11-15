@@ -1,6 +1,6 @@
 # MeTeOra, le prove del lettore lontano: uno speaker Cast al posto della scheda audio.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/11/2026: nasce con lontano.py, nella 1.117.0. Nella 3.11.1 la radio allo speaker dal ripetitore. Nella 3.11.6 i fotogrammi interi allo speaker. Nella 3.12.0 le TV convertite.
+# 03/11/2026: nasce con lontano.py, nella 1.117.0. Nella 3.11.1 la radio allo speaker dal ripetitore. Nella 3.11.6 i fotogrammi interi allo speaker. Nella 3.12.0 le TV convertite. Nella 3.26.9 la fila dei comandi, i salti uniti dal punto chiesto, il timeout che non perde lo speaker, i rinvii, la pausa in fila e la chiusura, con un apparecchio finto che suona in tempo reale.
 
 """Le prove di lontano.py, con un apparecchio, un server e una sorgente del
 WAV in RAM finti: niente rete e niente libmpv. Gli stati dell'apparecchio si mandano

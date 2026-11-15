@@ -1,6 +1,6 @@
 # MeTeOra, le prove della trasmissione agli apparecchi Cast: formati, ricerca, connessione e server.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 22/10/2026: nasce con trasmissione.py, tappa 15 b del piano. Nella 1.117.0 il brano in pausa, l'indirizzo negli stati e il muto.
+# 22/10/2026: nasce con trasmissione.py, tappa 15 b del piano. Nella 1.117.0 il brano in pausa, l'indirizzo negli stati e il muto. Nella 3.26.9 senza_risposta.
 
 """Le prove di trasmissione, senza apparecchi e senza rete.
 
