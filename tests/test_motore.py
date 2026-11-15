@@ -1672,6 +1672,103 @@ def test_i_sottotitoli_dei_video_con_lo_speaker(crea, avvisi, tmp_path):
     m.usa_il_lontano(None)
 
 
+# Un WebVTT che scorre come quelli automatici di YouTube, con il cue di 10
+# millesimi fra due sottotitoli e una pausa.
+WEBVTT_CHE_SCORRE = ("WEBVTT\n\n00:00:01.000 --> 00:00:02.990\n \nPrima riga\n\n00:00:02.990 --> 00:00:03.000\nPrima riga\n \n\n"
+    "00:00:03.000 --> 00:00:05.000\nPrima riga\nSeconda riga\n\n00:00:08.000 --> 00:00:09.000\nDopo la pausa\n")
+
+
+def test_i_sottotitoli_dei_siti_con_lo_speaker(crea, avvisi, monkeypatch):
+    # Gabriele, 15 novembre 2026: con lo speaker i sottotitoli di un video di
+    # YouTube si scaricano una volta e si seguono come il karaoke, senza il
+    # lettore ombra, che riscaricava tutto l'audio.
+    import indirizzi
+
+    scaricati = []
+
+    def scarica(traccia, intestazioni=(), attesa=None):
+        scaricati.append((traccia.lingua, tuple(intestazioni)))
+        if traccia.lingua == "de":
+            raise OSError("HTTP Error 403")
+        return WEBVTT_CHE_SCORRE if traccia.lingua == "it" else "WEBVTT\n\n00:00:00.500 --> 00:00:09.000\nEnglish line\n"
+
+    monkeypatch.setattr(indirizzi, "scarica_i_sottotitoli", scarica)
+    pagina = "https://www.youtube.com/watch?v=prova"
+    tracce = [indirizzi.Sottotitoli("https://a/it.vtt", "it", "Italian (Original)", True), indirizzi.Sottotitoli("https://a/de.vtt", "de", "Deutsch"),
+        indirizzi.Sottotitoli("https://a/en.vtt", "en", "English")]
+    indirizzi._tieni(pagina, False, indirizzi.Flusso("https://a/audio.webm", ["User-Agent: di prova"], sottotitoli=tracce))
+    detti = []
+    m = crea(ai_sottotitoli=detti.append, al_caricamento=avvisi("al_caricamento"))
+    lontano = _LontanoFinto()
+    lontano.posizione = 0.0
+    m.usa_il_lontano(lontano)
+    m.suona(pagina)
+    assert _aspetta(lambda: (m.tracce() or {}).get("sub"))
+    # Una traccia che non si scarica resta fuori; le altre hanno la lingua e il titolo.
+    assert m.tracce()["sub"] == [
+        {"id": 1, "type": "sub", "title": "automatici", "lang": "it", "selected": False, "external": True, "image": False, "codec": "webvtt"},
+        {"id": 2, "type": "sub", "title": "English", "lang": "en", "selected": False, "external": True, "image": False, "codec": "webvtt"}]
+    # Ognuna si scarica una volta, con le intestazioni del flusso; l'ombra non nasce.
+    assert scaricati == [("it", ("User-Agent: di prova",)), ("de", ("User-Agent: di prova",)), ("en", ("User-Agent: di prova",))] and m._ombra is None
+    assert _aspetta(lambda: "al_caricamento" in avvisi.nomi())
+    # Non scelta tace; scelta, dice il blocco in corso e poi quelli che
+    # cominciano, senza il cue di 10 millesimi.
+    lontano.posizione = 1.5
+    time.sleep(0.3)
+    assert detti == [] and m.resto_del_sottotitolo() is None
+    m.scegli_traccia("sid", "1")
+    assert _aspetta(lambda: detti == ["Prima riga"]) and m.resto_del_sottotitolo() == pytest.approx(1.49)
+    lontano.posizione = 3.2
+    assert _aspetta(lambda: detti == ["Prima riga", "Prima riga\nSeconda riga"])
+    # Fra due sottotitoli non c'e' niente da dire.
+    lontano.posizione = 6.0
+    time.sleep(0.3)
+    assert len(detti) == 2 and m.resto_del_sottotitolo() is None
+    # L'altra traccia dice subito il suo blocco in corso, e la prima tace.
+    m.scegli_traccia("sid", "2")
+    assert _aspetta(lambda: detti[-1] == "English line") and [t["selected"] for t in m.tracce()["sub"]] == [False, True]
+    # Spenti tacciono; il karaoke non c'e', ne' la sua vista.
+    m.scegli_traccia("sid", "no")
+    lontano.posizione = 8.5
+    time.sleep(0.3)
+    assert len(detti) == 3 and m.blocchi_del_karaoke() is None
+    # Lo stop ferma il filo.
+    m.stop()
+    assert m.tracce() is None and m._sottotitoli_lontani is None
+    m.usa_il_lontano(None)
+
+
+def test_i_sottotitoli_dei_siti_sul_pc_hanno_titolo_e_lingua(avvisi, tmp_path):
+    # Gabriele, 15 novembre 2026: con sub-files libmpv chiamava la traccia
+    # con la coda del suo indirizzo firmato, e D la leggeva tutta; sub-add le
+    # da' il titolo e la lingua, nell'ordine dato, senza sceglierle. I
+    # sottotitoli sono file sul disco, che sub-add apre come gli indirizzi.
+    import indirizzi
+
+    brano = _silenzio(tmp_path / "audio.wav", 6)
+    (tmp_path / "it.vtt").write_text("WEBVTT\n\n00:00:00.500 --> 00:00:04.000\nCiao a tutti\n", encoding="utf-8")
+    (tmp_path / "de.vtt").write_text("WEBVTT\n\n00:00:00.500 --> 00:00:04.000\nHallo\n", encoding="utf-8")
+    pagina = "https://www.youtube.com/watch?v=prova"
+    tracce = [indirizzi.Sottotitoli(str(tmp_path / "it.vtt"), "it", "Italian (Original)", True), indirizzi.Sottotitoli(str(tmp_path / "de.vtt"), "de", "Deutsch")]
+    indirizzi._tieni(pagina, False, indirizzi.Flusso(brano, sottotitoli=tracce))
+    detti, caricati = [], []
+    m = Motore(ao="null", ai_sottotitoli=detti.append, al_caricamento=lambda: caricati.append(True))
+    try:
+        m.suona(pagina)
+        # L'avviso arriva dopo la prima traccia, e di nuovo dopo l'ultima.
+        assert _aspetta(lambda: len((m.tracce() or {"sub": []})["sub"]) == 2 and len(caricati) == 2, 10)
+        sub = m.tracce()["sub"]
+        assert [(t.get("title"), t.get("lang"), t.get("selected"), t.get("codec")) for t in sub] == [("automatici", "it", False, "webvtt"), ("Deutsch", "de", False, "webvtt")]
+        m.scegli_traccia("sid", str(sub[0]["id"]))
+        assert _aspetta(lambda: detti == ["Ciao a tutti"], 5)
+        # Il brano dopo, un file, non ha le tracce del sito.
+        m.suona(_silenzio(tmp_path / "file.wav", 2))
+        assert _aspetta(lambda: m.tracce() is not None and m._attivo.percorso.endswith("file.wav"), 5)
+        assert _aspetta(lambda: m.tracce()["sub"] == [], 2)
+    finally:
+        m.chiudi()
+
+
 def test_la_sorgente_wav(crea, tmp_path):
     # 2.7.0: il WAV in RAM per gli speaker, al posto del FLAC su disco, con
     # libmpv vero che scrive nella pipe con nome: tre secondi di seno a 16 bit

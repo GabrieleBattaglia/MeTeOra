@@ -85,10 +85,74 @@ def test_il_capitolo_nuovo_si_dice_suonando_ma_non_dopo_un_salto(finestra, monke
 
 def test_i_sottotitoli_di_un_sito():
     info = {"language": "en",
-        "subtitles": {"de": [{"ext": "json3", "url": "https://s/de.json"}, {"ext": "vtt", "url": "https://s/de.vtt"}]},
-        "automatic_captions": {"en": [{"ext": "vtt", "url": "https://a/en.vtt"}], "fr": [{"ext": "vtt", "url": "https://a/fr.vtt"}],
-            "it": [{"ext": "vtt", "url": "https://a/it.vtt"}]}}
+        "subtitles": {"de": [{"ext": "json3", "url": "https://s/de.json"}, {"ext": "vtt", "url": "https://s/de.vtt", "name": "Deutsch", "http_headers": {"Referer": "https://s/"}}]},
+        "automatic_captions": {"en-orig": [{"ext": "vtt", "url": "https://a/en.vtt", "name": "English (Original)"}], "en": [{"ext": "vtt", "url": "https://a/en.vtt"}],
+            "fr": [{"ext": "vtt", "url": "https://a/fr.vtt"}], "it": [{"ext": "vtt", "url": "https://a/en.vtt?tlang=it", "name": "Italian"}]}}
     # Prima l'italiano, la lingua di MeTeOra; dei sottotitoli automatici solo
-    # quelli della lingua del video e dell'italiano.
-    assert indirizzi.sottotitoli_dell_info(info) == ["https://a/it.vtt", "https://s/de.vtt", "https://a/en.vtt"]
+    # quelli della lingua del video e dell'italiano, e un indirizzo una volta sola.
+    tracce = indirizzi.sottotitoli_dell_info(info)
+    assert [t.indirizzo for t in tracce] == ["https://a/en.vtt?tlang=it", "https://s/de.vtt", "https://a/en.vtt"]
     assert indirizzi.sottotitoli_dell_info({}) == []
+    # Ognuna con la lingua, il nome e le intestazioni di yt-dlp (Gabriele, 15
+    # novembre 2026): il titolo dice se sono automatici, e tradotti dal sito.
+    italiano, tedesco, inglese = tracce
+    assert (italiano.lingua, italiano.automatici, italiano.tradotti, italiano.titolo) == ("it", True, True, "automatici, tradotti")
+    assert (tedesco.lingua, tedesco.nome, tedesco.automatici, tedesco.titolo, tedesco.intestazioni) == ("de", "Deutsch", False, "Deutsch", ("Referer: https://s/",))
+    assert (inglese.lingua, inglese.nome, inglese.tradotti, inglese.titolo) == ("en", "English (Original)", False, "automatici")
+    assert indirizzi.Sottotitoli("https://s/x.vtt").titolo == "del sito"
+    # Il flusso li porta tutti, come Sottotitoli.
+    flusso = indirizzi.flusso_dell_info({**info, "url": "https://a/audio.webm", "protocol": "https"})
+    assert flusso.sottotitoli == tuple(tracce)
+    # D dice la lingua anche dal codice di due lettere.
+    assert modulo._descrivi_traccia({"lang": "it", "title": "automatici", "codec": "webvtt"}, 0, 2) == "1 di 2, italiano, automatici, webvtt"
+    assert modulo._descrivi_traccia({"lang": "en", "title": "English", "codec": "webvtt"}, 1, 2) == "2 di 2, inglese, English, webvtt"
+
+
+# L'inizio dei sottotitoli automatici veri di un video di Superquark su
+# YouTube, che scorrono, con i cue di 10 millesimi (3.19.1).
+WEBVTT_DI_SUPERQUARK = ("WEBVTT\nKind: captions\nLanguage: it\n\n"
+    "00:00:00.000 --> 00:00:01.790 align:start position:0%\n \nLeen<00:00:00.560><c> per</c><00:00:00.719><c> la</c><00:00:00.840><c> canzone</c>\n\n"
+    "00:00:01.790 --> 00:00:01.800 align:start position:0%\nLeen per la canzone\n \n\n"
+    "00:00:01.800 --> 00:00:04.230 align:start position:0%\nLeen per la canzone\nCaruso<00:00:02.800><c> che</c><00:00:02.919><c> ha</c><00:00:03.120><c> avuto</c>\n\n"
+    "00:00:04.230 --> 00:00:04.240 align:start position:0%\nCaruso che ha avuto\n \n\n"
+    "00:00:04.240 --> 00:00:06.470 align:start position:0%\nCaruso che ha avuto\nsappiamo<00:00:04.600><c> si</c><00:00:04.800><c> è</c><00:00:05.000><c> trovato</c>\n\n")
+
+
+def test_i_sottotitoli_dei_siti_nella_finestra_con_lo_speaker(finestra, monkeypatch, sintesi_finta):
+    # Gabriele, 15 novembre 2026: con lo speaker i sottotitoli di YouTube si
+    # leggono dal loro file. Con i sottotitoli accesi la prima traccia si
+    # sceglie da sola, D la dice con la lingua e il titolo, e le righe che
+    # scorrono si dicono una volta sola, come sul PC.
+    import time
+
+    from test_finestra import _premi
+    from test_karaoke import _SpeakerFinto
+
+    def aspetta(condizione):
+        fine = time.time() + 5
+        while time.time() < fine and not condizione():
+            wx.Yield()
+            time.sleep(0.02)
+        return condizione()
+
+    monkeypatch.setattr(indirizzi, "scarica_i_sottotitoli", lambda _traccia, _intestazioni=(), _attesa=None: WEBVTT_DI_SUPERQUARK)
+    pagina = "https://www.youtube.com/watch?v=yXWQ_voCgwU"
+    indirizzi._tieni(pagina, False, indirizzi.Flusso("https://a/audio.webm", sottotitoli=[indirizzi.Sottotitoli("https://a/it.vtt", "it", "Italian (Original)", True)]))
+    speaker = _SpeakerFinto()
+    finestra.motore.usa_il_lontano(speaker)
+    finestra.impostazioni["sottotitoli"] = True
+    finestra.impostazioni["destinazione"] = "sintesi"
+    try:
+        finestra.motore.suona(pagina)
+        assert aspetta(lambda: [t["selected"] for t in (finestra.motore.tracce() or {}).get("sub", [])] == [True])
+        assert _premi(finestra, "d") == "Sottotitoli letti, traccia 1 di 1, italiano, automatici, webvtt; scelta 2 di 2: spenti, 1 traccia."
+        for posizione in (0.5, 1.2, 2.0, 3.5, 4.5, 5.5):
+            speaker.posizione = posizione
+            time.sleep(0.15)
+            wx.Yield()
+        assert aspetta(lambda: [t for _n, t in sintesi_finta.detti if not t.startswith("Sottotitoli")] == ["Leen per la canzone", "Caruso che ha avuto",
+            "sappiamo si è trovato"])
+        conti = finestra._statistiche.dati["conti"]
+        assert conti["righe_dei_sottotitoli"] == conti["righe_allo_speaker"] == conti["righe_dei_siti_allo_speaker"] == 3
+    finally:
+        finestra.motore.usa_il_lontano(None)

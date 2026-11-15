@@ -347,6 +347,21 @@ def _fra(valore, minimo, massimo):
     return max(minimo, min(massimo, valore))
 
 
+def _senza_ripetizioni(blocchi):
+    """I blocchi dei sottotitoli di un sito seguiti allo speaker senza le
+    ripetizioni che libmpv sul PC non direbbe (Gabriele, 15 novembre 2026):
+    un blocco uguale a quello di prima, attaccato a lui e cominciato meno di
+    RIPETIZIONE_MINIMA secondi dopo, diventa uno con lui, come i cartelli ASS
+    animati della 1.82.0; uno cominciato dopo, come un ritornello, resta."""
+    uniti = []
+    for inizio, fine, testo in blocchi:
+        if uniti and testo == uniti[-1][2] and inizio <= uniti[-1][1] + 0.001 and inizio - uniti[-1][0] < RIPETIZIONE_MINIMA:
+            uniti[-1] = (uniti[-1][0], max(uniti[-1][1], fine), testo)
+        else:
+            uniti.append((inizio, fine, testo))
+    return uniti
+
+
 class _Brano:
     """Dove sta un brano per libmpv: l'indirizzo, le opzioni di loadfile e,
     per i SID, il sottobrano scelto e quanti ce ne sono."""
@@ -415,8 +430,11 @@ class _Lettore:
         self.finito = False
         self.volume_scritto = volume
         self.af_scritto = af
-        # Le liste di un indirizzo in rete scritte nel lettore (3.2.0).
+        # Le liste di un indirizzo in rete scritte nel lettore (3.2.0), e le
+        # tracce dei sottotitoli del sito del brano caricato, che si
+        # aggiungono quando e' aperto (Gabriele, 15 novembre 2026).
         self.liste_scritte = {}
+        self.sottotitoli_del_sito = ()
         # Se il brano caricato e' una diretta, e il titolo in onda che la
         # radio manda nei metadati ICY (3.3.0).
         self.dal_vivo = False
@@ -507,6 +525,7 @@ class _Lettore:
         self.percorso = brano.percorso
         self.karaoke = None
         self.durata_vera = None
+        self.sottotitoli_del_sito = brano.sottotitoli
         self.dal_vivo, self.titolo_in_onda = brano.dal_vivo, None
         self.formato_imposto = brano.opzioni.get("demuxer-lavf-format")
         self.karaoke_in_volo = self.karaoke_da_rifare = False
@@ -542,8 +561,11 @@ class _Lettore:
         """Le intestazioni HTTP e l'audio a parte di un indirizzo in rete
         (3.2.0), o le liste vuote dopo un indirizzo: sono opzioni di tutto il
         lettore, e valgono per il brano dopo. Si scrivono una voce alla volta
-        con change-list append, che non spezza le virgole di un'intestazione."""
-        for nome, voci in (("http-header-fields", brano.intestazioni), ("audio-files", brano.audio), ("sub-files", brano.sottotitoli)):
+        con change-list append, che non spezza le virgole di un'intestazione.
+        I sottotitoli del sito non passano piu' da sub-files, che non da' il
+        titolo: li aggiunge _aggiungi_i_sottotitoli_del_sito (Gabriele, 15
+        novembre 2026)."""
+        for nome, voci in (("http-header-fields", brano.intestazioni), ("audio-files", brano.audio)):
             if not voci and not self.liste_scritte.get(nome):
                 continue
             self.comando("change-list", nome, "clr", "")
@@ -595,11 +617,14 @@ class _Ombra:
     """Il lettore ombra dello speaker Cast (Gabriele, 3.19.0). Con lo speaker
     il video suona solo lassu', e libmpv non legge i suoi sottotitoli: questa
     libmpv muta, sull'uscita nulla e senza immagine, apre lo stesso brano e lo
-    tiene al punto dello speaker, e i suoi sottotitoli, dentro il file,
-    accanto o del sito, arrivano come sul PC. numero e' il brano dello
-    speaker che ha aperto, pronto vale dal FILE_LOADED. al_testo(numero,
-    testo) riceve ogni sottotitolo, al_caricamento() avvisa che le tracce ci
-    sono. Le tracce a immagini non si danno: senza il video non si leggono."""
+    tiene al punto dello speaker, e i suoi sottotitoli, dentro il file o
+    accanto, arrivano come sul PC. Solo per i video sul disco: quelli dei
+    siti li legge dal loro file _sottotitoli_allo_speaker, senza scaricare
+    l'audio una seconda volta (Gabriele, 15 novembre 2026). numero e' il
+    brano dello speaker che ha aperto, pronto vale dal FILE_LOADED.
+    al_testo(numero, testo) riceve ogni sottotitolo, al_caricamento() avvisa
+    che le tracce ci sono. Le tracce a immagini non si danno: senza il video
+    non si leggono."""
 
     def __init__(self, al_testo, al_caricamento):
         self.numero = None
@@ -623,7 +648,10 @@ class _Ombra:
         self._testo = self._inizio = None
         self._nuovo = False
         self._karaoke = karaoke_del_brano
-        for nome, voci in (("http-header-fields", brano.intestazioni), ("audio-files", brano.audio), ("sub-files", brano.sottotitoli)):
+        # I sottotitoli dei siti non passano piu' dall'ombra, che riscaricava
+        # tutto l'audio: li legge dal loro file _sottotitoli_allo_speaker
+        # (Gabriele, 15 novembre 2026).
+        for nome, voci in (("http-header-fields", brano.intestazioni), ("audio-files", brano.audio)):
             self.mpv.command("change-list", nome, "clr", "")
             for voce in voci:
                 self.mpv.command("change-list", nome, "append", voce)
@@ -851,6 +879,10 @@ class Motore:
         # ogni brano nuovo e allo stop e ferma il filo che lo segue.
         self._karaoke_lontano = None
         self._brano_lontano = 0
+        # I sottotitoli del brano di un sito che suona allo speaker, letti dal
+        # loro file (Gabriele, 15 novembre 2026): [(indirizzi.Sottotitoli,
+        # karaoke.Seguito)], una coppia per traccia, o None.
+        self._sottotitoli_lontani = None
         # Il lettore ombra dello speaker, per i sottotitoli dei video (3.19.0):
         # nasce al primo video che suona allo speaker.
         self._ombra = None
@@ -1002,17 +1034,24 @@ class Motore:
     def _segui_il_karaoke_lontano(self, percorso, brano=None, inizio=None):
         """Un brano nuovo allo speaker (3.17.0): il suo testo del karaoke si
         cerca in disparte, come per i lettori, perche' la ricerca puo'
-        aspettare una cartella di rete, e poi un filo lo segue. Un video, o un
-        brano di un sito con i sottotitoli, va invece al lettore ombra, che
-        legge anche il testo del karaoke accanto (3.19.0)."""
+        aspettare una cartella di rete, e poi un filo lo segue. Un video sul
+        disco va invece al lettore ombra, che legge anche il testo del karaoke
+        accanto (3.19.0). Un brano di un sito con i sottotitoli, come un video
+        di YouTube, va a un filo che li scarica una volta e li segue come il
+        karaoke: l'ombra apriva il flusso una terza volta, e ne scaricava
+        tutto l'audio a raffica (Gabriele, 15 novembre 2026)."""
         with self._blocco:
             self._brano_lontano += 1
-            numero, self._karaoke_lontano = self._brano_lontano, None
+            numero, self._karaoke_lontano, self._sottotitoli_lontani = self._brano_lontano, None, None
         if not percorso:
             return
-        if brano is not None and (formati.e_video(percorso) or (formati.e_indirizzo(percorso) and brano.sottotitoli)):
+        if formati.e_indirizzo(percorso):
+            if brano is not None and brano.sottotitoli:
+                threading.Thread(target=self._sottotitoli_allo_speaker, args=(numero, percorso, brano.sottotitoli, brano.intestazioni),
+                    name="MeTeOra, sottotitoli dello speaker", daemon=True).start()
+        elif brano is not None and formati.e_video(percorso):
             threading.Thread(target=self._ombra_allo_speaker, args=(numero, brano, inizio), name="MeTeOra, ombra dello speaker", daemon=True).start()
-        elif not formati.e_indirizzo(percorso):
+        else:
             threading.Thread(target=self._karaoke_allo_speaker, args=(numero, percorso), name="MeTeOra, karaoke dello speaker", daemon=True).start()
 
     def _ombra_allo_speaker(self, numero, brano, inizio):
@@ -1081,14 +1120,14 @@ class Motore:
     def _lascia_il_karaoke_lontano(self):
         with self._blocco:
             self._brano_lontano += 1
-            self._karaoke_lontano = None
+            self._karaoke_lontano = self._sottotitoli_lontani = None
 
     def _karaoke_allo_speaker(self, numero, percorso):
         """Nel suo filo: il testo del karaoke del brano numero diventa la
         traccia dello speaker, e la finestra rilegge le tracce, che la sceglie
         con i sottotitoli accesi; poi, finche' quel brano suona allo speaker,
-        ogni PASSO_DEL_KARAOKE_LONTANO le sue righe vanno ai sottotitoli,
-        dalla posizione che lo speaker dice (Gabriele, 3.17.0)."""
+        le sue righe vanno ai sottotitoli, dalla posizione che lo speaker dice
+        (Gabriele, 3.17.0)."""
         fonte, righe = karaoke.cerca(percorso)
         if fonte is None:
             return
@@ -1099,6 +1138,44 @@ class Motore:
             self._karaoke_lontano = seguito
         if self._al_caricamento is not None:
             self._al_caricamento()
+        self._segui_lo_speaker(numero, percorso, [seguito])
+
+    def _sottotitoli_allo_speaker(self, numero, percorso, sottotitoli, intestazioni=()):
+        """Nel suo filo: le tracce dei sottotitoli del brano numero, di un
+        sito come YouTube, si scaricano una volta, pochi KB l'una, con le
+        intestazioni del sito, e diventano le tracce dello speaker, come la
+        traccia del karaoke; la finestra le rilegge, e con i sottotitoli
+        accesi sceglie la prima. Poi, finche' quel brano suona allo speaker,
+        i blocchi della traccia scelta vanno ai sottotitoli, dalla posizione
+        che lo speaker dice (Gabriele, 15 novembre 2026). Una traccia che non
+        si scarica, o non ha testo, resta fuori; senza tracce il filo finisce."""
+        tracce = []
+        for traccia in sottotitoli:
+            with self._blocco:
+                if self._chiuso or numero != self._brano_lontano or self._lontano is None:
+                    return
+            try:
+                blocchi = _senza_ripetizioni(indirizzi.blocchi_del_webvtt(indirizzi.scarica_i_sottotitoli(traccia, intestazioni)))
+            except Exception:  # noqa: BLE001 - la rete fallisce in molti modi: la traccia resta fuori, il brano suona lo stesso
+                blocchi = []
+            if blocchi:
+                tracce.append((traccia, karaoke.Seguito(traccia, [], pronti=blocchi)))
+        if not tracce:
+            return
+        with self._blocco:
+            if self._chiuso or numero != self._brano_lontano or self._lontano is None:
+                return
+            self._sottotitoli_lontani = tracce
+        if self._al_caricamento is not None:
+            self._al_caricamento()
+        self._segui_lo_speaker(numero, percorso, [seguito for _traccia, seguito in tracce])
+
+    def _segui_lo_speaker(self, numero, percorso, seguiti):
+        """Nel filo di chi segue lo speaker: finche' il brano numero suona
+        allo speaker, ogni PASSO_DEL_KARAOKE_LONTANO i testi dei seguiti,
+        karaoke.Seguito, vanno ai sottotitoli, dalla posizione che lo speaker
+        dice; ne parla solo quello scelto. Per il karaoke (3.17.0) e per i
+        sottotitoli dei siti (Gabriele, 15 novembre 2026)."""
         while True:
             time.sleep(PASSO_DEL_KARAOKE_LONTANO)
             with self._blocco:
@@ -1112,7 +1189,7 @@ class Motore:
             with self._blocco:
                 if numero != self._brano_lontano:
                     return
-                testi = seguito.avanza(posizione)
+                testi = [testo for seguito in seguiti for testo in seguito.avanza(posizione)]
             if self._ai_sottotitoli is not None:
                 for testo in testi:
                     self._ai_sottotitoli(testo)
@@ -1594,9 +1671,11 @@ class Motore:
         """I secondi d'orologio che restano al sottotitolo mostrato adesso dal
         brano in corso, contando la velocita', o None se non si sa: servono
         alla barra braille a blocchi, per dividerli fra i blocchi (1.83.0).
-        Con uno speaker Cast, quelli del blocco del karaoke (3.17.0)."""
+        Con uno speaker Cast, quelli del blocco del karaoke (3.17.0), o della
+        traccia scelta dei sottotitoli del sito (Gabriele, 15 novembre 2026)."""
         with self._blocco:
             lontano, seguito, ombra = self._lontano, self._karaoke_lontano, self._ombra_attiva()
+            seguito = next((s for _traccia, s in self._sottotitoli_lontani or () if s.scelto), seguito)
         if ombra is not None:
             return ombra.resto()
         if lontano is not None:
@@ -1659,8 +1738,33 @@ class Motore:
                     lettore.durata_vera = durata
         if formati.e_video(percorso or ""):
             self._aggiungi_le_passate(lettore, percorso, numero, functools.partial(self._aggiungi_il_karaoke, lettore, percorso, numero, poi))
+        elif formati.e_indirizzo(percorso or ""):
+            # Un indirizzo non ha il karaoke accanto, ma i sottotitoli del sito.
+            self._aggiungi_i_sottotitoli_del_sito(lettore, numero, poi)
         else:
             self._aggiungi_il_karaoke(lettore, percorso, numero, poi)
+
+    def _aggiungi_i_sottotitoli_del_sito(self, lettore, numero, poi=None, posto=0):
+        """Un brano di un sito appena aperto, il caricamento numero del
+        lettore: le sue tracce di sottotitoli, come quelle di YouTube,
+        diventano tracce di libmpv con sub-add, che da' il titolo e la lingua
+        di indirizzi.Sottotitoli, senza sceglierle. Con sub-files (3.8.0)
+        libmpv chiamava ogni traccia con la coda del suo indirizzo firmato,
+        timedtext?v=...&fmt=vtt, e D la leggeva tutta (Gabriele, 15 novembre
+        2026). sub-add scarica la traccia in disparte, e le aggiunte vanno una
+        alla volta, dalla risposta di quella prima: insieme finirebbero in un
+        ordine qualunque, e la prima, nella lingua di MeTeOra, non sarebbe piu'
+        quella che la finestra sceglie. poi(), se c'e', arriva quando la prima
+        e' aggiunta, e di nuovo dopo l'ultima, cosi' chi legge le tracce le
+        trova. Nel filo degli eventi del lettore, fuori dal blocco."""
+        with self._blocco:
+            tracce = lettore.sottotitoli_del_sito if lettore._richieste == numero and not self._chiuso else ()
+            traccia = tracce[posto] if posto < len(tracce) else None
+            if traccia is not None:
+                lettore.comando("sub-add", traccia.indirizzo, "auto", traccia.titolo, traccia.lingua,
+                    risposta=lambda _errore, _esito: self._aggiungi_i_sottotitoli_del_sito(lettore, numero, poi, posto + 1))
+        if poi is not None and (posto == 1 or traccia is None):
+            poi()
 
     def _aggiungi_il_karaoke(self, lettore, percorso, numero, poi=None):
         """Il testo a tempo di un brano appena aperto, se c'e', diventa la
@@ -1812,16 +1916,21 @@ class Motore:
         "audio": [...], "sub": [...]}, ciascuna come la da' track-list di
         mpv (id, selected, title, lang, codec...). None se non c'e' un brano
         aperto. Con uno speaker Cast va solo l'audio: ci sono i sottotitoli
-        del video dal lettore ombra (3.19.0), o il testo del karaoke, se il
-        brano ne ha uno, come una traccia (3.17.0)."""
+        del video dal lettore ombra (3.19.0), quelli del sito letti dal loro
+        file, con id da 1 in su, il titolo e la lingua di
+        indirizzi.Sottotitoli (Gabriele, 15 novembre 2026), o il testo del
+        karaoke, se il brano ne ha uno, come una traccia (3.17.0)."""
         if self._lontano is not None:
             if not self._lontano.percorso:
                 return None
             with self._blocco:
-                seguito, ombra = self._karaoke_lontano, self._ombra_attiva()
+                seguito, ombra, del_sito = self._karaoke_lontano, self._ombra_attiva(), self._sottotitoli_lontani
             if ombra is not None:
                 # I sottotitoli del video, dal lettore ombra (3.19.0).
                 return {"video": False, "audio": [], "sub": ombra.tracce()}
+            if del_sito is not None:
+                return {"video": False, "audio": [], "sub": [{"id": numero, "type": "sub", "title": traccia.titolo, "lang": traccia.lingua or None,
+                    "selected": scelta.scelto, "external": True, "image": False, "codec": "webvtt"} for numero, (traccia, scelta) in enumerate(del_sito, 1)]}
             sub = [] if seguito is None else [{"id": 1, "type": "sub", "title": karaoke.titolo(seguito.fonte), "selected": seguito.scelto, "external": True,
                 "image": False, "codec": "subrip"}]
             return {"video": False, "audio": [], "sub": sub}
@@ -1861,12 +1970,17 @@ class Motore:
     def scegli_traccia(self, tipo, numero):
         """tipo "aid" o "sid": la traccia audio o dei sottotitoli del brano in
         corso, per numero, o "no" per nessuna. Con uno speaker Cast, il testo
-        del karaoke del brano, scelto o no (3.17.0)."""
+        del karaoke del brano, scelto o no (3.17.0), o una delle tracce dei
+        sottotitoli del sito, per il suo id, senza toccare libmpv (Gabriele,
+        15 novembre 2026)."""
         if self._lontano is not None:
             with self._blocco:
                 ombra = self._ombra_attiva()
                 if tipo == "sid" and ombra is not None:
                     ombra.scegli(numero)
+                elif tipo == "sid" and self._sottotitoli_lontani is not None:
+                    for posto, (_traccia, seguito) in enumerate(self._sottotitoli_lontani, 1):
+                        seguito.scegli(str(numero) == str(posto))
                 elif tipo == "sid" and self._karaoke_lontano is not None:
                     self._karaoke_lontano.scegli(str(numero) != "no")
             return

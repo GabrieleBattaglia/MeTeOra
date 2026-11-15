@@ -32,6 +32,8 @@ release e prende il posto della vecchia quando nessuna chiamata e' in corso.
 
 import contextlib
 import hashlib
+import html
+import http.client
 import io
 import json
 import os
@@ -43,6 +45,7 @@ import time
 import urllib.parse
 import urllib.request
 import zipfile
+from typing import NamedTuple
 
 import formati
 import percorsi
@@ -392,6 +395,36 @@ def chiudi():
 # Le risposte.
 
 
+class Sottotitoli(NamedTuple):
+    """Una traccia di sottotitoli di un brano di un sito, in WebVTT (issue 45,
+    3.8.0): l'indirizzo, la lingua senza la regione, come it, il nome che le
+    da' yt-dlp, come Italian (Original), se sono automatici, come quelli di
+    YouTube, e se sono tradotti dal sito, e le intestazioni HTTP che yt-dlp
+    dice di mandare, come righe Nome: valore. Lingua e titolo fanno il nome
+    della traccia: con il solo indirizzo libmpv la chiamava con la coda
+    dell'indirizzo firmato, timedtext?v=...&fmt=vtt, e D la leggeva tutta
+    (Gabriele, 15 novembre 2026)."""
+
+    indirizzo: str
+    lingua: str = ""
+    nome: str = ""
+    automatici: bool = False
+    tradotti: bool = False
+    intestazioni: tuple = ()
+
+    @property
+    def titolo(self):
+        """Il titolo della traccia, da leggere con D accanto alla lingua: per
+        quelli automatici automatici, o automatici e tradotti, perche' yt-dlp
+        li chiama con la sola lingua, in inglese; per gli altri il nome che
+        dice il sito, o del sito se non lo dice."""
+        if self.automatici:
+            # Traduttori: il titolo di una traccia di sottotitoli di un sito fatti dal sito stesso, come quelli di YouTube, e tradotti da lui in un'altra lingua.
+            return _("automatici, tradotti") if self.tradotti else _("automatici")
+        # Traduttori: il titolo di una traccia di sottotitoli di un sito quando il sito non le da' un nome.
+        return self.nome or _("del sito")
+
+
 class Flusso:
     """Che cosa dare a libmpv: l'indirizzo diretto, le intestazioni HTTP come
     righe Nome: valore, gli indirizzi delle tracce audio a parte, e se e' una
@@ -399,7 +432,8 @@ class Flusso:
 
     def __init__(self, indirizzo, intestazioni=(), audio=(), dal_vivo=False, sottotitoli=()):
         self.indirizzo, self.intestazioni, self.audio, self.dal_vivo = indirizzo, tuple(intestazioni), tuple(audio), dal_vivo
-        # Gli indirizzi dei sottotitoli in WebVTT (issue 45, 3.8.0).
+        # Le tracce dei sottotitoli in WebVTT (issue 45, 3.8.0), come
+        # Sottotitoli, con la lingua e il nome (Gabriele, 15 novembre 2026).
         self.sottotitoli = tuple(sottotitoli)
 
     def __repr__(self):
@@ -448,11 +482,14 @@ def flusso_dell_info(info):
 
 
 def sottotitoli_dell_info(info):
-    """Gli indirizzi dei sottotitoli di un brano di un sito, in WebVTT, che
+    """Le tracce dei sottotitoli di un brano di un sito, in WebVTT, che
     libmpv legge (Gabriele, issue 45, 3.8.0): quelli scritti, in tutte le
     lingue, e quelli automatici, come quelli di YouTube, solo nella lingua del
     brano e in quella di MeTeOra, che altrimenti sarebbero cento traduzioni.
-    Prima la lingua di MeTeOra, che libmpv sceglie per prima."""
+    Prima la lingua di MeTeOra, che libmpv sceglie per prima. Ognuna e' un
+    Sottotitoli, con la lingua, il nome e le intestazioni che dice yt-dlp
+    (Gabriele, 15 novembre 2026); una traduzione automatica di YouTube ha
+    tlang nell'indirizzo, la lingua in cui il sito la traduce."""
     import lingua
 
     originale = str(info.get("language") or "").split("-")[0].lower()
@@ -462,10 +499,99 @@ def sottotitoli_dell_info(info):
             base = str(codice).split("-")[0].lower()
             if automatici and base not in (originale, lingua.CODICE):
                 continue
-            indirizzo = next((f.get("url") for f in formati_della_lingua or [] if f.get("ext") == "vtt" and f.get("url")), None)
-            if indirizzo and indirizzo not in (t[1] for t in tracce):
-                tracce.append((base != lingua.CODICE, indirizzo))
-    return [indirizzo for _altra, indirizzo in sorted(tracce, key=lambda t: t[0])][:SOTTOTITOLI_MASSIMI]
+            formato = next((f for f in formati_della_lingua or [] if f.get("ext") == "vtt" and f.get("url")), None)
+            if formato is None or formato["url"] in (t[1].indirizzo for t in tracce):
+                continue
+            intestazioni = tuple(f"{nome}: {valore}" for nome, valore in (formato.get("http_headers") or {}).items())
+            tradotti = automatici and "tlang" in urllib.parse.parse_qs(urllib.parse.urlsplit(formato["url"]).query)
+            tracce.append((base != lingua.CODICE, Sottotitoli(formato["url"], base, str(formato.get("name") or "").strip(), automatici, tradotti, intestazioni)))
+    return [traccia for _altra, traccia in sorted(tracce, key=lambda t: t[0])][:SOTTOTITOLI_MASSIMI]
+
+
+# I sottotitoli dei siti che MeTeOra scarica da se', per lo speaker Cast
+# (Gabriele, 15 novembre 2026): quanto si aspetta il sito, e quanto puo'
+# pesare un file, al piu'. Misure del 15 novembre 2026: il WebVTT dei
+# sottotitoli automatici di un video di YouTube di due minuti e mezzo pesa 17
+# KB e arriva in un decimo di secondo; il suo audio pesa 126 volte tanto.
+ATTESA_DEI_SOTTOTITOLI = 15.0
+PESO_DEI_SOTTOTITOLI = 8 << 20
+# Il WebVTT: la riga dei tempi di un cue, con le ore o senza, e i tag fra
+# minore e maggiore, come <c>, <i> e i tempi delle parole, <00:00:01.560>.
+_TEMPI_DEL_CUE = re.compile(r"\s*((?:\d+:)?\d{1,2}:\d{2}[.,]\d{1,3})\s+-->\s+((?:\d+:)?\d{1,2}:\d{2}[.,]\d{1,3})")
+_TAG_DEL_CUE = re.compile(r"<[^>]*>")
+# I cue piu' corti non sono sottotitoli da leggere: YouTube ne mette uno di 10
+# millesimi a ogni passaggio dei sottotitoli che scorrono, con la sola riga
+# che resta, o vuoto (54 su 109 nel video di Superquark della 3.19.1).
+DURATA_MINIMA_DEL_CUE = 0.05
+
+
+def scarica_i_sottotitoli(traccia, intestazioni=(), attesa=ATTESA_DEI_SOTTOTITOLI):
+    """Il testo del WebVTT di una traccia di Sottotitoli, scaricato una volta,
+    con le intestazioni HTTP che yt-dlp le da' o, se non ne da', con quelle
+    date, come quelle del flusso, che libmpv manda anche per i sottotitoli
+    (Gabriele, 15 novembre 2026). Senza Accept-Encoding: il sito risponde in
+    chiaro. OSError se l'indirizzo non e' http o https, se il sito non
+    risponde o dice di no, o se il file supera PESO_DEI_SOTTOTITOLI. Da
+    chiamare fuori dal filo della finestra."""
+    if urllib.parse.urlsplit(traccia.indirizzo).scheme.lower() not in ("http", "https"):
+        raise OSError(f"i sottotitoli non sono in rete: {traccia.indirizzo}")
+    campi = {"User-Agent": "Mozilla/5.0"}
+    for riga in traccia.intestazioni or intestazioni:
+        nome, _due_punti, valore = str(riga).partition(":")
+        if nome.strip() and nome.strip().lower() != "accept-encoding":
+            campi[nome.strip()] = valore.strip()
+    richiesta = urllib.request.Request(traccia.indirizzo, headers=campi)  # noqa: S310 - http o https, controllato sopra
+    try:
+        with urllib.request.urlopen(richiesta, timeout=attesa) as risposta:  # noqa: S310 - http o https, dato da yt-dlp
+            dati = risposta.read(PESO_DEI_SOTTOTITOLI + 1)
+    except (http.client.HTTPException, ValueError) as e:
+        raise OSError(str(e)) from e
+    if len(dati) > PESO_DEI_SOTTOTITOLI:
+        raise OSError(f"i sottotitoli superano {PESO_DEI_SOTTOTITOLI} byte")
+    return dati.decode("utf-8-sig", "replace")
+
+
+def _secondi_del_cue(tempo):
+    """I secondi di un tempo del WebVTT, come 01:02:03.450 o 02:03.450."""
+    *sopra, secondi = tempo.replace(",", ".").split(":")
+    ore, minuti = ([0] + [int(parte) for parte in sopra])[-2:]
+    return ore * 3600 + minuti * 60 + float(secondi)
+
+
+def blocchi_del_webvtt(testo):
+    """I blocchi di un WebVTT, [(inizio, fine, testo)] in ordine di inizio,
+    con la loro fine vera, come quelli del karaoke: sono i sottotitoli dei
+    siti che MeTeOra legge seguendo la posizione dello speaker Cast (Gabriele,
+    15 novembre 2026). Il testo e' quello che libmpv da' sul PC: senza i tag
+    fra minore e maggiore, compresi i tempi delle parole, e con le entita'
+    come &amp; scritte per esteso; le righe restano, senza quelle vuote, con
+    gli spazi in fila ridotti a uno. Un cue finisce alla prima riga vuota, o
+    alla riga dei tempi di quello dopo; YouTube scrive righe con un solo
+    spazio dentro il cue, che non lo chiudono. I cue senza testo, e quelli
+    piu' corti di DURATA_MINIMA_DEL_CUE, restano fuori."""
+    blocchi = []
+    tempi, righe = None, []
+
+    def chiudi():
+        if tempi is None:
+            return
+        scritte = [" ".join(html.unescape(_TAG_DEL_CUE.sub("", riga)).split()) for riga in righe]
+        scritto = "\n".join(riga for riga in scritte if riga)
+        if scritto and tempi[1] - tempi[0] >= DURATA_MINIMA_DEL_CUE:
+            blocchi.append((tempi[0], tempi[1], scritto))
+
+    for riga in (testo or "").lstrip("\ufeff").splitlines():
+        trovati = _TEMPI_DEL_CUE.match(riga)
+        if trovati:
+            chiudi()
+            tempi, righe = (_secondi_del_cue(trovati.group(1)), _secondi_del_cue(trovati.group(2))), []
+        elif not riga:
+            chiudi()
+            tempi, righe = None, []
+        elif tempi is not None:
+            righe.append(riga)
+    chiudi()
+    return sorted(blocchi, key=lambda blocco: blocco[0])
 
 
 def _titolo(info):

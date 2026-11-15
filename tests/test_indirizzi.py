@@ -357,6 +357,76 @@ def test_il_motore_apre_il_flusso_con_le_sue_liste():
     assert motore._Brano("https://x.it/pagina").indirizzo == "https://x.it/pagina"
 
 
+# L'inizio vero del WebVTT dei sottotitoli automatici di un video di
+# Superquark su YouTube, yXWQ_voCgwU, scaricato il 15 novembre 2026 (parole
+# accorciate): le righe con un solo spazio, i tempi delle parole, i cue di 10
+# millesimi fra quelli che scorrono, anche vuoti.
+WEBVTT_DI_YOUTUBE = ("WEBVTT\nKind: captions\nLanguage: it\n\n"
+    "00:00:00.000 --> 00:00:01.790 align:start position:0%\n \nLeen<00:00:00.560><c> per</c><00:00:00.719><c> la</c><00:00:00.840><c> canzone</c>\n\n"
+    "00:00:01.790 --> 00:00:01.800 align:start position:0%\nLeen per la canzone\n \n\n"
+    "00:00:01.800 --> 00:00:04.230 align:start position:0%\nLeen per la canzone\nCaruso<00:00:02.800><c> che</c><00:00:02.919><c> ha</c><00:00:03.120><c> avuto</c>\n\n"
+    "00:00:04.230 --> 00:00:04.240 align:start position:0%\nCaruso che ha avuto\n \n\n"
+    "00:00:47.750 --> 00:00:47.760 align:start position:0%\n \n \n\n"
+    "00:00:47.760 --> 00:00:50.750 align:start position:0%\n \nfeci<00:00:48.760><c> ma</c><00:00:49.199><c> veramente</c>\n\n")
+
+
+def test_i_blocchi_del_webvtt():
+    # Gabriele, 15 novembre 2026: i sottotitoli dei siti con lo speaker si
+    # leggono dal loro file, con il testo che libmpv da' sul PC.
+    assert indirizzi.blocchi_del_webvtt(WEBVTT_DI_YOUTUBE) == [(0.0, 1.79, "Leen per la canzone"), (1.8, 4.23, "Leen per la canzone\nCaruso che ha avuto"),
+        (47.76, 50.75, "feci ma veramente")]
+    # Le ore, la virgola, il BOM, gli a capo di Windows, STYLE, NOTE e i nomi
+    # dei cue, le voci e le entita'; un cue chiuso dal cue dopo; in ordine.
+    altro = ("\ufeffWEBVTT\r\n\r\nSTYLE\r\n::cue { color: yellow }\r\n\r\nNOTE una nota\r\n\r\n"
+        "uno\r\n01:00:02,500 --> 01:00:04.000 line:90%\r\n<v Anna>Tom &amp; Jerry</v>\r\n&lt;sottovoce&gt;\r\n\r\n"
+        "00:10.000 --> 00:12.000\r\nPrima   riga\r\n00:12.000 --> 00:13.000\r\nSubito dopo\r\n")
+    assert indirizzi.blocchi_del_webvtt(altro) == [(10.0, 12.0, "Prima riga"), (12.0, 13.0, "Subito dopo"), (3602.5, 3604.0, "Tom & Jerry\n<sottovoce>")]
+    assert indirizzi.blocchi_del_webvtt("") == [] and indirizzi.blocchi_del_webvtt(None) == [] and indirizzi.blocchi_del_webvtt("non e' un WebVTT") == []
+
+
+def test_i_sottotitoli_si_scaricano_una_volta_con_le_intestazioni(monkeypatch):
+    # Gabriele, 15 novembre 2026: con le intestazioni della traccia o, se
+    # yt-dlp non ne da', con quelle date, come quelle del flusso; senza
+    # Accept-Encoding, perche' il sito risponda in chiaro.
+    import http.client
+
+    chieste = []
+
+    class Risposta(io.BytesIO):
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_eccezione):
+            self.close()
+
+    def apri(richiesta, timeout=None):
+        chieste.append((richiesta.full_url, dict(richiesta.header_items()), timeout))
+        return Risposta("\ufeffWEBVTT\n\n00:01.000 --> 00:02.000\nCiao\n".encode())
+
+    monkeypatch.setattr(indirizzi.urllib.request, "urlopen", apri)
+    traccia = indirizzi.Sottotitoli("https://www.youtube.com/api/timedtext?v=1&fmt=vtt", "it")
+    testo = indirizzi.scarica_i_sottotitoli(traccia, ("User-Agent: Mozilla/5.0 (di prova)", "Accept-Encoding: gzip", "Accept: */*"))
+    assert testo.startswith("WEBVTT") and indirizzi.blocchi_del_webvtt(testo) == [(1.0, 2.0, "Ciao")]
+    assert chieste == [("https://www.youtube.com/api/timedtext?v=1&fmt=vtt", {"User-agent": "Mozilla/5.0 (di prova)", "Accept": "*/*"}, indirizzi.ATTESA_DEI_SOTTOTITOLI)]
+    indirizzi.scarica_i_sottotitoli(traccia._replace(intestazioni=("Referer: https://s/",)), ("User-Agent: del flusso",))
+    assert chieste[-1][1] == {"User-agent": "Mozilla/5.0", "Referer": "https://s/"}
+    # Un file troppo grande, un indirizzo che non e' in rete o una risposta rotta sono OSError.
+    monkeypatch.setattr(indirizzi, "PESO_DEI_SOTTOTITOLI", 10)
+    with pytest.raises(OSError, match="superano"):
+        indirizzi.scarica_i_sottotitoli(traccia)
+    quante = len(chieste)
+    with pytest.raises(OSError, match="in rete"):
+        indirizzi.scarica_i_sottotitoli(indirizzi.Sottotitoli("file:///C:/segreto.vtt"))
+    assert len(chieste) == quante
+
+    def rotta(_richiesta, timeout=None):
+        raise http.client.IncompleteRead(b"WEB")
+
+    monkeypatch.setattr(indirizzi.urllib.request, "urlopen", rotta)
+    with pytest.raises(OSError):
+        indirizzi.scarica_i_sottotitoli(traccia)
+
+
 # Gli indirizzi nella finestra.
 
 

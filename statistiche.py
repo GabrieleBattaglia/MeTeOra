@@ -1861,6 +1861,8 @@ class Pagina:
             _("Di queste, del karaoke: {n}.").format(n=self.c("righe_del_karaoke")),
             # Il karaoke (3.17.0) e i sottotitoli dei video (3.19.0) con lo speaker Cast.
             _("Di queste, con lo speaker, del karaoke o dei video: {n}.").format(n=self.c("righe_allo_speaker")),
+            # I sottotitoli dei siti con lo speaker, letti dal loro file (Gabriele, 15 novembre 2026).
+            _("Di queste, dei siti con lo speaker, dal file dei sottotitoli: {n}.").format(n=self.c("righe_dei_siti_allo_speaker")),
             # I sottotitoli che scorrono, come quelli automatici di YouTube (3.19.1).
             _("Sottotitoli che scorrono, con la sola riga già detta, non ridetti: {n}.").format(n=self.c("righe_scorrevoli_saltate")),
             _("Passate in anticipo degli impressi: avviate {avviate}, finite {finite}.").format(avviate=self.e("passata_avviata"), finite=self.e("passata_finita")),

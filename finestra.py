@@ -687,6 +687,10 @@ RAPPORTI = (("-1", _("quello del video")), ("16:9", "16:9"), ("4:3", "4:3"), ("2
 LINGUE = {"ita": _("italiano"), "eng": _("inglese"), "fre": _("francese"), "fra": _("francese"), "ger": _("tedesco"), "deu": _("tedesco"), "spa": _("spagnolo"),
     "por": _("portoghese"), "jpn": _("giapponese"), "chi": _("cinese"), "zho": _("cinese"), "rus": _("russo"), "dut": _("olandese"), "nld": _("olandese"),
     "swe": _("svedese"), "pol": _("polacco"), "kor": _("coreano"), "ara": _("arabo"), "und": None}
+# Gli stessi nomi per i codici di due lettere, come quelli delle tracce dei
+# sottotitoli dei siti, it ed en (Gabriele, 15 novembre 2026).
+LINGUE.update({"it": LINGUE["ita"], "en": LINGUE["eng"], "fr": LINGUE["fra"], "de": LINGUE["deu"], "es": LINGUE["spa"], "pt": LINGUE["por"], "ja": LINGUE["jpn"],
+    "zh": LINGUE["zho"], "ru": LINGUE["rus"], "nl": LINGUE["nld"], "sv": LINGUE["swe"], "pl": LINGUE["pol"], "ko": LINGUE["kor"], "ar": LINGUE["ara"]})
 
 
 def _descrivi_traccia(traccia, indice, totale):
@@ -9382,9 +9386,13 @@ class Finestra(wx.Frame):
             self._statistiche.conta("righe_riconosciute")
         elif formati.e_midi(self.motore.in_corso or ""):
             self._statistiche.conta("righe_del_karaoke")
-        # Con lo speaker: il karaoke (3.17.0) e i sottotitoli dei video, dal lettore ombra (3.19.0).
+        # Con lo speaker: il karaoke (3.17.0) e i sottotitoli dei video, dal
+        # lettore ombra (3.19.0); quelli dei siti dal loro file (Gabriele, 15
+        # novembre 2026), che si contano anche a parte.
         if self.motore.lontano is not None:
             self._statistiche.conta("righe_allo_speaker")
+            if formati.e_indirizzo(self.motore.in_corso or ""):
+                self._statistiche.conta("righe_dei_siti_allo_speaker")
         self._ai_testi_letti(testo, self.motore.resto_del_sottotitolo)
         # L'ora e' dei messaggi di MeTeOra, non dei testi da leggere o da
         # cantare (Gabriele, 3.17.2).
