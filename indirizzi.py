@@ -397,10 +397,20 @@ class Flusso:
     righe Nome: valore, gli indirizzi delle tracce audio a parte, e se e' una
     diretta, che non ha durata ne' fine (3.3.0)."""
 
-    def __init__(self, indirizzo, intestazioni=(), audio=(), dal_vivo=False, sottotitoli=()):
+    def __init__(self, indirizzo, intestazioni=(), audio=(), dal_vivo=False, sottotitoli=(), pezzo=None):
         self.indirizzo, self.intestazioni, self.audio, self.dal_vivo = indirizzo, tuple(intestazioni), tuple(audio), dal_vivo
         # Gli indirizzi dei sottotitoli in WebVTT (issue 45, 3.8.0).
         self.sottotitoli = tuple(sottotitoli)
+        # I byte di ogni richiesta HTTP, quando il sito vuole il flusso a
+        # pezzi, o None (Gabriele, 15 novembre 2026: i salti con YouTube erano
+        # diventati lenti). Misurato dall'esploratore del 15 novembre 2026: a
+        # una richiesta aperta, Range: bytes=0-, come la fa libmpv, YouTube da'
+        # circa 26 KB/s, appena il doppio del tempo reale per l'audio di un
+        # video, e ogni salto aspetta; a pezzi da 10 MB da' da 4 a 11 MB/s,
+        # e il primo byte arriva in 30 ms invece di 2,3 s. yt-dlp lo dice
+        # nel formato scelto, http_chunk_size, e il motore lo passa a libmpv
+        # come curl-max-request-size, come lo script ytdl_hook di mpv.
+        self.pezzo = pezzo
 
     def __repr__(self):
         return f"Flusso({self.indirizzo!r})"
@@ -444,7 +454,20 @@ def flusso_dell_info(info):
     intestazioni = formati_scelti[0].get("http_headers") or info.get("http_headers") or {}
     audio = [a for a in (_diretto_del_formato(f) for f in formati_scelti[1:]) if a]
     return Flusso(principale, [f"{nome}: {valore}" for nome, valore in intestazioni.items()], audio, dal_vivo=bool(info.get("is_live")),
-        sottotitoli=sottotitoli_dell_info(info))
+        sottotitoli=sottotitoli_dell_info(info), pezzo=pezzo_dei_formati(formati_scelti))
+
+
+def pezzo_dei_formati(formati_scelti):
+    """I byte di ogni richiesta HTTP per i formati scelti da yt-dlp, dal loro
+    http_chunk_size, o None se nessuno lo dice (15 novembre 2026). Con il
+    video e l'audio a parte vale il piu' piccolo, come nello script ytdl_hook
+    di mpv: l'opzione di libmpv e' una per brano, e vale per tutti e due."""
+    pezzi = []
+    for formato in formati_scelti:
+        pezzo = (formato.get("downloader_options") or {}).get("http_chunk_size")
+        if isinstance(pezzo, (int, float)) and not isinstance(pezzo, bool) and pezzo > 0:
+            pezzi.append(int(pezzo))
+    return min(pezzi) if pezzi else None
 
 
 def sottotitoli_dell_info(info):

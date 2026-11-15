@@ -12,6 +12,7 @@ volume, silenzio per la dissolvenza, dove contano i volumi dei due lettori
 nel tempo. Le dissolvenze durano da 300 a 500 ms.
 """
 
+import contextlib
 import os
 import threading
 import time
@@ -1723,4 +1724,183 @@ def test_la_sorgente_wav(crea, tmp_path):
     assert m.durata_da_convertire(str(tmp_path / "non_ce.wav")) is None
     with pytest.raises(ValueError):
         m.sorgente_wav(str(tmp_path / "non_ce.wav"))
+
+
+# Il ramo velocita (Gabriele, 15 novembre 2026): i salti con YouTube erano
+# diventati lenti.
+
+
+def _server_a_intervalli(dati):
+    """Un server HTTP come quello dei flussi di YouTube, che serve dati a
+    intervalli di byte e annota l'intestazione Range di ogni richiesta."""
+    import http.server
+
+    chiesti = []
+
+    class Gestore(http.server.BaseHTTPRequestHandler):
+        def log_message(self, *_argomenti):
+            pass
+
+        def do_GET(self):
+            intervallo = self.headers.get("Range")
+            chiesti.append(intervallo)
+            inizio, fine = 0, len(dati) - 1
+            if intervallo and intervallo.startswith("bytes="):
+                da, _trattino, a = intervallo[len("bytes="):].partition("-")
+                inizio, fine = int(da or 0), min(int(a), len(dati) - 1) if a else len(dati) - 1
+                self.send_response(206)
+                self.send_header("Content-Range", f"bytes {inizio}-{fine}/{len(dati)}")
+            else:
+                self.send_response(200)
+            self.send_header("Content-Type", "audio/wav")
+            self.send_header("Accept-Ranges", "bytes")
+            self.send_header("Content-Length", str(fine - inizio + 1))
+            self.end_headers()
+            # libmpv chiude la connessione quando ha letto quanto gli serve.
+            with contextlib.suppress(OSError):
+                self.wfile.write(dati[inizio:fine + 1])
+
+    server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Gestore)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    return server, chiesti
+
+
+def _chiudi_il_server(server):
+    server.shutdown()
+    server.server_close()
+
+
+def test_il_flusso_a_pezzi_arriva_a_libmpv_a_pezzi(crea, tmp_path):
+    # YouTube da' circa 26 KB/s a una richiesta aperta, Range: bytes=0-, e da
+    # 4 a 11 MB/s a pezzi da 10 MB (misura dell'esploratore): il pezzo che
+    # yt-dlp dice arriva a libmpv come curl-max-request-size, per i lettori,
+    # per la sonda dello speaker e per il suo convertitore. Qui un server
+    # vero, in locale, con pezzi da 64 KB.
+    import indirizzi
+    import wav_in_ram
+
+    brano = _seno(tmp_path / "brano.wav", 20, frequenza=8000)
+    with open(brano, "rb") as f:
+        dati = f.read()
+    server, chiesti = _server_a_intervalli(dati)
+    try:
+        vero = f"http://127.0.0.1:{server.server_address[1]}/brano.wav"
+        pagina = "https://www.youtube.com/watch?v=a_pezzi"
+        indirizzi._tieni(pagina, False, indirizzi.Flusso(vero, pezzo=65536))
+        assert modulo._Brano(pagina, inizio=3.0).opzioni == {"start": "3.000", "curl-max-request-size": "65536"}
+        m = crea()
+        # La sonda dello speaker.
+        assert m.formato_da_convertire(pagina) == (pytest.approx(20.0, abs=0.1), 48000, 16)
+        assert chiesti and all(r and r.startswith("bytes=") and not r.endswith("-") for r in chiesti), chiesti
+        # Il convertitore dello speaker, fino in fondo.
+        chiesti.clear()
+        sorgente = m.sorgente_wav(pagina)
+        try:
+            richiesta = sorgente.nuova_richiesta()
+            letti = bytearray()
+            while len(letti) < sorgente.dimensione:
+                pezzo = sorgente.leggi(len(letti), 65536, richiesta)
+                assert pezzo
+                letti += pezzo
+            assert max(letti[wav_in_ram.INTESTAZIONE:]) > 0 and not sorgente.guasta
+        finally:
+            sorgente.chiudi()
+        assert len(chiesti) >= len(dati) // 65536 and all(r and not r.endswith("-") for r in chiesti), chiesti
+        # Il lettore del PC.
+        chiesti.clear()
+        m.suona(pagina)
+        assert _aspetta(lambda: m._attivo.pronto and m.posizione is not None)
+        assert chiesti and all(r and not r.endswith("-") for r in chiesti), chiesti
+        m.stop()
+        # Un flusso senza pezzo, come quelli degli altri siti, resta com'era.
+        indirizzi._tieni(pagina, False, indirizzi.Flusso(vero))
+        assert modulo._Brano(pagina).opzioni == {}
+        indirizzi.metti_il_diretto("http://radio.example/flusso", dal_vivo=True)
+        assert modulo._Brano("http://radio.example/flusso").opzioni == {} and modulo._Brano(brano).opzioni == {}
+    finally:
+        _chiudi_il_server(server)
+
+
+def test_la_ripartenza_dopo_la_scadenza_rinnova_il_flusso(crea, tmp_path, monkeypatch):
+    # Un flusso vale venti minuti (indirizzi.FLUSSO_VALIDO): dopo, una
+    # ripartenza del WAV in RAM per un salto lontano apriva la pagina, che
+    # libmpv senza ytdl non apre, e lo speaker restava nel silenzio fino alla
+    # fine (15 novembre 2026). Il convertitore rinnova il flusso da se', con
+    # yt-dlp, senza il video.
+    import indirizzi
+    import wav_in_ram
+
+    monkeypatch.setattr(wav_in_ram, "dimensione_della_finestra", lambda libera=None: 2**20 // 12 * 12)
+    brano = _seno(tmp_path / "lungo.wav", 120, frequenza=8000)
+    with open(brano, "rb") as f:
+        server, _chiesti = _server_a_intervalli(f.read())
+    vero = f"http://127.0.0.1:{server.server_address[1]}/lungo.wav"
+    pagina = "https://www.youtube.com/watch?v=scaduto"
+    rinnovi = []
+
+    def risolvi(indirizzo, video=False):
+        rinnovi.append((indirizzo, video))
+        flusso = indirizzi.Flusso(vero, pezzo=1 << 20)
+        indirizzi._tieni(indirizzo, video, flusso)
+        return indirizzi.Pagina(indirizzo, None, flusso=flusso)
+
+    monkeypatch.setattr(indirizzi, "risolvi", risolvi)
+    m = crea()
+    try:
+        # Senza il flusso, la sonda lo chiede; con il flusso, la sorgente parte senza.
+        sorgente = m.sorgente_wav(pagina)
+        assert rinnovi == [(pagina, False)]
+        try:
+            assert max(sorgente.leggi(wav_in_ram.INTESTAZIONE, 65536, sorgente.nuova_richiesta())) > 0
+            assert rinnovi == [(pagina, False)]
+            # Il flusso scade; il salto lontano lo rinnova, e il brano suona.
+            indirizzi.dimentica(pagina)
+            lontano = wav_in_ram.INTESTAZIONE + 60 * sorgente.al_secondo
+            pezzo = sorgente.leggi(lontano, 65536, sorgente.nuova_richiesta())
+            assert pezzo and max(pezzo) > 0 and not sorgente.guasta and sorgente.ripartenze == 1
+            assert rinnovi == [(pagina, False)] * 2
+        finally:
+            sorgente.chiudi()
+        # Se yt-dlp non trova il flusso, la ripartenza e' un guasto, non silenzio.
+        sorgente = m.sorgente_wav(pagina)
+        try:
+            monkeypatch.setattr(indirizzi, "risolvi", lambda indirizzo, video=False: (_ for _ in ()).throw(indirizzi.ErroreIndirizzo("niente")))
+            indirizzi.dimentica(pagina)
+            assert sorgente.leggi(lontano, 65536, sorgente.nuova_richiesta()) is None and sorgente.guasta
+        finally:
+            sorgente.chiudi()
+    finally:
+        _chiudi_il_server(server)
+
+
+def test_le_ripartenze_del_wav_in_ram_non_lasciano_libmpv_vive(crea, tmp_path, monkeypatch):
+    # Con una conversione veloce, come un file del disco o il flusso a pezzi
+    # di YouTube, il passaggio sostituito lasciava libmpv ferma a scrivere in
+    # una pipe che nessuno leggeva piu', e terminate la aspettava per sempre:
+    # a ogni ripartenza una libmpv e un filo in piu' (misura dell'esploratore
+    # del 15 novembre 2026). Con libmpv vera, dopo otto ripartenze e la
+    # chiusura non resta niente.
+    import wav_in_ram
+
+    def vivi(nome):
+        return sum(1 for f in threading.enumerate() if f.name.startswith(nome))
+
+    monkeypatch.setattr(wav_in_ram, "dimensione_della_finestra", lambda libera=None: 2**20 // 12 * 12)
+    brano = _seno(tmp_path / "lungo.wav", 120, frequenza=8000)
+    m = crea()
+    libmpv = vivi("MPVEventHandlerThread")
+    sorgente = m.sorgente_wav(brano)
+    try:
+        for secondi in (30, 60, 90, 15, 105, 45, 75, 5):
+            pezzo = sorgente.leggi(wav_in_ram.INTESTAZIONE + secondi * sorgente.al_secondo, 4096, sorgente.nuova_richiesta())
+            assert pezzo and max(pezzo) > 0
+            # Il convertitore riempie la finestra, e resta fermo a scrivere;
+            # quello di prima si chiude in disparte, e con lui al piu' uno
+            # ancora piu' vecchio, su una macchina carica.
+            time.sleep(0.2)
+            assert vivi("MPVEventHandlerThread") <= libmpv + 3
+        assert sorgente.ripartenze == 8 and not sorgente.guasta
+    finally:
+        sorgente.chiudi()
+    assert _aspetta(lambda: not vivi("MeTeOra, fine del WAV in RAM") and not vivi("MeTeOra, WAV in RAM") and vivi("MPVEventHandlerThread") == libmpv, 20)
 

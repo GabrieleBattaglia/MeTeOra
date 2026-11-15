@@ -131,6 +131,23 @@ def test_il_flusso_e_la_scheda_di_un_brano():
     assert indirizzi._pagina(YOUTUBE, {**INFO_YOUTUBE, "fulltitle": "altro"}).titolo == "Me at the zoo"
 
 
+def test_il_pezzo_delle_richieste_dei_formati():
+    # 15 novembre 2026: yt-dlp dice in http_chunk_size a che pezzi chiedere
+    # il flusso di YouTube, che a una richiesta aperta risponde a 26 KB/s; il
+    # motore lo passa a libmpv come curl-max-request-size.
+    a_pezzi = {**INFO_YOUTUBE, "downloader_options": {"http_chunk_size": 10485760}}
+    assert indirizzi.flusso_dell_info(a_pezzi).pezzo == 10485760
+    assert indirizzi.flusso_dell_info(INFO_YOUTUBE).pezzo is None and indirizzi.flusso_dell_info(MIXCLOUD).pezzo is None
+    # Con il video e l'audio a parte vale il piu' piccolo, come nello script ytdl_hook di mpv.
+    video = {**VIDEO, "requested_formats": [{**VIDEO["requested_formats"][0], "downloader_options": {"http_chunk_size": 10485760}},
+        {**VIDEO["requested_formats"][1], "downloader_options": {"http_chunk_size": 5242880}}]}
+    assert indirizzi.flusso_dell_info(video).pezzo == 5242880
+    assert indirizzi.pezzo_dei_formati([{"downloader_options": {"http_chunk_size": True}}, {"downloader_options": None}, {}, {"downloader_options": {"http_chunk_size": -1}}]) is None
+    # Gli indirizzi diretti e le radio non ne hanno.
+    indirizzi.metti_il_diretto("http://radio.example/flusso", dal_vivo=True)
+    assert indirizzi.pronto("https://archive.org/download/x/a.mp3").pezzo is None and indirizzi.pronto("http://radio.example/flusso").pezzo is None
+
+
 def test_esplora_una_playlist_e_risolve_le_sue_voci(monkeypatch):
     chiamate = []
     _risposte(monkeypatch, {ALBUM: INFO_ALBUM, "https://blazo.bandcamp.com/track/intro": INFO_INTRO}, chiamate)

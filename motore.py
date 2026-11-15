@@ -320,6 +320,12 @@ _OPZIONI_DEL_FLUSSO = {"demuxer-lavf-format": "wav", "demuxer-lavf-probe-info": 
     "cache": "no", "demuxer-readahead-secs": "1"}
 # La durata di un MIDI di cui la mappa dei tempi non si legge.
 DURATA_DI_RISERVA_DEL_MIDI = 180.0
+# L'opzione di loadfile che fa chiedere a libmpv il flusso di un sito a pezzi
+# di tanti byte, quando yt-dlp lo vuole, come YouTube (Gabriele, 15 novembre
+# 2026: vedi indirizzi.Flusso.pezzo). La libmpv di MeTeOra scarica con curl:
+# l'opzione di FFmpeg, stream-lavf-o request_size, qui non cambia niente
+# (misura dell'esploratore del 15 novembre 2026).
+OPZIONE_DEL_PEZZO = "curl-max-request-size"
 
 
 def _indirizzo_nel_lettore(lettore, brano):
@@ -334,6 +340,27 @@ def _indirizzo_nel_lettore(lettore, brano):
     if brano.indirizzo.startswith(f"{diretta.SCHEMA}://"):
         return diretta.indirizzo_vero(brano.indirizzo)
     return brano.indirizzo
+
+
+# Un rinnovo alla volta: due ripartenze ravvicinate dello stesso WAV in RAM
+# non chiamano yt-dlp due volte.
+_rinnovo_dei_flussi = threading.Lock()
+
+
+def _flusso_per_il_convertitore(percorso):
+    """Per il convertitore dello speaker, nel suo filo, che non e' quello
+    della finestra (Gabriele, 15 novembre 2026): il flusso di un indirizzo di
+    un sito, rinnovato con yt-dlp se quello tenuto e' scaduto. Un flusso vale
+    indirizzi.FLUSSO_VALIDO, venti minuti; una ripartenza del WAV in RAM dopo,
+    per un salto fuori dalla finestra di RAM, apriva la pagina, che libmpv con
+    ytdl spento non apre, e lo speaker restava nel silenzio fino alla fine del
+    brano. Radio e file sono sempre pronti. Solleva ErroreIndirizzo se yt-dlp
+    non trova il flusso."""
+    if not formati.e_indirizzo(percorso):
+        return
+    with _rinnovo_dei_flussi:
+        if indirizzi.pronto(percorso) is None:
+            indirizzi.risolvi(percorso, video=False)
 
 
 def _testo(valore):
@@ -374,6 +401,12 @@ class _Brano:
                     self.indirizzo = diretta.indirizzo_per_mpv(self.indirizzo)
                 # I sottotitoli del sito, come quelli di YouTube (3.8.0).
                 self.sottotitoli = getattr(flusso, "sottotitoli", ())
+                # Il flusso a pezzi, come lo vuole YouTube (15 novembre 2026):
+                # le opzioni del brano arrivano ai lettori, all'ombra e al
+                # convertitore dello speaker. Radio e file non ce l'hanno.
+                pezzo = getattr(flusso, "pezzo", None)
+                if pezzo:
+                    self.opzioni[OPZIONE_DEL_PEZZO] = str(int(pezzo))
         elif self.sottobrano is not None:
             self.sottobrani = max(1, sottobrani.info(percorso)["sottobrani"])
             secondi = durata_del_sottobrano(percorso, self.sottobrano)
@@ -1153,18 +1186,24 @@ class Motore:
         a 24 bit lo speaker li suona gracchianti (prova di Gabriele su
         GabryBar del 5 novembre 2026, prototipi/prova_formati_wav.py); la
         durata dei Musepack e dei DSF da mutagen. La durata e' None se non si
-        sa."""
+        sa. Un indirizzo di un sito si apre con le opzioni del brano, come il
+        flusso a pezzi di YouTube, e con il flusso rinnovato se e' scaduto (15
+        novembre 2026): la sonda apriva YouTube a richiesta aperta, e
+        aspettava da 0,6 a 1,2 secondi invece di 0,1."""
         risolto = sottobrano_risolto(percorso, sottobrano)
         if risolto is not None:
             return max(1.0, durata_del_sottobrano(percorso, risolto)), wav_in_ram.FREQUENZA, 16
         if self._banco_midi and formati.e_midi(percorso):
             return (midi.durata(percorso) or DURATA_DI_RISERVA_DEL_MIDI) + midi.CODA, wav_in_ram.FREQUENZA, 16
+        _flusso_per_il_convertitore(percorso)
+        brano = _Brano(percorso)
         lettore = mpv.MPV(**{**OPZIONI_DI_BASE, "ao": "null", "pause": True})
         try:
             pronto = threading.Event()
             lettore.register_event_callback(lambda evento: pronto.set() if evento.event_id.value in (
                 mpv.MpvEventID.FILE_LOADED, mpv.MpvEventID.END_FILE) else None)
-            lettore.command("loadfile", _indirizzo_nel_lettore(lettore, _Brano(percorso)))
+            opzioni = ",".join(f"{chiave}={valore}" for chiave, valore in brano.opzioni.items())
+            lettore.command("loadfile", _indirizzo_nel_lettore(lettore, brano), "replace", "-1", opzioni)
             pronto.wait(ATTESA_DELLA_DURATA)
             durata = float(lettore.duration) if lettore.duration else None
             parametri = None
@@ -1192,7 +1231,10 @@ class Motore:
         Senza filtri: con lo speaker equalizzatore, velocita' e tono non
         valgono. Non blocca: alla_fine() arriva dal filo di libmpv quando ha
         finito, anche per un errore. Torna il lettore, che si ferma con
-        terminate() (2.7.0)."""
+        terminate() (2.7.0). Un indirizzo di un sito il cui flusso e' scaduto
+        si rinnova prima con yt-dlp, qui, nel filo del convertitore (15
+        novembre 2026): ErroreIndirizzo se yt-dlp non lo trova."""
+        _flusso_per_il_convertitore(percorso)
         brano = _Brano(percorso, sottobrano, inizio or None, self._banco_midi)
         banco = self._banco_midi
 
