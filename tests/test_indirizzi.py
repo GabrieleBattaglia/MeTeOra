@@ -374,6 +374,180 @@ def test_il_motore_apre_il_flusso_con_le_sue_liste():
     assert motore._Brano("https://x.it/pagina").indirizzo == "https://x.it/pagina"
 
 
+# L'inizio vero del WebVTT dei sottotitoli automatici di un video di
+# Superquark su YouTube, yXWQ_voCgwU, scaricato il 15 novembre 2026 (parole
+# accorciate): le righe con un solo spazio, i tempi delle parole, i cue di 10
+# millesimi fra quelli che scorrono, anche vuoti.
+WEBVTT_DI_YOUTUBE = ("WEBVTT\nKind: captions\nLanguage: it\n\n"
+    "00:00:00.000 --> 00:00:01.790 align:start position:0%\n \nLeen<00:00:00.560><c> per</c><00:00:00.719><c> la</c><00:00:00.840><c> canzone</c>\n\n"
+    "00:00:01.790 --> 00:00:01.800 align:start position:0%\nLeen per la canzone\n \n\n"
+    "00:00:01.800 --> 00:00:04.230 align:start position:0%\nLeen per la canzone\nCaruso<00:00:02.800><c> che</c><00:00:02.919><c> ha</c><00:00:03.120><c> avuto</c>\n\n"
+    "00:00:04.230 --> 00:00:04.240 align:start position:0%\nCaruso che ha avuto\n \n\n"
+    "00:00:47.750 --> 00:00:47.760 align:start position:0%\n \n \n\n"
+    "00:00:47.760 --> 00:00:50.750 align:start position:0%\n \nfeci<00:00:48.760><c> ma</c><00:00:49.199><c> veramente</c>\n\n")
+
+
+def test_i_blocchi_del_webvtt():
+    # Gabriele, 15 novembre 2026: i sottotitoli dei siti con lo speaker si
+    # leggono dal loro file, con il testo che libmpv da' sul PC.
+    assert indirizzi.blocchi_del_webvtt(WEBVTT_DI_YOUTUBE) == [(0.0, 1.79, "Leen per la canzone"), (1.8, 4.23, "Leen per la canzone\nCaruso che ha avuto"),
+        (47.76, 50.75, "feci ma veramente")]
+    # Le ore, la virgola, il BOM, gli a capo di Windows, STYLE, NOTE e i nomi
+    # dei cue, le voci e le entita'; un cue chiuso dal cue dopo; in ordine.
+    altro = ("\ufeffWEBVTT\r\n\r\nSTYLE\r\n::cue { color: yellow }\r\n\r\nNOTE una nota\r\n\r\n"
+        "uno\r\n01:00:02,500 --> 01:00:04.000 line:90%\r\n<v Anna>Tom &amp; Jerry</v>\r\n&lt;sottovoce&gt;\r\n\r\n"
+        "00:10.000 --> 00:12.000\r\nPrima   riga\r\n00:12.000 --> 00:13.000\r\nSubito dopo\r\n")
+    assert indirizzi.blocchi_del_webvtt(altro) == [(10.0, 12.0, "Prima riga"), (12.0, 13.0, "Subito dopo"), (3602.5, 3604.0, "Tom & Jerry\n<sottovoce>")]
+    assert indirizzi.blocchi_del_webvtt("") == [] and indirizzi.blocchi_del_webvtt(None) == [] and indirizzi.blocchi_del_webvtt("non e' un WebVTT") == []
+
+
+class _RispostaFinta(io.BytesIO):
+    """La risposta di urlopen, con l'indirizzo vero dopo i rimandi."""
+
+    def __init__(self, dati, indirizzo=""):
+        super().__init__(dati)
+        self._indirizzo = indirizzo
+
+    def geturl(self):
+        return self._indirizzo
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_eccezione):
+        self.close()
+
+
+def test_i_sottotitoli_si_scaricano_una_volta_con_le_intestazioni(monkeypatch):
+    # Gabriele, 15 novembre 2026: con le intestazioni della traccia o, se
+    # yt-dlp non ne da', con quelle date, come quelle del flusso; senza
+    # Accept-Encoding, perche' il sito risponda in chiaro.
+    import http.client
+
+    chieste = []
+
+    def apri(richiesta, timeout=None):
+        chieste.append((richiesta.full_url, dict(richiesta.header_items()), timeout))
+        return _RispostaFinta("\ufeffWEBVTT\n\n00:01.000 --> 00:02.000\nCiao\n".encode(), richiesta.full_url)
+
+    monkeypatch.setattr(indirizzi.urllib.request, "urlopen", apri)
+    traccia = indirizzi.Sottotitoli("https://www.youtube.com/api/timedtext?v=1&fmt=vtt", "it")
+    testo = indirizzi.scarica_i_sottotitoli(traccia, ("User-Agent: Mozilla/5.0 (di prova)", "Accept-Encoding: gzip", "Accept: */*"))
+    assert testo.startswith("WEBVTT") and indirizzi.blocchi_del_webvtt(testo) == [(1.0, 2.0, "Ciao")]
+    assert chieste == [("https://www.youtube.com/api/timedtext?v=1&fmt=vtt", {"User-agent": "Mozilla/5.0 (di prova)", "Accept": "*/*"}, indirizzi.ATTESA_DEI_SOTTOTITOLI)]
+    indirizzi.scarica_i_sottotitoli(traccia._replace(intestazioni=("Referer: https://s/",)), ("User-Agent: del flusso",))
+    assert chieste[-1][1] == {"User-agent": "Mozilla/5.0", "Referer": "https://s/"}
+    # Un file troppo grande, un indirizzo che non e' in rete o una risposta rotta sono OSError.
+    monkeypatch.setattr(indirizzi, "PESO_DEI_SOTTOTITOLI", 10)
+    with pytest.raises(OSError, match="superano"):
+        indirizzi.scarica_i_sottotitoli(traccia)
+    quante = len(chieste)
+    with pytest.raises(OSError, match="in rete"):
+        indirizzi.scarica_i_sottotitoli(indirizzi.Sottotitoli("file:///C:/segreto.vtt"))
+    assert len(chieste) == quante
+
+    def rotta(_richiesta, timeout=None):
+        raise http.client.IncompleteRead(b"WEB")
+
+    monkeypatch.setattr(indirizzi.urllib.request, "urlopen", rotta)
+    with pytest.raises(OSError):
+        indirizzi.scarica_i_sottotitoli(traccia)
+
+
+# Una playlist HLS di sottotitoli fatta come quella dell'esempio pubblico di
+# Apple, img_bipbop_adv_example_fmp4, che yt-dlp da' con il protocollo
+# m3u8_native: pezzi di 6 secondi, ognuno un WebVTT con X-TIMESTAMP-MAP e i
+# tempi di tutta la playlist. Il cue a cavallo di due pezzi e' in tutti e due;
+# l'ultimo pezzo ha un MPEGTS diverso, che libmpv non guarda.
+PLAYLIST_DEI_SOTTOTITOLI = ("#EXTM3U\n#EXT-X-TARGETDURATION:6\n#EXT-X-VERSION:3\n#EXT-X-MEDIA-SEQUENCE:0\n#EXT-X-PLAYLIST-TYPE:VOD\n"
+    "#EXTINF:6.00000,\t\nfileSequence0.webvtt\n#EXTINF:6.00000,\t\n../altri/fileSequence1.webvtt\n#EXTINF:6.00000,\t\nhttps://cdn.example/fileSequence2.webvtt\n"
+    "#EXT-X-ENDLIST\n")
+PEZZI_DELLA_PLAYLIST = {
+    "https://s.example/sub/it/fileSequence0.webvtt": ("\ufeffWEBVTT\nX-TIMESTAMP-MAP=MPEGTS:900000,LOCAL:00:00:00.000\n\n"
+        "1\n00:00:00.008 --> 00:00:00.992\nSubtitles: Bip!\n\n2\n00:00:05.500 --> 00:00:06.500\nA cavallo\n"),
+    "https://s.example/sub/altri/fileSequence1.webvtt": ("WEBVTT\nX-TIMESTAMP-MAP=MPEGTS:900000,LOCAL:00:00:00.000\n\n"
+        "2\n00:00:05.500 --> 00:00:06.500\nA cavallo\n\n3\n00:00:07.000 --> 00:00:07.992\nSubtitles: Bop!"),
+    "https://cdn.example/fileSequence2.webvtt": "WEBVTT\nX-TIMESTAMP-MAP=MPEGTS:1800000,LOCAL:00:00:00.000\n\n00:00:12.000 --> 00:00:12.992\nCol suo MPEGTS\n"}
+
+
+def test_i_sottotitoli_a_pezzi_di_una_playlist_hls(monkeypatch):
+    # Revisione del 15 novembre 2026: alcuni siti, non YouTube, danno i
+    # sottotitoli come una playlist HLS di pezzi WebVTT. Con lo speaker la
+    # traccia spariva: si scaricava la sola playlist, che non ha cue. Ora si
+    # scaricano i pezzi, come fa libmpv sul PC, e un vtt intero, se il sito
+    # lo da', vale prima di quello a pezzi.
+    info = {"subtitles": {"it": [{"ext": "vtt", "protocol": "m3u8_native", "url": "https://s.example/it.m3u8"}],
+        "en": [{"ext": "vtt", "protocol": "m3u8_native", "url": "https://s.example/en.m3u8"}, {"ext": "vtt", "protocol": "https", "url": "https://s.example/en.vtt"}]}}
+    assert [t.indirizzo for t in indirizzi.sottotitoli_dell_info(info)] == ["https://s.example/it.m3u8", "https://s.example/en.vtt"]
+    pagine = {"https://s.example/it.m3u8": (PLAYLIST_DEI_SOTTOTITOLI, "https://s.example/sub/it/prog_index.m3u8"),
+        "https://s.example/manca.m3u8": (PLAYLIST_DEI_SOTTOTITOLI.replace("fileSequence0", "manca"), "https://s.example/sub/it/manca.m3u8"),
+        "https://s.example/locale.m3u8": ("#EXTM3U\n#EXTINF:6,\nfile:///C:/segreto.vtt\n#EXT-X-ENDLIST\n", "https://s.example/locale.m3u8"),
+        "https://s.example/vuota.m3u8": ("#EXTM3U\n#EXT-X-ENDLIST\n", "https://s.example/vuota.m3u8"),
+        **{indirizzo: (testo, indirizzo) for indirizzo, testo in PEZZI_DELLA_PLAYLIST.items()}}
+    chieste = []
+
+    def apri(richiesta, timeout=None):
+        chieste.append((richiesta.full_url, dict(richiesta.header_items())))
+        if richiesta.full_url not in pagine:
+            raise OSError("HTTP Error 404: Not Found")
+        testo, vero = pagine[richiesta.full_url]
+        return _RispostaFinta(testo.encode("utf-8"), vero)
+
+    monkeypatch.setattr(indirizzi.urllib.request, "urlopen", apri)
+    traccia = indirizzi.Sottotitoli("https://s.example/it.m3u8", "it", intestazioni=("Referer: https://s.example/",))
+    testo = indirizzi.scarica_i_sottotitoli(traccia)
+    # I tempi come sono scritti, come in libmpv, che X-TIMESTAMP-MAP non lo
+    # guarda; il cue a cavallo una volta sola, come in libmpv.
+    assert indirizzi.blocchi_del_webvtt(testo) == [(0.008, 0.992, "Subtitles: Bip!"), (5.5, 6.5, "A cavallo"), (7.0, 7.992, "Subtitles: Bop!"),
+        (12.0, 12.992, "Col suo MPEGTS")]
+    # La playlist, poi i pezzi, dall'indirizzo vero della playlist, ognuno
+    # una volta e con le intestazioni della traccia.
+    assert chieste[0][0] == "https://s.example/it.m3u8" and sorted(indirizzo for indirizzo, _campi in chieste[1:]) == sorted(PEZZI_DELLA_PLAYLIST)
+    assert all(campi == {"User-agent": "Mozilla/5.0", "Referer": "https://s.example/"} for _indirizzo, campi in chieste)
+    # Un pezzo che ripete lo stesso file, come con EXT-X-BYTERANGE, si scarica una volta.
+    pagine["https://s.example/byterange.m3u8"] = ("#EXTM3U\n#EXT-X-BYTERANGE:60@0\n#EXTINF:6,\nhttps://cdn.example/fileSequence2.webvtt\n"
+        "#EXT-X-BYTERANGE:40@60\n#EXTINF:6,\nhttps://cdn.example/fileSequence2.webvtt\n#EXT-X-ENDLIST\n", "https://s.example/byterange.m3u8")
+    chieste.clear()
+    assert indirizzi.blocchi_del_webvtt(indirizzi.scarica_i_sottotitoli(traccia._replace(indirizzo="https://s.example/byterange.m3u8"))) == [
+        (12.0, 12.992, "Col suo MPEGTS")]
+    assert [indirizzo for indirizzo, _campi in chieste] == ["https://s.example/byterange.m3u8", "https://cdn.example/fileSequence2.webvtt"]
+    # Il peso vale per tutti i pezzi insieme.
+    peso_vero = indirizzi.PESO_DEI_SOTTOTITOLI
+    monkeypatch.setattr(indirizzi, "PESO_DEI_SOTTOTITOLI", max(len(testo.encode("utf-8")) for testo, _vero in pagine.values()))
+    with pytest.raises(OSError, match="superano"):
+        indirizzi.scarica_i_sottotitoli(traccia)
+    monkeypatch.setattr(indirizzi, "PESO_DEI_SOTTOTITOLI", peso_vero)
+    # Un pezzo che manca, uno che non e' in rete, una playlist senza pezzi o
+    # con troppi: OSError, e la traccia resta fuori.
+    with pytest.raises(OSError, match="404"):
+        indirizzi.scarica_i_sottotitoli(traccia._replace(indirizzo="https://s.example/manca.m3u8"))
+    chieste.clear()
+    with pytest.raises(OSError, match="in rete"):
+        indirizzi.scarica_i_sottotitoli(traccia._replace(indirizzo="https://s.example/locale.m3u8"))
+    assert [indirizzo for indirizzo, _campi in chieste] == ["https://s.example/locale.m3u8"]
+    with pytest.raises(OSError, match="pezzi"):
+        indirizzi.scarica_i_sottotitoli(traccia._replace(indirizzo="https://s.example/vuota.m3u8"))
+    pezzi_veri = indirizzi.PEZZI_MASSIMI_DEI_SOTTOTITOLI
+    monkeypatch.setattr(indirizzi, "PEZZI_MASSIMI_DEI_SOTTOTITOLI", 2)
+    with pytest.raises(OSError, match="pezzi"):
+        indirizzi.scarica_i_sottotitoli(traccia)
+    monkeypatch.setattr(indirizzi, "PEZZI_MASSIMI_DEI_SOTTOTITOLI", pezzi_veri)
+    # Una traccia che non serve piu', perche' il brano e' cambiato, non scarica i pezzi.
+    chieste.clear()
+    with pytest.raises(OSError, match="non servono"):
+        indirizzi.scarica_i_sottotitoli(traccia, serve=lambda: False)
+    assert [indirizzo for indirizzo, _campi in chieste] == ["https://s.example/it.m3u8"]
+
+
+def test_i_capitoli_dei_siti_senza_segnaposto_e_da_due_in_su():
+    # Gabriele, 15 novembre 2026: il titolo che yt-dlp inventa per i capitoli
+    # senza nome non si dice, e un capitolo solo non e' una divisione.
+    capitoli = [{"start_time": 5.0, "title": "<Untitled Chapter 2>"}, {"start_time": 0, "title": "<Untitled Chapter 1>"}, {"start_time": 61.5, "title": " Il resto "}]
+    assert indirizzi.scheda_dell_info({"title": "Corso", "chapters": capitoli})["capitoli"] == [[0.0, ""], [5.0, ""], [61.5, "Il resto"]]
+    assert "capitoli" not in indirizzi.scheda_dell_info({"title": "Corso", "chapters": [{"start_time": 0, "title": "Tutto"}]})
+    assert "capitoli" not in indirizzi.scheda_dell_info({"title": "Corso", "chapters": None})
+
+
 # Gli indirizzi nella finestra.
 
 

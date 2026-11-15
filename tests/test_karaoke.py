@@ -211,6 +211,22 @@ def test_il_seguito_dello_speaker():
     assert s.avanza(7.6) == ["Seconda strofa\nRitornello"]
 
 
+def test_il_seguito_dei_blocchi_pronti():
+    # I sottotitoli dei siti con lo speaker (Gabriele, 15 novembre 2026): i
+    # blocchi gia' fatti, con la loro fine vera, senza l'anticipo del karaoke.
+    s = karaoke.Seguito("sito", [], pronti=[(4.0, 6.0, "Seconda"), (1.0, 2.5, "Prima")])
+    s.scegli(True)
+    assert s.blocchi == [(1.0, 2.5, "Prima"), (4.0, 6.0, "Seconda")]
+    assert s.avanza(0.5) == [] and s.avanza(1.1) == ["Prima"]
+    # Dopo la fine vera non c'e' niente in corso, nemmeno dopo un salto.
+    assert s.resto(2.0) == pytest.approx(0.5) and s.resto(3.0) is None
+    assert s.avanza(3.0) == [] and s.avanza(4.2) == ["Seconda"] and s.avanza(9.0) == []
+    # Il modo e l'anticipo del karaoke non li toccano.
+    s.imposta("strofa", 3.0)
+    assert s.blocchi == [(1.0, 2.5, "Prima"), (4.0, 6.0, "Seconda")]
+    assert s.avanza(1.5) == ["Prima"] and s.resto(1.5) == pytest.approx(1.0)
+
+
 def _sylt(*voci, tipo=1):
     from mutagen.id3 import ID3, SYLT
 

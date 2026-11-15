@@ -516,19 +516,26 @@ class Seguito:
     seguendo la sua posizione: avanza(posizione) da' i testi dei blocchi che
     cominciano, in ordine, anche uno piu' corto di un passo, e dopo un salto
     quello in corso. scelto dice se il testo si legge, come una traccia di
-    sottotitoli scelta: non scelto, avanza segue la posizione in silenzio."""
+    sottotitoli scelta: non scelto, avanza segue la posizione in silenzio.
+    Con pronti i blocchi sono gia' fatti, [(inizio, fine, testo)] con la loro
+    fine vera, come quelli dei sottotitoli dei siti seguiti allo speaker
+    (Gabriele, 15 novembre 2026): valgono come sono, e il modo e l'anticipo,
+    che sono del karaoke, non li toccano. Fra due blocchi staccati non c'e'
+    niente in corso, come sul PC fra due sottotitoli."""
 
-    def __init__(self, fonte, righe, modo="riga", anticipo=0.0):
+    def __init__(self, fonte, righe, modo="riga", anticipo=0.0, pronti=None):
         self.fonte, self.righe = fonte, righe
         self.scelto = False
         self._posizione = None
         self._ultimo = None
+        self._pronti = sorted(pronti, key=lambda blocco: blocco[0]) if pronti is not None else None
         self.imposta(modo, anticipo)
 
     def imposta(self, modo, anticipo):
         """Il modo e l'anticipo, in secondi, come per la traccia. Il blocco
-        in corso non si ridice: il seguente arriva gia' con quelli nuovi."""
-        self._blocchi = blocchi(self.righe, modo, anticipo)
+        in corso non si ridice: il seguente arriva gia' con quelli nuovi. I
+        blocchi pronti restano come sono."""
+        self._blocchi = list(self._pronti) if self._pronti is not None else blocchi(self.righe, modo, anticipo)
         self._inizi = [blocco[0] for blocco in self._blocchi]
         self._ultimo = self._in_corso(self._posizione) if self._posizione is not None else None
 

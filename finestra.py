@@ -413,7 +413,8 @@ TASTI = {
     ("m", CTRL_MAIUSCOLO): "volume_di_prima",
     ("m", ALT): "volume_massimo",
     ("m", CTRL_ALT): "volume_minimo",
-    # La virgola, accanto a M: i capitoli degli audiolibri e dei film (1.93.0).
+    # La virgola, accanto a M: i capitoli degli audiolibri e dei film (1.93.0),
+    # e dei video dei siti, come YouTube, che li dice yt-dlp (3.2.0).
     (",", SOLO): "capitolo",
     (",", CTRL): "capitolo_precedente",
     (",", MAIUSCOLO): "capitolo_successivo",
@@ -509,7 +510,7 @@ TASTI_COMUNI = [
     "E i passi dei salti: Ctrl e Maiuscolo chiedono quello indietro e quello avanti, Ctrl e Maiuscolo insieme li riportano ai predefiniti. W va a un tempo."),
     _("M il volume: Ctrl e Maiuscolo lo abbassano e lo alzano di un passo, Ctrl e Maiuscolo insieme lo riportano a quello di prima del massimo o dello zero, "
     "Alt lo porta al massimo, Ctrl e Alt a zero, che fa da muto. Il punto: il passo del volume."),
-    _("La virgola, i capitoli degli audiolibri e dei film: Ctrl e Maiuscolo il precedente e il successivo, Alt l'ultimo, Ctrl e Alt il primo; "
+    _("La virgola, i capitoli degli audiolibri, dei film e dei video dei siti, come YouTube: Ctrl e Maiuscolo il precedente e il successivo, Alt l'ultimo, Ctrl e Alt il primo; "
     "Ctrl con la virgola, oltre i primi secondi di un capitolo, torna al suo inizio."),
     _("A la velocità, F il tono, di un semitono: Ctrl abbassa, Maiuscolo alza, Ctrl e Maiuscolo insieme tornano al normale, Alt al massimo, Ctrl e Alt al minimo."),
     _("U la banda dell'equalizzatore: Ctrl e Maiuscolo la precedente e la seguente, Alt l'ultima, Ctrl e Alt la prima. "
@@ -687,6 +688,10 @@ RAPPORTI = (("-1", _("quello del video")), ("16:9", "16:9"), ("4:3", "4:3"), ("2
 LINGUE = {"ita": _("italiano"), "eng": _("inglese"), "fre": _("francese"), "fra": _("francese"), "ger": _("tedesco"), "deu": _("tedesco"), "spa": _("spagnolo"),
     "por": _("portoghese"), "jpn": _("giapponese"), "chi": _("cinese"), "zho": _("cinese"), "rus": _("russo"), "dut": _("olandese"), "nld": _("olandese"),
     "swe": _("svedese"), "pol": _("polacco"), "kor": _("coreano"), "ara": _("arabo"), "und": None}
+# Gli stessi nomi per i codici di due lettere, come quelli delle tracce dei
+# sottotitoli dei siti, it ed en (Gabriele, 15 novembre 2026).
+LINGUE.update({"it": LINGUE["ita"], "en": LINGUE["eng"], "fr": LINGUE["fra"], "de": LINGUE["deu"], "es": LINGUE["spa"], "pt": LINGUE["por"], "ja": LINGUE["jpn"],
+    "zh": LINGUE["zho"], "ru": LINGUE["rus"], "nl": LINGUE["nld"], "sv": LINGUE["swe"], "pl": LINGUE["pol"], "ko": LINGUE["kor"], "ar": LINGUE["ara"]})
 
 
 def _descrivi_traccia(traccia, indice, totale):
@@ -2239,11 +2244,15 @@ class Finestra(wx.Frame):
 
     def _suona_il_capitolo(self, dati):
         """X, Invio o il menu su un capitolo della plancia: il file da li'; se
-        suona gia', un salto."""
+        suona gia', un salto, con il suono dei capitoli della virgola: quello
+        del precedente se il capitolo comincia prima del punto in cui si e',
+        anche se e' quello in cui si e', altrimenti quello del successivo
+        (Gabriele, 15 novembre 2026)."""
         frase = f"{frase_del_capitolo(dati['numero'], dati['totale'], dati['titolo'], dati['secondi'])}."
         if self.motore.in_corso and dati["brano"] is self.coda.corrente:
+            indietro = dati["secondi"] < (self.motore.posizione or 0.0)
             self._vai_a(dati["secondi"])
-            self._riscontro("capitolo_successivo", frase)
+            self._riscontro("capitolo_precedente" if indietro else "capitolo_successivo", frase)
             return
         self._suona(dati["playlist"], dati["brano"], inizio=dati["secondi"])
         self.scrivi(f"{frase_del_capitolo(dati['numero'], dati['totale'], dati['titolo'], dati['secondi'], dal=True)}.")
@@ -9382,9 +9391,13 @@ class Finestra(wx.Frame):
             self._statistiche.conta("righe_riconosciute")
         elif formati.e_midi(self.motore.in_corso or ""):
             self._statistiche.conta("righe_del_karaoke")
-        # Con lo speaker: il karaoke (3.17.0) e i sottotitoli dei video, dal lettore ombra (3.19.0).
+        # Con lo speaker: il karaoke (3.17.0) e i sottotitoli dei video, dal
+        # lettore ombra (3.19.0); quelli dei siti dal loro file (Gabriele, 15
+        # novembre 2026), che si contano anche a parte.
         if self.motore.lontano is not None:
             self._statistiche.conta("righe_allo_speaker")
+            if formati.e_indirizzo(self.motore.in_corso or ""):
+                self._statistiche.conta("righe_dei_siti_allo_speaker")
         self._ai_testi_letti(testo, self.motore.resto_del_sottotitolo)
         # L'ora e' dei messaggi di MeTeOra, non dei testi da leggere o da
         # cantare (Gabriele, 3.17.2).

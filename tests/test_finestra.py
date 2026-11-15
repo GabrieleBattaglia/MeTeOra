@@ -7020,6 +7020,52 @@ def test_virgola_e_punto_vanno_ai_capitoli(finestra, monkeypatch, suoni_annotati
     assert salti[-1] == 900.0
 
 
+def test_i_capitoli_dei_video_dei_siti(finestra, monkeypatch, suoni_annotati):
+    # Gabriele, 15 novembre 2026: i capitoli di un video di YouTube, dalla
+    # scheda di yt-dlp nello schedario; quelli senza nome si dicono con il
+    # numero e il tempo, senza il segnaposto di yt-dlp.
+    import indirizzi
+
+    pagina = "https://www.youtube.com/watch?v=prova"
+    finestra.schedario.metti_la_scheda(pagina, indirizzi.scheda_dell_info({"title": "Corso", "duration": 900, "chapters": [
+        {"start_time": 0, "title": "<Untitled Chapter 1>"}, {"start_time": 379.0, "title": "How do we write Code?"}]}))
+    stato = {"posizione": 100.0}
+    salti = []
+    monkeypatch.setattr(type(finestra.motore), "in_corso", property(lambda _self: pagina))
+    monkeypatch.setattr(type(finestra.motore), "posizione", property(lambda _self: stato["posizione"]))
+    monkeypatch.setattr(finestra.motore, "vai_a", lambda secondi: salti.append(secondi) or stato.update(posizione=secondi))
+    assert _premi(finestra, ",") == "Capitolo 1 di 2, 0:00."
+    _tasto(finestra, ",", maiuscolo=True)
+    assert salti == [379.0] and suoni_annotati[-1] == "capitolo_successivo" and _ultima(finestra) == "Capitolo 2 di 2: How do we write Code?, 6:19."
+    _tasto(finestra, ",", ctrl=True, alt=True)
+    assert salti[-1] == 0.0 and suoni_annotati[-1] == "capitolo_precedente" and _ultima(finestra) == "Capitolo 1 di 2, 0:00."
+
+
+def test_x_su_un_capitolo_suona_il_verso_del_salto(finestra, monkeypatch, suoni_annotati):
+    # Gabriele, 15 novembre 2026: X su un capitolo della plancia, con il
+    # brano che suona, fa il suono del capitolo precedente quando torna
+    # indietro, anche all'inizio di quello in cui si e', e quello del
+    # successivo quando va avanti.
+    libro = Brano(r"C:\m\libro.m4b")
+    stato = {"posizione": 700.0}
+    salti = []
+    monkeypatch.setattr(type(finestra.motore), "in_corso", property(lambda _self: libro.percorso))
+    monkeypatch.setattr(type(finestra.motore), "posizione", property(lambda _self: stato["posizione"]))
+    monkeypatch.setattr(finestra, "_vai_a", lambda secondi: salti.append(secondi) or stato.update(posizione=secondi))
+    monkeypatch.setattr(finestra.coda, "corrente", libro)
+
+    def capitolo(numero, secondi):
+        return {"numero": numero, "totale": 3, "titolo": "", "secondi": secondi, "brano": libro, "playlist": None}
+
+    finestra._suona_il_capitolo(capitolo(3, 1200.0))
+    assert salti == [1200.0] and suoni_annotati[-1] == "capitolo_successivo" and _ultima(finestra) == "Capitolo 3 di 3, 20:00."
+    finestra._suona_il_capitolo(capitolo(1, 0.0))
+    assert salti[-1] == 0.0 and suoni_annotati[-1] == "capitolo_precedente"
+    stato["posizione"] = 650.0
+    finestra._suona_il_capitolo(capitolo(2, 600.0))
+    assert salti[-1] == 600.0 and suoni_annotati[-1] == "capitolo_precedente"
+
+
 def test_i_capitoli_nella_plancia(finestra, monkeypatch):
     # 1.93.0: un file con i capitoli nella scheda diventa un ramo; X su un
     # capitolo suona il file da li'.
