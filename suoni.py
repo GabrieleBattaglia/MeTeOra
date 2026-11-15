@@ -83,7 +83,15 @@ EVENTI = {
     "registrazione_in_pausa": "meteora_registrazione_in_pausa",
     "registrazione_ripresa": "meteora_registrazione_ripresa",
     "registrazione_fermata": "meteora_registrazione_fermata",
-    "registrazione_in_ascolto": "meteora_registrazione_in_ascolto",
+    # L'attesa di Alt con R, che dal 15 novembre 2026 si accende e si spegne
+    # (Gabriele): la coppia speculare di una casella della collezione, che
+    # sale e scende; e la chiusura di MeTeOra rimandata finche' le
+    # registrazioni non sono salvate, una spia che si spegne. Sono preset
+    # della collezione non firmati: suonano segnaposto, finche' Gabriele non
+    # li sceglie all'ascolto.
+    "registrazione_in_ascolto": "casella_solo_nuovi_spuntata",
+    "registrazione_attesa_spenta": "casella_solo_nuovi_tolta",
+    "chiusura_in_attesa": "spia_che_si_spegne",
     "registrazione_eliminata": "meteora_registrazione_eliminata",
     "alle_registrazioni": "meteora_alle_registrazioni",
     "cartella_delle_registrazioni": "meteora_cartella_delle_registrazioni",
@@ -303,8 +311,9 @@ EVENTI = {
 # non firma perche' non e' suo, finche' Gabriele non sceglie all'ascolto i
 # suoni nuovi, che entrano nella collezione col prefisso meteora_. Lo sono
 # state le registrazioni nella 3.5.0, fino alla 3.5.2, e la scheda degli
-# effetti e la console letta nella 3.8.0; dalla 3.8.1 e' vuoto.
-SEGNAPOSTO = frozenset()
+# effetti e la console letta nella 3.8.0; dalla 3.8.1 era vuoto. Dal 15
+# novembre 2026 l'attesa che si accende e si spegne e la chiusura rimandata.
+SEGNAPOSTO = frozenset({"registrazione_in_ascolto", "registrazione_attesa_spenta", "chiusura_in_attesa"})
 
 # Gli eventi che le statistiche contano senza un preset della collezione: il
 # loro suono si fa al volo. Piu' e meno del volume dalla 1.116.2; prima

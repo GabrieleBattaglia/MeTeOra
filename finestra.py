@@ -172,6 +172,16 @@ class _Scorrimento(ctypes.Structure):
         ("nPos", ctypes.c_int), ("nTrackPos", ctypes.c_int)]
 
 
+# Il motivo che Windows mostra a chi lo spegne mentre MeTeOra salva le
+# registrazioni, sulla finestra (Gabriele, 15 novembre 2026).
+_blocca_lo_spegnimento = ctypes.WinDLL("user32").ShutdownBlockReasonCreate
+_blocca_lo_spegnimento.argtypes = [wintypes.HWND, wintypes.LPCWSTR]
+_blocca_lo_spegnimento.restype = wintypes.BOOL
+_sblocca_lo_spegnimento = ctypes.WinDLL("user32").ShutdownBlockReasonDestroy
+_sblocca_lo_spegnimento.argtypes = [wintypes.HWND]
+_sblocca_lo_spegnimento.restype = wintypes.BOOL
+
+
 _leggi_lo_scorrimento = ctypes.WinDLL("user32").GetScrollInfo
 _leggi_lo_scorrimento.argtypes = [wintypes.HWND, ctypes.c_int, ctypes.POINTER(_Scorrimento)]
 _leggi_lo_scorrimento.restype = wintypes.BOOL
@@ -316,9 +326,11 @@ TASTI = {
     ("e", CTRL_MAIUSCOLO): "passi_predefiniti",
     # R, le registrazioni delle radio e degli indirizzi in rete (Gabriele,
     # issue 42, 3.5.0): da sola dice com'e', Maiuscolo registra, mette in
-    # pausa e riprende, Ctrl ferma, Ctrl e Maiuscolo porta al ramo, Alt
-    # registra la prossima radio che parte, Ctrl e Alt apre la cartella, Alt
-    # e Maiuscolo elimina la registrazione in corso o l'attesa.
+    # pausa e riprende, Ctrl chiude il file e spegne l'attesa, Ctrl e
+    # Maiuscolo porta al ramo, Alt accende e spegne l'attesa, che registra
+    # tutto cio' che suona in streaming senza i silenzi (15 novembre 2026),
+    # Ctrl e Alt apre la cartella, Alt e Maiuscolo elimina la registrazione
+    # in corso.
     ("r", SOLO): "registrazione",
     ("r", CTRL): "ferma_la_registrazione",
     ("r", MAIUSCOLO): "registra",
@@ -523,8 +535,9 @@ TASTI_COMUNI = [
     _("T mette un marker dove sei, o rinomina quello su cui sei; Ctrl con T toglie quelli prima del punto, Maiuscolo con T li toglie tutti, Ctrl e Maiuscolo con T quelli dopo, "
     "Alt con T dice quanti sono. Y il marker su cui sei o quello prima: Ctrl e Maiuscolo il precedente e il successivo, Alt l'ultimo, Ctrl e Alt il primo. "
     "Maiuscolo con le cifre da 1 a 0 va ai primi dieci marker del brano della plancia."),
-    _("R la registrazione della radio o dell'indirizzo che suona: da sola dice com'è; Ctrl con R la ferma; Maiuscolo con R la comincia, la mette in pausa e la riprende; "
-    "Ctrl e Maiuscolo con R portano alle Registrazioni; Alt con R registra la prossima radio che parte; Ctrl e Alt con R aprono la loro cartella; Alt e Maiuscolo con R eliminano la registrazione in corso o l'attesa."),
+    _("R la registrazione della radio o dell'indirizzo che suona: da sola dice com'è; Ctrl con R la chiude e spegne l'attesa; Maiuscolo con R la comincia, la mette in pausa e la riprende; "
+    "Ctrl e Maiuscolo con R portano alle Registrazioni; Alt con R accende e spegne l'attesa, che registra tutto quello che suona in streaming, senza i silenzi; "
+    "Ctrl e Alt con R aprono la loro cartella; Alt e Maiuscolo con R eliminano la registrazione in corso."),
     _("F4 mette nei Preferiti il brano selezionato. F5 plancia, F6 console, F7 cruscotto, Maiuscolo con F7 le statistiche, F8 porta la selezione e il fuoco della plancia sul brano in riproduzione, Ctrl con F8 la sgancia e Maiuscolo con F8 ce la tiene agganciata, "
     "F9 dice se il ramo col fuoco è aperto, e quante voci ha aperte dentro: Ctrl con F9 lo chiude e Maiuscolo con F9 lo apre con tutto quello che ha dentro, "
     "Ctrl e Maiuscolo con F9 fermano un'apertura, Alt con F9 apre tutta la plancia e Ctrl e Alt con F9 la chiude; mentre si apre puoi navigare; "
@@ -740,7 +753,24 @@ CANALI_DELLE_REGISTRAZIONI = {
 # Traduttori: la frequenza e i canali come li dice la voce Formato e qualità delle registrazioni.
 FREQUENZE_DA_LEGGERE = {0: _("frequenza della sorgente"), 44100: "44.1 kHz", 48000: "48 kHz", 96000: "96 kHz"}
 CANALI_DA_LEGGERE = {"sorgente": _("canali della sorgente"), "mono": _("mono"), "stereo": _("stereo")}
+# L'attesa che segue la sorgente (Gabriele, 15 novembre 2026): cio' che si
+# sente deve restare lo stesso per ATTESA_DELLA_SORGENTE millisecondi prima
+# che la registrazione cominci, vada in pausa, riprenda o passi a un'altra
+# sorgente, contro i cambi rapidi e la dissolvenza, che fa entrare il brano
+# nuovo mentre l'altro sfuma; il margine serve anche a libmpv per dire canali
+# e kbps della sorgente. Una diretta che cade si ricollega dopo tanti secondi,
+# uno per tentativo; una parte che dura PARTE_BUONA secondi rimette i
+# tentativi da capo. L'avviso che si registra arriva ogni
+# AVVISO_DELLE_REGISTRAZIONI secondi, quello dei capitoli di una puntata, che
+# scarica piu' veloce dell'ascolto, al piu' ogni AVVISO_DEI_CAPITOLI; durante
+# una chiusura rimandata la riga del salvataggio si riscrive ogni
+# AGGIORNAMENTO_DELLA_CHIUSURA.
 ATTESA_DELLA_SORGENTE = 2500
+RIPROVE_DELLA_REGISTRAZIONE = (1, 2, 5, 10, 30)
+PARTE_BUONA = 60.0
+AVVISO_DELLE_REGISTRAZIONI = 600.0
+AVVISO_DEI_CAPITOLI = 10.0
+AGGIORNAMENTO_DELLA_CHIUSURA = 10.0
 # La console letta da sola (issue 44, 3.7.0): le scelte, dalla piu' bassa,
 # come le dice la riga della voce.
 LETTURE_DELLA_CONSOLE = {
@@ -1474,10 +1504,26 @@ class Finestra(wx.Frame):
         # L'uscita della musica, con gli effetti a parte (3.11.3).
         self._uscita_della_musica = None
         # Le registrazioni (3.5.0): quella in corso o in pausa, l'attesa di
-        # Alt con R, e se un comando che aspetta libmpv e' in volo.
+        # Alt con R, e se un comando che aspetta libmpv e' in volo. Dal 15
+        # novembre 2026 l'attesa resta accesa finche' non la si spegne, ma
+        # all'avvio e' sempre spenta; poi le registrazioni che si chiudono in
+        # disparte e quelle che si recuperano, la sorgente vista con il suo
+        # momento, quella da non registrare finche' non ne suona un'altra, la
+        # chiusura chiesta durante un comando in volo, il ricollegamento in
+        # attesa, l'ultimo avviso, e la chiusura di MeTeOra rimandata.
         self._registrazione = None
         self._in_ascolto = False
         self._registrazione_occupata = False
+        self._in_chiusura = []
+        self._recuperi_in_corso = 0
+        self._sorgente_vista = None
+        self._da_non_registrare = None
+        self._da_chiudere = None
+        self._riprova = None
+        self._ultimo_avviso = None
+        self._ultimo_avviso_dei_capitoli = 0.0
+        self._chiusura_chiesta = None
+        self._ultima_frase_della_chiusura = 0.0
         self._video = None
         self._video_nel_motore = False
         # Il brano su cui la finestra del video e' stata nascosta a mano, con
@@ -1664,6 +1710,12 @@ class Finestra(wx.Frame):
         self.Bind(wx.EVT_CHAR_HOOK, self._tasto)
         self.Bind(wx.EVT_CLOSE, self._alla_chiusura)
         self.Bind(wx.EVT_ACTIVATE, self._all_attivazione)
+        # Lo spegnimento di Windows arriva all'applicazione: mentre una
+        # registrazione si salva si rifiuta (Gabriele, 15 novembre 2026).
+        applicazione = wx.GetApp()
+        if applicazione is not None:
+            applicazione.Bind(wx.EVT_QUERY_END_SESSION, self._spegnimento_chiesto)
+            applicazione.Bind(wx.EVT_END_SESSION, self._spegnimento)
         # I file aperti da Windows, raccolti per un attimo (1.91.0), e
         # l'ascolto delle altre copie di MeTeOra, che meteora.py collega.
         self._da_aprire = []
@@ -6258,7 +6310,7 @@ class Finestra(wx.Frame):
         self._annuncia(pl, brano, evento)
         if brano.radio:
             self._radio_partita(brano)
-        self._registra_quando_entra(brano)
+        self._segui_la_sorgente()
         if ripresa:
             self._statistiche.conta("ripresi_dal_punto")
             self.scrivi(_("Riprendo da {tempo}, dove l'avevi lasciato: X lo fa ripartire da capo.").format(tempo=tempo(ripresa)))
@@ -6710,6 +6762,7 @@ class Finestra(wx.Frame):
     def _fine_della_lista(self):
         self._aggiorna_etichette()
         self._aggiorna_il_video()
+        self._segui_la_sorgente()
         if self._timer_a_fine_brano:
             self._timer_a_fine_brano = False
             self._riscontro("timer_scaduto", _("Timer scaduto: il brano è finito, e la riproduzione si ferma."))
@@ -6806,7 +6859,7 @@ class Finestra(wx.Frame):
         self.coda.imposta(nuova, brano)
         self._segna_nel_mazzo(nuova, brano, numero)
         self._annuncia(nuova, brano, evento)
-        self._registra_quando_entra(brano)
+        self._segui_la_sorgente()
 
     def _brano_in_errore(self, percorso):
         if self._chiusa:
@@ -6826,6 +6879,7 @@ class Finestra(wx.Frame):
             self._errori_di_fila[id(corrente)] = corrente
         nome = corrente.nome_del_file if corrente is not None and corrente.percorso == percorso else os.path.basename(percorso or "")
         self._riscontro("errore", _("Non riesco a suonare {nome}.").format(nome=nome))
+        self._segui_la_sorgente()
         segno = self._avanzamento_dopo_errore = object()
         self._dopo_il_suono(self._avanza_dopo_l_errore, segno)
 
@@ -6934,6 +6988,7 @@ class Finestra(wx.Frame):
             self.motore.pausa(False, sfumando=True)
             self._riscontro("ripresa", self._frase_della_ripresa())
             self._riprende_il_video()
+            self._segui_la_sorgente()
         elif self.motore.in_corso:
             # Come in Winamp: X su cio' che sta suonando lo fa ripartire da capo;
             # con la dissolvenza accesa, sfumando (Gabriele, 2 ottobre 2026).
@@ -7080,6 +7135,7 @@ class Finestra(wx.Frame):
             self._conta_la_ripartenza()
             self._riscontro("ripresa", self._frase_della_ripresa())
             self._riprende_il_video()
+        self._segui_la_sorgente()
 
     def _conta_la_ripartenza(self):
         """Un brano ricaricato da fermo per un comando (issue 39), che X o C
@@ -7132,6 +7188,7 @@ class Finestra(wx.Frame):
             self.coda.imposta(None, None)
         self._aggiorna_etichette()
         self._aggiorna_il_video()
+        self._segui_la_sorgente()
         return selezione
 
     # Il timer di spegnimento (1.95.0).
@@ -8159,6 +8216,7 @@ class Finestra(wx.Frame):
         self._scatto_delle_statistiche()
         self._guarda_il_capitolo()
         self._guarda_l_indirizzo()
+        self._guarda_le_registrazioni()
         self._annota_il_punto_di_ripresa()
         self._giri_delle_statistiche += 1
         if self._giri_delle_statistiche % GIRI_IN_UN_MINUTO == 1:
@@ -10099,18 +10157,34 @@ class Finestra(wx.Frame):
         brano = self.coda.corrente
         if not self.motore.in_corso or brano is None or brano.percorso != self.motore.in_corso:
             self._riscontro("non_disponibile", _("Non suona niente da registrare: Maiuscolo con R registra la radio o l'indirizzo in rete che suona, "
-                "Alt con R il prossimo che parte."))
+                "Alt con R accende l'attesa, che registra tutto quello che suona."))
             return None
         if not formati.e_indirizzo(brano.percorso):
             self._riscontro("non_disponibile", _("{nome} è un file, già sul disco: si registrano le radio e gli indirizzi in rete.").format(nome=brano.nome_del_file))
             return None
         return brano
 
-    def _avvia_la_registrazione(self, brano):
+    def _sorgente_che_suona(self):
+        """La radio o l'indirizzo in rete che si sente adesso, o None: in
+        pausa, fermo, su un file o a fine lista non passa niente in streaming
+        da registrare (Gabriele, 15 novembre 2026)."""
+        percorso, brano = self.motore.in_corso, self.coda.corrente
+        if not percorso or self.motore.in_pausa or brano is None or brano.percorso != percorso or not formati.e_indirizzo(percorso):
+            return None
+        return brano
+
+    def _avvia_la_registrazione(self, brano, dall_attesa=False):
         """Comincia a registrare la radio o l'indirizzo che suona, con il
-        formato e la qualita' delle impostazioni, adattati alla sorgente."""
+        formato e la qualita' delle impostazioni, adattati alla sorgente. Dal
+        15 novembre 2026 una diretta si riconosce anche dal motore, come una
+        radio Icecast aperta con Ctrl con V; una puntata porta i capitoli
+        della sua scheda, che diventano marker; e la registrazione dice i
+        titoli nuovi e le cadute della rete."""
         flusso = indirizzi.pronto(brano.percorso)
         if flusso is None:
+            if dall_attesa:
+                # L'attesa non riprova ogni secondo: aspetta un'altra sorgente.
+                self._da_non_registrare = brano.percorso
             self._riscontro("errore", _("Il flusso di {nome} non è più pronto: fallo ripartire con X, e registra di nuovo.").format(nome=brano.nome_del_file))
             return
         imp = self.impostazioni
@@ -10119,59 +10193,169 @@ class Finestra(wx.Frame):
             sorgente_kbps = brano.radio["bitrate"]
         kbps, canali, frequenza = registrazioni.parametri(imp["formato_registrazioni"], imp["qualita_registrazioni"], sorgente_kbps, canali, frequenza,
             scelta_canali=imp["canali_registrazioni"], scelta_frequenza=imp["frequenza_registrazioni"])
+        dal_vivo = bool(flusso.dal_vivo) or (self.motore.in_corso == brano.percorso and self.motore.dal_vivo)
+        capitoli = [] if dal_vivo else [tuple(capitolo) for capitolo in (self.schedario.scheda(brano.percorso) or {}).get("capitoli") or []]
         registrazione = registrazioni.Registrazione(brano.percorso, brano.nome_del_file, flusso, imp["formato_registrazioni"], kbps, canali, frequenza,
-            al_termine=lambda r: wx.CallAfter(self._registrazione_finita_da_se, r), dove=self._cartella_delle_registrazioni(), bit=imp["bit_registrazioni"])
+            al_termine=self._fine_da_se_in_disparte, dove=self._cartella_delle_registrazioni(), bit=imp["bit_registrazioni"], dal_vivo=dal_vivo,
+            al_marker=lambda reg, numero, nome, secondi: wx.CallAfter(self._marker_della_registrazione, reg, numero, nome, secondi),
+            alla_caduta=lambda reg, secondi: wx.CallAfter(self._registrazione_caduta, reg, secondi), capitoli=capitoli)
         try:
             registrazione.avvia()
         except OSError as e:
+            if dall_attesa:
+                self._da_non_registrare = brano.percorso
             self._riscontro("errore", _("La registrazione di {nome} non parte: {errore}").format(nome=brano.nome_del_file, errore=e))
             return
-        self._registrazione, self._in_ascolto = registrazione, False
+        self._registrazione, self._da_non_registrare = registrazione, None
+        # Il capitolo da cui parte una puntata non si dice: lo dice l'avvio.
+        registrazione.capitoli_avvisati = registrazione.capitoli_passati() if hasattr(registrazione, "capitoli_passati") else 0
         self._statistiche.conta("registrazioni_avviate")
+        if dall_attesa:
+            self._statistiche.conta("registrazioni_dall_attesa")
+        self._ultimo_avviso = self._orologio_delle_registrazioni()
         self._riscontro("registrazione_avviata", _("Registro {nome}, in {formato}. Ctrl con R la ferma.").format(nome=brano.nome_del_file,
             formato=registrazione.descrizione))
 
-    def _registra_quando_entra(self, brano):
-        """Con l'attesa di Alt con R, la radio o l'indirizzo in rete appena
-        entrato si registra dopo ATTESA_DELLA_SORGENTE, perche' libmpv apra il
-        flusso e ne dica canali e kbps. Vale per i brani suonati e, dalla
-        3.13.2, anche per quello preparato che entra con il passaggio, come il
-        seguente di una playlist di YouTube: prima non si registrava."""
-        if self._in_ascolto and self._registrazione is None and formati.e_indirizzo(brano.percorso):
-            wx.CallLater(ATTESA_DELLA_SORGENTE, self._registra_se_suona, brano)
+    # L'attesa che segue la sorgente (Gabriele, 15 novembre 2026).
 
-    def _registra_se_suona(self, brano):
-        """Con l'attesa di Alt con R: la radio o l'indirizzo partito si
-        registra, se suona ancora e l'attesa c'e' ancora."""
-        if self._chiusa or not self._in_ascolto or self._registrazione is not None:
+    # L'orologio delle registrazioni, che le prove sostituiscono.
+    _orologio_delle_registrazioni = staticmethod(time.monotonic)
+
+    def _segui_la_sorgente(self):
+        """Con l'attesa accesa la registrazione segue cio' che si sente:
+        comincia, va in pausa senza vuoti, riprende nello stesso file o passa
+        a un'altra sorgente quando cio' che si sente e' lo stesso da
+        ATTESA_DELLA_SORGENTE millisecondi, contro i cambi rapidi e la
+        dissolvenza, in cui il brano nuovo entra mentre l'altro sfuma. La
+        chiamano i comandi che cambiano cio' che suona e, come rete di
+        sicurezza, il giro di ogni secondo."""
+        if self._chiusa or self._chiusura_chiesta is not None or not self._in_ascolto:
+            self._sorgente_vista = None
             return
-        if self.coda.corrente is brano and self.motore.in_corso == brano.percorso:
-            self._avvia_la_registrazione(brano)
+        brano = self._sorgente_che_suona()
+        percorso = brano.percorso if brano is not None else None
+        adesso = self._orologio_delle_registrazioni()
+        if self._sorgente_vista is None or self._sorgente_vista[0] != percorso:
+            self._sorgente_vista = (percorso, adesso)
+            if ATTESA_DELLA_SORGENTE > 0:
+                wx.CallLater(ATTESA_DELLA_SORGENTE + 50, self._segui_la_sorgente)
+                return
+        if adesso - self._sorgente_vista[1] < ATTESA_DELLA_SORGENTE / 1000 - 0.05:
+            return
+        self._agisci_sulla_sorgente(brano)
+
+    def _agisci_sulla_sorgente(self, brano):
+        """La sorgente che si sente e' stabile: la registrazione la segue. La
+        stessa sorgente riprende una pausa automatica; il silenzio mette in
+        pausa una diretta, mentre una puntata scarica intera come prima;
+        un'altra sorgente chiude il file di prima, in disparte, e ne comincia
+        uno suo. La pausa a mano vince sempre su quella automatica."""
+        if self._registrazione_occupata:
+            return
+        percorso = brano.percorso if brano is not None else None
+        if percorso != self._da_non_registrare and percorso is not None:
+            self._da_non_registrare = None
+        reg = self._registrazione
+        if reg is not None:
+            if percorso == reg.sorgente:
+                if reg.stato == "in_pausa" and reg.motivo == "sorgente":
+                    self._pausa_automatica(reg, False)
+                return
+            if percorso is None:
+                if reg.dal_vivo and reg.stato == "in_corso":
+                    self._pausa_automatica(reg, True)
+                elif reg.stato == "in_pausa" and reg.motivo == "rete":
+                    # La rete e' caduta e il lettore tace: si aspetta la sorgente.
+                    self._annulla_la_riprova()
+                    reg.metti_il_motivo("sorgente")
+                return
+            self._chiudi_la_registrazione("altra_sorgente")
+        if brano is not None and self._registrazione is None and percorso != self._da_non_registrare:
+            self._avvia_la_registrazione(brano, dall_attesa=True)
+
+    def _pausa_automatica(self, reg, pausa):
+        """La pausa e la ripresa che l'attesa fa da se', in disparte e senza
+        suono; la ripresa riapre il flusso fresco della sorgente."""
+        self._registrazione_occupata = True
+        flusso = None if pausa else indirizzi.pronto(reg.sorgente)
+
+        def lavoro():
+            try:
+                reg.pausa(pausa, motivo="sorgente", flusso=flusso)
+            except OSError as e:
+                return e
+            return None
+
+        registrazioni_in_disparte(lavoro, lambda esito: wx.CallAfter(self._pausa_della_registrazione, reg, pausa, esito, "sorgente"))
+
+    def _suona_la_sorgente(self, reg):
+        brano = self._sorgente_che_suona()
+        return brano is not None and brano.percorso == reg.sorgente
+
+    def _spegni_l_attesa(self):
+        self._in_ascolto, self._sorgente_vista, self._da_non_registrare = False, None, None
+        self._statistiche.conta("attese_spente")
 
     def _frase_della_registrazione(self, registrazione):
-        """Il titolo, i secondi e il peso di una registrazione."""
+        """Il titolo, i secondi e il peso di una registrazione, letti senza il
+        suo lucchetto: un'unione in corso non ferma la finestra."""
         # Traduttori: una registrazione, come Rai Radio 3, 12:34, 11.5 MB.
         return _("{nome}, {durata}, {peso}").format(nome=registrazione.titolo, durata=tempo(registrazione.secondi),
             peso=midi.dimensione_da_leggere(registrazione.byte))
 
+    def _frase_dei_salvataggi(self):
+        """Le registrazioni che si chiudono in disparte, con a che punto e' il
+        loro salvataggio, come Salvo in disparte: Rai Radio 3, 45%; o vuota."""
+        voci = []
+        for reg in self._in_chiusura:
+            avanzamento = getattr(reg, "avanzamento", None)
+            if avanzamento is not None:
+                # Traduttori: una registrazione che si salva, come Rai Radio 3, 45%.
+                voci.append(_("{nome}, {percentuale}%").format(nome=reg.titolo, percentuale=int(avanzamento * 100)))
+            elif reg.stato == "in_corso" and not getattr(reg, "salvataggio_chiesto", False):
+                # Traduttori: una puntata lasciata per un'altra sorgente, che finisce di scaricare.
+                voci.append(_("{nome}, che scarica ancora").format(nome=reg.titolo))
+            else:
+                voci.append(reg.titolo)
+        voci += [_("una registrazione da recuperare")] * self._recuperi_in_corso
+        # Traduttori: le registrazioni che si salvano mentre MeTeOra fa altro, come Salvo in disparte: Rai Radio 3, 45%.
+        return _("Salvo in disparte: {elenco}.").format(elenco="; ".join(voci)) if voci else ""
+
     def _comando_registrazione(self):
-        """R (Gabriele, issue 42): com'e' la registrazione, o l'attesa; nella
-        console, alla sintesi e al braille, come gli altri tasti da soli."""
+        """R (Gabriele, issue 42): com'e' la registrazione, l'attesa e i
+        salvataggi in disparte; nella console, alla sintesi e al braille, come
+        gli altri tasti da soli. Dal 15 novembre 2026 secondi e byte si leggono
+        senza il lucchetto della registrazione, e R non aspetta piu' la fine
+        di un'unione lunga."""
         reg = self._registrazione
         if reg is None and self._in_ascolto:
-            testo = _("In ascolto: registro la prossima radio o il prossimo indirizzo in rete che parte. Alt e Maiuscolo con R tolgono l'attesa.")
+            testo = _("Attesa accesa: registro le radio e gli indirizzi in rete che suonano, senza i silenzi. Alt con R la spegne.")
         elif reg is None:
-            testo = _("Nessuna registrazione. Maiuscolo con R registra la radio o l'indirizzo in rete che suona, Alt con R il prossimo che parte.")
+            testo = _("Nessuna registrazione. Maiuscolo con R registra la radio o l'indirizzo in rete che suona; Alt con R accende l'attesa, che registra tutto quello che suona.")
+        elif reg.stato == "in_pausa" and reg.motivo in ("sorgente", "rete"):
+            testo = _("La registrazione di {registrazione} aspetta che la sorgente torni a suonare. Maiuscolo con R la mette in pausa, Ctrl con R la ferma.").format(
+                registrazione=self._frase_della_registrazione(reg))
         elif reg.stato == "in_pausa":
             testo = _("Registrazione in pausa: {registrazione}. Maiuscolo con R riprende, Ctrl con R la ferma.").format(registrazione=self._frase_della_registrazione(reg))
         else:
             testo = _("Registro {registrazione}, in {formato}. Maiuscolo con R la mette in pausa, Ctrl con R la ferma.").format(
                 registrazione=self._frase_della_registrazione(reg), formato=reg.descrizione)
+            if self._in_ascolto:
+                testo += " " + _("L'attesa è accesa.")
+        salvataggi = self._frase_dei_salvataggi()
+        if salvataggi:
+            testo += " " + salvataggi
         self._riporta(testo, "registrazione")
 
     def _comando_registra(self):
         """Maiuscolo con R: comincia a registrare cio' che suona, o mette in
-        pausa la registrazione, o la riprende."""
+        pausa la registrazione, o la riprende. La pausa a mano vince su quella
+        automatica: messa durante l'attesa della sorgente, la sorgente che
+        torna non la riprende; e la ripresa con l'attesa accesa, se la
+        sorgente tace, la rimette ad aspettarla (Gabriele, 15 novembre 2026)."""
+        if self._chiusura_chiesta is not None:
+            self._riscontro("non_disponibile", _("MeTeOra si sta chiudendo: salvo le registrazioni, poi esco."))
+            return
         if self._registrazione_occupata:
             self._riscontro("non_disponibile", _("Un momento: la registrazione sta chiudendo un pezzo."))
             return
@@ -10179,83 +10363,220 @@ class Finestra(wx.Frame):
         if reg is None:
             brano = self._sorgente_da_registrare()
             if brano is not None:
+                self._da_non_registrare = None
                 self._avvia_la_registrazione(brano)
+            return
+        if reg.stato == "in_pausa" and reg.motivo in ("sorgente", "rete"):
+            self._annulla_la_riprova()
+            reg.metti_il_motivo("mano")
+            self._statistiche.conta("registrazioni_in_pausa")
+            self._riscontro("registrazione_in_pausa", _("Registrazione in pausa: {registrazione}. Maiuscolo con R riprende.").format(
+                registrazione=self._frase_della_registrazione(reg)))
+            return
+        if reg.stato == "in_pausa" and self._in_ascolto and not self._suona_la_sorgente(reg):
+            reg.metti_il_motivo("sorgente")
+            self._riscontro("registrazione_ripresa", _("Registrazione ripresa: {nome} riparte appena la sorgente torna a suonare.").format(nome=reg.titolo))
             return
         pausa = reg.stato == "in_corso"
         self._registrazione_occupata = True
+        flusso = None if pausa else indirizzi.pronto(reg.sorgente)
 
         def lavoro():
             try:
-                reg.pausa(pausa)
+                reg.pausa(pausa, motivo="mano", flusso=flusso)
             except OSError as e:
                 return e
             return None
 
-        registrazioni_in_disparte(lavoro, lambda esito: wx.CallAfter(self._pausa_della_registrazione, reg, pausa, esito))
+        registrazioni_in_disparte(lavoro, lambda esito: wx.CallAfter(self._pausa_della_registrazione, reg, pausa, esito, "mano"))
 
-    def _pausa_della_registrazione(self, reg, pausa, esito):
+    def _pausa_della_registrazione(self, reg, pausa, esito, motivo="mano"):
+        """La fine di una pausa o di una ripresa: a mano con il suo suono;
+        automatica, per la sorgente o per la rete, con una riga senza suono."""
         self._registrazione_occupata = False
-        if self._chiusa or reg is not self._registrazione:
+        if self._chiusa:
+            return
+        if reg is not self._registrazione:
+            self._dopo_il_comando()
             return
         if esito is not None:
-            self._riscontro("errore", _("La registrazione di {nome} non riprende: {errore}").format(nome=reg.titolo, errore=esito))
+            if motivo == "rete":
+                # Il ricollegamento non e' partito: si riprova, o si smette.
+                self._registrazione_caduta(reg, 0.0)
+            elif motivo == "sorgente":
+                # La ripresa automatica non riesce: il file si chiude, con quello
+                # che c'e', e la sorgente non si riprova finche' non cambia.
+                self._da_non_registrare = reg.sorgente
+                self._riscontro("errore", _("La registrazione di {nome} non riprende: {errore}. Chiudo il file.").format(nome=reg.titolo, errore=esito))
+                self._chiudi_la_registrazione("ctrl_r")
+            else:
+                self._riscontro("errore", _("La registrazione di {nome} non riprende: {errore}").format(nome=reg.titolo, errore=esito))
+            self._dopo_il_comando()
             return
-        if pausa:
+        if motivo == "sorgente":
+            if pausa:
+                self._statistiche.conta("pause_automatiche")
+                self._avviso(_("La registrazione di {registrazione} aspetta che la sorgente torni a suonare.").format(registrazione=self._frase_della_registrazione(reg)))
+            else:
+                self._statistiche.conta("riprese_automatiche")
+                numero, nome = getattr(reg, "ultimo_marker", None) or (0, "")
+                self._avviso(_("Registro {nome}, marker {numero}: {marker}, a {tempo}.").format(nome=reg.titolo, numero=numero, marker=nome, tempo=tempo(reg.secondi)))
+        elif motivo == "rete":
+            self._statistiche.conta("ricollegamenti_delle_registrazioni")
+            self._avviso(_("La registrazione di {nome} si è ricollegata, e continua nello stesso file.").format(nome=reg.titolo))
+        elif pausa:
             self._statistiche.conta("registrazioni_in_pausa")
             self._riscontro("registrazione_in_pausa", _("Registrazione in pausa: {registrazione}. Maiuscolo con R riprende.").format(
                 registrazione=self._frase_della_registrazione(reg)))
         else:
             self._riscontro("registrazione_ripresa", _("Registrazione ripresa: {registrazione}.").format(registrazione=self._frase_della_registrazione(reg)))
+        self._dopo_il_comando()
+
+    def _dopo_il_comando(self):
+        """Un comando della registrazione e' finito: la chiusura chiesta
+        intanto, da Alt con R o dall'uscita, si fa adesso."""
+        motivo, self._da_chiudere = self._da_chiudere, None
+        if motivo is not None and self._registrazione is not None:
+            self._chiudi_la_registrazione(motivo)
+        if self._chiusura_chiesta is not None:
+            self._prosegui_la_chiusura()
 
     def _comando_ferma_la_registrazione(self):
-        """Ctrl con R: ferma la registrazione e chiude il file, in disparte."""
+        """Ctrl con R: chiude il file, in disparte, e spegne anche l'attesa
+        (Gabriele, 15 novembre 2026); senza registrazione spegne l'attesa."""
         reg = self._registrazione
         if reg is None:
-            testo = _("Non c'è una registrazione da fermare: Alt e Maiuscolo con R tolgono l'attesa.") if self._in_ascolto else _("Non c'è una registrazione da fermare.")
-            self._riscontro("non_disponibile", testo)
+            if self._in_ascolto:
+                self._spegni_l_attesa()
+                self._riscontro("registrazione_attesa_spenta", _("Attesa spenta: non c'era una registrazione da fermare."))
+                return
+            self._riscontro("non_disponibile", _("Non c'è una registrazione da fermare."))
             return
         if self._registrazione_occupata:
             self._riscontro("non_disponibile", _("Un momento: la registrazione sta chiudendo un pezzo."))
             return
-        self._registrazione_occupata = True
-        self.scrivi(_("Chiudo la registrazione di {nome}.").format(nome=reg.titolo), "registrazione")
-        registrazioni_in_disparte(reg.ferma, lambda percorso: wx.CallAfter(self._registrazione_fermata, reg, percorso))
+        testo = _("Chiudo la registrazione di {nome}.").format(nome=reg.titolo)
+        if self._in_ascolto:
+            self._spegni_l_attesa()
+            testo = _("Chiudo la registrazione di {nome}, e l'attesa si spegne.").format(nome=reg.titolo)
+        self.scrivi(testo, "registrazione")
+        self._chiudi_la_registrazione("ctrl_r")
 
-    def _registrazione_fermata(self, reg, percorso):
-        self._registrazione_occupata = False
+    def _chiudi_la_registrazione(self, motivo):
+        """La registrazione in corso va fra quelle in chiusura, e si chiude e
+        si salva in un filo, mentre la finestra risponde e un'altra puo'
+        cominciare. Una puntata lasciata per un'altra sorgente mentre scarica
+        ancora finisce di scaricare: la chiude la sua fine. Con un comando in
+        volo la chiusura aspetta lui. Torna la registrazione."""
+        reg = self._registrazione
+        if reg is None:
+            return None
+        if self._registrazione_occupata:
+            self._da_chiudere = motivo
+            return reg
+        self._registrazione = None
+        self._annulla_la_riprova()
+        self._in_chiusura.append(reg)
+        if motivo == "altra_sorgente" and not reg.dal_vivo and reg.stato == "in_corso":
+            return reg
+        self._salva_in_disparte(reg, motivo)
+        return reg
+
+    def _salva_in_disparte(self, reg, motivo):
+        """ferma in un filo, con la scheda dei file letta li': quella di un AAC
+        di ore costa. Poi _registrazione_fermata, nel filo della finestra."""
+        reg.salvataggio_chiesto = True
+
+        def lavoro():
+            percorso = reg.ferma()
+            self._leggi_le_schede(reg)
+            return percorso
+
+        registrazioni_in_disparte(lavoro, lambda percorso: wx.CallAfter(self._registrazione_fermata, reg, percorso, motivo))
+
+    def _leggi_le_schede(self, reg):
+        """Nel filo della registrazione: le schede dei file che avranno i
+        marker, perche' la loro chiave vuole la durata giusta dello schedario."""
+        for file in dict.fromkeys(voce[0] for voce in getattr(reg, "marker_finali", None) or []):
+            with contextlib.suppress(Exception):
+                self.schedario.leggi_subito(file)
+
+    def _fine_da_se_in_disparte(self, reg):
+        """al_termine di una registrazione, dal suo filo: il file e' gia'
+        chiuso; le schede si leggono qui, poi lo dice la finestra."""
+        self._leggi_le_schede(reg)
+        wx.CallAfter(self._registrazione_finita_da_se, reg)
+
+    def _registrazione_fermata(self, reg, percorso, motivo=None):
+        """Una registrazione chiusa in disparte: con Ctrl con R, con Alt con R,
+        per un'altra sorgente, all'uscita o recuperata all'avvio. Il conto, i
+        marker, il ramo, e la riga con il suono dopo quello che suona."""
         if reg is self._registrazione:
             self._registrazione = None
-        if self._chiusa:
+        if reg in self._in_chiusura:
+            self._in_chiusura.remove(reg)
+        if motivo == "recupero":
+            self._recuperi_in_corso = max(0, self._recuperi_in_corso - 1)
+        if self._chiusa or getattr(reg, "detta", False):
             return
+        reg.detta = True
         if percorso is not None:
             self._conta_la_registrazione(reg)
+            if self._chiusura_chiesta is not None:
+                self._statistiche.conta("registrazioni_salvate_alla_chiusura")
+        marker = self._metti_i_marker_della_registrazione(reg)
         self._rinfresca_le_registrazioni()
-        if percorso is None:
-            self._riscontro("registrazione_fermata", _("Registrazione di {nome} fermata: non era arrivato niente da scrivere.").format(nome=reg.titolo))
-            return
-        if self._parti_non_unite(reg):
-            return
-        self._riscontro("registrazione_fermata", _("Registrazione finita: {registrazione}. È nel ramo Registrazioni, come {file}.").format(
-            registrazione=self._frase_della_registrazione(reg), file=os.path.basename(percorso)))
+        if motivo == "recupero":
+            self._registrazione_recuperata(reg, percorso)
+        elif percorso is None:
+            self._riscontro_dopo("registrazione_fermata", _("Registrazione di {nome} fermata: non era arrivato niente da scrivere.").format(nome=reg.titolo))
+        elif self._parti_non_unite(reg):
+            pass
+        elif motivo == "interrotta":
+            self._statistiche.conta("registrazioni_interrotte")
+            self._riscontro_dopo("errore", _("La registrazione di {nome} si è interrotta: il flusso non risponde più. Quello che è arrivato è nel ramo Registrazioni.").format(
+                nome=reg.titolo))
+        else:
+            self._riscontro_dopo("registrazione_fermata", _("Registrazione finita: {registrazione}{marker}. È nel ramo Registrazioni, come {file}.").format(
+                registrazione=self._frase_della_registrazione(reg), marker=self._frase_dei_marker(marker), file=os.path.basename(percorso)))
+        if self._chiusura_chiesta is not None:
+            self._prosegui_la_chiusura()
+
+    @staticmethod
+    def _frase_dei_marker(marker):
+        # Traduttori: in fondo alla riga di una registrazione finita, quanti marker automatici ha, come Registrazione finita: Rai Radio 3, 12:34, 12 MB, con 5 marker.
+        return ngettext(", con {n} marker", ", con {n} marker", marker).format(n=marker) if marker else ""
 
     def _registrazione_finita_da_se(self, reg):
         """Il flusso registrato e' finito da se': una puntata tutta, o una
-        radio caduta. Il file e' gia' chiuso."""
+        radio caduta. Il file e' gia' chiuso. Con l'attesa accesa la stessa
+        sorgente non si registra di nuovo finche' non ne suona un'altra."""
         if reg is self._registrazione:
             self._registrazione = None
-        if self._chiusa:
+            self._annulla_la_riprova()
+            if self._in_ascolto:
+                self._da_non_registrare = reg.sorgente
+        if reg in self._in_chiusura:
+            self._in_chiusura.remove(reg)
+        if self._chiusa or getattr(reg, "detta", False):
             return
+        reg.detta = True
         self._conta_la_registrazione(reg)
+        if self._chiusura_chiesta is not None:
+            self._statistiche.conta("registrazioni_salvate_alla_chiusura")
+        marker = self._metti_i_marker_della_registrazione(reg)
         self._rinfresca_le_registrazioni()
         if self._parti_non_unite(reg):
-            return
-        if reg.stato == "completa":
-            self._riscontro("registrazione_fermata", _("Registrazione finita: {registrazione}, è arrivata alla fine. È nel ramo Registrazioni.").format(
-                registrazione=self._frase_della_registrazione(reg)))
+            pass
+        elif reg.stato == "completa":
+            self._riscontro_dopo("registrazione_fermata", _("Registrazione finita: {registrazione}{marker}, è arrivata alla fine. È nel ramo Registrazioni.").format(
+                registrazione=self._frase_della_registrazione(reg), marker=self._frase_dei_marker(marker)))
         else:
             self._statistiche.conta("registrazioni_interrotte")
-            self._riscontro("errore", _("La registrazione di {nome} si è interrotta: il flusso si è chiuso. Quello che è arrivato è nel ramo Registrazioni.").format(
+            self._riscontro_dopo("errore", _("La registrazione di {nome} si è interrotta: il flusso si è chiuso. Quello che è arrivato è nel ramo Registrazioni.").format(
                 nome=reg.titolo))
+        if self._chiusura_chiesta is not None:
+            self._prosegui_la_chiusura()
 
     def _parti_non_unite(self, reg):
         """Vero, con il riscontro, se le parti di una registrazione non si sono
@@ -10281,6 +10602,163 @@ class Finestra(wx.Frame):
         self._statistiche.conta("registrazioni_di_dirette" if reg.dal_vivo else "registrazioni_di_puntate")
         self._statistiche.massimo("registrazione_piu_lunga", round(reg.secondi), reg.titolo)
         self._statistiche.massimo("registrazione_piu_pesante", reg.byte, reg.titolo)
+        # Il tempo del salvataggio, con il primato (Gabriele, 15 novembre 2026).
+        salvataggio = getattr(reg, "salvataggio", None)
+        if salvataggio:
+            self._statistiche.conta("millisecondi_di_salvataggio", round(salvataggio * 1000))
+            self._statistiche.massimo("salvataggio_piu_lungo", round(salvataggio, 1), reg.titolo)
+
+    def _metti_i_marker_della_registrazione(self, reg):
+        """I marker automatici di una registrazione chiusa sul suo file, o
+        sulle sue parti separate, come quelli di T e raggiungibili con Y: la
+        chiave e' quella del nome e della durata dello schedario, il nome e'
+        il titolo, e un marker che c'e' gia' in quel punto resta. Un file
+        senza durata non ne ha: la sua chiave sarebbe il percorso, e quando lo
+        schedario la sa i marker non si troverebbero piu'. Torna quanti ne ha
+        messi."""
+        per_file = {}
+        for file, secondi, nome in getattr(reg, "marker_finali", None) or []:
+            per_file.setdefault(file, []).append((secondi, nome))
+        chiavi, messi = [], 0
+        for file, voci in per_file.items():
+            durata, _numero = self._durata_dei_marker(file, leggi=True)
+            if not durata:
+                continue
+            k = marcatori.chiave(file, durata)
+            for secondi, nome in voci:
+                tempo_del_marker = min(max(0.0, secondi), durata)
+                if self.marcatori.trova(k, tempo_del_marker) is not None:
+                    continue
+                marker = self.marcatori.aggiungi(k, tempo_del_marker, file, durata)
+                if nome:
+                    self.marcatori.rinomina(k, marker, nome)
+                messi += 1
+            chiavi.append(k)
+        if messi:
+            self._statistiche.conta("marker_delle_registrazioni", messi)
+            self._salva_i_marker(*chiavi)
+        return messi
+
+    # I marker, le cadute della rete e gli avvisi (Gabriele, 15 novembre 2026).
+
+    def _avviso(self, testo, categoria=None):
+        """Una riga della registrazione senza suono, che si legge come le
+        altre righe, secondo la lettura della console di F10: chi registra
+        puo' ascoltare qualcosa che chiede concentrazione."""
+        self.scrivi(testo, categoria)
+        self._statistiche.conta("avvisi_delle_registrazioni")
+        self._ultimo_avviso = self._orologio_delle_registrazioni()
+
+    def _marker_della_registrazione(self, reg, numero, nome, secondi):
+        """Un titolo in onda nuovo, arrivato dalla connessione della
+        registrazione, e' diventato un marker: lo dice una riga."""
+        if self._chiusa or reg is not self._registrazione:
+            return
+        self._avviso(_("Registro {nome}, marker {numero}: {marker}, a {tempo}.").format(nome=reg.titolo, numero=numero, marker=nome, tempo=tempo(secondi)))
+
+    def _registrazione_caduta(self, reg, secondi):
+        """Una diretta registrata ha perso la connessione, ed e' in pausa per
+        la rete. Se il lettore suona ancora la sorgente si ricollega da se',
+        dopo 1, 2, 5, 10 e 30 secondi, nello stesso file, togliendo la riserva
+        doppia; se il lettore tace, con l'attesa accesa aspetta la sorgente;
+        altrimenti finisce, interrotta. secondi e' quanto e' durata la parte
+        caduta: una parte buona rimette i tentativi da capo."""
+        if self._chiusa or reg is not self._registrazione or reg.stato != "in_pausa" or reg.motivo != "rete":
+            return
+        if secondi >= PARTE_BUONA:
+            reg.riprove = 0
+        tentativi = getattr(reg, "riprove", 0)
+        brano = self._sorgente_che_suona()
+        suona = brano is not None and brano.percorso == reg.sorgente
+        if suona and tentativi < len(RIPROVE_DELLA_REGISTRAZIONE):
+            reg.riprove = tentativi + 1
+            if not tentativi:
+                self._avviso(_("La registrazione di {nome} ha perso la connessione: mi ricollego.").format(nome=reg.titolo))
+            self._annulla_la_riprova()
+            self._riprova = wx.CallLater(RIPROVE_DELLA_REGISTRAZIONE[tentativi] * 1000, self._riprova_la_registrazione, reg)
+            return
+        if self._in_ascolto and not suona:
+            reg.riprove = 0
+            reg.metti_il_motivo("sorgente")
+            self._avviso(_("La registrazione di {registrazione} aspetta che la sorgente torni a suonare.").format(registrazione=self._frase_della_registrazione(reg)))
+            return
+        if self._in_ascolto:
+            # La sorgente suona ma non risponde piu' al registratore: l'attesa non ci riprova finche' non cambia.
+            self._da_non_registrare = reg.sorgente
+        self._chiudi_la_registrazione("interrotta")
+
+    def _riprova_la_registrazione(self, reg):
+        """Un tentativo di ricollegare la diretta, in disparte."""
+        self._riprova = None
+        if self._chiusa or reg is not self._registrazione or reg.stato != "in_pausa" or reg.motivo != "rete" or self._registrazione_occupata:
+            return
+        if not self._suona_la_sorgente(reg):
+            self._registrazione_caduta(reg, 0.0)
+            return
+        self._registrazione_occupata = True
+        flusso = indirizzi.pronto(reg.sorgente)
+
+        def lavoro():
+            try:
+                reg.pausa(False, flusso=flusso)
+            except OSError as e:
+                return e
+            return None
+
+        registrazioni_in_disparte(lavoro, lambda esito: wx.CallAfter(self._pausa_della_registrazione, reg, False, esito, "rete"))
+
+    def _annulla_la_riprova(self):
+        riprova, self._riprova = self._riprova, None
+        if riprova is not None:
+            with contextlib.suppress(Exception):
+                riprova.Stop()
+
+    def _guarda_le_registrazioni(self):
+        """Ogni secondo, dal giro delle statistiche: la registrazione segue la
+        sorgente; i capitoli passati da una puntata; ogni dieci minuti l'avviso
+        che si registra, o che l'attesa e' accesa, mentre una registrazione e'
+        aperta o l'attesa accesa; e durante una chiusura rimandata, a che
+        punto e' il salvataggio."""
+        self._segui_la_sorgente()
+        adesso = self._orologio_delle_registrazioni()
+        reg = self._registrazione
+        if reg is not None and not reg.dal_vivo and reg.stato == "in_corso" and getattr(reg, "capitoli", None):
+            self._capitoli_della_puntata(reg, adesso)
+        aperta = reg is not None and (reg.stato == "in_corso" or getattr(reg, "motivo", None) in ("sorgente", "rete"))
+        if not aperta and not self._in_ascolto:
+            self._ultimo_avviso = None
+        elif self._ultimo_avviso is None:
+            self._ultimo_avviso = adesso
+        elif adesso - self._ultimo_avviso >= AVVISO_DELLE_REGISTRAZIONI:
+            self._avviso_periodico(reg if aperta else None)
+        if self._chiusura_chiesta is not None and adesso - self._ultima_frase_della_chiusura >= AGGIORNAMENTO_DELLA_CHIUSURA:
+            self._ultima_frase_della_chiusura = adesso
+            self.scrivi(self._frase_della_chiusura(), "chiusura")
+
+    def _avviso_periodico(self, reg):
+        """L'avviso dei dieci minuti, sulla riga di quello di prima se nella
+        console non e' arrivato altro."""
+        if reg is None:
+            testo = _("Attesa accesa: registro la prossima radio o il prossimo indirizzo in rete che suona.")
+        elif reg.stato == "in_corso":
+            # Traduttori: l'avviso dei dieci minuti di una registrazione, come Registro Rai Radio 3: 1:20:00, 75 MB.
+            testo = _("Registro {nome}: {durata}, {peso}.").format(nome=reg.titolo, durata=tempo(reg.secondi), peso=midi.dimensione_da_leggere(reg.byte))
+        else:
+            testo = _("La registrazione di {registrazione} aspetta che la sorgente torni a suonare.").format(registrazione=self._frase_della_registrazione(reg))
+        self._avviso(testo, "avviso_della_registrazione")
+
+    def _capitoli_della_puntata(self, reg, adesso):
+        """I capitoli di una puntata che la registrazione ha passato: la
+        puntata scarica piu' veloce dell'ascolto, e una riga dice l'ultimo, al
+        piu' ogni AVVISO_DEI_CAPITOLI secondi."""
+        passati = reg.capitoli_passati()
+        if passati <= getattr(reg, "capitoli_avvisati", 0) or adesso - self._ultimo_avviso_dei_capitoli < AVVISO_DEI_CAPITOLI:
+            return
+        reg.capitoli_avvisati, self._ultimo_avviso_dei_capitoli = passati, adesso
+        inizio, titolo = reg.capitoli[passati - 1]
+        # Traduttori: il capitolo senza titolo di una puntata registrata, come capitolo 3.
+        nome = registrazioni.nome_del_marker(titolo) or _("capitolo {numero}").format(numero=passati)
+        self._avviso(_("Registro {nome}, marker {numero}: {marker}, a {tempo}.").format(nome=reg.titolo, numero=passati, marker=nome, tempo=tempo(inizio)))
 
     def _comando_vai_alle_registrazioni(self):
         """Ctrl e Maiuscolo con R: la plancia sul ramo Registrazioni."""
@@ -10291,18 +10769,35 @@ class Finestra(wx.Frame):
             "Registrazioni: ancora nessuna."))
 
     def _comando_registra_quando_parte(self):
-        """Alt con R: l'attesa; la prossima radio o il prossimo indirizzo in
-        rete che parte si registra."""
-        if self._registrazione is not None:
-            self._riscontro("non_disponibile", _("Sto già registrando {nome}: Ctrl con R la ferma.").format(nome=self._registrazione.titolo))
-            return
+        """Alt con R, l'interruttore dell'attesa (Gabriele, 15 novembre 2026):
+        accesa, si registra tutto cio' che passa in streaming, senza i
+        silenzi, finche' non la si spegne, anche la sorgente che suona gia';
+        spenta, il file in corso si chiude e si salva. All'avvio e' sempre
+        spenta, e non si salva nelle impostazioni."""
         if self._in_ascolto:
-            self._riscontro("non_disponibile", _("Sono già in ascolto: Alt e Maiuscolo con R tolgono l'attesa."))
+            reg = self._registrazione
+            self._spegni_l_attesa()
+            self._annulla_la_riprova()
+            if reg is None:
+                self._riscontro("registrazione_attesa_spenta", _("Attesa spenta: le radio e gli indirizzi in rete non si registrano più da soli."))
+                return
+            self._riscontro("registrazione_attesa_spenta", _("Attesa spenta: chiudo la registrazione di {nome}.").format(nome=reg.titolo))
+            self._chiudi_la_registrazione("attesa_spenta")
             return
-        self._in_ascolto = True
+        if self._chiusura_chiesta is not None:
+            self._riscontro("non_disponibile", _("MeTeOra si sta chiudendo: salvo le registrazioni, poi esco."))
+            return
+        self._in_ascolto, self._sorgente_vista, self._da_non_registrare = True, None, None
+        # Il conto di sempre delle pressioni di Alt con R: ora le accensioni.
         self._statistiche.conta("registrazioni_in_ascolto")
-        self._riscontro("registrazione_in_ascolto", _("In ascolto: registro la prossima radio o il prossimo indirizzo in rete che parte. "
-            "Alt e Maiuscolo con R tolgono l'attesa."))
+        self._ultimo_avviso = self._orologio_delle_registrazioni()
+        reg = self._registrazione
+        if reg is not None:
+            testo = _("Attesa accesa: la registrazione di {nome} segue la sorgente, senza i silenzi. Alt con R la spegne.").format(nome=reg.titolo)
+        else:
+            testo = _("Attesa accesa: registro le radio e gli indirizzi in rete che suonano, senza i silenzi, finché Alt con R non la spegne.")
+        self._riscontro("registrazione_in_ascolto", testo)
+        self._segui_la_sorgente()
 
     def _comando_apri_la_cartella_delle_registrazioni(self):
         """Ctrl e Alt con R: la cartella delle registrazioni in Esplora risorse."""
@@ -10318,14 +10813,13 @@ class Finestra(wx.Frame):
 
     def _comando_elimina_la_registrazione(self):
         """Alt e Maiuscolo con R: elimina la registrazione in corso, dopo una
-        domanda, o toglie l'attesa."""
+        domanda; serve solo a questo, e l'attesa la spegne Alt con R, con il
+        suo suono (Gabriele, 15 novembre 2026). Dopo la domanda si ricontrolla
+        che la registrazione sia ancora quella in corso: intanto puo' essere
+        finita da se', salvata e contata."""
         reg = self._registrazione
-        if reg is None and self._in_ascolto:
-            self._in_ascolto = False
-            self._riscontro("registrazione_eliminata", _("Niente più attesa: la prossima radio non si registra."))
-            return
         if reg is None:
-            self._riscontro("non_disponibile", _("Non c'è una registrazione in corso, né un'attesa, da eliminare."))
+            self._riscontro("non_disponibile", _("Non c'è una registrazione in corso da eliminare."))
             return
         if self._registrazione_occupata:
             self._riscontro("non_disponibile", _("Un momento: la registrazione sta chiudendo un pezzo."))
@@ -10334,17 +10828,166 @@ class Finestra(wx.Frame):
                 _("Registrazioni")):
             self._annullato(_("La registrazione continua."))
             return
+        if reg is not self._registrazione or self._registrazione_occupata or reg.stato not in ("in_corso", "in_pausa"):
+            self._riscontro("non_disponibile", _("La registrazione di {nome} intanto non è più in corso: non la elimino.").format(nome=reg.titolo))
+            return
         self._registrazione_occupata = True
+        self._annulla_la_riprova()
+        if self._in_ascolto:
+            # L'attesa non la ricomincia finche' non suona un'altra sorgente.
+            self._da_non_registrare = reg.sorgente
         registrazioni_in_disparte(reg.elimina, lambda _esito: wx.CallAfter(self._registrazione_eliminata, reg))
 
     def _registrazione_eliminata(self, reg):
         self._registrazione_occupata = False
         if reg is self._registrazione:
             self._registrazione = None
+        reg.detta = True
         if self._chiusa:
             return
         self._statistiche.conta("registrazioni_eliminate")
         self._riscontro("registrazione_eliminata", _("Registrazione di {nome} eliminata.").format(nome=reg.titolo))
+        self._dopo_il_comando()
+
+    # La chiusura che aspetta il salvataggio (Gabriele, 15 novembre 2026).
+
+    def _da_salvare(self):
+        """Vero se una registrazione e' aperta, si chiude in disparte o si recupera."""
+        return self._registrazione is not None or bool(self._in_chiusura) or self._recuperi_in_corso > 0
+
+    def _frase_della_chiusura(self):
+        """MeTeOra si chiude appena le registrazioni sono salvate, con a che punto sono."""
+        salvataggi = self._frase_dei_salvataggi()
+        if not salvataggi:
+            return _("MeTeOra si chiude appena le registrazioni sono salvate.")
+        # Traduttori: salvataggi e' la frase Salvo in disparte: Rai Radio 3, 45%.
+        return _("MeTeOra si chiude appena le registrazioni sono salvate. {salvataggi}").format(salvataggi=salvataggi)
+
+    def _rimanda_la_chiusura(self, forzata=False):
+        """La chiusura di MeTeOra con una registrazione aperta o in salvataggio:
+        sempre rimandata, senza eccezioni e senza uscita d'emergenza. La prima
+        volta il lettore si ferma, l'attesa si spegne, le registrazioni si
+        chiudono e si salvano in disparte, e Windows sa perche' non si puo'
+        spegnere; ogni volta il suono dice che la richiesta e' arrivata, e la
+        console a che punto e' il salvataggio. Finito tutto, MeTeOra si chiude
+        da se', con forzata come chiudi_per_aggiornare."""
+        self._suono("chiusura_in_attesa")
+        if self._chiusura_chiesta is None:
+            self._chiusura_chiesta = "forzata" if forzata else "normale"
+            self._statistiche.conta("chiusure_rimandate")
+            self._in_ascolto, self._sorgente_vista = False, None
+            self._annulla_la_riprova()
+            if self.motore.in_corso:
+                self._ferma(sfumando=False)
+            self._chiudi_la_registrazione("chiusura")
+            # Le puntate che scaricavano in disparte si fermano con quello che hanno.
+            for reg in list(self._in_chiusura):
+                if not getattr(reg, "salvataggio_chiesto", False) and getattr(reg, "stato", None) == "in_corso":
+                    self._salva_in_disparte(reg, "chiusura")
+            with contextlib.suppress(Exception):
+                _blocca_lo_spegnimento(self.GetHandle(), _("MeTeOra sta salvando le registrazioni, e si chiude da sé appena ha finito."))
+        elif forzata:
+            self._chiusura_chiesta = "forzata"
+        self._ultima_frase_della_chiusura = self._orologio_delle_registrazioni()
+        self.scrivi(self._frase_della_chiusura(), "chiusura")
+
+    def _prosegui_la_chiusura(self):
+        """Durante una chiusura rimandata: la registrazione rimasta per un
+        comando in volo si chiude adesso; salvato tutto, MeTeOra si chiude."""
+        if self._chiusura_chiesta is None or self._chiusa:
+            return
+        if self._registrazione is not None and not self._registrazione_occupata:
+            self._chiudi_la_registrazione("chiusura")
+        if self._da_salvare():
+            return
+        with contextlib.suppress(Exception):
+            _sblocca_lo_spegnimento(self.GetHandle())
+        self.scrivi(_("Registrazioni salvate: MeTeOra si chiude."), "chiusura")
+        wx.CallAfter(self.Close, self._chiusura_chiesta == "forzata")
+
+    def _salva_in_fretta(self):
+        """Allo spegnimento di Windows, o a una chiusura che non si puo'
+        rifiutare: ogni registrazione aperta o in salvataggio lascia subito le
+        sue parti come file separati, senza perdere niente, con i loro marker."""
+        tutte = ([self._registrazione] if self._registrazione is not None else []) + list(self._in_chiusura)
+        self._registrazione, self._in_chiusura = None, []
+        self._annulla_la_riprova()
+        for reg in tutte:
+            with contextlib.suppress(Exception):
+                reg.salva_in_fretta()
+                self._statistiche.conta("registrazioni_salvate_alla_chiusura")
+                if getattr(reg, "parti_separate", None):
+                    self._statistiche.conta("registrazioni_a_parti_separate")
+                self._metti_i_marker_della_registrazione(reg)
+        with contextlib.suppress(Exception):
+            _sblocca_lo_spegnimento(self.GetHandle())
+
+    def _spegnimento_chiesto(self, evento):
+        """Windows chiede se puo' spegnersi, EVT_QUERY_END_SESSION: mentre una
+        registrazione e' aperta o si salva, no, con il motivo scritto per chi
+        spegne, e la chiusura comincia come con Esc."""
+        if not self._chiusa and self._da_salvare() and evento.CanVeto():
+            evento.Veto()
+            self._rimanda_la_chiusura()
+            return
+        evento.Skip()
+
+    def _spegnimento(self, evento):
+        """Windows si spegne, EVT_END_SESSION, che non si puo' rifiutare: le
+        registrazioni si salvano subito a parti; poi wx chiude come sempre."""
+        if not self._chiusa and self._da_salvare():
+            self._salva_in_fretta()
+        evento.Skip()
+
+    def _recupera_le_registrazioni(self):
+        """All'avvio, le registrazioni rimaste a meta' da un crollo o da uno
+        spegnimento a forza, con le parti .parzialeN, nella cartella scelta e
+        in quella di sempre: si uniscono in disparte, con i tagli e i marker
+        del loro file delle parti, o diventano file separati, e la console lo
+        dice (Gabriele, 15 novembre 2026)."""
+        viste = set()
+        for cartella in (self._cartella_delle_registrazioni(), registrazioni.cartella()):
+            normale = os.path.normcase(os.path.abspath(cartella))
+            if normale in viste or not os.path.isdir(cartella):
+                continue
+            viste.add(normale)
+            for percorso in registrazioni.rimaste(cartella):
+                self._recuperi_in_corso += 1
+                registrazioni_in_disparte(functools.partial(self._recupera, percorso), lambda reg, percorso=percorso: wx.CallAfter(self._recupero_finito, reg, percorso))
+
+    def _recupera(self, percorso):
+        """Nel filo: la registrazione rimasta, unita o a parti, con le schede lette."""
+        reg = registrazioni.Registrazione.da_recuperare(percorso)
+        if reg is not None:
+            reg.ferma()
+            self._leggi_le_schede(reg)
+        return reg
+
+    def _recupero_finito(self, reg, percorso):
+        if reg is None:
+            self._recuperi_in_corso = max(0, self._recuperi_in_corso - 1)
+            if self._chiusura_chiesta is not None:
+                self._prosegui_la_chiusura()
+            return
+        self._registrazione_fermata(reg, reg.file_finali[0] if reg.file_finali else None, "recupero")
+
+    def _registrazione_recuperata(self, reg, percorso):
+        """La riga di una registrazione recuperata all'avvio, senza suono."""
+        parti = getattr(reg, "recuperate", 0)
+        self._statistiche.conta("registrazioni_recuperate_all_avvio")
+        self._statistiche.conta("parti_recuperate_all_avvio", parti)
+        if percorso is None:
+            return
+        if getattr(reg, "parti_separate", None):
+            self._statistiche.conta("registrazioni_a_parti_separate")
+            testo = ngettext("Ho recuperato la registrazione di {nome}, rimasta a metà da una chiusura improvvisa: {n} parte, nel ramo Registrazioni, come {file}.",
+                "Ho recuperato la registrazione di {nome}, rimasta a metà da una chiusura improvvisa: {n} file, nel ramo Registrazioni, come {file}.",
+                len(reg.parti_separate)).format(nome=reg.titolo, n=len(reg.parti_separate), file=os.path.basename(reg.parti_separate[0]))
+        else:
+            testo = ngettext("Ho recuperato la registrazione di {nome}, rimasta a metà da una chiusura improvvisa: {n} parte unita, nel ramo Registrazioni, come {file}.",
+                "Ho recuperato la registrazione di {nome}, rimasta a metà da una chiusura improvvisa: {n} parti unite, nel ramo Registrazioni, come {file}.", parti).format(
+                nome=reg.titolo, n=parti, file=os.path.basename(percorso))
+        self.scrivi(testo)
 
     # Le radio in rete, tappa 19 c (3.3.0, issue 40).
 
@@ -11883,7 +12526,12 @@ class Finestra(wx.Frame):
         wx.MessageBox(testo, _("Aggiornamento di MeTeOra"), wx.OK | wx.ICON_INFORMATION, self)
 
     def chiudi_per_aggiornare(self):
-        """GBUtils sta per sostituire MeTeOra: si chiude salvando tutto."""
+        """GBUtils sta per sostituire MeTeOra: si chiude salvando tutto. Con
+        una registrazione aperta o in salvataggio la chiusura forzata si
+        rimanda finche' tutto non e' salvato (Gabriele, 15 novembre 2026)."""
+        if self._da_salvare():
+            self._rimanda_la_chiusura(forzata=True)
+            return
         self.Close(force=True)
 
     # L'invito a offrire un caffe' (Gabriele, 4 ottobre 2026, 1.75.0): dalla
@@ -14306,6 +14954,7 @@ class Finestra(wx.Frame):
         come non regolare. Poi, dopo i suoni dell'avvio, la pulizia."""
         self._salva_le_statistiche_in_disparte()
         self._avvia_la_ricerca_cast()
+        self._recupera_le_registrazioni()
         self._dopo_il_suono(self._comincia_la_pulizia)
 
     # La pulizia all'avvio (Gabriele, 19 ottobre 2026, 1.104.0).
@@ -14681,7 +15330,20 @@ class Finestra(wx.Frame):
         if self._chiusa:
             evento.Skip()
             return
+        if self._da_salvare():
+            # Una registrazione aperta o in salvataggio (Gabriele, 15 novembre
+            # 2026): la chiusura si rifiuta finche' tutto non e' salvato; se non
+            # si puo' rifiutare, le parti si salvano subito come file.
+            if evento.CanVeto():
+                evento.Veto()
+                self._rimanda_la_chiusura()
+                return
+            self._salva_in_fretta()
         self._chiusa = True
+        applicazione = wx.GetApp()
+        if applicazione is not None:
+            applicazione.Unbind(wx.EVT_QUERY_END_SESSION, handler=self._spegnimento_chiesto)
+            applicazione.Unbind(wx.EVT_END_SESSION, handler=self._spegnimento)
         # Da qui la plancia risponde a NVDA come Windows (issue 21): NVDA puo'
         # chiedere anche mentre la finestra si chiude.
         if self._accessibile is not None:
@@ -14698,10 +15360,6 @@ class Finestra(wx.Frame):
         lettore_di_rete.lettori.chiudi()
         # Le chiamate a yt-dlp in corso si fermano (3.2.0).
         indirizzi.chiudi()
-        # Una registrazione in corso si chiude, e il file resta (3.5.0).
-        if self._registrazione is not None:
-            with contextlib.suppress(Exception):
-                self._registrazione.ferma()
         if self._ricerca_cast is not None:
             # La ricerca chiude il suo zeroconf: in disparte, come lo speaker,
             # che il motore chiude con se'.
