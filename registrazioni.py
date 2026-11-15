@@ -1,6 +1,6 @@
 # MeTeOra, le registrazioni: le radio e gli indirizzi in rete scritti su file.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 10/11/2026: nasce con la 3.5.0, issue 42. Nella 3.11.0 le dirette HTTP lette da diretta.py, senza riconnessioni. Nella 3.13.2 le unioni lunghe senza troncare, e le parti salvate a file se l'unione fallisce. Nella 3.15.0 bit, frequenza e canali scelti, e il WAV con RF64. Nella 3.26.0 l'attesa che segue la sorgente, con la pausa per motivo, i ricollegamenti detti quando arriva l'audio, con il buco dall'ultimo dato, i marker dei titoli e delle riprese, il salvataggio in fretta, ogni pacchetto sul disco e il recupero delle parti, anche di quella aperta al crollo; la diretta riconosciuta da se'. Nella 3.26.4 l'unione senza ricodificare, e secondi e byte senza lucchetto. Nella 3.26.9 i flussi dei siti chiesti a pezzi.
+# 10/11/2026: nasce con la 3.5.0, issue 42. Nella 3.11.0 le dirette HTTP lette da diretta.py, senza riconnessioni. Nella 3.13.2 le unioni lunghe senza troncare, e le parti salvate a file se l'unione fallisce. Nella 3.15.0 bit, frequenza e canali scelti, e il WAV con RF64. Nella 3.26.0 l'attesa che segue la sorgente, con la pausa per motivo, i ricollegamenti detti quando arriva l'audio, con il buco dall'ultimo dato, i marker dei titoli e delle riprese, il salvataggio in fretta, ogni pacchetto sul disco e il recupero delle parti, anche di quella aperta al crollo; la diretta riconosciuta da se'. Nella 3.26.4 l'unione senza ricodificare, e secondi e byte senza lucchetto. Nella 3.26.9 i flussi dei siti chiesti a pezzi. Nella 3.26.24 nome_del_capitolo, Capitolo e il numero per i capitoli senza nome.
 
 """Le registrazioni (3.5.0, issue 42).
 
@@ -171,6 +171,16 @@ def nome_del_marker(testo):
     il marker si chiama come quelli di T, M e il numero."""
     nome = " ".join(str(testo or "").split())
     return nome[:LUNGHEZZA_DEL_MARKER].rstrip() if len(nome) > LUNGHEZZA_DEL_MARKER else nome
+
+
+def nome_del_capitolo(titolo, numero):
+    """Il nome del marker del capitolo numero di una puntata, da 1: il suo
+    titolo, o, per un capitolo senza nome, Capitolo e il numero, come lo
+    dicono l'avviso della registrazione e la virgola. Prima il marker si
+    chiamava come quelli di T, M e un numero suo, e l'avviso diceva capitolo
+    e il numero del capitolo (revisione dell'unione, 15 novembre 2026)."""
+    # Traduttori: il marker di un capitolo senza nome di una puntata registrata, come Capitolo 3.
+    return nome_del_marker(titolo) or _("Capitolo {numero}").format(numero=numero)
 
 
 def parametri(formato, kbps, sorgente_kbps=None, canali=None, frequenza=None, scelta_canali=CANALI_DELLA_SORGENTE, scelta_frequenza=0):
@@ -866,7 +876,7 @@ class Registrazione:
         for parte, (inizio, taglio, _tenuti) in zip(parti, tratti, strict=True):
             voci.extend((inizio + max(0.0, voce[0] - taglio), voce[1]) for voce in parte.marker)
         if not self.dal_vivo:
-            voci.extend((inizio, nome_del_marker(titolo)) for inizio, titolo in self.capitoli if 0.0 <= inizio < totale)
+            voci.extend((inizio, nome_del_capitolo(titolo, numero)) for numero, (inizio, titolo) in enumerate(self.capitoli, 1) if 0.0 <= inizio < totale)
         voci.sort(key=lambda voce: voce[0])
         finali = []
         for tempo, nome in voci:
@@ -927,7 +937,7 @@ class Registrazione:
             salvate.append(arrivo)
             voci.extend((arrivo, voce[0], voce[1]) for voce in parte.marker)
             if not self.dal_vivo:
-                voci.extend((arrivo, inizio - parte.inizio, nome_del_marker(titolo)) for inizio, titolo in self.capitoli
+                voci.extend((arrivo, inizio - parte.inizio, nome_del_capitolo(titolo, numero)) for numero, (inizio, titolo) in enumerate(self.capitoli, 1)
                     if parte.inizio <= inizio < parte.inizio + max(parte.secondi, 0.0))
         self._parti = []
         self.marker_finali = voci

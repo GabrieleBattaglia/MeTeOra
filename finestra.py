@@ -1,6 +1,6 @@
 # MeTeOra, la finestra principale: plancia dei comandi, console e cruscotto.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17). Nella 2.7.1 la precedenza ai tasti sul lavoro in disparte. Nella 2.7.2 i lettori di rete chiusi all'uscita. Nella 2.7.3 i tasti funzione nelle tabelle COMANDI_DEI_TASTI_FUNZIONE e INTERRUTTORI, lette dalla prova della guida rapida, e le righe del cruscotto nell'ordine della regola. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.1.0 la voce Componenti aggiuntivi delle impostazioni, e gli altri banchi liberi da scaricare. Nella 3.2.0 gli indirizzi in rete: Ctrl con V, Apri un indirizzo, il ramo Indirizzi, il flusso chiesto prima di suonare e in anticipo per il seguente, e yt-dlp aggiornato ogni giorno. Nella 3.3.0 il ramo Radio, con la ricerca delle radio, il titolo in onda, le dirette che non si saltano e i contatori di radio, componenti e lingua. Nella 3.3.1 la voce Lingua con la sua lista anche con una lingua sola. Nella 3.4.0 i Preferiti in rete, un ramo in cima ai Preferiti, con F4 che sceglie la categoria (issue 41). Nella 3.5.0 le registrazioni, con la famiglia di R e il ramo Registrazioni, e i comandi dei marker su T (issue 42). Nella 3.6.0 la scheda degli effetti, con Ctrl e Maiuscolo con Z (issue 43). Nella 3.7.0 la console letta da sola, con la famiglia di F10 (issue 44). Nella 3.8.0 D per i titoli in onda e i capitoli, e il capitolo nuovo detto suonando (issue 45). Nella 3.8.1 anche i caratteri di console e cruscotto hanno lo sfondo scelto, che NVDA legge. Nella 3.8.2 le radio ascoltate di recente nel sottoramo Recenti. Nella 3.9.0 Cerca contenuti negli Indirizzi, i risultati man mano e i dieci secondi per entrare negli Indirizzi (issue 47). Nella 3.9.1 l'avviso dei dieci secondi. Nella 3.9.2 formato, sorgente e primati delle registrazioni per le statistiche. Nella 3.10.0 Mostra altri risultati dei contenuti e Mostra altre radio. Nella 3.10.1 un minuto per entrare negli Indirizzi. Nella 3.10.2 un minuto anche per le radio Recenti. Nella 3.10.3 il suono della sorgente tenuta. Nella 3.11.2 il controllo di yt-dlp detto anche senza novità. Nella 3.11.3 le correzioni delle due verifiche delle novita' dalla 3.6.0 alla 3.11.1. Nella 3.11.4 la radio delle Recenti e il brano degli Indirizzi salgono subito in cima, con la coda che ricorda l'ordine di prima. Nella 3.11.5 le sorgenti Radio e Ricerca dei contenuti nelle statistiche. Nella 3.11.6 i conti del ripetitore dello speaker. Nella 3.12.0 il convertitore dal vivo per lo speaker. Nella 3.13.0 la voce Cartella delle registrazioni. Nella 3.13.2 l'attesa di Alt con R anche al passaggio, e le parti non unite dette. Nella 3.14.0 la voce Vai alla cartella delle registrazioni. Nella 3.15.0 la voce Formato e qualità delle registrazioni, a due passi. Nella 3.16.0 YouTube Music di riserva nella ricerca dei contenuti. Nella 3.16.1 le anteprime di SoundCloud tolte dai risultati. Nella 3.16.2 l'etichetta degli Indirizzi segue i brani entrati dopo il minuto di ascolto. Nella 3.17.0 le righe del karaoke dette con lo speaker, contate. Nella 3.17.1 la console che segue il fondo senza spostare il cursore. Nella 3.17.2 i sottotitoli e il karaoke nella console senza l'ora. Nella 3.18.0 la vista del karaoke a tutto schermo, con il video acceso. Nella 3.19.0 le righe con lo speaker contate tutte. Nella 3.19.1 i sottotitoli che scorrono senza la riga ridetta. Nella 3.20.0 le voci Dimensione del karaoke a tutto schermo e Colore della riga da cantare. Nella 3.26.0 Alt con R interruttore dell'attesa, che segue la sorgente senza i silenzi e riprova quelle non riuscite, i ricollegamenti, i marker e gli avvisi delle registrazioni, la chiusura che aspetta il salvataggio, l'aggiornamento che non la interrompe, lo spegnimento di Windows e il recupero all'avvio in disparte. Nella 3.26.4 Alt e Maiuscolo con R che ricontrolla dopo la domanda, e R che non aspetta l'unione. Nella 3.26.14 le lingue di due lettere, il suono del capitolo precedente su X e la riga della virgola.
+# 30/09/2026: nasce con la tappa 1. Nella 1.2.0 i sottobrani dei SID, nella 1.3.0 il loop A-B, nella 1.4.0 il cestino, Nella 1.102.2 la voce del volume dice del livello originale e del limitatore. Nella 1.102.3 rubberband nei crediti. Nella 1.102.4 l'invito a offrire un caffe' non compare piu' alla chiusura: resta la voce delle impostazioni. Nella 1.103.0 le statistiche, con la loro voce nella plancia e Maiuscolo con F7. Nella 1.104.0 la pulizia all'avvio, le statistiche salvate subito, il file del crash svuotato ogni minuto e Rinomina file che porta con se' anche il punto da riprendere e lo storico. Nella 1.104.2 la stessa cartella con le maiuscole diverse e' una cartella sola. Nella 1.105.0 Dove sono, sull'apostrofo: tempo, brano e lista di cio' che suona, nella console e alla sintesi e al braille dei sottotitoli, dove la riga nuova prende il posto di quella di prima. Nella 1.105.1 la riga In riproduzione chiama la lista come Dove sono: Risultati e Preferiti, non piu' cartella Risultati e playlist Preferiti. Nella 1.109.0 Ordina e Mescola nel menu della playlist e dei Preferiti, e il ramo Playlist ricostruito tiene aperti anche i brani e i sottobrani che lo erano. Nella 1.110.0 la durata residua, su Maiuscolo con l'apostrofo: trascorso, mancante e totale di cio' che suonera' la plancia, con la percentuale ascoltata e l'ora di fine, nella console e alla sintesi e al braille dei sottotitoli. Nella 1.111.0 lo stato della selezione detto a NVDA nella plancia, con la sua voce delle impostazioni (issue 21). Nella 1.112.0 la pulizia all'avvio riconosce il disco di ogni lettera, e salta quelle usate da dischi diversi o con un disco che non riconosce, e tutte se il file dei dischi non si legge; Riconosci questo disco nel menu delle unita' contese, indicato dalla riga della pulizia, e il disco di una lettera guardato ogni volta che MeTeOra ne usa un file; le voci di una lettera diventata contesa, o riconosciuta a mano, mentre la pulizia lavorava restano; infine Riconosci questo disco chiede conferma con il conto delle voci, la Sentinella dice subito, con il suo suono, la lettera che rende contesa, e la riga della pulizia suggerisce Riconosci questo disco solo per le lettere usate da dischi diversi. Nella 1.113.0 l'importazione delle playlist M3U, M3U8 e PLS di altri programmi, con il comando Importa playlist, da Apri file e da Windows. Nella 1.113.1 l'etichetta di un file con piu' sottobrani somma solo le durate note e dice quanti sono senza durata, invece di cadere in errore (issue 24). Nella 1.113.3 la voce Barra dei comandi per il mouse dice il suo nome nell'errore, non quello dell'Inseguimento della plancia, e l'Inseguimento passa il suo (issue 26). Nella 1.113.5 le statistiche si scrivono solo se sono cambiate davvero, al piu' ogni mezz'ora, oltre che all'avvio e all'uscita. Nella 1.116.0 le schede audio che arrivano e se ne vanno, come le cuffie Bluetooth: PortAudio riletto, la scheda scelta lasciata e ritrovata, e il brano che riparte quando la sua uscita si perde. Nella 1.116.1 il tempo delle statistiche va alla scheda che suona davvero, non a quella scelta che manca.. Nella 1.116.2 il suono di piu' e meno fatto al volo, che dice il volume con la sua frequenza. Nella 1.116.3 i comandi che si muovono nel brano rispondono anche da fermi, ricaricandolo in pausa all'inizio (issue 39). Nella 1.119.0 gli speaker Cast fra le destinazioni, con la lista unica e il filtro, e le statistiche delle uscite (tappa 15 b, issue 31). Nella 2.0.6 il rinfresco dei Preferiti non porta piu' il fuoco su Playlist (issue 29). Nella 2.1.0 le voci Entra al PUB e Chiedi aiuto al PUB (issue 30). Nella 2.2.0 il segnalibro, su H (issue 37). Nella 2.4.0 i registri degli errori in Chiedi aiuto al PUB e i sostenitori nei crediti. Nella 2.7.0 le aperture in blocco in disparte, senza limiti e anche su Questo PC e Questa rete, con i comandi tutti su F9 (tappa 17). Nella 2.7.1 la precedenza ai tasti sul lavoro in disparte. Nella 2.7.2 i lettori di rete chiusi all'uscita. Nella 2.7.3 i tasti funzione nelle tabelle COMANDI_DEI_TASTI_FUNZIONE e INTERRUTTORI, lette dalla prova della guida rapida, e le righe del cruscotto nell'ordine della regola. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.1.0 la voce Componenti aggiuntivi delle impostazioni, e gli altri banchi liberi da scaricare. Nella 3.2.0 gli indirizzi in rete: Ctrl con V, Apri un indirizzo, il ramo Indirizzi, il flusso chiesto prima di suonare e in anticipo per il seguente, e yt-dlp aggiornato ogni giorno. Nella 3.3.0 il ramo Radio, con la ricerca delle radio, il titolo in onda, le dirette che non si saltano e i contatori di radio, componenti e lingua. Nella 3.3.1 la voce Lingua con la sua lista anche con una lingua sola. Nella 3.4.0 i Preferiti in rete, un ramo in cima ai Preferiti, con F4 che sceglie la categoria (issue 41). Nella 3.5.0 le registrazioni, con la famiglia di R e il ramo Registrazioni, e i comandi dei marker su T (issue 42). Nella 3.6.0 la scheda degli effetti, con Ctrl e Maiuscolo con Z (issue 43). Nella 3.7.0 la console letta da sola, con la famiglia di F10 (issue 44). Nella 3.8.0 D per i titoli in onda e i capitoli, e il capitolo nuovo detto suonando (issue 45). Nella 3.8.1 anche i caratteri di console e cruscotto hanno lo sfondo scelto, che NVDA legge. Nella 3.8.2 le radio ascoltate di recente nel sottoramo Recenti. Nella 3.9.0 Cerca contenuti negli Indirizzi, i risultati man mano e i dieci secondi per entrare negli Indirizzi (issue 47). Nella 3.9.1 l'avviso dei dieci secondi. Nella 3.9.2 formato, sorgente e primati delle registrazioni per le statistiche. Nella 3.10.0 Mostra altri risultati dei contenuti e Mostra altre radio. Nella 3.10.1 un minuto per entrare negli Indirizzi. Nella 3.10.2 un minuto anche per le radio Recenti. Nella 3.10.3 il suono della sorgente tenuta. Nella 3.11.2 il controllo di yt-dlp detto anche senza novità. Nella 3.11.3 le correzioni delle due verifiche delle novita' dalla 3.6.0 alla 3.11.1. Nella 3.11.4 la radio delle Recenti e il brano degli Indirizzi salgono subito in cima, con la coda che ricorda l'ordine di prima. Nella 3.11.5 le sorgenti Radio e Ricerca dei contenuti nelle statistiche. Nella 3.11.6 i conti del ripetitore dello speaker. Nella 3.12.0 il convertitore dal vivo per lo speaker. Nella 3.13.0 la voce Cartella delle registrazioni. Nella 3.13.2 l'attesa di Alt con R anche al passaggio, e le parti non unite dette. Nella 3.14.0 la voce Vai alla cartella delle registrazioni. Nella 3.15.0 la voce Formato e qualità delle registrazioni, a due passi. Nella 3.16.0 YouTube Music di riserva nella ricerca dei contenuti. Nella 3.16.1 le anteprime di SoundCloud tolte dai risultati. Nella 3.16.2 l'etichetta degli Indirizzi segue i brani entrati dopo il minuto di ascolto. Nella 3.17.0 le righe del karaoke dette con lo speaker, contate. Nella 3.17.1 la console che segue il fondo senza spostare il cursore. Nella 3.17.2 i sottotitoli e il karaoke nella console senza l'ora. Nella 3.18.0 la vista del karaoke a tutto schermo, con il video acceso. Nella 3.19.0 le righe con lo speaker contate tutte. Nella 3.19.1 i sottotitoli che scorrono senza la riga ridetta. Nella 3.20.0 le voci Dimensione del karaoke a tutto schermo e Colore della riga da cantare. Nella 3.26.0 Alt con R interruttore dell'attesa, che segue la sorgente senza i silenzi e riprova quelle non riuscite, i ricollegamenti, i marker e gli avvisi delle registrazioni, la chiusura che aspetta il salvataggio, l'aggiornamento che non la interrompe, lo spegnimento di Windows e il recupero all'avvio in disparte. Nella 3.26.4 Alt e Maiuscolo con R che ricontrolla dopo la domanda, e R che non aspetta l'unione. Nella 3.26.14 le lingue di due lettere, il suono del capitolo precedente su X e la riga della virgola. Nella 3.26.24 le riprove dell'attesa che tacciono fino all'audio, R durante il ricollegamento, la chiusura che lascia perdere gli avvii in sospeso, e i capitoli con il nome del loro marker.
 # nella 1.5.0 le cartelle suonate con le sottocartelle, nella 1.6.0 i Preferiti, nella 1.7.0 conti e durate delle playlist, nella 1.8.0 il filtro,
 # nella 1.12.0 durate nella plancia, riga della console riscritta, F9 e F10, Maiuscolo+C;
 # nella 1.13.0 l'avanzamento automatico che segue la plancia, nella 1.14.0 l'inseguimento con Maiuscolo+F8,
@@ -10272,6 +10272,13 @@ class Finestra(wx.Frame):
             al_marker=lambda reg, numero, nome, secondi: wx.CallAfter(self._marker_della_registrazione, reg, numero, nome, secondi),
             alla_caduta=lambda reg, secondi: wx.CallAfter(self._registrazione_caduta, reg, secondi), capitoli=capitoli,
             alla_ripresa=lambda reg, motivo: wx.CallAfter(self._registrazione_ripresa, reg, motivo), da_riconoscere=not dal_vivo and not scheda.get("durata"))
+        # Una riprova dell'attesa, di una sorgente la cui registrazione non era
+        # riuscita: si dice e si conta solo quando la sua prima parte riceve
+        # l'audio, in _registrazione_ripresa. Prima ogni tentativo diceva
+        # Registro con il suono della registrazione avviata, anche quando poi
+        # falliva, e l'avviso dei dieci minuti non arrivava mai (revisione
+        # dell'unione, 15 novembre 2026).
+        registrazione.in_riprova = bool(dall_attesa and self._non_riuscita is not None and self._non_riuscita[0] == brano.percorso)
         try:
             registrazione.avvia()
         except Exception as e:  # noqa: BLE001 - avvia dice OSError, ma niente deve restare a meta'
@@ -10286,11 +10293,17 @@ class Finestra(wx.Frame):
         self._registrazione, self._da_non_registrare = registrazione, None
         # Il capitolo da cui parte una puntata non si dice: lo dice l'avvio.
         registrazione.capitoli_avvisati = registrazione.capitoli_passati() if hasattr(registrazione, "capitoli_passati") else 0
+        if not registrazione.in_riprova:
+            self._registrazione_avviata(registrazione, dall_attesa)
+
+    def _registrazione_avviata(self, registrazione, dall_attesa):
+        """La riga e il suono di una registrazione che comincia, con i suoi
+        conti: subito, o per una riprova dell'attesa quando arriva l'audio."""
         self._statistiche.conta("registrazioni_avviate")
         if dall_attesa:
             self._statistiche.conta("registrazioni_dall_attesa")
         self._ultimo_avviso = self._orologio_delle_registrazioni()
-        self._riscontro("registrazione_avviata", _("Registro {nome}, in {formato}. Ctrl con R la ferma.").format(nome=brano.nome_del_file,
+        self._riscontro("registrazione_avviata", _("Registro {nome}, in {formato}. Ctrl con R la ferma.").format(nome=registrazione.titolo,
             formato=registrazione.descrizione))
 
     # L'attesa che segue la sorgente (Gabriele, 15 novembre 2026).
@@ -10344,7 +10357,13 @@ class Finestra(wx.Frame):
                     self._pausa_automatica(reg, False)
                 return
             if percorso is None:
-                if reg.dal_vivo and reg.stato == "in_corso":
+                if self._riprova_senza_audio(reg):
+                    # Una riprova senza audio non va in pausa, con la sua riga
+                    # e il marker della ripresa a 0:00: si chiude in silenzio, e
+                    # la sorgente che riparte si riprova (revisione delle
+                    # correzioni, 15 novembre 2026).
+                    self._chiudi_la_registrazione("altra_sorgente")
+                elif reg.dal_vivo and reg.stato == "in_corso":
                     self._pausa_automatica(reg, True)
                 elif reg.stato == "in_pausa" and reg.motivo == "rete":
                     # La rete e' caduta e il lettore tace: si aspetta la sorgente.
@@ -10411,6 +10430,21 @@ class Finestra(wx.Frame):
         # Traduttori: le registrazioni che si salvano mentre MeTeOra fa altro, come Salvo in disparte: Rai Radio 3, 45%.
         return _("Salvo in disparte: {elenco}.").format(elenco="; ".join(voci)) if voci else ""
 
+    @staticmethod
+    def _riprova_senza_audio(reg):
+        """Una riprova dell'attesa che registra, ma non ha ancora ricevuto
+        l'audio: per R e l'avviso dei dieci minuti la sorgente non e' ancora
+        riuscita (revisione dell'unione, 15 novembre 2026)."""
+        return getattr(reg, "in_riprova", False) and reg.stato == "in_corso"
+
+    @staticmethod
+    def _si_ricollega(reg):
+        """Una diretta registrata che ha perso la connessione: fra un tentativo
+        e l'altro e' in pausa per la rete, e durante un tentativo e' gia' in
+        corso ma senza l'audio. Prima R, durante il tentativo, diceva Registro
+        (revisione dell'unione, 15 novembre 2026)."""
+        return (reg.stato == "in_pausa" and reg.motivo == "rete") or (reg.stato == "in_corso" and getattr(reg, "ricollegando", False))
+
     def _frase_dell_attesa(self):
         """Con l'attesa accesa e senza registrazione, per R e per l'avviso dei
         dieci minuti: se la sorgente che suona non si registra, perche'; vuota
@@ -10434,14 +10468,14 @@ class Finestra(wx.Frame):
         di un'unione lunga; con la rete caduta dice che si ricollega, e con
         l'attesa se la sorgente che suona non si registra."""
         reg = self._registrazione
-        if reg is None and self._in_ascolto and self._frase_dell_attesa():
+        if (reg is None or self._riprova_senza_audio(reg)) and self._in_ascolto and self._frase_dell_attesa():
             # Traduttori: in coda alla frase di R con l'attesa accesa.
             testo = self._frase_dell_attesa() + " " + _("Alt con R spegne l'attesa.")
         elif reg is None and self._in_ascolto:
             testo = _("Attesa accesa: registro le radio e gli indirizzi in rete che suonano, senza i silenzi. Alt con R la spegne.")
         elif reg is None:
             testo = _("Nessuna registrazione. Maiuscolo con R registra la radio o l'indirizzo in rete che suona; Alt con R accende l'attesa, che registra tutto quello che suona.")
-        elif reg.stato == "in_pausa" and reg.motivo == "rete":
+        elif self._si_ricollega(reg):
             # Traduttori: R durante il ricollegamento di una diretta registrata che ha perso la connessione.
             testo = _("La registrazione di {registrazione} si sta ricollegando alla sorgente. Maiuscolo con R la mette in pausa, Ctrl con R la ferma.").format(
                 registrazione=self._frase_della_registrazione(reg))
@@ -10480,6 +10514,14 @@ class Finestra(wx.Frame):
             if brano is not None:
                 self._da_non_registrare = None
                 self._avvia_la_registrazione(brano)
+            return
+        if self._in_ascolto and self._riprova_senza_audio(reg):
+            # Una riprova dell'attesa che non ha ancora l'audio non e' una
+            # registrazione da mettere in pausa: lo si dice come fa R, e
+            # l'attesa continua a riprovare (revisione delle correzioni, 15
+            # novembre 2026).
+            self._riscontro("non_disponibile", (self._frase_dell_attesa() or _("Attesa accesa: la registrazione di {nome} sta partendo.").format(
+                nome=reg.titolo)) + " " + _("Alt con R spegne l'attesa."))
             return
         if reg.stato == "in_pausa" and reg.motivo in ("sorgente", "rete"):
             self._annulla_la_riprova()
@@ -10546,6 +10588,13 @@ class Finestra(wx.Frame):
             return
         if self._non_riuscita is not None and self._non_riuscita[0] == reg.sorgente:
             self._non_riuscita = None
+        # Il tentativo di ricollegamento e' riuscito: R e l'avviso dei dieci
+        # minuti tornano a dire Registro.
+        reg.ricollegando = False
+        if getattr(reg, "in_riprova", False):
+            # La riprova dell'attesa riceve l'audio: adesso registra davvero.
+            reg.in_riprova = False
+            self._registrazione_avviata(reg, True)
         if motivo == "rete":
             self._statistiche.conta("ricollegamenti_delle_registrazioni")
             self._avviso(_("La registrazione di {nome} si è ricollegata, e continua nello stesso file.").format(nome=reg.titolo))
@@ -10665,6 +10714,11 @@ class Finestra(wx.Frame):
             motivo == "interrotta" and self._in_ascolto and self._non_riuscita is not None and self._non_riuscita[0] == reg.sorgente) else ""
         if motivo == "recupero":
             self._registrazione_recuperata(reg, percorso)
+        elif percorso is None and getattr(reg, "in_riprova", False) and motivo in ("interrotta", "altra_sorgente", "chiusura"):
+            # Una riprova dell'attesa che non ha ricevuto niente: non e' stata
+            # una registrazione, e non si dice ne' si conta; Ctrl con R e Alt
+            # con R hanno la loro riga (revisione dell'unione, 15 novembre 2026).
+            pass
         elif percorso is None and motivo == "interrotta" and getattr(reg, "ripetuta", False):
             # L'attesa riprova una sorgente che ancora non risponde: lo dicono R e l'avviso dei dieci minuti.
             self._statistiche.conta("registrazioni_interrotte")
@@ -10700,7 +10754,22 @@ class Finestra(wx.Frame):
         """Il flusso registrato e' finito da se': una puntata tutta, o una
         radio caduta. Il file e' gia' chiuso. Con l'attesa accesa la stessa
         puntata non si registra di nuovo finche' non suona un'altra sorgente;
-        una diretta, che non finisce, si riprova (revisione del 15 novembre 2026)."""
+        una diretta, che non finisce, si riprova (revisione del 15 novembre 2026).
+        Una riprova dell'attesa finita senza aver scritto niente, come una
+        puntata che non si apre, e' una riprova fallita: tace, non si conta, e
+        l'attesa ci riprova (revisione delle correzioni, 15 novembre 2026)."""
+        if getattr(reg, "in_riprova", False) and not reg.file_finali:
+            if reg is self._registrazione:
+                self._registrazione = None
+                self._annulla_la_riprova()
+                if self._in_ascolto:
+                    self._registrazione_non_riuscita(reg.sorgente, "")
+            if reg in self._in_chiusura:
+                self._in_chiusura.remove(reg)
+            reg.detta = True
+            if self._chiusura_chiesta is not None:
+                self._prosegui_la_chiusura()
+            return
         if reg is self._registrazione:
             self._registrazione = None
             self._annulla_la_riprova()
@@ -10824,12 +10893,20 @@ class Finestra(wx.Frame):
         tentativi = getattr(reg, "riprove", 0)
         brano = self._sorgente_che_suona()
         suona = brano is not None and brano.percorso == reg.sorgente
+        if self._in_ascolto and not secondi and getattr(reg, "in_riprova", False):
+            # Una riprova dell'attesa che non ha ricevuto niente non si
+            # ricollega: la sorgente non risponde ancora, e l'attesa la riprova
+            # fra un minuto, in silenzio. Con i cinque tentativi il giro durava
+            # un minuto e 48 secondi (revisione dell'unione, 15 novembre 2026).
+            # Con la sorgente ferma si chiude in silenzio anche lei.
+            if suona:
+                self._registrazione_non_riuscita(reg.sorgente, "")
+            reg.ripetuta = True
+            self._chiudi_la_registrazione("interrotta")
+            return
         if suona and tentativi < len(RIPROVE_DELLA_REGISTRAZIONE):
             reg.riprove = tentativi + 1
-            # Una registrazione dell'attesa che riprova una sorgente non
-            # riuscita, e non ha ricevuto niente, non lo ridice.
-            in_riprova = self._non_riuscita is not None and self._non_riuscita[0] == reg.sorgente and not secondi
-            if (not tentativi or secondi > 0) and not in_riprova:
+            if not tentativi or secondi > 0:
                 self._avviso(_("La registrazione di {nome} ha perso la connessione: mi ricollego.").format(nome=reg.titolo))
             self._annulla_la_riprova()
             self._riprova = wx.CallLater(RIPROVE_DELLA_REGISTRAZIONE[tentativi] * 1000, self._riprova_la_registrazione, reg)
@@ -10856,6 +10933,8 @@ class Finestra(wx.Frame):
             self._registrazione_caduta(reg, 0.0)
             return
         self._registrazione_occupata = True
+        # Fino all'audio, R e l'avviso dei dieci minuti dicono che si ricollega.
+        reg.ricollegando = True
         flusso = indirizzi.pronto(reg.sorgente)
         registrazioni_in_disparte(functools.partial(_pausa_in_disparte, reg, False, "rete", flusso),
             lambda esito: wx.CallAfter(self._pausa_della_registrazione, reg, False, esito, "rete"))
@@ -10894,14 +10973,14 @@ class Finestra(wx.Frame):
         dice anche la pausa a mano con l'attesa accesa, che prima diceva di
         registrare la prossima radio, il ricollegamento, e la sorgente che
         con l'attesa non si registra."""
-        if reg is None:
+        if reg is None or (self._riprova_senza_audio(reg) and self._frase_dell_attesa()):
             testo = self._frase_dell_attesa() or _("Attesa accesa: registro la prossima radio o il prossimo indirizzo in rete che suona.")
+        elif self._si_ricollega(reg):
+            # Traduttori: l'avviso dei dieci minuti durante il ricollegamento di una diretta registrata.
+            testo = _("La registrazione di {registrazione} si sta ricollegando alla sorgente.").format(registrazione=self._frase_della_registrazione(reg))
         elif reg.stato == "in_corso":
             # Traduttori: l'avviso dei dieci minuti di una registrazione, come Registro Rai Radio 3: 1:20:00, 75 MB.
             testo = _("Registro {nome}: {durata}, {peso}.").format(nome=reg.titolo, durata=tempo(reg.secondi), peso=midi.dimensione_da_leggere(reg.byte))
-        elif reg.motivo == "rete":
-            # Traduttori: l'avviso dei dieci minuti durante il ricollegamento di una diretta registrata.
-            testo = _("La registrazione di {registrazione} si sta ricollegando alla sorgente.").format(registrazione=self._frase_della_registrazione(reg))
         elif reg.motivo == "sorgente":
             testo = _("La registrazione di {registrazione} aspetta che la sorgente torni a suonare.").format(registrazione=self._frase_della_registrazione(reg))
         else:
@@ -10917,8 +10996,8 @@ class Finestra(wx.Frame):
             return
         reg.capitoli_avvisati, self._ultimo_avviso_dei_capitoli = passati, adesso
         inizio, titolo = reg.capitoli[passati - 1]
-        # Traduttori: il capitolo senza titolo di una puntata registrata, come capitolo 3.
-        nome = registrazioni.nome_del_marker(titolo) or _("capitolo {numero}").format(numero=passati)
+        # Il nome che il marker avra' sul file (revisione dell'unione, 15 novembre 2026).
+        nome = registrazioni.nome_del_capitolo(titolo, passati)
         self._avviso(_("Registro {nome}, marker {numero}: {marker}, a {tempo}.").format(nome=reg.titolo, numero=passati, marker=nome, tempo=tempo(inizio)))
 
     def _comando_vai_alle_registrazioni(self):
@@ -10979,7 +11058,8 @@ class Finestra(wx.Frame):
         che la registrazione sia ancora quella in corso: intanto puo' essere
         finita da se', salvata e contata."""
         reg = self._registrazione
-        if reg is None:
+        if reg is None or self._riprova_senza_audio(reg):
+            # Anche una riprova dell'attesa senza audio: non ha niente da eliminare.
             self._riscontro("non_disponibile", _("Non c'è una registrazione in corso da eliminare."))
             return
         if self._registrazione_occupata:
@@ -11046,6 +11126,12 @@ class Finestra(wx.Frame):
             self._statistiche.conta("chiusure_rimandate")
             self._in_ascolto, self._sorgente_vista = False, None
             self._annulla_la_riprova()
+            # Un indirizzo che si stava aprendo, e il brano che doveva partire
+            # dopo uno in errore, non partono piu': il lettore si ferma, e
+            # avrebbero suonato fino alla fine del salvataggio, diventando il
+            # punto da riprendere (revisione dell'unione, 15 novembre 2026).
+            # Un X premuto intanto suona come sempre.
+            self._flusso_atteso = self._avanzamento_dopo_errore = None
             self._ripresa_della_chiusura = self._stato_da_riprendere()
             if self.motore.in_corso:
                 self._ferma(sfumando=False)
@@ -11931,6 +12017,12 @@ class Finestra(wx.Frame):
         self._indirizzo_in_apertura = None
         if self._chiusa:
             return
+        # Durante la chiusura che aspetta il salvataggio l'indirizzo entra
+        # negli Indirizzi, ma non suona: avrebbe suonato fino alla fine del
+        # salvataggio, diventando il punto da riprendere (revisione delle
+        # correzioni, 15 novembre 2026).
+        if self._chiusura_chiesta is not None:
+            suona = False
         if isinstance(esito, Exception):
             self._riscontro("errore", _("L'indirizzo di {sito} non si apre: {motivo}.").format(sito=indirizzi.sito(indirizzo), motivo=esito))
             return

@@ -1,6 +1,6 @@
 # MeTeOra, le prove del motore: due lettori, velocita', tono, equalizzatore, dissolvenza e fine brano senza attese.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.55.0 (tappa 4, issue 15). Nella 1.113.4 le prove del filtro del tempo e del tono cambiato al volo aspettano che il motore abbia visto gli eventi di mpv, invece dei tempi (issue 27). Nella 1.116.0 alle_uscite e l'uscita che non si apre piu'. Nella 1.117.0 il lettore lontano e la conversione in FLAC. Nella 2.0.5 il calo, la sfumatura e la catena del volume oltre 100 aspettati per stato, non per tempo (issue 28). Nella 2.7.4 la sorgente a 24 bit che va allo speaker a 16. Nella 3.26.9 i flussi a pezzi con libmpv vera e un server in locale, il flusso rinnovato dopo la scadenza e il lettore lontano vero dentro il motore. Nella 3.26.14 i sottotitoli dei siti con lo speaker, anche a pezzi HLS, le tracce del PC una alla volta e il sottotitolo che sposta solo la riga vuota.
+# 01/10/2026: nasce con la 1.55.0 (tappa 4, issue 15). Nella 1.113.4 le prove del filtro del tempo e del tono cambiato al volo aspettano che il motore abbia visto gli eventi di mpv, invece dei tempi (issue 27). Nella 1.116.0 alle_uscite e l'uscita che non si apre piu'. Nella 1.117.0 il lettore lontano e la conversione in FLAC. Nella 2.0.5 il calo, la sfumatura e la catena del volume oltre 100 aspettati per stato, non per tempo (issue 28). Nella 2.7.4 la sorgente a 24 bit che va allo speaker a 16. Nella 3.26.9 i flussi a pezzi con libmpv vera e un server in locale, il flusso rinnovato dopo la scadenza e il lettore lontano vero dentro il motore. Nella 3.26.14 i sottotitoli dei siti con lo speaker, anche a pezzi HLS, le tracce del PC una alla volta e il sottotitolo che sposta solo la riga vuota. Nella 3.26.24 i sottotitoli dopo il rinnovo, con il video, e l'uscita con lo speaker lasciato.
 
 """Le prove del motore vero, senza suoni.
 
@@ -2343,6 +2343,77 @@ def test_la_chiusura_del_motore_aspetta_lo_stop_dello_speaker(crea, tmp_path):
     durata = time.monotonic() - inizio
     assert [c[0] for c in apparecchio.chiamate] == ["suona", "vai_a", "ferma", "chiudi"] and apparecchio.chiamate[-1] == ("chiudi", False)
     assert durata < modulo.ATTESA_DELLO_SPEAKER_ALL_USCITA + 1
+
+
+def test_l_uscita_aspetta_anche_lo_speaker_lasciato(crea, tmp_path):
+    # Passando al PC, o a un altro speaker, e uscendo subito: lo stop allo
+    # speaker lasciato e' in fila dietro un salto che conferma tardi, e
+    # l'uscita aspettava solo lo speaker in uso. Il lasciato continuava a
+    # suonare (revisione dell'unione, 15 novembre 2026).
+    brano = str(tmp_path / "brano.mp3")
+    with open(brano, "wb") as f:
+        f.write(bytes(1024))
+    m = crea()
+    lettore, apparecchio, stati = _speaker_vero(ritardo=0.6)
+    m.usa_il_lontano(lettore)
+    m.suona(brano)
+    assert lettore.aspetta_i_comandi()
+    _suona_allo_speaker(stati, apparecchio)
+    m.salta(30)
+    assert _aspetta(lambda: any(c[0] == "vai_a" for c in apparecchio.chiamate))
+    m.usa_il_lontano(None)
+    inizio = time.monotonic()
+    m.chiudi()
+    durata = time.monotonic() - inizio
+    assert [c[0] for c in apparecchio.chiamate] == ["suona", "vai_a", "ferma", "chiudi"]
+    assert durata < modulo.ATTESA_DELLO_SPEAKER_ALL_USCITA + 1
+
+
+def test_i_sottotitoli_dei_siti_con_lo_speaker_dopo_il_rinnovo(crea, avvisi, monkeypatch):
+    # Il brano di un sito riparte allo speaker con il flusso tenuto scaduto,
+    # come passando allo speaker dopo venti minuti, o con Y e la dissolvenza:
+    # il convertitore lo rinnova, e i sottotitoli arrivano dal flusso nuovo,
+    # con una sola chiamata a yt-dlp. Prima il brano restava senza tracce
+    # finche' non si rifaceva con X. Il flusso nuovo si chiede con il video,
+    # come quello scaduto: solo audio, tornando al PC il video non c'era piu'
+    # (revisione dell'unione, 15 novembre 2026).
+    import indirizzi
+
+    monkeypatch.setattr(indirizzi, "scarica_i_sottotitoli", lambda traccia, intestazioni=(), attesa=None, serve=None: WEBVTT_CHE_SCORRE)
+    pagina = "https://www.youtube.com/watch?v=rinnovo"
+    tracce = [indirizzi.Sottotitoli("https://a/it.vtt", "it", "Italian (Original)", True)]
+    chiesti = []
+
+    def risolvi(indirizzo, video=False):
+        chiesti.append((indirizzo, video))
+        time.sleep(0.3)
+        flusso = indirizzi.Flusso("https://a/nuovo.webm", ["User-Agent: di prova"], sottotitoli=tracce)
+        indirizzi._tieni(indirizzo, video, flusso)
+        return indirizzi.Pagina(indirizzo, None, flusso=flusso)
+
+    monkeypatch.setattr(indirizzi, "risolvi", risolvi)
+    indirizzi._tieni(pagina, True, indirizzi.Flusso("https://a/vecchio.webm", sottotitoli=tracce))
+    with indirizzi._flussi_blocco:
+        flusso, _scadenza, video = indirizzi._flussi[pagina]
+        indirizzi._flussi[pagina] = (flusso, time.monotonic() - 1.0, video)
+    assert indirizzi.pronto(pagina) is None and indirizzi.video_tenuto(pagina)
+    detti = []
+    m = crea(ai_sottotitoli=detti.append, al_caricamento=avvisi("al_caricamento"))
+    lontano = _LontanoFinto()
+    lontano.posizione = 0.0
+    m.usa_il_lontano(lontano)
+    m.suona(pagina, inizio=12.0)
+    # Il convertitore dello speaker rinnova anche lui, nello stesso momento.
+    convertitore = threading.Thread(target=modulo._flusso_per_il_convertitore, args=(pagina,))
+    convertitore.start()
+    assert _aspetta(lambda: len((m.tracce() or {}).get("sub") or ()) == 1)
+    convertitore.join(5)
+    assert chiesti == [(pagina, True)] and indirizzi.pronto(pagina, video=True) is not None
+    m.scegli_traccia("sid", "1")
+    lontano.posizione = 1.5
+    assert _aspetta(lambda: detti == ["Prima riga"])
+    m.stop()
+    m.usa_il_lontano(None)
 
 
 def test_un_salto_con_lo_speaker_dice_il_sottotitolo_una_volta(crea, avvisi, tmp_path):

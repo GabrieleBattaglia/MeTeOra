@@ -1,6 +1,6 @@
 # MeTeOra, il lettore lontano: uno speaker Cast al posto della scheda audio, con la strada A e il WAV in RAM.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/11/2026: nasce con la 1.117.0, tappa 15 b del piano. Nella 2.6.4 il sottobrano resta a fine brano, come nel motore. Nella 3.11.1 le radio, con MeTeOra che fa da ripetitore senza conversione. Nella 3.11.3 le letture chiuse allo stop e all'errore, i titoli vecchi scartati e le liste dirette allo speaker. Nella 3.11.6 allo speaker solo fotogrammi interi, e i conti per le statistiche. Nella 3.12.0 le TV con l'audio convertito dal vivo, e le liste rifiutate ricordate. Nella 3.26.9 i comandi allo speaker in fila in un filo loro, dal punto chiesto, con i rinvii prima del brano, e i salti senza risposta che non perdono lo speaker.
+# 03/11/2026: nasce con la 1.117.0, tappa 15 b del piano. Nella 2.6.4 il sottobrano resta a fine brano, come nel motore. Nella 3.11.1 le radio, con MeTeOra che fa da ripetitore senza conversione. Nella 3.11.3 le letture chiuse allo stop e all'errore, i titoli vecchi scartati e le liste dirette allo speaker. Nella 3.11.6 allo speaker solo fotogrammi interi, e i conti per le statistiche. Nella 3.12.0 le TV con l'audio convertito dal vivo, e le liste rifiutate ricordate. Nella 3.26.9 i comandi allo speaker in fila in un filo loro, dal punto chiesto, con i rinvii prima del brano, e i salti senza risposta che non perdono lo speaker. Nella 3.26.24 lo stop senza sessione che non perde lo speaker, e gli indirizzi diretti nel WAV in RAM.
 # Nella 2.6.5 la fine che lo speaker non dice, fermo in caricamento all'ultimo campione. Nella 2.7.0 il WAV in RAM al posto del FLAC su disco.
 
 """Il lettore che suona su un apparecchio Cast, per il motore.
@@ -97,8 +97,14 @@ def _unisci(fila, voce):
 def da_convertire(percorso, sottobrano=None, midi_reso=False):
     """Vero se il brano va mandato come WAV in RAM: un formato
     che il Chromecast non legge, un video, un sottobrano di un SID o della
-    musica delle console, o un MIDI che MeTeOra rende con FluidSynth."""
-    return sottobrano is not None or midi_reso or formati.e_video(percorso) or not trasmissione.legge_da_se(percorso)
+    musica delle console, un MIDI che MeTeOra rende con FluidSynth, o un
+    indirizzo in rete. Un indirizzo diretto a un MP3, come quelli di
+    archive.org o di un M3U importato, andava al server come un file del
+    disco, che non lo trovava, e allo speaker non suonava: dalla 3.2.0
+    (revisione dell'unione, 15 novembre 2026). Le radio vanno al ripetitore
+    prima di qui."""
+    return (sottobrano is not None or midi_reso or formati.e_video(percorso) or formati.e_indirizzo(percorso)
+            or not trasmissione.legge_da_se(percorso))
 
 
 class LettoreLontano:
@@ -336,6 +342,18 @@ class LettoreLontano:
     def _converti_e_manda(self, generazione, percorso, sottobrano, inizio):
         try:
             sorgente = self._converti(percorso, sottobrano)
+        except ValueError:
+            # Senza durata: un indirizzo diretto e' una diretta non segnata
+            # come radio, come un MP3 di Icecast aperto con Ctrl con V o da un
+            # M3U importato, e va al ripetitore come le radio (revisione delle
+            # correzioni, 15 novembre 2026).
+            sorgente = None
+            if formati.e_indirizzo(percorso) and indirizzi.diretto(percorso):
+                with self._blocco:
+                    corrente = generazione == self._generazione
+                if corrente:
+                    self._ripeti_la_radio(generazione, percorso)
+                return
         except Exception:  # noqa: BLE001 - libmpv e la pipe falliscono in molti modi: per il lettore vuol dire che il brano non si suona
             sorgente = None
         with self._blocco:
@@ -710,6 +728,13 @@ class LettoreLontano:
             try:
                 cosa()
             except Exception as errore:  # noqa: BLE001 - pychromecast e la rete falliscono in molti modi: lo dice al_guasto
+                # Uno stop che lo speaker non conferma, o mandato prima che
+                # abbia una sessione, come V durante la conversione del primo
+                # brano, non e' uno speaker perso: non c'era niente da fermare,
+                # e la connessione che cade la dice al_distacco. Prima la
+                # musica tornava sul PC (revisione dell'unione, 15 novembre 2026).
+                if tipo == "ferma" and trasmissione.senza_risposta(errore):
+                    return
                 self._guasto(errore)
 
     def _manda_il_salto(self, punto):

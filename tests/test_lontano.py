@@ -1,6 +1,6 @@
 # MeTeOra, le prove del lettore lontano: uno speaker Cast al posto della scheda audio.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 03/11/2026: nasce con lontano.py, nella 1.117.0. Nella 3.11.1 la radio allo speaker dal ripetitore. Nella 3.11.6 i fotogrammi interi allo speaker. Nella 3.12.0 le TV convertite. Nella 3.26.9 la fila dei comandi, i salti uniti dal punto chiesto, il timeout che non perde lo speaker, i rinvii, la pausa in fila e la chiusura, con un apparecchio finto che suona in tempo reale.
+# 03/11/2026: nasce con lontano.py, nella 1.117.0. Nella 3.11.1 la radio allo speaker dal ripetitore. Nella 3.11.6 i fotogrammi interi allo speaker. Nella 3.12.0 le TV convertite. Nella 3.26.9 la fila dei comandi, i salti uniti dal punto chiesto, il timeout che non perde lo speaker, i rinvii, la pausa in fila e la chiusura, con un apparecchio finto che suona in tempo reale. Nella 3.26.24 lo stop senza sessione e l'indirizzo diretto a un MP3.
 
 """Le prove di lontano.py, con un apparecchio, un server e una sorgente del
 WAV in RAM finti: niente rete e niente libmpv. Gli stati dell'apparecchio si mandano
@@ -521,6 +521,57 @@ def test_un_salto_senza_risposta_non_perde_lo_speaker(tmp_path):
     apparecchio.guasto = RequestTimeout("pause", 10.0)
     lettore.pausa()
     assert lettore.aspetta_i_comandi() and banco.avvisi[-1][0] == "guasto" and "pause" in banco.avvisi[-1][1]
+
+
+def test_uno_stop_senza_sessione_non_perde_lo_speaker(banco):
+    # V mentre si converte il primo brano dopo il collegamento: lo speaker non
+    # ha ancora una sessione, e pychromecast allo stop solleva RequestFailed.
+    # Valeva come speaker perso, e la musica tornava sul PC (revisione
+    # dell'unione, 15 novembre 2026). Un altro errore resta un guasto.
+    from pychromecast.error import RequestFailed, RequestTimeout
+
+    lettore, apparecchio = banco.lettore, banco.apparecchio
+    lettore.suona(r"C:\m\brano.mp3")
+    assert lettore.aspetta_i_comandi()
+    for errore in (RequestFailed("stop"), RequestTimeout("stop", 10.0)):
+        apparecchio.guasto = errore
+        lettore.stop()
+        assert lettore.aspetta_i_comandi() and not [a for a in banco.avvisi if a[0] == "guasto"]
+        apparecchio.guasto = None
+        lettore.suona(r"C:\m\brano.mp3")
+        assert lettore.aspetta_i_comandi()
+    apparecchio.guasto = OSError("rete assente")
+    lettore.stop()
+    assert lettore.aspetta_i_comandi() and banco.avvisi[-1] == ("guasto", "rete assente")
+
+
+def test_un_indirizzo_diretto_a_un_mp3_si_converte(banco):
+    # Un indirizzo diretto a un MP3, come quelli di archive.org o di un M3U
+    # importato, andava al server come un file del disco, che non lo trovava:
+    # allo speaker non suonava, dalla 3.2.0 (revisione dell'unione, 15
+    # novembre 2026). Ora va come i siti, nel WAV in RAM.
+    indirizzo = "https://archive.org/download/prova/brano.mp3"
+    assert lontano.da_convertire(indirizzo) and not lontano.da_convertire(r"C:\m\brano.mp3")
+    banco.lettore.suona(indirizzo)
+    assert _aspetta(lambda: banco.conversioni == [(indirizzo, None)]) and not banco.server.pubblicati
+
+
+def test_un_indirizzo_diretto_senza_durata_va_al_ripetitore(tmp_path):
+    # Un MP3 di Icecast aperto con Ctrl con V, o da un M3U importato: una
+    # diretta non segnata come radio, senza durata. Il WAV in RAM non si fa,
+    # e va al ripetitore come le radio, invece che all'errore (revisione
+    # delle correzioni, 15 novembre 2026).
+    def senza_durata(percorso, sottobrano):
+        raise ValueError(f"la durata di {percorso} non si sa")
+
+    banco = _Banco(tmp_path, converti=senza_durata)
+    ripetute = []
+    banco.lettore._ripeti_la_radio = lambda generazione, percorso: ripetute.append(percorso)
+    banco.lettore.suona("http://icestreaming.example/3.mp3")
+    assert _aspetta(lambda: ripetute == ["http://icestreaming.example/3.mp3"]) and not [a for a in banco.avvisi if a[0] == "errore"]
+    # Un brano di un sito senza durata, come una diretta di YouTube, resta un errore.
+    banco.lettore.suona("https://www.youtube.com/watch?v=diretta")
+    assert _aspetta(lambda: ("errore", "https://www.youtube.com/watch?v=diretta") in banco.avvisi) and len(ripetute) == 1
 
 
 def test_un_salto_prima_che_lo_speaker_abbia_il_brano_lo_aspetta(banco):

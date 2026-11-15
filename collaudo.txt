@@ -2,7 +2,7 @@ Collaudo di MeTeOra 3.26.0: le registrazioni che seguono la sorgente.
 Premi Alt con R senza niente che suona: suona il suono dell'attesa accesa, e la console dice Attesa accesa.
 Premi ancora Alt con R: suona un suono diverso, quello dell'attesa spenta, che scende dove l'altro sale, e la console dice Attesa spenta.
 Ascolta i due suoni dell'attesa, la casella che sale e quella che scende, al tuo volume degli effetti: se uno non si sente o non ti piace, dimmelo.
-Fai partire Rai Radio 3 e premi Alt con R: la registrazione parte subito, con il suo suono, e R dice anche che l'attesa è accesa.
+Fai partire Rai Radio 3 e premi Alt con R: suona l'attesa accesa, e dopo due secondi e mezzo la registrazione parte, con il suo suono; R dice anche che l'attesa è accesa.
 Metti in pausa con C e aspetta tre secondi: la console dice, senza suono, che la registrazione aspetta che la sorgente torni a suonare.
 Riprendi con C: dopo un paio di secondi la console dice, senza suono, Registro Rai Radio 3, marker con Ripresa alle e l'ora.
 Ferma con V, poi suona un file del disco per un minuto: la registrazione resta in pausa, e nessun file nuovo compare.
@@ -21,26 +21,26 @@ Premi ancora Maiuscolo con R: la registrazione riprende.
 Premi Alt e Maiuscolo con R senza registrazione: dice che non c'è una registrazione da eliminare, e l'attesa resta com'era.
 Con una registrazione in corso premi Alt e Maiuscolo con R e rispondi No: la registrazione continua; rifallo e rispondi Sì: la registrazione si elimina, e con l'attesa accesa la stessa radio non si registra di nuovo finché non ne suona un'altra, e R lo dice.
 Suona un video di YouTube con l'attesa accesa: la registrazione parte, e mettendo in pausa il video la registrazione va avanti, perché scarica il video intero; finita, la console dice che è arrivata alla fine, dopo pochi secondi anche per un video lungo.
-Suona un video lungo di YouTube con l'attesa accesa e, prima che finisca di scaricare, fai partire una radio: la registrazione del video si chiude con quello che ha scaricato, e comincia quella della radio.
+Suona un video di YouTube di almeno due ore con l'attesa accesa e, nei primi secondi, prima che la console dica che la registrazione è arrivata alla fine, fai partire una radio: la registrazione del video si chiude con quello che ha scaricato, e comincia quella della radio.
 Registra un video di YouTube con i capitoli: la console dice i capitoli che la registrazione passa, al più uno ogni dieci secondi, e sul file finito i marker sono i capitoli.
-Metti in pausa a mano la registrazione di un video, metti in pausa il video e premi Maiuscolo con R: la registrazione riprende subito.
+Nei primi secondi della registrazione di un video lungo, mettila in pausa a mano con Maiuscolo con R, metti in pausa il video e premi ancora Maiuscolo con R: la registrazione riprende subito.
 Apri una radio con Ctrl con V, incollando il suo indirizzo, e premi subito Maiuscolo con R; poi metti in pausa con C, con l'attesa accesa: la registrazione va in pausa da sola, come quella di una radio del ramo Radio.
 Con una registrazione in corso premi Esc: suona il suono della chiusura che aspetta, la radio si ferma, e la console dice che MeTeOra si chiude appena le registrazioni sono salvate; MeTeOra si chiude da solo appena ha finito.
-Durante il salvataggio di una registrazione lunga in FLAC premi Esc due volte: ogni volta il suono e la percentuale; MeTeOra si chiude da solo alla fine.
+Registra a lungo una radio in FLAC, con almeno una pausa e una ripresa, chiudila con Ctrl con R e, durante il salvataggio, premi Esc due volte: ogni volta il suono e la percentuale; MeTeOra si chiude da solo alla fine.
 Ascolta il suono della chiusura che aspetta, la spia che si spegne: se non ti piace, dimmelo.
-Suona un file del disco, fermati a metà, registra una radio con l'attesa accesa e chiudi MeTeOra con Esc: al prossimo avvio riprende il file del disco dal punto dov'era, non da capo.
+Con l'attesa accesa registra una radio, poi suona un file del disco e, a metà, chiudi MeTeOra con Esc: aspetta il salvataggio, e al prossimo avvio il file del disco riprende dal punto dov'era, non da capo.
 Con una registrazione in corso da un minuto, chiudi MeTeOra con Termina processo dalla scheda Dettagli di Gestione attività: al prossimo avvio la console dice che ha recuperato la registrazione, che è nel ramo Registrazioni, in un file solo, fino agli ultimi istanti prima della chiusura.
 Rifallo dopo una pausa e una ripresa, con la registrazione in WAV: il file recuperato è uno solo, e la plancia dice una durata giusta, non di ore.
-Con una registrazione in corso in FLAC lunga, spegni Windows: Windows dice che MeTeOra sta salvando le registrazioni; aspetta, e lo spegnimento continua da sé quando MeTeOra ha finito.
+Con una registrazione in corso in FLAC lunga, con almeno una pausa e una ripresa, spegni Windows: Windows dice che MeTeOra sta salvando le registrazioni; aspetta, e lo spegnimento continua da sé quando MeTeOra ha finito.
 Con una radio in registrazione stacca la rete per pochi secondi e riattaccala: la console dice che la registrazione ha perso la connessione, e che si è ricollegata solo quando la registrazione riprende davvero; il file continua, e ascoltandolo nel punto della caduta non manca niente di quello che la radio ha trasmesso intanto.
-Con l'attesa accesa e una radio in registrazione stacca la rete per due minuti: la console dice una volta che la registrazione si è interrotta e che l'attesa ci riprova; riattaccata la rete, entro un minuto la registrazione riparte da sola, e R intanto dice perché non registra.
+Con l'attesa accesa e una radio in registrazione stacca la rete per due minuti: la console dice che la registrazione ha perso la connessione; quando la radio smette di suonare, R dice che la registrazione aspetta la sorgente; riattaccata la rete, fai ripartire la radio con X: la registrazione riprende nello stesso file, con il marker della ripresa.
 Nelle statistiche, la sezione Le registrazioni dice quante registrazioni sono partite dall'attesa, e le righe nuove dell'attesa, delle pause automatiche, delle riprove, dei marker, degli avvisi e dei salvataggi.
 Collaudo di MeTeOra 3.26.4: le unioni delle registrazioni.
 Registra una radio per mezz'ora, mettila in pausa e riprendila più volte, e chiudila con Ctrl con R: il salvataggio dura un attimo, e la durata che dicono la plancia e Dove sono è quella giusta.
 Nella registrazione in MP3 ascolta il punto della ripresa: si sente un attimo imperfetto, di qualche centesimo di secondo, o niente; dimmi se ti disturba.
 Rifai la pausa e la ripresa con le registrazioni in AAC e in Opus, e ascolta il punto della ripresa: l'Opus può avere un attacco morbido di un decimo di secondo; dimmi se ti disturba.
 Prova lo stesso in Opus: il file finito si salta fino in fondo, e la plancia dice la durata giusta.
-Durante il salvataggio di una registrazione lunga in FLAC premi R: risponde subito, e dice Salvo in disparte con la percentuale.
+Registra a lungo una radio in FLAC, con almeno una pausa e una ripresa, chiudila con Ctrl con R e, durante il salvataggio, premi R: risponde subito, e dice Salvo in disparte con la percentuale.
 Collaudo di MeTeOra 3.26.9: i salti con YouTube e i comandi allo speaker.
 Sul PC, con un video di YouTube lungo almeno un'ora, Maiuscolo con Q e Ctrl con Q ripetuti: il punto nuovo si sente subito, senza secondi di attesa.
 Sul PC, nello stesso video, Alt con Q e poi Ctrl e Alt con Q: la fine e l'inizio si sentono subito.
@@ -50,7 +50,7 @@ Con GabryBar, un video di YouTube lungo: Maiuscolo con Q, suono e riga arrivano 
 Con GabryBar, tre Maiuscolo con Q premuti di fila velocemente: lo speaker va avanti di 30 secondi, e Q dice il punto giusto.
 Con GabryBar, un video di YouTube con i sottotitoli accesi, Maiuscolo con Q dentro una battuta lunga: i sottotitoli tornano subito, e la battuta si dice una volta sola.
 Con GabryBar, Maiuscolo con Q subito dopo aver fatto partire un video di YouTube, prima che suoni: il video parte dal punto chiesto, e la musica non torna sul PC.
-Con GabryBar, un file lungo ripreso da un'ora o più: Maiuscolo con Q nei primi secondi, la console dice un'ora e 30 secondi e lo speaker ci va.
+Con GabryBar, un file lungo ripreso da un'ora o più: Maiuscolo con Q nei primi secondi, la console dice il punto da cui è ripreso più il salto, per esempio un'ora e 10 secondi, e lo speaker ci va.
 Con GabryBar, la pausa subito dopo aver fatto partire un brano: il brano resta in pausa, e la musica non torna sul PC.
 Con GabryBar, Maiuscolo con Q e subito la pausa premuta due volte, svelti: il brano riprende a suonare, e la console dice prima Pausa e poi Riprende.
 Con GabryBar, dopo più di 20 minuti di un video di YouTube, W a un punto lontano, per esempio un'ora più avanti: il suono riprende dopo qualche secondo, invece del silenzio.
@@ -76,3 +76,11 @@ Nella plancia, con il brano che suona, X su un capitolo prima del punto in cui s
 Nelle statistiche, nella sezione del video, la riga delle righe dei siti con lo speaker, dal file dei sottotitoli.
 Collaudo di MeTeOra 3.26.15: i tasti dei marker nelle statistiche.
 Nelle statistiche, la sezione dei marker dice Prima del punto, con Ctrl e T, e Dopo il punto, con Ctrl e Maiuscolo e T.
+Collaudo di MeTeOra 3.26.24: le correzioni della revisione dell'unione.
+Sul PC, un video di YouTube con i sottotitoli accesi, ascoltato per più di venti minuti; poi passa a GabryBar: dopo qualche secondo i sottotitoli tornano, e D li dice.
+Con il video acceso fai partire un video di YouTube sul PC, poi passa a GabryBar e ascolta per più di venti minuti; W un'ora più avanti, poi torna a una scheda del PC: la finestra del video si apre di nuovo.
+Con una registrazione lunga in FLAC aperta, con almeno una pausa e una ripresa, premi X su un video di YouTube degli Indirizzi e, mentre la console dice Apro, premi Esc: durante il salvataggio il video non parte, e MeTeOra si chiude a salvataggio finito.
+Con una radio in registrazione stacca la rete per una ventina di secondi e premi R più volte, a qualche secondo di distanza: dice sempre che la registrazione si sta ricollegando, mai Registro.
+Se trovi un video di YouTube con i capitoli senza nome, registralo: la console dice marker 3: Capitolo 3, e sul file finito Y dice Capitolo 3.
+Con GabryBar appena collegato fai partire un video di YouTube e, mentre si prepara, prima che suoni, premi V: la musica non torna sul PC, e GabryBar resta la scheda scelta.
+Con GabryBar, Ctrl con V con l'indirizzo diretto di un MP3, per esempio uno di archive.org: suona.

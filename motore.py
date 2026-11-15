@@ -1,6 +1,6 @@
 # MeTeOra, il motore di riproduzione: libmpv, e i SID in tempo reale.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7). Nella 1.65.0 i MIDI resi da FluidSynth (tappa 8). Nella 1.66.0 la musica delle console con libgme. Nella 1.67.0 il file lasciato o rinominato per Rinomina file. Nella 1.82.0 il testo del karaoke come traccia in memoria, senza i .lrc caricati da mpv, e due sottotitoli uguali di fila detti tutti e due. Nella 1.83.0 il tempo che resta al sottotitolo, per la barra braille a blocchi. Nella 1.83.3 la durata vera di Musepack e DSF, da mutagen. Nella 1.93.0 i capitoli che libmpv vede. Nella 1.95.0 l'attenuazione, per la sfumatura del timer di spegnimento. Nella 1.96.0 il volume uniforme con ReplayGain. Nella 1.96.11 suona con a_volume_pieno. Nella 1.102.2 (issue 22) il ricampionamento con soxr, le bande compensate, il preamplificatore nella catena e il volume oltre 100 con il limitatore. Nella 1.102.3 rubberband quando velocita' o tono sono cambiati, con il tono fatto da lui (issue 20). Nella 1.116.0 alle_uscite, quando cambiano le uscite audio di mpv, e all_uscita_persa, quando il brano si ferma perche' l'uscita non si apre piu'. Nella 1.117.0 il lettore lontano, uno speaker Cast al posto delle schede, e converti_in_flac. Nella 2.7.0 sorgente_wav e passaggio_in_pcm, il WAV in RAM al posto del FLAC su disco. Nella 2.7.4 il WAV in RAM sempre a 16 bit, che lo speaker suona bene anche a 96 kHz. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 gli indirizzi in rete: il flusso di yt-dlp, con le intestazioni e l'audio a parte, anche per lo speaker. Nella 3.3.0 le dirette senza durata, riconosciute anche da sole, e il titolo in onda dai metadati ICY. Nella 3.5.0 caratteristiche(), per le registrazioni che si adattano alla sorgente. Nella 3.8.0 i sottotitoli dei siti, con sub-files. Nella 3.11.0 le dirette HTTP lette da diretta.py, con il protocollo diretta://, il titolo in onda da li' e il ripiego su libmpv. Nella 3.17.0 il testo del karaoke anche con lo speaker Cast, seguito dalla sua posizione. Nella 3.18.0 i blocchi del karaoke per la vista a tutto schermo. Nella 3.19.0 il lettore ombra dello speaker, per i sottotitoli dei video. Nella 3.26.9 i flussi dei siti chiesti a pezzi, il flusso rinnovato dal convertitore dello speaker, la posizione attesa dello speaker per la finestra e la chiusura che aspetta lo stop allo speaker. Nella 3.26.14 i sottotitoli dei siti con lo speaker letti dal loro file, le tracce dei siti aggiunte una alla volta sul PC, e il sottotitolo che sposta solo la riga vuota non si ridice.
+# 30/09/2026: nasce con la tappa 1, dai prototipi della tappa 0. Nella 1.51.0 la scheda audio della musica, letta e scelta. Nella 1.55.0 due lettori, velocita', tono, equalizzatore e dissolvenza incrociata (tappa 4, issue 15); nella 1.55.1 i comandi ai lettori diventano asincroni, e a fine brano la finestra non aspetta piu' il mezzo secondo in cui mpv svuota l'uscita. Nella 1.58.0 stop, pausa, ripresa, X da capo e marker sfumano con la dissolvenza accesa; nella 1.58.4 le discese arrivano allo zero prima di fermarsi. Nella 1.61.1 i SID partono prima. Nella 1.62.0 attesa_del_sid. Nella 1.62.2 due lettori sullo stesso SID ne condividono la resa. Nella 1.62.4 OPZIONI_DI_BASE, anche per la sonda dello schedario. Nella 1.63.0 il video in una finestra, le tracce e i sottotitoli (tappa 7). Nella 1.65.0 i MIDI resi da FluidSynth (tappa 8). Nella 1.66.0 la musica delle console con libgme. Nella 1.67.0 il file lasciato o rinominato per Rinomina file. Nella 1.82.0 il testo del karaoke come traccia in memoria, senza i .lrc caricati da mpv, e due sottotitoli uguali di fila detti tutti e due. Nella 1.83.0 il tempo che resta al sottotitolo, per la barra braille a blocchi. Nella 1.83.3 la durata vera di Musepack e DSF, da mutagen. Nella 1.93.0 i capitoli che libmpv vede. Nella 1.95.0 l'attenuazione, per la sfumatura del timer di spegnimento. Nella 1.96.0 il volume uniforme con ReplayGain. Nella 1.96.11 suona con a_volume_pieno. Nella 1.102.2 (issue 22) il ricampionamento con soxr, le bande compensate, il preamplificatore nella catena e il volume oltre 100 con il limitatore. Nella 1.102.3 rubberband quando velocita' o tono sono cambiati, con il tono fatto da lui (issue 20). Nella 1.116.0 alle_uscite, quando cambiano le uscite audio di mpv, e all_uscita_persa, quando il brano si ferma perche' l'uscita non si apre piu'. Nella 1.117.0 il lettore lontano, uno speaker Cast al posto delle schede, e converti_in_flac. Nella 2.7.0 sorgente_wav e passaggio_in_pcm, il WAV in RAM al posto del FLAC su disco. Nella 2.7.4 il WAV in RAM sempre a 16 bit, che lo speaker suona bene anche a 96 kHz. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.2.0 gli indirizzi in rete: il flusso di yt-dlp, con le intestazioni e l'audio a parte, anche per lo speaker. Nella 3.3.0 le dirette senza durata, riconosciute anche da sole, e il titolo in onda dai metadati ICY. Nella 3.5.0 caratteristiche(), per le registrazioni che si adattano alla sorgente. Nella 3.8.0 i sottotitoli dei siti, con sub-files. Nella 3.11.0 le dirette HTTP lette da diretta.py, con il protocollo diretta://, il titolo in onda da li' e il ripiego su libmpv. Nella 3.17.0 il testo del karaoke anche con lo speaker Cast, seguito dalla sua posizione. Nella 3.18.0 i blocchi del karaoke per la vista a tutto schermo. Nella 3.19.0 il lettore ombra dello speaker, per i sottotitoli dei video. Nella 3.26.9 i flussi dei siti chiesti a pezzi, il flusso rinnovato dal convertitore dello speaker, la posizione attesa dello speaker per la finestra e la chiusura che aspetta lo stop allo speaker. Nella 3.26.14 i sottotitoli dei siti con lo speaker letti dal loro file, le tracce dei siti aggiunte una alla volta sul PC, e il sottotitolo che sposta solo la riga vuota non si ridice. Nella 3.26.24 i sottotitoli dei siti con lo speaker dopo il rinnovo del flusso, il rinnovo con il video, e l'uscita che aspetta anche gli speaker lasciati.
 
 """Due lettori libmpv per tutti i formati.
 
@@ -375,8 +375,12 @@ def _flusso_per_il_convertitore(percorso):
     try:
         with voce[0]:
             # Chi aspettava il rinnovo di un altro filo trova il flusso pronto.
+            # Il flusso nuovo si chiede come quello scaduto, con il video se lo
+            # aveva: rinnovato solo audio, prendeva il posto di quello con il
+            # video, e tornando al PC il video non c'era piu' (revisione
+            # dell'unione, 15 novembre 2026).
             if indirizzi.pronto(percorso) is None:
-                indirizzi.risolvi(percorso, video=False)
+                indirizzi.risolvi(percorso, video=indirizzi.video_tenuto(percorso))
     finally:
         with _rinnovi_blocco:
             voce[1] -= 1
@@ -450,8 +454,13 @@ class _Brano:
         self.intestazioni = self.audio = self.sottotitoli = ()
         # Una diretta, come una radio, non ha durata ne' fine (3.3.0).
         self.dal_vivo = False
+        # Un indirizzo il cui flusso tenuto e' scaduto: il brano parte senza,
+        # e con lo speaker il convertitore lo rinnova; i suoi sottotitoli
+        # arrivano dal flusso rinnovato (revisione dell'unione, 15 novembre 2026).
+        self.senza_flusso = False
         if formati.e_indirizzo(percorso):
             flusso = indirizzi.pronto(percorso)
+            self.senza_flusso = flusso is None
             if flusso is not None:
                 self.indirizzo, self.intestazioni, self.audio, self.dal_vivo = flusso.indirizzo, flusso.intestazioni, flusso.audio, flusso.dal_vivo
                 # Una diretta HTTP la legge MeTeOra, con diretta.py: la lettura
@@ -461,8 +470,10 @@ class _Brano:
                 # I sottotitoli del sito, come quelli di YouTube (3.8.0).
                 self.sottotitoli = getattr(flusso, "sottotitoli", ())
                 # Il flusso a pezzi, come lo vuole YouTube (15 novembre 2026):
-                # le opzioni del brano arrivano ai lettori, all'ombra e al
-                # convertitore dello speaker. Radio e file non ce l'hanno.
+                # le opzioni del brano arrivano ai lettori del PC, con le tracce
+                # dei siti, e al convertitore dello speaker; l'ombra, che dalla
+                # 3.26.14 apre solo i video sul disco, non le vede. Radio e file
+                # non ce l'hanno.
                 pezzo = getattr(flusso, "pezzo", None)
                 if pezzo:
                     self.opzioni[OPZIONE_DEL_PEZZO] = str(int(pezzo))
@@ -944,6 +955,10 @@ class Motore:
         # Il lettore lontano, uno speaker Cast scelto al posto delle schede
         # del PC (1.117.0): finche' c'e', i comandi del brano vanno a lui.
         self._lontano = None
+        # Gli speaker lasciati da poco, che finiscono i loro comandi, lo stop
+        # e la chiusura, nel loro filo: l'uscita li aspetta come quello in uso
+        # (revisione dell'unione, 15 novembre 2026).
+        self._lasciati = []
         self._velocita = 1.0
         self._tono = 0
         self._bande = [0] * len(valori.FREQUENZE_DELLE_BANDE)
@@ -1131,6 +1146,9 @@ class Motore:
             if brano is not None and brano.sottotitoli:
                 threading.Thread(target=self._sottotitoli_allo_speaker, args=(numero, percorso, brano.sottotitoli, brano.intestazioni),
                     name="MeTeOra, sottotitoli dello speaker", daemon=True).start()
+            elif brano is not None and brano.senza_flusso:
+                threading.Thread(target=self._sottotitoli_dopo_il_rinnovo, args=(numero, percorso), name="MeTeOra, sottotitoli dello speaker",
+                    daemon=True).start()
         elif brano is not None and formati.e_video(percorso):
             threading.Thread(target=self._ombra_allo_speaker, args=(numero, brano, inizio), name="MeTeOra, ombra dello speaker", daemon=True).start()
         else:
@@ -1267,6 +1285,31 @@ class Motore:
         if date > 1 and self._al_caricamento is not None and serve():
             self._al_caricamento()
 
+    def _sottotitoli_dopo_il_rinnovo(self, numero, percorso):
+        """Nel suo filo: un brano di un sito partito allo speaker con il flusso
+        tenuto scaduto, come passando allo speaker dopo venti minuti, o con Y e
+        la dissolvenza accesa, che rifanno il brano. Il convertitore lo
+        rinnova da se', e i sottotitoli non partivano: il brano era senza
+        tracce finche' non si rifaceva con X. Qui si aspetta il flusso nuovo
+        che chiede il convertitore, senza chiamare yt-dlp: se yt-dlp non
+        riusciva, una seconda chiamata faceva aspettare il doppio lo speaker
+        prima dell'errore. Poi i sottotitoli si seguono come sempre (revisione
+        dell'unione, 15 novembre 2026)."""
+        fine = time.monotonic() + indirizzi.ATTESA + 10.0
+        while True:
+            with self._blocco:
+                if self._chiuso or numero != self._brano_lontano or self._lontano is None:
+                    return
+            flusso = indirizzi.pronto(percorso)
+            if flusso is not None:
+                break
+            if time.monotonic() >= fine:
+                return
+            time.sleep(0.25)
+        sottotitoli = getattr(flusso, "sottotitoli", ()) if flusso is not None else ()
+        if sottotitoli:
+            self._sottotitoli_allo_speaker(numero, percorso, sottotitoli, flusso.intestazioni)
+
     def _seguiti_dei_sottotitoli(self):
         """Con il lucchetto: i karaoke.Seguito delle tracce dei sottotitoli
         del sito arrivate fin qui."""
@@ -1305,6 +1348,11 @@ class Motore:
         self.stop()
         with self._blocco:
             prima, self._lontano = self._lontano, lettore
+            if lettore in self._lasciati:
+                self._lasciati.remove(lettore)
+            if prima is not None and prima is not lettore:
+                # Ne bastano gli ultimi: i piu' vecchi hanno finito da tempo.
+                self._lasciati = [*self._lasciati[-3:], prima]
         if prima is not None and prima is not lettore:
             prima.chiudi(attendi=False)
 
@@ -1354,6 +1402,12 @@ class Motore:
             lettore.command("loadfile", _indirizzo_nel_lettore(lettore, brano), "replace", "-1", opzioni)
             pronto.wait(ATTESA_DELLA_DURATA)
             durata = float(lettore.duration) if lettore.duration else None
+            # Una diretta, un flusso di rete che non si salta, come un MP3 di
+            # Icecast aperto con Ctrl con V: libmpv da' come durata il pezzo
+            # gia' letto, e lo speaker ne suonava qualche secondo (revisione
+            # delle correzioni, 15 novembre 2026).
+            if durata and lettore.demuxer_via_network and not lettore.seekable:
+                durata = None
             parametri = None
             scadenza = time.monotonic() + ATTESA_DEL_FORMATO
             while durata and parametri is None and time.monotonic() < scadenza:
@@ -2444,11 +2498,20 @@ class Motore:
                 return
             self._chiuso = True
             lontano, self._lontano = self._lontano, None
+            lasciati, self._lasciati = self._lasciati, []
             ombra, self._ombra = self._ombra, None
         if lontano is not None:
             with contextlib.suppress(Exception):
                 lontano.chiudi(attendi=False)
-                lontano.aspetta_i_comandi(ATTESA_DELLO_SPEAKER_ALL_USCITA)
+        # Lo speaker in uso e quelli lasciati da poco, come passando a un altro
+        # speaker o al PC subito prima di uscire, ricevono il loro stop: in
+        # tutto, al piu' ATTESA_DELLO_SPEAKER_ALL_USCITA secondi. Prima uno
+        # lasciato con un salto confermato tardi in fila continuava a suonare
+        # (revisione dell'unione, 15 novembre 2026).
+        fine = time.monotonic() + ATTESA_DELLO_SPEAKER_ALL_USCITA
+        for speaker in [*lasciati, *([lontano] if lontano is not None else [])]:
+            with contextlib.suppress(Exception):
+                speaker.aspetta_i_comandi(max(0.0, fine - time.monotonic()))
         if ombra is not None:
             with contextlib.suppress(Exception):
                 ombra.chiudi()

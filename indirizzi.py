@@ -1,6 +1,6 @@
 # MeTeOra, gli indirizzi in rete: le pagine dei siti, aperte con yt-dlp.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 05/11/2026: nasce con la 3.2.0, tappa 19 b del piano, issue 40. Nella 3.3.0 le dirette, senza durata, e gli indirizzi diretti, che libmpv apre senza yt-dlp. Nella 3.3.1 la pagina che non c'e', il 404, e il 403 detti per chi ascolta. Nella 3.5.1 gli appunti con un indirizzo senza https://. Nella 3.8.0 i sottotitoli dei siti. Nella 3.9.0 la ricerca dei contenuti, issue 47. Nella 3.16.0 YouTube Music di riserva, quando YouTube chiede l'eta' e non da' risultati. Nella 3.16.1 le anteprime di SoundCloud tolte. Nella 3.26.9 il pezzo dei flussi, per chiederli a pezzi come vuole YouTube. Nella 3.26.14 i sottotitoli dei siti con il titolo e la lingua, il loro file WebVTT scaricato, anche a pezzi HLS, e i capitoli senza il segnaposto, da due in su.
+# 05/11/2026: nasce con la 3.2.0, tappa 19 b del piano, issue 40. Nella 3.3.0 le dirette, senza durata, e gli indirizzi diretti, che libmpv apre senza yt-dlp. Nella 3.3.1 la pagina che non c'e', il 404, e il 403 detti per chi ascolta. Nella 3.5.1 gli appunti con un indirizzo senza https://. Nella 3.8.0 i sottotitoli dei siti. Nella 3.9.0 la ricerca dei contenuti, issue 47. Nella 3.16.0 YouTube Music di riserva, quando YouTube chiede l'eta' e non da' risultati. Nella 3.16.1 le anteprime di SoundCloud tolte. Nella 3.26.9 il pezzo dei flussi, per chiederli a pezzi come vuole YouTube. Nella 3.26.14 i sottotitoli dei siti con il titolo e la lingua, il loro file WebVTT scaricato, anche a pezzi HLS, e i capitoli senza il segnaposto, da due in su. Nella 3.26.24 video_tenuto, per rinnovare un flusso come quello scaduto.
 
 """Gli indirizzi in rete (3.2.0, issue 40).
 
@@ -788,6 +788,15 @@ def _tieni(indirizzo, video, flusso):
     adesso = time.monotonic()
     with _flussi_blocco:
         _flussi[indirizzo] = (flusso, _scadenza(flusso, adesso), video)
+
+
+def video_tenuto(indirizzo):
+    """Vero se il flusso tenuto per l'indirizzo, anche scaduto, era stato
+    chiesto con il video: chi lo rinnova lo chiede allo stesso modo
+    (revisione dell'unione, 15 novembre 2026)."""
+    with _flussi_blocco:
+        tenuto = _flussi.get(indirizzo)
+    return bool(tenuto is not None and tenuto[2])
 
 
 # Gli indirizzi che libmpv apre da se', senza yt-dlp, anche senza l'estensione

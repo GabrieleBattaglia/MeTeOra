@@ -1,6 +1,6 @@
 # MeTeOra, le prove delle registrazioni: libmpv vero su file locali, niente rete.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 10/11/2026: nasce con la 3.5.0, issue 42. Nella 3.13.0 la cartella delle registrazioni; nella 3.13.2 l'attesa al passaggio e le parti non unite. Nella 3.14.0 la voce che apre la cartella. Nella 3.15.0 i bit veri nei file e la voce a due passi. Nella 3.26.0 l'attesa che segue la sorgente, i ricollegamenti, i marker, gli avvisi, la chiusura che aspetta, una diretta vera da un server ICY in locale al passo dell'orologio, lo stallo della rete, il crollo a meta' e il recupero all'avvio. Nella 3.26.4 le unioni senza ricodificare lette da mutagen e la giunzione decodificata. Nella 3.26.9 la registrazione di un flusso a pezzi.
+# 10/11/2026: nasce con la 3.5.0, issue 42. Nella 3.13.0 la cartella delle registrazioni; nella 3.13.2 l'attesa al passaggio e le parti non unite. Nella 3.14.0 la voce che apre la cartella. Nella 3.15.0 i bit veri nei file e la voce a due passi. Nella 3.26.0 l'attesa che segue la sorgente, i ricollegamenti, i marker, gli avvisi, la chiusura che aspetta, una diretta vera da un server ICY in locale al passo dell'orologio, lo stallo della rete, il crollo a meta' e il recupero all'avvio. Nella 3.26.4 le unioni senza ricodificare lette da mutagen e la giunzione decodificata. Nella 3.26.9 la registrazione di un flusso a pezzi. Nella 3.26.24 le riprove mute fino all'audio, R durante il ricollegamento, gli avvii in sospeso alla chiusura e i capitoli senza nome.
 
 import contextlib
 import datetime
@@ -946,7 +946,8 @@ def test_i_capitoli_di_una_puntata_si_dicono_senza_inondare(finestra, con_regist
     righe = len(finestra._righe)
     puntata.passati = 3
     finestra._guarda_le_registrazioni()
-    assert finestra._righe[-1].startswith("Registro Puntata, marker 3: capitolo 3, a 2:00.") and len(finestra._righe) == righe + 1
+    # Il capitolo senza nome si dice con il nome che il suo marker avra' sul file.
+    assert finestra._righe[-1].startswith("Registro Puntata, marker 3: Capitolo 3, a 2:00.") and len(finestra._righe) == righe + 1
     puntata.passati = 4
     con_registrazioni.orologio[0] += 5
     finestra._guarda_le_registrazioni()
@@ -2249,3 +2250,173 @@ def test_la_registrazione_di_un_flusso_a_pezzi_lo_chiede_a_pezzi(tmp_path):
     finally:
         server.shutdown()
         server.server_close()
+
+
+# La revisione dell'unione dei tre rami (15 novembre 2026).
+
+
+def test_i_capitoli_senza_nome_hanno_lo_stesso_nome_sul_file_e_nell_avviso(tmp_path):
+    """Un capitolo senza nome di una puntata, come quelli che yt-dlp chiama
+    Untitled Chapter: il marker sul file si chiama Capitolo e il suo numero,
+    come lo dice l'avviso. Prima il marker si chiamava M e un numero suo."""
+    assert registrazioni.nome_del_capitolo("", 3) == "Capitolo 3" and registrazioni.nome_del_capitolo("  La   sigla ", 1) == "La sigla"
+    puntata = registrazioni.Registrazione("https://www.youtube.com/watch?v=capitoli", "Puntata", indirizzi.Flusso("https://x/puntata.webm"),
+        dove=str(tmp_path), capitoli=[[0.0, ""], [60.0, "Intervista"], [120.0, ""], [500.0, "Oltre la fine"]])
+    assert [(secondi, nome) for _file, secondi, nome in puntata._marker_sul_file([], [], 300.0)] == [
+        (0.0, "Capitolo 1"), (60.0, "Intervista"), (120.0, "Capitolo 3")]
+
+
+def test_le_riprove_dell_attesa_tacciono_fino_all_audio(finestra, con_registrazioni, monkeypatch, suoni_annotati):
+    """La radio suona, ma il registratore non la riapre: ogni riprova
+    dell'attesa tace e non si conta finche' non arriva l'audio, non rifa' i
+    cinque ricollegamenti e torna ogni minuto; R e l'avviso dei dieci minuti
+    dicono che non riesce. Prima ogni riprova diceva Registro con il suono
+    della registrazione avviata, ogni minuto e 48 secondi, e l'avviso dei
+    dieci minuti non arrivava mai."""
+    from test_finestra import _premi
+
+    import finestra as modulo
+
+    _premi(finestra, "r", alt=True)
+    _suona_la_radio(finestra, con_registrazioni)
+    prima = _Finta.create[-1]
+
+    def non_risponde(valore, motivo="mano", flusso=None):
+        raise OSError("il server non risponde")
+
+    monkeypatch.setattr(prima, "pausa", non_risponde)
+    prima.cade()
+    assert finestra._registrazione is None and finestra._non_riuscita[2] == 1
+    conti = finestra._statistiche.dati["conti"]
+    nomi = ("registrazioni_avviate", "registrazioni_dall_attesa", "registrazioni_interrotte", "avvisi_delle_registrazioni")
+    prima_dei_giri = {nome: conti.get(nome, 0) for nome in nomi}
+    ricollegamenti = []
+    monkeypatch.setattr(modulo.wx, "CallLater", lambda ms, funzione, *argomenti: (
+        ricollegamenti.append(ms) if getattr(funzione, "__name__", "") == "_riprova_la_registrazione" else None) or funzione(*argomenti))
+    righe, suoni = len(finestra._righe), len(suoni_annotati)
+    for giro in range(11):
+        con_registrazioni.orologio[0] += 60
+        finestra._guarda_le_registrazioni()
+        riprova = _Finta.create[-1]
+        assert finestra._registrazione is riprova and riprova.in_riprova
+        if giro == 0:
+            assert _premi(finestra, "r").startswith("Attesa accesa, ma la registrazione di Rai Radio 3 non è riuscita: ci riprovo ogni minuto mentre suona")
+        monkeypatch.setattr(riprova, "pausa", non_risponde)
+        monkeypatch.setattr(riprova, "ferma", lambda riprova=riprova: riprova.comandi.append("ferma"))
+        riprova.cade(0.0)
+        assert finestra._registrazione is None and finestra._non_riuscita[2] == giro + 2
+    assert not ricollegamenti and conti["riprove_dell_attesa"] == 11
+    nuove = finestra._righe[righe:]
+    assert not any(r.startswith("Registro Rai Radio 3") for r in nuove) and "registrazione_avviata" not in suoni_annotati[suoni:]
+    # In undici minuti un avviso solo, quello dei dieci minuti, che dice che
+    # non riesce, oltre alla risposta di R; e nessun conto in piu'.
+    assert conti["avvisi_delle_registrazioni"] == prima_dei_giri["avvisi_delle_registrazioni"] + 1
+    assert sum(1 for r in nuove if r.startswith("Attesa accesa, ma la registrazione di Rai Radio 3 non è riuscita")) == 2
+    assert all(conti.get(nome, 0) == prima_dei_giri[nome] for nome in nomi[:3])
+    # La riprova che riceve l'audio si dice adesso, con il suo suono, e si conta.
+    con_registrazioni.orologio[0] += 60
+    finestra._guarda_le_registrazioni()
+    buona = _Finta.create[-1]
+    buona.alla_ripresa(buona, None)
+    assert finestra._righe[-1].startswith("Registro Rai Radio 3, in ") and suoni_annotati[-1] == "registrazione_avviata"
+    assert conti["registrazioni_avviate"] == prima_dei_giri["registrazioni_avviate"] + 1 and conti["registrazioni_dall_attesa"] == prima_dei_giri[
+        "registrazioni_dall_attesa"] + 1
+    assert finestra._non_riuscita is None and not buona.in_riprova and _premi(finestra, "r").startswith("Registro Rai Radio 3, 12:34")
+
+
+def test_r_durante_un_tentativo_di_ricollegamento(finestra, con_registrazioni):
+    """Durante un tentativo di ricollegamento, finche' la parte nuova non
+    riceve l'audio, R e l'avviso dei dieci minuti dicono che la registrazione
+    si sta ricollegando: prima, a tentativo in corso, dicevano Registro."""
+    from test_finestra import _premi
+
+    _suona_la_radio(finestra, con_registrazioni)
+    finestra._comando_registra()
+    reg = _Finta.create[-1]
+    reg.cade()
+    assert reg.stato == "in_corso" and reg.ricollegando
+    detto = _premi(finestra, "r")
+    assert detto.startswith("La registrazione di Rai Radio 3, 12:34, ") and " si sta ricollegando alla sorgente." in detto
+    finestra._ultimo_avviso -= 600
+    finestra._guarda_le_registrazioni()
+    assert finestra._righe[-1].startswith("La registrazione di Rai Radio 3, 12:34, ") and " si sta ricollegando alla sorgente." in finestra._righe[-1]
+    reg.arriva()
+    assert finestra._righe[-1].startswith("La registrazione di Rai Radio 3 si è ricollegata") and not reg.ricollegando
+    assert _premi(finestra, "r").startswith("Registro Rai Radio 3, 12:34, ")
+
+
+def test_la_chiusura_rimandata_lascia_perdere_gli_avvii_in_sospeso(finestra, con_registrazioni, monkeypatch):
+    """Esc con una registrazione aperta mentre un indirizzo si apre, o mentre
+    il brano seguente sta per partire dopo uno in errore: la chiusura
+    rimandata li lascia perdere, come V. Prima partivano e suonavano fino
+    alla fine del salvataggio, e diventavano il punto da riprendere."""
+    import finestra as modulo
+
+    lavori = []
+    _suona_la_radio(finestra, con_registrazioni)
+    finestra._comando_registra()
+    monkeypatch.setattr(modulo, "registrazioni_in_disparte", lambda lavoro, al_termine: lavori.append((lavoro, al_termine)))
+    finestra._flusso_atteso = flusso = object()
+    finestra._avanzamento_dopo_errore = seguente = object()
+    finestra.Close()
+    assert not finestra._chiusa and finestra._chiusura_chiesta == "normale"
+    assert finestra._flusso_atteso is None and finestra._avanzamento_dopo_errore is None
+    partiti = []
+    monkeypatch.setattr(finestra, "_suona", lambda *argomenti, **chiavi: partiti.append("suona"))
+    monkeypatch.setattr(finestra, "_seguente_automatico", lambda *argomenti, **chiavi: partiti.append("seguente"))
+    con_registrazioni.stato["in_corso"] = None
+    finestra._flusso_trovato(flusso, None, con_registrazioni.brano, None, ("suona",))
+    finestra._avanza_dopo_l_errore(seguente)
+    assert not partiti
+    # Un indirizzo aperto con Ctrl con V, arrivato durante la chiusura, entra
+    # negli Indirizzi ma non suona.
+    pagina = types.SimpleNamespace(playlist=False, titolo="Un video", scheda=None)
+    finestra._indirizzo_aperto("https://www.youtube.com/watch?v=durante", pagina)
+    assert not partiti
+    while lavori:
+        lavoro, al_termine = lavori.pop()
+        al_termine(lavoro())
+    assert finestra._chiusa
+
+
+def test_una_riprova_senza_audio_non_e_una_registrazione(finestra, con_registrazioni, monkeypatch, suoni_annotati):
+    """Durante una riprova dell'attesa che non ha ancora l'audio, Maiuscolo
+    con R non la mette in pausa e Alt e Maiuscolo con R non la elimina: non e'
+    una registrazione. Se la sorgente si ferma, la riprova si chiude in
+    silenzio; e una riprova finita da se' senza file tace, e l'attesa ci
+    riprova (revisione delle correzioni, 15 novembre 2026)."""
+    from test_finestra import _premi
+
+    _premi(finestra, "r", alt=True)
+    _suona_la_radio(finestra, con_registrazioni)
+    prima = _Finta.create[-1]
+
+    def non_risponde(valore, motivo="mano", flusso=None):
+        raise OSError("il server non risponde")
+
+    monkeypatch.setattr(prima, "pausa", non_risponde)
+    prima.cade()
+    conti = finestra._statistiche.dati["conti"]
+    in_pausa, eliminate = conti.get("registrazioni_in_pausa", 0), conti.get("registrazioni_eliminate", 0)
+    con_registrazioni.orologio[0] += 60
+    finestra._guarda_le_registrazioni()
+    riprova = _Finta.create[-1]
+    assert riprova.in_riprova
+    assert _premi(finestra, "r", maiuscolo=True).startswith("Attesa accesa, ma la registrazione di Rai Radio 3 non è riuscita")
+    assert _premi(finestra, "r", alt=True, maiuscolo=True).startswith("Non c'è una registrazione in corso da eliminare.")
+    assert riprova.stato == "in_corso" and conti.get("registrazioni_in_pausa", 0) == in_pausa and conti.get("registrazioni_eliminate", 0) == eliminate
+    # La sorgente si ferma: la riprova si chiude in silenzio, senza pausa automatica.
+    monkeypatch.setattr(riprova, "ferma", lambda: riprova.comandi.append("ferma"))
+    righe = len(finestra._righe)
+    con_registrazioni.stato["in_corso"] = None
+    finestra._guarda_le_registrazioni()
+    assert finestra._registrazione is None and riprova.comandi[-1] == "ferma" and len(finestra._righe) == righe
+    assert ("pausa", True) not in riprova.comandi
+    # Una riprova finita da se' senza file, come una puntata che non si apre.
+    _suona_la_radio(finestra, con_registrazioni)
+    terza = _Finta.create[-1]
+    terza.in_riprova = True
+    monkeypatch.setattr(type(terza), "file_finali", property(lambda self: []))
+    righe = len(finestra._righe)
+    finestra._registrazione_finita_da_se(terza)
+    assert finestra._registrazione is None and len(finestra._righe) == righe and finestra._non_riuscita[0] == RADIO
