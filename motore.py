@@ -347,6 +347,23 @@ def _fra(valore, minimo, massimo):
     return max(minimo, min(massimo, valore))
 
 
+def _righe_piene(testo):
+    """Le righe di un sottotitolo che si vedono, senza gli spazi attorno e
+    senza quelle vuote."""
+    return [riga.strip() for riga in (testo or "").splitlines() if riga.strip()]
+
+
+def _solo_spostato(testo, prima):
+    """Vero se il sottotitolo testo ha le stesse righe di quello di prima, e
+    cambia solo nelle righe vuote: non e' un sottotitolo nuovo. E' il cue di
+    10 millesimi che YouTube mette fra due sottotitoli che scorrono: dopo una
+    pausa, " \\nassai Ma tanto" diventa "assai Ma tanto\\n", e la finestra lo
+    ridiceva come un ritornello (Gabriele, 15 novembre 2026, misurato sul
+    video di Superquark: libmpv lo coglie solo qualche volta)."""
+    righe = _righe_piene(testo)
+    return bool(righe) and righe == _righe_piene(prima)
+
+
 def _senza_ripetizioni(blocchi):
     """I blocchi dei sottotitoli di un sito seguiti allo speaker senza le
     ripetizioni che libmpv sul PC non direbbe (Gabriele, 15 novembre 2026):
@@ -682,13 +699,18 @@ class _Ombra:
                 return
             mia = self.mpv.time_pos
             if mia is None or abs(mia - posizione) > SCARTO_DELL_OMBRA:
+                # Come nei lettori: dopo un salto il sottotitolo si dice sempre.
+                self._testo = None
                 self.mpv.command_async("seek", f"{posizione:.3f}", "absolute+exact")
         except Exception:  # noqa: BLE001 - una libmpv che cambia brano intanto
             return
 
     def _sottotitolo(self, _nome, testo):
+        """Come nei lettori: non quello che sposta solo le righe vuote
+        (Gabriele, 15 novembre 2026)."""
+        spostato = _solo_spostato(testo, self._testo)
         self._testo, self._nuovo = testo, True
-        if testo and self.numero is not None:
+        if testo and not spostato and self.numero is not None:
             self._al_testo(self.numero, testo)
 
     def _inizio_del_sottotitolo(self, _nome, inizio):
@@ -1596,6 +1618,9 @@ class Motore:
             if self._preparato is None:
                 self._chiesto = False
             self._attivo.imposta("af", self._catena())
+            # Dopo un salto il sottotitolo di adesso si dice sempre, anche se
+            # ha le righe di quello visto prima (_solo_spostato).
+            self._attivo.testo_visto = None
             self._attivo.comando("seek", str(secondi), riferimento, "exact")
             self._cambiato()
 
@@ -1636,12 +1661,15 @@ class Motore:
 
     def _sottotitolo(self, lettore, _nome, testo):
         """sub-text di un lettore, nel suo filo: conta solo quello del brano
-        in corso, e non vuoto."""
+        in corso, e non vuoto, e non quello che sposta solo le righe vuote
+        del sottotitolo di prima (_solo_spostato), che non si ridice neppure
+        come un ritornello (Gabriele, 15 novembre 2026)."""
         with self._blocco:
             if self._chiuso or lettore is not self._attivo:
                 return
+            spostato = _solo_spostato(testo, lettore.testo_visto)
             lettore.testo_visto, lettore.testo_nuovo = testo, True
-        if testo and self._ai_sottotitoli is not None:
+        if testo and not spostato and self._ai_sottotitoli is not None:
             self._ai_sottotitoli(testo)
 
     def _sottotitolo_a_immagini(self, lettore, _nome, inizio):

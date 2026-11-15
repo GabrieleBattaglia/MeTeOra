@@ -15,6 +15,7 @@ nel tempo. Le dissolvenze durano da 300 a 500 ms.
 import os
 import threading
 import time
+import types
 import wave
 
 import numpy as np
@@ -1402,6 +1403,40 @@ def test_due_sottotitoli_uguali_di_fila_si_dicono_due_volte(avvisi):
         # Il lettore che non e' attivo non conta.
         m._sottotitolo(m._lettori[1], "sub-text", "Altro")
         assert "Altro" not in detti
+    finally:
+        m.chiudi()
+
+
+def test_il_sottotitolo_che_sposta_solo_la_riga_vuota_non_si_ridice(avvisi):
+    # Gabriele, 15 novembre 2026: il cue di 10 millesimi di YouTube dopo una
+    # pausa ha le stesse righe di quello prima, con la riga vuota spostata:
+    # libmpv lo coglie qualche volta, e la finestra lo ridiceva come un
+    # ritornello. Sono i testi veri di libmpv sul video di Superquark.
+    detti = []
+    m = Motore(ao="null", ai_sottotitoli=detti.append)
+    try:
+        lettore = m._attivo
+        m._sottotitolo(lettore, "sub-text", " \nassai Ma tanto tanto bene")
+        m._sottotitolo_a_immagini(lettore, "sub-start", 131.08)
+        m._sottotitolo(lettore, "sub-text", "assai Ma tanto tanto bene\n")
+        m._sottotitolo_a_immagini(lettore, "sub-start", 136.93)
+        m._sottotitolo(lettore, "sub-text", "assai Ma tanto tanto bene\n[Musica]")
+        m._sottotitolo_a_immagini(lettore, "sub-start", 136.94)
+        assert detti == [" \nassai Ma tanto tanto bene", "assai Ma tanto tanto bene\n[Musica]"]
+        # Il cue che lascia solo la riga di sotto e' un sottotitolo che scorre: arriva, e lo filtra la finestra.
+        m._sottotitolo(lettore, "sub-text", "[Musica]\n")
+        assert detti[-1] == "[Musica]\n"
+        # Dopo un salto il sottotitolo si dice anche con le righe di prima.
+        m._sottotitolo(lettore, "sub-text", "Caruso\n")
+        m.vai_a(18.0)
+        m._sottotitolo(lettore, "sub-text", " \nCaruso")
+        assert detti[-1] == " \nCaruso"
+        # Lo stesso nel lettore ombra dello speaker.
+        ombra = types.SimpleNamespace(_testo=None, _nuovo=False, numero=1, _al_testo=lambda _numero, testo: detti.append(testo))
+        detti.clear()
+        for testo in (" \nfeci ma veramente", "feci ma veramente\n", "feci ma veramente\ncosì e poi"):
+            modulo._Ombra._sottotitolo(ombra, "sub-text", testo)
+        assert detti == [" \nfeci ma veramente", "feci ma veramente\ncosì e poi"]
     finally:
         m.chiudi()
 
