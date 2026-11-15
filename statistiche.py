@@ -2001,6 +2001,9 @@ class Pagina:
             _("Dischi riconosciuti a mano: {riconosciuti}; lettere rese contese dalla Sentinella, a MeTeOra aperto: {contese}.").format(
                 riconosciuti=self.e("disco_riconosciuto"), contese=self.e("disco_diverso")),
             _("Attese dei SID, dei MIDI e delle console oltre un secondo e mezzo, dopo un salto: {n}.").format(n=self.c("attese_lunghe")),
+            # I salti allo speaker in fila al filo dei comandi (15 novembre 2026).
+            _("Salti allo speaker uniti perché ravvicinati: {uniti}; senza risposta in tempo, con la musica rimasta sullo speaker: {senza}.").format(
+                uniti=self.c("salti_uniti_allo_speaker"), senza=self.c("salti_senza_risposta_dallo_speaker")),
             _("Comandi che lì non valgono: {non_validi}; niente da suonare: {niente}.").format(non_validi=self.e("non_disponibile"), niente=self.e("niente_da_suonare")),
         ]
         return righe

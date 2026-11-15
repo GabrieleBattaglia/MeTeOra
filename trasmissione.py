@@ -66,6 +66,19 @@ def disponibile():
     return find_spec("pychromecast") is not None
 
 
+def senza_risposta(errore):
+    """Vero per l'errore di un comando che l'apparecchio non ha confermato:
+    RequestTimeout, quando pychromecast ha aspettato la risposta per i suoi
+    10 secondi, o RequestFailed, quando non e' partito, per esempio perche'
+    l'apparecchio non ha ancora il brano. L'apparecchio c'e' ancora: la
+    connessione che cade la dice al_distacco (15 novembre 2026)."""
+    try:
+        from pychromecast.error import RequestFailed, RequestTimeout
+    except ImportError:
+        return False
+    return isinstance(errore, (RequestTimeout, RequestFailed))
+
+
 def tipo_di(percorso):
     """Il tipo del file da dichiarare all'apparecchio, dall'estensione."""
     return TIPI.get(os.path.splitext(percorso)[1].lower(), TIPO_SCONOSCIUTO)

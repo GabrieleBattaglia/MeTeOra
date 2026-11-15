@@ -8,6 +8,7 @@ a mano, come li manderebbe pychromecast dal suo filo."""
 
 import os
 import threading
+import time
 
 import pytest
 
@@ -88,11 +89,38 @@ class _ServerFinto:
         self.fermato = True
 
 
+class _ApparecchioLento(_ApparecchioFinto):
+    """Lo speaker che risponde a un salto solo quando la prova lo lascia
+    andare, come pychromecast, che aspetta la sua risposta fino a 10 secondi;
+    intanto dice ancora la posizione di prima. errore_del_salto, se c'e', e'
+    quello che il salto solleva alla fine."""
+
+    def __init__(self):
+        super().__init__()
+        self.via = threading.Event()
+        self.errore_del_salto = None
+
+    def vai_a(self, secondi):
+        self._annota("vai_a", secondi)
+        assert self.via.wait(5)
+        if self.errore_del_salto is not None:
+            raise self.errore_del_salto
+
+
+def _aspetta(condizione, secondi=5):
+    fine = time.monotonic() + secondi
+    while time.monotonic() < fine:
+        if condizione():
+            return True
+        time.sleep(0.01)
+    return condizione()
+
+
 class _Banco:
     """Il lettore lontano con i suoi finti, e gli avvisi in una lista."""
 
-    def __init__(self, tmp_path, converti=None):
-        self.apparecchio = _ApparecchioFinto()
+    def __init__(self, tmp_path, converti=None, apparecchio=None):
+        self.apparecchio = apparecchio or _ApparecchioFinto()
         self.server = _ServerFinto()
         self.avvisi = []
         self.conversioni = []
@@ -140,6 +168,8 @@ def test_da_convertire():
 def test_un_brano_che_lo_speaker_legge(banco):
     lettore, apparecchio = banco.lettore, banco.apparecchio
     lettore.suona(r"C:\m\Brano.MP3", inizio=12.5)
+    # Dal 15 novembre 2026 i comandi vanno allo speaker dal loro filo.
+    assert lettore.aspetta_i_comandi()
     assert apparecchio.chiamate == [("suona", "http://pc/file/1.mp3", "audio/mpeg", "Brano.MP3", 12.5, False)]
     assert lettore.percorso == r"C:\m\Brano.MP3" and lettore.posizione is None and lettore.durata is None
     # Finche' lo speaker non lo ha, gli stati del brano di prima non contano.
@@ -181,6 +211,7 @@ def test_la_fine_che_lo_speaker_non_dice(banco, monkeypatch):
     assert not any(isinstance(a, tuple) and a[0] == "errore" for a in banco.avvisi)
     # Se lo speaker dice la fine da se', entro l'attesa, la fine e' una sola.
     lettore.suona("brano.mp3")
+    assert lettore.aspetta_i_comandi()
     indirizzo = banco.apparecchio.chiamate[-1][1]
     banco.stato(trasmissione.IN_RIPRODUZIONE, indirizzo, durata=200.0)
     banco.allo_stato({"stato": trasmissione.IN_CARICAMENTO, "posizione": 199.9, "durata": 200.0, "motivo": None, "indirizzo": indirizzo})
@@ -189,6 +220,7 @@ def test_la_fine_che_lo_speaker_non_dice(banco, monkeypatch):
     assert banco.avvisi.count("fine") == 2
     # E se riparte, per esempio dopo un salto indietro, la fine attesa si toglie.
     lettore.suona("altro.mp3")
+    assert lettore.aspetta_i_comandi()
     indirizzo = banco.apparecchio.chiamate[-1][1]
     banco.stato(trasmissione.IN_RIPRODUZIONE, indirizzo, durata=200.0)
     banco.allo_stato({"stato": trasmissione.IN_CARICAMENTO, "posizione": 200.0, "durata": 200.0, "motivo": None, "indirizzo": indirizzo})
@@ -198,40 +230,200 @@ def test_la_fine_che_lo_speaker_non_dice(banco, monkeypatch):
 
 
 def test_i_comandi(banco):
+    # Dal 15 novembre 2026 i comandi vanno allo speaker dal loro filo, in
+    # fila: aspetta_i_comandi aspetta che siano arrivati.
     lettore, apparecchio = banco.lettore, banco.apparecchio
     lettore.suona("brano.flac", in_pausa=True)
-    assert apparecchio.chiamate[-1][-1] is True and lettore.in_pausa
+    assert lettore.in_pausa and lettore.aspetta_i_comandi()
+    assert apparecchio.chiamate[-1][-1] is True
     banco.stato(trasmissione.IN_PAUSA, "http://pc/file/1.flac")
     assert banco.avvisi == ["caricato"] and lettore.in_pausa
-    assert lettore.pausa() is False and apparecchio.chiamate[-1] == ("riprendi",)
-    assert lettore.pausa(True) is True and apparecchio.chiamate[-1] == ("pausa",)
+    assert lettore.pausa() is False and lettore.aspetta_i_comandi() and apparecchio.chiamate[-1] == ("riprendi",)
+    assert lettore.pausa(True) is True and lettore.aspetta_i_comandi() and apparecchio.chiamate[-1] == ("pausa",)
     apparecchio.posizione = 30.0
     lettore.salta(-40)
+    assert lettore.aspetta_i_comandi()
     lettore.vai_a(90)
+    assert lettore.aspetta_i_comandi()
     assert apparecchio.chiamate[-2:] == [("vai_a", 0.0), ("vai_a", 90.0)]
     # Il volume da 0 a 100, quello dello speaker; quello chiesto vale per un
     # attimo, finche' lo speaker non dice il suo.
     assert lettore.volume == 40
     lettore.volume = 150
+    assert lettore.volume == 100 and lettore.aspetta_i_comandi()
     assert apparecchio.volume == 1.0 and lettore.volume == 100
     lettore.volume = 25
-    assert apparecchio.volume == 0.25
+    assert lettore.aspetta_i_comandi() and apparecchio.volume == 0.25
     apparecchio.volume = 0.3
     assert lettore.volume == 25
     lettore._quando_chiesto -= lontano.MEMORIA_DEL_VOLUME
     assert lettore.volume == 30
     lettore.muto = True
-    assert apparecchio.muto is True and lettore.muto
+    assert lettore.aspetta_i_comandi() and apparecchio.muto is True and lettore.muto
     lettore.stop()
-    assert apparecchio.chiamate[-1] == ("ferma",) and lettore.percorso is None
+    assert lettore.percorso is None and lettore.aspetta_i_comandi() and apparecchio.chiamate[-1] == ("ferma",)
     # Da fermi, stop, pausa e salti non mandano niente.
     quanti = len(apparecchio.chiamate)
     lettore.stop()
     lettore.vai_a(5)
-    assert lettore.pausa() is False and len(apparecchio.chiamate) == quanti
+    assert lettore.pausa() is False and lettore.aspetta_i_comandi() and len(apparecchio.chiamate) == quanti
     # Senza un brano di MeTeOra che suona, lo speaker si lascia com'e'.
     lettore.chiudi()
     assert apparecchio.chiamate[-1] == ("chiudi", True) and banco.server.fermato
+
+
+def test_i_salti_ravvicinati_partono_dal_punto_chiesto(tmp_path):
+    # Gabriele, 15 novembre 2026: con lo speaker, Maiuscolo con Q due volte di
+    # fila partiva dal punto vecchio, che lo speaker dice ancora, e la
+    # finestra aspettava la sua risposta. Il salto va in fila al filo dei
+    # comandi, la posizione e' subito il punto chiesto, e i salti in fila
+    # diventano uno, al punto chiesto per ultimo.
+    apparecchio = _ApparecchioLento()
+    banco = _Banco(tmp_path, apparecchio=apparecchio)
+    lettore, conti = banco.lettore, []
+    lettore._al_conto = lambda nome, quanto: conti.append((nome, quanto))
+    lettore.suona("brano.mp3")
+    assert lettore.aspetta_i_comandi()
+    banco.stato(trasmissione.IN_RIPRODUZIONE, "http://pc/file/1.mp3", durata=300.0)
+    apparecchio.posizione = 30.0
+    assert lettore.posizione == 30.0
+    lettore.salta(10)
+    # Il primo salto e' in volo, e lo speaker non risponde: la posizione e' il punto chiesto.
+    assert _aspetta(lambda: ("vai_a", 40.0) in apparecchio.chiamate) and lettore.posizione == 40.0
+    inizio = time.monotonic()
+    lettore.salta(10)
+    lettore.salta(10)
+    assert time.monotonic() - inizio < 0.5 and lettore.posizione == 60.0
+    assert conti == [("salti_uniti_allo_speaker", 1)]
+    # Oltre la fine, la fine.
+    lettore.vai_a(1000)
+    assert lettore.posizione == 300.0 and conti == [("salti_uniti_allo_speaker", 1)] * 2
+    lettore.vai_a(60)
+    apparecchio.via.set()
+    assert lettore.aspetta_i_comandi()
+    assert [c for c in apparecchio.chiamate if c[0] == "vai_a"] == [("vai_a", 40.0), ("vai_a", 60.0)]
+    # Arrivato il salto, il punto chiesto vale ancora per un attimo, poi vale quello dello speaker.
+    assert lettore.posizione == 60.0
+    assert _aspetta(lambda: lettore.posizione == 30.0, lontano.MEMORIA_DEL_PUNTO + 3)
+    # Un salto chiesto e poi un brano nuovo: il punto non vale per lui.
+    lettore.vai_a(90)
+    lettore.suona("altro.mp3")
+    assert lettore.posizione is None and lettore.aspetta_i_comandi()
+
+
+def test_un_salto_senza_risposta_non_perde_lo_speaker(tmp_path):
+    # pychromecast aspetta la risposta di un salto fino a 10 secondi, poi
+    # solleva RequestTimeout: prima andava ad al_guasto, e la musica tornava
+    # sul PC. Uno speaker che carica il punto nuovo puo' rispondere tardi;
+    # la connessione che cade la dice al_distacco (15 novembre 2026).
+    from pychromecast.error import RequestFailed, RequestTimeout
+
+    apparecchio = _ApparecchioLento()
+    apparecchio.via.set()
+    banco = _Banco(tmp_path, apparecchio=apparecchio)
+    lettore, conti = banco.lettore, []
+    lettore._al_conto = lambda nome, quanto: conti.append((nome, quanto))
+    lettore.suona("brano.mp3")
+    banco.stato(trasmissione.IN_RIPRODUZIONE, "http://pc/file/1.mp3", durata=300.0)
+    apparecchio.errore_del_salto = RequestTimeout("seek 40.0", 10.0)
+    lettore.vai_a(40)
+    assert lettore.aspetta_i_comandi()
+    apparecchio.errore_del_salto = RequestFailed("seek 50.0")
+    lettore.vai_a(50)
+    assert lettore.aspetta_i_comandi()
+    assert banco.avvisi == ["caricato"] and conti == [("salti_senza_risposta_dallo_speaker", 1)] * 2
+    # Un altro errore, come la rete che non c'e', resta un guasto; e cosi'
+    # una pausa senza risposta, come prima.
+    apparecchio.errore_del_salto = OSError("rete assente")
+    lettore.vai_a(60)
+    assert lettore.aspetta_i_comandi() and banco.avvisi[-1] == ("guasto", "rete assente")
+    apparecchio.guasto = RequestTimeout("pause", 10.0)
+    lettore.pausa()
+    assert lettore.aspetta_i_comandi() and banco.avvisi[-1][0] == "guasto" and "pause" in banco.avvisi[-1][1]
+
+
+def test_un_salto_prima_che_lo_speaker_abbia_il_brano_lo_aspetta(banco):
+    # Un salto chiesto prima che lo speaker abbia il brano andrebbe al brano
+    # di prima, o a nessuno: aspetta il brano, e parte dal punto da cui il
+    # brano e' partito, non dall'inizio (15 novembre 2026).
+    lettore, apparecchio = banco.lettore, banco.apparecchio
+    lettore.suona("brano.mp3", inizio=100.0)
+    assert lettore.aspetta_i_comandi() and lettore.posizione is None
+    lettore.salta(10)
+    assert lettore.posizione == 110.0
+    time.sleep(0.2)
+    assert not [c for c in apparecchio.chiamate if c[0] == "vai_a"]
+    banco.stato(trasmissione.IN_RIPRODUZIONE, "http://pc/file/1.mp3", durata=300.0)
+    assert lettore.aspetta_i_comandi() and apparecchio.chiamate[-1] == ("vai_a", 110.0)
+
+
+def test_un_salto_durante_la_conversione_non_ferma_il_brano(tmp_path):
+    # Un salto o una pausa chiesti mentre la sorgente del WAV in RAM si
+    # prepara, prima che il brano vada allo speaker, si rinviano: il brano
+    # parte appena la sorgente c'e', e loro arrivano quando lo speaker lo ha.
+    via = threading.Event()
+
+    def lenta(percorso, sottobrano):
+        via.wait(5)
+        return _SorgenteFinta(percorso, sottobrano)
+
+    banco = _Banco(tmp_path, converti=lenta)
+    lettore, apparecchio, conti = banco.lettore, banco.apparecchio, []
+    lettore._al_conto = lambda nome, quanto: conti.append((nome, quanto))
+    lettore.suona("video.mkv")
+    lettore.salta(30)
+    lettore.salta(30)
+    lettore.pausa()
+    assert lettore.posizione == 60.0 and lettore.aspetta_i_comandi() and apparecchio.chiamate == []
+    assert conti == [("salti_uniti_allo_speaker", 1)]
+    inizio = time.monotonic()
+    via.set()
+    assert banco.aspetta_suona() and time.monotonic() - inizio < 1
+    assert lettore.aspetta_i_comandi() and [c[0] for c in apparecchio.chiamate] == ["suona"] and apparecchio.chiamate[0][-1] is True
+    banco.stato(trasmissione.IN_PAUSA, "http://pc/sorgente/1.wav", durata=600.0)
+    assert lettore.aspetta_i_comandi() and apparecchio.chiamate[1:] == [("vai_a", 60.0), ("pausa",)]
+
+
+def test_i_comandi_del_brano_di_prima_non_partono(tmp_path):
+    # Dietro un salto lento, una pausa del brano di prima e un salto non
+    # arrivano al brano nuovo; il volume, che e' dello speaker, si'.
+    apparecchio = _ApparecchioLento()
+    banco = _Banco(tmp_path, apparecchio=apparecchio)
+    lettore = banco.lettore
+    lettore.suona("brano.mp3")
+    banco.stato(trasmissione.IN_RIPRODUZIONE, "http://pc/file/1.mp3", durata=300.0)
+    lettore.vai_a(40)
+    assert _aspetta(lambda: ("vai_a", 40.0) in apparecchio.chiamate)
+    lettore.pausa()
+    lettore.vai_a(80)
+    lettore.volume = 55
+    lettore.suona("altro.mp3")
+    apparecchio.via.set()
+    assert lettore.aspetta_i_comandi()
+    dopo = apparecchio.chiamate[apparecchio.chiamate.index(("vai_a", 40.0)) + 1:]
+    assert dopo == [("suona", "http://pc/file/2.mp3", "audio/mpeg", "altro.mp3", None, False)] and apparecchio.volume == 0.55
+
+
+def test_la_chiusura_arriva_dopo_i_comandi_e_non_dice_guasti(tmp_path):
+    # La chiusura va in fondo alla fila; senza attendi la finestra non la
+    # aspetta. Da li' un comando che non arriva, o la connessione che cade,
+    # non sono piu' un guasto: lo speaker non e' piu' quello in uso.
+    apparecchio = _ApparecchioLento()
+    banco = _Banco(tmp_path, apparecchio=apparecchio)
+    lettore = banco.lettore
+    lettore.suona("brano.mp3")
+    banco.stato(trasmissione.IN_RIPRODUZIONE, "http://pc/file/1.mp3", durata=300.0)
+    lettore.vai_a(40)
+    assert _aspetta(lambda: ("vai_a", 40.0) in apparecchio.chiamate)
+    inizio = time.monotonic()
+    lettore.chiudi(attendi=False)
+    assert time.monotonic() - inizio < 0.5 and not banco.server.fermato
+    apparecchio.guasto = OSError("spento")
+    lettore.volume = 10
+    apparecchio.via.set()
+    assert lettore.aspetta_i_comandi() and banco.server.fermato
+    banco.al_distacco("LOST")
+    assert banco.avvisi == ["caricato"] and apparecchio.chiamate[-1] == ("chiudi", False) and apparecchio.volume == 0.4
 
 
 def test_la_chiusura_spegne_solo_i_brani_di_meteora(banco):
@@ -336,7 +528,7 @@ def test_gli_errori(tmp_path):
     banco.lettore.suona("brano.mp3")
     banco.apparecchio.guasto = OSError("speaker spento")
     banco.lettore.pausa()
-    assert banco.avvisi[-1] == ("guasto", "speaker spento")
+    assert banco.lettore.aspetta_i_comandi() and banco.avvisi[-1] == ("guasto", "speaker spento")
 
 
 def test_una_radio_va_allo_speaker_dal_ripetitore(banco, monkeypatch):

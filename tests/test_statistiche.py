@@ -643,6 +643,17 @@ def test_la_riga_dei_dischi_nella_salute(tmp_path):
     assert "Dischi riconosciuti a mano: 1; lettere rese contese dalla Sentinella, a MeTeOra aperto: 3." in _pagina(s).la_salute()
 
 
+def test_la_riga_dei_salti_allo_speaker_nella_salute(tmp_path):
+    # 15 novembre 2026: i salti in fila per lo speaker, uniti quando sono
+    # ravvicinati, e quelli che lo speaker non ha confermato in tempo, che
+    # non lo danno piu' per perso. Contati da lontano.py, anche a zero.
+    s, _o = _nuove(tmp_path)
+    assert "Salti allo speaker uniti perché ravvicinati: 0; senza risposta in tempo, con la musica rimasta sullo speaker: 0." in _pagina(s).la_salute()
+    s.conta("salti_uniti_allo_speaker", 4)
+    s.conta("salti_senza_risposta_dallo_speaker")
+    assert "Salti allo speaker uniti perché ravvicinati: 4; senza risposta in tempo, con la musica rimasta sullo speaker: 1." in _pagina(s).la_salute()
+
+
 def test_ogni_evento_dei_suoni_ha_il_suo_nome():
     # Senza nome la pagina direbbe l'evento com'e', senza accenti, e il conto
     # di quelli che MeTeOra conosce sarebbe sbagliato (1.113.0).
