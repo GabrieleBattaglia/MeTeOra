@@ -360,7 +360,7 @@ def test_una_connessione_rifiutata_si_dice_anche_subito(tmp_path):
             reg.pausa(False)
         assert caduta.wait(15) and (reg.stato, reg.motivo) == ("in_pausa", "rete")
     assert len(cadute) == 3 and not reg._parti
-    assert reg.ferma() is None
+    assert reg.ferma() is None and not os.path.exists(reg.percorso + registrazioni.FILE_DELLE_PARTI)
 
 
 def _server_icy(audio, metaint, titoli, pausa=0.15):

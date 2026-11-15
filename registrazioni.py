@@ -441,7 +441,9 @@ class Registrazione:
         try:
             vuota = not os.path.getsize(parte.file)
         except OSError:
+            # libmpv non ha scritto niente, come per una connessione rifiutata.
             self._chiudendo = None
+            self._annota()
             return
         if vuota:
             with contextlib.suppress(OSError):
@@ -684,7 +686,11 @@ class Registrazione:
         riesce, o si ferma per la fretta, le parti diventano file."""
         with self._blocco:
             self._chiudi_la_parte()
-            if not self._parti or (len(self._parti) == 1 and self._parti[0].file == self.percorso):
+            if not self._parti:
+                # Non e' arrivato niente: nemmeno il file delle parti resta.
+                self._togli_l_annotazione()
+                return
+            if len(self._parti) == 1 and self._parti[0].file == self.percorso:
                 return
             self.in_salvataggio, self.avanzamento = True, 0.0
             inizio = time.monotonic()
