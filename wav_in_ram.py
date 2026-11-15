@@ -24,7 +24,15 @@ brani resi emulando, SID, musica delle console e MIDI, che ripartendo
 emulano da capo, in avanti si aspetta la conversione in corsa. Se il
 convertitore finisce prima della dimensione dichiarata il resto e'
 silenzio, se va oltre si taglia: la fine arriva puntuale. Una conversione
-che non scrive niente e' un brano che non si legge, e il server chiude.
+che non scrive niente e' un brano che non si legge, e il server chiude;
+dal 15 novembre 2026 anche quando riparte da un salto, come un flusso di
+YouTube scaduto, che dava silenzio fino alla fine del brano, salvo negli
+ultimi SECONDI_VUOTI_IN_FONDO, dove la fine vera puo' venire prima di quella
+dichiarata. La pipe di un passaggio sostituito, e quella di una diretta
+chiusa, si vuota finche' libmpv non si ferma: con una conversione veloce
+libmpv restava fermo a scrivere in una pipe che nessuno leggeva piu',
+terminate lo aspettava per sempre, e a ogni ripartenza restavano vivi un
+filo e una libmpv.
 
 La qualita' e' quella della sorgente, nei limiti dello speaker (domanda di
 Gabriele del 5 novembre 2026): la frequenza della sorgente fra 44,1, 48, 88,2
@@ -43,6 +51,7 @@ finestra pronti subito; la fine sempre con FINISHED.
 """
 
 import ctypes
+import mmap
 import os
 import struct
 import threading
@@ -66,6 +75,10 @@ FINESTRA_MASSIMA = 512 * 2**20
 PARTE_DIETRO = 0.25
 # Fin dove, avanti, si aspetta il convertitore invece di farlo ripartire.
 SECONDI_DA_ASPETTARE = 10
+# Una ripartenza che non scrive niente e' un guasto, se non comincia negli
+# ultimi tanti secondi dichiarati: li', la fine vera puo' venire prima di
+# quella dichiarata, e il resto e' silenzio, come prima (15 novembre 2026).
+SECONDI_VUOTI_IN_FONDO = 30
 PEZZO = 65536
 TIPO = "audio/wav"
 
@@ -197,7 +210,10 @@ class _Passaggio:
         try:
             self._lettore = avvia(secondi, self.pipe.percorso, self._finito, frequenza, bit)
         except Exception:
+            # Chi aspetta torna, e la pipe, che non serve piu', si chiude.
             self.pipe.sblocca()
+            self._filo.join(5)
+            self.pipe.chiudi()
             raise
 
     def _finito(self):
@@ -205,14 +221,21 @@ class _Passaggio:
         threading.Thread(target=self.pipe.sblocca, daemon=True).start()
 
     def _versa(self):
+        """Nel suo filo: i byte della pipe vanno nella sorgente. Quando il
+        passaggio non vale piu' la pipe si vuota lo stesso, senza versare,
+        finche' libmpv non la chiude: non resta fermo a scrivere, e terminate
+        non lo aspetta per sempre (15 novembre 2026)."""
         scritti = 0
+        vale = True
         try:
             self.pipe.aspetta_chi_scrive()
             while True:
                 pezzo = self.pipe.leggi()
-                if not pezzo or not self._sorgente._versa(self._generazione, pezzo):
+                if not pezzo:
                     break
-                scritti += len(pezzo)
+                vale = vale and self._sorgente._versa(self._generazione, pezzo)
+                if vale:
+                    scritti += len(pezzo)
         except OSError:
             pass
         finally:
@@ -222,6 +245,14 @@ class _Passaggio:
         threading.Thread(target=self._chiudi, name="MeTeOra, fine del WAV in RAM", daemon=True).start()
 
     def _chiudi(self):
+        # La pipe di un passaggio che non vale piu' la vuota _versa, fino a
+        # quando libmpv non la chiude (15 novembre 2026). Con una conversione
+        # veloce, con il flusso a pezzi di YouTube o gia' con un file del
+        # disco, libmpv restava fermo a scrivere in una pipe piena che nessuno
+        # leggeva piu', e terminate lo aspettava per sempre: l'esploratore,
+        # dopo tre o quattro ripartenze, contava quattro o cinque fili di fine
+        # e altrettante libmpv ancora vive. Staccarla con DisconnectNamedPipe
+        # non va: da un altro filo aspetta che finisca la lettura in corso.
         try:
             if self._lettore is not None:
                 self._lettore.terminate()
@@ -256,12 +287,29 @@ class SorgenteWav:
         self._testa = intestazione(self.totale_pcm, self.frequenza, self.bit)
         self._cond = threading.Condition()
         self._generazione = 0
-        self._base, self._dati, self._finito, self._letto = 0, bytearray(), False, 0
+        # La finestra sta in un anello allocato una volta, al primo pezzo, e
+        # tenuto per tutte le ripartenze (15 novembre 2026): il byte di PCM p
+        # sta al posto p % capacita. Il bytearray che cresceva a ogni pezzo,
+        # con il flusso a pezzi di YouTube che riempie la finestra a 250 volte
+        # il tempo reale, si riallocava copiando centinaia di megabyte con il
+        # GIL preso, e gli altri fili, quello della finestra compreso,
+        # aspettavano fino a 90 ms (misura del 15 novembre 2026, 384 MB a
+        # pezzi da 64 KB: allocato una volta, 23 ms al piu'). Una mappa
+        # anonima, che Windows riempie di zeri solo quando la si scrive, non
+        # ferma tutto per azzerarla. Il di piu' sono due pezzi della pipe:
+        # davanti a chi legge si sta sotto la finestra meno la parte dietro,
+        # e dietro si tiene la parte dietro.
+        self._capacita = min(self.finestra, self.totale_pcm) + 2 * PEZZO
+        self._anello = None
+        # Il PCM valido va dal byte base, per lunghezza byte; letto e' dove
+        # e' arrivato chi legge, finito se il passaggio di adesso e' finito.
+        self._base, self._lunghezza, self._finito, self._letto = 0, 0, False, 0
         self._passaggio = None
         self._chiusa = False
         self._richiesta = 0
-        # Vero se un passaggio partito dall'inizio non ha scritto niente: il
-        # brano non si legge, e il server chiude.
+        # Vero se un passaggio non ha scritto niente, partito dall'inizio o,
+        # dal 15 novembre 2026, da un salto che non e' in fondo: il brano non
+        # si legge, e il server chiude.
         self.guasta = False
         self.ripartenze = 0
         self.convertiti = 0
@@ -275,7 +323,7 @@ class SorgenteWav:
                 return
             self._generazione += 1
             generazione = self._generazione
-            self._base, self._dati, self._finito, self._letto = inizio, bytearray(), False, inizio
+            self._base, self._lunghezza, self._finito, self._letto = inizio, 0, False, inizio
             vecchio, self._passaggio = self._passaggio, None
             self._cond.notify_all()
         if vecchio is not None:
@@ -293,29 +341,60 @@ class SorgenteWav:
         passaggio.ferma()
 
     def _versa(self, generazione, pezzo):
-        """Dal filo della pipe: aggiunge i byte, aspettando se la finestra
-        davanti a chi legge e' piena. Falso se il passaggio non vale piu'."""
+        """Dal filo della pipe: aggiunge i byte all'anello, aspettando se la
+        finestra davanti a chi legge e' piena, o l'anello. Falso se il
+        passaggio non vale piu'."""
         with self._cond:
-            while generazione == self._generazione and self._base + len(self._dati) - self._letto >= self.finestra - self.dietro:
+            while True:
+                if generazione != self._generazione:
+                    return False
+                self._accorcia()
+                if self._base + self._lunghezza - self._letto < self.finestra - self.dietro and self._lunghezza + len(pezzo) <= self._capacita:
+                    break
                 self._cond.wait(0.5)
-            if generazione != self._generazione:
-                return False
-            self._dati += pezzo
+            if self._anello is None:
+                self._anello = mmap.mmap(-1, self._capacita)
+            dove = (self._base + self._lunghezza) % self._capacita
+            primo = min(len(pezzo), self._capacita - dove)
+            self._anello[dove:dove + primo] = pezzo[:primo]
+            if primo < len(pezzo):
+                self._anello[:len(pezzo) - primo] = pezzo[primo:]
+            self._lunghezza += len(pezzo)
             self.convertiti += len(pezzo)
-            troppo = self._letto - self.dietro - self._base
-            if troppo > 0:
-                troppo = min(troppo, len(self._dati)) // self.quadro * self.quadro
-                del self._dati[:troppo]
-                self._base += troppo
             self._cond.notify_all()
             return True
 
+    def _accorcia(self):
+        """Con il lucchetto: i byte piu' indietro della parte dietro, rispetto
+        a chi legge, non valgono piu', e il loro posto nell'anello si libera."""
+        troppo = self._letto - self.dietro - self._base
+        if troppo > 0:
+            troppo = min(troppo, self._lunghezza) // self.quadro * self.quadro
+            self._base += troppo
+            self._lunghezza -= troppo
+
+    def _copia(self, da, quanti):
+        """Con il lucchetto: quanti byte di PCM dal byte da, che l'anello ha."""
+        dove = da % self._capacita
+        primo = min(quanti, self._capacita - dove)
+        pezzo = self._anello[dove:dove + primo]
+        if primo < quanti:
+            pezzo += self._anello[:quanti - primo]
+        return pezzo
+
     def _fine(self, generazione, scritti):
+        """Un passaggio e' finito, con scritti byte. Uno vuoto e' un guasto
+        anche quando riparte da un salto (Gabriele, 15 novembre 2026): un
+        flusso di YouTube scaduto non si apriva, e lo speaker restava nel
+        silenzio fino alla fine del brano, anche per ore. Negli ultimi
+        SECONDI_VUOTI_IN_FONDO dichiarati no: li' la fine vera del brano puo'
+        venire prima, e il resto e' silenzio."""
         with self._cond:
             if generazione != self._generazione:
                 return
             self._finito = True
-            if scritti == 0 and self._base == 0:
+            in_fondo = self._base >= self.totale_pcm - SECONDI_VUOTI_IN_FONDO * self.al_secondo
+            if scritti == 0 and (self._base == 0 or not in_fondo):
                 self.guasta = True
             self._cond.notify_all()
 
@@ -339,7 +418,7 @@ class SorgenteWav:
             return self._testa[inizio:inizio + min(quanti, INTESTAZIONE - inizio)]
         pcm = inizio - INTESTAZIONE
         with self._cond:
-            fine_scritta = self._base + len(self._dati)
+            fine_scritta = self._base + self._lunghezza
             avanti = not self.emulato and pcm > fine_scritta + SECONDI_DA_ASPETTARE * self.al_secondo
             fuori = pcm < self._base or avanti
         if fuori:
@@ -350,10 +429,9 @@ class SorgenteWav:
             while True:
                 if self._chiusa or self.guasta or richiesta != self._richiesta:
                     return None
-                fine_scritta = self._base + len(self._dati)
+                fine_scritta = self._base + self._lunghezza
                 if self._base <= pcm < fine_scritta:
-                    da = pcm - self._base
-                    pezzo = bytes(self._dati[da:da + quanti])
+                    pezzo = self._copia(pcm, min(quanti, fine_scritta - pcm))
                     break
                 if self._finito and pcm >= fine_scritta:
                     pezzo = bytes(quanti)
@@ -371,7 +449,9 @@ class SorgenteWav:
             self._chiusa = True
             self._generazione += 1
             vecchio, self._passaggio = self._passaggio, None
-            self._dati = bytearray()
+            anello, self._anello, self._lunghezza = self._anello, None, 0
+            if anello is not None:
+                anello.close()
             self._cond.notify_all()
         if vecchio is not None:
             vecchio.ferma()
@@ -396,7 +476,9 @@ class FlussoPcm:
         self.pipe = Pipe(f"meteora_dal_vivo_{os.getpid()}_{next(_numeri)}")
         self._testa = intestazione(MASSIMO_DEL_WAV // quadro(BIT) * quadro(BIT), frequenza)
         self._blocco = threading.Lock()
-        self._collegata = self._chiusa = self._in_lettura = self._pipe_chiusa = False
+        # Avvisa chi vuota la pipe dopo close che la lettura in corso e' finita.
+        self._letta = threading.Condition(self._blocco)
+        self._collegata = self._chiusa = self._in_lettura = False
         try:
             self._lettore = avvia(self.pipe.percorso, self._finito)
         except Exception:
@@ -424,13 +506,12 @@ class FlussoPcm:
         except OSError:
             dati = b""
         finally:
+            # Dopo close la pipe non si chiude qui: la vuota _vuota, e la
+            # chiude _chiudi quando libmpv si e' fermato.
             with self._blocco:
                 self._in_lettura = False
                 chiusa = self._chiusa
-                chiudere = chiusa and not self._pipe_chiusa
-                self._pipe_chiusa = self._pipe_chiusa or chiudere
-            if chiudere:
-                self.pipe.chiudi()
+                self._letta.notify_all()
             if chiusa:
                 dati = b""
         self.scritti += len(dati)
@@ -444,18 +525,40 @@ class FlussoPcm:
         threading.Thread(target=self._chiudi, name="MeTeOra, fine della diretta convertita", daemon=True).start()
 
     def _chiudi(self):
+        # Come per i passaggi del WAV in RAM: mentre libmpv si ferma, la pipe
+        # si vuota fino alla fine, e si chiude solo dopo (revisione del 15
+        # novembre 2026). Chiusa prima di terminate, libmpv restava fermo a
+        # scrivere nella meta' dei casi, misurato con libmpv vera: una libmpv
+        # e un filo vivi per ogni TV fermata o cambiata. Vuotata, terminate
+        # torna in un centesimo di secondo.
+        vuota = threading.Thread(target=self._vuota, name="MeTeOra, pipe della diretta convertita", daemon=True)
+        vuota.start()
         try:
             self._lettore.terminate()
         except Exception:  # noqa: BLE001, S110 - un convertitore gia' finito si chiude come puo'
             pass
         finally:
+            # Chi vuota la pipe e aspetta ancora libmpv, che non e' mai
+            # arrivato, torna; poi la pipe si chiude, una volta sola.
             self.pipe.sblocca()
-            # La pipe la chiude chi arriva per ultimo, una volta sola.
-            with self._blocco:
-                chiudere = not self._in_lettura and not self._pipe_chiusa
-                self._pipe_chiusa = self._pipe_chiusa or chiudere
-            if chiudere:
-                self.pipe.chiudi()
+            vuota.join(5)
+            self.pipe.chiudi()
+
+    def _vuota(self):
+        """Nel suo filo, dopo close: finita la lettura in corso, la pipe si
+        legge e si butta finche' libmpv non la chiude, o finche' sblocca non
+        la apre al posto suo."""
+        with self._letta:
+            while self._in_lettura:
+                self._letta.wait(0.5)
+        try:
+            if not self._collegata:
+                self.pipe.aspetta_chi_scrive()
+                self._collegata = True
+            while self.pipe.leggi():
+                pass
+        except OSError:
+            pass
 
     def cancel(self):
         self.close()

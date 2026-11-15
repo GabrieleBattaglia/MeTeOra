@@ -51,6 +51,81 @@ class _Convertitore:
         return type("Lettore", (), {"terminate": lambda _self: fermo.set()})()
 
 
+class _SoloDallInizio(_Convertitore):
+    """Il convertitore di un flusso che dopo la prima volta non si apre piu',
+    come una pagina di YouTube con il flusso scaduto: dall'inizio scrive, da
+    un salto non apre nemmeno la pipe, e dice subito che ha finito."""
+
+    def __call__(self, secondi, uscita, alla_fine, frequenza, bit):
+        if secondi:
+            self.partenze.append(round(secondi * frequenza * wav_in_ram.quadro(bit)))
+            threading.Thread(target=alla_fine, daemon=True).start()
+            return type("Lettore", (), {"terminate": lambda _self: None})()
+        return super().__call__(secondi, uscita, alla_fine, frequenza, bit)
+
+
+def _veloce(inizio, quanti):
+    """_atteso, ma svelto: un giro di 251 byte ripetuto."""
+    giro = bytes(range(251)) * (quanti // 251 + 2)
+    return giro[inizio % 251:inizio % 251 + quanti]
+
+
+class _Ostinato:
+    """Un convertitore come libmpv: scrive piu' svelto di chi legge, a pezzi
+    da 64 KB, e il suo terminate aspetta che abbia finito di scrivere. Fermo a
+    scrivere in una pipe piena, che nessuno legge, terminate non tornerebbe
+    mai: qui torna dopo ATTESA secondi, e si conta fra i bloccati.
+    dal_vivo(uscita, alla_fine) e' quello delle dirette, senza fine."""
+
+    ATTESA = 3.0
+
+    def __init__(self, totale=None):
+        self.totale = totale
+        self.tornati = self.bloccati = 0
+        self._blocco = threading.Lock()
+
+    def __call__(self, secondi, uscita, alla_fine, frequenza, bit):
+        return self._parti(round(secondi * frequenza * wav_in_ram.quadro(bit)), uscita, alla_fine)
+
+    def dal_vivo(self, uscita, alla_fine):
+        return self._parti(0, uscita, alla_fine)
+
+    def _parti(self, inizio, uscita, alla_fine):
+        fermo = threading.Event()
+
+        def scrivi():
+            try:
+                with open(uscita, "wb", buffering=0) as pipe:
+                    posizione = inizio
+                    while not fermo.is_set() and (self.totale is None or posizione < self.totale):
+                        pipe.write(_veloce(posizione, 65536))
+                        posizione += 65536
+            except OSError:
+                pass
+            finally:
+                alla_fine()
+
+        filo = threading.Thread(target=scrivi, name="convertitore ostinato", daemon=True)
+        filo.start()
+        ostinato = self
+
+        class Lettore:
+            def terminate(self):
+                fermo.set()
+                filo.join(ostinato.ATTESA)
+                with ostinato._blocco:
+                    if filo.is_alive():
+                        ostinato.bloccati += 1
+                    else:
+                        ostinato.tornati += 1
+
+        return Lettore()
+
+
+def _vivi(nome):
+    return sum(1 for f in threading.enumerate() if f.name.startswith(nome))
+
+
 def _esatti(sorgente, inizio, quanti, richiesta):
     """quanti byte da inizio, chiesti finche' arrivano, come fa il server:
     leggi da' quelli gia' convertiti, anche meno di quanti."""
@@ -159,6 +234,28 @@ def test_il_convertitore_si_ferma_a_finestra_piena():
         sorgente.chiudi()
 
 
+def test_l_anello_tiene_la_parte_dietro_anche_a_cavallo():
+    # 15 novembre 2026: la finestra sta in un anello allocato una volta, che
+    # non si rialloca a ogni pezzo. Letto un mega di fila, cioe' l'anello
+    # quasi tre volte, un salto indietro dentro la parte dietro e una lettura
+    # a cavallo della fine dell'anello danno i byte giusti, senza ripartire.
+    durata = 10.0
+    totale = int(durata * 48000) * 4
+    convertitore = _Convertitore(totale)
+    sorgente = SorgenteWav(convertitore, durata, finestra=256 * 1024)
+    try:
+        assert sorgente._capacita == 256 * 1024 + 2 * wav_in_ram.PEZZO
+        mega = 1024 * 1024
+        assert _esatti(sorgente, INTESTAZIONE, mega, sorgente.nuova_richiesta()) == _atteso(0, mega)
+        indietro = mega - 32 * 1024
+        assert _esatti(sorgente, INTESTAZIONE + indietro, 16 * 1024, sorgente.nuova_richiesta()) == _atteso(indietro, 16 * 1024)
+        a_cavallo = 3 * sorgente._capacita - 4096
+        assert _esatti(sorgente, INTESTAZIONE + a_cavallo, 8192, sorgente.nuova_richiesta()) == _atteso(a_cavallo, 8192)
+        assert convertitore.partenze == [0] and sorgente.ripartenze == 0
+    finally:
+        sorgente.chiudi()
+
+
 def test_un_salto_fuori_dalla_finestra_riparte():
     durata = 60.0
     totale = int(durata * 48000) * 4
@@ -206,6 +303,72 @@ def test_un_brano_che_non_si_legge(monkeypatch):
 
     sorgente = SorgenteWav(rotto, 1.0, finestra=4 * 2**20)
     assert sorgente.leggi(INTESTAZIONE, 1000, sorgente.nuova_richiesta()) is None and sorgente.guasta
+
+
+def test_una_ripartenza_che_non_scrive_niente_e_un_guasto():
+    # Gabriele, 15 novembre 2026: un flusso di YouTube scaduto non si apriva
+    # piu' alla ripartenza, e lo speaker restava nel silenzio fino alla fine
+    # del brano, anche per ore. Una ripartenza vuota e' un guasto, e il
+    # server chiude; negli ultimi SECONDI_VUOTI_IN_FONDO e' silenzio, come
+    # prima, perche' li' la fine vera puo' venire prima di quella dichiarata.
+    durata = 120.0
+    totale = int(durata * 48000) * 4
+    convertitore = _SoloDallInizio(totale)
+    sorgente = SorgenteWav(convertitore, durata, finestra=2**20 // 12 * 12)
+    try:
+        assert _esatti(sorgente, INTESTAZIONE, 1000, sorgente.nuova_richiesta()) == _atteso(0, 1000)
+        in_fondo = INTESTAZIONE + int((durata - wav_in_ram.SECONDI_VUOTI_IN_FONDO / 2) * 48000) * 4
+        assert sorgente.leggi(in_fondo, 1000, sorgente.nuova_richiesta()) == bytes(1000) and not sorgente.guasta
+        lontano = INTESTAZIONE + 60 * 48000 * 4
+        assert sorgente.leggi(lontano, 1000, sorgente.nuova_richiesta()) is None and sorgente.guasta
+        assert sorgente.ripartenze == 2 and len(convertitore.partenze) == 3
+    finally:
+        sorgente.chiudi()
+
+
+def test_le_ripartenze_non_lasciano_convertitori_appesi():
+    # 15 novembre 2026, dalla misura dell'esploratore: con una conversione
+    # veloce, il flusso a pezzi di YouTube o un file del disco, il passaggio
+    # sostituito lasciava libmpv ferma a scrivere in una pipe che nessuno
+    # leggeva piu', e terminate la aspettava per sempre: a ogni ripartenza
+    # restavano vivi un filo di fine e una libmpv. La pipe ora si vuota
+    # finche' libmpv non si ferma.
+    convertitore = _Ostinato(120 * 48000 * 4)
+    sorgente = SorgenteWav(convertitore, 120.0, finestra=2**20 // 12 * 12)
+    try:
+        time.sleep(0.3)
+        for secondi in (30, 60, 90, 20, 100, 45, 75, 5):
+            inizio = secondi * sorgente.al_secondo
+            assert _esatti(sorgente, INTESTAZIONE + inizio, 4096, sorgente.nuova_richiesta()) == _veloce(inizio, 4096)
+            # Il convertitore riempie la finestra e resta fermo a scrivere.
+            time.sleep(0.2)
+        assert sorgente.ripartenze == 8
+    finally:
+        sorgente.chiudi()
+    scadenza = time.monotonic() + 2 * _Ostinato.ATTESA
+    while time.monotonic() < scadenza and (_vivi("MeTeOra, fine del WAV in RAM") or _vivi("convertitore ostinato")):
+        time.sleep(0.05)
+    assert convertitore.bloccati == 0 and convertitore.tornati == 9
+    assert not _vivi("MeTeOra, fine del WAV in RAM") and not _vivi("convertitore ostinato")
+
+
+def test_la_diretta_chiusa_senza_leggere_ferma_il_convertitore():
+    # Lo stesso per l'audio delle TV convertito dal vivo (3.12.0): chiusa la
+    # lettura, nessuno vuota piu' la pipe, e la si chiude prima di fermare
+    # libmpv (15 novembre 2026).
+    convertitore = _Ostinato()
+    flusso = wav_in_ram.FlussoPcm(convertitore.dal_vivo)
+    assert flusso.read(100).startswith(b"RIFF")
+    dati = flusso.read(65536)
+    assert dati and dati == _veloce(0, len(dati))
+    time.sleep(0.3)
+    inizio = time.monotonic()
+    flusso.close()
+    scadenza = time.monotonic() + 2 * _Ostinato.ATTESA
+    while time.monotonic() < scadenza and not (convertitore.tornati or convertitore.bloccati):
+        time.sleep(0.05)
+    assert convertitore.tornati == 1 and convertitore.bloccati == 0 and time.monotonic() - inizio < _Ostinato.ATTESA
+    assert flusso.read(10) == b""
 
 
 def test_chiusa_non_da_piu_niente():

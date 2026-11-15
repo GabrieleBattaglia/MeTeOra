@@ -173,6 +173,15 @@ class _CastFinto:
         self.connessione = ascolto
 
 
+def test_i_comandi_senza_risposta():
+    # 15 novembre 2026: un comando che pychromecast non vede confermato in
+    # tempo, o che non parte, non vuol dire che l'apparecchio non c'e' piu'.
+    from pychromecast.error import NotConnected, RequestFailed, RequestTimeout
+
+    assert trasmissione.senza_risposta(RequestTimeout("seek 10", 10.0)) and trasmissione.senza_risposta(RequestFailed("seek 10"))
+    assert not trasmissione.senza_risposta(NotConnected("connessione caduta")) and not trasmissione.senza_risposta(OSError("rete"))
+
+
 def test_l_apparecchio_che_non_risponde(browser_finto, monkeypatch):
     import pychromecast
 
