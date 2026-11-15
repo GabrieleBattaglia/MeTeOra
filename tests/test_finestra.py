@@ -4120,8 +4120,13 @@ class _SpeakerFinto:
     def chiudi(self, attendi=True):
         self.chiamate.append(("chiudi", attendi))
 
+    @property
+    def posizione_attesa(self):
+        # Quella che il motore da' alla finestra (15 novembre 2026): qui la stessa.
+        return self.posizione
 
-_CUCINA = {"uuid": "6d9b1c3e", "nome": "Cucina", "modello": "Google Home Speaker", "produttore": "Google Inc.", "tipo": "audio",
+
+_CUCINA ={"uuid": "6d9b1c3e", "nome": "Cucina", "modello": "Google Home Speaker", "produttore": "Google Inc.", "tipo": "audio",
            "indirizzo": "192.168.1.72", "porta": 8009}
 _OVUNQUE = {"uuid": "a1b2", "nome": "ovunque", "modello": "Google Cast Group", "produttore": "Google Inc.", "tipo": "group",
             "indirizzo": "192.168.1.33", "porta": 32230}

@@ -30,10 +30,13 @@ aspetta la risposta di quasi ogni comando, fino a 10 secondi, e la finestra
 aspettava con lui, con il suono e la riga dopo la risposta. Partono uno alla
 volta, nell'ordine in cui sono chiesti, e la finestra torna subito; i salti
 in fila diventano uno solo, al punto chiesto per ultimo, e cosi' i volumi.
-Il punto chiesto con un salto vale come posizione finche' il salto non e'
-arrivato, e un attimo dopo: due salti ravvicinati partono dal punto chiesto,
-non da quello vecchio che l'apparecchio dice ancora. Un salto senza risposta
-in tempo non e' uno speaker perso.
+Il punto chiesto con un salto vale per la finestra e per i salti dopo,
+posizione_attesa, finche' il salto non e' arrivato, e intanto corre come lo
+speaker: due salti ravvicinati partono dal punto chiesto, non da quello
+vecchio che l'apparecchio dice ancora. La posizione dell'apparecchio,
+posizione, resta quella del suono, che seguono il lettore ombra dei
+sottotitoli e il karaoke. Un salto senza risposta in tempo non e' uno
+speaker perso.
 """
 
 import collections
@@ -53,11 +56,6 @@ import wav_in_ram
 # vale anche finche' il comando aspetta in fila, e i secondi contano da
 # quando e' arrivato.
 MEMORIA_DEL_VOLUME = 1.0
-# Lo stesso per il punto chiesto con un salto (Gabriele, 15 novembre 2026):
-# vale finche' il salto non e' arrivato all'apparecchio, e per tanti secondi
-# dopo. Due pressioni ravvicinate di Maiuscolo con Q, o della virgola per i
-# capitoli, partivano dal punto vecchio, che l'apparecchio dice ancora.
-MEMORIA_DEL_PUNTO = 1.0
 # Quanto chiudi, con attendi, aspetta al piu' che i comandi in fila arrivino.
 ATTESA_DELLA_CHIUSURA = 60.0
 # Le voci della fila dei comandi che, in fila una dopo l'altra, diventano una.
@@ -181,14 +179,22 @@ class LettoreLontano:
         self._rinviati = []
         # Vero dopo chiudi: niente piu' comandi, e niente piu' avvisi di guasto.
         self._chiuso = False
-        # Il punto chiesto con l'ultimo salto: (secondi, generazione, numero
-        # del salto, scadenza in monotonic, None finche' il salto non e'
-        # arrivato), e quanti salti sono stati chiesti, per numerarli. E il
-        # punto da cui il brano e' partito, per un salto chiesto prima che
-        # l'apparecchio dica la sua posizione.
+        # Il punto chiesto con l'ultimo salto, finche' il salto non e'
+        # arrivato: (secondi, generazione, numero del salto, da quando corre in
+        # monotonic, o None se non corre perche' l'apparecchio e' in pausa o
+        # non ha ancora il brano), e quanti salti sono stati chiesti, per
+        # numerarli. E il punto da cui il brano e' partito, che vale finche'
+        # l'apparecchio non dice la sua posizione.
         self._punto_chiesto = None
         self._salti = 0
         self._inizio = None
+        # L'ultima pausa chiesta, (generazione, numero), finche' e' in fila,
+        # rinviata o in volo: intanto gli stati dell'apparecchio non toccano
+        # la pausa chiesta, come per il volume. Senza, uno stato che diceva
+        # ancora "suona" faceva ripetere la pausa alla pressione dopo, invece
+        # di riprendere (15 novembre 2026). E quante pause, per numerarle.
+        self._pausa_in_fila = None
+        self._pause = 0
         self.apparecchio = connetti(self._stato, self._distacco)
 
     # Lo stato, come lo chiede il motore.
@@ -203,11 +209,13 @@ class LettoreLontano:
 
     @property
     def posizione(self):
-        """I secondi del brano adesso, o None se l'apparecchio non l'ha ancora.
-        Dopo un salto, per un attimo, il punto chiesto (MEMORIA_DEL_PUNTO)."""
-        punto = self._punto_valido()
-        if punto is not None:
-            return punto
+        """I secondi del brano dove l'apparecchio lo suona adesso, o None se
+        non l'ha ancora. E' quella del suono: la seguono il lettore ombra dei
+        sottotitoli e il karaoke dello speaker, e dopo un salto resta quella
+        di prima finche' il salto non arriva. Con il punto chiesto al suo
+        posto, fermo, l'ombra rifaceva il salto piu' volte, e il sottotitolo
+        in corso si ridiceva (revisione del 15 novembre 2026). Per la finestra
+        e per i salti vale posizione_attesa."""
         if not self._pronto:
             return None
         try:
@@ -215,17 +223,49 @@ class LettoreLontano:
         except Exception:  # noqa: BLE001 - un apparecchio sparito non sa la posizione
             return None
 
-    def _punto_valido(self):
-        """Il punto chiesto con l'ultimo salto, se vale ancora per il brano di
-        adesso: finche' il salto non e' arrivato all'apparecchio, e per
-        MEMORIA_DEL_PUNTO secondi dopo; altrimenti None."""
+    @property
+    def posizione_attesa(self):
+        """I secondi del brano per la finestra e per i salti (Gabriele, 15
+        novembre 2026): dopo un salto il punto chiesto, finche' il salto non
+        arriva all'apparecchio, che intanto corre come lui; prima che
+        l'apparecchio abbia il brano, il punto da cui lo comincera'; poi la
+        sua posizione. Due pressioni ravvicinate di Maiuscolo con Q, o della
+        virgola per i capitoli, partivano dal punto vecchio, che
+        l'apparecchio dice ancora; e un brano ripreso a un'ora, con un salto
+        nei primi secondi, la finestra lo diceva a 30 secondi. None senza un
+        brano, o se non si sa."""
         with self._blocco:
-            chiesto = self._punto_chiesto
-            if chiesto is None or chiesto[1] != self._generazione or self.percorso is None:
+            if self.percorso is None:
                 return None
-            if chiesto[3] is not None and time.monotonic() >= chiesto[3]:
-                return None
-            return chiesto[0]
+            punto = self._punto_adesso()
+            if punto is not None:
+                return punto
+            if not self._pronto:
+                return self._inizio or None
+        return self.posizione
+
+    def _punto_adesso(self):
+        """Con il lucchetto: il punto chiesto con l'ultimo salto, dove e'
+        arrivato correndo, se vale ancora per il brano di adesso; altrimenti
+        None."""
+        chiesto = self._punto_chiesto
+        if chiesto is None or chiesto[1] != self._generazione or self.percorso is None:
+            return None
+        secondi, _generazione, _numero, da_quando = chiesto
+        if da_quando is not None:
+            secondi += time.monotonic() - da_quando
+            if self._durata:
+                secondi = min(secondi, float(self._durata))
+        return secondi
+
+    def _ritocca_il_punto(self):
+        """Con il lucchetto, dopo un cambio della pausa o con il brano arrivato
+        all'apparecchio: il punto chiesto riparte da dove e' arrivato, e corre
+        solo se l'apparecchio suona."""
+        adesso = self._punto_adesso()
+        if adesso is not None:
+            corre = self._pronto and not self._pausa
+            self._punto_chiesto = (adesso, *self._punto_chiesto[1:3], time.monotonic() if corre else None)
 
     @property
     def durata(self):
@@ -278,6 +318,7 @@ class LettoreLontano:
             self.titolo_in_onda = None
             self._lista_diretta = None
             self._punto_chiesto = None
+            self._pausa_in_fila = None
             self._inizio = inizio
             self._rinviati.clear()
         if vecchia is not None:
@@ -474,21 +515,30 @@ class LettoreLontano:
 
     def pausa(self, valore=None, sfumando=False):
         """Mette o toglie la pausa; senza valore la inverte. Torna il nuovo
-        stato. Lo speaker non sfuma: sfumando c'e' per il motore."""
+        stato. Lo speaker non sfuma: sfumando c'e' per il motore. Finche' la
+        pausa e' in fila, la pausa chiesta vale piu' di quella che lo speaker
+        dice (15 novembre 2026)."""
         with self._blocco:
             if self.percorso is None:
                 return self._pausa
             self._pausa = (not self._pausa) if valore is None else bool(valore)
             pausa = self._pausa
-            generazione = self._generazione
-        self._comanda("pausa", self.apparecchio.pausa if pausa else self.apparecchio.riprendi, generazione)
+            self._ritocca_il_punto()
+            self._pause += 1
+            self._pausa_in_fila = (self._generazione, self._pause)
+            self._in_fila(("pausa", self._generazione, self.apparecchio.pausa if pausa else self.apparecchio.riprendi, self._pause))
         return pausa
 
     def stop(self, sfumando=False):
+        """Ferma il brano. Il comando ferma vale per l'apparecchio, non per il
+        brano: un altro stop, un brano nuovo o la chiusura, chiesti prima che
+        parta, non lo lasciano cadere (revisione del 15 novembre 2026).
+        Legato al brano, cadeva con lo stop che chiudi rifa', e passando dallo
+        speaker al PC, o a un altro speaker, quello di prima continuava a
+        suonare. In fila resta prima di un brano chiesto dopo."""
         with self._blocco:
             c_era = self.percorso is not None
             self._generazione += 1
-            generazione = self._generazione
             self.percorso = self.sottobrano = self.sottobrani = None
             self._indirizzo = None
             self._pronto = False
@@ -497,16 +547,18 @@ class LettoreLontano:
             self.titolo_in_onda = None
             self._lista_diretta = None
             self._punto_chiesto = None
+            self._pausa_in_fila = None
+            self._inizio = None
             self._rinviati.clear()
         self._lascia_se_finito()
         self._lascia_la_lettura()
         if c_era:
-            self._comanda("ferma", self.apparecchio.ferma, generazione)
+            self._comanda("ferma", self.apparecchio.ferma)
 
     def vai_a(self, secondi):
         """Il salto ai secondi dati, nei limiti del brano, in fila per
-        l'apparecchio: il punto vale subito come posizione (15 novembre
-        2026), e un salto ancora in fila prende quello nuovo."""
+        l'apparecchio: il punto vale subito per posizione_attesa (15
+        novembre 2026), e un salto ancora in fila prende quello nuovo."""
         with self._blocco:
             if self.percorso is None:
                 return
@@ -514,20 +566,19 @@ class LettoreLontano:
             if self._durata:
                 punto = min(punto, float(self._durata))
             self._salti += 1
-            self._punto_chiesto = (punto, self._generazione, self._salti, None)
+            corre = self._pronto and not self._pausa
+            self._punto_chiesto = (punto, self._generazione, self._salti, time.monotonic() if corre else None)
             unito = self._in_fila(("salto", self._generazione, punto, self._salti))
         if unito:
             self._conta("salti_uniti_allo_speaker", 1)
 
     def salta(self, secondi):
-        """Un salto dal punto di adesso: dopo un altro salto, dal punto
-        chiesto, anche se l'apparecchio non ci e' ancora arrivato (Gabriele,
-        15 novembre 2026); prima che dica dove e', dal punto da cui il brano
-        e' partito."""
-        posizione = self.posizione
-        if posizione is None:
-            posizione = self._inizio or 0.0
-        self.vai_a(posizione + secondi)
+        """Un salto da posizione_attesa, come lo calcola la finestra: dopo un
+        altro salto, dal punto chiesto, anche se l'apparecchio non ci e'
+        ancora arrivato (Gabriele, 15 novembre 2026); prima che dica dove e',
+        dal punto da cui il brano e' partito."""
+        with self._blocco:
+            self.vai_a((self.posizione_attesa or 0.0) + secondi)
 
     def chiudi(self, attendi=True):
         """Ferma, chiude la connessione e il server; i FLAC convertiti restano
@@ -568,9 +619,10 @@ class LettoreLontano:
 
     def _comanda(self, tipo, comando, generazione=None):
         """Un comando per l'apparecchio, in fila al filo dei comandi. tipo e'
-        suona, pausa, ferma o muto; con generazione vale solo per quel brano:
-        un brano nuovo, o lo stop, lo lasciano cadere se non e' ancora
-        partito, e una pausa anche a brano finito."""
+        suona, ferma o muto; con generazione vale solo per quel brano, come
+        suona: un brano nuovo, o lo stop, lo lasciano cadere se non e' ancora
+        partito. Ferma e muto valgono per l'apparecchio. La pausa va in fila
+        da pausa, numerata."""
         with self._blocco:
             self._in_fila((tipo, generazione, comando, None))
 
@@ -617,19 +669,37 @@ class LettoreLontano:
                 vecchia = generazione is not None and (generazione != self._generazione or (tipo in _COL_BRANO and self.percorso is None))
                 rinviata = not vecchia and tipo in _COL_BRANO and not self._pronto
                 unito = rinviata and _unisci(self._rinviati, voce)
+                if vecchia:
+                    self._voce_finita(tipo, numero)
             if unito:
                 self._conta("salti_uniti_allo_speaker", 1)
             if vecchia or rinviata:
                 continue
             # Un avviso che non va, per esempio con la finestra che si
             # chiude, non ferma la fila.
-            with contextlib.suppress(Exception):
-                self._esegui(tipo, cosa, numero)
+            try:
+                with contextlib.suppress(Exception):
+                    self._esegui(tipo, cosa)
+            finally:
+                with self._blocco:
+                    self._voce_finita(tipo, numero)
 
-    def _esegui(self, tipo, cosa, numero):
+    def _voce_finita(self, tipo, numero):
+        """Con il lucchetto: una voce della fila e' arrivata all'apparecchio,
+        o e' caduta. Arrivata l'ultima pausa chiesta, la pausa torna a seguire
+        gli stati dell'apparecchio; arrivato l'ultimo salto chiesto, la
+        posizione attesa torna la sua, che la risposta al salto ha gia'
+        aggiornato (revisione del 15 novembre 2026: tenere il punto chiesto
+        un secondo di piu' non serve)."""
+        if tipo == "pausa" and self._pausa_in_fila is not None and self._pausa_in_fila[1] == numero:
+            self._pausa_in_fila = None
+        elif tipo == "salto" and self._punto_chiesto is not None and self._punto_chiesto[2] == numero:
+            self._punto_chiesto = None
+
+    def _esegui(self, tipo, cosa):
         """Nel filo dei comandi: una voce della fila."""
         if tipo == "salto":
-            self._manda_il_salto(cosa, numero)
+            self._manda_il_salto(cosa)
         elif tipo == "volume":
             self._manda_il_volume(cosa)
         elif tipo == "chiudi":
@@ -642,13 +712,14 @@ class LettoreLontano:
             except Exception as errore:  # noqa: BLE001 - pychromecast e la rete falliscono in molti modi: lo dice al_guasto
                 self._guasto(errore)
 
-    def _manda_il_salto(self, punto, numero):
+    def _manda_il_salto(self, punto):
         """Nel filo dei comandi: il salto all'apparecchio, che ha il brano.
         Un salto senza risposta non e' uno speaker perso (Gabriele, 15
         novembre 2026): pychromecast aspetta la risposta fino a 10 secondi, e
         uno speaker che carica il punto nuovo puo' rispondere tardi; la
         connessione che cade la dice al_distacco. Si contano, come i salti
-        uniti."""
+        uniti. Arrivato, il punto chiesto lascia il posto alla posizione
+        dell'apparecchio (_voce_finita)."""
         try:
             self.apparecchio.vai_a(punto)
         except Exception as errore:  # noqa: BLE001 - pychromecast e la rete falliscono in molti modi
@@ -656,12 +727,6 @@ class LettoreLontano:
                 self._conta("salti_senza_risposta_dallo_speaker", 1)
             else:
                 self._guasto(errore)
-        finally:
-            with self._blocco:
-                chiesto = self._punto_chiesto
-                if chiesto is not None and chiesto[2] == numero:
-                    # Arrivato: il punto chiesto vale ancora per un attimo.
-                    self._punto_chiesto = (*chiesto[:3], time.monotonic() + MEMORIA_DEL_PUNTO)
 
     def _manda_il_volume(self, valore):
         """Nel filo dei comandi: il volume all'apparecchio. Arrivato l'ultimo
@@ -738,6 +803,11 @@ class LettoreLontano:
         if avviso is not None:
             avviso()
 
+    def _pausa_in_attesa(self):
+        """Con il lucchetto: vero se l'ultima pausa chiesta per il brano non e'
+        ancora arrivata all'apparecchio."""
+        return self._pausa_in_fila is not None and self._pausa_in_fila[0] == self._generazione
+
     def _all_ultimo_campione(self, posizione):
         return posizione is not None and bool(self._durata) and posizione >= self._durata - MARGINE_DELLA_FINE
 
@@ -772,10 +842,14 @@ class LettoreLontano:
             self._durata = stato["durata"]
         self._fine_attesa = None
         if stato["stato"] in _SUONA_O_ASPETTA:
-            if stato["stato"] != trasmissione.IN_CARICAMENTO:
+            # Una pausa chiesta che non e' ancora arrivata vale piu' dello
+            # stato, che e' di prima (15 novembre 2026).
+            if stato["stato"] != trasmissione.IN_CARICAMENTO and not self._pausa_in_attesa():
                 self._pausa = stato["stato"] == trasmissione.IN_PAUSA
-            if not self._pronto:
-                self._pronto = True
+            nuovo = not self._pronto
+            self._pronto = True
+            self._ritocca_il_punto()
+            if nuovo:
                 self._riprendi_i_rinviati()
                 return self._al_caricamento
             if stato["stato"] == trasmissione.IN_CARICAMENTO and self._all_ultimo_campione(stato.get("posizione")):

@@ -28,10 +28,11 @@ che non scrive niente e' un brano che non si legge, e il server chiude;
 dal 15 novembre 2026 anche quando riparte da un salto, come un flusso di
 YouTube scaduto, che dava silenzio fino alla fine del brano, salvo negli
 ultimi SECONDI_VUOTI_IN_FONDO, dove la fine vera puo' venire prima di quella
-dichiarata. La pipe di un passaggio sostituito si vuota finche' libmpv non
-si ferma: con una conversione veloce libmpv restava fermo a scrivere in una
-pipe che nessuno leggeva piu', terminate lo aspettava per sempre, e a ogni
-ripartenza restavano vivi un filo e una libmpv.
+dichiarata. La pipe di un passaggio sostituito, e quella di una diretta
+chiusa, si vuota finche' libmpv non si ferma: con una conversione veloce
+libmpv restava fermo a scrivere in una pipe che nessuno leggeva piu',
+terminate lo aspettava per sempre, e a ogni ripartenza restavano vivi un
+filo e una libmpv.
 
 La qualita' e' quella della sorgente, nei limiti dello speaker (domanda di
 Gabriele del 5 novembre 2026): la frequenza della sorgente fra 44,1, 48, 88,2
@@ -475,7 +476,9 @@ class FlussoPcm:
         self.pipe = Pipe(f"meteora_dal_vivo_{os.getpid()}_{next(_numeri)}")
         self._testa = intestazione(MASSIMO_DEL_WAV // quadro(BIT) * quadro(BIT), frequenza)
         self._blocco = threading.Lock()
-        self._collegata = self._chiusa = self._in_lettura = self._pipe_chiusa = False
+        # Avvisa chi vuota la pipe dopo close che la lettura in corso e' finita.
+        self._letta = threading.Condition(self._blocco)
+        self._collegata = self._chiusa = self._in_lettura = False
         try:
             self._lettore = avvia(self.pipe.percorso, self._finito)
         except Exception:
@@ -503,13 +506,12 @@ class FlussoPcm:
         except OSError:
             dati = b""
         finally:
+            # Dopo close la pipe non si chiude qui: la vuota _vuota, e la
+            # chiude _chiudi quando libmpv si e' fermato.
             with self._blocco:
                 self._in_lettura = False
                 chiusa = self._chiusa
-                chiudere = chiusa and not self._pipe_chiusa
-                self._pipe_chiusa = self._pipe_chiusa or chiudere
-            if chiudere:
-                self.pipe.chiudi()
+                self._letta.notify_all()
             if chiusa:
                 dati = b""
         self.scritti += len(dati)
@@ -523,28 +525,40 @@ class FlussoPcm:
         threading.Thread(target=self._chiudi, name="MeTeOra, fine della diretta convertita", daemon=True).start()
 
     def _chiudi(self):
-        # Se nessuno la sta leggendo, la pipe si chiude prima di fermare
-        # libmpv, che senza chi legge resta fermo a scrivere in una pipe
-        # piena, e terminate lo aspetterebbe per sempre (15 novembre 2026).
-        # Se una lettura e' in corso libmpv non e' fermo, e la pipe la chiude
-        # lei quando torna; dopo close non ne comincia un'altra.
-        with self._blocco:
-            chiudere = not self._in_lettura and not self._pipe_chiusa
-            self._pipe_chiusa = self._pipe_chiusa or chiudere
-        if chiudere:
-            self.pipe.chiudi()
+        # Come per i passaggi del WAV in RAM: mentre libmpv si ferma, la pipe
+        # si vuota fino alla fine, e si chiude solo dopo (revisione del 15
+        # novembre 2026). Chiusa prima di terminate, libmpv restava fermo a
+        # scrivere nella meta' dei casi, misurato con libmpv vera: una libmpv
+        # e un filo vivi per ogni TV fermata o cambiata. Vuotata, terminate
+        # torna in un centesimo di secondo.
+        vuota = threading.Thread(target=self._vuota, name="MeTeOra, pipe della diretta convertita", daemon=True)
+        vuota.start()
         try:
             self._lettore.terminate()
         except Exception:  # noqa: BLE001, S110 - un convertitore gia' finito si chiude come puo'
             pass
         finally:
+            # Chi vuota la pipe e aspetta ancora libmpv, che non e' mai
+            # arrivato, torna; poi la pipe si chiude, una volta sola.
             self.pipe.sblocca()
-            # La pipe la chiude chi arriva per ultimo, una volta sola.
-            with self._blocco:
-                chiudere = not self._in_lettura and not self._pipe_chiusa
-                self._pipe_chiusa = self._pipe_chiusa or chiudere
-            if chiudere:
-                self.pipe.chiudi()
+            vuota.join(5)
+            self.pipe.chiudi()
+
+    def _vuota(self):
+        """Nel suo filo, dopo close: finita la lettura in corso, la pipe si
+        legge e si butta finche' libmpv non la chiude, o finche' sblocca non
+        la apre al posto suo."""
+        with self._letta:
+            while self._in_lettura:
+                self._letta.wait(0.5)
+        try:
+            if not self._collegata:
+                self.pipe.aspetta_chi_scrive()
+                self._collegata = True
+            while self.pipe.leggi():
+                pass
+        except OSError:
+            pass
 
     def cancel(self):
         self.close()

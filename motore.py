@@ -134,6 +134,12 @@ PASSO_DEL_SORVEGLIANTE = 0.02
 # campioni, che arriva quando il decodificatore e' pronto.
 ATTESA_DELLA_DURATA = 15.0
 ATTESA_DEL_FORMATO = 2.0
+# Quanto la chiusura del motore, all'uscita di MeTeOra, aspetta al piu' che i
+# comandi allo speaker Cast arrivino, lo stop e la chiusura compresi
+# (revisione del 15 novembre 2026): sono in fila a un filo demone, dietro un
+# salto che lo speaker puo' confermare fino a 10 secondi dopo, e il processo
+# finiva prima, con lo speaker che suonava ancora.
+ATTESA_DELLO_SPEAKER_ALL_USCITA = 2.0
 _FINE_NORMALE = mpv.MpvEventEndFile.EOF
 _FINE_PER_ERRORE = mpv.MpvEventEndFile.ERROR
 # L'errore con cui mpv chiude il brano quando non riesce ad aprire l'uscita
@@ -342,9 +348,14 @@ def _indirizzo_nel_lettore(lettore, brano):
     return brano.indirizzo
 
 
-# Un rinnovo alla volta: due ripartenze ravvicinate dello stesso WAV in RAM
-# non chiamano yt-dlp due volte.
-_rinnovo_dei_flussi = threading.Lock()
+# Un rinnovo alla volta per indirizzo: due ripartenze ravvicinate dello
+# stesso WAV in RAM non chiamano yt-dlp due volte. indirizzo -> [lucchetto,
+# quanti lo aspettano], con il suo lucchetto breve; la voce se ne va con
+# l'ultimo. Uno solo per tutti faceva aspettare il rinnovo di un video, fino
+# a indirizzi.ATTESA, anche agli altri brani, gia' pronti, e alle TV, che
+# yt-dlp non lo usano (revisione del 15 novembre 2026).
+_rinnovi = {}
+_rinnovi_blocco = threading.Lock()
 
 
 def _flusso_per_il_convertitore(percorso):
@@ -354,13 +365,23 @@ def _flusso_per_il_convertitore(percorso):
     indirizzi.FLUSSO_VALIDO, venti minuti; una ripartenza del WAV in RAM dopo,
     per un salto fuori dalla finestra di RAM, apriva la pagina, che libmpv con
     ytdl spento non apre, e lo speaker restava nel silenzio fino alla fine del
-    brano. Radio e file sono sempre pronti. Solleva ErroreIndirizzo se yt-dlp
-    non trova il flusso."""
-    if not formati.e_indirizzo(percorso):
+    brano. Radio e file sono sempre pronti, e un flusso pronto non aspetta
+    nessuno. Solleva ErroreIndirizzo se yt-dlp non trova il flusso."""
+    if not formati.e_indirizzo(percorso) or indirizzi.pronto(percorso) is not None:
         return
-    with _rinnovo_dei_flussi:
-        if indirizzi.pronto(percorso) is None:
-            indirizzi.risolvi(percorso, video=False)
+    with _rinnovi_blocco:
+        voce = _rinnovi.setdefault(percorso, [threading.Lock(), 0])
+        voce[1] += 1
+    try:
+        with voce[0]:
+            # Chi aspettava il rinnovo di un altro filo trova il flusso pronto.
+            if indirizzi.pronto(percorso) is None:
+                indirizzi.risolvi(percorso, video=False)
+    finally:
+        with _rinnovi_blocco:
+            voce[1] -= 1
+            if not voce[1]:
+                _rinnovi.pop(percorso, None)
 
 
 def _testo(valore):
@@ -1955,9 +1976,13 @@ class Motore:
 
     @property
     def posizione(self):
-        """I secondi del brano in corso, o None se non c'e' o non e' ancora aperto."""
+        """I secondi del brano in corso, o None se non c'e' o non e' ancora
+        aperto. Con uno speaker Cast, quelli che valgono per i salti: dopo un
+        salto il punto chiesto, finche' lo speaker non ci arriva, e prima che
+        abbia il brano quello da cui partira' (15 novembre 2026, vedi
+        lontano.LettoreLontano.posizione_attesa)."""
         if self._lontano is not None:
-            return self._lontano.posizione
+            return self._lontano.posizione_attesa
         lettore = self._attivo
         if not lettore.pronto or lettore.finito:
             return None
@@ -2239,7 +2264,7 @@ class Motore:
 
     def chiudi(self):
         """Ferma il sorvegliante e chiude tutti e due i lettori, sempre, e il
-        lettore lontano, se c'e'."""
+        lettore lontano, se c'e', aspettando per poco i suoi comandi."""
         with self._blocco:
             if self._chiuso:
                 return
@@ -2249,6 +2274,7 @@ class Motore:
         if lontano is not None:
             with contextlib.suppress(Exception):
                 lontano.chiudi(attendi=False)
+                lontano.aspetta_i_comandi(ATTESA_DELLO_SPEAKER_ALL_USCITA)
         if ombra is not None:
             with contextlib.suppress(Exception):
                 ombra.chiudi()

@@ -1562,6 +1562,14 @@ class _LontanoFinto:
     def chiudi(self, attendi=True):
         self.chiamate.append(("chiudi", attendi))
 
+    @property
+    def posizione_attesa(self):
+        # Quella che il motore da' alla finestra (15 novembre 2026): qui la stessa.
+        return self.posizione
+
+    def aspetta_i_comandi(self, attesa=5.0):
+        return True
+
 
 def test_il_lettore_lontano(crea, avvisi, tmp_path):
     m = crea(al_salto=avvisi("al_salto"))
@@ -1903,4 +1911,183 @@ def test_le_ripartenze_del_wav_in_ram_non_lasciano_libmpv_vive(crea, tmp_path, m
     finally:
         sorgente.chiudi()
     assert _aspetta(lambda: not vivi("MeTeOra, fine del WAV in RAM") and not vivi("MeTeOra, WAV in RAM") and vivi("MPVEventHandlerThread") == libmpv, 20)
+
+
+# La revisione del ramo velocita (15 novembre 2026): il lettore lontano vero
+# dentro il motore, non _LontanoFinto, con lo speaker finto di
+# tests/test_lontano.py che suona in tempo reale e risponde ai salti in
+# ritardo, e libmpv vera.
+
+
+def _speaker_vero(ritardo=None):
+    """Un lontano.LettoreLontano vero, con lo speaker che suona in tempo
+    reale, il server finto e una sorgente finta per i brani da convertire:
+    (lettore, apparecchio, stati), e stati["allo_stato"] manda gli stati
+    dello speaker, come pychromecast."""
+    from test_lontano import _ApparecchioCheSuona, _ServerFinto, _SorgenteFinta
+
+    import lontano
+
+    apparecchio = _ApparecchioCheSuona(ritardo)
+    stati = {}
+
+    def connetti(allo_stato, al_distacco):
+        stati["allo_stato"] = allo_stato
+        return apparecchio
+
+    return lontano.LettoreLontano(connetti, _ServerFinto(), _SorgenteFinta), apparecchio, stati
+
+
+def _suona_allo_speaker(stati, apparecchio, durata=300.0):
+    """Lo speaker dice che suona il brano che ha ricevuto per ultimo."""
+    import trasmissione
+
+    indirizzo = next(c[1] for c in reversed(apparecchio.chiamate) if c[0] == "suona")
+    stati["allo_stato"]({"stato": trasmissione.IN_RIPRODUZIONE, "posizione": 0.0, "durata": durata, "motivo": None, "indirizzo": indirizzo})
+
+
+def test_lo_speaker_lasciato_si_ferma(crea, tmp_path):
+    # Scegliendo un altro speaker, o una scheda del PC, usa_il_lontano fa lo
+    # stop e chiude lo speaker di prima: il suo comando ferma, legato al
+    # brano, cadeva con lo stop che chiudi rifa', e lo speaker di prima
+    # continuava a suonare. _LontanoFinto non lo vedeva.
+    brano = str(tmp_path / "brano.mp3")
+    with open(brano, "wb") as f:
+        f.write(bytes(1024))
+    m = crea()
+    primo, apparecchio, stati = _speaker_vero()
+    apparecchio.via.set()
+    m.usa_il_lontano(primo)
+    m.suona(brano)
+    assert primo.aspetta_i_comandi()
+    _suona_allo_speaker(stati, apparecchio)
+    secondo, altro, _stati = _speaker_vero()
+    altro.via.set()
+    m.usa_il_lontano(secondo)
+    m.suona(brano)
+    assert primo.aspetta_i_comandi() and secondo.aspetta_i_comandi()
+    assert [c[0] for c in apparecchio.chiamate] == ["suona", "ferma", "chiudi"] and apparecchio.chiamate[-1] == ("chiudi", True)
+    assert [c[0] for c in altro.chiamate] == ["suona"]
+    # Tornando al PC, si ferma anche il secondo.
+    m.usa_il_lontano(None)
+    assert secondo.aspetta_i_comandi() and [c[0] for c in altro.chiamate] == ["suona", "ferma", "chiudi"] and m.lontano is None
+
+
+def test_la_chiusura_del_motore_aspetta_lo_stop_dello_speaker(crea, tmp_path):
+    # All'uscita di MeTeOra lo stop allo speaker va in fila, dietro un salto
+    # che lo speaker conferma tardi, in un filo demone, e il processo finiva
+    # prima: lo speaker continuava a suonare. La chiusura del motore aspetta
+    # i comandi, al piu' ATTESA_DELLO_SPEAKER_ALL_USCITA.
+    brano = str(tmp_path / "brano.mp3")
+    with open(brano, "wb") as f:
+        f.write(bytes(1024))
+    m = crea()
+    lettore, apparecchio, stati = _speaker_vero(ritardo=0.5)
+    m.usa_il_lontano(lettore)
+    m.suona(brano)
+    assert lettore.aspetta_i_comandi()
+    _suona_allo_speaker(stati, apparecchio)
+    m.salta(30)
+    assert _aspetta(lambda: any(c[0] == "vai_a" for c in apparecchio.chiamate))
+    inizio = time.monotonic()
+    m.chiudi()
+    durata = time.monotonic() - inizio
+    assert [c[0] for c in apparecchio.chiamate] == ["suona", "vai_a", "ferma", "chiudi"] and apparecchio.chiamate[-1] == ("chiudi", False)
+    assert durata < modulo.ATTESA_DELLO_SPEAKER_ALL_USCITA + 1
+
+
+def test_un_salto_con_lo_speaker_dice_il_sottotitolo_una_volta(crea, avvisi, tmp_path):
+    # Dopo un salto il lettore lontano dava come posizione il punto chiesto,
+    # fermo, finche' lo speaker non rispondeva e per un secondo dopo; l'ombra,
+    # che corre, se ne scostava e risaltava allo stesso punto ogni mezzo
+    # secondo, e il sottotitolo in corso si ridiceva tre o quattro volte.
+    # L'ombra segue il suono dello speaker: un salto, un sottotitolo. Lo
+    # speaker risponde al salto dopo 0.3 secondi.
+    film = _silenzio(tmp_path / "film.mkv", 30)
+    (tmp_path / "film.srt").write_text("1\n00:00:01,000 --> 00:00:02,500\nPrima\n\n2\n00:00:12,000 --> 00:00:17,000\nSeconda\n\n"
+                                       "3\n00:00:25,000 --> 00:00:26,000\nTerza\n", encoding="utf-8")
+    detti = []
+    m = crea(ai_sottotitoli=detti.append, al_caricamento=avvisi("al_caricamento"))
+    lettore, apparecchio, stati = _speaker_vero(ritardo=0.3)
+    m.usa_il_lontano(lettore)
+    m.suona(film)
+    assert _aspetta(lambda: any(c[0] == "suona" for c in apparecchio.chiamate))
+    _suona_allo_speaker(stati, apparecchio, 30.0)
+    assert _aspetta(lambda: (m.tracce() or {}).get("sub"), 10)
+    m.scegli_traccia("sid", str(m.tracce()["sub"][0]["id"]))
+    # Fra Prima e Seconda, il salto dentro Seconda, che dura cinque secondi.
+    assert _aspetta(lambda: lettore.posizione > 3.0)
+    detti.clear()
+    m.vai_a(12.0)
+    # La finestra ha subito il punto chiesto; l'ombra il suono, che arriva dopo.
+    assert m.posizione == pytest.approx(12.0, abs=0.1) and lettore.posizione < 5.0
+    time.sleep(2.5)
+    assert detti == ["Seconda"] and lettore.posizione == pytest.approx(14.2, abs=0.3)
+    m.usa_il_lontano(None)
+
+
+def test_la_diretta_convertita_chiusa_non_lascia_libmpv_vive(crea, tmp_path):
+    # L'audio delle TV per lo speaker, wav_in_ram.FlussoPcm, chiuso senza piu'
+    # leggere: con la pipe chiusa prima di terminate libmpv restava fermo a
+    # scrivere nella meta' dei casi, con un filo e una libmpv vivi per ogni
+    # TV fermata, e la prova con il convertitore finto non lo vedeva. La
+    # pipe si vuota mentre libmpv si ferma: sei chiusure, e non resta niente.
+    import wav_in_ram
+
+    def vivi(nome):
+        return sum(1 for f in threading.enumerate() if f.name.startswith(nome))
+
+    m = crea()
+    brano = _seno(tmp_path / "tv.wav", 60, frequenza=8000)
+    libmpv = vivi("MPVEventHandlerThread")
+    for _ in range(6):
+        flusso = wav_in_ram.FlussoPcm(lambda uscita, alla_fine: m.passaggio_in_pcm(brano, None, None, uscita, alla_fine))
+        assert flusso.read(100).startswith(b"RIFF") and flusso.read(65536)
+        # libmpv riempie la pipe e resta fermo a scrivere.
+        time.sleep(0.3)
+        flusso.close()
+    assert _aspetta(lambda: not vivi("MeTeOra, fine della diretta convertita") and not vivi("MeTeOra, pipe della diretta convertita")
+                    and vivi("MPVEventHandlerThread") == libmpv, 20)
+
+
+def test_un_rinnovo_lento_non_fa_aspettare_gli_altri_brani(monkeypatch):
+    # Il lucchetto dei rinnovi era uno per tutti, preso anche solo per
+    # guardare se il flusso era pronto: il rinnovo di un video, fino a 60
+    # secondi con yt-dlp, faceva aspettare la sonda e il convertitore degli
+    # altri brani, gia' pronti, e delle TV. Ora aspetta solo chi chiede lo
+    # stesso indirizzo, e yt-dlp si chiama una volta sola.
+    import indirizzi
+
+    scaduto = "https://www.youtube.com/watch?v=rinnovo_lento"
+    pronto = "https://www.youtube.com/watch?v=gia_pronto"
+    tv = "https://tv.example/diretta_del_rinnovo.m3u8"
+    indirizzi._tieni(pronto, False, indirizzi.Flusso("https://googlevideo.example/pronto", pezzo=10485760))
+    indirizzi.metti_il_diretto(tv, dal_vivo=True)
+    via, chiamate = threading.Event(), []
+
+    def risolvi_lento(indirizzo, video=False):
+        chiamate.append(indirizzo)
+        assert via.wait(10)
+        flusso = indirizzi.Flusso("https://googlevideo.example/nuovo", pezzo=10485760)
+        indirizzi._tieni(indirizzo, video, flusso)
+        return indirizzi.Pagina(indirizzo, None, flusso=flusso)
+
+    monkeypatch.setattr(indirizzi, "risolvi", risolvi_lento)
+    fili = [threading.Thread(target=modulo._flusso_per_il_convertitore, args=(scaduto,), daemon=True) for _ in range(2)]
+    try:
+        for filo in fili:
+            filo.start()
+        assert _aspetta(lambda: chiamate)
+        for indirizzo in (pronto, tv):
+            inizio = time.monotonic()
+            modulo._flusso_per_il_convertitore(indirizzo)
+            assert time.monotonic() - inizio < 0.5, indirizzo
+    finally:
+        via.set()
+        for filo in fili:
+            filo.join(5)
+    assert not any(filo.is_alive() for filo in fili)
+    assert chiamate == [scaduto] and indirizzi.pronto(scaduto) is not None and scaduto not in modulo._rinnovi
+    for indirizzo in (scaduto, pronto):
+        indirizzi.dimentica(indirizzo)
 

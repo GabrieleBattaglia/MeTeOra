@@ -280,6 +280,11 @@ class _SpeakerFinto:
     def chiudi(self, attendi=True):
         pass
 
+    @property
+    def posizione_attesa(self):
+        # Quella che il motore da' alla finestra (15 novembre 2026): qui la stessa.
+        return self.posizione
+
 
 def test_il_karaoke_nella_finestra_con_lo_speaker(finestra, tmp_path, sintesi_finta):
     # Gabriele, 3.17.0: con lo speaker il testo si sceglie da solo, con i
