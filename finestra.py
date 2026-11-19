@@ -957,6 +957,12 @@ def _traccia_del_testo_salvato(tracce):
     cartella Testi (3.28.0), o None."""
     titolo = karaoke.titolo("video")
     return next((t for t in tracce["sub"] if t.get("title") == titolo), None) if tracce else None
+
+
+def _traccia_del_testo_salvato_scelta(tracce):
+    """Vero se la traccia scelta e' quella del testo salvato del video."""
+    salvato = _traccia_del_testo_salvato(tracce)
+    return salvato is not None and bool(salvato.get("selected"))
 # L'ultima riga delle istruzioni di ogni campo.
 REGOLA_DEL_DOLLARO = _("Le righe che cominciano con il dollaro non contano: scrivi nell'ultima riga.")
 # La prova della scheda audio degli effetti: un centesimo di secondo di
@@ -9553,10 +9559,16 @@ class Finestra(wx.Frame):
         if self._chiusa or not testo or not self.impostazioni["sottotitoli"]:
             return
         self._statistiche.conta("righe_dei_sottotitoli")
-        if self._lettura is not None:
+        # Da dove viene la riga: scorre falso e' la lettura del karaoke dal
+        # video; con quella accesa nei tratti che mancano, le righe della
+        # traccia del testo salvato arrivano da libmpv, e sono sue (3.28.1).
+        if not scorre:
             self._statistiche.conta("righe_riconosciute")
-            if self._lettura.tipo == "karaoke":
-                self._statistiche.conta("righe_del_karaoke_dal_video", len(righe))
+            self._statistiche.conta("righe_del_karaoke_dal_video", len(righe))
+        elif self._lettura is not None and self._lettura.tipo != "karaoke":
+            self._statistiche.conta("righe_riconosciute")
+        elif _traccia_del_testo_salvato_scelta(self.motore.tracce() if self.motore.in_corso else None):
+            self._statistiche.conta("righe_del_testo_salvato", len(righe))
         elif formati.e_midi(self.motore.in_corso or ""):
             self._statistiche.conta("righe_del_karaoke")
         # Con lo speaker: il karaoke (3.17.0) e i sottotitoli dei video, dal
@@ -9828,12 +9840,26 @@ class Finestra(wx.Frame):
         altre = [t for t in tracce["sub"] if all(t is not n for n in nostre)]
         return not altre and karaoke_dal_video.e_un_karaoke(self._titolo_del_video())
 
-    def _avviso_del_karaoke(self, frase, con_l_archivio):
-        """Dalla lettura del karaoke: com'e' andata con l'archivio dei testi."""
+    def _avviso_del_karaoke(self, frase, esito):
+        """Dalla lettura del karaoke: com'e' andata con l'archivio dei testi,
+        con esito uno di karaoke_dal_video.ESITI; senza archivio si conta
+        anche il perche' (3.28.1)."""
         if self._chiusa:
             return
-        self._statistiche.conta("karaoke_dall_archivio" if con_l_archivio else "karaoke_senza_archivio")
+        self._statistiche.conta("karaoke_dall_archivio" if esito == "archivio" else "karaoke_senza_archivio")
+        if esito != "archivio":
+            self._statistiche.conta(f"karaoke_archivio_{esito}")
         self.scrivi(frase)
+
+    def _testo_del_video_salvato(self, esito, titolo):
+        """Dalla lettura del karaoke: il testo e' nella cartella Testi. Si
+        contano i testi nuovi e quelli diventati completi, e si tiene il
+        primato del piu' lungo (3.28.1)."""
+        if esito["nuovo"]:
+            self._statistiche.conta("testi_dei_video_salvati")
+        if esito["completato"]:
+            self._statistiche.conta("testi_dei_video_completati")
+        self._statistiche.massimo("testo_del_video_piu_lungo", esito["righe"], titolo)
 
     def _scegli_gli_impressi(self, tracce, passata):
         """I sottotitoli impressi nel video, in fondo al giro di Maiuscolo
@@ -9905,7 +9931,8 @@ class Finestra(wx.Frame):
             voce = testi_dei_video.voce(voluta[2])
             self._statistiche.conta("letture_del_karaoke_dal_video")
             self._lettura = karaoke_dal_video.LetturaDelKaraoke(self.motore, lambda testo: wx.CallAfter(self._sottotitolo, testo, False), voluta[1],
-                voluta[2], self._titolo_del_video(), lambda frase, con_l_archivio: wx.CallAfter(self._avviso_del_karaoke, frase, con_l_archivio),
+                voluta[2], self._titolo_del_video(), lambda frase, esito: wx.CallAfter(self._avviso_del_karaoke, frase, esito),
+                salvato=lambda esito, titolo: wx.CallAfter(self._testo_del_video_salvato, esito, titolo),
                 guasto=lambda frase: wx.CallAfter(self._riscontro, "errore", frase), coperti=voce["coperti"] if voce is not None else ()).avvia()
         elif voluta is not None:
             classe = sottotitoli_ocr.LetturaDelleImmagini if voluta[0] == "immagini" else sottotitoli_ocr.LetturaDegliImpressi

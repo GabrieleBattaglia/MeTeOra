@@ -10534,8 +10534,8 @@ class _KaraokeFinto:
     tipo = "karaoke"
     create = None
 
-    def __init__(self, motore, dici, lingua, percorso, titolo, avvisa, guasto=None, coperti=()):
-        self.lingua, self.percorso, self.titolo, self.dici, self.avvisa = lingua, percorso, titolo, dici, avvisa
+    def __init__(self, motore, dici, lingua, percorso, titolo, avvisa, guasto=None, coperti=(), salvato=None):
+        self.lingua, self.percorso, self.titolo, self.dici, self.avvisa, self.salvato = lingua, percorso, titolo, dici, avvisa, salvato
         self.coperti, self.fermata, self.aspettata = list(coperti), False, False
         _KaraokeFinto.create.append(self)
 
@@ -10579,9 +10579,19 @@ def test_il_karaoke_dal_video_parte_da_solo_e_d_lo_spegne(finestra, monkeypatch,
     lettura.dici("It's me\nI was wondering")
     wx.Yield()
     assert _ultima(finestra) == "It's me I was wondering" and finestra._statistiche.dati["conti"]["righe_del_karaoke_dal_video"] == 4
-    lettura.avvisa("Testo del karaoke di Adele: è nell'archivio dei testi.", True)
+    lettura.avvisa("Testo del karaoke di Adele: è nell'archivio dei testi.", "archivio")
     wx.Yield()
-    assert _ultima(finestra) == "Testo del karaoke di Adele: è nell'archivio dei testi." and finestra._statistiche.dati["conti"]["karaoke_dall_archivio"] == 1
+    conti = finestra._statistiche.dati["conti"]
+    assert _ultima(finestra) == "Testo del karaoke di Adele: è nell'archivio dei testi." and conti["karaoke_dall_archivio"] == 1
+    # 3.28.1: senza archivio si conta anche il perche'; e i testi salvati, completati, e il piu' lungo.
+    lettura.avvisa("L'archivio dei testi non risponde.", "errore")
+    lettura.salvato({"righe": 40, "nuovo": True, "completato": False}, "Adele - Hello (Karaoke Version)")
+    lettura.salvato({"righe": 64, "nuovo": False, "completato": True}, "Adele - Hello (Karaoke Version)")
+    wx.Yield()
+    assert conti["karaoke_senza_archivio"] == 1 and conti["karaoke_archivio_errore"] == 1
+    assert conti["testi_dei_video_salvati"] == 1 and conti["testi_dei_video_completati"] == 1
+    assert finestra._statistiche.dati["record"]["testo_del_video_piu_lungo"]["valore"] == 64
+    assert finestra._statistiche.dati["record"]["testo_del_video_piu_lungo"]["cosa"] == "Adele - Hello (Karaoke Version)"
     # Ctrl con D scende a spenti: la lettura si ferma, e il video non si decodifica piu'.
     _tasto(finestra, "d", ctrl=True)
     assert lettura.fermata and _ultima(finestra) == "Sottotitoli letti spenti." and finestra._lettura is None and video_letto[-1] is False
@@ -10640,6 +10650,10 @@ def test_il_testo_salvato_del_video(finestra, monkeypatch, suoni_annotati):
     stato["tracce"]["sub"][0]["selected"] = True
     _tasto(finestra, "d")
     assert _ultima(finestra) == "Testo del karaoke dal video; scelta 2 di 3: spenti, il testo del karaoke dal video e gli impressi."
+    # Le righe della traccia del testo salvato si contano a parte (3.28.1).
+    finestra._sottotitolo("Hello\nIt's me")
+    conti = finestra._statistiche.dati["conti"]
+    assert conti["righe_del_testo_salvato"] == 2 and "righe_riconosciute" not in conti
     # Letto a meta': la traccia, e il riconoscimento solo dove manca.
     stato["in_corso"] = "https://www.youtube.com/watch?v=yyyyyyyyyyy"
     finestra.coda.corrente = Brano(stato["in_corso"], titolo="Torn (Karaoke)")

@@ -34,9 +34,9 @@ def test_la_chiave_di_un_file_cambia_col_file(tmp_path):
 
 def test_salva_unisce_e_diventa_karaoke():
     assert testi_dei_video.voce(URL) is None and karaoke.cerca(URL) == (None, [])
-    quante = testi_dei_video.salva(URL, "Rick - Song (Karaoke)", 200.0, [(12.4, ["Riga uno", "Riga due"]), (20.0, ["Riga tre"])], [(10.0, 60.0)],
-                                   "Rick - Song")
-    assert quante == 3
+    esito = testi_dei_video.salva(URL, "Rick - Song (Karaoke)", 200.0, [(12.4, ["Riga uno", "Riga due"]), (20.0, ["Riga tre"])], [(10.0, 60.0)],
+                                  "Rick - Song")
+    assert esito == {"righe": 3, "nuovo": True, "completato": False}
     voce = testi_dei_video.voce(URL)
     assert voce == {"coperti": [(10.0, 60.0)], "durata": 200.0, "righe": 3, "archivio": "Rick - Song", "completo": False}
     fonte, righe = karaoke.cerca(URL)
@@ -46,7 +46,9 @@ def test_salva_unisce_e_diventa_karaoke():
     assert karaoke.blocchi(righe)[0] == (12.4, 20.0, "Riga uno\nRiga due")
     # Un altro ascolto: i tratti nuovi si uniscono, il gruppo gia' salvato non si ripete.
     assert testi_dei_video.salva(URL, "Rick - Song (Karaoke)", 0, [(12.5, ["Riga uno", "Riga due"]), (150.0, ["Riga quattro"])],
-                                 [(0.0, 10.0), (60.0, 200.0)]) == 4
+                                 [(0.0, 10.0), (60.0, 200.0)]) == {"righe": 4, "nuovo": False, "completato": True}
+    # Gia' completo, un altro salvataggio non lo completa di nuovo.
+    assert testi_dei_video.salva(URL, "Rick - Song (Karaoke)", 0, [(180.0, ["Riga cinque"])], [(0.0, 200.0)])["completato"] is False
     voce = testi_dei_video.voce(URL)
     assert voce["coperti"] == [(0.0, 200.0)] and voce["completo"] and voce["durata"] == 200.0 and voce["archivio"] == "Rick - Song"
     assert testi_dei_video.salva(URL, "x", 1, [], []) is None

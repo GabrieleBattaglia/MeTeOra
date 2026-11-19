@@ -2,6 +2,12 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.28.1] - 2026-11-19
+
+- Le statistiche del testo dei video karaoke si completano, chiesto da Gabriele. Nella sezione del video, i testi della cartella Testi salvati la prima volta e quelli completati, insieme ai ripresi e ai tolti dopo un anno; le righe dette dai testi salvati, senza il riconoscimento; e il perché delle letture senza il testo dell'archivio: la canzone non trovata, l'archivio che non risponde, i testi trovati che non erano la canzone. Fra i record, il testo più lungo letto da un video karaoke, con le sue righe e il titolo del video.
+- Mentre il riconoscimento legge i tratti che mancano a un testo salvato, le righe che arrivano dalla traccia del testo salvato non contano più fra quelle riconosciute.
+- Le prove sono in tests/test_karaoke_dal_video.py, tests/test_testi_dei_video.py e tests/test_finestra.py.
+
 ## [3.28.0] - 2026-11-19
 
 - Il testo dei video karaoke, come quelli di Sing King su YouTube, chiesto da Gabriele nella issue 51. Questi video non hanno sottotitoli: le parole sono disegnate nell'immagine. MeTeOra le legge con il riconoscimento dei caratteri di Windows, sul fotogramma intero, due volte e mezzo al secondo, e cerca ogni riga letta nell'archivio libero dei testi LRCLIB: si dice la riga dell'archivio, con le parole esatte, appena compare sullo schermo, prima che si canti. Il testo giusto si trova dal titolo del video, e fra i risultati dell'archivio vince quello che somiglia alle prime righe lette. Nella prova del 19 novembre 2026, su 24 video di otto canali, in italiano e in inglese, i video mostravano 968 righe e MeTeOra ne ha dette il 91%, con le parole giuste; le righe dette con un testo sbagliato sono state circa 3 su 1.455. Loghi, nomi dei canali e il cartello iniziale con cantante e canzone non si dicono. Il riconoscimento costa dal 5 al 15% di un core.

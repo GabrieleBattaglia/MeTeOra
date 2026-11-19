@@ -140,7 +140,9 @@ def _lettura(monkeypatch, motore, cerca, coperti=(), pagine=PAGINE):
     monkeypatch.setattr(ocr, "leggi", leggi)
     detti, avvisi = [], []
     lettura = kv.LetturaDelKaraoke(motore, detti.append, "it-IT", motore.in_corso, "Queen - Bohemian Rhapsody (Karaoke Version)",
-        lambda frase, con_l_archivio: avvisi.append((frase, con_l_archivio)), coperti=coperti, cerca=cerca)
+        lambda frase, esito: avvisi.append((frase, esito)), coperti=coperti, cerca=cerca,
+        salvato=lambda esito, titolo: lette_salvate.append((esito, titolo)))
+    lette_salvate = lettura.salvataggi = []
     return lettura, detti, avvisi, lette
 
 
@@ -160,8 +162,10 @@ def test_la_lettura_con_l_archivio_salva_il_testo(monkeypatch):
     _fino_a(lettura, motore, 20.0)
     assert detti == ["Is this the real life\nIs this just fantasy", "Caught in a landslide\nNo escape from reality"]
     assert avvisi == [("Testo del karaoke di Queen - Bohemian Rhapsody (Karaoke Version): è nell'archivio dei testi, Queen - Bohemian Rhapsody; "
-                       "le righe lette si dicono con le sue parole.", True)]
+                       "le righe lette si dicono con le sue parole.", "archivio")]
     assert lettura.esito_dell_archivio == "trovato" and lettura.righe_dette == 4
+    # Il salvataggio lo sa chi tiene le statistiche: un testo nuovo, non ancora completo.
+    assert lettura.salvataggi == [({"righe": 4, "nuovo": True, "completato": False}, "Queen - Bohemian Rhapsody (Karaoke Version)")]
     # Il testo e' nella cartella Testi, con i tratti letti.
     voce = testi_dei_video.voce(YOUTUBE)
     assert voce["righe"] == 4 and voce["archivio"] == "Queen - Bohemian Rhapsody" and voce["coperti"][0][0] == pytest.approx(0.0, abs=0.5)
@@ -182,7 +186,7 @@ def test_senza_archivio_si_dice_l_ocr(monkeypatch):
     # Il logo e' gia' sullo schermo dall'inizio: si dice una volta, come l'OCR lo legge.
     assert detti == ["SING KING", "Is thls the reai life\nIs this just fantasy", "Caught in a landslide\nNo escape frorn reality"]
     assert avvisi == [("L'archivio dei testi non risponde: il testo di Queen - Bohemian Rhapsody (Karaoke Version) si legge dal video così com'è, "
-                       "con qualche errore possibile.", False)]
+                       "con qualche errore possibile.", "errore")]
     # Un archivio che non ha la canzone del video: dieci righe lette, nessuna
     # riconosciuta; da li' si dice l'OCR, senza aver mai detto che c'era.
     versi = ["Sole cuore amore", "Volare oh oh", "Nel blu dipinto di blu", "Una lunga storia d'amore", "Ancora tu non mi sorprende",
@@ -192,7 +196,7 @@ def test_senza_archivio_si_dice_l_ocr(monkeypatch):
     motore = _MotoreFinto(durata=80.0)
     lettura, detti, avvisi, _lette = _lettura(monkeypatch, motore, lambda titolo: [ALTRO], pagine=altre)
     _fino_a(lettura, motore, 30.0)
-    assert len(avvisi) == 1 and avvisi[0][1] is False and avvisi[0][0].startswith("I testi dell'archivio non sono quello di")
+    assert len(avvisi) == 1 and avvisi[0][1] == "diverso" and avvisi[0][0].startswith("I testi dell'archivio non sono quello di")
     assert "Sapore di sale" in detti and "Volare oh oh" not in detti
 
 

@@ -133,9 +133,13 @@ def voce(percorso):
         return None
     tratti = unisci(dati.get("coperti") or [])
     durata = float(dati.get("durata") or 0)
-    completo = durata > 0 and sum(fine - inizio for inizio, fine in tratti) >= durata - MARGINE
     return {"coperti": tratti, "durata": durata, "righe": int(dati.get("righe") or 0), "archivio": dati.get("archivio") or "",
-            "completo": bool(completo)}
+            "completo": _completo(tratti, durata)}
+
+
+def _completo(tratti, durata):
+    """Vero se i tratti letti coprono il video fino a MARGINE dalla durata."""
+    return durata > 0 and sum(fine - inizio for inizio, fine in unisci(tratti)) >= durata - MARGINE
 
 
 def righe(percorso):
@@ -199,8 +203,10 @@ def testo_lrc(titolo, gruppi):
 def salva(percorso, titolo, durata, gruppi, tratti, archivio=""):
     """Aggiunge al testo del video i gruppi (istante, [righe]) letti e i tratti
     (inizio, fine) coperti, a quello che c'era. archivio e' il testo
-    dell'archivio usato, come Adele - Hello, o vuoto. Torna quante righe ha
-    ora il testo, o None se non si e' potuto salvare."""
+    dell'archivio usato, come Adele - Hello, o vuoto. Torna, per le
+    statistiche, {"righe": quante ne ha ora il testo, "nuovo": vero se prima
+    non c'era, "completato": vero se e' diventato completo adesso}; None se
+    non si e' potuto salvare."""
     nome = chiave(percorso)
     if nome is None or not (gruppi or tratti):
         return None
@@ -222,15 +228,17 @@ def salva(percorso, titolo, durata, gruppi, tratti, archivio=""):
             tutti.setdefault(istante, []).extend(righe_del_gruppo)
         ordinati = sorted(tutti.items())
         quante = sum(len(r) for _istante, r in ordinati)
-        testi[nome] = {"origine": percorso, "titolo": titolo, "durata": round(float(durata or prima.get("durata") or 0), 1),
-            "coperti": [[round(a, 1), round(b, 1)] for a, b in unisci([*(prima.get("coperti") or []), *tratti])],
+        durata_vera = round(float(durata or prima.get("durata") or 0), 1)
+        coperti_prima = prima.get("coperti") or []
+        coperti = unisci([*coperti_prima, *tratti])
+        testi[nome] = {"origine": percorso, "titolo": titolo, "durata": durata_vera, "coperti": [[round(a, 1), round(b, 1)] for a, b in coperti],
             "archivio": archivio or prima.get("archivio") or "", "creato": prima.get("creato") or _oggi(), "ascoltato": _oggi(), "righe": quante}
         try:
             _scrivi(nome + ".lrc", testo_lrc(titolo, ordinati))
             _scrivi_l_indice(testi)
         except OSError:
             return None
-    return quante
+    return {"righe": quante, "nuovo": not prima, "completato": _completo(coperti, durata_vera) and not _completo(coperti_prima, durata_vera)}
 
 
 def pulisci(oggi=None):

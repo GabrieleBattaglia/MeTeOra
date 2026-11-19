@@ -1654,6 +1654,10 @@ class Pagina:
         if "risultati" in r:
             # Traduttori: ricerca è quello che si è cercato, e dove, come «hubbard in tutto MeTeOra»; n quanti risultati.
             righe.append(_("La ricerca con più risultati: {ricerca}, {n}.").format(ricerca=r["risultati"].get("cosa", ""), n=r["risultati"]["valore"]))
+        if "testo_del_video_piu_lungo" in r:
+            # Traduttori: righe e' quante righe, come 64 righe; titolo quello del video karaoke (3.28.1).
+            righe.append(_("Il testo più lungo letto da un video karaoke: {righe}, {titolo}.").format(
+                righe=plurale(int(r["testo_del_video_piu_lungo"]["valore"]), "{n} riga", "{n} righe"), titolo=r["testo_del_video_piu_lungo"].get("cosa", "")))
         if "ricerca_piu_lunga" in r:
             # Traduttori: ricerca è quello che si è cercato, e dove, come «hubbard in tutto MeTeOra».
             righe.append(_("La ricerca più lunga: {durata}, {ricerca}.").format(durata=durata(r["ricerca_piu_lunga"]["valore"]),
@@ -1920,8 +1924,15 @@ class Pagina:
             _("Testo dei video karaoke: letture {letture}, righe dette {righe}; con il testo dell'archivio {archivio}, senza {senza}.").format(
                 letture=self.c("letture_del_karaoke_dal_video"), righe=self.c("righe_del_karaoke_dal_video"), archivio=self.c("karaoke_dall_archivio"),
                 senza=self.c("karaoke_senza_archivio")),
-            _("Testi dei video karaoke ripresi dalla cartella Testi: {ripresi}; tolti dopo un anno senza ascolti: {tolti}.").format(
+            # Il perche' delle letture senza il testo dell'archivio (3.28.1).
+            _("Senza il testo dell'archivio: canzone non trovata {assente}, archivio che non risponde {errore}, testi trovati che non erano "
+              "la canzone {diverso}.").format(assente=self.c("karaoke_archivio_assente"), errore=self.c("karaoke_archivio_errore"),
+                diverso=self.c("karaoke_archivio_diverso")),
+            # La cartella Testi (3.28.0, i salvati e i completati nella 3.28.1).
+            _("Testi dei video karaoke nella cartella Testi: salvati {salvati}, completati {completati}, ripresi {ripresi}, tolti dopo un anno "
+              "senza ascolti {tolti}.").format(salvati=self.c("testi_dei_video_salvati"), completati=self.c("testi_dei_video_completati"),
                 ripresi=self.c("testi_dei_video_ripresi"), tolti=self.c("testi_dei_video_tolti")),
+            _("Righe dette dai testi salvati dei video karaoke, senza il riconoscimento: {n}.").format(n=self.c("righe_del_testo_salvato")),
         ]
 
     # 17.

@@ -74,6 +74,9 @@ CONTROLLO_PARTE = 0.3
 CONFERMA = 2
 # Ogni quante righe dette il testo si salva, oltre che alla fine.
 SALVA_OGNI = 20
+# Com'e' andata con l'archivio, per avvisa e le statistiche: il testo c'e';
+# la canzone non c'e'; l'archivio non risponde; i testi trovati non sono lei.
+ESITI = ("archivio", "assente", "errore", "diverso")
 # Un passo della posizione piu' lungo di cosi' e' un salto: il tratto letto
 # si chiude e ne comincia un altro.
 SALTO = 2.0
@@ -316,18 +319,20 @@ class Abbinatore:
 class LetturaDelKaraoke(_Lettura):
     """Il testo di un video karaoke letto al volo, finche' lo si ferma.
     dici(testo) riceve le righe nuove, a capo fra l'una e l'altra;
-    avvisa(frase, con_l_archivio) dice alla console cosa e' successo con
-    l'archivio, e se le righe ora vengono da li'. coperti sono i tratti
-    gia' letti un'altra volta: li' il riconoscimento resta spento. Alla fine,
-    e ogni SALVA_OGNI righe, il testo va nella cartella Testi."""
+    avvisa(frase, esito) dice alla console cosa e' successo con l'archivio,
+    con esito uno di ESITI. coperti sono i tratti gia' letti un'altra volta:
+    li' il riconoscimento resta spento. Alla fine, e ogni SALVA_OGNI righe,
+    il testo va nella cartella Testi, e salvato(esito, titolo), se c'e',
+    riceve quello che dice testi_dei_video.salva, per le statistiche."""
 
     tipo = "karaoke"
 
-    def __init__(self, motore, dici, lingua, percorso, titolo, avvisa, guasto=None, coperti=(), cerca=None, salva=None):
+    def __init__(self, motore, dici, lingua, percorso, titolo, avvisa, guasto=None, coperti=(), cerca=None, salva=None, salvato=None):
         super().__init__("testo del karaoke dal video", motore, dici, lingua, guasto)
         self.percorso = percorso
         self.titolo = titolo
         self._avvisa = avvisa
+        self._salvato = salvato
         # Le prove danno i loro; senza, quelli veri, cercati al momento.
         self._cerca = cerca or (lambda titolo: cerca_nell_archivio(titolo))
         self._salva = salva or (lambda *dati: testi_dei_video.salva(*dati))
@@ -379,16 +384,20 @@ class LetturaDelKaraoke(_Lettura):
     def _avvisa_l_esito(self, archivio):
         nome = self.titolo
         if archivio is not None:
+            esito = "archivio"
             # Traduttori: titolo e' quello del video; canzone e' quella trovata nell'archivio dei testi, come Adele - Hello.
             frase = _("Testo del karaoke di {titolo}: è nell'archivio dei testi, {canzone}; le righe lette si dicono con le sue parole.").format(
                 titolo=nome, canzone=archivio.nome)
         elif self.esito_dell_archivio == "errore":
+            esito = "errore"
             frase = _("L'archivio dei testi non risponde: il testo di {titolo} si legge dal video così com'è, con qualche errore possibile.").format(titolo=nome)
         elif self._candidati:
+            esito = "diverso"
             frase = _("I testi dell'archivio non sono quello di {titolo}: si legge dal video così com'è, con qualche errore possibile.").format(titolo=nome)
         else:
+            esito = "assente"
             frase = _("Il testo di {titolo} non è nell'archivio dei testi: si legge dal video così com'è, con qualche errore possibile.").format(titolo=nome)
-        self._avvisa(frase, archivio is not None)
+        self._avvisa(frase, esito)
 
     def _tratto(self, tratto, posizione):
         """Il tratto letto si allunga fino alla posizione, o se c'e' stato un
@@ -408,9 +417,12 @@ class LetturaDelKaraoke(_Lettura):
         if not self.gruppi:
             return
         try:
-            self._salva(self.percorso, self.titolo, self._motore.durata or 0, list(self.gruppi), tratti, self.archivio_usato)
+            esito = self._salva(self.percorso, self.titolo, self._motore.durata or 0, list(self.gruppi), tratti, self.archivio_usato)
         except Exception as errore:  # noqa: BLE001 - un testo che non si salva non ferma la lettura
             self._giro_guasto(errore)
+            return
+        if esito and self._salvato is not None:
+            self._salvato(esito, self.titolo)
 
     def _dici_le_proposte(self, abbinatore, proposte):
         dire = []
