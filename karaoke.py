@@ -1,13 +1,15 @@
 # MeTeOra, i testi del karaoke: MIDI e .kar, .lrc accanto al brano, SYLT dei tag ID3, fatti traccia di sottotitoli.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.82.0, per la tappa 10, punto e. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.17.0 Seguito, il testo detto seguendo la posizione dello speaker Cast. Nella 3.18.0 i blocchi del Seguito, per la vista del karaoke. Nella 3.26.14 il Seguito con i blocchi pronti, per i sottotitoli dei siti con lo speaker.
+# 04/10/2026: nasce con la 1.82.0, per la tappa 10, punto e. Nella 3.0.0 i testi passano da lingua.py, per le traduzioni. Nella 3.17.0 Seguito, il testo detto seguendo la posizione dello speaker Cast. Nella 3.18.0 i blocchi del Seguito, per la vista del karaoke. Nella 3.26.14 il Seguito con i blocchi pronti, per i sottotitoli dei siti con lo speaker. Nella 3.28.0 la fonte dal video, i testi della cartella Testi (issue 51).
 
 """I testi a tempo del karaoke (tappa 10, punto e).
 
 Le fonti, nell'ordine: il testo cantato dentro un MIDI, negli eventi FF 05,
 o negli eventi di testo FF 01 dei .kar; un file .lrc con lo stesso nome del
 brano, anche nella forma estesa con i tempi per parola; i testi
-sincronizzati SYLT dei tag ID3, in millisecondi. Ogni fonte da' una lista
+sincronizzati SYLT dei tag ID3, in millisecondi; per un video, anche in
+rete, il testo letto dall'immagine, nella cartella Testi (testi_dei_video,
+3.28.0). Ogni fonte da' una lista
 di Riga: l'istante in secondi, il testo e se comincia una strofa; una Riga
 senza testo e' una pausa, che chiude la riga prima.
 MeTeOra ne fa una traccia di sottotitoli SubRip, per riga o per strofa e con
@@ -40,6 +42,8 @@ FONTI = {
     "lrc": _("dal file LRC"),
     # Traduttori: come sopra: dai testi sincronizzati dei tag ID3 del brano.
     "sylt": _("dai tag del brano"),
+    # Traduttori: come sopra: dal testo letto in un video karaoke e tenuto nella cartella Testi.
+    "video": _("dal video"),
 }
 MODI = ("riga", "strofa")
 # L'ultima riga, o strofa, resta per tanto dopo il suo inizio.
@@ -425,19 +429,26 @@ def _leggi(percorso):
 
 def cerca(percorso):
     """(fonte, righe) del testo a tempo del brano, con fonte una chiave di
-    FONTI; (None, []) se non ce n'e'. Mai un errore."""
-    estensione = os.path.splitext(percorso)[1].lower()
-
-    def dal_file_lrc():
-        lrc = file_lrc(percorso)
-        return dal_lrc(_testo_del_file(_leggi(lrc))) if lrc else []
+    FONTI; (None, []) se non ce n'e'. Per ultimo il testo letto da un video
+    karaoke, nella cartella Testi (3.28.0): l'unico che ha un indirizzo in
+    rete. Mai un errore."""
+    import testi_dei_video
 
     tentativi = []
-    if estensione in formati.MIDI:
-        tentativi.append(("midi", lambda: dal_midi(_leggi(percorso), kar=estensione == ".kar")))
-    tentativi.append(("lrc", dal_file_lrc))
-    if estensione not in formati.MIDI:
-        tentativi.append(("sylt", lambda: dai_tag(percorso)))
+    if not formati.e_indirizzo(percorso):
+        estensione = os.path.splitext(percorso)[1].lower()
+
+        def dal_file_lrc():
+            lrc = file_lrc(percorso)
+            return dal_lrc(_testo_del_file(_leggi(lrc))) if lrc else []
+
+        if estensione in formati.MIDI:
+            tentativi.append(("midi", lambda: dal_midi(_leggi(percorso), kar=estensione == ".kar")))
+        tentativi.append(("lrc", dal_file_lrc))
+        if estensione not in formati.MIDI:
+            tentativi.append(("sylt", lambda: dai_tag(percorso)))
+    if formati.e_video(percorso) or formati.e_indirizzo(percorso):
+        tentativi.append(("video", lambda: testi_dei_video.righe(percorso)))
     for fonte, leggi in tentativi:
         try:
             righe = leggi()

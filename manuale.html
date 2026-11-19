@@ -232,6 +232,7 @@ kbd {
 <ul>
 <li><a href="#karaoke-testi">I testi a tempo</a></li>
 <li><a href="#karaoke-lettura">Come arriva il testo</a></li>
+<li><a href="#karaoke-video">I video karaoke</a></li>
 <li><a href="#braille-a-blocchi">La barra braille a blocchi</a></li>
 <li><a href="#esempi-karaoke">Esempi</a></li>
 </ul></li>
@@ -481,7 +482,7 @@ kbd {
 </ul>
 <h4>Il video</h4>
 <ul>
-<li><kbd>D</kbd>: dice i sottotitoli letti, fra le scelte del brano: spenti, le tracce dei sottotitoli e sui video in fondo i sottotitoli impressi; le tracce fatte di immagini le legge il riconoscimento dei caratteri.</li>
+<li><kbd>D</kbd>: dice i sottotitoli letti, fra le scelte del brano: spenti, le tracce dei sottotitoli e sui video il testo del karaoke dal video e in fondo i sottotitoli impressi; le tracce fatte di immagini le legge il riconoscimento dei caratteri.</li>
 <li><kbd>Ctrl con D</kbd>: sceglie i sottotitoli precedenti, fermandosi a spenti.</li>
 <li><kbd>Maiuscolo con D</kbd>: sceglie i sottotitoli successivi. Sui brani senza sottotitoli, Ctrl e Maiuscolo con D li spengono e li accendono per i brani dopo, e sui brani con il testo del karaoke il testo.</li>
 <li><kbd>Alt con D</kbd>: sceglie l'ultima scelta, sui video i sottotitoli impressi.</li>
@@ -1507,7 +1508,7 @@ kbd {
 <h3 id="sottotitoli-immagini">I sottotitoli fatti di immagini</h3>
 <p>Alcuni sottotitoli non sono testo ma immagini: le tracce dei DVD e dei Blu-ray, VobSub e PGS, e i sottotitoli impressi nel video, che fanno parte dell'immagine. MeTeOra li legge con il riconoscimento dei caratteri di Windows, nella lingua della traccia, se Windows la sa leggere, altrimenti in italiano; le lingue sono quelle installate in Windows, di solito italiano e inglese. Per leggere, MeTeOra guarda il fotogramma anche con il video spento, senza aprire nessuna finestra. Se il riconoscimento di Windows non c'è, la console lo dice e questi sottotitoli non si leggono.</p>
 <p>Una traccia a immagini si sceglie con D, come le altre, e la console dice che è fatta di immagini. A ogni sottotitolo nuovo MeTeOra lo fotografa, isola le lettere e le legge: arrivano alla sintesi e nella console come quelli di testo, quasi subito. Con il video spento il fotogramma diventa nero e nella foto restano solo le lettere; con il video acceso MeTeOra fotografa il fotogramma con il sottotitolo e senza, e legge la differenza.</p>
-<p>Sui video, in fondo alle scelte di D, dopo l'ultima traccia, c'è Sottotitoli impressi, e Alt con D ci va diretto; la scelta resta anche alla riapertura di MeTeOra, come i sottotitoli accesi. Come si leggono lo decide la voce Sottotitoli impressi delle impostazioni:</p>
+<p>Sui video, in fondo alle scelte di D, dopo l'ultima traccia e il testo del karaoke dal video, descritto nel capitolo Il karaoke, c'è Sottotitoli impressi, e Alt con D ci va diretto; la scelta resta anche alla riapertura di MeTeOra, come i sottotitoli accesi. Come si leggono lo decide la voce Sottotitoli impressi delle impostazioni:</p>
 <ul>
 <li>Letti al volo, il modo di partenza: mentre il video suona, MeTeOra guarda un paio di volte al secondo la fascia in basso del fotogramma, e quando c'è un testo nuovo, letto uguale due volte di fila, lo manda alla sintesi, con circa mezzo secondo di ritardo. Una scritta che resta ferma, come il logo di un canale, si sente una volta sola.</li>
 <li>Letti prima, con la passata: la prima volta MeTeOra percorre tutto il video in sottofondo, a cinque volte la velocità normale, un film di un'ora e mezza in circa venti minuti, e intanto li legge al volo; la console dice a che punto è. Alla fine salva accanto al video un file di sottotitoli con un nome riconoscibile, per esempio Film.impressi.it.srt, che diventa subito la traccia dei sottotitoli impressi; se intanto hai scelto un'altra traccia o un altro brano, la tua scelta resta, e la console dice che Alt con D sceglie il file. Le volte dopo il file c'è già, e Sottotitoli impressi sceglie lui, a tempo e senza ritardo, anche con il modo al volo. Le scritte ferme per più di quindici secondi, come i loghi, nel file non vanno. Una passata che non trova sottotitoli non si rifà su quel video fino alla chiusura di MeTeOra; e se accanto al video non si può scrivere, per esempio in una cartella protetta, la passata non parte e la console lo dice.</li>
@@ -1632,7 +1633,8 @@ kbd {
 <ul>
 <li>dentro i MIDI: i file kar, con il testo diviso in sillabe e le barre che vanno a capo e cambiano strofa, anche quando si chiamano mid, e i file mid con il testo cantato; i tempi si contano dal file, anche quando la musica cambia velocità;</li>
 <li>da un file LRC accanto al brano, con il suo stesso nome, per esempio Canzone.lrc accanto a Canzone.mp3, anche nella forma con i tempi di ogni parola; vale anche accanto a un video, come un video musicale;</li>
-<li>dai tag del brano, per esempio di un MP3, quando portano il testo sincronizzato, SYLT.</li>
+<li>dai tag del brano, per esempio di un MP3, quando portano il testo sincronizzato, SYLT;</li>
+<li>per i video, anche quelli dei siti, dalla cartella Testi, dove MeTeOra tiene il testo che ha letto dall'immagine di un video karaoke, come racconta più avanti I video karaoke.</li>
 </ul>
 <p>Gli accordi scritti in mezzo al testo, i titoli e gli avvisi del copyright all'inizio del file si saltano, e un MIDI con meno di tre righe di testo non è un karaoke; se un kar ha solo accordi al posto delle sillabe, vale il suo testo cantato. Le lettere accentate arrivano giuste anche dai file fatti con i vecchi programmi per DOS. Una riga lunghissima, di un file che non va mai a capo, si spezza alle pause del canto, sempre fra due parole.</p>
 <h3 id="karaoke-lettura">Come arriva il testo</h3>
@@ -1644,6 +1646,17 @@ kbd {
 <li>Dove vanno sottotitoli e karaoke: alla sintesi e al braille, solo alla sintesi o solo al braille. Vale anche per i sottotitoli dei video. Il braille arriva con NVDA e JAWS; con la voce di Windows solo al braille vuol dire solo nella console.</li>
 </ul>
 <p>Cambiando il modo o l'anticipo, il testo del brano in corso si rifà subito: la riga dopo arriva già con il modo e l'anticipo nuovi.</p>
+<h3 id="karaoke-video">I video karaoke</h3>
+<p>Molti video karaoke, come quelli di Sing King o di Karaoke Academy su YouTube, non hanno sottotitoli: il testo da cantare è disegnato nell'immagine. MeTeOra lo legge da sé, con tre tecniche insieme:</p>
+<ul>
+<li>il riconoscimento dei caratteri di Windows guarda tutto il fotogramma due volte e mezzo al secondo, anche con il video spento, e dice quando compare ogni riga;</li>
+<li>l'archivio libero dei testi LRCLIB, su internet, dà le parole esatte: MeTeOra cerca ogni riga letta nel testo della canzone, e dice la riga dell'archivio, senza le lettere storte del riconoscimento;</li>
+<li>la canzone si trova dal titolo del video, senza le parole dei canali come Karaoke Version, e fra i testi trovati vince quello che somiglia di più alle prime righe lette.</li>
+</ul>
+<p>La lettura parte da sola quando i sottotitoli letti sono accesi, il titolo del video o il nome del file dice karaoke e il video non ha altri sottotitoli. Su ogni altro video la scegli con D: dopo le tracce dei sottotitoli c'è Testo del karaoke dal video, e dopo ancora i sottotitoli impressi. Ctrl con D fino a spenti la ferma, e con lei il riconoscimento, che non consuma più niente; se su un video karaoke scegli con D un'altra cosa, la lettura resta spenta per quel video.</p>
+<p>Ogni riga si dice appena compare sullo schermo, mezzo secondo dopo, e nei karaoke le righe compaiono prima del canto; le righe che compaiono insieme, come una strofa intera, arrivano insieme. Una riga che cresce, nei video che scrivono una parola alla volta, dice solo le parole nuove; due versi uguali di fila, come un ritornello, si dicono tutti e due. I loghi, i nomi dei canali e il cartello iniziale con cantante e canzone non si dicono. All'inizio la console dice com'è andata con l'archivio: Testo del karaoke di, il titolo del video, è nell'archivio dei testi, con cantante e canzone, appena ne ha riconosciute due righe. Se la canzone non c'è, o l'archivio non risponde, le righe si dicono come le legge il riconoscimento, con qualche errore possibile, e la console lo dice. All'archivio va solo il titolo del video.</p>
+<p>Sulla prova di 24 video di otto canali, in italiano e in inglese, MeTeOra ha detto il 91% delle righe che i video mostravano, con le parole giuste; le righe con un testo sbagliato sono state circa 3 su 1.455. Va meno bene sui video con lo sfondo che si muove sotto il testo, come quelli di KaraFun.</p>
+<p>Il testo letto si tiene nella cartella Testi, dentro la cartella delle registrazioni: un file LRC per ogni video e l'indice Testi.json, che lega ogni testo al suo video, su YouTube dal suo identificativo e sul disco da percorso, dimensione e data. Quando il video torna, il testo è la sua traccia del karaoke, Testo del karaoke, dal video, a tempo, con il modo per riga o per strofa e l'anticipo delle impostazioni, e il riconoscimento resta spento; arriva anche allo speaker Cast. Se la volta prima ti eri fermato a metà, o avevi saltato un pezzo, il riconoscimento si accende solo nei tratti che mancano, e il testo si completa. All'avvio MeTeOra toglie i testi dei video non ascoltati da un anno, perché la cartella non cresca per sempre. La prima lettura con lo speaker Cast non c'è, perché lo speaker non dà i fotogrammi da leggere.</p>
 <h3 id="karaoke-vista">La vista a tutto schermo, per chi canta guardando</h3>
 <p>Per chi vede lo schermo e canta, MeTeOra ha una vista del karaoke a tutto schermo. Si accende con il video, Maiuscolo con F1, e si spegne con lui, Ctrl con F1: con il video acceso, ogni brano da cantare che non ha un video suo, come un MIDI, un KAR o un MP3 con il suo LRC, la apre da sé, sopra MeTeOra e sullo stesso schermo. Va anche con lo speaker Cast.</p>
 <p>In alto c'è la riga da cantare, in grassetto, alta circa un decimo dello schermo; sotto arrivano le tre prossime, alte due terzi di lei. Le misure seguono lo schermo, non i caratteri della console, perché si legga da qualche metro, anche su un televisore. Le righe già cantate spariscono, e il testo scorre da solo verso l'alto; una riga lunga va a capo fra le parole. La dimensione e il colore della riga da cantare si scelgono nelle impostazioni, con le voci Dimensione del karaoke a tutto schermo e Colore della riga da cantare. Lo sfondo e il colore delle prossime sono quelli della console, scelti nelle impostazioni; la riga da cantare ha un colore che risalta di più: sugli sfondi scuri il giallo, o il bianco se il testo è già giallo, su quelli chiari il blu scuro, o il nero. Prima che il canto cominci le righe sono tutte prossime; fra una riga e l'altra resta in alto l'ultima cominciata. Il modo per riga o per strofa e l'anticipo del karaoke valgono anche qui.</p>
@@ -1659,6 +1672,14 @@ kbd {
 <li>Porta il fuoco su un file kar e premi X.</li>
 <li>Se i sottotitoli letti sono accesi, il testo arriva da solo; se sono spenti, premi Maiuscolo con D, e la console dice Testo del karaoke letto, dal MIDI.</li>
 <li>Ogni riga arriva un secondo prima del suo canto; Ctrl con D spegne il testo, e Maiuscolo con D lo riaccende.</li>
+</ol>
+<h4>Un video karaoke di YouTube</h4>
+<ol>
+<li>Con i sottotitoli letti accesi, premi Ctrl con V con l'indirizzo di un video karaoke negli appunti, o cercalo con Cerca contenuti.</li>
+<li>Il video parte, e la console dice che il testo è nell'archivio dei testi, con cantante e canzone.</li>
+<li>Ogni riga arriva allo screen reader e alla console appena compare sullo schermo, prima del canto.</li>
+<li>Per fermare la lettura premi Ctrl con D fino a sentire Sottotitoli letti spenti.</li>
+<li>La volta dopo lo stesso video ha già il suo testo: la console non dice niente dell'archivio, e le righe arrivano a tempo dalla cartella Testi.</li>
 </ol>
 <h4>Un MP3 con il suo testo</h4>
 <ol>

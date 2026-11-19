@@ -1916,6 +1916,12 @@ class Pagina:
             # I sottotitoli che scorrono, come quelli automatici di YouTube (3.19.1).
             _("Sottotitoli che scorrono, con la sola riga già detta, non ridetti: {n}.").format(n=self.c("righe_scorrevoli_saltate")),
             _("Passate in anticipo degli impressi: avviate {avviate}, finite {finite}.").format(avviate=self.e("passata_avviata"), finite=self.e("passata_finita")),
+            # Il testo dei video karaoke, letto dall'immagine con l'archivio dei testi (3.28.0).
+            _("Testo dei video karaoke: letture {letture}, righe dette {righe}; con il testo dell'archivio {archivio}, senza {senza}.").format(
+                letture=self.c("letture_del_karaoke_dal_video"), righe=self.c("righe_del_karaoke_dal_video"), archivio=self.c("karaoke_dall_archivio"),
+                senza=self.c("karaoke_senza_archivio")),
+            _("Testi dei video karaoke ripresi dalla cartella Testi: {ripresi}; tolti dopo un anno senza ascolti: {tolti}.").format(
+                ripresi=self.c("testi_dei_video_ripresi"), tolti=self.c("testi_dei_video_tolti")),
         ]
 
     # 17.

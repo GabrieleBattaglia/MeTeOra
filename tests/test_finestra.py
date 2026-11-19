@@ -6072,6 +6072,11 @@ def _ocr_finto(finestra, monkeypatch):
     impressi = type("LetturaDegliImpressiFinta", (_LetturaFinta,), {"tipo": "impressi"})
     monkeypatch.setattr(sottotitoli_ocr, "LetturaDelleImmagini", immagini)
     monkeypatch.setattr(sottotitoli_ocr, "LetturaDegliImpressi", impressi)
+    # Il testo del karaoke dal video (3.28.0), finto anche lui.
+    import karaoke_dal_video
+
+    _KaraokeFinto.create = []
+    monkeypatch.setattr(karaoke_dal_video, "LetturaDelKaraoke", _KaraokeFinto)
     monkeypatch.setattr(ocr, "disponibile", lambda: True)
     monkeypatch.setattr(ocr, "lingua_per", lambda etichetta: "en-US" if etichetta == "eng" else "it-IT")
     video_letto = []
@@ -6097,8 +6102,14 @@ def test_maiuscolo_f2_con_le_immagini_e_gli_impressi(finestra, monkeypatch, suon
     finestra._sottotitolo_a_immagini()
     stato["tracce"] = _tracce(sottotitoli=2, scelto_sub=1)
     stato["tracce"]["sub"][1].update(codec="dvd_subtitle", lang="eng", title="")
+    # Dalla 3.28.0, prima degli impressi, il testo del karaoke dal video.
+    _tasto(finestra, "d", maiuscolo=True)
+    assert chiamate[-1] == ("sid", "no") and finestra._lettura.tipo == "karaoke" and _LetturaFinta.create[0].fermata
+    stato["tracce"] = _tracce(sottotitoli=2)
+    stato["tracce"]["sub"][1].update(codec="dvd_subtitle", lang="eng", title="")
     _tasto(finestra, "d", maiuscolo=True)
     assert chiamate[-1] == ("sid", "no") and finestra.impostazioni["impressi_scelti"] and finestra._lettura.tipo == "impressi"
+    assert _KaraokeFinto.create[0].fermata
     assert _ultima(finestra) == "Sottotitoli impressi, letti al volo." and finestra.impostazioni["sottotitoli"] is True
     assert _LetturaFinta.create[0].fermata
     stato["tracce"] = _tracce(sottotitoli=2)
@@ -6131,7 +6142,8 @@ def test_gli_impressi_con_la_passata(finestra, monkeypatch, suoni_annotati, tmp_
     monkeypatch.setattr(sottotitoli_ocr, "PassataDegliImpressi", PassataFinta)
     aggiunti = []
     monkeypatch.setattr(finestra.motore, "aggiungi_sottotitoli", lambda percorso, titolo, lingua, scegli=True: aggiunti.append((percorso, titolo, lingua, scegli)))
-    _tasto(finestra, "d", maiuscolo=True)
+    # Gli impressi sono l'ultima scelta: dalla 3.28.0, prima di loro, c'e' il testo del karaoke dal video.
+    _tasto(finestra, "d", alt=True)
     assert len(passate) == 1 and passate[0].video == stato["in_corso"] and finestra._lettura.tipo == "impressi"
     assert "passata_avviata" in suoni_annotati
     assert _ultima(finestra) == "Sottotitoli impressi, letti al volo mentre la passata li prepara per le volte dopo."
@@ -6147,7 +6159,7 @@ def test_gli_impressi_con_la_passata(finestra, monkeypatch, suoni_annotati, tmp_
     stato["tracce"]["sub"][0]["title"] = "Sottotitoli impressi"
     finestra.impostazioni["sottotitoli"] = False
     finestra.impostazioni["impressi_scelti"] = False
-    _tasto(finestra, "d", maiuscolo=True)
+    _tasto(finestra, "d", alt=True)
     assert chiamate[-1] == ("sid", "1") and _ultima(finestra) == "Sottotitoli impressi, dal file della passata fatta prima." and len(passate) == 1
     stato["tracce"] = _tracce(sottotitoli=1, scelto_sub=0)
     stato["tracce"]["sub"][0]["title"] = "Sottotitoli impressi"
@@ -10513,3 +10525,134 @@ def test_la_voce_lingua(finestra, monkeypatch, suoni_annotati):
     monkeypatch.setattr(modulo, "FinestraScelta", _SceltaFinta(None))
     finestra._cambia_impostazione("lingua", lista)
     assert _ultima(finestra) == "Lingua: non cambiata." and scelte == ["en", "it"]
+
+
+class _KaraokeFinto:
+    """La lettura finta del testo del karaoke dal video (3.28.0): annota con
+    cosa nasce, e se la si ferma e la si aspetta."""
+
+    tipo = "karaoke"
+    create = None
+
+    def __init__(self, motore, dici, lingua, percorso, titolo, avvisa, guasto=None, coperti=()):
+        self.lingua, self.percorso, self.titolo, self.dici, self.avvisa = lingua, percorso, titolo, dici, avvisa
+        self.coperti, self.fermata, self.aspettata = list(coperti), False, False
+        _KaraokeFinto.create.append(self)
+
+    def avvia(self):
+        return self
+
+    def ferma(self):
+        self.fermata = True
+
+    def aspetta(self, secondi=10):
+        self.aspettata = True
+
+
+def _karaoke_finto(finestra, monkeypatch, titolo, indirizzo="https://www.youtube.com/watch?v=abcdefghijk"):
+    import karaoke_dal_video
+
+    video_letto = _ocr_finto(finestra, monkeypatch)
+    _KaraokeFinto.create = []
+    monkeypatch.setattr(karaoke_dal_video, "LetturaDelKaraoke", _KaraokeFinto)
+    stato, chiamate = _video_finto(finestra, monkeypatch, _tracce())
+    stato["in_corso"] = indirizzo
+    finestra.coda.corrente = Brano(indirizzo, titolo=titolo)
+    finestra.impostazioni["sottotitoli"] = True
+    return stato, chiamate, video_letto
+
+
+def test_il_karaoke_dal_video_parte_da_solo_e_d_lo_spegne(finestra, monkeypatch, suoni_annotati):
+    # 3.28.0, Gabriele: sui video karaoke la lettura del testo parte da sola;
+    # Ctrl con D fino a spenti la ferma, e con lei il riconoscimento.
+    stato, _chiamate, video_letto = _karaoke_finto(finestra, monkeypatch, "Adele - Hello (Karaoke Version)")
+    finestra._aggiorna_il_video()
+    lettura = finestra._lettura
+    assert lettura.tipo == "karaoke" and lettura.percorso == stato["in_corso"] and lettura.titolo == "Adele - Hello (Karaoke Version)"
+    assert lettura.lingua == "it-IT" and lettura.coperti == [] and video_letto[-1] is True
+    assert finestra._statistiche.dati["conti"]["letture_del_karaoke_dal_video"] == 1
+    _tasto(finestra, "d")
+    assert _ultima(finestra) == "Testo del karaoke dal video; scelta 2 di 3: spenti, il testo del karaoke dal video e gli impressi."
+    # Le righe arrivano ai sottotitoli; una riga uguale all'ultima di prima
+    # non si toglie, come con i sottotitoli che scorrono: e' un verso nuovo.
+    lettura.dici("Hello\nIt's me")
+    lettura.dici("It's me\nI was wondering")
+    wx.Yield()
+    assert _ultima(finestra) == "It's me I was wondering" and finestra._statistiche.dati["conti"]["righe_del_karaoke_dal_video"] == 4
+    lettura.avvisa("Testo del karaoke di Adele: è nell'archivio dei testi.", True)
+    wx.Yield()
+    assert _ultima(finestra) == "Testo del karaoke di Adele: è nell'archivio dei testi." and finestra._statistiche.dati["conti"]["karaoke_dall_archivio"] == 1
+    # Ctrl con D scende a spenti: la lettura si ferma, e il video non si decodifica piu'.
+    _tasto(finestra, "d", ctrl=True)
+    assert lettura.fermata and _ultima(finestra) == "Sottotitoli letti spenti." and finestra._lettura is None and video_letto[-1] is False
+    finestra._aggiorna_il_video()
+    assert finestra._lettura is None
+    # Maiuscolo con D lo riaccende; ancora, gli impressi, che Alt con D sceglie come prima.
+    _tasto(finestra, "d", maiuscolo=True)
+    assert finestra._lettura.tipo == "karaoke" and len(_KaraokeFinto.create) == 2
+    assert _ultima(finestra) == "Testo del karaoke dal video, letto dal riconoscimento dei caratteri con le parole dell'archivio dei testi."
+    _tasto(finestra, "d", maiuscolo=True)
+    assert _KaraokeFinto.create[1].fermata and finestra._lettura.tipo == "impressi" and _ultima(finestra) == "Sottotitoli impressi, letti al volo."
+    _tasto(finestra, "d", alt=True)
+    assert _ultima(finestra).startswith("È già l'ultima scelta.")
+    # Gli impressi scelti, su un video karaoke nuovo vince il karaoke.
+    stato["in_corso"] = "https://www.youtube.com/watch?v=kkkkkkkkkkk"
+    finestra.coda.corrente = Brano(stato["in_corso"], titolo="Torn (Karaoke Version)")
+    finestra._aggiorna_il_video()
+    assert finestra._lettura.tipo == "karaoke" and finestra._lettura.percorso == stato["in_corso"]
+
+
+def test_il_karaoke_dal_video_si_sceglie_su_ogni_video(finestra, monkeypatch, suoni_annotati):
+    stato, _chiamate, _video_letto = _karaoke_finto(finestra, monkeypatch, "Un film qualunque")
+    finestra._aggiorna_il_video()
+    assert finestra._lettura is None
+    # Un video con altri sottotitoli non parte da solo, anche se e' un karaoke.
+    stato["tracce"] = _tracce(sottotitoli=1)
+    finestra.coda.corrente = Brano(stato["in_corso"], titolo="Torn (Karaoke)")
+    assert not finestra._karaoke_voluto(stato["tracce"])
+    stato["tracce"] = _tracce()
+    finestra.coda.corrente = Brano(stato["in_corso"], titolo="Un film qualunque")
+    _tasto(finestra, "d", maiuscolo=True)
+    prima = finestra._lettura
+    assert prima.tipo == "karaoke" and prima.titolo == "Un film qualunque"
+    # Un video nuovo: la scelta era di quello, e la lettura si ferma.
+    stato["in_corso"] = "https://www.youtube.com/watch?v=zzzzzzzzzzz"
+    finestra.coda.corrente = Brano(stato["in_corso"], titolo="Altro film")
+    finestra._aggiorna_il_video()
+    assert prima.fermata and finestra._lettura is None
+    # Un file sul disco che il nome dice karaoke: il titolo e' il nome senza l'estensione.
+    stato["in_corso"] = r"C:\m\Torn (Karaoke Version).mp4"
+    finestra.coda.corrente = Brano(stato["in_corso"])
+    finestra._aggiorna_il_video()
+    assert finestra._lettura.tipo == "karaoke" and finestra._lettura.titolo == "Torn (Karaoke Version)"
+
+
+def test_il_testo_salvato_del_video(finestra, monkeypatch, suoni_annotati):
+    import testi_dei_video
+
+    # Letto tutto un'altra volta: la sua traccia, e il riconoscimento spento.
+    stato, chiamate, _video_letto = _karaoke_finto(finestra, monkeypatch, "Adele - Hello (Karaoke Version)")
+    testi_dei_video.salva(stato["in_corso"], "Adele - Hello", 100.0, [(5.0, ["Hello"])], [(0.0, 100.0)])
+    stato["tracce"] = _tracce(sottotitoli=1)
+    stato["tracce"]["sub"][0]["title"] = "Testo del karaoke, dal video"
+    finestra._aggiorna_il_video()
+    assert chiamate[-1] == ("sid", "1") and finestra._lettura is None and finestra._statistiche.dati["conti"]["testi_dei_video_ripresi"] == 1
+    stato["tracce"]["sub"][0]["selected"] = True
+    _tasto(finestra, "d")
+    assert _ultima(finestra) == "Testo del karaoke dal video; scelta 2 di 3: spenti, il testo del karaoke dal video e gli impressi."
+    # Letto a meta': la traccia, e il riconoscimento solo dove manca.
+    stato["in_corso"] = "https://www.youtube.com/watch?v=yyyyyyyyyyy"
+    finestra.coda.corrente = Brano(stato["in_corso"], titolo="Torn (Karaoke)")
+    testi_dei_video.salva(stato["in_corso"], "Torn", 100.0, [(5.0, ["Riga"])], [(0.0, 40.0)])
+    stato["tracce"] = _tracce(sottotitoli=1)
+    stato["tracce"]["sub"][0]["title"] = "Testo del karaoke, dal video"
+    finestra._aggiorna_il_video()
+    assert chiamate[-1] == ("sid", "1") and finestra._lettura.tipo == "karaoke" and finestra._lettura.coperti == [(0.0, 40.0)]
+    # Spento e riacceso con D, la console dice da dove viene il testo.
+    stato["tracce"]["sub"][0]["selected"] = True
+    _tasto(finestra, "d", ctrl=True)
+    assert finestra._lettura is None and chiamate[-1] == ("sid", "no")
+    stato["tracce"]["sub"][0]["selected"] = False
+    _tasto(finestra, "d", maiuscolo=True)
+    assert chiamate[-1] == ("sid", "1") and finestra._lettura.tipo == "karaoke"
+    assert _ultima(finestra) == "Testo del karaoke dal video, dalla cartella Testi; il riconoscimento legge i tratti che mancano."

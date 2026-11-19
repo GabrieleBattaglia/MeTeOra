@@ -12,6 +12,7 @@
 # 05/11/2026, 3.2.0: yt-dlp e QuickJS nella cartella della prova, e mai chiamati davvero.
 # 06/11/2026, 3.3.0: radio-browser mai interrogato, e gli indirizzi diretti di ogni prova per conto loro.
 # 10/11/2026, 3.5.0: le registrazioni nella cartella della prova.
+# 19/11/2026, 3.28.0: la cartella Testi nella cartella della prova, e l'archivio dei testi mai interrogato.
 
 """Le regole comuni delle prove.
 
@@ -161,6 +162,22 @@ def registrazioni_nella_prova(monkeypatch, tmp_path):
     import registrazioni
 
     monkeypatch.setattr(registrazioni, "cartella", lambda: str(tmp_path / "Registrazioni"))
+
+
+@pytest.fixture(autouse=True)
+def testi_nella_prova(monkeypatch, tmp_path):
+    """La cartella Testi del karaoke dal video (3.28.0) nella cartella della
+    prova, e l'archivio dei testi mai interrogato: le prove che lo vogliono
+    mettono le loro risposte finte."""
+    import karaoke_dal_video
+    import testi_dei_video
+
+    monkeypatch.setattr(testi_dei_video, "_base", str(tmp_path / "Registrazioni"))
+
+    def senza_rete(domanda, attesa):
+        raise OSError("l'archivio dei testi non si interroga nelle prove")
+
+    monkeypatch.setattr(karaoke_dal_video, "_chiedi", senza_rete)
 
 
 @pytest.fixture(autouse=True)

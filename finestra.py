@@ -61,6 +61,7 @@ import formati
 import importazione
 import indirizzi
 import karaoke
+import karaoke_dal_video
 import lettore_di_rete
 import lingua
 import lontano
@@ -83,6 +84,7 @@ import sottotitoli_ocr
 import statistiche
 import suoni
 import tag
+import testi_dei_video
 import trasmissione
 import valori
 import version
@@ -948,6 +950,13 @@ _DALLE_TRACCE = object()
 def _traccia_della_passata(tracce):
     """La traccia del file di una passata dei sottotitoli impressi, o None."""
     return next((t for t in tracce["sub"] if t.get("title") == TITOLO_DELLA_PASSATA), None) if tracce else None
+
+
+def _traccia_del_testo_salvato(tracce):
+    """La traccia del karaoke fatta col testo letto dal video e salvato nella
+    cartella Testi (3.28.0), o None."""
+    titolo = karaoke.titolo("video")
+    return next((t for t in tracce["sub"] if t.get("title") == titolo), None) if tracce else None
 # L'ultima riga delle istruzioni di ogni campo.
 REGOLA_DEL_DOLLARO = _("Le righe che cominciano con il dollaro non contano: scrivi nell'ultima riga.")
 # La prova della scheda audio degli effetti: un centesimo di secondo di
@@ -1427,6 +1436,10 @@ class Finestra(wx.Frame):
         self._statistiche = statistiche.Statistiche(os.path.join(cartella_dati, FILE_STATISTICHE))
         self._statistiche.carica()
         self._statistiche.avvio(version.VERSION, self.impostazioni["versione"])
+        # La cartella Testi del karaoke dal video, dentro quella delle
+        # registrazioni, e la pulizia dei testi di piu' di un anno (3.28.0).
+        testi_dei_video.imposta_la_cartella(self._cartella_delle_registrazioni())
+        threading.Thread(target=self._pulisci_i_testi_dei_video, name="MeTeOra, pulizia dei testi", daemon=True).start()
         # Vero quando la finestra ha tutto cio' che l'orologio guarda.
         self._orologio_pronto = False
         self.archivio = Archivio(os.path.join(cartella_dati, FILE_PLAYLIST))
@@ -1491,6 +1504,10 @@ class Finestra(wx.Frame):
         # sottotitoli_ocr, o None; la passata in anticipo in corso, o None
         # (1.80.0). La scelta degli impressi sta nelle impostazioni.
         self._lettura = None
+        # Il testo del karaoke dal video (3.28.0): il video su cui D l'ha
+        # scelto, e quello su cui D ha scelto altro; i video karaoke lo
+        # scelgono da soli, finche' D non sceglie altro.
+        self._karaoke_scelto = self._karaoke_rifiutato = None
         self._passata = None
         # La pulizia all'avvio in corso, nel suo filo (1.104.0); i percorsi che
         # aveva da guardare, cosi' come erano scritti, e quelli, normalizzati,
@@ -9345,6 +9362,15 @@ class Finestra(wx.Frame):
         ha cambiato niente: la lettura dei sottotitoli fatti di immagini deve
         sapere la scelta prima che le tracce la dicano."""
         scelta = next((t for t in tracce["sub"] if t.get("selected")), None)
+        if self.impostazioni["sottotitoli"] and scelta is None and self._karaoke_voluto(tracce):
+            # Un video karaoke: il suo testo salvato, se c'e', o la lettura
+            # dal video, che decide _aggiorna_la_lettura (3.28.0).
+            salvato = _traccia_del_testo_salvato(tracce)
+            if salvato is None:
+                return _DALLE_TRACCE
+            self._statistiche.conta("testi_dei_video_ripresi")
+            self.motore.scegli_traccia("sid", str(salvato["id"]))
+            return salvato
         if self.impostazioni["sottotitoli"] and scelta is None and tracce["sub"]:
             passata = _traccia_della_passata(tracce)
             # Gli impressi scelti contano solo sui video: su un brano senza,
@@ -9503,7 +9529,7 @@ class Finestra(wx.Frame):
             self.motore.imposta_il_video(None)
             self._video_nel_motore = False
 
-    def _sottotitolo(self, testo):
+    def _sottotitolo(self, testo, scorre=True):
         """Un sottotitolo del brano in corso: alla sintesi scelta e nella
         console, se i sottotitoli letti sono accesi. Alla voce va subito,
         intero; al braille in fila, a blocchi lunghi quanto la barra, con il
@@ -9513,10 +9539,12 @@ class Finestra(wx.Frame):
         due righe, e quella di sotto sale sopra nel sottotitolo dopo: se un
         sottotitolo comincia con l'ultima riga di quello di prima, si dice solo
         il resto, e niente se non c'e' altro (Gabriele, 3.19.1). Un
-        sottotitolo uguale a quello di prima, come un ritornello, si dice intero."""
+        sottotitolo uguale a quello di prima, come un ritornello, si dice intero.
+        scorre falso e' per il testo del karaoke dal video (3.28.0), che dice
+        gia' solo le righe nuove: due versi uguali di fila sono due versi."""
         righe = [riga.strip() for riga in testo.splitlines() if riga.strip()]
         precedenti, self._righe_del_sottotitolo = self._righe_del_sottotitolo, righe
-        if precedenti and righe and righe != precedenti and righe[0] == precedenti[-1]:
+        if scorre and precedenti and righe and righe != precedenti and righe[0] == precedenti[-1]:
             righe = righe[1:]
             if not righe:
                 self._statistiche.conta("righe_scorrevoli_saltate")
@@ -9527,6 +9555,8 @@ class Finestra(wx.Frame):
         self._statistiche.conta("righe_dei_sottotitoli")
         if self._lettura is not None:
             self._statistiche.conta("righe_riconosciute")
+            if self._lettura.tipo == "karaoke":
+                self._statistiche.conta("righe_del_karaoke_dal_video", len(righe))
         elif formati.e_midi(self.motore.in_corso or ""):
             self._statistiche.conta("righe_del_karaoke")
         # Con lo speaker: il karaoke (3.17.0) e i sottotitoli dei video, dal
@@ -9597,30 +9627,37 @@ class Finestra(wx.Frame):
     def _posti_dei_sottotitoli(self):
         """Le scelte fra cui si muove D (issue 38, al posto del giro di
         Maiuscolo con F2): spenti, poi le tracce dei sottotitoli, poi sui
-        video i sottotitoli impressi (1.80.0), se c'e' il file della passata
-        o si possono leggere; la traccia del file di una passata non e' una
-        scelta a se', e' quella degli impressi. Su un brano senza
+        video il testo del karaoke letto dal video (3.28.0), se c'e' il suo
+        testo salvato o si puo' leggere, e per ultimi i sottotitoli impressi
+        (1.80.0), se c'e' il file della passata o si possono leggere: Alt con
+        D ci va diretto, come prima. La traccia del file di una passata non
+        e' una scelta a se', e' quella degli impressi; quella del testo
+        salvato e' quella del karaoke dal video. Su un brano senza
         sottotitoli, e senza impressi, o da fermi: spenti e accesi per i
         brani dopo. Torna (tracce, passata, sottotitoli, con_gli_impressi,
-        attuale, quante), con attuale contato da zero."""
+        con_il_karaoke, attuale, quante), con attuale contato da zero."""
         tracce = self.motore.tracce() if self.motore.in_corso else None
         passata = _traccia_della_passata(tracce)
-        sottotitoli = [t for t in (tracce["sub"] if tracce else []) if t is not passata]
+        salvato = _traccia_del_testo_salvato(tracce)
+        sottotitoli = [t for t in (tracce["sub"] if tracce else []) if t is not passata and t is not salvato]
         con_gli_impressi = bool(tracce and tracce["video"] and (passata is not None or ocr.disponibile()))
-        if not sottotitoli and not con_gli_impressi:
-            return tracce, passata, sottotitoli, False, 1 if self.impostazioni["sottotitoli"] else 0, 2
-        quante = 1 + len(sottotitoli) + con_gli_impressi
-        if con_gli_impressi and ((passata is not None and passata.get("selected")) or (self.impostazioni["impressi_scelti"]
-                and self.impostazioni["sottotitoli"] and not any(t.get("selected") for t in sottotitoli))):
+        con_il_karaoke = bool(tracce and tracce["video"] and (salvato is not None or ocr.disponibile()))
+        if not sottotitoli and not con_gli_impressi and not con_il_karaoke:
+            return tracce, passata, sottotitoli, False, False, 1 if self.impostazioni["sottotitoli"] else 0, 2
+        quante = 1 + len(sottotitoli) + con_gli_impressi + con_il_karaoke
+        nessuna = self.impostazioni["sottotitoli"] and not any(t.get("selected") for t in sottotitoli)
+        if con_il_karaoke and ((salvato is not None and salvato.get("selected")) or (nessuna and self._karaoke_voluto(tracce))):
+            attuale = len(sottotitoli) + 1
+        elif con_gli_impressi and ((passata is not None and passata.get("selected")) or (self.impostazioni["impressi_scelti"] and nessuna)):
             attuale = quante - 1
         else:
             scelta = next((i for i, t in enumerate(sottotitoli) if t.get("selected")), None)
             attuale = 0 if scelta is None or not self.impostazioni["sottotitoli"] else scelta + 1
-        return tracce, passata, sottotitoli, con_gli_impressi, attuale, quante
+        return tracce, passata, sottotitoli, con_gli_impressi, con_il_karaoke, attuale, quante
 
-    def _frase_dei_sottotitoli(self, tracce, sottotitoli, con_gli_impressi, attuale, quante):
+    def _frase_dei_sottotitoli(self, tracce, sottotitoli, con_gli_impressi, con_il_karaoke, attuale, quante):
         """La scelta dei sottotitoli, fra quante, da dire."""
-        if not sottotitoli and not con_gli_impressi:
+        if not sottotitoli and not con_gli_impressi and not con_il_karaoke:
             if attuale:
                 return _("Sottotitoli letti accesi; questo brano non ne ha.") if tracce else _("Sottotitoli letti accesi; valgono per i brani che ne hanno.")
             return _("Sottotitoli letti spenti; questo brano non ne ha.") if tracce else _("Sottotitoli letti spenti; valgono per i brani che ne hanno.")
@@ -9628,13 +9665,27 @@ class Finestra(wx.Frame):
             stato = _("Sottotitoli letti spenti")
         elif attuale <= len(sottotitoli):
             stato = _("Sottotitoli letti, traccia {traccia}").format(traccia=_descrivi_traccia(sottotitoli[attuale - 1], attuale - 1, len(sottotitoli)))
+        elif con_il_karaoke and attuale == len(sottotitoli) + 1:
+            stato = _("Testo del karaoke dal video")
         else:
             stato = _("Sottotitoli impressi")
-        if sottotitoli and con_gli_impressi:
+        tracce_offerte = plurale(len(sottotitoli), "{n} traccia", "{n} tracce") if sottotitoli else ""
+        if con_il_karaoke:
+            if sottotitoli and con_gli_impressi:
+                # Traduttori: tracce e' il numero delle tracce dei sottotitoli, come 2 tracce.
+                offerta = _("{tracce}, il testo del karaoke dal video e gli impressi").format(tracce=tracce_offerte)
+            elif sottotitoli:
+                # Traduttori: tracce e' il numero delle tracce dei sottotitoli, come 2 tracce.
+                offerta = _("{tracce} e il testo del karaoke dal video").format(tracce=tracce_offerte)
+            elif con_gli_impressi:
+                offerta = _("il testo del karaoke dal video e gli impressi")
+            else:
+                offerta = _("il testo del karaoke dal video")
+        elif sottotitoli and con_gli_impressi:
             # Traduttori: tracce e' il numero delle tracce dei sottotitoli, come 2 tracce.
-            offerta = _("{tracce} e gli impressi").format(tracce=plurale(len(sottotitoli), "{n} traccia", "{n} tracce"))
+            offerta = _("{tracce} e gli impressi").format(tracce=tracce_offerte)
         elif sottotitoli:
-            offerta = plurale(len(sottotitoli), "{n} traccia", "{n} tracce")
+            offerta = tracce_offerte
         else:
             offerta = _("gli impressi")
         # Traduttori: stato e' la scelta di adesso, come Sottotitoli impressi; offerta quelle oltre a spenti, come 2 tracce e gli impressi.
@@ -9642,8 +9693,8 @@ class Finestra(wx.Frame):
 
     def _comando_sottotitoli(self):
         """D (issue 38): i sottotitoli letti, la scelta fra quante."""
-        tracce, _passata, sottotitoli, con_gli_impressi, attuale, quante = self._posti_dei_sottotitoli()
-        self._riporta(self._frase_dei_sottotitoli(tracce, sottotitoli, con_gli_impressi, attuale, quante), "sottotitoli")
+        tracce, _passata, sottotitoli, con_gli_impressi, con_il_karaoke, attuale, quante = self._posti_dei_sottotitoli()
+        self._riporta(self._frase_dei_sottotitoli(tracce, sottotitoli, con_gli_impressi, con_il_karaoke, attuale, quante), "sottotitoli")
 
     def _comando_sottotitoli_precedenti(self):
         self._vai_ai_sottotitoli(lambda attuale, _quante: attuale - 1, -1)
@@ -9662,10 +9713,10 @@ class Finestra(wx.Frame):
         Ctrl e Alt con D spenti: scelta(attuale, quante) da' la nuova, che si
         ferma alla prima e all'ultima. Su un brano senza sottotitoli, e
         senza impressi da leggere, li accende o li spegne per i brani dopo."""
-        tracce, passata, sottotitoli, con_gli_impressi, attuale, quante = self._posti_dei_sottotitoli()
+        tracce, passata, sottotitoli, con_gli_impressi, con_il_karaoke, attuale, quante = self._posti_dei_sottotitoli()
         indice = max(0, min(quante - 1, scelta(attuale, quante)))
         if indice == attuale:
-            frase = self._frase_dei_sottotitoli(tracce, sottotitoli, con_gli_impressi, attuale, quante)
+            frase = self._frase_dei_sottotitoli(tracce, sottotitoli, con_gli_impressi, con_il_karaoke, attuale, quante)
             if indice == 0:
                 frase = _("È già la prima scelta. {frase}").format(frase=frase)
             elif indice == quante - 1:
@@ -9674,17 +9725,22 @@ class Finestra(wx.Frame):
                 frase = _("È già questa scelta. {frase}").format(frase=frase)
             self._riscontro("nessun_altro_brano", frase, "sottotitoli")
             return
-        if not sottotitoli and not con_gli_impressi:
+        if not sottotitoli and not con_gli_impressi and not con_il_karaoke:
             acceso = indice == 1
             self.impostazioni["impressi_scelti"] = False
             frase = (_("Sottotitoli letti accesi; questo brano non ne ha.") if tracce else _("Sottotitoli letti accesi.")) if acceso else _("Sottotitoli letti spenti.")
+        elif con_il_karaoke and indice == len(sottotitoli) + 1:
+            acceso, frase = True, self._scegli_il_karaoke_dal_video(tracce, _traccia_del_testo_salvato(tracce))
         elif indice == 0:
+            self._lascia_il_karaoke_dal_video()
             acceso, frase = False, _("Sottotitoli letti spenti.")
             self.impostazioni["impressi_scelti"] = False
             self.motore.scegli_traccia("sid", "no")
         elif indice <= len(sottotitoli):
+            self._lascia_il_karaoke_dal_video()
             acceso, frase = True, self._scegli_i_sottotitoli(tracce, sottotitoli[indice - 1], indice - 1, len(sottotitoli))
         else:
+            self._lascia_il_karaoke_dal_video()
             acceso, frase = True, self._scegli_gli_impressi(tracce, passata)
         self.impostazioni["sottotitoli"] = acceso
         self._salva_impostazioni()
@@ -9720,6 +9776,64 @@ class Finestra(wx.Frame):
                 frase += " " + _("È fatta di immagini, e il riconoscimento dei caratteri di Windows non c'è: non si può leggere.")
         self._aggiorna_la_lettura(tracce, scelta=traccia)
         return frase
+
+    def _scegli_il_karaoke_dal_video(self, tracce, salvato):
+        """Il testo del karaoke letto dal video, nel giro di D prima degli
+        impressi (3.28.0): il testo salvato nella cartella Testi, se c'e', come traccia
+        del karaoke, e il riconoscimento solo dove manca; altrimenti la
+        lettura al volo, col riconoscimento dei caratteri e l'archivio dei
+        testi. Vale per questo video; i video karaoke la scelgono da soli."""
+        self.impostazioni["sottotitoli"] = True
+        self._karaoke_scelto, self._karaoke_rifiutato = self.motore.in_corso, None
+        self._testo_superato()
+        if salvato is not None:
+            voce = testi_dei_video.voce(self.motore.in_corso)
+            self._statistiche.conta("testi_dei_video_ripresi")
+            self.motore.scegli_traccia("sid", str(salvato["id"]))
+            self._aggiorna_la_lettura(tracce, scelta=salvato)
+            if voce is not None and voce["completo"]:
+                return _("Testo del karaoke dal video, dalla cartella Testi: è già letto tutto, e il riconoscimento resta spento.")
+            return _("Testo del karaoke dal video, dalla cartella Testi; il riconoscimento legge i tratti che mancano.")
+        self.motore.scegli_traccia("sid", "no")
+        self._aggiorna_la_lettura(tracce, scelta=None)
+        return _("Testo del karaoke dal video, letto dal riconoscimento dei caratteri con le parole dell'archivio dei testi.")
+
+    def _lascia_il_karaoke_dal_video(self):
+        """D va su un'altra scelta: per questo video il testo del karaoke dal
+        video resta spento, anche se e' un karaoke."""
+        if self.motore.in_corso:
+            self._karaoke_scelto, self._karaoke_rifiutato = None, self.motore.in_corso
+
+    def _titolo_del_video(self):
+        """Il titolo del video in corso: quello del sito, o il nome del file
+        senza l'estensione."""
+        brano = self.coda.corrente
+        if brano is not None and brano.percorso == self.motore.in_corso and formati.e_indirizzo(brano.percorso):
+            return brano.nome_del_file
+        return os.path.splitext(os.path.basename(self.motore.in_corso or ""))[0]
+
+    def _karaoke_voluto(self, tracce):
+        """Vero se sul video in corso si legge il testo del karaoke dal video:
+        scelto con D, o da solo su un video che il titolo dice karaoke e che
+        non ha altri sottotitoli (Gabriele, 19 novembre 2026), se D non ha
+        scelto altro."""
+        percorso = self.motore.in_corso
+        if not percorso or not tracce or not tracce["video"]:
+            return False
+        if self._karaoke_scelto == percorso:
+            return True
+        if self._karaoke_rifiutato == percorso:
+            return False
+        nostre = (_traccia_della_passata(tracce), _traccia_del_testo_salvato(tracce))
+        altre = [t for t in tracce["sub"] if all(t is not n for n in nostre)]
+        return not altre and karaoke_dal_video.e_un_karaoke(self._titolo_del_video())
+
+    def _avviso_del_karaoke(self, frase, con_l_archivio):
+        """Dalla lettura del karaoke: com'e' andata con l'archivio dei testi."""
+        if self._chiusa:
+            return
+        self._statistiche.conta("karaoke_dall_archivio" if con_l_archivio else "karaoke_senza_archivio")
+        self.scrivi(frase)
 
     def _scegli_gli_impressi(self, tracce, passata):
         """I sottotitoli impressi nel video, in fondo al giro di Maiuscolo
@@ -9762,20 +9876,38 @@ class Finestra(wx.Frame):
         if self.impostazioni["sottotitoli"] and tracce and tracce["video"] and not self._chiusa:
             if scelta is _DALLE_TRACCE:
                 scelta = next((t for t in tracce["sub"] if t.get("selected")), None)
+            salvato = _traccia_del_testo_salvato(tracce)
             if scelta is not None and scelta.get("codec") in sottotitoli_ocr.CODEC_A_IMMAGINI:
                 voluta = ("immagini", ocr.lingua_per(scelta.get("lang")))
+            elif scelta is not None and salvato is not None and scelta.get("title") == salvato.get("title"):
+                # Il testo salvato del video: il riconoscimento legge solo i
+                # tratti che mancano, e niente se c'e' tutto (3.28.0).
+                voce = testi_dei_video.voce(self.motore.in_corso)
+                if voce is None or not voce["completo"]:
+                    voluta = ("karaoke", ocr.lingua_per(None), self.motore.in_corso)
+            elif scelta is None and self._karaoke_voluto(tracce):
+                voluta = ("karaoke", ocr.lingua_per(None), self.motore.in_corso)
             elif scelta is None and self.impostazioni["impressi_scelti"]:
                 voluta = ("impressi", ocr.lingua_per(None))
         if voluta is not None and (voluta[1] is None or not ocr.disponibile()):
             voluta = None
-        attuale = (self._lettura.tipo, self._lettura.lingua) if self._lettura is not None else None
+        attuale = None
+        if self._lettura is not None:
+            # La lettura del karaoke e' di un video: un video nuovo ne vuole una nuova.
+            attuale = (self._lettura.tipo, self._lettura.lingua) + ((self._lettura.percorso,) if self._lettura.tipo == "karaoke" else ())
         if voluta == attuale:
             return
         if self._lettura is not None:
             self._lettura.ferma()
             self._lettura = None
         self.motore.leggi_il_video(voluta is not None, oscura=voluta is not None and voluta[0] == "immagini")
-        if voluta is not None:
+        if voluta is not None and voluta[0] == "karaoke":
+            voce = testi_dei_video.voce(voluta[2])
+            self._statistiche.conta("letture_del_karaoke_dal_video")
+            self._lettura = karaoke_dal_video.LetturaDelKaraoke(self.motore, lambda testo: wx.CallAfter(self._sottotitolo, testo, False), voluta[1],
+                voluta[2], self._titolo_del_video(), lambda frase, con_l_archivio: wx.CallAfter(self._avviso_del_karaoke, frase, con_l_archivio),
+                guasto=lambda frase: wx.CallAfter(self._riscontro, "errore", frase), coperti=voce["coperti"] if voce is not None else ()).avvia()
+        elif voluta is not None:
             classe = sottotitoli_ocr.LetturaDelleImmagini if voluta[0] == "immagini" else sottotitoli_ocr.LetturaDegliImpressi
             self._lettura = classe(self.motore, lambda testo: wx.CallAfter(self._sottotitolo, testo), voluta[1],
                 guasto=lambda frase: wx.CallAfter(self._riscontro, "errore", frase)).avvia()
@@ -10166,6 +10298,14 @@ class Finestra(wx.Frame):
         o Registrazioni accanto ai dati (3.13.0)."""
         return self.impostazioni["cartella_registrazioni"] or registrazioni.cartella()
 
+    def _pulisci_i_testi_dei_video(self):
+        """Nel suo filo, all'avvio: via i testi dei video karaoke non
+        ascoltati da un anno, perche' la cartella Testi non cresca per sempre
+        (Gabriele, 3.28.0)."""
+        tolti = testi_dei_video.pulisci()
+        if tolti:
+            wx.CallAfter(self._statistiche.conta, "testi_dei_video_tolti", tolti)
+
     def _cartella_da_leggere(self):
         scelta = self.impostazioni["cartella_registrazioni"]
         if not scelta:
@@ -10208,6 +10348,8 @@ class Finestra(wx.Frame):
         self.impostazioni["cartella_registrazioni"] = scelta
         self._salva_impostazioni()
         self._statistiche.conta("cartelle_delle_registrazioni_cambiate")
+        # I testi dei video karaoke nuovi vanno nella cartella Testi di quella nuova.
+        testi_dei_video.imposta_la_cartella(self._cartella_delle_registrazioni())
         if genitore and genitore.IsShown() and hasattr(genitore, "aggiorna"):
             genitore.aggiorna("cartella_registrazioni", self._riga_dell_impostazione("cartella_registrazioni"))
         self._rinfresca_le_registrazioni()
@@ -15718,6 +15860,10 @@ class Finestra(wx.Frame):
         for lavoro in (self._lettura, self._passata, self._pulizia):
             if lavoro is not None:
                 lavoro.ferma()
+        if self._lettura is not None and self._lettura.tipo == "karaoke":
+            # Il testo del karaoke dal video si salva fermandosi: lo si aspetta,
+            # al piu' due secondi (3.28.0).
+            self._lettura.aspetta(2)
         # Anche i conti di Riconosci questo disco: la loro domanda non arriva piu'.
         self._conti_fermati.set()
         if self._video is not None:
