@@ -4,6 +4,8 @@ Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
 ## [3.27.0] - 2026-11-19
 
+Pubblicata il 19 novembre 2026, con l'installatore e lo zip: la settima release, che porta agli utenti tutto quello che è venuto dopo la 3.12.0, dalla cartella e dal formato delle registrazioni della 3.13.0 e della 3.15.0 al karaoke e ai sottotitoli con lo speaker, alla vista del karaoke a tutto schermo, all'attesa di Alt con R che segue la sorgente, a YouTube che risponde subito ai salti, fino alla console letta solo alla sintesi. Senza il passaggio da VirusTotal, come le release prima.
+
 - La lettura della console ha anche la scelta solo alla sintesi, senza il braille, chiesta da Gabriele nella issue 49. La lista della voce Lettura della console e i tasti della famiglia di F10 vanno ora da spenta, a solo al braille, a solo alla sintesi, al braille e alla sintesi. Dove vanno sottotitoli e karaoke la aveva già.
 - Le prove sono in tests/test_console_letta.py.
 
