@@ -1,3 +1,0 @@
-Collaudo di MeTeOra 3.26.25 e 3.27.0: solo le prove che vogliono te; il resto lo provano la suite e le prove automatiche.
-Premi Ctrl con F10 dal braille e sintesi: la console si legge solo alla sintesi, e NVDA dice le righe nuove con la voce, senza mandarle alla barra braille; Ctrl con F10 ancora, solo al braille.
-Se ti ricapita, ascoltando un file lungo dall'Iliadbox, che la lettura si interrompa: la console dice che si è interrotta e riprende dal punto, e il brano continua invece di passare al seguente.
