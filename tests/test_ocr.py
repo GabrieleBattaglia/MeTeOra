@@ -1,6 +1,7 @@
 # MeTeOra, le prove del riconoscimento dei caratteri e dei sottotitoli fatti di immagini (1.80.0).
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
 
+import threading
 import time
 
 import pytest
@@ -52,6 +53,40 @@ def test_parole_e_lingue(monkeypatch):
     assert not ocr.disponibile()
     monkeypatch.setattr(ocr, "lingue", lambda: [])
     assert ocr.lingua_per("ita") is None
+
+
+def test_un_ciclo_asyncio_per_filo_non_uno_per_lettura(monkeypatch):
+    """Issue 50: un ciclo nuovo a ogni lettura apriva su Windows una
+    connessione locale, e a decine di letture al secondo le porte finivano e
+    la lettura si bloccava per sempre. Ora ogni filo ha il suo ciclo, creato
+    alla prima lettura: due fili, duecento letture ciascuno, due cicli."""
+
+    class Riga:
+        text = "Ciao a tutti"
+
+    class Esito:
+        lines = (Riga(),)
+
+    class Motore:
+        async def recognize_async(self, bitmap):
+            return Esito()
+
+    monkeypatch.setattr(ocr, "_motore", lambda lingua: Motore())
+    monkeypatch.setattr(ocr, "_bitmap", lambda immagine: immagine)
+    creati = []
+    vero = ocr.asyncio.new_event_loop
+    monkeypatch.setattr(ocr.asyncio, "new_event_loop", lambda: creati.append(1) or vero())
+    letture = []
+
+    def lavora():
+        letture.extend(ocr.leggi(object(), "it-IT") for _volta in range(200))
+
+    for _filo in range(2):
+        filo = threading.Thread(target=lavora)
+        filo.start()
+        filo.join(10)
+    assert len(letture) == 400 and all(righe == ["Ciao a tutti"] for righe in letture)
+    assert len(creati) == 2
 
 
 @pytest.mark.skipif(not ocr.disponibile(), reason="il riconoscimento dei caratteri di Windows non c'e'")

@@ -1,6 +1,6 @@
 # MeTeOra, il riconoscimento dei caratteri: i sottotitoli a immagini e quelli impressi nel video, letti con Windows.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 04/10/2026: nasce con la 1.80.0, dalla tappa 10 (punti a e b), dopo il banco su Roma.
+# 04/10/2026: nasce con la 1.80.0, dalla tappa 10 (punti a e b), dopo il banco su Roma. Nella 3.27.1 un ciclo asyncio per filo, non uno per lettura (issue 50).
 
 """Il riconoscimento dei caratteri di Windows (Windows.Media.Ocr), dai pacchetti
 winrt di PyPI: legge le scritte in un'immagine, nelle lingue installate in
@@ -17,7 +17,10 @@ Due modi di preparare il testo, misurati sul banco del 4 ottobre 2026:
 Il riconoscimento si chiama da un filo a parte, mai da quello della finestra.
 Ogni filo ha i suoi motori: Windows rifiuta un secondo riconoscimento sullo
 stesso motore mentre il primo lavora, e la lettura al volo e la passata
-lavorano insieme (revisione della 1.80.0).
+lavorano insieme (revisione della 1.80.0). E ogni filo ha il suo ciclo
+asyncio, creato alla prima lettura: un ciclo nuovo a ogni lettura, su
+Windows, apre una connessione locale con se' stesso, e a decine di letture
+al secondo le porte finiscono e la lettura si blocca per sempre (issue 50).
 """
 
 import asyncio
@@ -128,8 +131,17 @@ def leggi(immagine, lingua):
     async def riconosci():
         return await motore.recognize_async(_bitmap(immagine))
 
-    esito = asyncio.run(riconosci())
+    esito = _ciclo().run_until_complete(riconosci())
     return [" ".join(riga.text.split()) for riga in esito.lines if riga.text.strip()]
+
+
+def _ciclo():
+    """Il ciclo asyncio del filo che chiama, creato la prima volta (issue 50).
+    Un ciclo non gira in due fili insieme: ogni filo ha il suo, come i motori."""
+    ciclo = getattr(_locale, "ciclo", None)
+    if ciclo is None or ciclo.is_closed():
+        ciclo = _locale.ciclo = asyncio.new_event_loop()
+    return ciclo
 
 
 def scritte_della_differenza(con, senza):

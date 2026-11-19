@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.27.1] - 2026-11-19
+
+- Il riconoscimento dei caratteri non si blocca più a ritmo alto, issue 50. A ogni lettura creava un ciclo asyncio nuovo, e su Windows ogni ciclo apre una connessione locale con sé stesso: a decine di letture al secondo le porte locali finivano e la lettura restava ferma per sempre, senza errori. È venuto fuori nella prova del testo dei video karaoke, con sei letture insieme: si fermavano tutte dopo un minuto e mezzo, con 5.423 connessioni in attesa di chiusura. Ora ogni filo ha il suo ciclo, creato alla prima lettura, e le connessioni in attesa restano fra una e sei. La passata dei sottotitoli impressi, con circa dieci letture al secondo, era sotto il limite ma non di molto.
+- Le prove sono in tests/test_ocr.py.
+
 ## [3.27.0] - 2026-11-19
 
 Pubblicata il 19 novembre 2026, con l'installatore e lo zip: la settima release, che porta agli utenti tutto quello che è venuto dopo la 3.12.0, dalla cartella e dal formato delle registrazioni della 3.13.0 e della 3.15.0 al karaoke e ai sottotitoli con lo speaker, alla vista del karaoke a tutto schermo, all'attesa di Alt con R che segue la sorgente, a YouTube che risponde subito ai salti, fino alla console letta solo alla sintesi. Senza il passaggio da VirusTotal, come le release prima.
