@@ -68,6 +68,41 @@ def test_l_abbinatore_dice_le_parole_dell_archivio():
     assert senza.abbina(30.4, "may be parted", "MAY BE PARTED") == "PARTED"
 
 
+TORN = """I thought I saw a man brought to life
+He was warm, he came around like he was dignified
+He showed me what it was to cry
+Well you couldn't be that man I adored
+Whisper words of wisdom, let it be"""
+
+
+def test_la_prima_parola_persa_si_ritrova():
+    # Collaudo della 3.28.2: la prima parola cambia colore appena comincia il
+    # canto, e in grigio l'OCR a volte non la legge; He showed me diventava
+    # showed me. Se mancano al piu' due parole, non dette da poco, la riga si
+    # dice dall'inizio; un pezzo piu' lungo e' una riga che il video spezza.
+    abbinatore = kv.Abbinatore(kv.Archivio(TORN), "Torn (Karaoke Version)")
+    assert abbinatore.abbina(22.4, "i thought i saw a man", "") == "I thought I saw a man" and abbinatore.posizione == 0
+    assert abbinatore.abbina(22.4, "brought to life", "") == "brought to life"
+    assert abbinatore.abbina(22.4, "he was warm he came around", "") == "He was warm, he came around"
+    assert abbinatore.abbina(22.4, "like he was dignified", "") == "like he was dignified"
+    assert abbinatore.abbina(33.0, "i adored", "") == "I adored"
+    assert abbinatore.abbina(33.5, "showed me", "") == "He showed me" and abbinatore.posizione == 19
+    # Le parole davanti dette da poco non si ridicono.
+    assert abbinatore.abbina(70.0, "whisper words", "") == "Whisper words"
+    assert abbinatore.abbina(70.4, "of wisdom let it be", "") == "of wisdom, let it be"
+
+
+def test_i_pezzi_di_una_strofa_si_salvano_in_ordine():
+    # Collaudo della 3.28.2: I adored, l'ultima riga, diventava ferma mezzo
+    # secondo prima delle altre, e nel testo salvato arrivava per prima.
+    gruppi = [(33.0, ["I adored"]), (33.48, ["He showed me", "what it was to cry"]), (33.9, ["Well you couldn't be that man"]),
+              (42.1, ["You don't seem to know"])]
+    assert kv.unisci_i_gruppi(gruppi, [[31], [18, 21], [25], [40]]) == [
+        (33.0, ["He showed me", "what it was to cry", "Well you couldn't be that man", "I adored"]), (42.1, ["You don't seem to know"])]
+    # Senza l'archivio l'ordine e' quello della lettura.
+    assert kv.unisci_i_gruppi(gruppi[:2], [[None], [None, None]]) == [(33.0, ["I adored", "He showed me", "what it was to cry"])]
+
+
 def test_le_righe_nuove_sullo_schermo():
     righe = kv.Righe()
     assert righe.nuove(0.0, ["Hello world line"]) == []

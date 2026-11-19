@@ -10670,3 +10670,83 @@ def test_il_testo_salvato_del_video(finestra, monkeypatch, suoni_annotati):
     _tasto(finestra, "d", maiuscolo=True)
     assert chiamate[-1] == ("sid", "1") and finestra._lettura.tipo == "karaoke"
     assert _ultima(finestra) == "Testo del karaoke dal video, dalla cartella Testi; il riconoscimento legge i tratti che mancano."
+
+
+def test_i_video_karaoke_dei_siti_si_chiedono_con_l_immagine(finestra, monkeypatch):
+    # 3.28.2, dal collaudo di Gabriele: con il video spento i siti davano solo
+    # l'audio, e il testo del karaoke dal video non aveva niente da leggere.
+    import ocr
+    import testi_dei_video
+
+    monkeypatch.setattr(ocr, "disponibile", lambda: True)
+    finestra.impostazioni["video"] = False
+    finestra.impostazioni["sottotitoli"] = True
+    karaoke = Brano("https://www.youtube.com/watch?v=abcdefghijk", titolo="Natalie Imbruglia - Torn (Karaoke Version)")
+    altro = Brano("https://www.youtube.com/watch?v=zzzzzzzzzzz", titolo="Un'intervista")
+    assert finestra._video_negli_indirizzi(karaoke) and not finestra._video_negli_indirizzi(altro) and not finestra._video_negli_indirizzi()
+    # Scelto con D su questo video, anche senza karaoke nel titolo; rifiutato con D, no.
+    finestra._karaoke_scelto = altro.percorso
+    assert finestra._video_negli_indirizzi(altro)
+    finestra._karaoke_scelto, finestra._karaoke_rifiutato = None, karaoke.percorso
+    assert not finestra._video_negli_indirizzi(karaoke)
+    finestra._karaoke_rifiutato = None
+    # Con il testo salvato completo basta l'audio; con i sottotitoli spenti, o senza riconoscimento, anche.
+    testi_dei_video.salva(karaoke.percorso, "Torn", 100.0, [(5.0, ["Riga"])], [(0.0, 100.0)])
+    assert not finestra._video_negli_indirizzi(karaoke)
+    testi_dei_video.salva(karaoke.percorso, "Torn", 300.0, [], [(0.0, 100.0)])
+    assert finestra._video_negli_indirizzi(karaoke)
+    finestra.impostazioni["sottotitoli"] = False
+    assert not finestra._video_negli_indirizzi(karaoke)
+    finestra.impostazioni["sottotitoli"] = True
+    monkeypatch.setattr(ocr, "disponibile", lambda: False)
+    assert not finestra._video_negli_indirizzi(karaoke)
+    # Con il video acceso, sempre, come prima.
+    finestra.impostazioni["video"] = True
+    assert finestra._video_negli_indirizzi(altro) and finestra._video_negli_indirizzi()
+
+
+def test_il_karaoke_dal_video_chiede_l_immagine_a_youtube(finestra, monkeypatch, suoni_annotati):
+    # 3.28.5, Gabriele: col video spento un video di YouTube che il titolo
+    # non dice karaoke arriva col solo audio; scegliendo con D il testo del
+    # karaoke dal video, l'immagine si chiede e il brano riparte dal punto.
+    import indirizzi
+
+    stato, _chiamate, _video_letto = _karaoke_finto(finestra, monkeypatch, "Un video qualunque")
+    stato["tracce"] = _tracce(video=False)
+    finestra.impostazioni["video"] = False
+    chiesti, suonati = [], []
+    monkeypatch.setattr(modulo, "indirizzi_in_disparte", lambda lavoro, al_termine: al_termine(lavoro()))
+    monkeypatch.setattr(indirizzi, "risolvi", lambda indirizzo, video=False: chiesti.append((indirizzo, video)) or indirizzi.Pagina(indirizzo, None))
+    monkeypatch.setattr(finestra.motore, "suona", lambda percorso, sottobrano=None, inizio=None, in_pausa=False, **altri: suonati.append(
+        (percorso, inizio, in_pausa)))
+    monkeypatch.setattr(type(finestra.motore), "posizione", property(lambda _self: 42.5))
+    finestra._aggiorna_il_video()
+    assert finestra._lettura is None
+    _tasto(finestra, "d")
+    assert _ultima(finestra) == "Sottotitoli letti spenti; scelta 1 di 2: spenti, il testo del karaoke dal video."
+    _tasto(finestra, "d", maiuscolo=True)
+    assert _ultima(finestra) == "Testo del karaoke dal video: chiedo al sito anche l'immagine, che serve a leggerlo, e il brano riparte da qui fra qualche secondo."
+    wx.Yield()
+    assert chiesti == [(stato["in_corso"], True)] and suonati == [(stato["in_corso"], 42.5, False)]
+    assert finestra._statistiche.dati["conti"]["immagini_chieste_per_il_karaoke"] == 1 and finestra._video_negli_indirizzi(finestra.coda.corrente)
+    # Il brano ripartito ha l'immagine: la lettura comincia.
+    stato["tracce"] = _tracce()
+    finestra._aggiorna_il_video()
+    assert finestra._lettura.tipo == "karaoke" and finestra._lettura.percorso == stato["in_corso"]
+    # Un sito che puo' essere solo audio, come SoundCloud, non la offre.
+    stato["tracce"] = _tracce(video=False)
+    stato["in_corso"] = "https://soundcloud.com/qualcuno/canzone"
+    finestra.coda.corrente = Brano(stato["in_corso"], titolo="Canzone")
+    assert finestra._posti_dei_sottotitoli()[4] is False
+    # Con lo speaker l'immagine non serve, e il testo salvato resta una scelta di D.
+    import testi_dei_video
+
+    stato["in_corso"] = "https://www.youtube.com/watch?v=qqqqqqqqqqq"
+    finestra.coda.corrente = Brano(stato["in_corso"], titolo="Altro video")
+    monkeypatch.setattr(type(finestra.motore), "lontano", property(lambda _self: object()))
+    assert finestra._posti_dei_sottotitoli()[4] is False
+    testi_dei_video.salva(stato["in_corso"], "Altro video", 100.0, [(5.0, ["Riga"])], [(0.0, 40.0)])
+    stato["tracce"] = _tracce(video=False, sottotitoli=1)
+    stato["tracce"]["sub"][0]["title"] = "Testo del karaoke, dal video"
+    posti = finestra._posti_dei_sottotitoli()
+    assert posti[4] is True and posti[2] == [] and posti[6] == 2

@@ -33,6 +33,7 @@ import time
 import urllib.parse
 import urllib.request
 
+import formati
 import ocr
 import testi_dei_video
 import version
@@ -57,6 +58,13 @@ LETTERE_BREVI = 12
 # Un pezzo detto da meno di tanti secondi non si ridice; se va oltre, si
 # dicono solo le parole nuove, come nei video che scrivono una parola alla volta.
 RECENTE = 8.0
+# Quante parole possono mancare davanti a una riga letta perche' la si dica
+# dall'inizio della riga dell'archivio (3.28.3).
+PAROLE_PERSE = 2
+# I pezzi di una strofa letti a meno di tanto l'uno dall'altro, nel testo
+# salvato, stanno insieme, nell'ordine dell'archivio (3.28.3): una riga che
+# diventa ferma mezzo secondo prima delle altre arrivava per prima.
+UNIONE = 1.0
 # Nei primi secondi una riga contenuta nel titolo del video e' il cartello
 # iniziale, con cantante e canzone: non si dice come testo.
 CARTELLO = 25.0
@@ -110,6 +118,14 @@ def e_un_karaoke(titolo):
     return "karaok" in (titolo or "").lower()
 
 
+def immagine_possibile(percorso):
+    """Vero se un indirizzo arrivato con il solo audio, come col video
+    spento, ha un'immagine da chiedere per leggerne il testo: i video di
+    YouTube, dove stanno i karaoke (3.28.5). Gli altri siti possono essere
+    solo audio, come SoundCloud, e non si sa prima di chiedere."""
+    return formati.e_indirizzo(percorso) and (testi_dei_video.chiave(percorso) or "").startswith("youtube-")
+
+
 def pulisci_il_titolo(titolo):
     """Il titolo senza le parole del karaoke: Natalie Imbruglia Torn."""
     return " ".join(_RUMORE.sub(" ", titolo or "").replace(" - ", " ").replace("-", " ").split())
@@ -158,6 +174,12 @@ class Archivio:
                 self.parole.extend((p, len(self.pezzi) - 1) for p in norm(pezzo).split())
         self.normali = [p for p, _pezzo in self.parole]
         self.righe = [norm(r) for r in testo.splitlines() if norm(r)]
+        # Per ogni parola, la prima della sua riga (3.28.3).
+        self.inizio_della_riga = []
+        for posizione, (_parola, pezzo) in enumerate(self.parole):
+            riga = self.pezzi[pezzo][1]
+            primo = posizione if posizione == 0 or self.pezzi[self.parole[posizione - 1][1]][1] != riga else self.inizio_della_riga[-1]
+            self.inizio_della_riga.append(primo)
 
     def testo(self, inizio, fine):
         return " ".join(p for p, _riga in self.pezzi[self.parole[inizio][1]:self.parole[fine - 1][1] + 1])
@@ -237,6 +259,26 @@ def nome_del_candidato(candidato):
     return f"{artista} - {canzone}".strip(" -")
 
 
+def unisci_i_gruppi(gruppi, posizioni):
+    """I gruppi (istante, [testi]) da salvare, con quelli letti a meno di
+    UNIONE secondi dal precedente uniti a lui, all'istante del primo; dove
+    tutte le posizioni nell'archivio sono note, le righe in quell'ordine.
+    posizioni ha, per ogni gruppo, la posizione di ogni testo, o None."""
+    uniti = []
+    for (istante, testi), dove in zip(gruppi, posizioni, strict=True):
+        if uniti and istante - uniti[-1][2] <= UNIONE:
+            uniti[-1][1].extend(zip(dove, testi, strict=True))
+            uniti[-1][2] = istante
+        else:
+            uniti.append([istante, list(zip(dove, testi, strict=True)), istante])
+    risultato = []
+    for istante, coppie, _ultimo in uniti:
+        if all(d is not None for d, _testo in coppie):
+            coppie = sorted(coppie, key=lambda coppia: coppia[0])
+        risultato.append((istante, [testo for _d, testo in coppie]))
+    return risultato
+
+
 class Righe:
     """Le righe nuove sullo schermo, lettura dopo lettura: una riga si propone
     quando compare in due letture di fila e non e' gia' sullo schermo. Sullo
@@ -285,6 +327,9 @@ class Abbinatore:
         self._puntatore = 0
         self._dette = []
         self._ultima = {}
+        # Dove comincia nell'archivio l'ultimo testo dato da abbina, o None
+        # senza archivio: serve a mettere in ordine il testo salvato.
+        self.posizione = None
 
     def abbina(self, istante, normale, letta):
         """Il testo da dire per la proposta, o None se si scarta."""
@@ -303,8 +348,25 @@ class Abbinatore:
             if fine <= max(sopra):
                 return None
             inizio = max(inizio, max(sopra))
+        else:
+            inizio = self._dall_inizio_della_riga(istante, inizio)
         self._dette.append((istante, inizio, fine))
+        self.posizione = inizio
         return self.archivio.testo(inizio, fine)
+
+    def _dall_inizio_della_riga(self, istante, inizio):
+        """La prima parola di una riga cambia colore appena comincia il canto,
+        e in grigio a volte l'OCR non la legge: He showed me diventava showed
+        me (collaudo della 3.28.2). Se alla riga dell'archivio mancano davanti
+        al piu' PAROLE_PERSE parole, non dette negli ultimi RECENTE secondi, si
+        dice dall'inizio. Un pezzo di riga piu' lungo e' una riga che il video
+        spezza in due, e la sua prima parte si dice da se'."""
+        primo = self.archivio.inizio_della_riga[inizio]
+        if not 0 < inizio - primo <= PAROLE_PERSE:
+            return inizio
+        if any(istante - tempo <= RECENTE and i < inizio and f > primo for tempo, i, f in self._dette):
+            return inizio
+        return primo
 
     def _senza_archivio(self, istante, normale, letta):
         """La riga come letta; se cresce da una appena detta, solo le parole nuove."""
@@ -341,6 +403,8 @@ class LetturaDelKaraoke(_Lettura):
         # gruppi detti (istante, [testi]), com'e' andata con l'archivio.
         self.tratti = []
         self.gruppi = []
+        # Per ogni gruppo, dove comincia nell'archivio ogni suo testo, o None.
+        self._posizioni = []
         self.righe_dette = 0
         self.esito_dell_archivio = None
         self.archivio_usato = ""
@@ -417,7 +481,8 @@ class LetturaDelKaraoke(_Lettura):
         if not self.gruppi:
             return
         try:
-            esito = self._salva(self.percorso, self.titolo, self._motore.durata or 0, list(self.gruppi), tratti, self.archivio_usato)
+            gruppi = unisci_i_gruppi(self.gruppi, self._posizioni)
+            esito = self._salva(self.percorso, self.titolo, self._motore.durata or 0, gruppi, tratti, self.archivio_usato)
         except Exception as errore:  # noqa: BLE001 - un testo che non si salva non ferma la lettura
             self._giro_guasto(errore)
             return
@@ -431,10 +496,13 @@ class LetturaDelKaraoke(_Lettura):
             if not testo:
                 continue
             dire.append(testo)
+            posizione = abbinatore.posizione if abbinatore.archivio is not None else None
             if self.gruppi and abs(self.gruppi[-1][0] - istante) < 0.01:
                 self.gruppi[-1][1].append(testo)
+                self._posizioni[-1].append(posizione)
             else:
                 self.gruppi.append((istante, [testo]))
+                self._posizioni.append([posizione])
         if dire and not self._fermo.is_set():
             self.righe_dette += len(dire)
             self._dici("\n".join(dire))

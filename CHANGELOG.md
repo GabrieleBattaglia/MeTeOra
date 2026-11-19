@@ -2,6 +2,29 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.28.5] - 2026-11-19
+
+- Il testo del karaoke dal video si sceglie con D anche su un video di YouTube arrivato con il solo audio, chiesto da Gabriele. Con il video spento un video il cui titolo non dice karaoke arriva senza immagine, e D non offriva la lettura del suo testo. Ora la offre, e scegliendola MeTeOra chiede al sito anche l'immagine: quando arriva, il brano riparte dal punto in cui era, e in pausa se lo era, e la lettura comincia; la console lo dice. Vale per YouTube, dove stanno i karaoke: gli altri siti possono essere solo audio, come SoundCloud. Con lo speaker l'immagine non si chiede, perché lo speaker non dà i fotogrammi.
+- Il testo salvato di un video è sempre una scelta di D, anche senza immagine: con lo speaker arrivava da solo con i sottotitoli accesi, ma D non lo nominava e non lo sceglieva.
+- Nelle statistiche, i video karaoke arrivati senza immagine e ripresi con l'immagine per leggerne il testo.
+- Le prove sono in tests/test_finestra.py; sul vero, Torn di Sing King chiesto a YouTube con l'immagine, senza finestra: fotogrammi a 1920 per 1080 e le strofe dette con le parole dell'archivio.
+
+## [3.28.4] - 2026-11-19
+
+- Il testo dei video karaoke non perde più la prima parola delle righe. Nella prova sullo speaker, con il testo di Torn letto al collaudo, alcune righe arrivavano senza la prima parola, come showed me invece di He showed me: nei karaoke la prima parola cambia colore appena comincia il canto, e in grigio il riconoscimento a volte non la legge. Ora, se alla riga dell'archivio mancano davanti una o due parole che non sono state dette da poco, la riga si dice dall'inizio. Sul banco, con lo stesso video, sono tornate intere tre righe: He showed me, But you crawled beneath e Our conversation has run dry; nella seconda strofa anche I'm wide awake.
+- Nel testo salvato le strofe sono in ordine. Una riga che diventa ferma mezzo secondo prima delle altre, come I adored, l'ultima della strofa, si diceva per prima, e così restava nel testo salvato. Ora i pezzi di una strofa letti a meno di un secondo l'uno dall'altro si salvano insieme, nell'ordine dell'archivio, e al riascolto la strofa arriva intera e in ordine. Un salvataggio di metà lettura con solo un pezzo della strofa viene sostituito da quello completo.
+- Le prove sono in tests/test_karaoke_dal_video.py e tests/test_testi_dei_video.py.
+
+## [3.28.3] - 2026-11-19
+
+- Con lo speaker Cast arriva anche il testo salvato di un video karaoke di un sito. Dal collaudo di Gabriele: riascoltando allo speaker un video di YouTube già letto, il testo non arrivava. Allo speaker, per un brano di un sito, MeTeOra seguiva solo i sottotitoli del sito, e la cartella Testi la guardava solo per i file del disco. Ora un brano di un sito senza sottotitoli suoi ha il suo testo salvato come traccia del karaoke, dal video, anche quando il flusso scaduto si rinnova passando allo speaker.
+- Le prove sono in tests/test_motore.py.
+
+## [3.28.2] - 2026-11-19
+
+- Il testo dei video karaoke dei siti funziona anche con il video spento. Dal collaudo di Gabriele: con il video spento MeTeOra chiedeva ai siti, come YouTube, solo l'audio, che pesa meno, e senza l'immagine il riconoscimento non aveva niente da leggere; D diceva che il brano non aveva sottotitoli. Ora un video karaoke, con i sottotitoli letti accesi, si chiede con l'immagine anche a video spento, e così il video su cui scegli il testo del karaoke con D; nessuna finestra si apre, e l'immagine si decodifica solo mentre la lettura legge. Se il testo salvato del video è già completo, o suona lo speaker Cast, che non dà i fotogrammi, basta l'audio, come prima.
+- Le prove sono in tests/test_finestra.py.
+
 ## [3.28.1] - 2026-11-19
 
 - Le statistiche del testo dei video karaoke si completano, chiesto da Gabriele. Nella sezione del video, i testi della cartella Testi salvati la prima volta e quelli completati, insieme ai ripresi e ai tolti dopo un anno; le righe dette dai testi salvati, senza il riconoscimento; e il perché delle letture senza il testo dell'archivio: la canzone non trovata, l'archivio che non risponde, i testi trovati che non erano la canzone. Fra i record, il testo più lungo letto da un video karaoke, con le sue righe e il titolo del video.

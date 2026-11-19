@@ -1783,6 +1783,51 @@ def test_i_sottotitoli_dei_siti_con_lo_speaker(crea, avvisi, monkeypatch):
     m.usa_il_lontano(None)
 
 
+def test_il_testo_salvato_dei_video_karaoke_con_lo_speaker(crea, avvisi, monkeypatch):
+    # 3.28.3, dal collaudo di Gabriele: un video karaoke di un sito, gia'
+    # letto, allo speaker non aveva il suo testo. Ora, senza sottotitoli del
+    # sito, il testo salvato nella cartella Testi si segue come il karaoke;
+    # e anche dopo il rinnovo del flusso, se quello nuovo non ne ha.
+    import indirizzi
+    import testi_dei_video
+
+    pagina = "https://www.youtube.com/watch?v=karaoke0001"
+    testi_dei_video.salva(pagina, "Torn (Karaoke)", 100.0, [(1.0, ["Prima riga", "Seconda riga"]), (5.0, ["Terza riga"])], [(0.0, 100.0)])
+    indirizzi._tieni(pagina, False, indirizzi.Flusso("https://a/audio.webm"))
+    detti = []
+    m = crea(ai_sottotitoli=detti.append, al_caricamento=avvisi("al_caricamento"))
+    lontano = _LontanoFinto()
+    lontano.posizione = 0.0
+    m.usa_il_lontano(lontano)
+    m.suona(pagina)
+    assert _aspetta(lambda: (m.tracce() or {}).get("sub"))
+    assert m.tracce()["sub"][0]["title"] == "Testo del karaoke, dal video" and m._ombra is None
+    m.scegli_traccia("sid", "1")
+    lontano.posizione = 1.5
+    assert _aspetta(lambda: detti == ["Prima riga\nSeconda riga"])
+    lontano.posizione = 5.2
+    assert _aspetta(lambda: detti[-1] == "Terza riga")
+    m.stop()
+    # Il flusso scaduto, rinnovato dal convertitore senza sottotitoli: il testo salvato arriva lo stesso.
+    with indirizzi._flussi_blocco:
+        flusso, _scadenza, video = indirizzi._flussi[pagina]
+        indirizzi._flussi[pagina] = (flusso, time.monotonic() - 1.0, video)
+
+    def risolvi(indirizzo, video=False):
+        flusso = indirizzi.Flusso("https://a/nuovo.webm")
+        indirizzi._tieni(indirizzo, video, flusso)
+        return indirizzi.Pagina(indirizzo, None, flusso=flusso)
+
+    monkeypatch.setattr(indirizzi, "risolvi", risolvi)
+    m.suona(pagina)
+    convertitore = threading.Thread(target=modulo._flusso_per_il_convertitore, args=(pagina,))
+    convertitore.start()
+    assert _aspetta(lambda: ((m.tracce() or {}).get("sub") or [{}])[0].get("title") == "Testo del karaoke, dal video")
+    convertitore.join(5)
+    m.stop()
+    m.usa_il_lontano(None)
+
+
 def test_i_sottotitoli_dei_siti_con_lo_speaker_arrivano_una_traccia_alla_volta(crea, avvisi, monkeypatch):
     # Revisione del 15 novembre 2026: la prima traccia, nella lingua di
     # MeTeOra, quella che la finestra sceglie, non aspetta le altre, che

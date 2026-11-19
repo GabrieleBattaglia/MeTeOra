@@ -6370,7 +6370,7 @@ class Finestra(wx.Frame):
             self._prepara_i_midi(lambda: self._suona(pl, brano, evento, sottobrano, inizio, sfuma_lo_stesso))
             return
         self._metti_il_diretto(brano)
-        if formati.e_indirizzo(brano.percorso) and indirizzi.pronto(brano.percorso, self._video_negli_indirizzi()) is None:
+        if formati.e_indirizzo(brano.percorso) and indirizzi.pronto(brano.percorso, self._video_negli_indirizzi(brano)) is None:
             self._trova_il_flusso(pl, brano, evento, sottobrano, inizio, sfuma_lo_stesso)
             return
         # Un flusso atteso intanto non suona piu': ha vinto questo brano.
@@ -6882,7 +6882,7 @@ class Finestra(wx.Frame):
             # Senza banco il MIDI non si prepara: a fine brano lo chiede _suona.
             return
         self._metti_il_diretto(brano)
-        if formati.e_indirizzo(brano.percorso) and indirizzi.pronto(brano.percorso, self._video_negli_indirizzi()) is None:
+        if formati.e_indirizzo(brano.percorso) and indirizzi.pronto(brano.percorso, self._video_negli_indirizzi(brano)) is None:
             # Il flusso si chiede adesso: se arriva in tempo, il brano si prepara (3.2.0).
             self._anticipa_il_flusso(brano, prepara=True)
             return
@@ -9653,7 +9653,10 @@ class Finestra(wx.Frame):
         salvato = _traccia_del_testo_salvato(tracce)
         sottotitoli = [t for t in (tracce["sub"] if tracce else []) if t is not passata and t is not salvato]
         con_gli_impressi = bool(tracce and tracce["video"] and (passata is not None or ocr.disponibile()))
-        con_il_karaoke = bool(tracce and tracce["video"] and (salvato is not None or ocr.disponibile()))
+        # Il testo salvato si sceglie sempre, anche senza immagine, come con
+        # lo speaker; la lettura vuole l'immagine, o un video di YouTube
+        # arrivato col solo audio, che la chiede scegliendola (3.28.5).
+        con_il_karaoke = bool(tracce and (salvato is not None or (ocr.disponibile() and (tracce["video"] or self._immagine_da_chiedere(tracce)))))
         if not sottotitoli and not con_gli_impressi and not con_il_karaoke:
             return tracce, passata, sottotitoli, False, False, 1 if self.impostazioni["sottotitoli"] else 0, 2
         quante = 1 + len(sottotitoli) + con_gli_impressi + con_il_karaoke
@@ -9795,20 +9798,70 @@ class Finestra(wx.Frame):
         del karaoke, e il riconoscimento solo dove manca; altrimenti la
         lettura al volo, col riconoscimento dei caratteri e l'archivio dei
         testi. Vale per questo video; i video karaoke la scelgono da soli."""
+        percorso = self.motore.in_corso
         self.impostazioni["sottotitoli"] = True
-        self._karaoke_scelto, self._karaoke_rifiutato = self.motore.in_corso, None
+        self._karaoke_scelto, self._karaoke_rifiutato = percorso, None
         self._testo_superato()
+        voce = testi_dei_video.voce(percorso)
+        completo = voce is not None and voce["completo"]
+        # Un video di YouTube arrivato col solo audio: l'immagine si chiede,
+        # e il brano riparte dal punto (3.28.5).
+        chiedi = not completo and ocr.disponibile() and self._immagine_da_chiedere(tracce)
+        if chiedi:
+            self._chiedi_l_immagine(percorso)
         if salvato is not None:
-            voce = testi_dei_video.voce(self.motore.in_corso)
             self._statistiche.conta("testi_dei_video_ripresi")
             self.motore.scegli_traccia("sid", str(salvato["id"]))
             self._aggiorna_la_lettura(tracce, scelta=salvato)
-            if voce is not None and voce["completo"]:
+            if completo:
                 return _("Testo del karaoke dal video, dalla cartella Testi: è già letto tutto, e il riconoscimento resta spento.")
+            if chiedi:
+                return _("Testo del karaoke dal video, dalla cartella Testi; per i tratti che mancano chiedo al sito anche l'immagine, "
+                         "e il brano riparte da qui fra qualche secondo.")
+            if not tracce["video"]:
+                return _("Testo del karaoke dal video, dalla cartella Testi; i tratti che mancano non si leggono, perché qui non c'è l'immagine.")
             return _("Testo del karaoke dal video, dalla cartella Testi; il riconoscimento legge i tratti che mancano.")
         self.motore.scegli_traccia("sid", "no")
         self._aggiorna_la_lettura(tracce, scelta=None)
+        if chiedi:
+            return _("Testo del karaoke dal video: chiedo al sito anche l'immagine, che serve a leggerlo, e il brano riparte da qui fra qualche secondo.")
         return _("Testo del karaoke dal video, letto dal riconoscimento dei caratteri con le parole dell'archivio dei testi.")
+
+    def _immagine_da_chiedere(self, tracce):
+        """Vero se il brano in corso e' un video di YouTube arrivato col solo
+        audio, come col video spento, e suona sul PC: la sua immagine si
+        puo' chiedere per leggerne il testo (3.28.5). Lo speaker non da' i
+        fotogrammi, e l'immagine non servirebbe."""
+        return bool(tracce and not tracce["video"] and self.motore.lontano is None and karaoke_dal_video.immagine_possibile(self.motore.in_corso))
+
+    def _chiedi_l_immagine(self, percorso):
+        """In disparte, il flusso del video con l'immagine: quando arriva il
+        brano riparte da dove era (3.28.5)."""
+        self._statistiche.conta("immagini_chieste_per_il_karaoke")
+
+        def lavoro():
+            try:
+                return indirizzi.risolvi(percorso, True)
+            except indirizzi.ErroreIndirizzo as e:
+                return e
+
+        indirizzi_in_disparte(lavoro, lambda esito: wx.CallAfter(self._immagine_arrivata, percorso, esito))
+
+    def _immagine_arrivata(self, percorso, esito):
+        """Il flusso con l'immagine e' arrivato: se suona ancora lo stesso
+        video, e il testo del karaoke dal video e' ancora la scelta, il brano
+        riparte dal punto in cui era, e in pausa se lo era, come passando
+        allo speaker; la lettura parte quando il motore ha le tracce."""
+        if self._chiusa or self.motore.in_corso != percorso or self._karaoke_scelto != percorso:
+            return
+        if isinstance(esito, Exception):
+            # Traduttori: nome e' il titolo del video; errore il motivo, come detto da yt-dlp.
+            self._riscontro("errore", _("Il sito non dà l'immagine di {nome}, e il testo del karaoke dal video non si può leggere: {errore}").format(
+                nome=self._titolo_del_video(), errore=esito))
+            return
+        posizione, in_pausa = self.motore.posizione, self.motore.in_pausa
+        self._uscente = self._preparato = None
+        self.motore.suona(percorso, inizio=posizione, in_pausa=in_pausa)
 
     def _lascia_il_karaoke_dal_video(self):
         """D va su un'altra scelta: per questo video il testo del karaoke dal
@@ -9830,11 +9883,12 @@ class Finestra(wx.Frame):
         non ha altri sottotitoli (Gabriele, 19 novembre 2026), se D non ha
         scelto altro."""
         percorso = self.motore.in_corso
-        if not percorso or not tracce or not tracce["video"]:
+        if not percorso or not tracce:
             return False
+        # Scelto con D vale anche mentre l'immagine e' in arrivo (3.28.5).
         if self._karaoke_scelto == percorso:
             return True
-        if self._karaoke_rifiutato == percorso:
+        if not tracce["video"] or self._karaoke_rifiutato == percorso:
             return False
         nostre = (_traccia_della_passata(tracce), _traccia_del_testo_salvato(tracce))
         altre = [t for t in tracce["sub"] if all(t is not n for n in nostre)]
@@ -11731,10 +11785,27 @@ class Finestra(wx.Frame):
 
     # Gli indirizzi in rete, tappa 19 b (3.2.0, issue 40).
 
-    def _video_negli_indirizzi(self):
+    def _video_negli_indirizzi(self, brano=None):
         """Il video dei siti si chiede solo con il video acceso: spento, basta
-        l'audio, che pesa molto meno."""
-        return bool(self.impostazioni["video"])
+        l'audio, che pesa molto meno. Ma il testo del karaoke dal video vuole
+        l'immagine anche a video spento (3.28.2, dal collaudo di Gabriele: col
+        solo audio non c'era niente da leggere): per il video su cui D l'ha
+        scelto, e per i video karaoke con i sottotitoli letti accesi, se il
+        riconoscimento c'e', il testo salvato non e' gia' completo e non
+        suona uno speaker, che i fotogrammi non li da'. L'immagine non apre
+        nessuna finestra: libmpv la decodifica solo mentre la lettura legge."""
+        if self.impostazioni["video"]:
+            return True
+        if brano is None or not formati.e_indirizzo(brano.percorso) or self.motore.lontano is not None:
+            return False
+        if self._karaoke_scelto == brano.percorso:
+            return True
+        if self._karaoke_rifiutato == brano.percorso or not self.impostazioni["sottotitoli"]:
+            return False
+        if not karaoke_dal_video.e_un_karaoke(brano.nome_del_file) or not ocr.disponibile():
+            return False
+        voce = testi_dei_video.voce(brano.percorso)
+        return voce is None or not voce["completo"]
 
     def _nome_in_corso(self):
         """Il nome del file che suona o, per un indirizzo, il suo titolo."""
@@ -12284,7 +12355,7 @@ class Finestra(wx.Frame):
         self._controlla_ytdlp()
         self._statistiche.conta("flussi_chiesti")
         self.scrivi(_("Apro {nome}, da {sito}.").format(nome=brano.nome_del_file, sito=indirizzi.sito(brano.percorso)), "indirizzi")
-        video = self._video_negli_indirizzi()
+        video = self._video_negli_indirizzi(brano)
 
         def lavoro():
             try:
@@ -12335,7 +12406,7 @@ class Finestra(wx.Frame):
     def _anticipa_il_flusso(self, brano, prepara=False):
         """Il flusso di un brano che suonera' dopo, chiesto in disparte; con
         prepara, arrivato in tempo, il brano si prepara per la dissolvenza."""
-        video = self._video_negli_indirizzi()
+        video = self._video_negli_indirizzi(brano)
         if brano.percorso in self._flussi_in_anticipo or not indirizzi.ytdlp_presente() or indirizzi.pronto(brano.percorso, video) is not None:
             return
         self._flussi_in_anticipo.add(brano.percorso)
@@ -15418,7 +15489,7 @@ class Finestra(wx.Frame):
         if indirizzi.pronto(brano.percorso) is None and not indirizzi.ytdlp_presente():
             self._riscontro_dopo("errore", _("{nome}, che suonava l'ultima volta, è un indirizzo in rete, e senza yt-dlp non si apre.").format(nome=brano.nome_del_file))
             return
-        video = self._video_negli_indirizzi()
+        video = self._video_negli_indirizzi(brano)
         self._controlla_ytdlp()
         self.scrivi(_("Apro {nome}, da {sito}.").format(nome=brano.nome_del_file, sito=indirizzi.sito(brano.percorso)), "indirizzi")
 

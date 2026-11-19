@@ -222,10 +222,13 @@ def salva(percorso, titolo, durata, gruppi, tratti, archivio=""):
         tutti = {istante: list(righe_del_gruppo) for istante, righe_del_gruppo in vecchi}
         for istante, righe_del_gruppo in gruppi:
             istante = round(float(istante), 2)
-            # Lo stesso gruppo gia' salvato, a un passo di distanza, non si ripete.
-            if any(abs(istante - altro) < 0.5 and tutti[altro] == list(righe_del_gruppo) for altro in tutti):
-                continue
-            tutti.setdefault(istante, []).extend(righe_del_gruppo)
+            # Lo stesso gruppo gia' salvato, a un passo di distanza, si
+            # sostituisce: un salvataggio di prima puo' averne avuto solo una
+            # parte, che la lettura poi ha completato (3.28.3).
+            vicino = next((altro for altro in tutti if abs(istante - altro) < 0.5), None)
+            if vicino is not None:
+                del tutti[vicino]
+            tutti[istante] = list(righe_del_gruppo)
         ordinati = sorted(tutti.items())
         quante = sum(len(r) for _istante, r in ordinati)
         durata_vera = round(float(durata or prima.get("durata") or 0), 1)

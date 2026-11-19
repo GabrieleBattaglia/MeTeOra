@@ -54,6 +54,14 @@ def test_salva_unisce_e_diventa_karaoke():
     assert testi_dei_video.salva(URL, "x", 1, [], []) is None
 
 
+def test_un_gruppo_completato_sostituisce_quello_salvato_a_meta():
+    # 3.28.3: un salvataggio a meta' lettura puo' avere solo un pezzo della
+    # strofa; quello dopo, con la strofa intera, lo sostituisce.
+    testi_dei_video.salva(URL, "Torn", 100.0, [(33.0, ["I adored"])], [(0.0, 34.0)])
+    testi_dei_video.salva(URL, "Torn", 100.0, [(33.0, ["He showed me", "I adored"]), (42.1, ["Altro"])], [(0.0, 43.0)])
+    assert [(r.inizio, r.testo) for r in testi_dei_video.righe(URL)] == [(33.0, "He showed me"), (33.0, "I adored"), (42.1, "Altro")]
+
+
 def test_la_pulizia_dopo_un_anno(tmp_path):
     testi_dei_video.salva(URL, "Vecchio", 100.0, [(5.0, ["Riga"])], [(0.0, 100.0)])
     nuovo = "https://www.youtube.com/watch?v=abcdefghijk"

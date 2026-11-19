@@ -1215,7 +1215,9 @@ class Motore:
         accanto (3.19.0). Un brano di un sito con i sottotitoli, come un video
         di YouTube, va a un filo che li scarica una volta e li segue come il
         karaoke: l'ombra apriva il flusso una terza volta, e ne scaricava
-        tutto l'audio a raffica (Gabriele, 15 novembre 2026)."""
+        tutto l'audio a raffica (Gabriele, 15 novembre 2026). Un brano di un
+        sito senza sottotitoli ha il suo testo salvato, se e' un video
+        karaoke gia' letto (3.28.3)."""
         with self._blocco:
             self._brano_lontano += 1
             numero, self._karaoke_lontano, self._sottotitoli_lontani = self._brano_lontano, None, None
@@ -1228,6 +1230,11 @@ class Motore:
             elif brano is not None and brano.senza_flusso:
                 threading.Thread(target=self._sottotitoli_dopo_il_rinnovo, args=(numero, percorso), name="MeTeOra, sottotitoli dello speaker",
                     daemon=True).start()
+            else:
+                # Senza sottotitoli del sito, il testo letto da un video
+                # karaoke e salvato nella cartella Testi, se c'e' (3.28.3, dal
+                # collaudo di Gabriele: allo speaker non arrivava).
+                threading.Thread(target=self._karaoke_allo_speaker, args=(numero, percorso), name="MeTeOra, karaoke dello speaker", daemon=True).start()
         elif brano is not None and formati.e_video(percorso):
             threading.Thread(target=self._ombra_allo_speaker, args=(numero, brano, inizio), name="MeTeOra, ombra dello speaker", daemon=True).start()
         else:
@@ -1389,6 +1396,9 @@ class Motore:
         sottotitoli = getattr(flusso, "sottotitoli", ()) if flusso is not None else ()
         if sottotitoli:
             self._sottotitoli_allo_speaker(numero, percorso, sottotitoli, flusso.intestazioni)
+        else:
+            # Senza sottotitoli del sito, il testo salvato del video karaoke (3.28.3).
+            self._karaoke_allo_speaker(numero, percorso)
 
     def _seguiti_dei_sottotitoli(self):
         """Con il lucchetto: i karaoke.Seguito delle tracce dei sottotitoli

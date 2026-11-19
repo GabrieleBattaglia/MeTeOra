@@ -1933,6 +1933,9 @@ class Pagina:
               "senza ascolti {tolti}.").format(salvati=self.c("testi_dei_video_salvati"), completati=self.c("testi_dei_video_completati"),
                 ripresi=self.c("testi_dei_video_ripresi"), tolti=self.c("testi_dei_video_tolti")),
             _("Righe dette dai testi salvati dei video karaoke, senza il riconoscimento: {n}.").format(n=self.c("righe_del_testo_salvato")),
+            # Il video di YouTube arrivato col solo audio, ripreso con l'immagine per leggerne il testo (3.28.5).
+            _("Video karaoke arrivati senza immagine e ripresi con l'immagine, per leggerne il testo: {n}.").format(
+                n=self.c("immagini_chieste_per_il_karaoke")),
         ]
 
     # 17.
