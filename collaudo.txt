@@ -1,15 +1,4 @@
 Collaudo di MeTeOra dalla 3.26.0 alla 3.26.24: solo le prove che vogliono le tue orecchie, NVDA, lo speaker vero, la rete o Windows veri; il resto lo provano la suite e le misure su GabryBar.
-Premi Alt con R due volte, senza niente che suona: senti i suoni dell'attesa accesa e spenta, la casella che sale e quella che scende; se uno non si sente o non ti piace, dimmelo.
-Con l'attesa accesa fai partire Rai Radio 3, mettila in pausa con C per qualche secondo, riprendila, poi fai partire Rai Radio 2 e spegni l'attesa con Alt con R: le righe senza suono e i suoni arrivano come dice il manuale, e NVDA le legge bene.
-Ascolta la registrazione di Rai Radio 3 appena fatta, nel ramo Registrazioni: niente buchi dove era in pausa, il punto della ripresa pulito o quasi, e Ctrl e Maiuscolo con Y ci saltano.
-Rifai pausa e ripresa con le registrazioni in AAC e in Opus, e ascolta il punto della ripresa: dimmi se ti disturba.
-Con l'attesa accesa ascolta Radio Paradise per qualche brano: a ogni brano nuovo, una ventina di secondi dopo, la console dice il marker con il titolo, e sul file chiuso Y dice i titoli.
-Con una registrazione aperta premi Esc: senti il suono della chiusura che aspetta, la spia che si spegne, e MeTeOra si chiude da solo a salvataggio finito; dimmi se il suono ti piace.
-Con una registrazione in corso da un minuto, chiudi MeTeOra con Termina processo dalla scheda Dettagli di Gestione attività: al prossimo avvio la console dice che l'ha recuperata, in un file solo.
-Con una registrazione lunga in FLAC, con almeno una pausa e una ripresa, spegni Windows: Windows dice che MeTeOra sta salvando le registrazioni, e lo spegnimento continua da sé quando ha finito.
-Con una radio in registrazione stacca la rete per una ventina di secondi e riattaccala: R dice che si sta ricollegando, la console dice che si è ricollegata quando riprende davvero, e nel file non manca niente.
-Con GabryBar, un video di YouTube lungo: Maiuscolo con Q, anche tre volte di fila, e la virgola sui capitoli rispondono subito, al tuo orecchio, e la console dice il punto giusto.
-Con GabryBar, un video di YouTube con i sottotitoli accesi, ascoltato oltre i venti minuti: W un'ora più avanti, il suono riprende dopo qualche secondo, e i sottotitoli continuano, letti da NVDA.
-Con GabryBar appena collegato fai partire un video di YouTube e, prima che suoni, premi V: la musica non torna sul PC, e GabryBar resta la scheda scelta.
-Con GabryBar, una TV cercando buddhi, e Ctrl con V con l'indirizzo diretto di un MP3, per esempio di archive.org: suonano tutti e due.
-Con GabryBar che suona, passa a una scheda del PC e chiudi MeTeOra: la musica passa al PC da dove era, poi MeTeOra si chiude, e GabryBar resta in silenzio.
+* Ho aperto adesso meteora per fare il collaudo. Sono le 11.43 del 18/11/2026. La console mi dice che sono spariti 918 file. Ma quali? Perchè? Sono preoccupato, di che si tratta sai dirmelo?
+* Mi è capitata una cosa strana. Ascoltavo la bibbia raccontata al modo di paolo Cevoli, in cartella video sul disco della iliadbox. Avevo le cuffie g325 e stavo mangiando. Arrivato al minuto 56 circa, meteora è passata al file dopo. In console non ho visto errori, come nemmeno ce n'erano nel file log. Semplicemente la riproduzione si è interrotta su quel file ed è passata a quello successivo.
+* il resto delle prove tutto passato. Prove ok.
