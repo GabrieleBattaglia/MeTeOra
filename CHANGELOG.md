@@ -4,6 +4,8 @@ Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
 ## [3.28.5] - 2026-11-19
 
+Pubblicata il 19 novembre 2026, con l'installatore e lo zip: l'ottava release, che porta agli utenti tutto quello che è venuto dopo la 3.27.0, cioè il testo dei video karaoke, dalla 3.28.0 alla 3.28.5, e il riconoscimento dei caratteri che non si blocca più, della 3.27.1.
+
 - Il testo del karaoke dal video si sceglie con D anche su un video di YouTube arrivato con il solo audio, chiesto da Gabriele. Con il video spento un video il cui titolo non dice karaoke arriva senza immagine, e D non offriva la lettura del suo testo. Ora la offre, e scegliendola MeTeOra chiede al sito anche l'immagine: quando arriva, il brano riparte dal punto in cui era, e in pausa se lo era, e la lettura comincia; la console lo dice. Vale per YouTube, dove stanno i karaoke: gli altri siti possono essere solo audio, come SoundCloud. Con lo speaker l'immagine non si chiede, perché lo speaker non dà i fotogrammi.
 - Il testo salvato di un video è sempre una scelta di D, anche senza immagine: con lo speaker arrivava da solo con i sottotitoli accesi, ma D non lo nominava e non lo sceglieva.
 - Nelle statistiche, i video karaoke arrivati senza immagine e ripresi con l'immagine per leggerne il testo.
