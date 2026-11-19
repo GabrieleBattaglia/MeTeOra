@@ -1,6 +1,6 @@
 # MeTeOra, le prove del motore: due lettori, velocita', tono, equalizzatore, dissolvenza e fine brano senza attese.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 01/10/2026: nasce con la 1.55.0 (tappa 4, issue 15). Nella 1.113.4 le prove del filtro del tempo e del tono cambiato al volo aspettano che il motore abbia visto gli eventi di mpv, invece dei tempi (issue 27). Nella 1.116.0 alle_uscite e l'uscita che non si apre piu'. Nella 1.117.0 il lettore lontano e la conversione in FLAC. Nella 2.0.5 il calo, la sfumatura e la catena del volume oltre 100 aspettati per stato, non per tempo (issue 28). Nella 2.7.4 la sorgente a 24 bit che va allo speaker a 16. Nella 3.26.9 i flussi a pezzi con libmpv vera e un server in locale, il flusso rinnovato dopo la scadenza e il lettore lontano vero dentro il motore. Nella 3.26.14 i sottotitoli dei siti con lo speaker, anche a pezzi HLS, le tracce del PC una alla volta e il sottotitolo che sposta solo la riga vuota. Nella 3.26.24 i sottotitoli dopo il rinnovo, con il video, e l'uscita con lo speaker lasciato.
+# 01/10/2026: nasce con la 1.55.0 (tappa 4, issue 15). Nella 1.113.4 le prove del filtro del tempo e del tono cambiato al volo aspettano che il motore abbia visto gli eventi di mpv, invece dei tempi (issue 27). Nella 1.116.0 alle_uscite e l'uscita che non si apre piu'. Nella 1.117.0 il lettore lontano e la conversione in FLAC. Nella 2.0.5 il calo, la sfumatura e la catena del volume oltre 100 aspettati per stato, non per tempo (issue 28). Nella 2.7.4 la sorgente a 24 bit che va allo speaker a 16. Nella 3.26.9 i flussi a pezzi con libmpv vera e un server in locale, il flusso rinnovato dopo la scadenza e il lettore lontano vero dentro il motore. Nella 3.26.14 i sottotitoli dei siti con lo speaker, anche a pezzi HLS, le tracce del PC una alla volta e il sottotitolo che sposta solo la riga vuota. Nella 3.26.24 i sottotitoli dopo il rinnovo, con il video, e l'uscita con lo speaker lasciato. Nella 3.26.25 la lettura interrotta, con un MP3 troncato.
 
 """Le prove del motore vero, senza suoni.
 
@@ -2320,6 +2320,39 @@ def test_lo_speaker_lasciato_si_ferma(crea, tmp_path):
     # Tornando al PC, si ferma anche il secondo.
     m.usa_il_lontano(None)
     assert secondo.aspetta_i_comandi() and [c[0] for c in altro.chiamate] == ["suona", "ferma", "chiudi"] and m.lontano is None
+
+
+def test_una_lettura_interrotta_riprende_dal_punto(crea, avvisi, tmp_path):
+    # Un file che finisce molto prima della sua durata, come un video in una
+    # cartella di rete la cui lettura si interrompe, non e' finito: l'avviso
+    # dice da dove riprendere, al piu' due volte di fila nello stesso punto,
+    # e la terza e' un errore. Un file che finisce davvero da' la fine
+    # (collaudo di Gabriele, 18 novembre 2026). Qui un MP3 a 64 kbps la cui
+    # intestazione Info dichiara 40 secondi, come la durata di un MP4, e che
+    # ne ha 3: libmpv crede all'intestazione. Il WAV no, conta i suoi byte.
+    from test_registrazioni import _registrata
+
+    interrotto = _registrata(tmp_path, "interrotto", 40).percorso
+    with open(interrotto, "r+b") as f:
+        f.truncate(1000 + 8000 * 3)
+    m = crea(alla_fine_anticipata=avvisi("alla_fine_anticipata"))
+
+    def finali():
+        return [(nome, argomenti) for _istante, nome, argomenti in avvisi.righe if nome in ("alla_fine_anticipata", "all_errore", "alla_fine")]
+
+    m.suona(interrotto)
+    assert _aspetta(lambda: len(finali()) == 1, 15)
+    nome, (percorso, sottobrano, secondi, riprende) = finali()[-1]
+    assert (nome, percorso, sottobrano, riprende) == ("alla_fine_anticipata", interrotto, None, True) and 2.5 < secondi <= 3.05
+    # Ripreso, si ferma di nuovo nello stesso punto: e' la sua fine, detta, e poi la fine come sempre.
+    m.suona(interrotto, inizio=secondi - 1.0)
+    assert _aspetta(lambda: len(finali()) == 3, 15)
+    assert [nome for nome, _argomenti in finali()[1:]] == ["alla_fine_anticipata", "alla_fine"] and finali()[1][1][3] is False
+    # Un file intero finisce come sempre, e poi un altro interrotto si riprende di nuovo.
+    m.suona(_seno(tmp_path / "intero.wav", 2))
+    assert _aspetta(lambda: len(finali()) == 4, 15) and finali()[-1][0] == "alla_fine"
+    m.suona(interrotto)
+    assert _aspetta(lambda: len(finali()) == 5, 15) and finali()[-1][1][3] is True
 
 
 def test_la_chiusura_del_motore_aspetta_lo_stop_dello_speaker(crea, tmp_path):

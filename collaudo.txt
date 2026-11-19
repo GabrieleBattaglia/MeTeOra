@@ -1,4 +1,3 @@
-Collaudo di MeTeOra dalla 3.26.0 alla 3.26.24: solo le prove che vogliono le tue orecchie, NVDA, lo speaker vero, la rete o Windows veri; il resto lo provano la suite e le misure su GabryBar.
-* Ho aperto adesso meteora per fare il collaudo. Sono le 11.43 del 18/11/2026. La console mi dice che sono spariti 918 file. Ma quali? Perchè? Sono preoccupato, di che si tratta sai dirmelo?
-* Mi è capitata una cosa strana. Ascoltavo la bibbia raccontata al modo di paolo Cevoli, in cartella video sul disco della iliadbox. Avevo le cuffie g325 e stavo mangiando. Arrivato al minuto 56 circa, meteora è passata al file dopo. In console non ho visto errori, come nemmeno ce n'erano nel file log. Semplicemente la riproduzione si è interrotta su quel file ed è passata a quello successivo.
-* il resto delle prove tutto passato. Prove ok.
+Collaudo di MeTeOra 3.26.25 e 3.27.0: solo le prove che vogliono te; il resto lo provano la suite e le prove automatiche.
+Premi Ctrl con F10 dal braille e sintesi: la console si legge solo alla sintesi, e NVDA dice le righe nuove con la voce, senza mandarle alla barra braille; Ctrl con F10 ancora, solo al braille.
+Se ti ricapita, ascoltando un file lungo dall'Iliadbox, che la lettura si interrompa: la console dice che si è interrotta e riprende dal punto, e il brano continua invece di passare al seguente.

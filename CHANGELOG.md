@@ -2,6 +2,17 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di MeTeOra.
 
+## [3.27.0] - 2026-11-19
+
+- La lettura della console ha anche la scelta solo alla sintesi, senza il braille, chiesta da Gabriele nella issue 49. La lista della voce Lettura della console e i tasti della famiglia di F10 vanno ora da spenta, a solo al braille, a solo alla sintesi, al braille e alla sintesi. Dove vanno sottotitoli e karaoke la aveva già.
+- Le prove sono in tests/test_console_letta.py.
+
+## [3.26.25] - 2026-11-19
+
+- Un file sul disco o in una cartella di rete che finisce più di 15 secondi prima della sua durata non è finito: la sua lettura si è interrotta. Al collaudo Gabriele ascoltava un video sull'Iliadbox, di un'ora e 50 minuti, e al minuto 56 MeTeOra è passato al seguente, senza errori. Il file è sano, e suonato da lì arriva in fondo: è stato un singhiozzo della lettura in rete, che libmpv ha preso per la fine. Ora il brano riparte da un secondo prima, e la console lo dice. Se si ferma di nuovo nello stesso punto, quella è la sua fine, come per un MP3 senza intestazione di cui libmpv stima la durata: si passa al seguente, e la console lo dice. Dopo un salto, in pausa, durante la dissolvenza, e per i brani dei siti, le dirette, i sottobrani e i brani resi in RAM, la fine resta quella di sempre.
+- Nelle statistiche, nella sezione della salute, le letture interrotte e riprese dal punto.
+- Le prove sono in tests/test_motore.py e tests/test_finestra.py.
+
 ## [3.26.24] - 2026-11-15
 
 Nove correzioni, dalla revisione del main unito: cinque revisori hanno cercato i difetti nati dall'incontro dei tre rami, e per ognuno due verificatori lo hanno confermato, uno leggendo il codice e uno riproducendolo. Tre difetti c'erano già prima di oggi.

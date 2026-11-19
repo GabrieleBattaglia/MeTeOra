@@ -1,6 +1,6 @@
 # MeTeOra, le prove della console letta da sola, dei capitoli detti suonando e dei sottotitoli dei siti.
 # Autori: Gabriele Battaglia (IZ4APU) & ClaudIA (Claude Opus 5.5, UltraCode).
-# 11/11/2026: nasce con la 3.8.0, issue 44 e 45. Nella 3.26.14 i sottotitoli dei siti con lo speaker, scelti da soli, e i loro contatori.
+# 11/11/2026: nasce con la 3.8.0, issue 44 e 45. Nella 3.26.14 i sottotitoli dei siti con lo speaker, scelti da soli, e i loro contatori. Nella 3.27.0 la console solo alla sintesi.
 
 import types
 
@@ -49,6 +49,13 @@ def test_la_famiglia_di_f10(finestra, monkeypatch, suoni_annotati):
     assert finestra.impostazioni["console_letta"] == "entrambi"
     _tasto(finestra, codice=wx.WXK_F10, maiuscolo=True)
     assert suoni_annotati[-1] == "console_letta_al_limite" and _ultima(finestra) == "La console si legge già al braille e alla sintesi."
+    # Un passo sotto, solo alla sintesi, senza il braille (Gabriele, issue 49, 3.27.0).
+    _tasto(finestra, codice=wx.WXK_F10, ctrl=True)
+    assert finestra.impostazioni["console_letta"] == "sintesi" and _ultima(finestra) == "La console si legge da sola, solo alla sintesi."
+    detti.clear()
+    finestra.scrivi("Alla voce")
+    finestra._leggi_le_righe()
+    assert ("Alla voce", "sintesi") in detti and not [d for d in detti if d[1] != "sintesi"]
     _tasto(finestra, codice=wx.WXK_F10, ctrl=True)
     assert finestra.impostazioni["console_letta"] == "braille"
     detti.clear()
